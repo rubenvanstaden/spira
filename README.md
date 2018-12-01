@@ -1,8 +1,5 @@
 # SPiRA
 
-SPiRA uses the Yuna package to generate a graph network from the layer polygons
-of a superconducting circuit. For the time being they have to be installed from source.
-
 The goal of SPiRA is develop a framework for IC designers to create and verify cicuit layouts. The framework uses a parameterized methodology that allows designers to generate PCells, apply rule checking, and LVS verification. The framework allows the following, though some parts are still under active development:
 
 * **RDD**: The newly proposed Python-based PDK schema, called Rule Deck Database. This schema allows connecting directly to Python object trees for advance data manipulation.

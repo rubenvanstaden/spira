@@ -12,7 +12,7 @@ Welcome to the SPiRA documentation!
    
    installation
    overview
-   examples
+   pcell_examples
    developers
 
 Indices and tables
