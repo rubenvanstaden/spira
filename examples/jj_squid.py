@@ -75,4 +75,3 @@ if __name__ == '__main__':
     jj.output(name=name)
 
     spira.LOG.end_print('Junction example finished')
-
