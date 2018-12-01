@@ -29,15 +29,15 @@
   };
 
   $.fn.autogrow.resize = function(textarea) {
-    var linewidth = parseInt($(textarea).css('line-width'), 10);
+    var lineHeight = parseInt($(textarea).css('line-height'), 10);
     var lines = textarea.value.split('\n');
     var columns = textarea.cols;
     var lineCount = 0;
     $.each(lines, function() {
       lineCount += Math.ceil(this.length / columns) || 1;
     });
-    var width = linewidth * (lineCount + 1);
-    $(textarea).css('width', width);
+    var height = lineHeight * (lineCount + 1);
+    $(textarea).css('height', height);
   };
 })(jQuery);
 
@@ -301,7 +301,7 @@
     li.hide();
 
     // Determine where in the parents children list to insert this comment.
-    for(i=0; i < siblings.length; i++) {
+    for(var i=0; i < siblings.length; i++) {
       if (comp(comment, siblings[i]) <= 0) {
         $('#cd' + siblings[i].id)
           .parent()

@@ -1,17 +1,23 @@
 Overview
 ========
 
-Yuna is the software package responsible for device and via detection. 
-Yuna also applies polygon algorithms to the wire layer and connects the 
-different wiring layers with each other and the necessary devices. 
-This is done using the Clippers polygon library and the gdspy library 
-that reads and parses the GDS layout file.
+SPiRA: A parameterized design framework using
+Python in conjunction with metaprogramming techniques to allow designers
+to create superconducting and quantum parameterized circuits, while simul-
+taneously checking for design rule errors. Using this parameterized kernel a
+new LVS methodology is proposed that follows a parameterized hierarchical
+approach to effectively detect layout primitives and devices. A mesh-to-netlist
+algorithm is presented that extracts a graph netlist from a circuit layout by first
+meshing the conducting polygons into two-dimensional triangular segments. 
+SPiRA consists of following logical parts, each of which is implemented as a
+segregated module:
 
-Layout Rules
-~~~~~~~~~~~~
+* Layout Generator Kernel (LGK): Layout generator framework that can bind to a PDK. This involves operations on the GDSII file format elements, such as polygons, label, cell references, etc.
 
-1. Watch out for device-to-wire connection discontinuities.
-2. A device, like ntrons or jjs, must be included as a cell if it is connected to ground. And as a different cell if it is not connected to ground.
-3. All ground cells must end with `_gnd`.
-4. Each cell must be centered around (0, 0).
-5. Wires connected to non-ground devices must be laid to connect to edges perfectly.
+* Layout Geometry Modular (LGM): Algorithms for layout polygon operations and physical geometry construction for 2D and 3D (experimental) modeling.
+
+* Layout Primitive Extractor (LPE): Detecting layout primitives, such as vias, ports, ntrons and junctions.
+
+* Layout Rule Checker (LRC): Parameterized Design Rule Checker using parameter restrictions and pattern cells.
+
+* Layout Netlist Extractor (LNE): Creates a graph network from a physical layout by first meshing interconnected polygon structures.

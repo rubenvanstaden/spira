@@ -41,9 +41,7 @@ pip install -e .
 
 ## Examples
 
-To run examples, *cd* into the `/pcells/examples/stable` directory and run any script
-using Python 3. The examples in the *unstable* directory is to show progress of changes
-made in the software versions and should be ignored by the average user.
+Examples of using the PCell implementation is given in [examples](https://spira.readthedocs.io/en/latest/examples.html).
 
 ## History of changes
 
