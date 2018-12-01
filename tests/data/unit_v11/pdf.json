@@ -1,0 +1,261 @@
+{
+    "Params":
+    {
+        "USER": {
+            "gds": 65,
+            "color": "#CC99FF"
+        },
+
+        "LAYER": {
+            "gds": 65,
+            "color": "#66FFB2"
+        },
+
+        "GROUND": {
+            "gds": 65,
+            "color": "#FF6666"
+        },
+
+        "VIA": {
+            "gds": 65,
+            "color": "#A0A0A0"
+        },
+
+        "JJ": {
+            "gds": 65,
+            "color": "#FFB266"
+        },
+
+        "SERIES_NODES": {
+            "gds": 65,
+            "color": "#66B2FF"
+        },
+
+        "RES": {
+            "gds": 65,
+            "color": "#FF66B2"
+        },
+
+        "NTRON": {
+            "gds": 65,
+            "color": "#FF6666"
+        }
+    },
+
+    "ix":
+    {
+        "1": {
+            "name": "Pt1",
+            "rank": 0,
+            "position": 1130,
+            "width": 135,
+            "color": "#B266FF"
+        },
+
+        "2": {
+            "name": "NbN1",
+            "type": "wire",
+            "ETL": 5,
+            "rank": 0,
+            "position": 1465,
+            "width": 300,
+            "color": "#FF66FF"
+        },
+
+        "4": {
+            "name": "Al",
+            "type": "wire",
+            "rank": 0,
+            "position": 2265,
+            "width": 600,
+            "color": "#FF66B2"
+        },
+
+        "5": {
+            "name": "NbN2",
+            "type": "wire",
+            "rank": 0,
+            "position": 2265,
+            "width": 600,
+            "color": "#FF66B2"
+        }
+    },
+
+    "hole":
+    {
+        "30": {
+            "name": "M0",
+            "rank": 0,
+            "position": 780,
+            "width": 200,
+            "color": "#CC99FF"
+        }
+    },
+
+    "via":
+    {
+        "3": {
+            "name": "Alvia",
+            "rank": 0,
+            "wire": [4, 5],
+            "position": "1265",
+            "width": "200",
+            "color": "#A0A0A0"
+        }
+    },
+
+    "res":
+    {
+        "9": {
+            "name": "R2",
+            "rank": 0,
+            "color": "#00CCCC",
+            "position": "1315",
+            "width": "40"
+        },
+
+        "11": {
+            "name": "R3",
+            "rank": 0,
+            "color": "#FFB266",
+            "position": "2865",
+            "width": "350"
+        }
+    },
+
+    "jj":
+    {
+        "21": {
+            "name": "J2",
+            "rank": 0,
+            "position": "1265",
+            "width": "50",
+            "color": "#00CCCC"
+        }
+    },
+
+    "term":
+    {
+        "63": {
+            "name": "TERM",
+            "color": "#888000"
+        },
+        "64": {
+            "name": "TEXT",
+            "color": "#808080"
+        }
+    },
+    
+    "cap":
+    {
+        "65": {
+            "name": "CAP",
+            "metals": [5, 4],
+            "color": "#F069B4"
+        },
+        "64": {
+            "name": "TEXT",
+            "color": "#800080"
+        }
+    },
+
+    "ntron":
+    {
+        "5": {
+            "name": "NTRON",
+            "metals": [4, 5],
+            "color": "#FFCC99"
+        }
+    },
+
+    "elementals":
+    {
+        "vias":
+        {
+            "via_NbN1_Al": {
+                "id": 0,
+                "type": 0,
+                "stack": [3],
+                "metals": [4, 5],
+                "color": "#A0A0A0"
+            },
+
+            "via_NbN2_Al": {
+                "id": 1,
+                "type": 1,
+                "stack": [3],
+                "metals": [4, 5],
+                "color": "#A0A0A0"
+            },
+
+            "via_frame_0": {
+                "id": 0,
+                "type": 0,
+                "stack": [97],
+                "metals": [2, 5],
+                "color": "#A0A0A0"
+            },
+
+            "via_frame_1": {
+                "id": 1,
+                "type": 1,
+                "stack": [97],
+                "metals": [2, 5],
+                "color": "#A0A0A0"
+            }
+        },
+
+        "ntrons":
+        {
+            "ntron_0": {
+                "id": 0,
+                "metals": [5],
+                "color": "#FF5555"
+            },
+
+            "ntron_1": {
+                "id": 0,
+                "metals": [5],
+                "color": "#FF5555"
+            },
+
+            "ntron_2": {
+                "id": 0,
+                "metals": [5],
+                "color": "#FF5555"
+            },
+
+            "ntron_CSHE": {
+                "id": 0,
+                "compress": 5,
+                "metals": [5],
+                "color": "#FF5555"
+            },
+            "ntron_4": {
+                "id": 0,
+                "metals": [5],
+                "color": "#FF5555"
+            }
+        }
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
