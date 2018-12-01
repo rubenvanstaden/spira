@@ -12,9 +12,8 @@ Welcome to Yuna's documentation!
    
    installation
    overview
-   gdspy
-   cell_labels
-   baselayers
+   examples
+   developers
 
 Indices and tables
 ==================

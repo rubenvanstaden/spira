@@ -8,7 +8,7 @@ sys.dont_write_bytecode = True
 
 setup(
     name="spira",
-    version='0.0.3',
+    version='0.0.1',
     description="Superconducting Circuit Modeling and Verification",
     author="Ruben van Staden",
     author_email="rubenvanstaden@gmail.com",
