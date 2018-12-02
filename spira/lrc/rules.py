@@ -78,7 +78,7 @@ class Surround(__DoubleLayerDesignRule__):
                                     x1 = abs(P.xmax - P.center[0])
                                     sx = (x1 + space)/x1
 
-                                    p_copy = P.clean_copy()
+                                    p_copy = deepcopy(P)
 
                                     p_scale = p_copy.scale(scalex=sx, scaley=sx, center=P.center)
 

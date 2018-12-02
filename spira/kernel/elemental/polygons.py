@@ -124,13 +124,13 @@ class __Polygon__(gdspy.PolygonSet, SimplyMixin, BaseElement):
     def __repr__(self):
         if self is None:
             return 'Polygon is None!'
-        return ("[SPiRA: Polygon] ({} vertices, layer {}, datatype {})").format(
-                sum([len(p) for p in self.polygons]),
-                self.gdslayer.number, self.gdslayer.datatype)
-        # return ("[SPiRA: Polygon] ({} center, " +
-        #         "{} vertices, layer {}, datatype {})").format(
-        #         self.center, sum([len(p) for p in self.polygons]),
+        # return ("[SPiRA: Polygon] ({} vertices, layer {}, datatype {})").format(
+        #         sum([len(p) for p in self.polygons]),
         #         self.gdslayer.number, self.gdslayer.datatype)
+        return ("[SPiRA: Polygon] ({} center, " +
+                "{} vertices, layer {}, datatype {})").format(
+                self.center, sum([len(p) for p in self.polygons]),
+                self.gdslayer.number, self.gdslayer.datatype)
 
     def __str__(self):
         return self.__repr__()
@@ -155,7 +155,9 @@ class __Polygon__(gdspy.PolygonSet, SimplyMixin, BaseElement):
 
     def __deepcopy__(self, memo):
         c_poly = self.modified_copy(polygons=self.polygons,
-                                    gdslayer=deepcopy(self.gdslayer))
+                                    gdslayer=deepcopy(self.gdslayer),
+                                    # gdspy_commit=False)
+                                    gdspy_commit=deepcopy(self.gdspy_commit))
         return c_poly
 
     def __add__(self, other):
@@ -210,28 +212,48 @@ class PolygonAbstract(__Polygon__):
     clockwise = param.BoolField(default=True)
     # points = param.PointListField()
 
+    gdspy_commit = param.BoolField()
+
+    __committed__ = {}
+
     def __init__(self, polygons=[], **kwargs):
         super().__init__(polygons, **kwargs)
 
     def dependencies(self):
         return None
 
-    def commit_to_gdspy(self, cell, gdspy_commit=None):
-        if gdspy_commit is None:
-            if not self.gdspy_commit:
-                from spira.kernel.utils import scale_polygon_down as spd
-                ply = deepcopy(self.polygons)
-                P = gdspy.PolygonSet(spd(ply),
-                                    self.gdslayer.number,
-                                    self.gdslayer.datatype)
-                cell.add(P)
-        else:
-            from spira.kernel.utils import scale_polygon_down as spd
+    def commit_to_gdspy(self, cell):
+        from spira.kernel.utils import scale_polygon_down as spd
+        # if gdspy_commit is not None:
+        #     if self.gdspy_commit is False:
+
+        #         if gdspy_commit is True:
+        #             self.gdspy_commit = True
+
+        #         from spira.kernel.utils import scale_polygon_down as spd
+        #         ply = deepcopy(self.polygons)
+        #         P = gdspy.PolygonSet(spd(ply),
+        #                             self.gdslayer.number,
+        #                             self.gdslayer.datatype)
+        #         cell.add(P)
+
+        # if self.gdspy_commit is False:
+        #     ply = deepcopy(self.polygons)
+        #     P = gdspy.PolygonSet(spd(ply),
+        #                         self.gdslayer.number,
+        #                         self.gdslayer.datatype)
+        #     cell.add(P)
+        #     self.gdspy_commit = True
+
+        if self.__repr__() not in list(PolygonAbstract.__committed__.keys()):
             ply = deepcopy(self.polygons)
             P = gdspy.PolygonSet(spd(ply),
                                 self.gdslayer.number,
                                 self.gdslayer.datatype)
             cell.add(P)
+            PolygonAbstract.__committed__.update({self.__repr__():P})
+        else:
+            cell.add(PolygonAbstract.__committed__[self.__repr__()])
 
     def flat_copy(self, level=-1, commit_to_gdspy=False):
         elems = []
@@ -324,7 +346,7 @@ class PolygonAbstract(__Polygon__):
 
     def move(self, origin=(0,0), destination=None, axis=None):
         from spira.kernel.elemental.port import PortAbstract
-        """ Moves elements of the Device from the origin point to the destination.  Both
+        """ Moves elements of the Device from the origin point to the destination. Both
          origin and destination can be 1x2 array-like, Port, or a key
          corresponding to one of the Ports in this device """
 

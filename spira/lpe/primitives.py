@@ -70,9 +70,9 @@ class __NetGenerator__(__CellContainer__):
                 if isinstance(S.ref, CMLayers):
                     # print(S.ref.layer)
                     if S.ref.layer.number == layer:
-                        print(S)
+                        # print(S)
                         for p in S.ref.elementals:
-                            print(p.ref.player)
+                            # print(p.ref.player)
                             # FIXME!!!
                             # if isinstance(p, ELayers):
                                 # raise Errors
@@ -115,10 +115,17 @@ class Circuit(__NetGenerator__):
 
     container = param.DataField(fdef_name='create_container')
 
+    def wrap_references(self, c, c2dmap):
+        from spira.kernel.utils import scale_coord_down as scd
+        for e in c.elementals:
+            if isinstance(e, SRef):
+                e.ref = c2dmap[e.ref]
+
     def create_container(self):
-        dmap = {}
+        deps = self.cell.dependencies()
+        c2dmap = {}
         for T in self.library.pcells:
-            for D in self.cell.dependencies():
+            for D in deps:
 
                 plane_elems = ElementList()
                 plane_elems += self.cell.elementals[(RDD.GROUND.M4.LAYER, 0)]
@@ -128,14 +135,10 @@ class Circuit(__NetGenerator__):
                 for S in T.elementals.sref:
                     S.ref.create_elementals(C.elementals)
 
-                C.name = '{}_pcell'.format(D.name)
-                dmap.update({D.name: C})
+                c2dmap.update({D: C})
 
-        # FIXME: Does not work recursively.
-        for e in self.cell.elementals.sref:
-            if e.ref.name in dmap.keys():
-                e.ref = dmap[e.ref.name]
-                e.ref.name = e.ref.name + '_n'
+        for c in deps:
+            self.wrap_references(c, c2dmap)
 
     def create_elementals(self, elems):
         """
@@ -148,6 +151,10 @@ class Circuit(__NetGenerator__):
         super().create_elementals(elems)
 
         self.container
+
+        # for e in self.cell.elementals:
+        #     print(e)
+        #     elems += e
 
         # for D in self.cell.elementals.dependencies():
         #     if isinstance(D, Device):

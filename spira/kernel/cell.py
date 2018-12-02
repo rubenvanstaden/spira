@@ -11,6 +11,7 @@ from spira.kernel.elemental.polygons import PolygonAbstract
 from spira.kernel.elemental.label import LabelAbstract
 from spira.lne.geometry import Geometry
 from spira.lne.graph import Graph
+from spira.lne.mesh import Mesh
 from spira.lne.graph import GraphAbstract
 from spira.lne.mesh import MeshAbstract
 from spira.kernel.elemental.port import PortAbstract
@@ -149,7 +150,6 @@ class __Cell__(gdspy.Cell, BaseCell):
             return ("[SPiRA: Cell(\'{}\')] " +
                    "({} elementals: {} sref, {} polygons, " +
                    "{} labels, {} ports)").format(
-                        # self.__class__.__name__,
                         self.name,
                         elems.__len__(),
                         elems.sref.__len__(),
@@ -221,13 +221,7 @@ class CellAbstract(__Cell__):
 
         gdspy.Cell.__init__(self, name, exclude_from_current=True)
 
-        if library is None:
-            pass
-            # from spira import settings
-            # from spira.templates.library import library as lib
-            # settings.set_library(lib)
-            # gdspy.current_library.cell_dict[self.name] = self
-        else:
+        if library is not None:
             self.library = library
 
         if elementals is not None:
@@ -245,27 +239,19 @@ class CellAbstract(__Cell__):
     def commit_to_gdspy(self):
         cd = gdspy.current_library.cell_dict
         if self.name not in cd.keys():
-            # self.to_gdspy
-
             cell = gdspy.Cell(self.name, exclude_from_current=True)
-
-            # for e in self.elementals.flat_copy(commit_to_gdspy=True):
             for e in self.elementals:
-                if not isinstance(e, (SRef, ElementList)):
-                    e.commit_to_gdspy(cell=cell, gdspy_commit=True)
-
-            # cell.elements = self.elements
-            # cell.labels = self.labels
-            # print(cell.elements)
+                if not isinstance(e, (SRef, ElementList, Graph, Mesh)):
+                    e.commit_to_gdspy(cell=cell)
             return cell
         else:
             return cd[self.name]
 
-    def wrap_references(self, cell, c2dmap):
+    def wrap_references(self, c, c2dmap):
         from spira.kernel.utils import scale_coord_down as scd
-        for e in cell.elementals:
+        for e in c.elementals:
             if isinstance(e, SRef):
-                G = c2dmap[cell]
+                G = c2dmap[c]
                 ref_device = c2dmap[e.ref]
                 G.add(gdspy.CellReference(ref_cell=ref_device,
                                           origin=scd(e.origin),
@@ -273,23 +259,25 @@ class CellAbstract(__Cell__):
                                           magnification=e.magnification,
                                           x_reflection=e.x_reflection))
 
-    def construct_gdspy_tree(self):
+    def construct_gdspy_tree(self, gdspy_commit=None):
         d = self.dependencies()
         c2dmap = {}
         for c in d:
-            if isinstance(c, Cell):
+            if issubclass(type(c), Cell):
                 G = c.commit_to_gdspy()
                 c2dmap.update({c:G})
-            else:
-                c.construct_gdspy_tree()
 
-        for cell in d:
-            self.wrap_references(cell, c2dmap)
-            glib.add(c2dmap[cell])
+        for c in d:
+            self.wrap_references(c, c2dmap)
+            glib.add(c2dmap[c])
 
         gdspy.LayoutViewer(library=glib)
 
-        return c2dmap
+        print('--- Constructed Cell ---')
+        print(c2dmap[self])
+
+        # return c2dmap
+        return c2dmap[self]
 
     def flat_copy(self, level=-1, commit_to_gdspy=False):
         self.elementals = self.elementals.flat_copy(level, commit_to_gdspy)
@@ -314,7 +302,7 @@ class CellAbstract(__Cell__):
 
     @property
     def to_gdspy(self):
-        for e in self.elementals.flat_copy(commit_to_gdspy=True):
+        for e in self.elementals.flat_copy(commit_to_gdspy=None):
             if not isinstance(e, ElementList):
                 e.commit_to_gdspy(cell=self)
 

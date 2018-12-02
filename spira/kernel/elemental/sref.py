@@ -5,7 +5,7 @@ import numpy as np
 import spira
 from copy import deepcopy
 
-from spira.kernel.parameters.initializer import BaseSRef
+from spira.kernel.parameters.initializer import BaseElement
 from spira.kernel.elemental.port import PortAbstract
 from spira.kernel.elemental.port import Port
 from spira.kernel.elemental.polygons import PolygonAbstract
@@ -19,7 +19,7 @@ class InspectMixin(object):
     def rm(self, cellname):
         print('\n - removed cell: \'{}\''.format(cellname))
         elems = self.elementals
-        self.elementals = ElementList()
+        self.elementals = spira.ElementList()
         for e in elems:
             if isinstance(e, SRef):
                 if cellname != e.ref.name:
@@ -33,13 +33,13 @@ class InspectMixin(object):
             print('{} : {}'.format(name, port))
 
 
-class __SRef__(gdspy.CellReference, BaseSRef):
+class __SRef__(gdspy.CellReference, BaseElement):
 
     __mixins__ = [TranformationMixin]
 
     def __init__(self, structure, **kwargs):
 
-        BaseSRef.__init__(self, **kwargs)
+        BaseElement.__init__(self, **kwargs)
 
         self.ref = structure
         self._parent_ports = structure.ports
@@ -106,7 +106,9 @@ class __SRef__(gdspy.CellReference, BaseSRef):
                     origin=self.origin,
                     rotation=self.rotation,
                     magnification=self.magnification,
-                    x_reflection=self.x_reflection)
+                    x_reflection=self.x_reflection,
+                    # gdspy_commit=False)
+                    gdspy_commit=deepcopy(self.gdspy_commit))
 
 
 class SRefAbstract(__SRef__):
@@ -116,17 +118,21 @@ class SRefAbstract(__SRef__):
 
     __mixins__ = [InspectMixin]
 
+    __committed__ = {}
+
     origin = param.PointField()
     rotation = param.FloatField()
     magnification = param.FloatField(default=None)
     x_reflection = param.BoolField(default=None)
 
+    gdspy_commit = param.BoolField()
+
     def __init__(self, structure, stretching={}, **kwargs):
         self.stretching = stretching
+        # self.gdspy_commit = gdspy_commit
         super().__init__(structure, **kwargs)
 
     def dependencies(self):
-        # d = spira.ElementList()
         from spira.kernel.cell import CellList
         d = CellList()
         d.add(self.ref)
@@ -178,12 +184,31 @@ class SRefAbstract(__SRef__):
         return el
 
     def commit_to_gdspy(self, cell):
-        S = gdspy.CellReference(self.ref.gdspycell,
-                                origin=self.origin,
-                                rotation=self.rotation,
-                                magnification=self.magnification,
-                                x_reflection=self.x_reflection)
-        cell.add(S)
+        from spira.kernel.utils import scale_coord_down as scd
+        # if (gdspy_commit is True) and (self.gdspy_commit is False):
+        #     self.gdspy_commit = True
+        # elif gdspy_commit is False:
+
+        # S = gdspy.CellReference(self.ref.commit_to_gdspy(gdspy_commit=False),
+        #                         origin=scd(self.origin),
+        #                         rotation=self.rotation,
+        #                         magnification=self.magnification,
+        #                         x_reflection=self.x_reflection)
+        # cell.add(S)
+
+        if self.__repr__() not in list(SRefAbstract.__committed__.keys()):
+            print(self)
+            S = gdspy.CellReference(self.ref.commit_to_gdspy(),
+            # S = gdspy.CellReference(self.ref.gdspycell,
+                                    origin=scd(self.origin),
+                                    rotation=self.rotation,
+                                    magnification=self.magnification,
+                                    x_reflection=self.x_reflection)
+            cell.add(S)
+            # self.gdspy_commit = True
+            SRefAbstract.__committed__.update({self.__repr__():S})
+        else:
+            cell.add(SRefAbstract.__committed__[self.__repr__()])
 
     @property
     def ports(self):

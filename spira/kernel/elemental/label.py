@@ -71,13 +71,19 @@ class LabelAbstract(__Label__):
     x_reflection = param.BoolField()
     texttype = param.IntegerField()
 
+    gdspy_commit = param.BoolField()
+
     def __init__(self, position, **kwargs):
         super().__init__(position, **kwargs)
 
     def commit_to_gdspy(self, cell, gdspy_commit=None):
-        if gdspy_commit is None:
-            if not self.gdspy_commit:
-                from spira.kernel.utils import scale_coord_down as scd
+        from spira.kernel.utils import scale_coord_down as scd
+
+        if gdspy_commit is not None:
+            if self.gdspy_commit is False:
+
+                self.gdspy_commit = True
+
                 L = gdspy.Label(self.text,
                                 scd(self.position),
                                 anchor='o',
@@ -87,17 +93,30 @@ class LabelAbstract(__Label__):
                                 layer=self.gdslayer.number,
                                 texttype=self.texttype)
                 cell.add(L)
-        else:
-            from spira.kernel.utils import scale_coord_down as scd
-            L = gdspy.Label(self.text,
-                            scd(self.position),
-                            anchor='o',
-                            rotation=self.rotation,
-                            magnification=self.magnification,
-                            x_reflection=self.x_reflection,
-                            layer=self.gdslayer.number,
-                            texttype=self.texttype)
-            cell.add(L)
+
+        # if gdspy_commit is None:
+        #     if not self.gdspy_commit:
+        #         from spira.kernel.utils import scale_coord_down as scd
+        #         L = gdspy.Label(self.text,
+        #                         scd(self.position),
+        #                         anchor='o',
+        #                         rotation=self.rotation,
+        #                         magnification=self.magnification,
+        #                         x_reflection=self.x_reflection,
+        #                         layer=self.gdslayer.number,
+        #                         texttype=self.texttype)
+        #         cell.add(L)
+        # else:
+        #     from spira.kernel.utils import scale_coord_down as scd
+        #     L = gdspy.Label(self.text,
+        #                     scd(self.position),
+        #                     anchor='o',
+        #                     rotation=self.rotation,
+        #                     magnification=self.magnification,
+        #                     x_reflection=self.x_reflection,
+        #                     layer=self.gdslayer.number,
+        #                     texttype=self.texttype)
+        #     cell.add(L)
 
     def reflect(self, p1=(0,1), p2=(0,0)):
         self.position = [self.position[0], -self.position[1]]

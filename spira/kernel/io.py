@@ -28,9 +28,7 @@ def wrap_labels(cell, c2dmap):
             params['gdslayer'] = layer
             params['str_anchor'] = l.anchor
 
-            lbl = spira.Label(position=scu(l.position), **params)
-            # lbl.scale_up()
-            D += lbl
+            D += spira.Label(position=scu(l.position), **params)
 
 
 def wrap_references(cell, c2dmap):
@@ -97,13 +95,11 @@ def import_gds(filename, cellname=None, flatten=False, duplayer={}):
                     layer = spira.Layer(number=e.layers[0], datatype=e.datatypes[0])
                     ply = spira.Polygons(polygons=spu([points]),
                                          gdslayer=layer)
-                    # ply.scale_up()
                     D += ply
             elif isinstance(e, gdspy.Polygon):
                 layer = spira.Layer(number=e.layers, datatype=e.datatype)
                 ply = spira.Polygons(polygons=spu([e.points]),
                                      gdslayer=layer)
-                # ply.scale_up()
                 D += ply
 
         c2dmap.update({cell:D})

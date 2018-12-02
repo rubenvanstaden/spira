@@ -12,7 +12,9 @@ class GeometryMixin(object):
         import spira
         if isinstance(self, spira.Cell):
             c_copy = deepcopy(self)
-            c_copy.to_gdspy
+            # c_copy.to_gdspy
+            c_copy = c_copy.commit_to_gdspy()
+            # c_copy = c_copy.construct_gdspy_tree(gdspy_commit=False)
             box = c_copy.get_bounding_box()
             [a,b], [c,d] = scu(box)
             points = [[[a,b], [c,b], [c,d], [a,d]]]
@@ -272,7 +274,8 @@ class __Field__(metaclass=MetaBase):
         """
         kwargs = {}
         for p in self.__external_fields__():
-            kwargs[p] = getattr(self, p)
+            # kwargs[p] = getattr(self, p)
+            kwargs[p] = deepcopy(getattr(self, p))
         kwargs.update(override_kwargs)
         return self.__class__(**kwargs)
 
@@ -380,11 +383,14 @@ class MetaCell(MetaBase):
             pass
 
         if kwargs['name'] is None:
-            kwargs['name'] = cls.__name__
-        else:
-            n = kwargs['name']
-            cls.__name__ = n[0].upper() + n[1:]
             kwargs['name'] = '{}-{}'.format(cls.__name__, cls._ID)
+
+        # if kwargs['name'] is None:
+        #     kwargs['name'] = cls.__name__
+        # else:
+        #     n = kwargs['name']
+        #     cls.__name__ = n[0].upper() + n[1:]
+        #     kwargs['name'] = '{}-{}'.format(cls.__name__, cls._ID)
 
         cls = super().__call__(**kwargs)
 
@@ -399,10 +405,6 @@ class BaseCell(FieldInitializer, metaclass=MetaCell):
     pass
 
 
-class BaseSRef(FieldInitializer, metaclass=MetaSref):
-    pass
-
-
 class BaseLayer(FieldInitializer, metaclass=MetaElemental):
     pass
 
@@ -410,10 +412,13 @@ class BaseLayer(FieldInitializer, metaclass=MetaElemental):
 from spira.kernel import parameters as param
 class BaseElement(FieldInitializer, metaclass=MetaElemental):
 
-    gdspy_commit = param.BoolField()
+    # gdspy_commit = param.BoolField()
 
     def flatten(self):
         return [self]
+
+    def commit_to_gdspy(self, cell, gdspy_commit=None):
+        return None
 
     def dependencies(self):
         return None

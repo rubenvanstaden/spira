@@ -200,7 +200,8 @@ class ElementList(TypedList, OutputMixin, ElementFilterMixin):
         from copy import deepcopy
         L = self.__class__()
         for item in self._list:
-            L += deepcopy(item)
+            L.append(deepcopy(item))
+            # L += deepcopy(item)
         return L
 
     def __contains__(self, name):

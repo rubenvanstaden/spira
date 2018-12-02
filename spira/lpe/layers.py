@@ -123,18 +123,25 @@ class DLayer(__DeviceLayer__):
         for p in self.device_elems.polygons:
             layer = p.gdslayer.number
             if layer in RDD.METALS.layers:
-                l2 = Layer(name='BoundingBox', number=layer, datatype=5)
+                l2 = Layer(name='BoundingBox', number=layer, datatype=8)
                 # FIXME: Ports with the same name overrides eachother.
                 elems += Port(name='P{}'.format(layer), midpoint=self.blayer.center, gdslayer=l2)
         return elems
 
     def create_box_layer(self):
         elems = ElementList()
+        setter = {}
+
         for p in self.device_elems.polygons:
             layer = p.gdslayer.number
-            if layer in RDD.METALS.layers:
-                l1 = Layer(name='BoundingBox', number=layer, datatype=5)
+            setter[layer] = 'not_set'
+
+        for p in self.device_elems.polygons:
+            layer = p.gdslayer.number
+            if layer in RDD.METALS.layers and setter[layer] == 'not_set':
+                l1 = Layer(name='BoundingBox', number=layer, datatype=8)
                 elems += Polygons(polygons=self.blayer.polygons, gdslayer=l1)
+                setter[layer] = 'already_set'
         return elems
 
     def create_elementals(self, elems):

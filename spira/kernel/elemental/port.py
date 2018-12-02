@@ -69,6 +69,8 @@ class PortAbstract(__Port__):
     poly_layer = param.LayerField(name='PortLayer', number=RDD.TERM)
     text_layer = param.LayerField(name='PortLayer', number=RDD.TEXT)
 
+    gdspy_commit = param.BoolField()
+
     def __init__(self, port=None, polygon=None, **kwargs):
         super().__init__(port=None, polygon=None, **kwargs)
 
@@ -111,10 +113,22 @@ class PortAbstract(__Port__):
     def point_inside(self, polygon):
         return pyclipper.PointInPolygon(self.midpoint, polygon) != 0
 
-    def commit_to_gdspy(self, cell):
-        if not self.gdspy_commit:
-            self.polygon.commit_to_gdspy(cell)
-            self.label.commit_to_gdspy(cell)
+    def commit_to_gdspy(self, cell, gdspy_commit=None):
+        if gdspy_commit is not None:
+            if self.gdspy_commit is False:
+
+                self.gdspy_commit = True
+
+                self.polygon.commit_to_gdspy(cell)
+                self.label.commit_to_gdspy(cell)
+
+        # if gdspy_commit is None:
+        #     if not self.gdspy_commit:
+        #         self.polygon.commit_to_gdspy(cell)
+        #         self.label.commit_to_gdspy(cell)
+        # else:
+        #     self.polygon.commit_to_gdspy(cell)
+        #     self.label.commit_to_gdspy(cell)
 
     def reflect(self, p1=(0,1), p2=(0,0)):
         self.midpoint = [self.midpoint[0], -self.midpoint[1]]
