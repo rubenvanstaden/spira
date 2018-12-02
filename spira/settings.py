@@ -15,7 +15,7 @@ import plotly.offline as offline
 
 LIB_NAME = 'SPiRA'
 LIB_DESCRIPTION = 'SPiRA: The Virtuoso'
-VERSION = 'version 0.0,1-alpha'
+VERSION = 'version 1.0-alpha'
 COPYRIGHT_INFO = 'MIT License'
 AUTHOR = 'Ruben van Staden'
 AUTHOR_EMAIL = 'rubenvanstaden@gmail.com'

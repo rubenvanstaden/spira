@@ -24,6 +24,7 @@ RDD.PRIMS.NTRONS = 7
 RDD.ERRORS = TechnologyTree()
 RDD.ERRORS.SPACING = 101
 RDD.ERRORS.DENSITY = 102
+RDD.ERRORS.WIDTH = 103
 
 RDD.GROUND = TechnologyTree()
 RDD.GROUND.M4 = TechnologyTree()
@@ -173,7 +174,7 @@ RDD.VIAS.J5.M5_METAL = 1.0
 RDD.VIAS.J5.M6_METAL = RDD.VIAS.J5.M5_METAL
 
 
-from spira.templates.vias import *
+from spira.templates.templates import *
 from spira.lrc.rules import *
 from spira.kernel.layer import Layer
 
@@ -196,27 +197,27 @@ C5 = Layer(name='C5', number=RDD.VIAS.C5.LAYER, datatype=0)
 MOAT = Layer(name='MOAT', number=67, datatype=0)
 
 
-RDD.VIAS.I4.PCELL = Via(
-    name = 'Via_I4',
-    surround = Surround(layer1=I4, layer2=M5, min=0.3),
+RDD.VIAS.I4.PCELL = ViaTemplate(
+    name = 'I4',
+    # surround = Surround(layer1=I4, layer2=M5, min=0.3),
     via_layer = I4, layer1 = M4, layer2 = M5
 )
 
-RDD.VIAS.I5.PCELL = Via(
-    name = 'Via_I5',
-    surround = Surround(layer1=I5, layer2=M6, min=0.3),
+RDD.VIAS.I5.PCELL = ViaTemplate(
+    name = 'I5',
+    # surround = Surround(layer1=I5, layer2=M6, min=0.3),
     via_layer = I5, layer1 = M5, layer2 = M6
 )
 
-RDD.VIAS.J5.PCELL = Via(
-    name = 'Via_J5',
-    surround = Surround(layer1=J5, layer2=M6, min=0.3),
+RDD.VIAS.J5.PCELL = ViaTemplate(
+    name = 'J5',
+    # surround = Surround(layer1=J5, layer2=M6, min=0.3),
     via_layer = J5, layer1 = M5, layer2 = M6
 )
 
-RDD.VIAS.C5.PCELL = Via(
-    name = 'Via_C5',
-    surround = Surround(layer1=C5, layer2=M6, min=0.35),
+RDD.VIAS.C5.PCELL = ViaTemplate(
+    name = 'C5',
+    # surround = Surround(layer1=C5, layer2=M6, min=0.35),
     via_layer = C5, layer1 = R5, layer2 = M6
 )
 

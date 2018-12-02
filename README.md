@@ -38,7 +38,7 @@ pip install -e .
 
 ## Examples
 
-Examples of using the PCell implementation is given in [examples](https://spira.readthedocs.io/en/latest/examples.html).
+Examples of using the PCell implementation is given in [examples](https://spira.readthedocs.io/en/latest/pcell_examples.html).
 
 ## History of changes
 

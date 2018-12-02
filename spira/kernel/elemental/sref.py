@@ -126,7 +126,9 @@ class SRefAbstract(__SRef__):
         super().__init__(structure, **kwargs)
 
     def dependencies(self):
-        d = spira.ElementList()
+        # d = spira.ElementList()
+        from spira.kernel.cell import CellList
+        d = CellList()
         d.add(self.ref)
         d.add(self.ref.dependencies())
         return d
@@ -137,7 +139,7 @@ class SRefAbstract(__SRef__):
                  x_reflection=self.x_reflection)
         return S
 
-    def flat_copy(self, level=-1):
+    def flat_copy(self, level=-1, commit_to_gdspy=False):
 
         if level == 0:
             el = spira.ElementList()
@@ -175,7 +177,7 @@ class SRefAbstract(__SRef__):
         el = self.ref.elementals.scale_down()
         return el
 
-    def add_to_gdspycell(self, cell):
+    def commit_to_gdspy(self, cell):
         S = gdspy.CellReference(self.ref.gdspycell,
                                 origin=self.origin,
                                 rotation=self.rotation,

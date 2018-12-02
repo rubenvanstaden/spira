@@ -89,10 +89,10 @@ class ElementFilterMixin(object):
 
     @property
     def dlayers(self):
-        from spira.lpe.primitives import DLayer
+        from spira.lpe.primitives import NLayer
         elems = ElementList()
         for S in self._list:
-            if isinstance(S.ref, DLayer):
+            if isinstance(S.ref, NLayer):
                 elems += S
         return elems
 
@@ -148,7 +148,7 @@ class ElementFilterMixin(object):
 
     @property
     def graph(self):
-        from spira.lne.mesh import Mesh
+        from spira.lne.mesh import MeshAbstract
         for e in self._list:
             if issubclass(type(e), MeshAbstract):
                 return e.g
@@ -211,25 +211,41 @@ class ElementList(TypedList, OutputMixin, ElementFilterMixin):
                     return True
         return False
 
+    # def dependencies(self):
+    #     d = ElementList()
+    #     for e in self._list:
+    #         d.add(e.dependencies())
+    #     return d
+
     def dependencies(self):
-        d = ElementList()
+        import spira
+        from spira.kernel.cell import CellList
+
+        cells = CellList()
         for e in self._list:
-            d.add(e.dependencies())
-        return d
+            cells.add(e.dependencies())
+        return cells
 
     def add(self, item):
         import spira
-        types = (spira.ElementList, list, set)
-        if item == None:
-            return
-        if isinstance(item, spira.Cell):
-            if not self.__contains__(item.name):
-                self += item
-        elif isinstance(item, types):
-            for s in item:
-                self.add(s)
-        else:
-            raise ValueError('add element not implemented!!!')
+        from spira.kernel.cell import CellList
+
+        cells = CellList()
+        for e in self._list:
+            cells.add(e.dependencies())
+        return cells
+
+        # types = (spira.ElementList, list, set)
+        # if item == None:
+        #     return
+        # if isinstance(item, spira.Cell):
+        #     if not self.__contains__(item.name):
+        #         self += item
+        # elif isinstance(item, types):
+        #     for s in item:
+        #         self.add(s)
+        # else:
+        #     raise ValueError('add element not implemented!!!')
 
     def stretch(self, stretch_class):
         for c in self:
@@ -263,10 +279,10 @@ class ElementList(TypedList, OutputMixin, ElementFilterMixin):
             elems += e
         return elems
 
-    def flat_copy(self, level=-1):
+    def flat_copy(self, level=-1, commit_to_gdspy=False):
         el = ElementList()
         for e in self._list:
-            el += e.flat_copy(level)
+            el += e.flat_copy(level, commit_to_gdspy)
         if level == -1:
             return el.flatten()
         else:

@@ -11,26 +11,7 @@ from spira.lne.mesh import Mesh
 from spira.kernel.parameters.initializer import BaseElement
 
 
-class MaterialStack(object):
-
-    def vertical_position(self, material_stack):
-        if self.rank >= 3:
-            start = material_stack[3][0]['start'] * 2.0
-            for i in range(3, self.rank):
-                if i in material_stack:
-                    start += material_stack[i][0]['width'] * 2.0
-                    self.width *= 1
-        else:
-            start = 0.0
-            for i in range(self.rank):
-                if i in material_stack:
-                    start += material_stack[i][0]['width'] * 2.0
-                    self.width *= 1
-        z = start * scale
-        return z
-
-
-class __Geometry__(MaterialStack, BaseElement):
+class __Geometry__(BaseElement):
 
     def __init__(self, lcar, **kwargs):
 
@@ -47,9 +28,14 @@ class __Geometry__(MaterialStack, BaseElement):
         self.geom.add_raw_code('Mesh.Algorithm = {};'.format(self.algorithm))
         self.geom.add_raw_code('Coherence Mesh;')
 
-        self.gmsh_elements = spira.ElementList()
-
         self.mesh = None
+
+    def __surfaces__(self):
+        surfaces = []
+        for e in self.elements:
+            if isinstance(e, pygmsh.built_in.plane_surface.PlaneSurface):
+                surfaces.append(e)
+        return surfaces
 
 
 class GeometryAbstract(__Geometry__):
@@ -60,9 +46,11 @@ class GeometryAbstract(__Geometry__):
     layer = param.IntegerField()
     dimension = param.IntegerField(default=2)
     algorithm = param.IntegerField(default=6)
+    polygons = param.ElementListField()
     # gmsh_elements = param.ElementListField()
 
     create_mesh = param.DataField(fdef_name='create_meshio')
+    elements = param.DataField(fdef_name='create_pygmsh_elements')
 
     def __init__(self, lcar=0.01, **kwargs):
         super().__init__(lcar=lcar, **kwargs)
@@ -100,43 +88,41 @@ class GeometryAbstract(__Geometry__):
         meshio.write(mesh_file, mm)
         meshio.write(vtk_file, mm)
 
+        # params = {
+        #     'name': self.name,
+        #     'layer': spira.Layer(number=self.layer),
+        #     'points': [mesh_data[0]],
+        #     'cells': [mesh_data[1]],
+        #     'point_data': [mesh_data[2]],
+        #     'cell_data': [mesh_data[3]],
+        #     'field_data': [mesh_data[4]]
+        # }
+
+        # return params
+
         return mesh_data
 
-    def create_geom_elements(self, elems):
-        print('number of polygons {}'.format(len(elems.polygons)))
+    def create_pygmsh_elements(self):
+        print('number of polygons {}'.format(len(self.polygons)))
 
-        dim = 2
         height = 0.0
         holes = None
-        material_stack = None
 
-        for ply in elems:
+        elems = ElementList()
+        for ply in self.polygons:
             for i, points in enumerate(ply.polygons):
-                if dim == 3:
-                    height = self.vertical_position(material_stack)
-
                 pp = numpy_to_list(points, height, unit=10e-9)
-
                 surface_label = '{}_{}_{}_{}'.format(ply.gdslayer.number,
                                                      ply.gdslayer.datatype,
                                                      GeometryAbstract._ID, i)
-
                 gp = self.geom.add_polygon(pp, lcar=1.0,
                                            make_surface=True,
                                            holes=holes)
-
                 self.geom.add_physical_surface(gp.surface, label=surface_label)
-
-                self.gmsh_elements += [gp.surface, gp.line_loop]
-
+                elems += [gp.surface, gp.line_loop]
                 GeometryAbstract._ID += 1
 
-    def __surfaces__(self):
-        surfaces = []
-        for e in self.gmsh_elements:
-            if isinstance(e, pygmsh.built_in.plane_surface.PlaneSurface):
-                surfaces.append(e)
-        return surfaces
+        return elems
 
     def extrude_surfaces(self, geom, surfaces):
         """ This extrudes the surface to a 3d volume element. """
@@ -180,13 +166,13 @@ class GeometryAbstract(__Geometry__):
 
             line_loops.append(gp.line_loop)
 
-    def flat_copy(self, level=-1):
+    def flat_copy(self, level=-1, commit_to_gdspy=False):
         return self
 
     def flatten(self):
         return [self]
 
-    def add_to_gdspycell(self, cell):
+    def commit_to_gdspy(self, cell):
         pass
 
     def transform(self, transform):

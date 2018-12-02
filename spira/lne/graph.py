@@ -231,13 +231,13 @@ class GraphAbstract(__Graph__):
 
         self.g = g1
 
-    def flat_copy(self, level=-1):
+    def flat_copy(self, level=-1, commit_to_gdspy=False):
         return self
 
     def flatten(self):
         return [self]
 
-    def add_to_gdspycell(self, cell):
+    def commit_to_gdspy(self, cell):
         pass
 
     def transform(self, transform):

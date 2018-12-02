@@ -22,6 +22,8 @@ class __Port__(BaseElement):
     def __init__(self, port=None, polygon=None, **kwargs):
         BaseElement.__init__(self, **kwargs)
 
+        # if self.extern_polygon:
+        #     pp = self.extern_polygon
         if self.length:
             layer = spira.Layer(name='Rectangle', number=65)
             pp = Rectangle(point1=[0, 0],
@@ -35,7 +37,8 @@ class __Port__(BaseElement):
 
         L = spira.Label(position=self.midpoint,
                         text=self.name,
-                        gdslayer=self.text_layer)
+                        gdslayer=self.text_layer,
+                        texttype=self.text_layer.datatype)
 
         self.label = L
 
@@ -61,6 +64,7 @@ class PortAbstract(__Port__):
     orientation = param.IntegerField()
     length = param.FloatField()
     parent = param.DataField()
+    extern_polygon = param.PolygonField()
     gdslayer = param.LayerField(name='PortLayer', number=RDD.TERM)
     poly_layer = param.LayerField(name='PortLayer', number=RDD.TERM)
     text_layer = param.LayerField(name='PortLayer', number=RDD.TEXT)
@@ -98,18 +102,19 @@ class PortAbstract(__Port__):
     def y(self):
         return self.midpoint[1]
 
-    def flat_copy(self, level=-1):
-        return self.modified_copy(midpoint=self.midpoint)
+    def flat_copy(self, level=-1, commit_to_gdspy=False):
+        c_port = self.modified_copy(midpoint=self.midpoint)
+        if commit_to_gdspy:
+            self.gdspy_write = True
+        return c_port
 
     def point_inside(self, polygon):
         return pyclipper.PointInPolygon(self.midpoint, polygon) != 0
 
-    def flatten(self):
-        return [self]
-
-    def add_to_gdspycell(self, cell):
-        self.polygon.add_to_gdspycell(cell)
-        self.label.add_to_gdspycell(cell)
+    def commit_to_gdspy(self, cell):
+        if not self.gdspy_commit:
+            self.polygon.commit_to_gdspy(cell)
+            self.label.commit_to_gdspy(cell)
 
     def reflect(self, p1=(0,1), p2=(0,0)):
         self.midpoint = [self.midpoint[0], -self.midpoint[1]]
@@ -166,6 +171,11 @@ class PortAbstract(__Port__):
                         text_layer=self.text_layer,
                         orientation=self.orientation)
         return new_port
+
+    def update(self, name, layer):
+        self.gdslayer = layer
+        self.text_layer = spira.Layer(number=layer.number, datatype=RDD.TEXT)
+        self.name += '_' + str(name)
 
 
 class Port(PortAbstract):

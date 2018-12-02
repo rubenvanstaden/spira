@@ -20,6 +20,7 @@ from spira.kernel.parameters.initializer import MetaBase
 from spira.kernel.parameters.initializer import BaseElement
 from spira.kernel import parameters as param
 from copy import copy, deepcopy
+from spira.kernel.utils import scale_polygon_up as spu
 
 
 def _reflect_points(points, p1=(0,0), p2=(1,0)):
@@ -57,9 +58,6 @@ class SimplyMixin(object):
         return spira.Polygons(polygons=mm.polygons,
                               gdslayer=self.gdslayer)
 
-    # @property
-    # def point_orientation(self):
-
     @property
     def merge(self):
         pcell = False
@@ -75,8 +73,6 @@ class SimplyMixin(object):
             for sol in solution:
                 self.polygons.append(sol)
         self.polygons = bool_operation(subj=self.polygons, method='union')
-        # if pcell: self.scale_down()
-
         return self
 
     @property
@@ -106,7 +102,17 @@ class __Polygon__(gdspy.PolygonSet, SimplyMixin, BaseElement):
     def __init__(self, polygons, **kwargs):
 
         self.unit = None
-        self.polygons = polygons
+
+        if len(polygons):
+            s1 = abs(polygons[0][2][0]/SCALE_UP)
+            if (s1 < 1e-3):
+                self.polygons = np.array(spu(polygons))
+            else:
+                self.polygons = np.array(polygons)
+        else:
+            self.polygons = np.array(polygons)
+
+        # self.polygons = np.array(polygons)
 
         BaseElement.__init__(self, **kwargs)
 
@@ -146,6 +152,11 @@ class __Polygon__(gdspy.PolygonSet, SimplyMixin, BaseElement):
 
     def __hash__(self):
         return hash(self.__key())
+
+    def __deepcopy__(self, memo):
+        c_poly = self.modified_copy(polygons=self.polygons,
+                                    gdslayer=deepcopy(self.gdslayer))
+        return c_poly
 
     def __add__(self, other):
         polygons = []
@@ -196,7 +207,8 @@ class PolygonAbstract(__Polygon__):
     gdslayer = param.LayerField()
     text = param.StringField(default='ply')
     color = param.ColorField(default='#F0B27A')
-    clockwise = param.BoolField(default=True) # TODO: Implement!
+    clockwise = param.BoolField(default=True)
+    # points = param.PointListField()
 
     def __init__(self, polygons=[], **kwargs):
         super().__init__(polygons, **kwargs)
@@ -204,40 +216,32 @@ class PolygonAbstract(__Polygon__):
     def dependencies(self):
         return None
 
-    def scale_up(self, value=None):
-        from spira.kernel.utils import scale_polygon_up as spu
-        self.polygons = spu(self.polygons, value)
-        return self
+    def commit_to_gdspy(self, cell, gdspy_commit=None):
+        if gdspy_commit is None:
+            if not self.gdspy_commit:
+                from spira.kernel.utils import scale_polygon_down as spd
+                ply = deepcopy(self.polygons)
+                P = gdspy.PolygonSet(spd(ply),
+                                    self.gdslayer.number,
+                                    self.gdslayer.datatype)
+                cell.add(P)
+        else:
+            from spira.kernel.utils import scale_polygon_down as spd
+            ply = deepcopy(self.polygons)
+            P = gdspy.PolygonSet(spd(ply),
+                                self.gdslayer.number,
+                                self.gdslayer.datatype)
+            cell.add(P)
 
-    def scale_down(self):
-        from spira.kernel.utils import scale_polygon_down as spd
-        self.polygons = spd(self.polygons)
-        return self
-
-    def add_to_gdspycell(self, cell):
-        assert isinstance(cell, gdspy.Cell)
-        from spira.kernel.utils import scale_polygon_down as spd
-        P = gdspy.PolygonSet(spd(self.polygons),
-                             self.gdslayer.number,
-                             self.gdslayer.datatype)
-        cell.add(P)
-
-    def flatten(self):
-        return [self]
-
-    def flat_copy(self, level=-1):
+    def flat_copy(self, level=-1, commit_to_gdspy=False):
         elems = []
         for points in self.polygons:
-            poly = self.modified_copy(polygons=[points])
-            elems.append(poly)
+            c_poly = self.modified_copy(polygons=[points], 
+                                        gdspy_commit=self.gdspy_commit)
+            elems.append(c_poly)
+            if commit_to_gdspy:
+                self.gdspy_commit = True
         return elems
-
-    def clean_copy(self):
-        return self.modified_copy(polygons=self.polygons)
-
-    def __deepcopy__(self, memo):
-        return Polygons(polygons=self.polygons,
-                        gdslayer=deepcopy(self.gdslayer))
 
     @property
     def ply_area(self):
@@ -246,21 +250,10 @@ class PolygonAbstract(__Polygon__):
 
     @property
     def bbox(self):
-        """
-        Returns the bounding box of the polygons.
-
-        Returns
-        -------
-        Out : Numpy array[2,2] or ``None``
-            Bounding box of this polygon in the form [[x_min, y_min],
-            [x_max, y_max]], or ``None`` if the polygon is empty.
-        """
-        if len(self.polygons) == 0:
-            return None
-        return np.array(((min(pts[:, 0].min() for pts in self.polygons),
-                             min(pts[:, 1].min() for pts in self.polygons)),
-                            (max(pts[:, 0].max() for pts in self.polygons),
-                             max(pts[:, 1].max() for pts in self.polygons))))
+        self.polygons = np.array(self.polygons)
+        bb = self.get_bounding_box()
+        assert len(bb) == 2
+        return bb
 
     @property
     def xmax(self):
@@ -372,7 +365,6 @@ class PolygonAbstract(__Polygon__):
         return self
 
 
-
 class UnionPolygons(PolygonAbstract, SimplyMixin):
 
     def __init__(self, polygons, **kwargs):
@@ -389,3 +381,4 @@ class Polygons(PolygonAbstract):
 from spira.kernel.parameters.descriptor import DataFieldDescriptor
 def PolygonField(polygons=[]):
     return DataFieldDescriptor(default=Polygons(polygons))
+    # return DataFieldDescriptor(default=Polygons(spu(polygons)))

@@ -18,6 +18,7 @@ def debug_path(filename):
 
 
 def wrap_labels(cell, c2dmap):
+    from spira.kernel.utils import scale_coord_up as scu
     for l in cell.get_labels():
         D = c2dmap[cell]
         if isinstance(l, gdspy.Label):
@@ -27,8 +28,8 @@ def wrap_labels(cell, c2dmap):
             params['gdslayer'] = layer
             params['str_anchor'] = l.anchor
 
-            lbl = spira.Label(position=l.position, **params)
-            lbl.scale_up()
+            lbl = spira.Label(position=scu(l.position), **params)
+            # lbl.scale_up()
             D += lbl
 
 
@@ -57,6 +58,7 @@ def create_spira_cell(cell):
 def import_gds(filename, cellname=None, flatten=False, duplayer={}):
 
     from spira.kernel.utils import scale_coord_up as scu
+    from spira.kernel.utils import scale_polygon_up as spu
     from spira import LOG
 
     LOG.header('Imported GDS file -> \'{}\''.format(filename))
@@ -93,15 +95,15 @@ def import_gds(filename, cellname=None, flatten=False, duplayer={}):
             if isinstance(e, gdspy.PolygonSet):
                 for points in e.polygons:
                     layer = spira.Layer(number=e.layers[0], datatype=e.datatypes[0])
-                    ply = spira.Polygons(polygons=[points],
+                    ply = spira.Polygons(polygons=spu([points]),
                                          gdslayer=layer)
-                    ply.scale_up()
+                    # ply.scale_up()
                     D += ply
             elif isinstance(e, gdspy.Polygon):
                 layer = spira.Layer(number=e.layers, datatype=e.datatype)
-                ply = spira.Polygons(polygons=[e.points],
+                ply = spira.Polygons(polygons=spu([e.points]),
                                      gdslayer=layer)
-                ply.scale_up()
+                # ply.scale_up()
                 D += ply
 
         c2dmap.update({cell:D})

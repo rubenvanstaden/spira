@@ -15,6 +15,6 @@ from spira.kernel.elemental.polygons import PolygonField
 from spira.kernel.parameters.descriptor import DataField
 from spira.kernel.parameters.descriptor import FunctionField
 
-from spira.lrc.rules import *
+# from spira.lrc.rules import *
 
 

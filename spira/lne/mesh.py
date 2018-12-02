@@ -163,13 +163,13 @@ class MeshAbstract(__Mesh__):
     def __point_data__(self):
         pass
 
-    def flat_copy(self, level=-1):
+    def flat_copy(self, level=-1, commit_to_gdspy=False):
         return self
 
     def flatten(self):
         return [self]
 
-    def add_to_gdspycell(self, cell):
+    def commit_to_gdspy(self, cell):
         pass
 
     def transform(self, transform):
@@ -256,7 +256,6 @@ class MeshLabeled(MeshAbstract):
 
     def add_device_label(self, n, S, points):
         for name, p in S.ports.items():
-            print(p)
             if p.gdslayer.name == 'GROUND':
                 pass
                 # if lbl.layer == self.layer.number:
@@ -279,10 +278,10 @@ class MeshLabeled(MeshAbstract):
                 #     self.g.add_node(num+1, pos=lbl.position, pin=D_gnd, surface=label)
                 #     self.g.add_edge(n, num+1)
             else:
-                print(S.flat_copy())
-                print(p.gdslayer.number)
-                print(self.layer.number)
-                print('')
+                # print(S.flat_copy())
+                # print(p.gdslayer.number)
+                # print(self.layer.number)
+                # print('')
                 if p.gdslayer.number == self.layer.number:
                     if p.point_inside(points):
                         self.g.node[n]['pin'] = S

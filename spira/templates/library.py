@@ -1,10 +1,9 @@
 import spira
-from spira.templates.devices import *
+from spira.templates.templates import *
 
 library = spira.Library(name='MiT-Library')
 
-library.add_pcell(pcell=JunctionModel())
-# library += JunctionModel()
+library.add_pcell(pcell=JunctionTemplate())
 
 
 if __name__ == '__main__':

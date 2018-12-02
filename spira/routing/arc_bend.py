@@ -82,7 +82,4 @@ if __name__ == '__main__':
     arc = ArcFractal(theta=90)
     elems = spira.ElementList()
     S = spira.SRef(arc)
-    # print(S.ref.ports)
-    # p1 = S.ports
-    # elems += S
     arc.output(name='arc_bend')

@@ -58,7 +58,7 @@ class Path(__Path__):
         pp.scale_up()
         return pp
 
-    def add_to_gdspycell(self, cell):
+    def commit_to_gdspy(self, cell):
         polypath = gdspy.PolyPath(self.points,
                                   self.width,
                                   number_of_paths=self.number_of_paths,
@@ -69,7 +69,7 @@ class Path(__Path__):
     def transform(self, transform):
         return self
 
-    def flat_copy(self, level=-1):
+    def flat_copy(self, level=-1, commit_to_gdspy=False):
         return self
 
     def flatten(self):

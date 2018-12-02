@@ -55,11 +55,11 @@ class DrawGraphAbstract(object):
         from spira.kernel.elemental.port import PortAbstract
 
         for p in self.get_ports():
-            p.add_to_gdspycell(cell=self)
+            p.commit_to_gdspy(cell=self)
 
         for e in self.elementals.flat_copy(level=-1):
             if not issubclass(type(e), PortAbstract):
-                e.add_to_gdspycell(cell=self)
+                e.commit_to_gdspy(cell=self)
         return self
 
     def plot_subgraphs(self, combine=False):
@@ -241,14 +241,28 @@ class DrawLayoutAbstract(object):
             raise ValueError('`path` variable not implemented!')
 
         library = settings.get_library()
+        library += self
+        library.to_gdspy
+
+
+
+
+        # print(library)
+        # if library is not None:
+        #     library += self
+        #     library.to_gdspy
+        # else:
+        #     # from spira.templates.library import library
+        #     # settings.set_library(library)
+        #     print(library)
+        #     library += self
+        #     library.to_gdspy
+
         # # library.single_cell(self)
 
         # if isinstance(self, spira.Cell):
         #     for p in self.get_ports():
-        #         p.add_to_gdspycell(cell=self)
-
-        library += self
-        library.to_gdspy
+        #         p.commit_to_gdspy(cell=self)
 
         # writer = gdspy.GdsWriter('out-file.gds', unit=1.0e-6, precision=1.0e-9)
         # cell = self.gdspycell

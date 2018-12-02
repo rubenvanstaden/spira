@@ -62,6 +62,7 @@ class TypedList(collections.MutableSequence):
 
     def append(self, val):
         self.insert(len(self._list), val)
+        # self._list.append(val)
 
     @property
     def value(self):

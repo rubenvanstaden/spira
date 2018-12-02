@@ -2,9 +2,15 @@ import spira
 from spira.kernel import parameters as param
 from spira.kernel.parameters.initializer import BaseElement
 from spira.kernel.parameters.descriptor import DataFieldDescriptor
+from spira.rdd import get_rule_deck
+from spira.lpe.layers import *
+
+
+RDD = get_rule_deck()
 
 
 class __DesignRule__(BaseElement):
+    violate = param.BoolField()
     doc = param.StringField()
     name = param.StringField()
 
@@ -21,23 +27,108 @@ class __DoubleLayerDesignRule__(__DesignRule__):
 
 
 class Width(__SingleLayerDesignRule__):
-    min = param.FloatField()
-    max = param.FloatField()
+    minimum = param.FloatField()
+    maximum = param.FloatField()
+    error = param.IntegerField(default=RDD.ERRORS.WIDTH)
 
     def __repr__(self):
-        return 'Rule width: min={} max={}'.format(self.min, self.max)
+        return 'Rule width: min={} max={}'.format(self.minimum, self.maximum)
 
     def apply(self, elems):
-        return True
+        fails = False
+        if self.violate:
+            fails = True
+        return fails
 
 
 class Surround(__DoubleLayerDesignRule__):
-    min = param.FloatField()
+    minimum = param.FloatField()
+    error = param.IntegerField(default=RDD.ERRORS.SPACING)
 
     def __repr__(self):
-        return 'Rule surround: min={}'.format(self.min)
+        return 'Rule surround: min={}'.format(self.minimum)
 
-    # def apply(self, i, P, M):
+    def apply(self, elems):
+
+        pos_elems = spira.ElementList()
+        neg_elems = spira.ElementList()
+
+        # print(elems)
+
+        for C in elems.dependencies():
+            for S in C.elementals.sref:
+                if S.ref.layer.number == self.layer1.number:
+                    pos_elems = S.ref.elementals
+                    C1 = S.ref
+
+                    for C in elems.dependencies():
+                        for S in C.elementals.sref:
+                            if S.ref.layer.number == self.layer2.number:
+                                neg_elems = S.ref.elementals
+                                C2 = S.ref
+
+                                fails = False
+
+                                if pos_elems and neg_elems:
+                                    P = pos_elems[0]
+                                    M = neg_elems[0]
+
+                                    space = self.minimum*1.0e+6
+
+                                    x1 = abs(P.xmax - P.center[0])
+                                    sx = (x1 + space)/x1
+
+                                    p_copy = P.clean_copy()
+
+                                    p_scale = p_copy.scale(scalex=sx, scaley=sx, center=P.center)
+
+                                    p_overlap = p_scale | M
+                                    # print(M)
+
+                                    if p_overlap:
+                                        a1 = round(p_scale.ply_area*10e-9)
+                                        a2 = round(p_overlap.ply_area*10e-9)
+
+                                        if abs(a1 - a2) > 1e-9:
+                                            fails = True
+
+                                            P_error = ELayer(points=P.polygons,
+                                                    number=C1.layer.number,
+                                                    error_type=self.error)
+                                            C1 += SRef(P_error)
+
+                                            M_error = ELayer(points=M.polygons,
+                                                    number=C2.layer.number,
+                                                    error_type=self.error)
+                                            C2 += SRef(M_error)
+
+                                            print('\n ------ Surround Rules ------')
+                                            print(self.layer1)
+                                            print('Surround ({}): {}'.format('fail', self.minimum))
+                                        else:
+                                            fails = False
+                                            print('\n ------ Surround Rules ------')
+                                            print(self.layer1)
+                                            print('Surround ({}): {}'.format('pass', self.minimum))
+
+                                return fails
+
+
+class Density(__DoubleLayerDesignRule__):
+    minimum = param.IntegerField()
+    error = param.IntegerField(default=RDD.ERRORS.DENSITY)
+
+    # TODO: Detect holes in die polygon
+
+    def __repr__(self):
+        return 'Rule density: min={}'.format(self.minimum)
+
+    def get_layer_area(self, elems):
+        area = 0.0
+        for e in elems:
+            area += e.ply_area
+        return area
+
     def apply(self, elems):
 
         pos_elems = spira.ElementList()
@@ -51,109 +142,20 @@ class Surround(__DoubleLayerDesignRule__):
 
         fails = False
 
-        if pos_elems and neg_elems:
-            P = pos_elems[0]
-            M = neg_elems[0]
-
-            space = self.min*1.0e+6
-
-            x1 = abs(P.xmax - P.center[0])
-            sx = (x1 + space)/x1
-
-            p_copy = P.clean_copy()
-
-            p_scale = p_copy.scale(scalex=sx, scaley=sx, center=P.center)
-
-            p_overlap = p_scale | M
-
-            a1 = round(p_scale.ply_area*10e-9)
-            a2 = round(p_overlap.ply_area*10e-9)
-
-            if abs(a1 - a2) > 1e-9:
-                fails = True
-                print('\n ------ Surround Rules ------')
-                print(self.layer1)
-                print('Surround ({}): {}'.format('fail', self.min))
-            else:
-                fails = False
-                print('\n ------ Surround Rules ------')
-                print(self.layer1)
-                print('Surround ({}): {}'.format('pass', self.min))
-
-        return fails
-
-        # if (P.gdslayer.number == self.layer1) and (M.gdslayer.number == self.layer2):
-        #     space = self.min*1.0e+6
-        #
-        #     x1 = abs(P.xmax - P.center[0])
-        #     sx = (x1 + space)/x1
-        #
-        #     p_copy = P.clean_copy()
-        #
-        #     p_scale = p_copy.scale(scalex=sx, scaley=sx, center=P.center)
-        #
-        #     p_overlap = p_scale | M
-        #
-        #     a1 = round(p_scale.ply_area*10e-9)
-        #     a2 = round(p_overlap.ply_area*10e-9)
-        #
-        #     if abs(a1 - a2) > 1e-9:
-        #         return True
-        # return False
-
-
-class Density(__DoubleLayerDesignRule__):
-    min = param.IntegerField()
-
-    # TODO: Detect holes in die polygon
-
-    def __repr__(self):
-        return 'Rule density: min={}'.format(self.min)
-
-    def get_layer_area(self, elems):
-        area = 0.0
-        for e in elems:
-            area += e.ply_area
-        return area
-
-    fails = True
-
-    def apply(self, elems):
-
-        pos_elems = spira.ElementList()
-        neg_elems = spira.ElementList()
-
-        for C in elems.dependencies():
-            if C.layer.number == self.layer1.number:
-                pos_elems = C.elementals
-            elif C.layer.number == self.layer2.number:
-                neg_elems = C.elementals
-
-        # pos_elems = spira.ElementList()
-        # neg_elems = spira.ElementList()
-        # for e in elems:
-        #     if e.gdslayer.number == self.layer1.number:
-        #         if e.gdslayer.datatype == 0:
-        #             pos_elems += e
-        #         elif e.gdslayer.datatype == 68:
-        #             neg_elems += e
-        #         else:
-        #             raise ValueError('Metal layer design rule not implemented.')
-
         Ap = self.get_layer_area(pos_elems)
         An = self.get_layer_area(neg_elems)
 
         if (Ap > 0) and (An > 0):
             presentage = 100 - (An/Ap)*100
 
-            if presentage < self.min:
-                fails = False
+            if presentage < self.minimum:
+                fails = True
                 print('\n ------ Design Rules ------')
                 print(self.layer1)
                 message = '[DRC: Density ({})]: (layer1 {}, layer2 {}, extracted_value {}%, rule_value {}%)'.format('fail', self.layer1.number, self.layer2.number, int(round(presentage)), self.min)
                 raise ValueError(message)
             else:
-                fails = True
+                fails = False
                 print('\n ------ Design Rules ------')
                 print(self.layer1)
                 print('Density ({}): {}%'.format('pass', int(round(presentage))))

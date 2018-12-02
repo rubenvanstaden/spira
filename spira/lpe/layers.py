@@ -9,9 +9,7 @@ from spira import settings
 from spira.rdd import get_rule_deck
 from spira.kernel.elemental.polygons import UnionPolygons
 from spira.kernel import parameters as param
-from spira.templates import vias
 from spira.kernel import utils
-from spira.lrc.rules import *
 from spira.kernel.cell import CellField
 
 from spira.kernel.cell import Cell
@@ -28,6 +26,35 @@ from spira.kernel.parameters.field.element_list import ElementList
 RDD = get_rule_deck()
 
 
+class CMLayers(Cell):
+
+    layer = param.LayerField()
+
+    def create_elementals(self, elems):
+        return elems
+
+    def set_net(self):
+        pass
+
+    def get_net(self):
+        pass
+
+
+class CNLayers(Cell):
+
+    layer = param.LayerField()
+
+    def create_elementals(self, elems):
+        return elems
+
+class CGLayers(Cell):
+
+    layer = param.LayerField()
+
+    def create_elementals(self, elems):
+        return elems
+
+
 class __DeviceLayer__(Cell):
     doc = param.StringField()
     name = param.StringField()
@@ -35,26 +62,60 @@ class __DeviceLayer__(Cell):
 
 class __ProcessLayer__(Cell):
     doc = param.StringField()
-    name = param.StringField()
+    points = param.DataField()
+    number = param.IntegerField()
+    error_type = param.IntegerField()
 
+    layer = param.DataField(fdef_name='create_layer')
+    player = param.DataField(fdef_name='create_polygon_layer')
 
-class PLayer(__ProcessLayer__):
+    def create_polygon_layer(self):
+        return Polygons(polygons=self.points, gdslayer=self.layer)
 
-    layer = param.LayerField()
-    player = param.PolygonField()
+    def create_layer(self):
+        return Layer(name=self.name, number=self.number, datatype=self.error_type)
 
     def create_elementals(self, elems):
-        # self.player.move(origin=self.player.center, destination=(0,0))
         elems += self.player
         return elems
 
 
-class BoxLayers(__DeviceLayer__):
+class __ConnectLayer__(__ProcessLayer__):
+
+    midpoint = param.PointField()
+
+    layer1 = param.LayerField()
+    layer2 = param.LayerField()
+
+    port1 = param.DataField(fdef_name='create_port1')
+    port2 = param.DataField(fdef_name='create_port2')
+
+    def create_port1(self):
+        port = Port(name='P1', midpoint=self.midpoint, gdslayer=self.layer1)
+        return port
+    
+    def create_port2(self):
+        port = Port(name='P2', midpoint=self.midpoint, gdslayer=self.layer2)
+        return port
+
+    def create_elementals(self, elems):
+
+        super().create_elementals(elems)
+
+        elems += self.port1
+        elems += self.port2
+
+        return elems
+
+
+class DLayer(__DeviceLayer__):
 
     blayer = param.PolygonField()
     device_elems = param.ElementListField()
     box = param.DataField(fdef_name='create_box_layer')
     terms = param.DataField(fdef_name='create_labels')
+
+    color = param.ColorField(default='#e54e7f')
 
     # def create_ports(self, ports):
     def create_labels(self):
@@ -86,7 +147,7 @@ class BoxLayers(__DeviceLayer__):
         return elems
 
 
-class GLayer(PLayer):
+class GLayer(__ProcessLayer__):
     """ Ground Plane layer. """
 
     blayer = param.PolygonField()
@@ -94,7 +155,6 @@ class GLayer(PLayer):
     box = param.DataField(fdef_name='create_box_layer')
     terms = param.DataField(fdef_name='create_labels')
 
-    # def create_ports(self, ports):
     def create_labels(self):
         elems = ElementList()
         for p in self.device_elems.polygons:
@@ -125,33 +185,7 @@ class GLayer(PLayer):
         return elems
 
 
-class MLayer(PLayer):
-
-    metal_elems = param.ElementListField()
-    metal_layer = param.DataField(fdef_name='create_merged_metal_layers')
-
-    def create_ports(self, ports):
-        pass
-
-    # def create_merged_metal_layers(self):
-    #     points = []
-    #     for p in self.metal_elems:
-    #         for pp in p.polygons:
-    #             points.append(pp)
-    #     if points:
-    #         self.player = UnionPolygons(polygons=points, gdslayer=self.layer)
-    #     return self.player
-
-    def create_elementals(self, elems):
-
-        # elems += self.metal_layer
-
-        super().create_elementals(elems)
-
-        return elems
-
-
-class ELayer(PLayer):
+class MLayer(__ProcessLayer__):
 
     def create_elementals(self, elems):
 
@@ -160,29 +194,32 @@ class ELayer(PLayer):
         return elems
 
 
-class DLayer(PLayer):
+class ELayer(__ProcessLayer__):
 
-    layer1 = param.LayerField()
-    layer2 = param.LayerField()
+    def create_elementals(self, elems):
 
-    port1 = param.DataField(fdef_name='create_port1')
-    port2 = param.DataField(fdef_name='create_port2')
+        super().create_elementals(elems)
+
+        return elems
+
+
+class NLayer(__ConnectLayer__):
 
     color = param.ColorField(default='#C0C0C0')
 
-    def create_port1(self):
-        port = Port(name='P1', midpoint=self.vlayer.center, gdslayer=self.layer1)
-        return port
-    
-    def create_port2(self):
-        port = Port(name='P2', midpoint=self.vlayer.center, gdslayer=self.layer2)
-        return port
-
     def create_elementals(self, elems):
 
         super().create_elementals(elems)
 
-        # elems += self.port1
-        # elems += self.port2
+        return elems
+
+
+class TLayer(__ConnectLayer__):
+
+    color = param.ColorField(default='#B4F8C8')
+
+    def create_elementals(self, elems):
+
+        super().create_elementals(elems)
 
         return elems

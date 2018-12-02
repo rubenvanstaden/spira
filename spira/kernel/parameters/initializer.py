@@ -302,7 +302,14 @@ class FieldInitializer(GeometryMixin, __Field__):
 class MetaElemental(MetaBase):
 
     def __call__(cls, *params, **keyword_params):
-        p, a, k, d = inspect.getargspec(cls.__init__)
+        # p, a, k, d = inspect.getfullargspec(cls.__init__)
+
+        full_args = inspect.getfullargspec(cls.__init__)
+        p = full_args.args
+        a = full_args.varargs
+        k = full_args.varkw
+        d = full_args.defaults
+
         if d is None: d = []
         kwargs = {}
         for k, v in zip(p[-len(d):], d):
@@ -318,7 +325,14 @@ class MetaElemental(MetaBase):
 class MetaSref(MetaBase):
 
     def __call__(cls, *params, **keyword_params):
-        p, a, k, d = inspect.getargspec(cls.__init__)
+        # p, a, k, d = inspect.getfullargspec(cls.__init__)
+
+        full_args = inspect.getfullargspec(cls.__init__)
+        p = full_args.args
+        a = full_args.varargs
+        k = full_args.varkw
+        d = full_args.defaults
+
         if d is None: d = []
         kwargs = {}
         for k, v in zip(p[-len(d):], d):
@@ -346,7 +360,14 @@ class MetaCell(MetaBase):
     """
 
     def __call__(cls, *params, **keyword_params):
-        p, a, k, d = inspect.getargspec(cls.__init__)
+        # p, a, k, d = inspect.getfullargspec(cls.__init__)
+
+        full_args = inspect.getfullargspec(cls.__init__)
+        p = full_args.args
+        a = full_args.varargs
+        k = full_args.varkw
+        d = full_args.defaults
+
         if d is None: d = []
         kwargs = {}
         for k, v in zip(p[-len(d):], d):
@@ -386,7 +407,21 @@ class BaseLayer(FieldInitializer, metaclass=MetaElemental):
     pass
 
 
+from spira.kernel import parameters as param
 class BaseElement(FieldInitializer, metaclass=MetaElemental):
+
+    gdspy_commit = param.BoolField()
+
+    def flatten(self):
+        return [self]
 
     def dependencies(self):
         return None
+
+    @property
+    def id(self):
+        return self.__id__
+
+    @id.setter
+    def id(self, _id):
+        self.__id__ = _id

@@ -25,9 +25,9 @@ class PointField(DataFieldDescriptor):
 
         s1 = abs(value[0]/SCALE_UP)
         s2 = abs(value[1]/SCALE_UP)
-        if (s1 < 1e-1):
+        if (s1 < 1e-3):
             value[0] = SCALE_UP*value[0]
-        if (s2 < 1e-1):
+        if (s2 < 1e-3):
             value[1] = SCALE_UP*value[1]
         obj.__store__[self.__name__] = value
 

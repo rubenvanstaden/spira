@@ -23,8 +23,9 @@ class Library(__Library__):
     """
 
     def __init__(self, name='spira_library', infile=None, **kwargs):
+        from spira.kernel.cell import CellList
         super().__init__(name=name, infile=None, **kwargs)
-        self.cells = ElementList()
+        self.cells = CellList()
         self.pcells = ElementList()
         self.graphs = list()
 
@@ -37,16 +38,27 @@ class Library(__Library__):
     def __str__(self):
         return self.__repr__()
 
+    # def __add__(self, other):
+    #     if isinstance(other, spira.Cell):
+    #         self.cells += other
+    #         for d in other.dependencies():
+    #             self.cells += d
+    #     elif isinstance(other, spira.ElementList):
+    #         for d in other.dependencies():
+    #             self.cells += d
+    #         # for s in other.sref:
+    #         #     self.cells += s.ref
+    #     return self
+
     def __add__(self, other):
+        from spira.kernel.cell import CellList
         if isinstance(other, spira.Cell):
-            self.cells += other
+            self.cells.add(other)
             for d in other.dependencies():
-                self.cells += d
+                self.cells.add(d)
         elif isinstance(other, spira.ElementList):
             for d in other.dependencies():
-                self.cells += d
-            # for s in other.sref:
-            #     self.cells += s.ref
+                self.cells.add(d)
         return self
 
     def add_pcell(self, pcell):
@@ -55,11 +67,15 @@ class Library(__Library__):
     @property
     def to_gdspy(self):
         for c in self.cells:
-            cd = gdspy.current_library.cell_dict
-            if c.name in cd.keys():
-                self.add(cd[c.name])
+            # FIXME: Add unit test for gdspy interfacing.
+            # cd = gdspy.current_library.cell_dict
+            cell = c.gdspycell
+            if c.name in self.cell_dict.keys():
+                self.cell_dict[c.name] = cell
+                # self.add(self.cell_dict[c.name])
             else:
-                self.add(c.gdspycell)
+                # self.cell_dict
+                self.add(cell)
 
     def referenced_structures(self):
         referred_to_list = list()

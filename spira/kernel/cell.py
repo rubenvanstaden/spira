@@ -25,16 +25,14 @@ from spira.kernel.parameters.initializer import MetaBase
 from spira.kernel.parameters.initializer import BaseCell
 
 
-# -----------------------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------------------------
 
 # http://tobyho.com/2009/01/18/auto-mixin-in-python/
 # http://code.activestate.com/recipes/577730-mixin-and-overlay/
-# https://stackoverflow.com/questions/6966772/using-the-call-method-of-a-metaclass-instead-of-new
+# https://stackoverflow.com/questions/6966772/using-the-call-
+# method-of-a-metaclass-instead-of-new
 
-# -----------------------------------------------------------------------------------------------
-
-
-# GEOMETRY = (GeometryAbstract, MeshAbstract, GraphAbstract, PortAbstract)
+# ----------------------------------------------------------------------------------------------
 
 
 class InspectMixin(object):
@@ -54,6 +52,22 @@ class InspectMixin(object):
         print('\n------------------------')
         for i, e in enumerate(self.elementals.sref):
             print('{}. {}'.format(i, e.ref))
+
+    def get_mlayers(self, layer):
+        from spira.lpe.layers import MLayer
+        from spira.kernel.elemental.polygons import Polygons
+        elems = ElementList()
+        for S in self.elementals.sref:
+            if isinstance(S.ref, MLayer):
+                if S.ref.layer.number == layer:
+                    for p in S.ref.elementals:
+                        # FIXME!!!
+                        # if isinstance(p, ELayers):
+                            # raise Errors
+                        if isinstance(p, Polygons):
+                            elems += p
+        return elems
+
 
     @property
     def bbox(self):
@@ -77,6 +91,14 @@ class InspectMixin(object):
         return self.elementals.ports
 
     @property
+    def graph(self):
+        return self.elementals.graph
+
+    @property
+    def subgraphs(self):
+        return self.elementals.subgraphs
+
+    @property
     def id(self):
         return self.__id__
 
@@ -96,16 +118,24 @@ class InspectMixin(object):
         return elems
 
 
+glib = gdspy.GdsLibrary(name='s2g')
+
+
 class __Cell__(gdspy.Cell, BaseCell):
 
     _ID = 0
 
     __mixins__ = [OutputMixin, InspectMixin]
 
-    def __init__(self, name=None, elementals=None, **kwargs):
-        BaseCell.__init__(self, **kwargs)
+    name = param.StringField()
 
-        self.cell_name = name
+    def __init__(self, name=None, elementals=None, **kwargs):
+
+        if name is not None:
+            self.__dict__['__name__'] = name
+            Cell.name.__set__(self, name)
+
+        BaseCell.__init__(self, **kwargs)
 
         if 'id0' in kwargs.keys():
             self.__id__ = '_{}'.format(self.id0)
@@ -119,9 +149,8 @@ class __Cell__(gdspy.Cell, BaseCell):
             return ("[SPiRA: Cell(\'{}\')] " +
                    "({} elementals: {} sref, {} polygons, " +
                    "{} labels, {} ports)").format(
-                        self.__class__.__name__,
-                        # 'i '+self.cell_name,
-                        # '     ',
+                        # self.__class__.__name__,
+                        self.name,
                         elems.__len__(),
                         elems.sref.__len__(),
                         elems.polygons.__len__(),
@@ -192,7 +221,14 @@ class CellAbstract(__Cell__):
 
         gdspy.Cell.__init__(self, name, exclude_from_current=True)
 
-        self.library = library
+        if library is None:
+            pass
+            # from spira import settings
+            # from spira.templates.library import library as lib
+            # settings.set_library(lib)
+            # gdspy.current_library.cell_dict[self.name] = self
+        else:
+            self.library = library
 
         if elementals is not None:
             self.elementals = elementals
@@ -202,14 +238,61 @@ class CellAbstract(__Cell__):
         return result
 
     def dependencies(self):
-        return self.elementals.dependencies()
+        deps = self.elementals.dependencies()
+        deps += self
+        return deps
 
-    # def _copy(self):
-    #     C = Cell(name=self.name, elementals=deepcopy(self.elementals))
-    #     return C
+    def commit_to_gdspy(self):
+        cd = gdspy.current_library.cell_dict
+        if self.name not in cd.keys():
+            # self.to_gdspy
 
-    def flat_copy(self, level=-1):
-        self.elementals = self.elementals.flat_copy(level)
+            cell = gdspy.Cell(self.name, exclude_from_current=True)
+
+            # for e in self.elementals.flat_copy(commit_to_gdspy=True):
+            for e in self.elementals:
+                if not isinstance(e, (SRef, ElementList)):
+                    e.commit_to_gdspy(cell=cell, gdspy_commit=True)
+
+            # cell.elements = self.elements
+            # cell.labels = self.labels
+            # print(cell.elements)
+            return cell
+        else:
+            return cd[self.name]
+
+    def wrap_references(self, cell, c2dmap):
+        from spira.kernel.utils import scale_coord_down as scd
+        for e in cell.elementals:
+            if isinstance(e, SRef):
+                G = c2dmap[cell]
+                ref_device = c2dmap[e.ref]
+                G.add(gdspy.CellReference(ref_cell=ref_device,
+                                          origin=scd(e.origin),
+                                          rotation=e.rotation,
+                                          magnification=e.magnification,
+                                          x_reflection=e.x_reflection))
+
+    def construct_gdspy_tree(self):
+        d = self.dependencies()
+        c2dmap = {}
+        for c in d:
+            if isinstance(c, Cell):
+                G = c.commit_to_gdspy()
+                c2dmap.update({c:G})
+            else:
+                c.construct_gdspy_tree()
+
+        for cell in d:
+            self.wrap_references(cell, c2dmap)
+            glib.add(c2dmap[cell])
+
+        gdspy.LayoutViewer(library=glib)
+
+        return c2dmap
+
+    def flat_copy(self, level=-1, commit_to_gdspy=False):
+        self.elementals = self.elementals.flat_copy(level, commit_to_gdspy)
         return self.elementals
 
     def flatten(self):
@@ -231,12 +314,12 @@ class CellAbstract(__Cell__):
 
     @property
     def to_gdspy(self):
-        for e in self.elementals.flat_copy():
+        for e in self.elementals.flat_copy(commit_to_gdspy=True):
             if not isinstance(e, ElementList):
-                e.add_to_gdspycell(cell=self)
+                e.commit_to_gdspy(cell=self)
 
     def remove_sref(self, sref):
-        elems = spira.ElementList()
+        elems = ElementList()
         for e in self.elementals:
             if e is not sref:
                 elems += e
@@ -442,6 +525,93 @@ class CellAbstract(__Cell__):
 
 class Cell(CellAbstract):
     pass
+
+
+from spira.kernel.parameters.field.typed_list import TypedList
+class CellList(TypedList):
+
+    __item_type__ = Cell
+
+    def is_empty(self):
+        if (len(self._list) == 0): return True
+        for e in self._list:
+            if not e.is_empty(): return False
+        return True
+
+    def __getitem__(self, key):
+        if isinstance(key, str):
+            for i in self._list:
+                if i.name == key: return i
+            raise IndexError("Structure " + key + " cannot be found in StructureList.")
+        else:
+            return list.__getitem__(self._list, key)
+
+    def __setitem__(self, key, value):
+        if isinstance(key, str):
+            for i in range(0, len(self._list)):
+                if self._list[i].name == key: 
+                    return list.__setitem__(self._list, i, value)
+            list.append(self._list, value)
+        else:
+            return list.__setitem__(self._list, key, value)
+
+    def __delitem__(self, key):
+        if isinstance(key, str):
+            for i in range(0, len(self._list)):
+                if self._list[i].name == key: 
+                    return list.__delitem__(self._list, i)
+                return
+            return list.__delitem__(self._list, key)
+        else:
+            return list.__delitem__(self._list, key)
+
+    def __contains__(self, item):
+        if isinstance(item, Cell):
+            name = item.name
+        else:
+            name = item
+        if isinstance(name, str):
+            for i in self._list:
+                if i.name == name: return True
+            return False
+        else:
+            return list.__contains__(self._list, item)
+
+    def __fast_contains__(self, name):
+        for i in self._list:
+            if i.name == name: 
+                return True
+        return False
+
+    def index(self, item):
+        if isinstance(item, str):
+            for i in range(0, len(self._list)):
+                if list.__getitem__(self._list, i).name == item:
+                    return i
+            raise ValueError("Cell " + item + " is not in CellList")
+        else:
+            list.index(self._list, item)
+
+    def add(self, item, overwrite=False):
+        if item == None:
+            return
+        if isinstance(item, Cell):
+            if overwrite:
+                self._list[item.name] = item
+                return
+            elif not self.__fast_contains__(item.name):
+                self._list.append(item)
+        elif isinstance(item, (CellList, list, set)):
+            for s in item:
+                self.add(s, overwrite)
+        else:
+            raise ValueError('Cannot add cell!')
+
+    def append(self, other, overwrite = False):
+        return self.add(other, overwrite)
+
+    def extend(self, other, overwrite = False):
+        return self.add(other, overwrite)
 
 
 from spira.kernel.parameters.descriptor import DataFieldDescriptor

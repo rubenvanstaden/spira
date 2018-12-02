@@ -46,6 +46,11 @@ class __Label__(gdspy.Label, BaseElement):
     def __eq__(self, other):
         return self.__id__ == other.__id__
 
+    def __deepcopy__(self, memo):
+        c_label = self.modified_copy(position=self.position, 
+                                     gdslayer=deepcopy(self.gdslayer))
+        return c_label
+
 
 class LabelAbstract(__Label__):
     """
@@ -69,31 +74,30 @@ class LabelAbstract(__Label__):
     def __init__(self, position, **kwargs):
         super().__init__(position, **kwargs)
 
-    def __deepcopy__(self, memo):
-        return Label(self.position, gdslayer=deepcopy(self.gdslayer))
-
-    def scale_up(self, value=None):
-        from spira.kernel.utils import scale_coord_up as scu
-        self.position = scu(self.position)
-        return self
-
-    def scale_down(self):
-        from spira.kernel.utils import scale_coord_down as scd
-        self.position = scd(self.position)
-        return self
-
-    def add_to_gdspycell(self, cell):
-        assert isinstance(cell, gdspy.Cell)
-        from spira.kernel.utils import scale_coord_down as scd
-        L = gdspy.Label(self.text,
-                        scd(self.position),
-                        anchor='o',
-                        rotation=self.rotation,
-                        magnification=self.magnification,
-                        x_reflection=self.x_reflection,
-                        layer=self.gdslayer.number,
-                        texttype=self.texttype)
-        cell.add(L)
+    def commit_to_gdspy(self, cell, gdspy_commit=None):
+        if gdspy_commit is None:
+            if not self.gdspy_commit:
+                from spira.kernel.utils import scale_coord_down as scd
+                L = gdspy.Label(self.text,
+                                scd(self.position),
+                                anchor='o',
+                                rotation=self.rotation,
+                                magnification=self.magnification,
+                                x_reflection=self.x_reflection,
+                                layer=self.gdslayer.number,
+                                texttype=self.texttype)
+                cell.add(L)
+        else:
+            from spira.kernel.utils import scale_coord_down as scd
+            L = gdspy.Label(self.text,
+                            scd(self.position),
+                            anchor='o',
+                            rotation=self.rotation,
+                            magnification=self.magnification,
+                            x_reflection=self.x_reflection,
+                            layer=self.gdslayer.number,
+                            texttype=self.texttype)
+            cell.add(L)
 
     def reflect(self, p1=(0,1), p2=(0,0)):
         self.position = [self.position[0], -self.position[1]]
@@ -116,23 +120,14 @@ class LabelAbstract(__Label__):
         if transform['rotation']:
             self.rotate(angle=transform['rotation'])
         if transform['origin']:
-            # self.move(origin=self.position, destination=transform['origin'])
             self.translate(dx=transform['origin'][0], dy=transform['origin'][1])
         return self
 
-    def flatten(self):
-        return [self]
-
-    def flat_copy(self, level=-1):
-        return self.modified_copy(position=self.position)
-
-    @property
-    def id(self):
-        return self.__id__
-
-    @id.setter
-    def id(self, _id):
-        self.__id__ = _id
+    def flat_copy(self, level=-1, commit_to_gdspy=False):
+        c_label = self.modified_copy(position=self.position)
+        if commit_to_gdspy:
+            self.gdspy_commit = True
+        return c_label
 
     def move(self, origin=(0,0), destination=None, axis=None):
         from spira.kernel.elemental.port import PortAbstract
