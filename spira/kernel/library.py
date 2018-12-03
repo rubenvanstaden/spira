@@ -6,7 +6,7 @@ import pathlib
 from spira.kernel.parameters.field.element_list import ElementList
 
 from spira.kernel.io import import_gds
-from spira.kernel.mixins import OutputMixin
+from spira.kernel.mixin.gdsii_output import OutputMixin
 from spira.kernel.parameters.initializer import BaseLibrary
 
 

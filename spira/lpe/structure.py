@@ -127,13 +127,14 @@ class ComposeGLayer(ComposeNLayer):
 
             gnd_full = self.ground_layer
 
-            gnd = gnd_full | box
+            if gnd_full:
+                gnd = gnd_full | box
 
-            c_glayer = CGLayers(layer=spira.Layer(gnd.gdslayer))
-            name = 'GLayer_{}'.format(gnd.gdslayer.number)
-            gnd_layer = GLayer(name=name, layer=gnd.gdslayer, player=gnd)
-            c_glayer += spira.SRef(gnd_layer)
-            elems += spira.SRef(c_glayer)
+                c_glayer = CGLayers(layer=spira.Layer(gnd.gdslayer))
+                name = 'GLayer_{}'.format(gnd.gdslayer.number)
+                gnd_layer = GLayer(name=name, layer=gnd.gdslayer, player=gnd)
+                c_glayer += spira.SRef(gnd_layer)
+                elems += spira.SRef(c_glayer)
 
         return elems
 
@@ -163,6 +164,8 @@ class __StructureCell__(ConnectDesignRules):
     Add a GROUND bbox to Device for primitive and
     DRC detection, since GROUND is only in Mask Cell.
     """
+
+    level = param.IntegerField(default=1)
 
     device_elems = param.ElementListField()
 

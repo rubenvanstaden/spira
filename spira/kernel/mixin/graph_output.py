@@ -17,39 +17,6 @@ import plotly.offline as offline
 from spira import settings
 
 
-class TranformationMixin(object):
-
-    def _rotate_points(self, points, angle = 45, center = (0,0)):
-        """
-        Rotates points around a centerpoint defined by `center`.
-        `points` may be input as either single points [1,2]
-        or array-like[N][2], and will return in kind
-        """
-        angle = angle*np.pi/180
-        ca = np.cos(angle)
-        sa = np.sin(angle)
-        sa = np.array((-sa, sa))
-        c0 = np.array(center)
-        if np.asarray(points).ndim == 2:
-            return (points - c0) * ca + (points - c0)[:,::-1] * sa + c0
-        if np.asarray(points).ndim == 1:
-            return (points - c0) * ca + (points - c0)[::-1] * sa + c0
-
-
-    def _reflect_points(self, points, p1=(0,0), p2=(1,0)):
-        """
-        Reflects points across the line formed by p1 and
-        p2. `points` may be input as either single points
-        [1,2] or array-like[N][2], and will return in kind
-        """
-        # From http://math.stackexchange.com/questions/11515/point-reflection-across-a-line
-        points = np.array(points); p1 = np.array(p1); p2 = np.array(p2);
-        if np.asarray(points).ndim == 1:
-            return 2*(p1 + (p2-p1)*np.dot((p2-p1),(points-p1))/norm(p2-p1)**2) - points
-        if np.asarray(points).ndim == 2:
-            return np.array([2*(p1 + (p2-p1)*np.dot((p2-p1),(p-p1))/norm(p2-p1)**2) - p for p in points])
-
-
 class DrawGraphAbstract(object):
     def abstract_collector(self):
         from spira.kernel.elemental.port import PortAbstract
@@ -224,65 +191,3 @@ class DrawGraphAbstract(object):
 
         return nodes
 
-
-class DrawLayoutAbstract(object):
-    import spira
-
-    def output(self, name=None, path='current'):
-        if name is None:
-            raise ValueError('GDS file not named.')
-
-        write_path = None
-        if path == 'current':
-            write_path = current_path(name)
-        elif path == 'debug':
-            write_path = debug_path(name)
-        else:
-            raise ValueError('`path` variable not implemented!')
-
-        library = settings.get_library()
-        library += self
-        library.to_gdspy
-
-
-
-
-        # print(library)
-        # if library is not None:
-        #     library += self
-        #     library.to_gdspy
-        # else:
-        #     # from spira.templates.library import library
-        #     # settings.set_library(library)
-        #     print(library)
-        #     library += self
-        #     library.to_gdspy
-
-        # # library.single_cell(self)
-
-        # if isinstance(self, spira.Cell):
-        #     for p in self.get_ports():
-        #         p.commit_to_gdspy(cell=self)
-
-        # writer = gdspy.GdsWriter('out-file.gds', unit=1.0e-6, precision=1.0e-9)
-        # cell = self.gdspycell
-        # writer.write_cell(cell)
-        # del cell
-        # writer.close()
-
-        # print(library)
-        # print(gdspy.current_library)
-        # print('Writting GDS file to path: {}'.format(write_path))
-        #
-        # print('')
-        # cell = gdspy.current_library.cell_dict['Ruben']
-        # print(cell)
-        # print('')
-
-        # gdspy.write_gds(outfile=write_path, name=name, unit=1.0e-6)
-        gdspy.LayoutViewer(library=library)
-        # gdspy.LayoutViewer(library=library, cells=cell)
-
-
-class OutputMixin(DrawLayoutAbstract, DrawGraphAbstract):
-    pass

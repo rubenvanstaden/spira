@@ -47,6 +47,7 @@ class CNLayers(Cell):
     def create_elementals(self, elems):
         return elems
 
+
 class CGLayers(Cell):
 
     layer = param.LayerField()

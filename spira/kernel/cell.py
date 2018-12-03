@@ -1,6 +1,6 @@
 from spira.kernel.parameters.initializer import FieldInitializer
-from spira.kernel.mixins import OutputMixin
-from spira.kernel.mixins import TranformationMixin
+from spira.kernel.mixin.gdsii_output import OutputMixin
+# from spira.kernel.mixins import TranformationMixin
 import spira.kernel.parameters as param
 from spira.kernel import utils
 from numpy.linalg import norm
@@ -237,44 +237,47 @@ class CellAbstract(__Cell__):
         return deps
 
     def commit_to_gdspy(self):
-        cd = gdspy.current_library.cell_dict
-        if self.name not in cd.keys():
-            cell = gdspy.Cell(self.name, exclude_from_current=True)
-            for e in self.elementals:
-                if not isinstance(e, (SRef, ElementList, Graph, Mesh)):
-                    e.commit_to_gdspy(cell=cell)
-            return cell
-        else:
-            return cd[self.name]
+        cell = gdspy.Cell(self.name, exclude_from_current=True)
+        for e in self.elementals:
+            if not isinstance(e, (SRef, ElementList, Graph, Mesh)):
+                e.commit_to_gdspy(cell=cell)
+        return cell
 
-    def wrap_references(self, c, c2dmap):
+        # cd = gdspy.current_library.cell_dict
+        # if self.name not in cd.keys():
+        #     cell = gdspy.Cell(self.name, exclude_from_current=True)
+        #     for e in self.elementals:
+        #         if not isinstance(e, (SRef, ElementList, Graph, Mesh)):
+        #         # if not isinstance(e, (ElementList, Graph, Mesh)):
+        #             e.commit_to_gdspy(cell=cell)
+        #     return cell
+        # else:
+        #     return cd[self.name]
+
+    def wrapper(self, c, c2dmap):
         from spira.kernel.utils import scale_coord_down as scd
         for e in c.elementals:
             if isinstance(e, SRef):
                 G = c2dmap[c]
                 ref_device = c2dmap[e.ref]
                 G.add(gdspy.CellReference(ref_cell=ref_device,
-                                          origin=scd(e.origin),
-                                          rotation=e.rotation,
-                                          magnification=e.magnification,
-                                          x_reflection=e.x_reflection))
+                                        origin=scd(e.origin),
+                                        rotation=e.rotation,
+                                        magnification=e.magnification,
+                                        x_reflection=e.x_reflection))
 
     def construct_gdspy_tree(self, gdspy_commit=None):
         d = self.dependencies()
         c2dmap = {}
         for c in d:
-            if issubclass(type(c), Cell):
-                G = c.commit_to_gdspy()
-                c2dmap.update({c:G})
+            G = c.commit_to_gdspy()
+            c2dmap.update({c:G})
 
         for c in d:
-            self.wrap_references(c, c2dmap)
+            self.wrapper(c, c2dmap)
             glib.add(c2dmap[c])
 
         gdspy.LayoutViewer(library=glib)
-
-        print('--- Constructed Cell ---')
-        print(c2dmap[self])
 
         # return c2dmap
         return c2dmap[self]

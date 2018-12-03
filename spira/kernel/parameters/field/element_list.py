@@ -1,6 +1,5 @@
 import collections
 from spira.kernel.parameters.field.typed_list import TypedList
-from spira.kernel.mixins import OutputMixin
 
 
 class PortList(TypedList):
@@ -164,7 +163,7 @@ class ElementFilterMixin(object):
         return subgraphs
 
 
-class ElementList(TypedList, OutputMixin, ElementFilterMixin):
+class ElementList(TypedList, ElementFilterMixin):
     """
 
     """

@@ -103,6 +103,7 @@ class __Polygon__(gdspy.PolygonSet, SimplyMixin, BaseElement):
 
         self.unit = None
 
+        # FIXME: Solve this shit.
         if len(polygons):
             s1 = abs(polygons[0][2][0]/SCALE_UP)
             if (s1 < 1e-3):
@@ -111,8 +112,6 @@ class __Polygon__(gdspy.PolygonSet, SimplyMixin, BaseElement):
                 self.polygons = np.array(polygons)
         else:
             self.polygons = np.array(polygons)
-
-        # self.polygons = np.array(polygons)
 
         BaseElement.__init__(self, **kwargs)
 
@@ -124,9 +123,6 @@ class __Polygon__(gdspy.PolygonSet, SimplyMixin, BaseElement):
     def __repr__(self):
         if self is None:
             return 'Polygon is None!'
-        # return ("[SPiRA: Polygon] ({} vertices, layer {}, datatype {})").format(
-        #         sum([len(p) for p in self.polygons]),
-        #         self.gdslayer.number, self.gdslayer.datatype)
         return ("[SPiRA: Polygon] ({} center, " +
                 "{} vertices, layer {}, datatype {})").format(
                 self.center, sum([len(p) for p in self.polygons]),
@@ -224,26 +220,6 @@ class PolygonAbstract(__Polygon__):
 
     def commit_to_gdspy(self, cell):
         from spira.kernel.utils import scale_polygon_down as spd
-        # if gdspy_commit is not None:
-        #     if self.gdspy_commit is False:
-
-        #         if gdspy_commit is True:
-        #             self.gdspy_commit = True
-
-        #         from spira.kernel.utils import scale_polygon_down as spd
-        #         ply = deepcopy(self.polygons)
-        #         P = gdspy.PolygonSet(spd(ply),
-        #                             self.gdslayer.number,
-        #                             self.gdslayer.datatype)
-        #         cell.add(P)
-
-        # if self.gdspy_commit is False:
-        #     ply = deepcopy(self.polygons)
-        #     P = gdspy.PolygonSet(spd(ply),
-        #                         self.gdslayer.number,
-        #                         self.gdslayer.datatype)
-        #     cell.add(P)
-        #     self.gdspy_commit = True
 
         if self.__repr__() not in list(PolygonAbstract.__committed__.keys()):
             ply = deepcopy(self.polygons)
@@ -272,7 +248,6 @@ class PolygonAbstract(__Polygon__):
 
     @property
     def bbox(self):
-        self.polygons = np.array(self.polygons)
         bb = self.get_bounding_box()
         assert len(bb) == 2
         return bb

@@ -32,26 +32,43 @@ from spira import settings
 RDD = get_rule_deck()
 
 
-class Device(__StructureCell__):
+class __Device__(__StructureCell__):
+
+    def create_elementals(self, elems):
+        super().create_elementals(elems)
+
+        # # TODO: Do DRC and ERC checking here.
+        # # sref_elems = self.cell.get_srefs()
+        # for S in self.cell.get_srefs():
+        #     if isinstance(S.ref, DLayer):
+        #         elems += S
+
+        # for S in self.cell.elementals:
+        #     if isinstance(S.ref, TLayer):
+        #         elems += S
+
+        return elems
+
+    
+class Device(__Device__):
+    pass
+
+
+class Gate(__Device__):
+    pass
+
+
+class Circuit(__Device__):
+    pass
+
+
+class __Generator__(__CellContainer__):
 
     level = param.IntegerField(default=1)
-
-    def create_elementals(self, elems):
-        super().create_elementals(elems)
-        return elems
-
-
-class StructuredMask(__StructureCell__):
-
-    def create_elementals(self, elems):
-        super().create_elementals(elems)
-        return elems
-
-
-class __NetGenerator__(__CellContainer__):
-
     lcar = param.IntegerField(default=0.01)
     algorithm = param.IntegerField(default=6)
+
+    generate_devices = param.DataField(fdef_name='create_devices')
 
     def create_graph(self, elems):
 
@@ -78,8 +95,6 @@ class __NetGenerator__(__CellContainer__):
                                 # raise Errors
                             if isinstance(p.ref.player, Polygons):
                                 ply_elems += p.ref.player
-
-            # print(ply_elems)
 
             if ply_elems:
                 geom = Geometry(name='{}'.format(layer), lcar=self.lcar, algorithm=self.algorithm, layer=layer, polygons=ply_elems)
@@ -110,18 +125,14 @@ class __NetGenerator__(__CellContainer__):
                 ng.write_graph(graphname='{}'.format(layer))
                 elems += ng
 
-
-class Circuit(__NetGenerator__):
-
-    container = param.DataField(fdef_name='create_container')
-
     def wrap_references(self, c, c2dmap):
         from spira.kernel.utils import scale_coord_down as scd
         for e in c.elementals:
             if isinstance(e, SRef):
-                e.ref = c2dmap[e.ref]
+                if e.ref in c2dmap:
+                    e.ref = c2dmap[e.ref]
 
-    def create_container(self):
+    def create_devices(self):
         deps = self.cell.dependencies()
         c2dmap = {}
         for T in self.library.pcells:
@@ -137,63 +148,73 @@ class Circuit(__NetGenerator__):
 
                 c2dmap.update({D: C})
 
-        for c in deps:
+        for c in self.cell.dependencies():
             self.wrap_references(c, c2dmap)
 
-    def create_elementals(self, elems):
-        """
-        Connect to the current library and get the
-        primitive metadata from the Rule Deck.
-        The pcell device is updated after parsing the
-        elementals in the via pcell class.
-        """
-
-        super().create_elementals(elems)
-
-        self.container
-
-        # for e in self.cell.elementals:
-        #     print(e)
-        #     elems += e
-
-        # for D in self.cell.elementals.dependencies():
-        #     if isinstance(D, Device):
-        #         self.create_graph(elems=D.elementals)
-
-        return elems
+        return SRef(self.cell)
 
 
-class Mask(StructuredMask):
+class GateGenerator(__Generator__):
+    """
+    Connect to the current library and get the
+    primitive metadata from the Rule Deck.
+    The pcell device is updated after parsing the
+    elementals in the via pcell class.
+    """
 
-    def create_elementals(self, elems):
+    structure_gate = param.DataField(fdef_name='create_structure_gate')
 
-        super().create_elementals(elems)
+    def create_structure_gate(self):
+        self.generate_devices
 
-        # TODO: Do DRC and ERC checking here.
-        # sref_elems = self.cell.get_srefs()
-        for S in self.cell.get_srefs():
-            if isinstance(S.ref, DLayer):
-                elems += S
-
-        for S in self.cell.elementals:
-            if isinstance(S.ref, TLayer):
-                elems += S
-
-        return elems
+        mask = Gate(cell=self.cell, cell_elems=self.cell.elementals)
+        return SRef(mask)
 
 
-class MaskCell(__NetGenerator__):
+class CircuitGenerator(GateGenerator):
 
-    def create_elementals(self, elems):
+    structure_circuit = param.DataField(fdef_name='create_structure_circuit')
 
-        super().create_elementals(elems)
+    def create_structure_circuit(self):
+        self.structure_gate
+
+        mask = Circuit(cell=self.cell, cell_elems=self.cell.elementals)
+        return SRef(mask)
+
+
+class MaskGenerator(CircuitGenerator):
+
+    structure_mask = param.DataField(fdef_name='create_structure_mask')
+
+    def create_structure_mask(self):
+        self.structure_circuit
 
         mask = Mask(cell=self.cell, cell_elems=self.cell.elementals)
-        elems += SRef(mask)
+        return SRef(mask)
 
-        self.create_graph(mask.elementals)
-
+    def create_elementals(self, elems):
         return elems
 
 
+class SLayout(MaskGenerator):
+
+    def create_elementals(self, elems):
+
+        # Primitives
+        if self.level == 0:
+            pass
+        # Devices
+        elif self.level == 1:
+            elems += self.generate_devices
+        # Gates
+        elif self.level == 2:
+            elems += self.structure_gate
+        # Circuits
+        elif self.level == 3:
+            elems += self.structure_circuit
+        # Mask
+        elif self.level == 4:
+            elems += self.structure_mask
+
+        return elems
 

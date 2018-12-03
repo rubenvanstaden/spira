@@ -11,7 +11,7 @@ from spira.kernel.elemental.port import Port
 from spira.kernel.elemental.polygons import PolygonAbstract
 from spira.kernel.elemental.polygons import Polygons
 import spira.kernel.parameters as param
-from spira.kernel.mixins import TranformationMixin
+from spira.kernel.mixin.transform import TranformationMixin
 
 
 class InspectMixin(object):
@@ -47,6 +47,7 @@ class __SRef__(gdspy.CellReference, BaseElement):
 
     def __repr__(self):
         name = self.ref.name
+        # return 'SREF'
         return ("[SPiRA: SRef] (\"{}\", at {}, srefs {}, " +
                "polygons {}, ports {}, labels {})").format(
                 name, self.origin,
@@ -72,34 +73,34 @@ class __SRef__(gdspy.CellReference, BaseElement):
                     return False
         return True
 
-    def __getitem__(self, val):
-        """
-        This allows you to access an alias from the
-        reference's parent, and receive a copy of the
-        reference which is correctly rotated and translated.
-        """
-        try:
-            alias_device = self.ref[val]
-        except:
-            raise ValueError('[PHIDL] Tried to access alias "%s" from parent '
-                'Device "%s", which does not exist' % (val, self.ref.name))
+    # def __getitem__(self, val):
+    #     """
+    #     This allows you to access an alias from the
+    #     reference's parent, and receive a copy of the
+    #     reference which is correctly rotated and translated.
+    #     """
+    #     try:
+    #         alias_device = self.ref[val]
+    #     except:
+    #         raise ValueError('[PHIDL] Tried to access alias "%s" from parent '
+    #             'Device "%s", which does not exist' % (val, self.ref.name))
 
-        assert isinstance(alias_device, SRef)
+    #     assert isinstance(alias_device, SRef)
 
-        new_reference = SRef(alias_device.ref,
-                            origin=alias_device.origin,
-                            rotation=alias_device.rotation,
-                            magnification=alias_device.magnification,
-                            x_reflection=alias_device.x_reflection)
+    #     new_reference = SRef(alias_device.ref,
+    #                         origin=alias_device.origin,
+    #                         rotation=alias_device.rotation,
+    #                         magnification=alias_device.magnification,
+    #                         x_reflection=alias_device.x_reflection)
 
-        if self.x_reflection:
-            new_reference.reflect((1,0))
-        if self.rotation is not None:
-            new_reference.rotate(self.rotation)
-        if self.origin is not None:
-            new_reference.move(self.origin)
+    #     if self.x_reflection:
+    #         new_reference.reflect((1,0))
+    #     if self.rotation is not None:
+    #         new_reference.rotate(self.rotation)
+    #     if self.origin is not None:
+    #         new_reference.move(self.origin)
 
-        return new_reference
+    #     return new_reference
 
     def __deepcopy__(self, memo):
         return SRef(structure=deepcopy(self.ref),

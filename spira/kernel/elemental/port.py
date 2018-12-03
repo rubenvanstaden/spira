@@ -8,7 +8,7 @@ from spira.kernel.parameters.initializer import BaseElement
 from spira.lgm.shape.basic import Rectangle
 from spira.lgm.shape.basic import Circle
 from spira.kernel.elemental.polygons import PolygonAbstract
-from spira.kernel.mixins import TranformationMixin
+from spira.kernel.mixin.transform import TranformationMixin
 from spira.rdd import get_rule_deck
 
 

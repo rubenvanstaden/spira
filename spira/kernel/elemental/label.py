@@ -4,7 +4,7 @@ import numpy as np
 from copy import copy, deepcopy
 from spira.kernel.parameters.initializer import BaseElement
 from spira.kernel import parameters as param
-from spira.kernel.mixins import TranformationMixin
+from spira.kernel.mixin.transform import TranformationMixin
 
 
 class __Label__(gdspy.Label, BaseElement):
@@ -17,11 +17,8 @@ class __Label__(gdspy.Label, BaseElement):
 
         BaseElement.__init__(self, **kwargs)
 
-        if 'id0' in kwargs.keys():
-            self.__id__ = '{}_{}'.format('surface', self.id0)
-        else:
-            self.__id__ = '{}_{}'.format(self.text, 0)
-            Label._ID += 1
+        self.id = '{}_{}'.format(self.text, Label._ID)
+        Label._ID += 1
 
         gdspy.Label.__init__(self, text=self.text,
                              position=self.position,
@@ -44,7 +41,7 @@ class __Label__(gdspy.Label, BaseElement):
         return self.__repr__()
 
     def __eq__(self, other):
-        return self.__id__ == other.__id__
+        return self.id == other.id
 
     def __deepcopy__(self, memo):
         c_label = self.modified_copy(position=self.position, 
@@ -59,7 +56,6 @@ class LabelAbstract(__Label__):
 
     _ID = 0
 
-    id0 = param.StringField()
     gdslayer = param.LayerField()
     text = param.StringField()
     metals = param.ListField()
@@ -78,12 +74,8 @@ class LabelAbstract(__Label__):
 
     def commit_to_gdspy(self, cell, gdspy_commit=None):
         from spira.kernel.utils import scale_coord_down as scd
-
         if gdspy_commit is not None:
             if self.gdspy_commit is False:
-
-                self.gdspy_commit = True
-
                 L = gdspy.Label(self.text,
                                 scd(self.position),
                                 anchor='o',
@@ -93,30 +85,7 @@ class LabelAbstract(__Label__):
                                 layer=self.gdslayer.number,
                                 texttype=self.texttype)
                 cell.add(L)
-
-        # if gdspy_commit is None:
-        #     if not self.gdspy_commit:
-        #         from spira.kernel.utils import scale_coord_down as scd
-        #         L = gdspy.Label(self.text,
-        #                         scd(self.position),
-        #                         anchor='o',
-        #                         rotation=self.rotation,
-        #                         magnification=self.magnification,
-        #                         x_reflection=self.x_reflection,
-        #                         layer=self.gdslayer.number,
-        #                         texttype=self.texttype)
-        #         cell.add(L)
-        # else:
-        #     from spira.kernel.utils import scale_coord_down as scd
-        #     L = gdspy.Label(self.text,
-        #                     scd(self.position),
-        #                     anchor='o',
-        #                     rotation=self.rotation,
-        #                     magnification=self.magnification,
-        #                     x_reflection=self.x_reflection,
-        #                     layer=self.gdslayer.number,
-        #                     texttype=self.texttype)
-        #     cell.add(L)
+                self.gdspy_commit = True
 
     def reflect(self, p1=(0,1), p2=(0,0)):
         self.position = [self.position[0], -self.position[1]]

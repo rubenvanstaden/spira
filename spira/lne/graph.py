@@ -5,7 +5,7 @@ import spira.kernel.parameters as param
 from spira.kernel.parameters.initializer import BaseElement
 import spira
 from spira import log as LOG
-from spira.kernel.mixins import OutputMixin
+from spira.kernel.mixin.gdsii_output import OutputMixin
 
 
 def _loops(g):
