@@ -43,7 +43,7 @@ class ComposeMLayers(__CellContainer__):
                 c_mlayer = CMLayers(layer=spira.Layer(number=layer))
 
                 for i, ply in enumerate(self._merged_layer(metal_elems)):
-                    ml = MLayer(name='MLayer_{}_{}'.format(layer, i),
+                    ml = MLayer(name='MLayer_{}_{}_{}'.format(layer, self.cell.name, i),
                                 points=ply.polygons,
                                 number=layer)
                     c_mlayer += spira.SRef(ml)
@@ -79,7 +79,7 @@ class ComposeNLayer(ComposeMLayers):
                 c_nlayer = CNLayers(layer=spira.Layer(layer))
 
                 for i, ply in enumerate(via_elems):
-                    ml = NLayer(name='Via_NLayer_{}_{}'.format(layer, i),
+                    ml = NLayer(name='Via_NLayer_{}_{}_{}'.format(layer, self.cell.name, i),
                                 points=ply.polygons,
                                 midpoint=ply.center,
                                 number=layer)
@@ -131,7 +131,7 @@ class ComposeGLayer(ComposeNLayer):
                 gnd = gnd_full | box
 
                 c_glayer = CGLayers(layer=spira.Layer(gnd.gdslayer))
-                name = 'GLayer_{}'.format(gnd.gdslayer.number)
+                name = 'GLayer_{}_{}'.format(self.cell.name, gnd.gdslayer.number)
                 gnd_layer = GLayer(name=name, layer=gnd.gdslayer, player=gnd)
                 c_glayer += spira.SRef(gnd_layer)
                 elems += spira.SRef(c_glayer)

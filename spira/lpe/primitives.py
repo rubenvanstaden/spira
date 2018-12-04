@@ -202,7 +202,7 @@ class SLayout(MaskGenerator):
 
         # Primitives
         if self.level == 0:
-            pass
+            elems += SRef(self.cell)
         # Devices
         elif self.level == 1:
             elems += self.generate_devices

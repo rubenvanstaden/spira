@@ -103,15 +103,17 @@ class __Polygon__(gdspy.PolygonSet, SimplyMixin, BaseElement):
 
         self.unit = None
 
-        # FIXME: Solve this shit.
         if len(polygons):
             s1 = abs(polygons[0][2][0]/SCALE_UP)
-            if (s1 < 1e-3):
-                self.polygons = np.array(spu(polygons))
-            else:
-                self.polygons = np.array(polygons)
+            # if (s1 < 1e-3):
+            #     self.polygons = np.array(spu(polygons))
+            # else:
+            #     self.polygons = np.array(polygons)
+            self.polygons = np.array(polygons)
         else:
             self.polygons = np.array(polygons)
+
+        # self.polygons = np.array(polygons)
 
         BaseElement.__init__(self, **kwargs)
 
@@ -123,6 +125,9 @@ class __Polygon__(gdspy.PolygonSet, SimplyMixin, BaseElement):
     def __repr__(self):
         if self is None:
             return 'Polygon is None!'
+        # return ("[SPiRA: Polygon] ({} vertices, layer {}, datatype {})").format(
+        #         sum([len(p) for p in self.polygons]),
+        #         self.gdslayer.number, self.gdslayer.datatype)
         return ("[SPiRA: Polygon] ({} center, " +
                 "{} vertices, layer {}, datatype {})").format(
                 self.center, sum([len(p) for p in self.polygons]),
@@ -185,6 +190,8 @@ class __Polygon__(gdspy.PolygonSet, SimplyMixin, BaseElement):
                         gdslayer=self.gdslayer)
 
     def __or__(self, other):
+        # print(self.polygons)
+        # print(other.polygons)
         pp = bool_operation(subj=other.polygons,
                             clip=self.polygons,
                             method='intersection')
@@ -220,7 +227,6 @@ class PolygonAbstract(__Polygon__):
 
     def commit_to_gdspy(self, cell):
         from spira.kernel.utils import scale_polygon_down as spd
-
         if self.__repr__() not in list(PolygonAbstract.__committed__.keys()):
             ply = deepcopy(self.polygons)
             P = gdspy.PolygonSet(spd(ply),
@@ -248,6 +254,7 @@ class PolygonAbstract(__Polygon__):
 
     @property
     def bbox(self):
+        self.polygons = np.array(self.polygons)
         bb = self.get_bounding_box()
         assert len(bb) == 2
         return bb

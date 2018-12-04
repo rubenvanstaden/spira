@@ -279,7 +279,6 @@ class CellAbstract(__Cell__):
 
         gdspy.LayoutViewer(library=glib)
 
-        # return c2dmap
         return c2dmap[self]
 
     def flat_copy(self, level=-1, commit_to_gdspy=False):

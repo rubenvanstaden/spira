@@ -32,12 +32,13 @@ def wrap_labels(cell, c2dmap):
 
 
 def wrap_references(cell, c2dmap):
+    from spira.kernel.utils import scale_coord_up as scu
     for e in cell.elements:
         if isinstance(e, gdspy.CellReference):
             D = c2dmap[cell]
             ref_device = c2dmap[e.ref_cell]
             D += spira.SRef(structure=ref_device,
-                            origin=c3d(e.origin),
+                            origin=scu(e.origin),
                             rotation=e.rotation,
                             magnification=e.magnification,
                             x_reflection=e.x_reflection)
@@ -67,9 +68,8 @@ def import_gds(filename, cellname=None, flatten=False, duplayer={}):
 
     if cellname is not None:
         if cellname not in gdsii_lib.cell_dict:
-            raise ValueError('[SPiRA] import_gds() The requested cell' +
-                             '(named {}) is not present in file' +
-                             '{}'.format(cellname, filename))
+            raise ValueError("[SPiRA] import_gds() The requested cell " +
+                             "(named {}) is not present in file {}".format(cellname, filename))
         topcell = gdsii_lib.cell_dict[cellname]
     elif cellname is None and len(top_level_cells) == 1:
         topcell = top_level_cells[0]
@@ -94,11 +94,13 @@ def import_gds(filename, cellname=None, flatten=False, duplayer={}):
                 for points in e.polygons:
                     layer = spira.Layer(number=e.layers[0], datatype=e.datatypes[0])
                     ply = spira.Polygons(polygons=spu([points]),
+                    # ply = spira.Polygons(polygons=[points],
                                          gdslayer=layer)
                     D += ply
             elif isinstance(e, gdspy.Polygon):
                 layer = spira.Layer(number=e.layers, datatype=e.datatype)
                 ply = spira.Polygons(polygons=spu([e.points]),
+                # ply = spira.Polygons(polygons=[e.points],
                                      gdslayer=layer)
                 D += ply
 

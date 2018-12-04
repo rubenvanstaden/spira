@@ -198,7 +198,6 @@ class SRefAbstract(__SRef__):
         # cell.add(S)
 
         if self.__repr__() not in list(SRefAbstract.__committed__.keys()):
-            print(self)
             S = gdspy.CellReference(self.ref.commit_to_gdspy(),
             # S = gdspy.CellReference(self.ref.gdspycell,
                                     origin=scd(self.origin),
