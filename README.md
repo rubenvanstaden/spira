@@ -36,8 +36,10 @@ source env/bin/activate
 pip install -e .
 ```
 
-## Examples
+## Documentation
 
+The complete framework [documentation](https://spira.readthedocs.io/en/latest/overview.html) explains the basics of the RDD and PCell API.
+Note that the DRC and LVS modules are still being developed.
 Examples of using the PCell implementation is given in [examples](https://spira.readthedocs.io/en/latest/pcell_examples.html).
 
 ## History of changes
