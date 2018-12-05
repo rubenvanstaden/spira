@@ -47,7 +47,6 @@ class __SRef__(gdspy.CellReference, BaseElement):
 
     def __repr__(self):
         name = self.ref.name
-        # return 'SREF'
         return ("[SPiRA: SRef] (\"{}\", at {}, srefs {}, " +
                "polygons {}, ports {}, labels {})").format(
                 name, self.origin,
@@ -73,34 +72,34 @@ class __SRef__(gdspy.CellReference, BaseElement):
                     return False
         return True
 
-    # def __getitem__(self, val):
-    #     """
-    #     This allows you to access an alias from the
-    #     reference's parent, and receive a copy of the
-    #     reference which is correctly rotated and translated.
-    #     """
-    #     try:
-    #         alias_device = self.ref[val]
-    #     except:
-    #         raise ValueError('[PHIDL] Tried to access alias "%s" from parent '
-    #             'Device "%s", which does not exist' % (val, self.ref.name))
+    def __getitem__(self, val):
+        """
+        This allows you to access an alias from the
+        reference's parent, and receive a copy of the
+        reference which is correctly rotated and translated.
+        """
+        try:
+            alias_device = self.ref[val]
+        except:
+            raise ValueError('[PHIDL] Tried to access alias "%s" from parent '
+                'Device "%s", which does not exist' % (val, self.ref.name))
 
-    #     assert isinstance(alias_device, SRef)
+        assert isinstance(alias_device, SRef)
 
-    #     new_reference = SRef(alias_device.ref,
-    #                         origin=alias_device.origin,
-    #                         rotation=alias_device.rotation,
-    #                         magnification=alias_device.magnification,
-    #                         x_reflection=alias_device.x_reflection)
+        new_reference = SRef(alias_device.ref,
+                            origin=alias_device.origin,
+                            rotation=alias_device.rotation,
+                            magnification=alias_device.magnification,
+                            x_reflection=alias_device.x_reflection)
 
-    #     if self.x_reflection:
-    #         new_reference.reflect((1,0))
-    #     if self.rotation is not None:
-    #         new_reference.rotate(self.rotation)
-    #     if self.origin is not None:
-    #         new_reference.move(self.origin)
+        if self.x_reflection:
+            new_reference.reflect((1,0))
+        if self.rotation is not None:
+            new_reference.rotate(self.rotation)
+        if self.origin is not None:
+            new_reference.move(self.origin)
 
-    #     return new_reference
+        return new_reference
 
     def __deepcopy__(self, memo):
         return SRef(structure=deepcopy(self.ref),
@@ -108,7 +107,6 @@ class __SRef__(gdspy.CellReference, BaseElement):
                     rotation=self.rotation,
                     magnification=self.magnification,
                     x_reflection=self.x_reflection,
-                    # gdspy_commit=False)
                     gdspy_commit=deepcopy(self.gdspy_commit))
 
 
@@ -130,7 +128,6 @@ class SRefAbstract(__SRef__):
 
     def __init__(self, structure, stretching={}, **kwargs):
         self.stretching = stretching
-        # self.gdspy_commit = gdspy_commit
         super().__init__(structure, **kwargs)
 
     def dependencies(self):
@@ -173,7 +170,6 @@ class SRefAbstract(__SRef__):
             self.translate(dx=transform['origin'][0], dy=transform['origin'][1])
         else:
             self.rotate(angle=transform['rotation'])
-            # self.move(origin=self.origin, destination=transform['origin'])
             self.translate(dx=transform['origin'][0], dy=transform['origin'][1])
         return self
 
@@ -183,32 +179,6 @@ class SRefAbstract(__SRef__):
     def scale_down(self):
         el = self.ref.elementals.scale_down()
         return el
-
-    def commit_to_gdspy(self, cell):
-        from spira.kernel.utils import scale_coord_down as scd
-        # if (gdspy_commit is True) and (self.gdspy_commit is False):
-        #     self.gdspy_commit = True
-        # elif gdspy_commit is False:
-
-        # S = gdspy.CellReference(self.ref.commit_to_gdspy(gdspy_commit=False),
-        #                         origin=scd(self.origin),
-        #                         rotation=self.rotation,
-        #                         magnification=self.magnification,
-        #                         x_reflection=self.x_reflection)
-        # cell.add(S)
-
-        if self.__repr__() not in list(SRefAbstract.__committed__.keys()):
-            S = gdspy.CellReference(self.ref.commit_to_gdspy(),
-            # S = gdspy.CellReference(self.ref.gdspycell,
-                                    origin=scd(self.origin),
-                                    rotation=self.rotation,
-                                    magnification=self.magnification,
-                                    x_reflection=self.x_reflection)
-            cell.add(S)
-            # self.gdspy_commit = True
-            SRefAbstract.__committed__.update({self.__repr__():S})
-        else:
-            cell.add(SRefAbstract.__committed__[self.__repr__()])
 
     @property
     def ports(self):

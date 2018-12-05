@@ -61,10 +61,10 @@ class JunctionSquid(spira.Cell):
 
 if __name__ == '__main__':
 
-    from spira import settings
-    from spira.templates.library import library
+    # from spira import settings
+    # from spira.templates.library import library
 
-    settings.set_library(library)
+    # settings.set_library(library)
 
     name = 'jj_squid'
     doc = 'Squid PCell with Junctions included.'
@@ -75,3 +75,4 @@ if __name__ == '__main__':
     jj.output(name=name)
 
     spira.LOG.end_print('Junction example finished')
+

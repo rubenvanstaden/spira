@@ -3,8 +3,8 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to Yuna's documentation!
-================================
+Welcome to the SPiRA documentation!
+===================================
 
 .. toctree::
    :maxdepth: 2
@@ -12,7 +12,8 @@ Welcome to Yuna's documentation!
    
    installation
    overview
-   examples
+   rdd_schema
+   pcell_examples
    developers
 
 Indices and tables

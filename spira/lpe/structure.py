@@ -34,7 +34,7 @@ class ComposeMLayers(__CellContainer__):
 
     def create_mlayers(self):
         elems = spira.ElementList()
-        for layer in (*RDD.METALS.layers, *RDD.GROUND.layers, RDD.MOAT.number):
+        for layer in (*RDD.METALS.layers, *[RDD.GDSII.GPLAYER], RDD.MOAT.number):
 
             flat_elems = self.cell_elems.flat_copy()
             metal_elems = flat_elems.get_polygons(layer=layer)
@@ -43,7 +43,7 @@ class ComposeMLayers(__CellContainer__):
                 c_mlayer = CMLayers(layer=spira.Layer(number=layer))
 
                 for i, ply in enumerate(self._merged_layer(metal_elems)):
-                    ml = MLayer(name='MLayer_{}_{}_{}'.format(layer, self.cell.name, i),
+                    ml = MLayer(name='MLayer_{}_{}_{}_{}'.format(layer, self.cell.name, self.cell.__id__, i),
                                 points=ply.polygons,
                                 number=layer)
                     c_mlayer += spira.SRef(ml)
@@ -112,7 +112,7 @@ class ComposeGLayer(ComposeNLayer):
             for pp in p.polygons:
                 points.append(pp)
         if points:
-            ll = Layer(number=RDD.GROUND.M4.LAYER, datatype=6)
+            ll = Layer(number=RDD.GDSII.GPLAYER, datatype=6)
             merged_ply = UnionPolygons(polygons=points, gdslayer=ll)
             return merged_ply
         return None
@@ -125,16 +125,15 @@ class ComposeGLayer(ComposeNLayer):
             box = self.cell.bbox
             # box.move(origin=box.center, destination=(0,0))
 
-            gnd_full = self.ground_layer
+            if self.ground_layer:
+                gnd = self.ground_layer | box
 
-            if gnd_full:
-                gnd = gnd_full | box
-
-                c_glayer = CGLayers(layer=spira.Layer(gnd.gdslayer))
-                name = 'GLayer_{}_{}'.format(self.cell.name, gnd.gdslayer.number)
-                gnd_layer = GLayer(name=name, layer=gnd.gdslayer, player=gnd)
-                c_glayer += spira.SRef(gnd_layer)
-                elems += spira.SRef(c_glayer)
+                if gnd:
+                    c_glayer = CGLayers(layer=spira.Layer(gnd.gdslayer))
+                    name = 'GLayer_{}_{}'.format(self.cell.name, gnd.gdslayer.number)
+                    gnd_layer = GLayer(name=name, layer=gnd.gdslayer, player=gnd)
+                    c_glayer += spira.SRef(gnd_layer)
+                    elems += spira.SRef(c_glayer)
 
         return elems
 
@@ -184,7 +183,7 @@ class __StructureCell__(ConnectDesignRules):
 
     def create_terminal_layers(self):
         flat_elems = self.cell_elems.flat_copy()
-        port_elems = flat_elems.get_polygons(layer=RDD.TERM)
+        port_elems = flat_elems.get_polygons(layer=RDD.GDSII.TERM)
         label_elems = flat_elems.labels
 
         elems = ElementList()
@@ -197,18 +196,18 @@ class __StructureCell__(ConnectDesignRules):
 
                 if s_p1 in RDD.METALS.keys: 
                     layer = RDD.METALS[s_p1].LAYER
-                    p1 = spira.Layer(name=lbls[0], number=layer, datatype=RDD.TEXT)
+                    p1 = spira.Layer(name=lbls[0], number=layer, datatype=RDD.GDSII.TEXT)
 
                 if s_p2 in RDD.METALS.keys: 
                     layer = RDD.METALS[s_p2].LAYER
-                    p2 = spira.Layer(name=lbls[0], number=layer, datatype=RDD.TEXT)
+                    p2 = spira.Layer(name=lbls[0], number=layer, datatype=RDD.GDSII.TEXT)
 
                 if p1 and p2:
                     if label.point_inside(polygon=port.polygons[0]):
                         term = TLayer(points=port.polygons,
                                     layer1=p1,
                                     layer2=p2,
-                                    number=RDD.TERM,
+                                    number=RDD.GDSII.TERM,
                                     midpoint=label.position)
 
                         term.ports[0].name = 'P1_{}'.format(label.text)

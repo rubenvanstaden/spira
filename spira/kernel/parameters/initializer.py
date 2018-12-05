@@ -132,8 +132,7 @@ class __Field__(metaclass=MetaBase):
         """
         kwargs = {}
         for p in self.__external_fields__():
-            # kwargs[p] = getattr(self, p)
-            kwargs[p] = deepcopy(getattr(self, p))
+            kwargs[p] = getattr(self, p)
         kwargs.update(override_kwargs)
         return self.__class__(**kwargs)
 
@@ -242,6 +241,7 @@ class MetaCell(MetaBase):
 
         if kwargs['name'] is None:
             kwargs['name'] = '{}-{}'.format(cls.__name__, cls._ID)
+            cls._ID += 1
 
         # if kwargs['name'] is None:
         #     kwargs['name'] = cls.__name__

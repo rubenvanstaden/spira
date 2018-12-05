@@ -65,9 +65,9 @@ class PortAbstract(__Port__):
     length = param.FloatField()
     parent = param.DataField()
     extern_polygon = param.PolygonField()
-    gdslayer = param.LayerField(name='PortLayer', number=RDD.TERM)
-    poly_layer = param.LayerField(name='PortLayer', number=RDD.TERM)
-    text_layer = param.LayerField(name='PortLayer', number=RDD.TEXT)
+    gdslayer = param.LayerField(name='PortLayer', number=RDD.GDSII.TERM)
+    poly_layer = param.LayerField(name='PortLayer', number=RDD.GDSII.TERM)
+    text_layer = param.LayerField(name='PortLayer', number=RDD.GDSII.TEXT)
 
     gdspy_commit = param.BoolField()
 
@@ -188,7 +188,7 @@ class PortAbstract(__Port__):
 
     def update(self, name, layer):
         self.gdslayer = layer
-        self.text_layer = spira.Layer(number=layer.number, datatype=RDD.TEXT)
+        self.text_layer = spira.Layer(number=layer.number, datatype=RDD.GDSII.TEXT)
         self.name += '_' + str(name)
 
 

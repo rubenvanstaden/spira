@@ -23,26 +23,9 @@ hooking Python classes to the RDD script:
 
 The following examples will illustrate each of the mentioned categories. First the database have to initialized and given a name and then process layers can be added.
 
-.. code-block:: python
-    :linenos:
-
-    from spira.rdd import get_rule_deck
-    from spira.rdd.technology import ProcessTree
-
-    print('Initializing Rule Deck Library...')
-
-    RDD = get_rule_deck()
-
-    RDD.name = 'MiTLL'
-
-    # Define new process tree.
-    RDD.METALS = ProcessTree()
-
-    # Define new process layer.
-    RDD.METALS.M5 = ProcessTree()
-    RDD.METALS.M5.LAYER = 50
-    RDD.METALS.M5.THICKNESS = 0.5
-    RDD.METALS.M5.LAMBDA = 0.5
+.. literalinclude:: ../examples/rdd/initialize.py
+   :language: python
+   :linenos:
 
 GDSII related data can be added by simple creating a data tree.
  
@@ -88,28 +71,4 @@ that describes the pattern recognition algorithm.
         layer1 = RDD.METALS.M5,
         layer2 = RDD.METALS.M6
     )
-
-Switching between databases based on different process technologies are done
-by simply importing the specific process RDD file.
-
-.. code-block:: python
-    :linenos:
-
-    >>> import spira
-    >>> from spira.rdd.settings import get_rule_deck
-    >>> RDD = get_rule_deck()
-    >>> RDD.name
-    'MiTLL'
-    >>> from pdks import aist
-    >>> RDD.name
-    'AiST'
-
-It is possible to analyze the data contained in the tree objects.
-
-.. code-block:: python
-    :linenos:
-
-    >>> RDD.METALS.keys
-    ['GP', 'RES', 'BAS', 'COU', 'CTL']
-
 

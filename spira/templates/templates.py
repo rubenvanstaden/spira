@@ -3,7 +3,10 @@ from spira.kernel.elemental.sref import SRef
 from spira.kernel.cell import CellField
 from spira.kernel import parameters as param
 from copy import copy, deepcopy
-from spira.rdd.mitll import RDD
+from spira.rdd.settings import get_rule_deck
+
+
+RDD = get_rule_deck()
 
 
 class __TemplateCell__(Cell):
@@ -18,21 +21,42 @@ class __TempateDevice__(__TemplateCell__):
     pass
 
 
+# class JunctionTemplate(__TempateDevice__):
+
+#     gdsdatatype = param.IntegerField(default=3)
+
+#     def create_elementals(self, elems):
+
+#         i4 = SRef(RDD.VIAS.I4.PCELL, origin=(0,0))
+#         i5 = SRef(RDD.VIAS.I5.PCELL, origin=(0,0))
+#         j5 = SRef(RDD.VIAS.J5.PCELL, origin=(0,0))
+#         c5 = SRef(RDD.VIAS.C5.PCELL, origin=(0,0))
+
+#         elems += i4
+#         elems += i5
+#         elems += j5
+#         elems += c5
+
+#         return elems
+
+
 class JunctionTemplate(__TempateDevice__):
 
     gdsdatatype = param.IntegerField(default=3)
 
     def create_elementals(self, elems):
 
-        i4 = SRef(RDD.VIAS.I4.PCELL, origin=(0,0))
-        i5 = SRef(RDD.VIAS.I5.PCELL, origin=(0,0))
-        j5 = SRef(RDD.VIAS.J5.PCELL, origin=(0,0))
-        c5 = SRef(RDD.VIAS.C5.PCELL, origin=(0,0))
+        rc = SRef(RDD.VIAS.RC.PCELL, origin=(0,0))
+        gc = SRef(RDD.VIAS.GC.PCELL, origin=(0,0))
+        bc = SRef(RDD.VIAS.BC.PCELL, origin=(0,0))
+        jc = SRef(RDD.VIAS.JC.PCELL, origin=(0,0))
+        cc = SRef(RDD.VIAS.CC.PCELL, origin=(0,0))
 
-        elems += i4
-        elems += i5
-        elems += j5
-        elems += c5
+        elems += rc
+        elems += gc
+        elems += bc
+        elems += jc
+        elems += cc
 
         return elems
 

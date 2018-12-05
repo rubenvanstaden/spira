@@ -1,50 +1,47 @@
-from spira.rdd import get_rule_deck
-from spira.rdd.technology import TechnologyTree
+from spira.rdd.technology import DataTree
+from spira.rdd.technology import ProcessTree
+from spira.rdd import RULE_DECK_DATABASE as RDD
 
 # --------------------------------------------------------------------------------
-# MITLL Process
+# MiTLL Process
 # --------------------------------------------------------------------------------
 
-print('Initializing Rule Deck Library...')
+RDD.name = 'SPiRA-default'
+RDD.desc = 'Process fabrication data for the MITLL process from the USA.'
 
-RDD = get_rule_deck()
+# ---------------------------------- GDSII ----------------------------------------
 
-RDD.SPACING = 101
-RDD.TEXT = 18
-RDD.TERM = 19
+RDD.GDSII = DataTree()
+RDD.GDSII.UNITS = 1e-6
+RDD.GDSII.TERM = 19
+RDD.GDSII.TEXT = 18
 
-RDD.PRIMS = TechnologyTree()
-RDD.PRIMS.DEFAULT = 0
-RDD.PRIMS.VIAS = 1
-RDD.PRIMS.JJS = 3
-RDD.PRIMS.NTRONS = 7
+# ---------------------------------- GDSII ----------------------------------------
 
-# RDD.MOAT = 67
-
-RDD.ERRORS = TechnologyTree()
+RDD.ERRORS = ProcessTree()
 RDD.ERRORS.SPACING = 101
 RDD.ERRORS.DENSITY = 102
 RDD.ERRORS.WIDTH = 103
 
-RDD.GROUND = TechnologyTree()
-RDD.GROUND.M4 = TechnologyTree()
+RDD.GROUND = ProcessTree()
+RDD.GROUND.M4 = ProcessTree()
 RDD.GROUND.M4.LAYER = 40
 RDD.GROUND.M4.COLOR = '#B6EBE6'
 
-RDD.METALS = TechnologyTree()
+RDD.METALS = ProcessTree()
 RDD.METALS.DATATYPE = 0
 
-RDD.METALS.L0 = TechnologyTree()
-RDD.METALS.M0 = TechnologyTree()
-RDD.METALS.M1 = TechnologyTree()
-RDD.METALS.M2 = TechnologyTree()
-RDD.METALS.M3 = TechnologyTree()
-# RDD.METALS.M4 = TechnologyTree()
-RDD.METALS.M5 = TechnologyTree()
-RDD.METALS.M6 = TechnologyTree()
-RDD.METALS.M7 = TechnologyTree()
-RDD.METALS.M8 = TechnologyTree()
-RDD.METALS.R5 = TechnologyTree()
+RDD.METALS.L0 = ProcessTree()
+RDD.METALS.M0 = ProcessTree()
+RDD.METALS.M1 = ProcessTree()
+RDD.METALS.M2 = ProcessTree()
+RDD.METALS.M3 = ProcessTree()
+# RDD.METALS.M4 = ProcessTree()
+RDD.METALS.M5 = ProcessTree()
+RDD.METALS.M6 = ProcessTree()
+RDD.METALS.M7 = ProcessTree()
+RDD.METALS.M8 = ProcessTree()
+RDD.METALS.R5 = ProcessTree()
 
 RDD.METALS.L0.LAYER = 3
 RDD.METALS.L0.COLOR = '#49CEC1'
@@ -72,12 +69,12 @@ RDD.METALS.M8.COLOR = '#9AE9A1'
 RDD.METALS.R5.LAYER = 52
 RDD.METALS.R5.COLOR = '#98FB98'
 
-RDD.VIAS = TechnologyTree()
+RDD.VIAS = ProcessTree()
 
 # --------------------------------------------------------------------------------
 # I0 Via
 # --------------------------------------------------------------------------------
-RDD.VIAS.C0 = TechnologyTree()
+RDD.VIAS.C0 = ProcessTree()
 RDD.VIAS.C0.LAYER = 4
 RDD.VIAS.C0.WIDTH = 0.5
 RDD.VIAS.C0.M5_METAL = 1.0
@@ -86,7 +83,7 @@ RDD.VIAS.C0.M4_METAL = RDD.VIAS.C0.M5_METAL
 # --------------------------------------------------------------------------------
 # I0 Via
 # --------------------------------------------------------------------------------
-RDD.VIAS.I0 = TechnologyTree()
+RDD.VIAS.I0 = ProcessTree()
 RDD.VIAS.I0.LAYER = 2
 RDD.VIAS.I0.WIDTH = 0.5
 RDD.VIAS.I0.M5_METAL = 1.0
@@ -95,7 +92,7 @@ RDD.VIAS.I0.M4_METAL = RDD.VIAS.I0.M5_METAL
 # --------------------------------------------------------------------------------
 # I4 Via
 # --------------------------------------------------------------------------------
-RDD.VIAS.I1 = TechnologyTree()
+RDD.VIAS.I1 = ProcessTree()
 RDD.VIAS.I1.LAYER = 11
 RDD.VIAS.I1.WIDTH = 0.5
 RDD.VIAS.I1.M5_METAL = 1.0
@@ -104,7 +101,7 @@ RDD.VIAS.I1.M4_METAL = RDD.VIAS.I1.M5_METAL
 # --------------------------------------------------------------------------------
 # I4 Via
 # --------------------------------------------------------------------------------
-RDD.VIAS.I2 = TechnologyTree()
+RDD.VIAS.I2 = ProcessTree()
 RDD.VIAS.I2.LAYER = 21
 RDD.VIAS.I2.WIDTH = 0.5
 RDD.VIAS.I2.M5_METAL = 1.0
@@ -113,7 +110,7 @@ RDD.VIAS.I2.M4_METAL = RDD.VIAS.I2.M5_METAL
 # --------------------------------------------------------------------------------
 # I4 Via
 # --------------------------------------------------------------------------------
-RDD.VIAS.I3 = TechnologyTree()
+RDD.VIAS.I3 = ProcessTree()
 RDD.VIAS.I3.LAYER = 31
 RDD.VIAS.I3.WIDTH = 0.5
 RDD.VIAS.I3.M5_METAL = 1.0
@@ -122,7 +119,7 @@ RDD.VIAS.I3.M4_METAL = RDD.VIAS.I3.M5_METAL
 # --------------------------------------------------------------------------------
 # I4 Via
 # --------------------------------------------------------------------------------
-RDD.VIAS.I4 = TechnologyTree()
+RDD.VIAS.I4 = ProcessTree()
 RDD.VIAS.I4.LAYER = 41
 RDD.VIAS.I4.WIDTH = 0.5
 RDD.VIAS.I4.M5_METAL = 1.0
@@ -131,7 +128,7 @@ RDD.VIAS.I4.M4_METAL = RDD.VIAS.I4.M5_METAL
 # --------------------------------------------------------------------------------
 # I5 Via
 # --------------------------------------------------------------------------------
-RDD.VIAS.I5 = TechnologyTree()
+RDD.VIAS.I5 = ProcessTree()
 RDD.VIAS.I5.LAYER = 54
 RDD.VIAS.I5.WIDTH = 0.5
 RDD.VIAS.I5.M5_METAL = 1.0
@@ -140,7 +137,7 @@ RDD.VIAS.I5.M4_METAL = RDD.VIAS.I5.M5_METAL
 # --------------------------------------------------------------------------------
 # I5 Via
 # --------------------------------------------------------------------------------
-RDD.VIAS.I6 = TechnologyTree()
+RDD.VIAS.I6 = ProcessTree()
 RDD.VIAS.I6.LAYER = 61
 RDD.VIAS.I6.WIDTH = 0.5
 RDD.VIAS.I6.M5_METAL = 1.0
@@ -149,7 +146,7 @@ RDD.VIAS.I6.M4_METAL = RDD.VIAS.I6.M5_METAL
 # --------------------------------------------------------------------------------
 # I5 Via
 # --------------------------------------------------------------------------------
-RDD.VIAS.I7 = TechnologyTree()
+RDD.VIAS.I7 = ProcessTree()
 RDD.VIAS.I7.LAYER = 71
 RDD.VIAS.I7.WIDTH = 0.5
 RDD.VIAS.I7.M5_METAL = 1.0
@@ -158,7 +155,7 @@ RDD.VIAS.I7.M4_METAL = RDD.VIAS.I7.M5_METAL
 # --------------------------------------------------------------------------------
 # C5 Via
 # --------------------------------------------------------------------------------
-RDD.VIAS.C5 = TechnologyTree()
+RDD.VIAS.C5 = ProcessTree()
 RDD.VIAS.C5.LAYER = 53
 RDD.VIAS.C5.WIDTH = 0.5
 RDD.VIAS.C5.R5_METAL = 1.0
@@ -167,7 +164,7 @@ RDD.VIAS.C5.M6_METAL = RDD.VIAS.C5.R5_METAL
 # --------------------------------------------------------------------------------
 # J5 Via
 # --------------------------------------------------------------------------------
-RDD.VIAS.J5 = TechnologyTree()
+RDD.VIAS.J5 = ProcessTree()
 RDD.VIAS.J5.LAYER = 51
 RDD.VIAS.J5.WIDTH = 0.5
 RDD.VIAS.J5.M5_METAL = 1.0
@@ -195,7 +192,6 @@ I5 = Layer(name='I5', number=RDD.VIAS.I5.LAYER, datatype=0)
 J5 = Layer(name='J5', number=RDD.VIAS.J5.LAYER, datatype=0)
 C5 = Layer(name='C5', number=RDD.VIAS.C5.LAYER, datatype=0)
 MOAT = Layer(name='MOAT', number=67, datatype=0)
-
 
 RDD.VIAS.I4.PCELL = ViaTemplate(
     name = 'I4',

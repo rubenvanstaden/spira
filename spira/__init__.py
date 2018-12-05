@@ -5,10 +5,9 @@ import spira.log as LOG
 from spira.kernel.io import import_gds
 
 from spira.kernel.library import Library
-from spira.rdd import get_rule_deck
-from spira.rdd.mitll import RDD
 
-RDD.name = 'MiTLL'
+from spira.rdd import get_rule_deck
+RDD = get_rule_deck()
 
 from spira.kernel.cell import Cell
 from spira.kernel.layer import Layer
@@ -40,9 +39,8 @@ def initialize():
 
     settings.set_library(library)
 
-    print(settings.START_MESSAGE)
-    print('-------------------------------------')
-    print('\nSuccessfully imported SPiRA')
-
+    # spira.LOG.success('Imported SPiRA: (RDD -> {})'.format(RDD.name))
+    # spira.LOG.success(settings.START_MESSAGE)
+    spira.LOG.start(name=settings.LIB_NAME, text=settings.START_MESSAGE)
 
 initialize()

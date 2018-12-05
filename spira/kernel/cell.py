@@ -239,7 +239,7 @@ class CellAbstract(__Cell__):
     def commit_to_gdspy(self):
         cell = gdspy.Cell(self.name, exclude_from_current=True)
         for e in self.elementals:
-            if not isinstance(e, (SRef, ElementList, Graph, Mesh)):
+            if not isinstance(e, (Cell, SRef, ElementList, Graph, Mesh)):
                 e.commit_to_gdspy(cell=cell)
         return cell
 
@@ -265,6 +265,13 @@ class CellAbstract(__Cell__):
                                         rotation=e.rotation,
                                         magnification=e.magnification,
                                         x_reflection=e.x_reflection))
+                # if e.ref in c2dmap:
+                #     ref_device = c2dmap[e.ref]
+                #     G.add(gdspy.CellReference(ref_cell=ref_device,
+                #                             origin=scd(e.origin),
+                #                             rotation=e.rotation,
+                #                             magnification=e.magnification,
+                #                             x_reflection=e.x_reflection))
 
     def construct_gdspy_tree(self, gdspy_commit=None):
         d = self.dependencies()
@@ -274,6 +281,7 @@ class CellAbstract(__Cell__):
             c2dmap.update({c:G})
 
         for c in d:
+            print(c)
             self.wrapper(c, c2dmap)
             glib.add(c2dmap[c])
 

@@ -167,7 +167,8 @@ class GLayer(__ProcessLayer__):
         elems = ElementList()
         for p in self.device_elems.polygons:
             layer = p.gdslayer.number
-            if layer in RDD.GROUND.layers:
+            # if layer in RDD.GROUND.layers:
+            if layer == RDD.GDSII.GPLAYER:
                 l2 = Layer(name='BoundingBox', number=layer, datatype=5)
                 elems += Port(name='P{}'.format(layer), midpoint=self.blayer.center, gdslayer=l2)
         return elems
@@ -176,7 +177,8 @@ class GLayer(__ProcessLayer__):
         elems = ElementList()
         for p in self.device_elems.polygons:
             layer = p.gdslayer.number
-            if layer in RDD.GROUND.layers:
+            # if layer in RDD.GROUND.layers:
+            if layer == RDD.GDSII.GPLAYER:
                 l1 = Layer(name='BoundingBox', number=layer, datatype=5)
                 elems += Polygons(polygons=self.blayer.polygons, gdslayer=l1)
         return elems

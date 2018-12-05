@@ -139,7 +139,7 @@ class __Generator__(__CellContainer__):
             for D in deps:
 
                 plane_elems = ElementList()
-                plane_elems += self.cell.elementals[(RDD.GROUND.M4.LAYER, 0)]
+                plane_elems += self.cell.elementals[(RDD.GDSII.GPLAYER, 0)]
 
                 C = Device(cell=D, cell_elems=D.elementals, plane_elems=plane_elems)
 
@@ -166,6 +166,8 @@ class GateGenerator(__Generator__):
 
     def create_structure_gate(self):
         self.generate_devices
+
+        self.cell.name += 'gate'
 
         mask = Gate(cell=self.cell, cell_elems=self.cell.elementals)
         return SRef(mask)

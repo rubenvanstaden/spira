@@ -15,12 +15,12 @@ import plotly.offline as offline
 
 LIB_NAME = 'SPiRA'
 LIB_DESCRIPTION = 'SPiRA: The Virtuoso'
-VERSION = 'version 1.0-alpha'
+VERSION = 'version 0.0.1-Auron'
 COPYRIGHT_INFO = 'MIT License'
 AUTHOR = 'Ruben van Staden'
 AUTHOR_EMAIL = 'rubenvanstaden@gmail.com'
 
-START_MESSAGE = '\n{} {} - {}'.format(LIB_NAME, VERSION, COPYRIGHT_INFO)
+START_MESSAGE = '{} - {}'.format(VERSION, COPYRIGHT_INFO)
 
 GRID = 5e-9
 UM = 10e-6
@@ -36,7 +36,20 @@ LIB = None
 DEVICES = None
 PDK_FILE = None
 
+
 # ---------------------------------------------------------------------------
+
+
+def initialize():
+    from .primitives.library import Library
+    from .io.output_gdsii import OutputGdsii
+    from .primitives.layer import LayerList
+    from .technology.settings import TECH
+    global Default_Library 
+    Default_Library = Library("GK_Default", unit = TECH.METRICS.UNIT, grid = TECH.METRICS.GRID)
+    set_current_library(Default_Library)
+    __set_current_layerlist__(LayerList())
+
 
 def set_library(library):
     """ Set the working library. """
@@ -46,7 +59,9 @@ def set_library(library):
 
 def get_library():
     """ Return current working library. """
-    global _library
+    lib = _library
+    if lib is None:
+        initialize()
     return _library
 
 

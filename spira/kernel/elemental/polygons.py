@@ -103,17 +103,21 @@ class __Polygon__(gdspy.PolygonSet, SimplyMixin, BaseElement):
 
         self.unit = None
 
-        if len(polygons):
-            s1 = abs(polygons[0][2][0]/SCALE_UP)
-            # if (s1 < 1e-3):
-            #     self.polygons = np.array(spu(polygons))
-            # else:
-            #     self.polygons = np.array(polygons)
-            self.polygons = np.array(polygons)
-        else:
-            self.polygons = np.array(polygons)
+        self.polygons = np.array([])
 
-        # self.polygons = np.array(polygons)
+        if len(polygons):
+            scaled = False
+            for point in polygons[0]:
+                if (point[0] != 0) and (point[1] != 0):
+                    p1 = abs(point[0]/SCALE_UP)
+                    p2 = abs(point[1]/SCALE_UP)
+                    if (p1 < 1e-3) and (p2 < 1e-3):
+                        scaled = True
+
+            if scaled: 
+                self.polygons = np.array(spu(polygons))
+            else:
+                self.polygons = np.array(polygons)
 
         BaseElement.__init__(self, **kwargs)
 
@@ -277,7 +281,12 @@ class PolygonAbstract(__Polygon__):
 
     @property
     def center(self):
-        return np.sum(self.bbox, 0)/2
+        # return np.sum(self.bbox, 0)/2
+        center = np.sum(self.bbox, 0)/2
+        center[0] = int(round(center[0]))
+        center[1] = int(round(center[1]))
+        # print(center)
+        return center
 
     @property
     def id(self):

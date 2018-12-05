@@ -1,6 +1,7 @@
+import spira
 
 
-class DataTree(object):
+class __DataTree__(object):
     """ A hierarchical tree for storing configuration settings. """
 
     def __init__(self, overwrite_allowed=[], **kwargs):
@@ -9,8 +10,16 @@ class DataTree(object):
     def __setattr__(self, key, value):
         if (key in self.__dict__) and (key not in ['name', 'desc', '__initialized__']):
             current_value = self.__dict__[key]
+
+            if key == 'LAYER':
+                value = spira.Layer(name='M4', number=current_value)
+
             if current_value != value:
                 self.__dict__[key] = value
+        elif (key == 'name') and (value != 'EMPTY'):
+            spira.LOG.rdd(text=value)
+            self.__dict__[key] = value
+            self.__getattribute__('__config_tree_keys__').append(key)
         else:
             self.__dict__[key] = value
             self.__getattribute__('__config_tree_keys__').append(key)
@@ -20,7 +29,7 @@ class DataTree(object):
         keys = self.__dict__.keys()
         for k in keys:
             value = self.__dict__[k]
-            if isinstance(value, DataTree):
+            if isinstance(value, __DataTree__):
                 child_doc = value.__generate_doc__(header.upper() + "." + k.upper())
                 doc = doc + child_doc + '\n'
             else:
@@ -34,30 +43,8 @@ class DataTree(object):
         for k in self.__config_tree_keys__:
             if k in self.__dict__:
                 value = self.__dict__[k]
-                if isinstance(value, TechnologyTree):
+                if isinstance(value, ProcessTree):
                     items.append(value)
-        return items
-
-    def get_key_by_layer(self, layer):
-        for k in self.__config_tree_keys__:
-            if k in self.__dict__:
-                value = self.__dict__[k]
-                if isinstance(value, TechnologyTree):
-                    if 'LAYER' not in value.keys:
-                        raise ValueError('No LAYER in TechnologyTree')
-                    if value['LAYER'] == layer.number:
-                        return value
-        return None
-
-    @property
-    def layers(self):
-        items = []
-        for k in self.__config_tree_keys__:
-            if k in self.__dict__:
-                value = self.__dict__[k]
-                if isinstance(value, TechnologyTree):
-                    if 'LAYER' in value.keys:
-                        items.append(value['LAYER'])
         return items
 
     @property
@@ -89,8 +76,8 @@ class DataTree(object):
 
 
 # class FabricationMetaData(DataTree):
-class PcellTechnologyTree(DataTree):
-    """ TechnologyTree for storing primitive PCell data.
+class PcellProcessTree(__DataTree__):
+    """ ProcessTree for storing primitive PCell data.
     The tree is initiated when retreiving the data. """
     def __init__(self, **kwargs):
         super(DelayedInitDataTree, self).__init__(**kwargs)
@@ -107,12 +94,43 @@ class PcellTechnologyTree(DataTree):
         raise NotImplementedError()
 
 
-class TechnologyTree(DataTree):
-    """ A hierarchical tree for storing technology settings. """
-    pass
+class DataTree(__DataTree__):
+    """ A hierarchical tree for storing fabrication data. """
+
+    def __repr__(self):
+        return '[DataTree] ({} keys)'.format(len(self.keys))
 
 
-class TechnologyLibrary(DataTree):
+class ProcessTree(__DataTree__):
+    """ A hierarchical tree for storing process layer settings. """
+
+    def __repr__(self):
+        return '[ProcessTree] ({} keys, {} layers)'.format(len(self.keys), len(self.layers))
+
+    def get_key_by_layer(self, layer):
+        for k in self.__config_tree_keys__:
+            if k in self.__dict__:
+                value = self.__dict__[k]
+                if isinstance(value, ProcessTree):
+                    if 'LAYER' not in value.keys:
+                        raise ValueError('No LAYER in ProcessTree')
+                    if value['LAYER'] == layer.number:
+                        return value
+        return None
+
+    @property
+    def layers(self):
+        items = []
+        for k in self.__config_tree_keys__:
+            if k in self.__dict__:
+                value = self.__dict__[k]
+                if isinstance(value, ProcessTree):
+                    if 'LAYER' in value.keys:
+                        items.append(value['LAYER'])
+        return items
+
+
+class TechnologyLibrary(__DataTree__):
     """ The fabrication process library """
 
     def __init__(self, name, description = None, fallback= None, **kwargs):

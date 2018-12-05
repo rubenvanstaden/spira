@@ -1,13 +1,13 @@
 from .technology import TechnologyLibrary
 
-global RULE_DECK
-RULE_DECK = TechnologyLibrary('Empty Rule Deck')
+global RULE_DECK_DATABASE
+RULE_DECK_DATABASE = TechnologyLibrary('EMPTY')
 
 def get_rule_deck():
-    global RULE_DECK
-    if RULE_DECK.name == 'Empty Rule Deck':
+    global RULE_DECK_DATABASE
+    if RULE_DECK_DATABASE.name == 'EMPTY':
         initialize_default()
-    return RULE_DECK
+    return RULE_DECK_DATABASE
 
 def initialize_default():
-    return
+    from pdks import default

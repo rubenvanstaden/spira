@@ -99,6 +99,29 @@ def header(text):
     print('')
 
 
+def success(text):
+    print('[', end='')
+    print(Fore.LIGHTGREEN_EX + 'Success', end='')
+    print('] ', end='')
+    print(text)
+
+
+def start(name, text):
+    print('')
+    print('[', end='')
+    print(Fore.LIGHTGREEN_EX + name, end='')
+    print('] ', end='')
+    print(text)
+
+
+def rdd(text):
+    print('')
+    print('[', end='')
+    print(Fore.LIGHTCYAN_EX + 'RDD', end='')
+    print('] ', end='')
+    print(text)
+
+
 def a_print(text):
     print('')
     print(Fore.LIGHTGREEN_EX + '*', end='')
