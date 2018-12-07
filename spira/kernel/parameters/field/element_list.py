@@ -38,7 +38,7 @@ class ElementFilterMixin(object):
         elems = ElementList()
         for ply in self.polygons:
             if layer is not None:
-                if ply.gdslayer.number == layer:
+                if ply.gdslayer == layer:
                     elems += ply
             if datatype is not None:
                 if ply.gdslyaer.datatype == datatype:
@@ -82,8 +82,9 @@ class ElementFilterMixin(object):
         from spira.lpe.primitives import MLayer
         elems = ElementList()
         for S in self._list:
-            if isinstance(S.ref, MLayer):
-                elems += S
+            for Sm in S.ref.elementals.sref:
+                if isinstance(Sm.ref, MLayer):
+                    elems += Sm
         return elems
 
     @property
@@ -91,8 +92,9 @@ class ElementFilterMixin(object):
         from spira.lpe.primitives import NLayer
         elems = ElementList()
         for S in self._list:
-            if isinstance(S.ref, NLayer):
-                elems += S
+            for Sn in S.ref.elementals.sref:
+                if isinstance(Sn.ref, NLayer):
+                    elems += Sn
         return elems
 
     def get_dlayer(self, layer):
@@ -103,7 +105,7 @@ class ElementFilterMixin(object):
                     if p.gdslayer.number == layer:
                         elems += S
                 else:
-                    if p.gdslayer.number == layer.number:
+                    if p.gdslayer == layer:
                         elems += S
         return elems
 
@@ -258,26 +260,36 @@ class ElementList(TypedList, ElementFilterMixin):
         return self
 
     def flat_elems(self):
-        import spira
+        def _flatten(list_to_flatten):
+            for elem in list_to_flatten:
+                if isinstance(elem, (ElementList, list, tuple)):
+                    for x in _flatten(elem):
+                        yield x
+                else:
+                    yield elem
 
-        def flat(S):
-            if S == []:
-                return S
-            if isinstance(S[0], list):
-                return flat(S[0]) + flat(S[1:])
-            elif isinstance(S[0], ElementList):
-                return S[0].flat_elems()
-            return S[:1] + flat(S[1:])
+        return _flatten(self._list)
 
-        if len(self._list[0]) == 1:
-            return self._list
 
-        elems = ElementList()
-        for e in flat(self._list):
-            if issubclass(type(e), spira.Cell):
-                e = e.elementals.flat_elems()
-            elems += e
-        return elems
+        # def flat(S):
+        #     if S == []:
+        #         return S
+        #     if isinstance(S[0], list):
+        #         return flat(S[0]) + flat(S[1:])
+        #     elif isinstance(S[0], ElementList):
+        #         # return S[0].flat_elems()
+        #         return flat(S[0]._list) + flat(S[1:])
+        #     return S[:1] + flat(S[1:])
+
+        # if len(self._list[0]) == 1:
+        #     return self._list
+
+        # elems = ElementList()
+        # for e in flat(self._list):
+        #     if issubclass(type(e), spira.Cell):
+        #         e = e.elementals.flat_elems()
+        #     elems += e
+        # return elems
 
     def flat_copy(self, level=-1, commit_to_gdspy=False):
         el = ElementList()

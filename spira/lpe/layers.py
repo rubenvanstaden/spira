@@ -118,12 +118,12 @@ class DLayer(__DeviceLayer__):
 
     color = param.ColorField(default='#e54e7f')
 
-    # def create_ports(self, ports):
     def create_labels(self):
         elems = ElementList()
         for p in self.device_elems.polygons:
             layer = p.gdslayer.number
-            if layer in RDD.METALS.layers:
+            players = RDD.PLAYER.get_physical_layers(purposes='METAL')
+            if layer in players:
                 l2 = Layer(name='BoundingBox', number=layer, datatype=8)
                 # FIXME: Ports with the same name overrides eachother.
                 elems += Port(name='P{}'.format(layer), midpoint=self.blayer.center, gdslayer=l2)
@@ -139,7 +139,8 @@ class DLayer(__DeviceLayer__):
 
         for p in self.device_elems.polygons:
             layer = p.gdslayer.number
-            if layer in RDD.METALS.layers and setter[layer] == 'not_set':
+            players = RDD.PLAYER.get_physical_layers(purposes=['METAL'])
+            if layer in players and setter[layer] == 'not_set':
                 l1 = Layer(name='BoundingBox', number=layer, datatype=8)
                 elems += Polygons(polygons=self.blayer.polygons, gdslayer=l1)
                 setter[layer] = 'already_set'

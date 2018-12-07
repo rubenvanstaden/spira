@@ -10,10 +10,6 @@ class __DataTree__(object):
     def __setattr__(self, key, value):
         if (key in self.__dict__) and (key not in ['name', 'desc', '__initialized__']):
             current_value = self.__dict__[key]
-
-            if key == 'LAYER':
-                value = spira.Layer(name='M4', number=current_value)
-
             if current_value != value:
                 self.__dict__[key] = value
         elif (key == 'name') and (value != 'EMPTY'):
@@ -43,8 +39,7 @@ class __DataTree__(object):
         for k in self.__config_tree_keys__:
             if k in self.__dict__:
                 value = self.__dict__[k]
-                if isinstance(value, ProcessTree):
-                    items.append(value)
+                items.append(value)
         return items
 
     @property
@@ -72,26 +67,10 @@ class __DataTree__(object):
                     return k
 
     def __getitem__(self, key):
-        return self.__dict__[key]
-
-
-# class FabricationMetaData(DataTree):
-class PcellProcessTree(__DataTree__):
-    """ ProcessTree for storing primitive PCell data.
-    The tree is initiated when retreiving the data. """
-    def __init__(self, **kwargs):
-        super(DelayedInitDataTree, self).__init__(**kwargs)
-        self.__initialized__ = False
-
-    def __getattr__(self, key):
-        if self.__initialized__:
-            raise IpcoreAttributeException("No attribute %s of DataTree" % key)
-        self.initialize()
-        self.__initialized__ = True
-        return getattr(self, key)
-
-    def initialize(self):
-        raise NotImplementedError()
+        value = self.__dict__[key]
+        if key == 'LAYER':
+            value = spira.Layer(name='M4', number=value)
+        return value
 
 
 class DataTree(__DataTree__):
@@ -99,6 +78,27 @@ class DataTree(__DataTree__):
 
     def __repr__(self):
         return '[DataTree] ({} keys)'.format(len(self.keys))
+
+
+class PhysicalTree(__DataTree__):
+    """ A hierarchical tree for storing process layer settings. """
+
+    def __repr__(self):
+        return '[PhysicalTree] ({} keys, {} layers)'.format(len(self.keys), len(self.layers))
+
+    def get_physical_layers(self, purposes):
+        plist = []
+        for k in self.__config_tree_keys__:
+            if k in self.__dict__:
+                value = self.__dict__[k]
+                if isinstance(purposes, list):
+                    for purpose in purposes:
+                        if value.purpose.symbol == purpose:
+                            plist.append(value)
+                else:
+                    if value.purpose.symbol == purposes:
+                        plist.append(value)
+        return plist
 
 
 class ProcessTree(__DataTree__):
@@ -140,3 +140,26 @@ class TechnologyLibrary(__DataTree__):
 
     def __repr__(self):
         return "< RDD %s>" % self.name
+
+
+class DynamicDataTree(__DataTree__):
+    """
+    A hierarchical tree for storing configuration settings, 
+    but with delayed initialisation : the initialize-function 
+    is called only at the moment a value is actually retrieved.
+    """
+    def __init__(self, **kwargs):
+        super(DynamicDataTree, self).__init__(**kwargs)
+        self.__initialized__ = False
+
+    def __getattr__(self, key):
+        if self.__initialized__:
+            raise ValueError('Alread initialized')
+        self.initialize()
+        self.__initialized__ = True
+        return getattr(self, key)
+
+    def initialize(self):
+        raise NotImplementedError()
+
+

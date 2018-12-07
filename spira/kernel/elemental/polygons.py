@@ -12,7 +12,6 @@ from numpy.linalg import norm
 from spira.kernel.utils import *
 
 from spira.settings import SCALE
-from spira.settings import DEVICES
 
 from shapely.geometry import Polygon as ShapelyPolygon
 
@@ -194,8 +193,6 @@ class __Polygon__(gdspy.PolygonSet, SimplyMixin, BaseElement):
                         gdslayer=self.gdslayer)
 
     def __or__(self, other):
-        # print(self.polygons)
-        # print(other.polygons)
         pp = bool_operation(subj=other.polygons,
                             clip=self.polygons,
                             method='intersection')

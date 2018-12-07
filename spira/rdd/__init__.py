@@ -10,4 +10,5 @@ def get_rule_deck():
     return RULE_DECK_DATABASE
 
 def initialize_default():
-    from pdks import default
+    from ..default import general
+    from ..default import pdk_default

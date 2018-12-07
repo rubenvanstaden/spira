@@ -112,6 +112,7 @@ def start(name, text):
     print(Fore.LIGHTGREEN_EX + name, end='')
     print('] ', end='')
     print(text)
+    print('\n---------------------------------------------\n')
 
 
 def rdd(text):

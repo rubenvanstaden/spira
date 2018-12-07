@@ -64,6 +64,12 @@ class Library(__Library__):
     def add_pcell(self, pcell):
         self.pcells += pcell
 
+    def get_cell(self, cell_name):
+        for C in self.cells:
+            if C.name == cell_name: 
+                return C
+        return None
+
     @property
     def to_gdspy(self):
         for c in self.cells:

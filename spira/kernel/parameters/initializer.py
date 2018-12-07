@@ -236,23 +236,33 @@ class MetaCell(MetaBase):
         for k, v in zip(p[1:len(params)+1], params):
             kwargs[k] = v
 
+        # ----------------------------- Library -------------------------------
+        # from . import library 
+        # from .. import settings
+        from spira.kernel import library
+        from spira import settings
+        lib = None
         if 'library' in kwargs:
-            pass
+            lib = kwargs['library']
+            del(kwargs['library'])
+        if lib is None:
+            lib = settings.get_library()
 
         if kwargs['name'] is None:
             kwargs['name'] = '{}-{}'.format(cls.__name__, cls._ID)
             cls._ID += 1
 
-        # if kwargs['name'] is None:
-        #     kwargs['name'] = cls.__name__
-        # else:
-        #     n = kwargs['name']
-        #     cls.__name__ = n[0].upper() + n[1:]
-        #     kwargs['name'] = '{}-{}'.format(cls.__name__, cls._ID)
+        name = kwargs['name']
 
         cls = super().__call__(**kwargs)
 
-        return cls
+        retrieved_cell = lib.get_cell(cell_name=name)
+        if retrieved_cell is None:
+            lib += cls
+            return cls
+        else:
+            del cls
+            return retrieved_cell
 
 
 class BaseLibrary(FieldInitializer, metaclass=MetaBase):

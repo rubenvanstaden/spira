@@ -20,7 +20,7 @@ class ComposeMLayers(__CellContainer__):
 
     mlayers = param.DataField(fdef_name='create_mlayers')
 
-    def _merged_layer(self, flat_metals):
+    def _merge_layers(self, flat_metals):
         points = []
         elems = spira.ElementList()
         for p in flat_metals:
@@ -34,28 +34,48 @@ class ComposeMLayers(__CellContainer__):
 
     def create_mlayers(self):
         elems = spira.ElementList()
-        for layer in (*RDD.METALS.layers, *[RDD.GDSII.GPLAYER], RDD.MOAT.number):
+        # players = RDD.PLAYER.get_physical_layers(purpose_symbol=['METAL', 'GROUND', 'MOAT'])
+        flat_elems = self.cell_elems.flat_copy()
+        for pl in RDD.PLAYER.get_physical_layers(purposes='METAL'):
 
-            flat_elems = self.cell_elems.flat_copy()
-            metal_elems = flat_elems.get_polygons(layer=layer)
+            metal_elems = flat_elems.get_polygons(layer=pl.layer)
 
             if metal_elems:
-                c_mlayer = CMLayers(layer=spira.Layer(number=layer))
-
-                for i, ply in enumerate(self._merged_layer(metal_elems)):
-                    ml = MLayer(name='MLayer_{}_{}_{}_{}'.format(layer, self.cell.name, self.cell.__id__, i),
+                c_mlayer = CMLayers(layer=pl.layer)
+                for i, ply in enumerate(self._merge_layers(metal_elems)):
+                    ml = MLayer(name='MLayer_{}_{}_{}_{}'.format(pl.layer.number, 
+                                                                 self.cell.name, 
+                                                                 self.cell.__id__, i),
                                 points=ply.polygons,
-                                number=layer)
+                                number=pl.layer.number)
                     c_mlayer += spira.SRef(ml)
-
                 elems += spira.SRef(c_mlayer)
+
+        # for layer in (*RDD.METALS.layers, *[RDD.GDSII.GPLAYER], RDD.MOAT.number):
+
+        #     flat_elems = self.cell_elems.flat_copy()
+        #     metal_elems = flat_elems.get_polygons(layer=layer)
+
+        #     if metal_elems:
+        #         c_mlayer = CMLayers(layer=spira.Layer(number=layer))
+        #         for i, ply in enumerate(self._merged_layer(metal_elems)):
+        #             ml = MLayer(name='MLayer_{}_{}_{}_{}'.format(layer, self.cell.name, self.cell.__id__, i),
+        #                         points=ply.polygons,
+        #                         number=layer)
+        #             c_mlayer += spira.SRef(ml)
+        #         elems += spira.SRef(c_mlayer)
 
         return elems
 
     def create_elementals(self, elems):
 
+        # TODO: Apply DRC checking between metals, before being placed.
+
         for lcell in self.mlayers:
             elems += lcell
+
+        # FIXME: Allow this operation.
+        # elems += self.mlayers
 
         return elems
 
@@ -64,27 +84,25 @@ class ComposeNLayer(ComposeMLayers):
 
     cell_elems = param.ElementListField()
 
-    level = param.IntegerField()
+    level = param.IntegerField(default=1)
 
     nlayers = param.DataField(fdef_name='create_nlayers')
 
     def create_nlayers(self):
         elems = ElementList()
-        for layer in RDD.VIAS.layers:
+        flat_elems = self.cell_elems.flat_copy()
+        for pl in RDD.PLAYER.get_physical_layers(purposes='VIA'):
 
-            flat_elems = self.cell_elems.flat_copy()
-            via_elems = flat_elems.get_polygons(layer=layer)
+            via_elems = flat_elems.get_polygons(layer=pl.layer)
 
             if via_elems:
-                c_nlayer = CNLayers(layer=spira.Layer(layer))
-
+                c_nlayer = CNLayers(layer=pl.layer)
                 for i, ply in enumerate(via_elems):
-                    ml = NLayer(name='Via_NLayer_{}_{}_{}'.format(layer, self.cell.name, i),
+                    ml = NLayer(name='Via_NLayer_{}_{}_{}'.format(pl.layer.number, self.cell.name, i),
                                 points=ply.polygons,
                                 midpoint=ply.center,
-                                number=layer)
+                                number=pl.layer.number)
                     c_nlayer += spira.SRef(ml)
-
                 elems += SRef(c_nlayer)
 
         return elems
@@ -127,9 +145,8 @@ class ComposeGLayer(ComposeNLayer):
 
             if self.ground_layer:
                 gnd = self.ground_layer | box
-
                 if gnd:
-                    c_glayer = CGLayers(layer=spira.Layer(gnd.gdslayer))
+                    c_glayer = CGLayers(layer=gnd.gdslayer)
                     name = 'GLayer_{}_{}'.format(self.cell.name, gnd.gdslayer.number)
                     gnd_layer = GLayer(name=name, layer=gnd.gdslayer, player=gnd)
                     c_glayer += spira.SRef(gnd_layer)
@@ -183,7 +200,7 @@ class __StructureCell__(ConnectDesignRules):
 
     def create_terminal_layers(self):
         flat_elems = self.cell_elems.flat_copy()
-        port_elems = flat_elems.get_polygons(layer=RDD.GDSII.TERM)
+        port_elems = flat_elems.get_polygons(layer=RDD.PURPOSE.TERM)
         label_elems = flat_elems.labels
 
         elems = ElementList()
@@ -221,10 +238,10 @@ class __StructureCell__(ConnectDesignRules):
 
         super().create_elementals(elems)
 
-        elems += self.devices
+        # elems += self.devices
 
-        for term in self.terminals:
-            elems += term
+        # for term in self.terminals:
+        #     elems += term
 
         return elems
 

@@ -69,27 +69,46 @@ class LabelAbstract(__Label__):
 
     gdspy_commit = param.BoolField()
 
+    __committed__ = {}
+
     def __init__(self, position, **kwargs):
         super().__init__(position, **kwargs)
 
-    def commit_to_gdspy(self, cell, gdspy_commit=None):
+    def commit_to_gdspy(self, cell):
         from spira.kernel.utils import scale_coord_down as scd
-        if gdspy_commit is not None:
-            if self.gdspy_commit is False:
-                L = gdspy.Label(self.text,
-                                scd(self.position),
-                                anchor='o',
-                                rotation=self.rotation,
-                                magnification=self.magnification,
-                                x_reflection=self.x_reflection,
-                                layer=self.gdslayer.number,
-                                texttype=self.texttype)
-                cell.add(L)
-                self.gdspy_commit = True
+        if self.__repr__() not in list(LabelAbstract.__committed__.keys()):
+            pos = deepcopy(self.position)
+            L = gdspy.Label(self.text,
+                            scd(pos),
+                            anchor='o',
+                            rotation=self.rotation,
+                            magnification=self.magnification,
+                            x_reflection=self.x_reflection,
+                            layer=self.gdslayer.number,
+                            texttype=self.texttype)
+            cell.add(L)
+            LabelAbstract.__committed__.update({self.__repr__():L})
+        else:
+            cell.add(LabelAbstract.__committed__[self.__repr__()])
+
+    # def commit_to_gdspy(self, cell, gdspy_commit=None):
+    #     from spira.kernel.utils import scale_coord_down as scd
+    #     if gdspy_commit is not None:
+    #         if self.gdspy_commit is False:
+    #             L = gdspy.Label(self.text,
+    #                             scd(self.position),
+    #                             anchor='o',
+    #                             rotation=self.rotation,
+    #                             magnification=self.magnification,
+    #                             x_reflection=self.x_reflection,
+    #                             layer=self.gdslayer.number,
+    #                             texttype=self.texttype)
+    #             cell.add(L)
+    #             self.gdspy_commit = True
 
     def reflect(self, p1=(0,1), p2=(0,0)):
         self.position = [self.position[0], -self.position[1]]
-        self.rotation = -self.rotation
+        self.rotation = self.rotation * (-1)
         self.rotation = np.mod(self.rotation, 360)
         return self
 

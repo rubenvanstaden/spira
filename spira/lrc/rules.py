@@ -29,7 +29,7 @@ class __DoubleLayerDesignRule__(__DesignRule__):
 class Width(__SingleLayerDesignRule__):
     minimum = param.FloatField()
     maximum = param.FloatField()
-    error = param.IntegerField(default=RDD.ERRORS.WIDTH)
+    error = param.IntegerField(default=RDD.PURPOSE.ERROR.MIN_WIDTH.datatype)
 
     def __repr__(self):
         return 'Rule width: min={} max={}'.format(self.minimum, self.maximum)
@@ -43,7 +43,7 @@ class Width(__SingleLayerDesignRule__):
 
 class Surround(__DoubleLayerDesignRule__):
     minimum = param.FloatField()
-    error = param.IntegerField(default=RDD.ERRORS.SPACING)
+    error = param.IntegerField(default=RDD.PURPOSE.ERROR.SPACING.datatype)
 
     def __repr__(self):
         return 'Rule surround: min={}'.format(self.minimum)
@@ -116,7 +116,7 @@ class Surround(__DoubleLayerDesignRule__):
 
 class Density(__DoubleLayerDesignRule__):
     minimum = param.IntegerField()
-    error = param.IntegerField(default=RDD.ERRORS.DENSITY)
+    error = param.IntegerField(default=RDD.PURPOSE.ERROR.DENSITY.datatype)
 
     # TODO: Detect holes in die polygon
 

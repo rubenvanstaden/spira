@@ -8,6 +8,7 @@ from numpy.linalg import norm
 from spira.kernel.parameters.field.element_list import ElementList
 
 from spira.kernel.elemental.polygons import PolygonAbstract
+from spira.kernel.elemental.polygons import Polygons
 from spira.kernel.elemental.label import LabelAbstract
 from spira.lne.geometry import Geometry
 from spira.lne.graph import Graph
@@ -24,6 +25,7 @@ import inspect
 import numpy as np
 from spira.kernel.parameters.initializer import MetaBase
 from spira.kernel.parameters.initializer import BaseCell
+from spira.rdd import get_rule_deck
 
 
 # ----------------------------------------------------------------------------------------------
@@ -34,6 +36,9 @@ from spira.kernel.parameters.initializer import BaseCell
 # method-of-a-metaclass-instead-of-new
 
 # ----------------------------------------------------------------------------------------------
+
+
+RDD = get_rule_deck()
 
 
 class InspectMixin(object):
@@ -243,37 +248,25 @@ class CellAbstract(__Cell__):
                 e.commit_to_gdspy(cell=cell)
         return cell
 
-        # cd = gdspy.current_library.cell_dict
-        # if self.name not in cd.keys():
-        #     cell = gdspy.Cell(self.name, exclude_from_current=True)
-        #     for e in self.elementals:
-        #         if not isinstance(e, (SRef, ElementList, Graph, Mesh)):
-        #         # if not isinstance(e, (ElementList, Graph, Mesh)):
-        #             e.commit_to_gdspy(cell=cell)
-        #     return cell
-        # else:
-        #     return cd[self.name]
-
     def wrapper(self, c, c2dmap):
         from spira.kernel.utils import scale_coord_down as scd
-        for e in c.elementals:
+        from spira.kernel.utils import scale_polygon_up as spu
+        elems = c.elementals.flat_elems()
+        # elems = c.elementals
+        for e in elems:
+            G = c2dmap[c]
             if isinstance(e, SRef):
-                G = c2dmap[c]
-                ref_device = c2dmap[e.ref]
-                G.add(gdspy.CellReference(ref_cell=ref_device,
+                G.add(gdspy.CellReference(ref_cell=c2dmap[e.ref],
                                         origin=scd(e.origin),
                                         rotation=e.rotation,
                                         magnification=e.magnification,
                                         x_reflection=e.x_reflection))
-                # if e.ref in c2dmap:
-                #     ref_device = c2dmap[e.ref]
-                #     G.add(gdspy.CellReference(ref_cell=ref_device,
-                #                             origin=scd(e.origin),
-                #                             rotation=e.rotation,
-                #                             magnification=e.magnification,
-                #                             x_reflection=e.x_reflection))
+            # elif isinstance(e, Polygons):
+            #     G.add(gdspy.PolygonSet(polygons=spu(e.polygons), 
+            #                            layer=e.gdslayer.number, 
+            #                            datatype=e.gdslayer.datatype))
 
-    def construct_gdspy_tree(self, gdspy_commit=None):
+    def construct_gdspy_tree(self):
         d = self.dependencies()
         c2dmap = {}
         for c in d:
@@ -281,13 +274,21 @@ class CellAbstract(__Cell__):
             c2dmap.update({c:G})
 
         for c in d:
-            print(c)
             self.wrapper(c, c2dmap)
             glib.add(c2dmap[c])
 
         gdspy.LayoutViewer(library=glib)
 
         return c2dmap[self]
+
+    def get_purpose_layers(self, purpose_symbol):
+        players = RDD.PLAYER.get_physical_layers(purposes=purpose_symbol)
+        elems = ElementList()
+        for ply in self.elementals.polygons:
+            for phys in players:
+                if ply.gdslayer == phys.layer:
+                    elems += ply
+        return elems
 
     def flat_copy(self, level=-1, commit_to_gdspy=False):
         self.elementals = self.elementals.flat_copy(level, commit_to_gdspy)

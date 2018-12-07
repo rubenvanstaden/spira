@@ -17,14 +17,17 @@ def Rectangle(point1, point2, **kwargs):
     return ply
 
 
-def Circle(center, radius):
+def Circle(center, radius, layer):
     circle = gdspy.Round(scd(center), radius,
                          inner_radius=0, initial_angle=0,
                          final_angle=0, number_of_points=6,
-                         max_points=6, layer=100, datatype=0)
+                         max_points=6)
+                        #  layer=layer.number, 
+                        #  datatype=65)
 
-    layer = spira.Layer(name='Circle', number=circle.layers[0])
-    ply = Polygons(polygons=spu(circle.polygons), gdslayer=layer)
+    ll = spira.Layer(name='Circle', number=layer.number, datatype=65)
+    # ll = spira.Layer(name='Circle', number=layer.number)
+    ply = Polygons(polygons=spu(circle.polygons), gdslayer=ll)
 
     return ply
 

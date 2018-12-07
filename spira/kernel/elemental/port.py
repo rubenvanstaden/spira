@@ -2,6 +2,7 @@ import spira
 import gdspy
 import pyclipper
 import numpy as np
+from copy import copy, deepcopy
 
 from spira.kernel import parameters as param
 from spira.kernel.parameters.initializer import BaseElement
@@ -22,8 +23,6 @@ class __Port__(BaseElement):
     def __init__(self, port=None, polygon=None, **kwargs):
         BaseElement.__init__(self, **kwargs)
 
-        # if self.extern_polygon:
-        #     pp = self.extern_polygon
         if self.length:
             layer = spira.Layer(name='Rectangle', number=65)
             pp = Rectangle(point1=[0, 0],
@@ -33,12 +32,12 @@ class __Port__(BaseElement):
             pp.rotate(angle=self.orientation, center=self.midpoint)
             pp.move(origin=pp.center, destination=self.midpoint)
         else:
-            pp = Circle(self.midpoint, radius=0.25*self.width)
+            pp = Circle(self.midpoint, radius=0.25*self.width, layer=self.gdslayer)
 
         L = spira.Label(position=self.midpoint,
                         text=self.name,
-                        gdslayer=self.text_layer,
-                        texttype=self.text_layer.datatype)
+                        gdslayer=self.gdslayer,
+                        texttype=self.text_layer.number)
 
         self.label = L
 
@@ -65,19 +64,21 @@ class PortAbstract(__Port__):
     length = param.FloatField()
     parent = param.DataField()
     extern_polygon = param.PolygonField()
-    gdslayer = param.LayerField(name='PortLayer', number=RDD.GDSII.TERM)
-    poly_layer = param.LayerField(name='PortLayer', number=RDD.GDSII.TERM)
+    gdslayer = param.LayerField(name='PortLayer', number=RDD.PURPOSE.TERM.datatype)
+    poly_layer = param.LayerField(name='PortLayer', number=RDD.PURPOSE.TERM.datatype)
     text_layer = param.LayerField(name='PortLayer', number=RDD.GDSII.TEXT)
 
     gdspy_commit = param.BoolField()
+
+    __committed__ = {}
 
     def __init__(self, port=None, polygon=None, **kwargs):
         super().__init__(port=None, polygon=None, **kwargs)
 
     @property
     def endpoints(self):
-        dx = self.width/2*np.cos((self.orientation - 90)*pi/180)
-        dy = self.width/2*np.sin((self.orientation - 90)*pi/180)
+        dx = self.width/2*np.cos((self.orientation - 90)*np.pi/180)
+        dy = self.width/2*np.sin((self.orientation - 90)*np.pi/180)
         left_point = self.midpoint - np.array([dx,dy])
         right_point = self.midpoint + np.array([dx,dy])
         return np.array([left_point, right_point])
@@ -87,13 +88,13 @@ class PortAbstract(__Port__):
         p1, p2 = np.array(points[0]), np.array(points[1])
         self.midpoint = (p1+p2)/2
         dx, dy = p2-p1
-        self.orientation = np.arctan2(dx,dy)*180/pi
-        self.width = sqrt(dx**2 + dy**2)
+        self.orientation = np.arctan2(dx,dy)*180/np.pi
+        self.width = np.sqrt(dx**2 + dy**2)
 
     @property
     def normal(self):
-        dx = np.cos((self.orientation)*pi/180)
-        dy = np.sin((self.orientation)*pi/180)
+        dx = np.cos((self.orientation)*np.pi/180)
+        dy = np.sin((self.orientation)*np.pi/180)
         return np.array([self.midpoint, self.midpoint + np.array([dx,dy])])
 
     @property
@@ -113,22 +114,11 @@ class PortAbstract(__Port__):
     def point_inside(self, polygon):
         return pyclipper.PointInPolygon(self.midpoint, polygon) != 0
 
-    def commit_to_gdspy(self, cell, gdspy_commit=None):
-        if gdspy_commit is not None:
-            if self.gdspy_commit is False:
-
-                self.gdspy_commit = True
-
-                self.polygon.commit_to_gdspy(cell)
-                self.label.commit_to_gdspy(cell)
-
-        # if gdspy_commit is None:
-        #     if not self.gdspy_commit:
-        #         self.polygon.commit_to_gdspy(cell)
-        #         self.label.commit_to_gdspy(cell)
-        # else:
-        #     self.polygon.commit_to_gdspy(cell)
-        #     self.label.commit_to_gdspy(cell)
+    def commit_to_gdspy(self, cell):
+        if self.__repr__() not in list(PortAbstract.__committed__.keys()):
+            self.polygon.commit_to_gdspy(cell)
+            self.label.commit_to_gdspy(cell)
+            PortAbstract.__committed__.update({self.__repr__():self})
 
     def reflect(self, p1=(0,1), p2=(0,0)):
         self.midpoint = [self.midpoint[0], -self.midpoint[1]]
@@ -157,17 +147,10 @@ class PortAbstract(__Port__):
             self.rotate(angle=T['rotation'], center=(0,0))
             self.translate(dx=T['origin'][0],
                            dy=T['origin'][1])
-            # self.label.reflect(p1=[0,0], p2=[1,0])
-            # self.label.rotate(angle=T['rotation'], center=(0,0))
-            # self.label.translate(dx=T['origin'][0],
-            #                dy=T['origin'][1])
         else:
             self.rotate(angle=T['rotation'], center=(0,0))
             self.translate(dx=T['origin'][0],
                            dy=T['origin'][1])
-            # self.label.rotate(angle=T['rotation'], center=(0,0))
-            # self.label.translate(dx=T['origin'][0],
-            #                dy=T['origin'][1])
 
         self.label.move(origin=self.label.position, destination=self.midpoint)
         self.polygon.move(origin=self.polygon.center, destination=self.midpoint)
@@ -186,10 +169,11 @@ class PortAbstract(__Port__):
                         orientation=self.orientation)
         return new_port
 
-    def update(self, name, layer):
-        self.gdslayer = layer
-        self.text_layer = spira.Layer(number=layer.number, datatype=RDD.GDSII.TEXT)
-        self.name += '_' + str(name)
+    def _update(self, name, layer):
+        ll = deepcopy(layer)
+        ll.datatype = 65
+        self.polygon.gdslayer = ll
+        self.label.gdslayer = ll
 
 
 class Port(PortAbstract):

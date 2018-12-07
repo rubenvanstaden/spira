@@ -135,18 +135,35 @@ class __Generator__(__CellContainer__):
     def create_devices(self):
         deps = self.cell.dependencies()
         c2dmap = {}
-        for T in self.library.pcells:
-            for D in deps:
+        # for DeviceTCell in self.library.pcells:
+        # print(RDD.DEVICES.JJ.PCELL)
+        # for DeviceTCell in RDD.DEVICES.JJ.PCELL:
+        #     print(type(DeviceTCell))
+        #     for C in deps:
+
+        #         plane_elems = ElementList()
+        #         plane_elems += self.cell.get_purpose_layers(purpose_symbol='GROUND')
+        #         # plane_elems += self.cell.elementals[(RDD.GDSII.GPLAYER, 0)]
+
+        #         D = Device(cell=C, cell_elems=C.elementals, plane_elems=plane_elems)
+
+        #         for PrimTCell in DeviceTCell.elementals.sref:
+        #             PrimTCell.ref.create_elementals(D.elementals)
+        #         c2dmap.update({C: D})
+
+        for key in RDD.DEVICES.keys:
+            DeviceTCell = RDD.DEVICES[key].PCELL
+            for C in deps:
 
                 plane_elems = ElementList()
-                plane_elems += self.cell.elementals[(RDD.GDSII.GPLAYER, 0)]
+                plane_elems += self.cell.get_purpose_layers(purpose_symbol='GROUND')
+                # plane_elems += self.cell.elementals[(RDD.GDSII.GPLAYER, 0)]
 
-                C = Device(cell=D, cell_elems=D.elementals, plane_elems=plane_elems)
+                D = Device(cell=C, cell_elems=C.elementals, plane_elems=plane_elems)
 
-                for S in T.elementals.sref:
-                    S.ref.create_elementals(C.elementals)
-
-                c2dmap.update({D: C})
+                for PrimTCell in DeviceTCell.elementals.sref:
+                    PrimTCell.ref.create_elementals(D.elementals)
+                c2dmap.update({C: D})
 
         for c in self.cell.dependencies():
             self.wrap_references(c, c2dmap)
