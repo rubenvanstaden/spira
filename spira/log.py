@@ -99,6 +99,13 @@ def header(text):
     print('')
 
 
+def section(text):
+    print('')
+    print(Fore.LIGHTMAGENTA_EX + '->', end='')
+    print(' ', end='')
+    print(text)
+
+
 def success(text):
     print('[', end='')
     print(Fore.LIGHTGREEN_EX + 'Success', end='')
@@ -112,7 +119,7 @@ def start(name, text):
     print(Fore.LIGHTGREEN_EX + name, end='')
     print('] ', end='')
     print(text)
-    print('\n---------------------------------------------\n')
+    print('\n\n---------------------------------------------\n')
 
 
 def rdd(text):

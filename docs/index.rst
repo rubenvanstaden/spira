@@ -13,6 +13,7 @@ Welcome to the SPiRA documentation!
    installation
    overview
    rdd_schema
+   tutorials
    pcell_examples
    developers
 

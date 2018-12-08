@@ -32,6 +32,7 @@ RDD.RES.COLOR = '#7FDCD3'
 
 RDD.BAS = ProcessTree()
 RDD.BAS.LAYER = Layer(name='BAS', number=4)
+RDD.BAS.WIDTH = 0.5
 RDD.BAS.COLOR = '#91E1D9'
 
 RDD.COU = ProcessTree()
