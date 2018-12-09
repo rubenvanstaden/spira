@@ -28,19 +28,22 @@ RDD.GP.COLOR = '#49CEC1'
 
 RDD.RES = ProcessTree()
 RDD.RES.LAYER = Layer(name='RES', number=3)
+RDD.RES.WIDTH = 1.5
 RDD.RES.COLOR = '#7FDCD3'
 
 RDD.BAS = ProcessTree()
 RDD.BAS.LAYER = Layer(name='BAS', number=4)
-RDD.BAS.WIDTH = 0.5
+RDD.BAS.WIDTH = 1.5
 RDD.BAS.COLOR = '#91E1D9'
 
 RDD.COU = ProcessTree()
 RDD.COU.LAYER = Layer(name='COU', number=8)
+RDD.COU.WIDTH = 1.5
 RDD.COU.COLOR = '#A4E6E0'
 
 RDD.CTL = ProcessTree()
 RDD.CTL.LAYER = Layer(name='CTL', number=12)
+RDD.CTL.WIDTH = 1.5
 RDD.CTL.COLOR = '#B6EBE6'
 
 RDD.JP = ProcessTree()
@@ -67,6 +70,7 @@ RDD.JJ.M5_METAL = 1.0
 
 RDD.BC = ProcessTree()
 RDD.BC.WIDTH = 0.5
+RDD.BC.SPACING = 0.5
 RDD.BC.LAYER = Layer(name='BC', number=7)
 RDD.BC.WIDTH = 0.5
 RDD.BC.M5_METAL = 1.0

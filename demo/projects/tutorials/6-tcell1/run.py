@@ -1,31 +1,35 @@
 import spira
 from spira import RDD
 from spira.default.templates import ViaTemplate
+from spira.lpe.primitives import Device
 
+"""
+This example demonstrates creating a via device. 
+Ports are automatically detected and added using
+the StructureCell base class implicit in the framework.
 
-from spira.lpe.structure import ComposeMLayers
-from spira.lpe.structure import ComposeNLayer
+Demonstrates:
+1. Creating a via device.
+2. A device is created using the Device class.
+"""
+
 class ViaPCell(spira.Cell):
 
     def create_elementals(self, elems):
         points = [[[0,0], [3,0], [3,1], [0,1]]]
-        ply0 = spira.Polygons(polygons=points, gdslayer=RDD.BAS.LAYER)
-        ply1 = spira.Polygons(polygons=points, gdslayer=RDD.COU.LAYER)
-        ply2 = spira.Polygons(polygons=points, gdslayer=RDD.BC.LAYER)
 
-        el1 = spira.ElementList()
-        el2 = spira.ElementList()
-        el3 = spira.ElementList()
+        ply_elems = spira.ElementList()
 
-        el1 += ply0
-        el2 += ply1
-        el3 += ply2
+        ply_elems += spira.Polygons(polygons=points, gdslayer=RDD.BAS.LAYER)
+        ply_elems += spira.Polygons(polygons=points, gdslayer=RDD.COU.LAYER)
+        ply_elems += spira.Polygons(polygons=points, gdslayer=RDD.BC.LAYER)
 
-        elems += spira.SRef(ComposeMLayers(cell_elems=el1))
-        elems += spira.SRef(ComposeMLayers(cell_elems=el2))
-        elems += spira.SRef(ComposeNLayer(cell_elems=el3))
+        # Creates a device by sending the created 
+        # elementals to the container cell.
+        elems += spira.SRef(Device(cell_elems=ply_elems))
         return elems
 
+# ------------------------------ Scripts ------------------------------------
 
 via = ViaPCell()
 

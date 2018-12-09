@@ -23,6 +23,7 @@ from spira.lne.mesh import Mesh
 from spira.lne.graph import Graph
 from spira.lne.geometry import Geometry
 
+from spira.lgm.shape.basic import Box
 from spira.lgm.shape.basic import Rectangle
 from spira.lgm.shape.basic import Circle
 

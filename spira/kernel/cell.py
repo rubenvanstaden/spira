@@ -578,7 +578,7 @@ class CellList(TypedList):
 
     def __fast_contains__(self, name):
         for i in self._list:
-            if i.name == name: 
+            if i.name == name:
                 return True
         return False
 
@@ -617,3 +617,12 @@ from spira.kernel.parameters.descriptor import DataFieldDescriptor
 def CellField(name=None, elementals=None, library=None):
     F = Cell(name=name, elementals=elementals, library=library)
     return DataFieldDescriptor(default=F)
+
+
+
+
+
+
+
+
+

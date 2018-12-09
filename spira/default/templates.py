@@ -171,6 +171,8 @@ class ViaTemplate(__TempatePrimitive__):
 
     def create_elementals(self, elems):
 
+        # FIXME: This assumes the received `elems` are
+        # wrapped as ComposedLayers.
         NLayers = elems.get_dlayer(layer=self.via_layer)
         M1 = elems.get_mlayer(layer=self.layer1)
         M2 = elems.get_mlayer(layer=self.layer2)
@@ -193,3 +195,10 @@ if __name__ == '__main__':
 
     jj = JunctionTemplate(pcell=True)
     jj.construct_gdspy_tree()
+
+
+
+
+
+
+

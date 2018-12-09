@@ -15,6 +15,10 @@ RDD = spira.get_rule_deck()
 
 
 class ComposeMLayers(__CellContainer__):
+    """
+    Decorates all elementas with purpose metal with
+    LCells and add them as elementals to the new class.
+    """
 
     cell_elems = param.ElementListField()
 
@@ -51,20 +55,6 @@ class ComposeMLayers(__CellContainer__):
                     c_mlayer += spira.SRef(ml)
                 elems += spira.SRef(c_mlayer)
 
-        # for layer in (*RDD.METALS.layers, *[RDD.GDSII.GPLAYER], RDD.MOAT.number):
-
-        #     flat_elems = self.cell_elems.flat_copy()
-        #     metal_elems = flat_elems.get_polygons(layer=layer)
-
-        #     if metal_elems:
-        #         c_mlayer = CMLayers(layer=spira.Layer(number=layer))
-        #         for i, ply in enumerate(self._merged_layer(metal_elems)):
-        #             ml = MLayer(name='MLayer_{}_{}_{}_{}'.format(layer, self.cell.name, self.cell.__id__, i),
-        #                         points=ply.polygons,
-        #                         number=layer)
-        #             c_mlayer += spira.SRef(ml)
-        #         elems += spira.SRef(c_mlayer)
-
         return elems
 
     def create_elementals(self, elems):
@@ -81,6 +71,10 @@ class ComposeMLayers(__CellContainer__):
 
 
 class ComposeNLayer(ComposeMLayers):
+    """
+    Decorates all elementas with purpose via with
+    LCells and add them as elementals to the new class.
+    """
 
     cell_elems = param.ElementListField()
 
@@ -98,6 +92,7 @@ class ComposeNLayer(ComposeMLayers):
             if via_elems:
                 c_nlayer = CNLayers(layer=pl.layer)
                 for i, ply in enumerate(via_elems):
+                    print(ply.gdslayer)
                     ml = NLayer(name='Via_NLayer_{}_{}_{}'.format(pl.layer.number, self.cell.name, i),
                                 points=ply.polygons,
                                 midpoint=ply.center,
@@ -140,10 +135,10 @@ class ComposeGLayer(ComposeNLayer):
         super().create_elementals(elems)
 
         if self.level == 1:
-            box = self.cell.bbox
-            # box.move(origin=box.center, destination=(0,0))
-
             if self.ground_layer:
+                box = self.cell.bbox
+                # box.move(origin=box.center, destination=(0,0))
+
                 gnd = self.ground_layer | box
                 if gnd:
                     c_glayer = CGLayers(layer=gnd.gdslayer)
@@ -238,12 +233,16 @@ class __StructureCell__(ConnectDesignRules):
 
         super().create_elementals(elems)
 
-        # elems += self.devices
-
-        # for term in self.terminals:
-        #     elems += term
+#         elems += self.devices
+# 
+#         for term in self.terminals:
+#             elems += term
 
         return elems
+
+
+
+
 
 
 

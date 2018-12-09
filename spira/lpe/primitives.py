@@ -1,5 +1,3 @@
-
-# import spira
 import gdspy
 import networkx as nx
 
@@ -37,15 +35,15 @@ class __Device__(__StructureCell__):
     def create_elementals(self, elems):
         super().create_elementals(elems)
 
-        # # TODO: Do DRC and ERC checking here.
-        # # sref_elems = self.cell.get_srefs()
-        # for S in self.cell.get_srefs():
-        #     if isinstance(S.ref, DLayer):
-        #         elems += S
+        # TODO: Do DRC and ERC checking here.
+        # sref_elems = self.cell.get_srefs()
+#         for S in self.cell.get_srefs():
+#             if isinstance(S.ref, DLayer):
+#                 elems += S
 
-        # for S in self.cell.elementals:
-        #     if isinstance(S.ref, TLayer):
-        #         elems += S
+#         for S in self.cell.elementals:
+#             if isinstance(S.ref, TLayer):
+#                 elems += S
 
         return elems
 
@@ -236,4 +234,7 @@ class SLayout(MaskGenerator):
             elems += self.structure_mask
 
         return elems
+
+
+
 

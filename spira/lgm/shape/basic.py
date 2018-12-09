@@ -8,12 +8,19 @@ from spira.kernel.utils import scale_polygon_up as spu
 from spira.kernel.utils import scale_coord_down as scd
 
 
+def Box(center, width, height, **kwargs):
+    p1 = [center[0]-width/2, center[1]-height/2]
+    p2 = [center[0]+width/2, center[1]+height/2]
+    rectangle = gdspy.Rectangle(p1, p2)
+    ply = Polygons(polygons=spu(rectangle.polygons),
+                   gdslayer=kwargs['gdslayer'])
+    return ply
+
+
 def Rectangle(point1, point2, **kwargs):
     rectangle = gdspy.Rectangle(point1, point2)
-
     ply = Polygons(polygons=spu(rectangle.polygons),
                    gdslayer=kwargs['layer'])
-
     return ply
 
 
