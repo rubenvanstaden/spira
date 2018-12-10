@@ -4,7 +4,7 @@ Overview
 **SPiRA**: A parameterized design framework using Python in conjunction 
 with metaprogramming techniques to allow designers to create superconducting 
 and quantum parameterized circuits, while simultaneously checking for design 
-rule errors. Using this parameterized kernel a new LVS methodology is proposed 
+rule errors. Using this parameterized gdsii a new LVS methodology is proposed 
 that follows a parameterized hierarchical approach to effectively detect layout 
 primitives and devices. A mesh-to-netlist algorithm is presented that extracts 
 a graph netlist from a circuit layout by first meshing the conducting polygons 

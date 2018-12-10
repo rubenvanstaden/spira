@@ -9,7 +9,7 @@ Parameterized Cells
 -------------------
 
 This examples defines the creation of a basic parameterized cell. By creating a new class that
-inherits from the `spira.Cell` class. This connects the created class to the SPiRA kernel
+inherits from the `spira.Cell` class. This connects the created class to the SPiRA gdsii
 that binds parameters using a meta-configuration.
 
 **Demonstrates**:
@@ -195,4 +195,99 @@ the functionality implicit in another defined class.
             comp = ComposeMLayers(cell_elems=elems)
             elems += spira.SRef(comp)
             return elems
+
+
+.. -----------------------------------------------------------------------------------
+
+
+TemplateCells Basic
+-------------------
+
+This example demonstrates creating a via device.
+Ports are automatically detected and added using
+the StructureCell base class implicit in the framework.
+
+**Demonstrates**:
+
+1. Creating a via device.
+2. A device is created using the Device class.
+
+.. code-block:: python
+    :linenos:
+
+    class ViaPCell(spira.Cell):
+
+        def create_elementals(self, elems):
+            points = [[[0,0], [3,0], [3,1], [0,1]]]
+
+            ply_elems = spira.ElementList()
+
+            ply_elems += spira.Polygons(polygons=points, gdslayer=RDD.BAS.LAYER)
+            ply_elems += spira.Polygons(polygons=points, gdslayer=RDD.COU.LAYER)
+            ply_elems += spira.Polygons(polygons=points, gdslayer=RDD.BC.LAYER)
+
+            # Creates a device by sending the created 
+            # elementals to the container cell.
+            elems += spira.SRef(Device(cell_elems=ply_elems))
+            return elems
+
+    # ------------------------------ Scripts ------------------------------------
+
+    via = ViaPCell()
+
+    ViaTemplate().create_elementals(elems=via.elementals)
+
+    via.construct_gdspy_tree()
+
+
+.. -----------------------------------------------------------------------------------
+
+
+TemplateCell Database
+---------------------
+
+This example shows the automatic creation of a via
+device using the set variables from the RDD.
+
+Demonstrates:
+1. How to automate a PCell from the RDD.
+2. DRC values can be set as parameters.
+
+
+.. code-block:: python
+    :linenos:
+
+    class ViaPCell(spira.Cell):
+
+        spacing = param.FloatField(default=RDD.BC.SPACING)
+
+        def create_elementals(self, elems):
+            
+            ply_elems = spira.ElementList()
+
+            ply_elems += spira.Box(center=(0,0), 
+                                width=RDD.BAS.WIDTH,
+                                height=RDD.BAS.WIDTH,
+                                gdslayer=RDD.BAS.LAYER)
+            ply_elems += spira.Box(center=(0,0), 
+                                width=RDD.COU.WIDTH,
+                                height=RDD.COU.WIDTH,
+                                gdslayer=RDD.COU.LAYER)
+            ply_elems += spira.Box(center=(0,0), 
+                                width=RDD.BAS.WIDTH - self.spacing,
+                                height=RDD.BAS.WIDTH - self.spacing,
+                                gdslayer=RDD.BC.LAYER)
+            elems += spira.SRef(Device(cell_elems=ply_elems))
+            return elems
+
+    # ------------------------------ Scripts ------------------------------------
+
+    via = ViaPCell()
+
+    ViaTemplate().create_elementals(elems=via.elementals)
+
+    via.construct_gdspy_tree()
+
+
+
 
