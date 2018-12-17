@@ -144,8 +144,8 @@ class TechnologyLibrary(__DataTree__):
 
 class DynamicDataTree(__DataTree__):
     """
-    A hierarchical tree for storing configuration settings, 
-    but with delayed initialisation : the initialize-function 
+    A hierarchical tree for storing configuration settings,
+    but with delayed initialisation : the initialize-function
     is called only at the moment a value is actually retrieved.
     """
     def __init__(self, **kwargs):
@@ -161,5 +161,8 @@ class DynamicDataTree(__DataTree__):
 
     def initialize(self):
         raise NotImplementedError()
+
+
+
 
 

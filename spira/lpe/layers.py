@@ -1,4 +1,3 @@
-
 # import spira
 import gdspy
 import networkx as nx
@@ -7,20 +6,19 @@ from copy import copy, deepcopy
 from spira import settings
 
 from spira.rdd import get_rule_deck
-from spira.kernel.elemental.polygons import UnionPolygons
-from spira.kernel import parameters as param
-from spira.kernel import utils
-from spira.kernel.cell import CellField
+from spira import param
+from spira.gdsii import utils
 
-from spira.kernel.cell import Cell
-from spira.kernel.layer import Layer
-from spira.kernel.elemental.polygons import Polygons
-from spira.kernel.elemental.label import Label
-from spira.kernel.elemental.port import Port
-from spira.kernel.elemental.sref import SRef
+from spira.gdsii.cell import Cell
+from spira.gdsii.layer import Layer
+from spira.gdsii.elemental.polygons import Polygons
+from spira.gdsii.elemental.label import Label
+from spira.gdsii.elemental.port import Port
+from spira.gdsii.elemental.port import Port
+from spira.gdsii.elemental.sref import SRef
 from spira.lne.graph import Graph
 from spira.lne.mesh import Mesh
-from spira.kernel.parameters.field.element_list import ElementList
+from spira.core.lists import ElementList
 
 
 RDD = get_rule_deck()
@@ -94,18 +92,18 @@ class __ConnectLayer__(__ProcessLayer__):
     def create_port1(self):
         port = Port(name='P1', midpoint=self.midpoint, gdslayer=self.layer1)
         return port
-    
+
     def create_port2(self):
         port = Port(name='P2', midpoint=self.midpoint, gdslayer=self.layer2)
         return port
 
+    def create_ports(self, ports):
+        ports += self.port1
+        ports += self.port2
+        return ports
+
     def create_elementals(self, elems):
-
         super().create_elementals(elems)
-
-        elems += self.port1
-        elems += self.port2
-
         return elems
 
 

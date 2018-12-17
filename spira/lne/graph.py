@@ -1,11 +1,11 @@
 import networkx as nx
-from spira.kernel.elemental.label import Label
-from spira.kernel.parameters.field.typed_graph import PathList
-import spira.kernel.parameters as param
-from spira.kernel.parameters.initializer import BaseElement
+from spira.gdsii.elemental.label import Label
+from spira.param.field.typed_graph import PathList
+from spira import param
+from spira.core.initializer import BaseElement
 import spira
 from spira import log as LOG
-from spira.kernel.mixin.gdsii_output import OutputMixin
+from spira.core.mixin.gdsii_output import OutputMixin
 
 
 def _loops(g):

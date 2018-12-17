@@ -14,14 +14,6 @@ START_MESSAGE = '{} - {}'.format(VERSION, COPYRIGHT_INFO)
 
 # ----------------------------- Default Globals --------------------------------
 
-GRID = 5e-9
-UM = 10e-6
-NM = 10e-9
-PM = 10e-12
-
-UNITS = UM
-SCALE = NM
-
 _current_library = None
 
 DEFAULT_LIBRARY = None
@@ -29,17 +21,13 @@ DEFAULT_LIBRARY = None
 # ----------------------------- Initialize Library -----------------------------
 
 def initialize():
-    from .kernel.library import Library
+    from .gdsii.library import Library
     from .rdd.settings import RDD
-    # from .templates.templates import JunctionTemplate
-    # from .default.templates import JunctionTemplate
 
     global DEFAULT_LIBRARY 
     DEFAULT_LIBRARY = Library('SPiRA-default',
                               unit=RDD.GDSII.UNIT,
                               precision=RDD.GDSII.PRECISION)
-
-    # DEFAULT_LIBRARY.add_pcell(pcell=RDD.DEVICES.JJ.PCELL)
 
     set_library(DEFAULT_LIBRARY)
 

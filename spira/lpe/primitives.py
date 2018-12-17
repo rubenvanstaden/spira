@@ -5,24 +5,23 @@ from copy import copy, deepcopy
 from spira import settings
 
 from spira.rdd import get_rule_deck
-from spira.kernel.elemental.polygons import UnionPolygons
-from spira.kernel import parameters as param
-from spira.kernel import utils
+from spira import param
+from spira.gdsii import utils
 
-from spira.kernel.cell import Cell
-from spira.kernel.layer import Layer
-from spira.kernel.elemental.polygons import Polygons
-from spira.kernel.elemental.label import Label
-from spira.kernel.elemental.port import Port
-from spira.kernel.elemental.sref import SRef
+from spira.gdsii.cell import Cell
+from spira.gdsii.layer import Layer
+from spira.gdsii.elemental.polygons import Polygons
+from spira.gdsii.elemental.label import Label
+from spira.gdsii.elemental.port import Port
+from spira.gdsii.elemental.sref import SRef
 from spira.lne.graph import Graph
 from spira.lne.mesh import Mesh
 from spira.lne.geometry import Geometry
-from spira.kernel.parameters.field.element_list import ElementList
+from spira.core.lists import ElementList
 
 from spira.lpe.containers import __CellContainer__
 from spira.lpe.layers import *
-from spira.lgm.booleans import merge
+# from spira.lgm.booleans import merge
 from spira.lpe.structure import __StructureCell__
 from spira import settings
 
@@ -47,7 +46,7 @@ class __Device__(__StructureCell__):
 
         return elems
 
-    
+
 class Device(__Device__):
     pass
 
@@ -124,7 +123,7 @@ class __Generator__(__CellContainer__):
                 elems += ng
 
     def wrap_references(self, c, c2dmap):
-        from spira.kernel.utils import scale_coord_down as scd
+        from spira.gdsii.utils import scale_coord_down as scd
         for e in c.elementals:
             if isinstance(e, SRef):
                 if e.ref in c2dmap:
@@ -214,6 +213,11 @@ class MaskGenerator(CircuitGenerator):
 
 
 class SLayout(MaskGenerator):
+    """
+    The StructureLayout is a converted layout that
+    takes designed elementals and wraps them with
+    different generators.
+    """
 
     def create_elementals(self, elems):
 
@@ -234,6 +238,11 @@ class SLayout(MaskGenerator):
             elems += self.structure_mask
 
         return elems
+
+
+
+
+
 
 
 

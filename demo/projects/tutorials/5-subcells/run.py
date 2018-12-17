@@ -1,16 +1,19 @@
 import spira
 from spira import param
+from spira import shapes
 from spira import LOG
 from spira import RDD
+
 
 """
 This examples defines the creation of a basic parameterized cell.
 This example shows the following:
 
 1. How to create subcells in a pcell.
-2. How to wrap elementals in a different cell what will 
+2. How to wrap elementals in a different cell what will
    merge similar intersecting polygons.
 """
+
 
 from spira.lpe.structure import ComposeMLayers
 class PCell(spira.Cell):
@@ -24,17 +27,22 @@ class PCell(spira.Cell):
               [[1.25, 4.75], [2.65, 6]]]
 
         for points in p0:
-            elems += spira.Rectangle(point1=points[0],
-                                     point2=points[1],
-                                     layer=self.layer)
+            shape = shapes.RectangleShape(p1=points[0],
+                                     p2=points[1],
+                                     gdslayer=self.layer)
+            elems += shapes.Rectangle(shape=shape)
 
         comp = ComposeMLayers(cell_elems=elems)
         elems += spira.SRef(comp)
         return elems
 
-# -------------------------- Scripting ---------------------------
 
-pcell = PCell()
-pcell.construct_gdspy_tree()
+# ---------------------------------------------------------------------
+
+
+if __name__ == '__main__':
+
+    pcell = PCell()
+    pcell.construct_gdspy_tree()
 
 

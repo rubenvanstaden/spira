@@ -1,12 +1,11 @@
-from spira.kernel.cell import Cell
-from spira.kernel.elemental.sref import SRef
-from spira.kernel.cell import CellField
-from spira.kernel import parameters as param
+from spira.gdsii.cell import Cell
+from spira.gdsii.elemental.sref import SRef
+from spira import param
 
 
 class __CellContainer__(Cell):
 
-    cell = CellField()
+    cell = param.CellField()
 
     def create_elementals(self, elems):
         elems += SRef(structure=self.cell)

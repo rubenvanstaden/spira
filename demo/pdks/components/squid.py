@@ -1,5 +1,5 @@
 import spira
-from spira.kernel import parameters as param
+from spira import param
 from spira.rdd import get_rule_deck
 
 

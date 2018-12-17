@@ -3,6 +3,7 @@ from spira import param
 from spira import LOG
 from spira import RDD
 
+
 """
 This examples defines the creation of a basic parameterized cell.
 This example shows the following:
@@ -12,6 +13,7 @@ This example shows the following:
 3. How to use the parameters when creating elementals.
 4. How to write to a GDSII file.
 """
+
 
 class PCell(spira.Cell):
 
@@ -23,9 +25,13 @@ class PCell(spira.Cell):
         elems += spira.Polygons(polygons=points, gdslayer=self.layer)
         return elems
 
-# -------------------------- Scripting ---------------------------
 
-pcell = PCell()
-pcell.construct_gdspy_tree()
+# --------------------------------------------------------------------------
+
+
+if __name__ == '__main__':
+
+    pcell = PCell()
+    pcell.construct_gdspy_tree()
 
 

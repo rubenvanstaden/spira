@@ -8,13 +8,13 @@ import numpy as np
 import networkx as nx
 from spira import settings
 
-from spira.kernel.elemental.label import Label
-from spira.kernel import utils
-import spira.kernel.parameters as param
+from spira.gdsii.elemental.label import Label
+from spira.gdsii import utils
+from spira import param
 
 from spira import log as LOG
-from spira.kernel.parameters.initializer import BaseElement
-from spira.rdd import get_rule_deck
+from spira.core.initializer import BaseElement
+# from spira.rdd import get_rule_deck
 from copy import copy, deepcopy
 
 
@@ -22,9 +22,6 @@ from copy import copy, deepcopy
 # colormap: https://www.color-hex.com/color-palette/166
 # https://www.color-hex.com/color-palette/66223
 # -------------------------------------------------------------------
-
-
-RDD = get_rule_deck()
 
 
 class __Mesh__(meshio.Mesh, BaseElement):
@@ -177,6 +174,8 @@ class MeshAbstract(__Mesh__):
 
 
 class MeshLabeled(MeshAbstract):
+
+    RDD = spira.get_rule_deck()
 
     primitives = param.ElementListField()
 

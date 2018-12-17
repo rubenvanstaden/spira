@@ -1,17 +1,12 @@
-from spira.kernel.cell import Cell
-from spira.lgm.shape.basic import Rectangle
-from spira.kernel.elemental.sref import SRef
-from spira.kernel.cell import CellField
-from spira.kernel.parameters.field.element_list import ElementList
-from spira.kernel import parameters as param
+import spira
+from spira import param
 from copy import copy, deepcopy
-from spira.rdd.settings import get_rule_deck
 
 
-RDD = get_rule_deck()
+RDD = spira.get_rule_deck()
 
 
-class __TemplateCell__(Cell):
+class __TemplateCell__(spira.Cell):
     pass
 
 

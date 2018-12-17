@@ -1,7 +1,7 @@
 import spira
-from spira.kernel import parameters as param
-from spira.kernel.parameters.initializer import BaseElement
-from spira.kernel.parameters.descriptor import DataFieldDescriptor
+from spira import param
+from spira.core.initializer import BaseElement
+from spira.core.descriptor import DataFieldDescriptor
 from spira.rdd import get_rule_deck
 from spira.lpe.layers import *
 

@@ -1,10 +1,11 @@
 import spira
 from spira import RDD
-from spira.default.templates import ViaTemplate
+from spira.core.default.templates import ViaTemplate
 from spira.lpe.primitives import Device
 
+
 """
-This example demonstrates creating a via device. 
+This example demonstrates creating a via device.
 Ports are automatically detected and added using
 the StructureCell base class implicit in the framework.
 
@@ -12,6 +13,7 @@ Demonstrates:
 1. Creating a via device.
 2. A device is created using the Device class.
 """
+
 
 class ViaPCell(spira.Cell):
 
@@ -24,16 +26,24 @@ class ViaPCell(spira.Cell):
         ply_elems += spira.Polygons(polygons=points, gdslayer=RDD.COU.LAYER)
         ply_elems += spira.Polygons(polygons=points, gdslayer=RDD.BC.LAYER)
 
+        for ply in ply_elems:
+            elems += ply
+
         # Creates a device by sending the created 
         # elementals to the container cell.
-        elems += spira.SRef(Device(cell_elems=ply_elems))
+#         elems += spira.SRef(Device(cell_elems=ply_elems))
         return elems
 
-# ------------------------------ Scripts ------------------------------------
+
+# -------------------------------------------------------------------------------
+
 
 via = ViaPCell()
 
-ViaTemplate().create_elementals(elems=via.elementals)
+# ViaTemplate().create_elementals(elems=via.elementals)
 
 via.construct_gdspy_tree()
+
+
+
 

@@ -1,8 +1,8 @@
 
 
-from spira.kernel.cell import Cell
-from spira.kernel.layer import Layer
-from spira.kernel.elemental.polygons import Polygons
-from spira.kernel.elemental.label import Label
-from spira.kernel.elemental.sref import SRef
-from spira.kernel.parameters.field.element_list import ElementList
+from spira.gdsii.cell import Cell
+from spira.gdsii.layer import Layer
+from spira.gdsii.elemental.polygons import Polygons
+from spira.gdsii.elemental.label import Label
+from spira.gdsii.elemental.sref import SRef
+from spira.core.lists import ElementList

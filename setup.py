@@ -37,7 +37,7 @@ setup(
     ],
 
     packages=['spira',
-              'spira.kernel',
+              'spira.gdsii',
               'spira.lgm',
               'spira.lne',
               'spira.lpe',

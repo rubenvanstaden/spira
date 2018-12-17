@@ -1,6 +1,7 @@
 import spira
-from spira.kernel import parameters as param
-from spira.lgm.booleans import merge
+from spira import param
+from spira import shapes
+# from spira.lgm.booleans import merge
 from spira.lpe.layers import *
 from spira.lrc.rules import *
 from spira.lrc.checking import Rules
@@ -31,8 +32,9 @@ class ComposeMLayers(__CellContainer__):
             for pp in p.polygons:
                 points.append(pp)
         if points:
-            merged_points = merge(points=points)
-            for pts in merged_points:
+            shape = shapes.Shape(points=points)
+            shape.apply_merge
+            for pts in shape.points:
                 elems += spira.Polygons(polygons=[pts])
         return elems
 
@@ -47,14 +49,13 @@ class ComposeMLayers(__CellContainer__):
             if metal_elems:
                 c_mlayer = CMLayers(layer=pl.layer)
                 for i, ply in enumerate(self._merge_layers(metal_elems)):
-                    ml = MLayer(name='MLayer_{}_{}_{}_{}'.format(pl.layer.number, 
-                                                                 self.cell.name, 
+                    ml = MLayer(name='MLayer_{}_{}_{}_{}'.format(pl.layer.number,
+                                                                 self.cell.name,
                                                                  self.cell.__id__, i),
                                 points=ply.polygons,
                                 number=pl.layer.number)
                     c_mlayer += spira.SRef(ml)
                 elems += spira.SRef(c_mlayer)
-
         return elems
 
     def create_elementals(self, elems):
@@ -194,39 +195,53 @@ class __StructureCell__(ConnectDesignRules):
         return Bs
 
     def create_terminal_layers(self):
-        flat_elems = self.cell_elems.flat_copy()
-        port_elems = flat_elems.get_polygons(layer=RDD.PURPOSE.TERM)
-        label_elems = flat_elems.labels
+#         flat_elems = self.cell_elems.flat_copy()
+#         port_elems = flat_elems.get_polygons(layer=RDD.PURPOSE.TERM)
+#         label_elems = flat_elems.labels
+# 
+#         elems = ElementList()
+#         for port in port_elems:
+#             for label in label_elems:
+# 
+#                 lbls = label.text.split(' ')
+#                 s_p1, s_p2 = lbls[1], lbls[2]
+#                 p1, p2 = None, None
+# 
+#                 if s_p1 in RDD.METALS.keys: 
+#                     layer = RDD.METALS[s_p1].LAYER
+#                     p1 = spira.Layer(name=lbls[0], number=layer, datatype=RDD.GDSII.TEXT)
+# 
+#                 if s_p2 in RDD.METALS.keys: 
+#                     layer = RDD.METALS[s_p2].LAYER
+#                     p2 = spira.Layer(name=lbls[0], number=layer, datatype=RDD.GDSII.TEXT)
+# 
+#                 if p1 and p2:
+#                     if label.point_inside(polygon=port.polygons[0]):
+#                         term = TLayer(points=port.polygons,
+#                                     layer1=p1,
+#                                     layer2=p2,
+#                                     number=RDD.GDSII.TERM,
+#                                     midpoint=label.position)
+# 
+#                         term.ports[0].name = 'P1_{}'.format(label.text)
+#                         term.ports[1].name = 'P2_{}'.format(label.text)
+# 
+#                         elems += SRef(term)
 
         elems = ElementList()
-        for port in port_elems:
-            for label in label_elems:
 
-                lbls = label.text.split(' ')
-                s_p1, s_p2 = lbls[1], lbls[2]
-                p1, p2 = None, None
+        for p in self.cell.ports:
+            if isinstance(p, spira.Term):
+                term = TLayer(points=p.polygon.polygons,
+#                               layer1=p1,
+#                               layer2=p2,
+                              number=RDD.PURPOSE.TERM.datatype,
+                              midpoint=p.label.position)
 
-                if s_p1 in RDD.METALS.keys: 
-                    layer = RDD.METALS[s_p1].LAYER
-                    p1 = spira.Layer(name=lbls[0], number=layer, datatype=RDD.GDSII.TEXT)
+                term.ports[0].name = 'P1_{}'.format(1)
+                term.ports[1].name = 'P2_{}'.format(2)
 
-                if s_p2 in RDD.METALS.keys: 
-                    layer = RDD.METALS[s_p2].LAYER
-                    p2 = spira.Layer(name=lbls[0], number=layer, datatype=RDD.GDSII.TEXT)
-
-                if p1 and p2:
-                    if label.point_inside(polygon=port.polygons[0]):
-                        term = TLayer(points=port.polygons,
-                                    layer1=p1,
-                                    layer2=p2,
-                                    number=RDD.GDSII.TERM,
-                                    midpoint=label.position)
-
-                        term.ports[0].name = 'P1_{}'.format(label.text)
-                        term.ports[1].name = 'P2_{}'.format(label.text)
-
-                        elems += SRef(term)
-
+                elems += SRef(term)
         return elems
 
     def create_elementals(self, elems):
@@ -234,11 +249,22 @@ class __StructureCell__(ConnectDesignRules):
         super().create_elementals(elems)
 
 #         elems += self.devices
-# 
-#         for term in self.terminals:
-#             elems += term
+
+        # for term in self.terminals:
+        #     elems += term
 
         return elems
+
+    def create_ports(self, ports):
+
+#         for t in self.cell.terms:
+#             ports += t
+
+        return ports
+
+
+
+
 
 
 

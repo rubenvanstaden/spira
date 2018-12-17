@@ -44,5 +44,12 @@ Examples of using the PCell implementation is given in [examples](https://spira.
 
 ## History of changes
 
+### Version 0.0.2 (Dec 17, 2018)
+* Added MidPointField for port and terminal midpoints.
+* Introduces the Shape class that allows for complex point
+manipulations. Shape points are created in the instance cell 
+method: `def create_points(self, points)`.
+* Introduces `term` which is a vertical connection port.
+
 ### Version 0.0.1 (Dec 01, 2018)
 * Initial release.

@@ -10,5 +10,5 @@ def get_rule_deck():
     return RULE_DECK_DATABASE
 
 def initialize_default():
-    from ..default import general
-    from ..default import pdk_default
+    from spira.core.default import general
+    from spira.core.default import pdk_default
