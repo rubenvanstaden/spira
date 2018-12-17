@@ -50,6 +50,7 @@ Examples of using the PCell implementation is given in [examples](https://spira.
 manipulations. Shape points are created in the instance cell 
 method: `def create_points(self, points)`.
 * Introduces `term` which is a vertical connection port.
+* Routes are defined as a Shape with two connected terminal ports.
 
 ### Version 0.0.1 (Dec 01, 2018)
 * Initial release.
