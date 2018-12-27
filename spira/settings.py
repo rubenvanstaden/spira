@@ -4,9 +4,12 @@ import numpy as np
 
 # ------------------------------ SPiRA Information -----------------------------
 
+__version__ = '0.0.2'
+__release__ = 'Auron'
+
 LIB_NAME = 'SPiRA'
 LIB_DESCRIPTION = 'SPiRA: The Virtuoso'
-VERSION = 'Version 0.0.1-Auron'
+VERSION = 'Version {}-{}'.format(__version__, __release__)
 COPYRIGHT_INFO = 'MIT License'
 AUTHOR = 'Ruben van Staden'
 AUTHOR_EMAIL = 'rubenvanstaden@gmail.com'

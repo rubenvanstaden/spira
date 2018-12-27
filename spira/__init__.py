@@ -27,3 +27,5 @@ def initialize():
     spira.LOG.start(name=settings.LIB_NAME, text=settings.START_MESSAGE)
 
 initialize()
+
+
