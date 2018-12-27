@@ -1,5 +1,6 @@
 import os
 import gdspy
+import numpy as np
 
 # ------------------------------ SPiRA Information -----------------------------
 
@@ -14,6 +15,9 @@ START_MESSAGE = '{} - {}'.format(VERSION, COPYRIGHT_INFO)
 
 # ----------------------------- Default Globals --------------------------------
 
+DEG2RAD = np.pi / 180.0
+RAD2DEG = 180.0 / np.pi
+
 _current_library = None
 
 DEFAULT_LIBRARY = None
@@ -26,8 +30,9 @@ def initialize():
 
     global DEFAULT_LIBRARY 
     DEFAULT_LIBRARY = Library('SPiRA-default',
-                              unit=RDD.GDSII.UNIT,
-                              precision=RDD.GDSII.PRECISION)
+        unit=RDD.GDSII.UNIT,
+        precision=RDD.GDSII.PRECISION
+    )
 
     set_library(DEFAULT_LIBRARY)
 

@@ -2,7 +2,7 @@ import networkx as nx
 from spira.gdsii.elemental.label import Label
 from spira.param.field.typed_graph import PathList
 from spira import param
-from spira.core.initializer import BaseElement
+from spira.core.initializer import ElementalInitializer
 import spira
 from spira import log as LOG
 from spira.core.mixin.gdsii_output import OutputMixin
@@ -128,13 +128,13 @@ def subgraphs(lgraph):
     lgraph.g = nx.disjoint_union_all(gg)
 
 
-class __Graph__(BaseElement):
+class __Graph__(ElementalInitializer):
 
     __mixins__ = [OutputMixin]
 
     def __init__(self, subgraphs, data=None, val=None, **kwargs):
 
-        BaseElement.__init__(self, **kwargs)
+        ElementalInitializer.__init__(self, **kwargs)
 
         self.g = nx.Graph()
 

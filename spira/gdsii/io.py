@@ -39,10 +39,10 @@ def wrap_references(cell, c2dmap):
             D = c2dmap[cell]
             ref_device = c2dmap[e.ref_cell]
             D += spira.SRef(structure=ref_device,
-                            origin=scd(e.origin),
+                            midpoint=scd(e.midpoint),
                             rotation=e.rotation,
                             magnification=e.magnification,
-                            x_reflection=e.x_reflection)
+                            reflection=e.reflection)
 
 
 def create_spira_cell(cell):
@@ -57,6 +57,7 @@ def create_spira_cell(cell):
 
 
 def import_gds(filename, cellname=None, flatten=False, duplayer={}):
+    """  """
 
     LOG.header('Imported GDS file -> \'{}\''.format(filename))
 
@@ -91,12 +92,12 @@ def import_gds(filename, cellname=None, flatten=False, duplayer={}):
             if isinstance(e, gdspy.PolygonSet):
                 for points in e.polygons:
                     layer = spira.Layer(number=e.layers[0], datatype=e.datatypes[0])
-                    ply = spira.Polygons(polygons=spd([points]),
+                    ply = spira.Polygons(shape=spd([points]),
                                          gdslayer=layer)
                     D += ply
             elif isinstance(e, gdspy.Polygon):
                 layer = spira.Layer(number=e.layers, datatype=e.datatype)
-                ply = spira.Polygons(polygons=spd([e.points]),
+                ply = spira.Polygons(shape=spd([e.points]),
                                      gdslayer=layer)
                 D += ply
 

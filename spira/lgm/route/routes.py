@@ -26,7 +26,7 @@ class RouteToCell(spira.Cell):
     shape = param.DataField()
 
     def create_elementals(self, elems):
-        elems += spira.Polygons(polygons=self.shape.points,
+        elems += spira.Polygons(shape=self.shape.points,
                                 gdslayer=spira.Layer(number=88))
         return elems
 

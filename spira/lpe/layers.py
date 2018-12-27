@@ -61,7 +61,8 @@ class __DeviceLayer__(Cell):
 
 class __ProcessLayer__(Cell):
     doc = param.StringField()
-    points = param.DataField()
+    points = param.ElementListField()
+    # points = param.PointArrayField()
     number = param.IntegerField()
     error_type = param.IntegerField()
 
@@ -69,7 +70,7 @@ class __ProcessLayer__(Cell):
     player = param.DataField(fdef_name='create_polygon_layer')
 
     def create_polygon_layer(self):
-        return Polygons(polygons=self.points, gdslayer=self.layer)
+        return Polygons(shape=self.points, gdslayer=self.layer)
 
     def create_layer(self):
         return Layer(name=self.name, number=self.number, datatype=self.error_type)
@@ -81,7 +82,7 @@ class __ProcessLayer__(Cell):
 
 class __ConnectLayer__(__ProcessLayer__):
 
-    midpoint = param.PointField()
+    midpoint = param.MidPointField()
 
     layer1 = param.LayerField()
     layer2 = param.LayerField()

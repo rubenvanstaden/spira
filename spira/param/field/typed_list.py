@@ -1,7 +1,7 @@
 import collections
 
 
-class TypedList(collections.MutableSequence):
+class TypedList(collections.abc.MutableSequence):
     __item_type__ = object
 
     def __init__(self, items=[]):

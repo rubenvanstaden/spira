@@ -8,14 +8,14 @@ from spira.core.lists import ElementList
 # from spira.gdsii.utils import numpy_to_list
 from spira import param
 from spira.lne.mesh import Mesh
-from spira.core.initializer import BaseElement
+from spira.core.initializer import ElementalInitializer
 
 
-class __Geometry__(BaseElement):
+class __Geometry__(ElementalInitializer):
 
     def __init__(self, lcar, **kwargs):
 
-        BaseElement.__init__(self, **kwargs)
+        ElementalInitializer.__init__(self, **kwargs)
 
         self.extrude = []
         self.volume = []

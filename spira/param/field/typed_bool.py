@@ -1,11 +1,11 @@
-
-
-
 from spira.core.descriptor import DataFieldDescriptor
 class BoolField(DataFieldDescriptor):
 
     def __init__(self, default=False, **kwargs):
-        kwargs['default'] = bool(default)
+        if default is None:
+            kwargs['default'] = None
+        else:
+            kwargs['default'] = bool(default)
         super().__init__(**kwargs)
 
     def __set__(self, obj, value): 
@@ -20,12 +20,12 @@ class BoolField(DataFieldDescriptor):
         value = obj.__store__[self.__name__]
         return value
 
-    def __repr__(self):
-        value = obj.__store__[self.__name__]
-        return ("[SPiRA: Bool] (value {})").format(value)
+    # def __repr__(self):
+    #     value = obj.__store__[self.__name__]
+    #     return ("[SPiRA: Bool] (value {})").format(value)
 
-    def __str__(self):
-        return self.__repr__()
+    # def __str__(self):
+    #     return self.__repr__()
 
 
 

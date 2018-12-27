@@ -1,62 +1,46 @@
 Installation
------------------
+============
+
+This page gives more information about installing and setting up the SPiRA framework. 
 
 Environment Setup
-~~~~~~~~~~~~~~~~~
+-----------------
 
-Yuna package descriptions:
+SPiRA package descriptions:
 
-* `docopt <http://docopt.org>`_ Command-line interface library.
 * `gdspy <https://github.com/rubenvanstaden/gdspy>`_ Library for GDS file manipulations.
 * `pyclipper <https://github.com/greginvm/pyclipper>`_ Python wrapper for Angusj Clipper library.
-* `termcolor <https://pypi.python.org/pypi/termcolor>`_ Package for color outputs in the terminal.
+* `pygmsh <https://github.com/nschloe/pygmsh>`_ The goal of pygmsh is to combine the power of Gmsh with the versatility of Python and to provide useful abstractions from the Gmsh scripting language so you can create complex geometries more easily.
+* `meshio <https://github.com/nschloe/meshio>`_ A package to read and write different mesh formats.
+* `NetworkX <https://networkx.github.io/>`_ A Python package for the creation, manipulation, and study of the structure, dynamics, and functions of complex networks.
 
-Make sure Python is installed on your system:
+Ubuntu
+------
 
-:: 
+The following packages has to be installed for Ubuntu systems.
+
+.. code-block:: bash
+    :linenos:
 
     sudo apt-get install python-dev
     sudo apt-get install python3-dev
-
-Install the necessary C++ compilers:
-
-::
-
-    sudo apt-get update 
     sudo apt-get install --reinstall build-essential
-
-Install TKinter which is needed by Matplotlib:
-
-::
-
     sudo apt-get install python-tk # Ubuntu
+    sudo apt-get update
 
-Installing
-~~~~~~~~~~
+ArchLinux
+---------
 
-You can install Yuna directly from the Python package manager *pip* using:
+On ArchLinux install the following:
 
-:: 
+.. code-block:: bash
+    :linenos:
 
-    sudo pip install yuna
+    sudo pacman -S tk
 
-To instead install Yuna from source, clone the git repository, *cd* into it, and run:
+FreeBSD
+-------
 
-::
+Support to be added in Q1 2019.
 
-    sudo pip install -r requirements.txt
-    sudo pip install .
 
-We can also install the package in development mode with a symlink, so that
-changes to the source files will be immediately available to other users of the
-package on your system.
-
-::
-
-    sudo pip install -e .
-
-Mac OS
-~~~~~~
-
-To get the Tkinter UI working in Mac, add the following file in `~/.matplotlib`:
-https://stackoverflow.com/questions/21784641/installation-issue-with-matplotlib-python

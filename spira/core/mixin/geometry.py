@@ -34,7 +34,7 @@ class GeometryMixin(object):
 
     @center.setter
     def center(self, destination):
-        self.move(destination=destination, origin=self.center)
+        self.move(destination=destination, midpoint=self.center)
 
     @property
     def x(self):
@@ -43,7 +43,7 @@ class GeometryMixin(object):
     @x.setter
     def x(self, destination):
         destination = (destination, self.center[1])
-        self.move(destination = destination, origin=self.center, axis='x')
+        self.move(destination = destination, midpoint=self.center, axis='x')
 
     @property
     def y(self):
@@ -52,7 +52,7 @@ class GeometryMixin(object):
     @y.setter
     def y(self, destination):
         destination = ( self.center[0], destination)
-        self.move(destination=destination, origin=self.center, axis='y')
+        self.move(destination=destination, midpoint=self.center, axis='y')
 
     @property
     def xmax(self):
@@ -60,7 +60,7 @@ class GeometryMixin(object):
 
     @xmax.setter
     def xmax(self, destination):
-        self.move(destination=(destination, 0), origin=self.bbox[1], axis='x')
+        self.move(destination=(destination, 0), midpoint=self.bbox[1], axis='x')
 
     @property
     def ymax(self):
@@ -68,7 +68,7 @@ class GeometryMixin(object):
 
     @ymax.setter
     def ymax(self, destination):
-        self.move(destination=(0, destination), origin=self.box[1], axis='y')
+        self.move(destination=(0, destination), midpoint=self.box[1], axis='y')
 
     @property
     def xmin(self):
@@ -76,7 +76,7 @@ class GeometryMixin(object):
 
     @xmin.setter
     def xmin(self, destination):
-        self.move(destination=(destination, 0), origin=self.box[0], axis='x')
+        self.move(destination=(destination, 0), midpoint=self.box[0], axis='x')
 
     @property
     def ymin(self):
@@ -84,7 +84,7 @@ class GeometryMixin(object):
 
     @ymin.setter
     def ymin(self, destination):
-        self.move(destination=(0, destination), origin=self.box[0], axis='y')
+        self.move(destination=(0, destination), midpoint=self.box[0], axis='y')
 
     @property
     def size(self):
@@ -125,17 +125,17 @@ class GeometryMixin(object):
         bb = self.bbox
         return [bb[0][0], bb[0][1]]
 
-    def movex(self, origin = 0, destination = None):
+    def movex(self, midpoint = 0, destination = None):
         if destination is None:
-            destination = origin
-            origin = 0
-        self.move(origin=(origin,0), destination=(destination,0))
+            destination = midpoint
+            midpoint = 0
+        self.move(midpoint=(midpoint,0), destination=(destination,0))
         return self
 
-    def movey(self, origin=0, destination=None):
+    def movey(self, midpoint=0, destination=None):
         if destination is None:
-            destination = origin
-            origin = 0
-        self.move(origin=(0,origin), destination=(0,destination))
+            destination = midpoint
+            midpoint = 0
+        self.move(midpoint=(0,midpoint), destination=(0,destination))
         return self
 

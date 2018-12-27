@@ -1,6 +1,6 @@
 from .field.typed_integer import IntegerField
 from .field.typed_string import StringField
-from .field.typed_float import FloatField
+# from .field.typed_float import FloatField
 from .field.typed_bool import BoolField
 from .field.typed_list import ListField
 from .field.layer_list import LayerListProperty
@@ -18,16 +18,17 @@ class MidPointField(DataFieldDescriptor):
     __type__ = Point
 
     def __init__(self, default=Point(0,0), **kwargs):
-        kwargs['default'] = self.__type__(default)
+        kwargs['default'] = [default.x, default.y]
+        # kwargs['default'] = self.__type__(default)
         super().__init__(**kwargs)
 
     def get_stored_value(self, obj):
         value = obj.__store__[self.__name__]
-        return value
-        # return self.__type__(value)
+        if not isinstance(value, (list, set, tuple, np.ndarray)):
+            raise ValueError('Correct MidPoint type to retreived.')
+        return list(value)
 
     def __set__(self, obj, value):
-        from spira.gdsii.utils import SCALE_UP
         if isinstance(value, self.__type__):
             value = self.__type__()
         elif isinstance(value, (list, set, tuple, np.ndarray)):
@@ -37,22 +38,38 @@ class MidPointField(DataFieldDescriptor):
                             "of {} (expected {}): {}"
                             .format(self.__class__, type(value)))
 
-        value.x = SCALE_UP*value.x
-        value.y = SCALE_UP*value.y
+        # if (value.x > 0) and (value.y > 0):
+        #     if (value.x/100 < 1.0) and (value.y/100 < 1.0):
+        #         from spira.gdsii.utils import SCALE_UP
+        #         from spira.gdsii.utils import SCALE_DOWN
+        #         value.x = SCALE_UP*value.x
+        #         value.y = SCALE_UP*value.y
 
         obj.__store__[self.__name__] = [value.x, value.y]
 
 
-def LayerField(name='', number=0, datatype=0):
-    from spira.gdsii.layer import Layer
-    F = Layer(name=name, number=number, datatype=datatype)
-    return DataFieldDescriptor(default=F)
-
-
-def PolygonField(polygons=[]):
+def PolygonField(shape=[]):
     from spira.gdsii.elemental.polygons import Polygons
-    F = Polygons(polygons)
+    F = Polygons(shape)
     return DataFieldDescriptor(default=F)
+
+
+def ShapeField(points=[]):
+    from spira.lgm.shapes.shape import Shape
+    F = Shape(points)
+    return DataFieldDescriptor(default=F)
+
+
+def LayerField(name='', number=0, datatype=0, **kwargs):
+    from spira.gdsii.layer import Layer
+    F = Layer(name=name, number=number, datatype=datatype, **kwargs)
+    return DataFieldDescriptor(default=F, **kwargs)
+
+
+# def FloatField(default=0.0, **kwargs):
+def FloatField(**kwargs):
+    from .variables import FLOAT
+    return DataFieldDescriptor(constraint=FLOAT, **kwargs)
 
 
 def CellField(name=None, elementals=None, library=None):
@@ -104,11 +121,14 @@ class PointArrayField(DataFieldDescriptor):
         # return value 
 
     def __operations__(self, points):
-        from spira.gdsii.utils import scale_polygon_up as spu
-        return spu(points) 
+        # from spira.gdsii.utils import scale_polygon_up as spu
+        # return spu(points) 
+        return points
 
     def __set__(self, obj, points):
-        points = self.__operations__(points)
+        # from spira.gdsii.utils import scale_polygon_up as spu
+        # pp = spu(self.__operations__(points))
+        # obj.__store__[self.__name__] = pp
         obj.__store__[self.__name__] = points
     
     # def __process__(self, points):

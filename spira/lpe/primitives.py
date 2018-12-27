@@ -4,9 +4,10 @@ import networkx as nx
 from copy import copy, deepcopy
 from spira import settings
 
-from spira.rdd import get_rule_deck
 from spira import param
+from spira import settings
 from spira.gdsii import utils
+from spira.rdd import get_rule_deck
 
 from spira.gdsii.cell import Cell
 from spira.gdsii.layer import Layer
@@ -19,11 +20,9 @@ from spira.lne.mesh import Mesh
 from spira.lne.geometry import Geometry
 from spira.core.lists import ElementList
 
-from spira.lpe.containers import __CellContainer__
 from spira.lpe.layers import *
-# from spira.lgm.booleans import merge
 from spira.lpe.structure import __StructureCell__
-from spira import settings
+from spira.lpe.containers import __CellContainer__
 
 
 RDD = get_rule_deck()
@@ -153,8 +152,10 @@ class __Generator__(__CellContainer__):
             for C in deps:
 
                 plane_elems = ElementList()
-                plane_elems += self.cell.get_purpose_layers(purpose_symbol='GROUND')
-                # plane_elems += self.cell.elementals[(RDD.GDSII.GPLAYER, 0)]
+                # from spira.gdsii import utils
+                # players = RDD.PLAYER.get_physical_layers(purposes='GROUND')
+                # plane_elems += utils.get_purpose_layers(self.cell, players)
+                # # plane_elems += self.cell.elementals[(RDD.GDSII.GPLAYER, 0)]
 
                 D = Device(cell=C, cell_elems=C.elementals, plane_elems=plane_elems)
 

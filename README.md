@@ -19,11 +19,7 @@ sudo dnf install tkinter
 sudo dnf install gmsh
 ```
 
-On ArchLinux install the following:
-
-```bash
-sudo pacman -S tk
-```
+Documentation for other Linux systems can be found in [installation](https://spira.readthedocs.io/en/latest/installation.html)
 
 ## Installation
 
@@ -33,18 +29,28 @@ First create a virtual environment:
 ```bash
 python3 -m venv env
 source env/bin/activate
+
+# Install requirements
+pip install -r requirements.txt
+
+# Normal install
+pip install .
+
+# Developer install
 pip install -e .
 ```
 
 ## Documentation
 
-The complete framework [documentation](https://spira.readthedocs.io/en/latest/overview.html) explains the basics of the RDD and PCell API.
-Note that the DRC and LVS modules are still being developed.
+The complete framework [documentation](https://spira.readthedocs.io/en/latest/overview.html) explains the basics of the RDD and PCell API. Note that the DRC and LVS modules are still being developed.
 Examples of using the PCell implementation is given in [examples](https://spira.readthedocs.io/en/latest/pcell_examples.html).
+
 
 ## History of changes
 
-### Version 0.0.2 (Dec 17, 2018)
+### Version 0.0.2 (Dec 27, 2018)
+* Started adding unit tests using pytest.
+* Updated auto doc generation for classes.
 * Added MidPointField for port and terminal midpoints.
 * Introduces the Shape class that allows for complex point
 manipulations. Shape points are created in the instance cell 

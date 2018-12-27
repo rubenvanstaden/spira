@@ -1,7 +1,6 @@
 import spira
 from spira import param
 from spira import shapes
-# from spira.lgm.booleans import merge
 from spira.lpe.layers import *
 from spira.lrc.rules import *
 from spira.lrc.checking import Rules
@@ -32,10 +31,13 @@ class ComposeMLayers(__CellContainer__):
             for pp in p.polygons:
                 points.append(pp)
         if points:
+            from spira.gdsii.utils import scale_polygon_down as spd
+            points = spd(points)
             shape = shapes.Shape(points=points)
             shape.apply_merge
             for pts in shape.points:
-                elems += spira.Polygons(polygons=[pts])
+                pts = spd([pts])
+                elems += spira.Polygons(shape=pts)
         return elems
 
     def create_mlayers(self):
@@ -51,7 +53,7 @@ class ComposeMLayers(__CellContainer__):
                 for i, ply in enumerate(self._merge_layers(metal_elems)):
                     ml = MLayer(name='MLayer_{}_{}_{}_{}'.format(pl.layer.number,
                                                                  self.cell.name,
-                                                                 self.cell.__id__, i),
+                                                                 self.cell.id, i),
                                 points=ply.polygons,
                                 number=pl.layer.number)
                     c_mlayer += spira.SRef(ml)
@@ -93,7 +95,6 @@ class ComposeNLayer(ComposeMLayers):
             if via_elems:
                 c_nlayer = CNLayers(layer=pl.layer)
                 for i, ply in enumerate(via_elems):
-                    print(ply.gdslayer)
                     ml = NLayer(name='Via_NLayer_{}_{}_{}'.format(pl.layer.number, self.cell.name, i),
                                 points=ply.polygons,
                                 midpoint=ply.center,
@@ -138,7 +139,7 @@ class ComposeGLayer(ComposeNLayer):
         if self.level == 1:
             if self.ground_layer:
                 box = self.cell.bbox
-                # box.move(origin=box.center, destination=(0,0))
+                # box.move(midpoint=box.center, destination=(0,0))
 
                 gnd = self.ground_layer | box
                 if gnd:
@@ -186,11 +187,11 @@ class __StructureCell__(ConnectDesignRules):
 
     def create_device_layers(self):
         box = self.cell.bbox
-        box.move(origin=box.center, destination=(0,0))
+        box.move(midpoint=box.center, destination=(0,0))
 
         B = DLayer(blayer=box, device_elems=self.cell.elementals)
         Bs = SRef(B)
-        Bs.move(origin=(0,0), destination=self.cell.bbox.center)
+        Bs.move(midpoint=(0,0), destination=self.cell.bbox.center)
 
         return Bs
 

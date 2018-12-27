@@ -134,11 +134,11 @@ class RouteManhattan180(spira.Cell):
 
                 b1.connect(port=b1.ports['P2'], destination=Total.term_ports['T1'])
                 h = (p2[1]-p1[1])/2 - radiusEff
-                b1.move(origin=b1.ports['P2'].midpoint, destination=[0, h])
+                b1.move(midpoint=b1.ports['P2'].midpoint, destination=[0, h])
 
                 b2.connect(port=b2.ports['P1'], destination=b1.ports['P1'])
                 h = (p2[0]-p1[0])
-                b2.move(origin=b2.ports['P2'].midpoint, destination=[h, b2.ports['P2'].midpoint[1]])
+                b2.move(midpoint=b2.ports['P2'].midpoint, destination=[h, b2.ports['P2'].midpoint[1]])
 
                 route = RouteShape(port1=b1.ports['P2'],
                                    port2=Total.term_ports['T1'],
@@ -149,7 +149,7 @@ class RouteManhattan180(spira.Cell):
                 r1 = spira.SRef(R1)
                 r1.rotate(angle=route.port2.orientation,
                           center=R1.port1.midpoint)
-                r1.move(origin=(0,0), destination=Total.term_ports['T1'].midpoint)
+                r1.move(midpoint=(0,0), destination=Total.term_ports['T1'].midpoint)
                 Total += r1
 
                 route = RouteShape(port1=b2.ports['P2'],
@@ -161,7 +161,7 @@ class RouteManhattan180(spira.Cell):
                 r2 = spira.SRef(R2)
                 r2.rotate(angle=route.port2.orientation,
                           center=R2.port1.midpoint)
-                r2.move(origin=(0,0), destination=Total.term_ports['T2'].midpoint)
+                r2.move(midpoint=(0,0), destination=Total.term_ports['T2'].midpoint)
                 Total += r2
 
                 route = RouteShape(port1=b2.ports['P1'],
@@ -173,7 +173,7 @@ class RouteManhattan180(spira.Cell):
                 r3 = spira.SRef(R3)
                 # r3.rotate(angle=route.port1.orientation,
                 #             center=R3.port1.midpoint)
-                r3.move(origin=(0,0), destination=b1.ports['P1'].midpoint)
+                r3.move(midpoint=(0,0), destination=b1.ports['P1'].midpoint)
                 Total += r3
 
 

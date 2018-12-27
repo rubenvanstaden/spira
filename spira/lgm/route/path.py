@@ -37,7 +37,7 @@ class PathShape(__Path__):
 
 
 def Path(shape):
-    return spira.Polygons(polygons=shape.points)
+    return spira.Polygons(shape=shape.points)
 
 
 

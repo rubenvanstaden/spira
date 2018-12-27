@@ -5,15 +5,18 @@ import numpy as np
 from copy import copy, deepcopy
 
 from spira import param
-from spira.core.initializer import BaseElement
+from spira.core.initializer import ElementalInitializer
 from spira.core.mixin.transform import TranformationMixin
 
 
-class __Port__(BaseElement):
+class __Port__(ElementalInitializer):
 
     __mixins__ = [TranformationMixin]
 
     __committed__ = {}
+
+
+class PortAbstract(__Port__):
 
     name = param.StringField()
     midpoint = param.MidPointField()
@@ -24,7 +27,14 @@ class __Port__(BaseElement):
     text_layer = param.LayerField(name='PortLayer', number=63)
 
     def __init__(self, port=None, polygon=None, **kwargs):
-        BaseElement.__init__(self, **kwargs)
+        super().__init__(**kwargs)
+
+        L = spira.Label(position=self.midpoint,
+                        text=self.name,
+                        gdslayer=self.gdslayer,
+                        texttype=self.text_layer.number)
+        self.label = L
+        self.arrow = None
 
     @property
     def endpoints(self):
@@ -48,13 +58,8 @@ class __Port__(BaseElement):
         dy = np.sin((self.orientation)*np.pi/180)
         return np.array([self.midpoint, self.midpoint + np.array([dx,dy])])
 
-    @property
-    def x(self):
-        return self.midpoint[0]
-
-    @property
-    def y(self):
-        return self.midpoint[1]
+    def point_inside(self, polygon):
+        return pyclipper.PointInPolygon(self.midpoint, polygon) != 0
 
     def flat_copy(self, level=-1, commit_to_gdspy=False):
         c_port = self.modified_copy(midpoint=self.midpoint)
@@ -62,48 +67,68 @@ class __Port__(BaseElement):
             self.gdspy_write = True
         return c_port
 
-    def point_inside(self, polygon):
-        return pyclipper.PointInPolygon(self.midpoint, polygon) != 0
-
     def commit_to_gdspy(self, cell):
         if self.__repr__() not in list(__Port__.__committed__.keys()):
             self.polygon.commit_to_gdspy(cell)
             self.label.commit_to_gdspy(cell)
             if self.arrow:
+                self.arrow.move(midpoint=self.arrow.center, destination=self.midpoint)
                 self.arrow.commit_to_gdspy(cell)
             __Port__.__committed__.update({self.__repr__():self})
 
-    def reflect(self, p1=(0,1), p2=(0,0)):
+    def reflect(self):
+        """ Reflect around the x-axis. """
         self.midpoint = [self.midpoint[0], -self.midpoint[1]]
         self.orientation = -self.orientation
         self.orientation = np.mod(self.orientation, 360)
+
+        if self.arrow:
+            self.arrow.reflect()
+
         return self
 
     def rotate(self, angle=45, center=(0,0)):
-        self.midpoint = self._rotate_points(self.midpoint, angle=angle, center=center)
+        """ Rotate port around the center with angle. """
+        self.midpoint = self.__rotate__(self.midpoint, angle=angle, center=center)
         self.orientation += angle
         self.orientation = np.mod(self.orientation, 360)
+
+        if self.arrow:
+            self.arrow.rotate(angle=90+angle)
+
         return self
 
     def translate(self, dx, dy):
+        """ Translate port by dx and dy. """
         self.midpoint = self.midpoint + np.array([dx, dy])
         return self
 
     def stretch(self, stretch_class):
+        """ Stretch port by with the given strecth class. """
         p = stretch_class.apply(self.midpoint)
         self.midpoint = p
         return self
 
     def transform(self, T):
-        if T['x_reflection']:
-            self.reflect(p1=[0,0], p2=[1,0])
+        """ Transform port with the given transform class. """
+        if T['reflection']:
+            self.reflect()
+            self.label.reflect()
+            self.polygon.reflect()
+            if self.arrow:
+                self.arrow.reflect()
         if T['rotation']:
             self.rotate(angle=T['rotation'], center=(0,0))
-        if T['origin']:
-            self.translate(dx=T['origin'][0], dy=T['origin'][1])
-
-        self.label.move(origin=self.label.position, destination=self.midpoint)
-        self.polygon.move(origin=self.polygon.center, destination=self.midpoint)
+            self.label.rotate(angle=T['rotation'])
+            self.polygon.rotate(angle=T['rotation'])
+            if self.arrow:
+                self.arrow.rotate(angle=T['rotation'])
+        if T['midpoint']:
+            self.translate(dx=T['midpoint'][0], dy=T['midpoint'][1])
+            self.label.move(midpoint=self.label.position, destination=self.midpoint)
+            self.polygon.move(midpoint=self.polygon.center, destination=self.midpoint)
+            if self.arrow:
+                self.arrow.move(midpoint=self.polygon.center, destination=self.midpoint)
 
         return self
 
@@ -114,28 +139,30 @@ class __Port__(BaseElement):
         self.label.gdslayer = ll
 
 
-class Port(__Port__):
+class Port(PortAbstract):
+    """
+    Ports are objects that connect different polygons
+    or references in a layout. Ports represent veritical
+    connection such as vias or junctions.
 
-    radius = param.FloatField(default=1)
+    Examples
+    --------
+    >>> port = spira.Port()
+    """
+
+    edge_width = param.FloatField(default=0.25)
 
     def __init__(self, port=None, polygon=None, **kwargs):
-        from spira import shapes
-        __Port__.__init__(self, port=port, polygon=polygon, **kwargs)
-
-        shape = shapes.CircleShape(center=self.midpoint, 
-                                   radius=0.25*self.radius, 
-                                   gdslayer=self.gdslayer)
-        pp = shapes.Circle(shape=shape)
-
-        L = spira.Label(position=self.midpoint,
-                        text=self.name,
-                        gdslayer=self.gdslayer,
-                        texttype=self.text_layer.number)
-
-        self.arrow = None
-        self.label = L
+        super().__init__(port=port, polygon=polygon, **kwargs)
 
         if polygon is None:
+            from spira import shapes
+            shape = shapes.CircleShape(
+                center=self.midpoint,
+                box_size=[self.edge_width, self.edge_width]
+            )
+            pp = spira.Polygons(shape=shape, gdslayer=self.gdslayer)
+            pp.move(midpoint=pp.center, destination=self.midpoint)
             self.polygon = pp
         else:
             self.polygon = polygon
@@ -143,21 +170,24 @@ class Port(__Port__):
     def __repr__(self):
         return ("[SPiRA: Port] (name {}, number {}, midpoint {}, " +
                 "radius {}, orientation {})").format(self.name, self.gdslayer.number, self.midpoint,
-                                                    self.radius, self.orientation)
-
-    def __str__(self):
-        return self.__repr__()
+                                                    self.edge_width, self.orientation)
 
     def _copy(self):
         new_port = Port(parent=self.parent,
-                        name=self.name,
-                        midpoint=self.midpoint,
-                        radius=self.radius,
-                        gdslayer=deepcopy(self.gdslayer),
-                        poly_layer=deepcopy(self.poly_layer),
-                        text_layer=deepcopy(self.text_layer),
-                        orientation=deepcopy(self.orientation))
+            polygon=self.polygon,
+            # polygon=deepcopy(self.polygon),
+            name=self.name,
+            midpoint=deepcopy(self.midpoint),
+            edge_width=self.edge_width,
+            gdslayer=deepcopy(self.gdslayer),
+            poly_layer=deepcopy(self.poly_layer),
+            text_layer=deepcopy(self.text_layer),
+            orientation=deepcopy(self.orientation))
         return new_port
+
+
+
+
 
 
 

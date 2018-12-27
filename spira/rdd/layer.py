@@ -1,23 +1,25 @@
-from spira.core.initializer import BaseElement
+from spira.core.initializer import ElementalInitializer
+# from spira.gdsii.layer import Layer
 from spira import param
 
 
-class __Layer__(BaseElement):
+class __Layer__(ElementalInitializer):
     pass
 
 
 class PurposeLayer(__Layer__):
 
+    doc = param.StringField()
     name = param.StringField()
     datatype = param.IntegerField()
     symbol = param.StringField()
 
     def __init__(self, **kwargs):
-        BaseElement.__init__(self, **kwargs)
+        ElementalInitializer.__init__(self, **kwargs)
 
-    def __repr__(self):
-        string = '[SPiRA: PurposeLayer] (\'{}\', datatype {}, symbol \'{}\')'
-        return string.format(self.name, self.datatype, self.symbol)
+    # def __repr__(self):
+    #     string = '[SPiRA: PurposeLayer] (\'{}\', datatype {}, symbol \'{}\')'
+    #     return string.format(self.name, self.datatype, self.symbol)
 
     def __str__(self):
         return self.__repr__()
@@ -60,11 +62,12 @@ class PhysicalLayer(__Layer__):
 
     """
 
+    doc = param.StringField()
     layer = param.LayerField()
     purpose = PurposeLayerField()
 
     def __init__(self, **kwargs):
-        BaseElement.__init__(self, **kwargs)
+        ElementalInitializer.__init__(self, **kwargs)
 
     def __repr__(self):
         string = '[SPiRA: PhysicalLayer] (layer \'{}\', symbol \'{}\')'
@@ -76,8 +79,8 @@ class PhysicalLayer(__Layer__):
     def __eq__(self, other):
         if isinstance(other, PhysicalLayer):
             return other.key == self.key
-        elif isinstance(other, Layer):
-            return other.number == self.layer.number
+        # elif isinstance(other, Layer):
+        #     return other.number == self.layer.number
         elif isinstance(other, int):
             return other == self.layer.number
         else:
@@ -86,8 +89,8 @@ class PhysicalLayer(__Layer__):
     def __neq__(self, other):
         if isinstance(other, PhysicalLayer):
             return other.key != self.key
-        elif isinstance(other, Layer):
-            return other.number != self.layer.number
+        # elif isinstance(other, Layer):
+        #     return other.number != self.layer.number
         elif isinstance(other, int):
             return other != self.layer.number
         else:

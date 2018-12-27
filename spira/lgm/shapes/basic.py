@@ -1,7 +1,10 @@
 import gdspy
 import spira
+import math
+import numpy as np
 from spira import param
-from spira.lgm.shapes.shape import __Shape__
+from spira.settings import DEG2RAD
+from spira.lgm.shapes.shape import Shape
 
 from spira.gdsii.elemental.polygons import PolygonAbstract
 from spira.gdsii.elemental.polygons import Polygons
@@ -10,168 +13,112 @@ from spira.gdsii.utils import scale_coord_down as scd
 from spira.core.initializer import FieldInitializer
 
 
-class __Rectangle__(gdspy.Rectangle, __Shape__):
+class BoxShape(Shape):
+
+    width = param.FloatField(default=1)
+    height = param.FloatField(default=1)
+
+    def create_points(self, points):
+
+        cx = self.center[0]
+        cy = self.center[1]
+        dx = 0.5 * self.width
+        dy = 0.5 * self.height
+        pts = [(cx + dx, cy + dy),
+               (cx - dx, cy + dy),
+               (cx - dx, cy - dy),
+               (cx + dx, cy - dy)]
+
+        points = np.array([pts])
+
+        return points
+
+
+class RectangleShape(Shape):
 
     p1 = param.PointField()
     p2 = param.PointField()
 
-    def __init__(self, **kwargs):
+    def create_points(self, points):
 
-        __Shape__.__init__(self, **kwargs)
-        gdspy.Rectangle.__init__(self,
-            point1=self.p1,
-            point2=self.p2,
-            layer=self.gdslayer
-        )
+        pts = [[self.p1[0], self.p1[1]], [self.p1[0], self.p2[1]],
+               [self.p2[0], self.p2[1]], [self.p2[0], self.p1[1]]]
 
-    def __repr__(self):
-        return None
+        points = np.array([pts])
 
-    def __str__(self):
-        return self.__repr__()
+        return points
 
 
-class __Box__(gdspy.Rectangle, __Shape__):
+class CircleShape(Shape):
 
-    width = param.FloatField()
-    height = param.FloatField()
-    center = param.PointField()
-
-    # TODO: Create a setter and getter for these parameters.
-    p1 = param.DataField(fdef_name='create_point1')
-    p2 = param.DataField(fdef_name='create_point2')
-
-    def create_point1(self):
-        x = self.center[0] - self.width/2
-        y = self.center[1] - self.height/2
-        return [x, y]
-
-    def create_point2(self):
-        x = self.center[0] + self.width/2
-        y = self.center[1] + self.height/2
-        return [x, y]
-
-    def __init__(self, **kwargs):
-
-        __Shape__.__init__(self, **kwargs)
-        gdspy.Rectangle.__init__(self,
-            point1=self.p1,
-            point2=self.p2,
-            layer=self.gdslayer
-        )
-
-    def __repr__(self):
-        return None
-
-    def __str__(self):
-        return self.__repr__()
-
-
-class __Circle__(gdspy.Round, __Shape__):
-
-    center = param.PointField()
-    radius = param.FloatField()
-
-    def __init__(self, **kwargs):
-
-        __Shape__.__init__(self, **kwargs)
-        gdspy.Round.__init__(self, self.center, self.radius,
-                             inner_radius=0, initial_angle=0,
-                             final_angle=0, number_of_points=6,
-                             max_points=6)
-
-    def __repr__(self):
-        return None
-
-    def __str__(self):
-        return self.__repr__()
-
-
-class RectangleShape(__Rectangle__):
+    box_size = param.PointField(default=(1.0, 1.0))
+    start_angle = param.FloatField(default=0.0)
+    end_angle = param.FloatField(default=360.0)
+    angle_step = param.FloatField(default=3)
 
     def create_points(self, points):
-        return self.polygons
+        sa = self.start_angle * DEG2RAD
+        ea = self.end_angle * DEG2RAD 
+        h_radius = self.box_size[0] / 2.0
+        v_radius = self.box_size[1] / 2.0
+        n_s = float(self.end_angle - self.start_angle) / self.angle_step
+        n_steps = int(math.ceil(abs(n_s))) * np.sign(n_s)
+        if n_steps == 0: 
+            if sa == ea:
+                pts = np.array([[math.cos(sa) * h_radius+self.center[0],
+                                 math.sin(sa) * v_radius+self.center[1]]])
+            else:
+                pts = np.array([[math.cos(sa) * h_radius+self.center[0],
+                                 math.sin(sa) * v_radius+self.center[1]],
+                                [math.cos(ea) * h_radius+self.center[0],
+                                 math.sin(ea) * v_radius+self.center[1]]])
+            return pts
+
+        angle_step = float(ea - sa) / n_steps
+        if self.clockwise:
+            angle_step = -angle_step
+            sign = -1
+        else:
+            sign = +1
+        while sign * sa > sign * ea:
+            ea += sign * 2 * math.pi
+
+        angles = np.arange(sa, ea + 0.5 * angle_step, angle_step)
+        pts = np.column_stack((np.cos(angles), np.sin(angles))) \
+                               * np.array([(h_radius, v_radius)]) \
+                               + np.array([(self.center[0], self.center[1])])
+
+        points = np.array([pts])
+
+        return points
 
 
-class BoxShape(__Box__):
+class ConvexPolygon(Shape):
 
-    def create_points(self, points):
-        return self.polygons
+    radius = param.FloatField(default=1.0)
+    num_sides = param.IntegerField(default=6)
+    
+    def create_points(self, pts):
+        if self.radius == 0.0:
+            pts.append(self.center)
+            return pts
+        angle_step = 2 * math.pi / self.num_sides
+        for i in range(0, self.num_sides):
+            x0 = self.radius * np.cos((i + 0.5) * angle_step + math.pi / 2)
+            y0 = self.radius * np.sin((i + 0.5) * angle_step + math.pi / 2)
+            pts.append((self.center[0] + x0, self.center[1] + y0))
 
+        points = np.array([pts])
 
-class CircleShape(__Circle__):
-
-    def create_points(self, points):
-        return self.polygons
-
-
-def Rectangle(shape):
-    return spira.Polygons(polygons=shape.points, gdslayer=shape.gdslayer)
-
-
-def Box(shape):
-    return spira.Polygons(polygons=shape.points, gdslayer=shape.gdslayer)
-
-
-def Circle(shape):
-    return spira.Polygons(polygons=shape.points)
-
-
-# def Box( width, height, center=(0,0), **kwargs):
-#     pass
-#     p1 = [center[0]-width/2, center[1]-height/2]
-#     p2 = [center[0]+width/2, center[1]+height/2]
-#     rectangle = gdspy.Rectangle(p1, p2)
-#
-#     if 'gdslayer' in kwargs:
-#         layer = kwargs['gdslayer']
-#     else:
-#         layer = spira.Layer(name='Box', number=99)
-#
-#     ply = Polygons(polygons=rectangle.polygons, gdslayer=layer)
-# #     ply = Polygons(polygons=spu(rectangle.polygons), gdslayer=layer)
-#
-#     return ply
-
-
-# def Rectangle(point1, point2, **kwargs):
-#     rectangle = gdspy.Rectangle(point1, point2)
-
-#     if 'gdslayer' in kwargs:
-#         layer = kwargs['gdslayer']
-#     else:
-#         layer = spira.Layer(name='Box', number=99)
-
-#     # ply = Polygons(polygons=spu(rectangle.polygons), gdslayer=layer)
-#     ply = Polygons(polygons=rectangle.polygons, gdslayer=layer)
-
-#     return ply
-
-
-# def Circle(center, radius, layer):
-#     circle = gdspy.Round(center, radius,
-#     # circle = gdspy.Round(scd(center), radius,
-#                          inner_radius=0, initial_angle=0,
-#                          final_angle=0, number_of_points=6,
-#                          max_points=6)
-#                         #  layer=layer.number,
-#                         #  datatype=65)
-
-#     ll = spira.Layer(name='Circle', number=layer.number, datatype=65)
-#     # ll = spira.Layer(name='Circle', number=layer.number)
-#     ply = Polygons(polygons=circle.polygons, gdslayer=ll)
-#     # ply = Polygons(polygons=spu(circle.polygons), gdslayer=ll)
-
-#     return ply
+        return points
 
 
 if __name__ == '__main__':
-
-    box = Box(p1=[0,0], p2=[1,1])
-    print(box.points)
-
-
-
-
+    # shape = CircleShape()
+    shape = ConvexPolygon()
+    ply = spira.Polygons(shape=shape)
+    cell = spira.Cell(name='yTron')
+    cell += ply
+    cell.output()
 
 

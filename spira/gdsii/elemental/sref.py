@@ -5,74 +5,16 @@ import numpy as np
 import spira
 from copy import deepcopy
 
-from spira.core.initializer import BaseElement
+from spira import param
 from spira.gdsii.elemental.port import __Port__
 from spira.gdsii.elemental.port import Port
-# from spira.gdsii.elemental.polygons import PolygonAbstract
-# from spira.gdsii.elemental.polygons import Polygons
-from spira import param
+from spira.core.initializer import ElementalInitializer
 from spira.core.mixin.transform import TranformationMixin
 
 
-class InspectMixin(object):
+class __SRef__(gdspy.CellReference, ElementalInitializer):
 
-    def rm(self, cellname):
-        print('\n - removed cell: \'{}\''.format(cellname))
-        elems = self.elementals
-        self.elementals = spira.ElementList()
-        for e in elems:
-            if isinstance(e, SRef):
-                if cellname != e.ref.name:
-                    self.elementals += e
-            else:
-                self.elementals += e
-
-    def ls_ports(self):
-        print('\n------------------------')
-        for name, port in self._local_ports.items():
-            print('{} : {}'.format(name, port))
-
-
-class __SRef__(gdspy.CellReference, BaseElement):
-
-    __mixins__ = [TranformationMixin, InspectMixin]
-
-    def __init__(self, structure, **kwargs):
-
-        BaseElement.__init__(self, **kwargs)
-
-        self.ref = structure
-        # self._terminals = structure.term_ports
-        # self._parent_ports = structure.term_ports
-        self._parent_ports = structure.terms
-        self._local_ports = {port.name:port._copy() for port in structure.terms}
-
-    def __repr__(self):
-        name = self.ref.name
-        return ("[SPiRA: SRef] (\"{}\", at {}, srefs {}, " +
-               "polygons {}, ports {}, labels {})").format(
-                name, self.origin,
-                len(self.ref.elementals.sref),
-                len(self.ref.elementals.polygons),
-                len(self.ref.ports),
-                len(self.ref.elementals.labels))
-
-    def __str__(self):
-        return self.__repr__()
-
-    def __eq__(self, other):
-        return self.__str__() == other.__str__()
-
-    # FIXME: Improve this algorithm.
-    def equal_geometry(self, other):
-        if self.origin != other.origin:
-            return False
-
-        for pi in self.ref.elementals.polygons:
-            for pj in other.ref.elementals.polygons:
-                if abs(pi.ply_area - pj.ply_area) > 1e-9:
-                    return False
-        return True
+    __mixins__ = [TranformationMixin]
 
     def __getitem__(self, val):
         """
@@ -89,44 +31,43 @@ class __SRef__(gdspy.CellReference, BaseElement):
         assert isinstance(alias_device, SRef)
 
         new_reference = SRef(alias_device.ref,
-                            origin=alias_device.origin,
-                            rotation=alias_device.rotation,
-                            magnification=alias_device.magnification,
-                            x_reflection=alias_device.x_reflection)
+            midpoint=alias_device.midpoint,
+            rotation=alias_device.rotation,
+            magnification=alias_device.magnification,
+            reflection=alias_device.reflection
+        )
 
-        if self.x_reflection:
+        if self.reflection:
             new_reference.reflect((1,0))
         if self.rotation is not None:
             new_reference.rotate(self.rotation)
-        if self.origin is not None:
-            new_reference.move(self.origin)
+        if self.midpoint is not None:
+            new_reference.move(self.midpoint)
 
         return new_reference
 
     def __deepcopy__(self, memo):
         return SRef(structure=deepcopy(self.ref),
-                    origin=self.origin,
-                    rotation=self.rotation,
-                    magnification=self.magnification,
-                    x_reflection=self.x_reflection,
-                    gdspy_commit=deepcopy(self.gdspy_commit))
+            midpoint=self.midpoint,
+            rotation=self.rotation,
+            magnification=self.magnification,
+            reflection=self.reflection,
+            gdspy_commit=deepcopy(self.gdspy_commit)
+        )
+
+    def __eq__(self, other):
+        return self.__str__() == other.__str__()
 
 
 class SRefAbstract(__SRef__):
-    """
 
-    """
-
-    origin = param.PointField()
-    rotation = param.FloatField()
-    magnification = param.FloatField(default=None)
-    x_reflection = param.BoolField(default=None)
-
-    def __init__(self, structure, stretching={}, **kwargs):
-        self.stretching = stretching
-        super().__init__(structure, **kwargs)
+    midpoint = param.MidPointField()
+    rotation = param.FloatField(default=0)
+    reflection = param.BoolField(default=False)
+    magnification = param.FloatField(default=1)
 
     def dependencies(self):
+        """  """
         from spira.gdsii.lists.cell_list import CellList
         d = CellList()
         d.add(self.ref)
@@ -135,13 +76,14 @@ class SRefAbstract(__SRef__):
 
     def _copy(self, level=0):
         S = SRef(structure=self.ref,
-                 origin=self.origin,
+                 midpoint=self.midpoint,
                  rotation=self.rotation,
                  magnification=self.magnification,
-                 x_reflection=self.x_reflection)
+                 reflection=self.reflection)
         return S
 
     def flat_copy(self, level=-1, commit_to_gdspy=False):
+        """  """
 
         if level == 0:
             el = spira.ElementList()
@@ -149,10 +91,10 @@ class SRefAbstract(__SRef__):
             return el
 
         transform = {
-            'origin': self.origin,
+            'midpoint': self.midpoint,
             'rotation': self.rotation,
             'magnification': self.magnification,
-            'x_reflection': self.x_reflection
+            'reflection': self.reflection
         }
 
         el = self.ref.elementals.flat_copy(level-1)
@@ -162,21 +104,17 @@ class SRefAbstract(__SRef__):
         return el
 
     def transform(self, transform):
-        if transform['x_reflection']:
+        if transform['reflection']:
             self.reflect(p1=[0,0], p2=[1,0])
             self.rotate(angle=transform['rotation'])
-            self.translate(dx=transform['origin'][0], dy=transform['origin'][1])
+            self.translate(dx=transform['midpoint'][0], dy=transform['midpoint'][1])
         else:
             self.rotate(angle=transform['rotation'])
-            self.translate(dx=transform['origin'][0], dy=transform['origin'][1])
+            self.translate(dx=transform['midpoint'][0], dy=transform['midpoint'][1])
         return self
 
     def flatten(self):
         return self.ref.flatten()
-
-    def scale_down(self):
-        el = self.ref.elementals.scale_down()
-        return el
 
     @property
     def ports(self):
@@ -189,35 +127,35 @@ class SRefAbstract(__SRef__):
         for port in self._parent_ports:
 
             tf = {
-                'origin': self.origin,
+                'midpoint': self.midpoint,
                 'rotation': self.rotation,
                 'magnification': self.magnification,
-                'x_reflection': self.x_reflection
+                'reflection': self.reflection
             }
 
             new_port = port._copy()
             self._local_ports[port.name] = new_port.transform(tf)
         return self._local_ports
 
-    def move(self, origin=(0,0), destination=None, axis=None):
+    def move(self, midpoint=(0,0), destination=None, axis=None):
         """
-        Moves the DeviceReference from the origin point to the destination. Both
-        origin and destination can be 1x2 array-like, Port, or a key
+        Moves the DeviceReference from the midpoint point to the destination. Both
+        midpoint and destination can be 1x2 array-like, Port, or a key
         corresponding to one of the Ports in this device_ref
         """
 
         if destination is None:
-            destination = origin
-            origin = (0,0)
+            destination = midpoint
+            midpoint = (0,0)
 
-        if issubclass(type(origin), __Port__):
-            o = origin.midpoint
-        elif np.array(origin).size == 2:
-            o = origin
-        elif origin in self.ports:
-            o = self.ports[origin].midpoint
+        if issubclass(type(midpoint), __Port__):
+            o = midpoint.midpoint
+        elif np.array(midpoint).size == 2:
+            o = midpoint
+        elif midpoint in self.ports:
+            o = self.ports[midpoint].midpoint
         else:
-            raise ValueError("[DeviceReference.move()] ``origin`` " +
+            raise ValueError("[DeviceReference.move()] ``midpoint`` " +
                              "not array-like, a port, or port name")
 
         if issubclass(type(destination), __Port__):
@@ -236,10 +174,17 @@ class SRefAbstract(__SRef__):
             d = (o[0], d[1])
 
         dxdy = np.array(d) - np.array(o)
-        self.origin = np.array(self.origin) + dxdy
+        self.midpoint = np.array(self.midpoint) + dxdy
+        return self
+
+    def translate(self, dx=0, dy=0):
+        """ Translate port by dx and dy. """
+        super().translate(dx=dx, dy=dy)
+        self.midpoint = self.midpoint
         return self
 
     def rotate(self, angle=45, center=(0,0)):
+        """  """
         if angle == 0:
             return self
 
@@ -247,11 +192,12 @@ class SRefAbstract(__SRef__):
             center = center.midpoint
 
         self.rotation += angle
-        self.origin = self._rotate_points(self.origin, angle, center)
+        self.midpoint = self.__rotate__(self.midpoint, angle, center)
 
         return self
 
     def reflect(self, p1=(0,1), p2=(0,0)):
+        """  """
         if issubclass(type(p1), __Port__):
             p1 = p1.midpoint
         if issubclass(type(p2), __Port__):
@@ -260,27 +206,28 @@ class SRefAbstract(__SRef__):
         p1 = np.array(p1)
         p2 = np.array(p2)
 
-        # Translate so reflection axis passes through origin
-        self.origin = self.origin - p1
+        # Translate so reflection axis passes through midpoint
+        self.midpoint = self.midpoint - p1
 
         # Rotate so reflection axis aligns with x-axis
         angle = np.arctan2((p2[1]-p1[1]), (p2[0]-p1[0]))*180 / np.pi
-        self.origin = self._rotate_points(self.origin, angle=-angle, center=[0,0])
+        self.midpoint = self.__rotate__(self.midpoint, angle=-angle, center=[0,0])
         self.rotation -= angle
 
         # Reflect across x-axis
-        self.x_reflection = not self.x_reflection
-        self.origin = [self.origin[0], -self.origin[1]]
+        self.reflection = not self.reflection
+        self.midpoint = [self.midpoint[0], -self.midpoint[1]]
         self.rotation = -self.rotation
 
         # Un-rotate and un-translate
-        self.origin = self._rotate_points(self.origin, angle=angle, center=[0,0])
+        self.midpoint = self.__rotate__(self.midpoint, angle=angle, center=[0,0])
         self.rotation += angle
-        self.origin = self.origin + p1
+        self.midpoint = self.midpoint + p1
 
         return self
 
     def connect(self, port, destination, overlap=0):
+        """  """
         if port in self.ports.keys():
             p = self.ports[port]
         elif issubclass(type(port), __Port__):
@@ -292,18 +239,40 @@ class SRefAbstract(__SRef__):
 
         angle = 180 + destination.orientation - p.orientation
         self.rotate(angle=angle, center=p.midpoint)
-        self.move(origin=p, destination=destination)
+        self.move(midpoint=p, destination=destination)
 
         return self
 
     def stretch(self, port, center=[0,0], vector=[1,1]):
+        """  """
         from spira.lgm.shape.stretch import Stretch
         self.stretching[port] = Stretch(center=center, vector=vector)
         return self
 
 
 class SRef(SRefAbstract):
-    pass
+    """
+
+    """
+
+    def __init__(self, structure, **kwargs):
+
+        ElementalInitializer.__init__(self, **kwargs)
+
+        self.ref = structure
+        self._parent_ports = structure.terms
+        self._local_ports = {port.name:port._copy() for port in structure.terms}
+
+    def __repr__(self):
+        name = self.ref.name
+        return ("[SPiRA: SRef] (\"{}\", at {}, srefs {}, " +
+               "polygons {}, ports {}, labels {})").format(
+                name, self.midpoint,
+                len(self.ref.elementals.sref),
+                len(self.ref.elementals.polygons),
+                len(self.ref.ports),
+                len(self.ref.elementals.labels))
+
 
 
 

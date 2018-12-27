@@ -1,6 +1,6 @@
 import spira
 from spira import param
-from spira.core.initializer import BaseElement
+from spira.core.initializer import ElementalInitializer
 from spira.core.descriptor import DataFieldDescriptor
 from spira.rdd import get_rule_deck
 from spira.lpe.layers import *
@@ -9,7 +9,7 @@ from spira.lpe.layers import *
 RDD = get_rule_deck()
 
 
-class __DesignRule__(BaseElement):
+class __DesignRule__(ElementalInitializer):
     violate = param.BoolField()
     doc = param.StringField()
     name = param.StringField()

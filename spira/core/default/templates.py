@@ -141,11 +141,11 @@ class JunctionTemplate(__TempateDevice__):
             elems += self.create_jc()
             elems += self.create_bc()
         else:
-            rc = SRef(RDD.VIAS.RC.PCELL, origin=(0,0))
-            gc = SRef(RDD.VIAS.GC.PCELL, origin=(0,0))
-            bc = SRef(RDD.VIAS.BC.PCELL, origin=(0,0))
-            jc = SRef(RDD.VIAS.JC.PCELL, origin=(0,0))
-            cc = SRef(RDD.VIAS.CC.PCELL, origin=(0,0))
+            rc = SRef(RDD.VIAS.RC.PCELL, midpoint=(0,0))
+            gc = SRef(RDD.VIAS.GC.PCELL, midpoint=(0,0))
+            bc = SRef(RDD.VIAS.BC.PCELL, midpoint=(0,0))
+            jc = SRef(RDD.VIAS.JC.PCELL, midpoint=(0,0))
+            cc = SRef(RDD.VIAS.CC.PCELL, midpoint=(0,0))
 
             elems += rc
             elems += gc

@@ -1,26 +1,27 @@
 from spira import param
-from spira.core.initializer import BaseElement
+from spira.core.initializer import ElementalInitializer
 
 
-class __Layer__(BaseElement):
+class __Layer__(ElementalInitializer):
     pass
 
 
 class Layer(__Layer__):
 
+    doc = param.StringField()
     name = param.StringField()
     number = param.IntegerField()
     datatype = param.IntegerField()
 
     def __init__(self, **kwargs):
-        BaseElement.__init__(self, **kwargs)
+        ElementalInitializer.__init__(self, **kwargs)
 
-    def __repr__(self):
-        string = '[SPiRA: Layer] (\'{}\', layer {}, datatype {})'
-        return string.format(self.name, self.number, self.datatype)
+    # def __repr__(self):
+    #     string = '[SPiRA: Layer] (\'{}\', layer {}, datatype {})'
+    #     return string.format(self.name, self.number, self.datatype)
 
-    def __str__(self):
-        return self.__repr__()
+    # def __str__(self):
+    #     return self.__repr__()
 
     def __eq__(self, other):
         if isinstance(other, Layer):

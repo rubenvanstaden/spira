@@ -1,15 +1,11 @@
 Developers
 ==========
 
-Documentation for developers for maintaining and extending.
-To instead install ExVerify from source, clone this repository, *cd* into it, and run:
+Documentation for developers for maintaining and extending. Extra information is added
+to better understand specific code implementations.
 
-.. code-block:: bash
-    :linenos:
-
-    pip install -r requirements.txt
-    pip install .
-    pip install -e .
+Distribtuion
+------------
 
 Uploading package to PyPi using *twine*.
 Remember to remove all Eggs before doing a push to PyPi.
@@ -59,13 +55,18 @@ Introduction to Python Virtual Enviroments:
 
 .. ---------------------------------------------------------------------------------------------
 
-Useful Information
-------------------
+Mixins
+------
 
-The following are useful links to some of the mixin implementations
-used in the SPiRA framework,
+The following are useful links to some of the mixin implementations used in the SPiRA framework,
 
 * http://tobyho.com/2009/01/18/auto-mixin-in-python/
 * http://code.activestate.com/recipes/577730-mixin-and-overlay/
 * https://stackoverflow.com/questions/6966772/using-the-call-
 * method-of-a-metaclass-instead-of-new
+
+Metaprogramming
+---------------
+
+
+

@@ -7,6 +7,15 @@ st = pyclipper.scale_to_clipper
 sf = pyclipper.scale_from_clipper
 
 
+def get_purpose_layers(cell, players):
+    elems = spira.ElementList()
+    for ply in cell.elementals.polygons:
+        for phys in players:
+            if ply.gdslayer == phys.layer:
+                elems += ply
+    return elems
+
+
 def combine(ply_elems):
     # TODO: Check that all polygons in the List
     # are of the same layer type.
@@ -64,7 +73,6 @@ def new_poly_operation(subj, clip, operation, number, datatype):
     pp = spira.Polygons(polygons=sp, gdslayer=layer)
 
     return pp
-
 
 
 def bool_operation(subj, clip=None, method=None, closed=True):

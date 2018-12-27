@@ -1,15 +1,17 @@
+import gdspy
 import inspect
 import collections
 import numpy as np
 from copy import copy, deepcopy
-from spira.core.mixin.geometry import GeometryMixin
+
+from spira.core.descriptor import BaseField
+from spira.core.descriptor import DataField
 
 
 class MetaBase(type):
     """
-    Base Metaclass to register and bind class to
-    property functions. All elements connect to
-    this metaclass.
+    Base Metaclass to register and bind class to property
+    functions. All elements connect to this metaclass.
     """
 
     @classmethod
@@ -36,6 +38,7 @@ class MetaBase(type):
         return cls
 
     def __init__(cls, name, bases, attrs):
+
         super().__init__(name, bases, attrs)
 
         cls.__props__ = []
@@ -61,17 +64,138 @@ class MetaBase(type):
 
         cls.__locked_fields__ = locked_fields
         cls.__unlocked_fields__ = unlocked_fields
-
-        cls.format_doc()
-
-    def format_doc(cls):
-        pass
+        cls.__generate_docs__()
 
 
-from spira.core.descriptor import BaseField
-from spira.core.descriptor import DataField
-class __Field__(metaclass=MetaBase):
-    """ This if the FieldConstructor """
+class MetaInitializer(MetaBase):
+    """
+    Metaclass that initiates spira classes for
+    meta-configuring classes and parameters.
+    """
+
+    MODULES = ['gdspy', 'meshio', 'pygmsh']
+    SECTIONS = ['Desc', 'Parameters', 'Examples', 'Notes', 'Returns']
+
+    def __map_parameters__(cls, *params, **keyword_params):
+        f = inspect.getfullargspec(cls.__init__)
+        p, d = f.args, f.defaults
+        if d is None: d = []
+        kwargs = {}
+        for k, v in zip(p[-len(d):], d):
+            kwargs[k] = v
+        kwargs.update(keyword_params)
+        for k, v in zip(p[1:len(params)+1], params):
+            kwargs[k] = v
+        return kwargs
+
+    def __generate_docs__(cls):
+
+        output = []
+        output.extend(cls.__get_class_docs__())
+        output.extend(cls.__get_function_docs__())
+
+        cls.__doc__ = '\n'.join(output)
+
+    def __get_class_docs__(cls):
+
+        output = list()
+
+        class_docs = {}
+        if cls.__doc__:
+            lines = inspect.getdoc(cls).split('\n')
+
+            lines = list(filter(lambda x: len(x.strip()) > 0, lines))
+
+            section = 'Desc'
+            class_docs[section] = []
+
+            for i in range(len(lines)):
+                if '---' in lines[i]:
+                    del class_docs[section][-1]
+                    section = lines[i-1].strip()
+                    class_docs[section] = []
+                line = lines[i].strip()
+                class_docs[section].append(line)
+
+        class_docs['Parameters'] = []
+
+        docparam = ''
+        for key in cls.SECTIONS:
+            if key in class_docs.keys():
+                value = class_docs[key]
+                if key == 'Desc':
+                    docparam += '\n'.join(value)
+                elif key == 'Parameters':
+                    params = cls.__fields__()
+                    if len(params) > 0:
+                        docparam += '\nParameters\n'
+                        docparam += '---------\n'
+                        for p in params:
+                            docparam += p + ' : ' + str(type(p)) + '\n'
+                            param_attr = getattr(cls, p)
+                            if hasattr(param_attr, '__doc__'):
+                                docparam += '\t' + param_attr.__doc__ + '\n'
+                else:
+                    docparam += '{}\n{}\n'.format(key, '\n'.join(value))
+                docparam += '\n'
+
+        from sphinxcontrib.napoleon import Config
+        config = Config(napoleon_use_param=True, napoleon_use_rtype=True)
+        from sphinxcontrib.napoleon.docstring import NumpyDocstring
+        lines = NumpyDocstring(docparam, config).lines()
+
+        output.extend(lines)
+
+        return output
+
+    def __get_function_docs__(cls):
+
+        prefix = '.. function:: '
+
+        output = list()
+
+        def _functions(module, cdef_name):
+            functions = list()
+            for f in inspect.getmembers(cdef_name[1], inspect.isfunction):
+                functions.append(f)
+            return functions
+
+        def _ignore_module(module, fdef_name):
+            remove = False
+            for c in inspect.getmembers(module, inspect.isclass):
+                functions = _functions(module, c)
+                for f in functions:
+                    if f[0] == fdef_name:
+                        remove = True
+            return remove
+
+        cls_dir = dir(cls)
+        for a in dir(MetaInitializer):
+            if a in cls_dir:
+                cls_dir.remove(a)
+        for a in cls_dir:
+            for module in cls.MODULES:
+                if _ignore_module(module, a):
+                    cls_dir.remove(a)
+
+        for attr_name in cls_dir:
+            if attr_name.find('__') < 0:
+                attr = getattr(cls, attr_name)
+                if inspect.isfunction(attr):
+                    sig = inspect.signature(attr)
+
+                    if len(dict(sig.parameters)) > 1:
+                        fargs = prefix + attr_name + str(sig)
+                        output.append(fargs)
+
+                    if inspect.getdoc(attr) is not None:
+                        output.append('\n' + inspect.getdoc(attr))
+                    output.append('\n')
+        return output
+
+
+class __Field__(metaclass=MetaInitializer):
+    """ This is the FieldConstructor """
 
     def __init__(self, **kwargs):
         if not hasattr(self, '__store__'):
@@ -79,15 +203,6 @@ class __Field__(metaclass=MetaBase):
 
         for key, value in kwargs.items():
             setattr(self, key, value)
-
-    @classmethod
-    def __get_fields__(cls):
-        prop = []
-        for attr_name in dir(cls):
-            attr = getattr(cls, attr_name)
-            if isinstance(attr, BaseField):
-                prop.append([attr_name, attr])
-        return prop
 
     @classmethod
     def __unlocked_field_params__(cls):
@@ -100,6 +215,15 @@ class __Field__(metaclass=MetaBase):
     @classmethod
     def __fields__(cls):
         return cls.__props__
+
+    @classmethod
+    def __get_fields__(cls):
+        prop = []
+        for attr_name in dir(cls):
+            attr = getattr(cls, attr_name)
+            if isinstance(attr, BaseField):
+                prop.append([attr_name, attr])
+        return prop
 
     def __external_fields__(self):
         ex_fields = []
@@ -126,10 +250,8 @@ class __Field__(metaclass=MetaBase):
         return self.__class__(**kwargs)
 
     def modified_copy(self, **override_kwargs):
-        """
-        Returns a copy, but where the user can
-        override properties using.
-        """
+        """ Returns a copy, but where the user can
+        override properties using. """
         kwargs = {}
         for p in self.__external_fields__():
             kwargs[p] = getattr(self, p)
@@ -137,7 +259,6 @@ class __Field__(metaclass=MetaBase):
         return self.__class__(**kwargs)
 
 
-# class FieldInitializer(GeometryMixin, __Field__):
 class FieldInitializer(__Field__):
     """
     Set the keyword arguments of the class and
@@ -151,14 +272,28 @@ class FieldInitializer(__Field__):
         self.__store_fields__(kwargs)
         self.__validation_check__()
 
+    def __repr__(self):
+        class_string = '[SPiRA: {}]'.format(self.__class__.__name__)
+        if hasattr(self, '__keywords__'):
+            _repr = list()
+            for k, v in self.__keywords__.items():
+                if ('__' not in k) and (v is not None):
+                    _repr.append('{} {}'.format(k, v))
+            c = ', '.join(_repr)
+            class_string = '{} ({})'.format(class_string, c)
+        return class_string
+
     def __store_fields__(self, kwargs):
         props = self.__fields__()
         for key, value in kwargs.items():
-            if key not in props:
-                raise ValueError("Keyword argument \'{}\' " +
-                                 "does not match any properties " +
-                                 "of {}.".format(key, type(self)))
-            setattr(self, key, value)
+            if key == 'doc':
+                self.__doc__ = value
+            else:
+                if key not in props:
+                    raise ValueError("Keyword argument \'{}\' " +
+                        "does not match any properties " +
+                        "of {}.".format(key, type(self)))
+                setattr(self, key, value)
 
     def __validation_check__(self):
         if not self.validate_parameters():
@@ -168,53 +303,16 @@ class FieldInitializer(__Field__):
         return True
 
 
-class MetaElemental(MetaBase):
+class MetaElemental(MetaInitializer):
 
     def __call__(cls, *params, **keyword_params):
-        # p, a, k, d = inspect.getfullargspec(cls.__init__)
-
-        full_args = inspect.getfullargspec(cls.__init__)
-        p = full_args.args
-        a = full_args.varargs
-        k = full_args.varkw
-        d = full_args.defaults
-
-        if d is None: d = []
-        kwargs = {}
-        for k, v in zip(p[-len(d):], d):
-            kwargs[k] = v
-        kwargs.update(keyword_params)
-        for k, v in zip(p[1:len(params)+1], params):
-            kwargs[k] = v
-
-        cls = super().__call__(**kwargs)
-        return cls
+        kwargs = cls.__map_parameters__(*params, **keyword_params)
+        instance = super().__call__(**kwargs)
+        instance.__keywords__ = kwargs
+        return instance
 
 
-class MetaSref(MetaBase):
-
-    def __call__(cls, *params, **keyword_params):
-        # p, a, k, d = inspect.getfullargspec(cls.__init__)
-
-        full_args = inspect.getfullargspec(cls.__init__)
-        p = full_args.args
-        a = full_args.varargs
-        k = full_args.varkw
-        d = full_args.defaults
-
-        if d is None: d = []
-        kwargs = {}
-        for k, v in zip(p[-len(d):], d):
-            kwargs[k] = v
-        kwargs.update(keyword_params)
-        for k, v in zip(p[1:len(params)+1], params):
-            kwargs[k] = v
-
-        cls = super().__call__(**kwargs)
-        return cls
-
-
-class MetaCell(MetaBase):
+class MetaCell(MetaInitializer):
     """
     Called when an instance of a SPiRA class is
     created. Pareses all kwargs and passes it to
@@ -223,30 +321,17 @@ class MetaCell(MetaBase):
     class Via(spira.Cell):
         layer = param.LayerField()
 
-    # Gets called here and passes
-    # kwargs['layer': 50] to FieldInitializer.
+    Gets called here and passes
+    kwargs['layer': 50] to FieldInitializer.
     >>> via = Via(layer=50)
     """
 
+    _ID = 0
+
     def __call__(cls, *params, **keyword_params):
-        # p, a, k, d = inspect.getfullargspec(cls.__init__)
 
-        full_args = inspect.getfullargspec(cls.__init__)
-        p = full_args.args
-        a = full_args.varargs
-        k = full_args.varkw
-        d = full_args.defaults
+        kwargs = cls.__map_parameters__(*params, **keyword_params)
 
-        if d is None: d = []
-        kwargs = {}
-        for k, v in zip(p[-len(d):], d):
-            kwargs[k] = v
-        kwargs.update(keyword_params)
-        for k, v in zip(p[1:len(params)+1], params):
-            kwargs[k] = v
-
-        # ----------------------------- Library -------------------------------
-        from spira.gdsii import library
         from spira import settings
         lib = None
         if 'library' in kwargs:
@@ -261,6 +346,8 @@ class MetaCell(MetaBase):
 
         name = kwargs['name']
 
+        cls.__keywords__ = kwargs
+
         cls = super().__call__(**kwargs)
 
         retrieved_cell = lib.get_cell(cell_name=name)
@@ -271,21 +358,19 @@ class MetaCell(MetaBase):
             del cls
             return retrieved_cell
 
+class CellInitializer(FieldInitializer, metaclass=MetaCell):
 
-class BaseLibrary(FieldInitializer, metaclass=MetaBase):
-    pass
+    def __str__(self):
+        return self.__repr__()
 
+    @property
+    def id(self):
+        return self.__str__()
 
-class BaseCell(FieldInitializer, metaclass=MetaCell):
-    pass
-
-
-class BaseLayer(FieldInitializer, metaclass=MetaElemental):
-    pass
 
 
 # from spira import param
-class BaseElement(FieldInitializer, metaclass=MetaElemental):
+class ElementalInitializer(FieldInitializer, metaclass=MetaElemental):
 
     # gdspy_commit = param.BoolField()
 
@@ -298,13 +383,17 @@ class BaseElement(FieldInitializer, metaclass=MetaElemental):
     def dependencies(self):
         return None
 
+    def __str__(self):
+        return self.__repr__()
+
     @property
     def id(self):
-        return self.__id__
+        return self.__str__()
 
-    @id.setter
-    def id(self, _id):
-        self.__id__ = _id
+
+
+
+
 
 
 

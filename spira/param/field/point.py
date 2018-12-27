@@ -84,6 +84,8 @@ class Point(__Point__):
 
     """
 
+    __scaled__ = False
+
     def __init__(self, *args):
         super().__init__(*args)
 

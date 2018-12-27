@@ -4,10 +4,10 @@ import numpy as np
 from spira import param
 from numpy.linalg import norm
 from numpy import sqrt, pi, cos, sin, log, exp, sinh, mod
-from spira.core.initializer import BaseElement
+from spira.core.initializer import ElementalInitializer
 
 
-class Shape(BaseElement):
+class Shape(ElementalInitializer):
     points = param.PointArrayField(fdef_name='create_points')
 
     def create_points(self, points):
@@ -144,7 +144,7 @@ if __name__ == '__main__':
     D = RouteBasic(route=route)
 
     # D.rotate(angle = 180 + p1.orientation - D.port1.orientation, center = D.port1.midpoint)
-    # D.move(origin = p1, destination = D.port1)
+    # D.move(midpoint = p1, destination = D.port1)
 
     D.construct_gdspy_tree()
 

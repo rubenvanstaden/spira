@@ -8,7 +8,7 @@ sys.dont_write_bytecode = True
 
 setup(
     name="spira",
-    version='0.0.1',
+    version='0.0.3',
     description="Superconducting Circuit Modeling and Verification",
     author="Ruben van Staden",
     author_email="rubenvanstaden@gmail.com",
@@ -17,35 +17,37 @@ setup(
     url="https://github.com/rubenvanstaden/spira",
 
     install_requires=[
-        'gdspy',
-        'holoviews',
-        'lxml',
-        'shapely',
-        'termcolor',
-        'pyclipper',
-        'colorama',
+        # Visual packages
         'matplotlib',
-        'networkx',
-        'docopt',
-        'pygmsh',
-        'meshio',
+        'plotly',
+        'pyqt5'
+        'lxml',
+
+        # Basic packages
+        'termcolor',
+        'colorama',
         'pandoc',
         'scipy',
-        'plotly',
         'pytest',
-        'pyqt5'
+
+        # Core packages
+        'gdspy',
+        'shapely',
+        'pyclipper',
+        'networkx',
+        'pygmsh',
+        'meshio',
     ],
 
     packages=['spira',
+              'spira.core',
               'spira.gdsii',
               'spira.lgm',
               'spira.lne',
               'spira.lpe',
               'spira.lrc',
-              'spira.rdd',
-              'spira.rdd',
-              'spira.templates',
-              'spira.routing'],
+              'spira.param',
+              'spira.rdd'],
 
     package_dir={'spira': 'spira'}
 )

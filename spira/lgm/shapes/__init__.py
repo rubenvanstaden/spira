@@ -1,4 +1,4 @@
 from .basic import *
-from .shape import Shape
+from .shape import *
 
 

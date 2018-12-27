@@ -2,32 +2,62 @@ import os
 import gdspy
 import spira
 
-from spira import log as LOG
-
-from spira.gdsii.utils import scale_coord_down as scd
-
-from spira.param.field.typed_graph import EdgeCapacitor
-from spira.param.field.typed_graph import EdgeInductor
-
-import matplotlib.pyplot as plt
-import plotly.graph_objs as go
-import plotly.offline as offline
-
 from spira import settings
+from spira import log as LOG
 from .graph_output import DrawGraphAbstract
 
 
+glib = gdspy.GdsLibrary(name='s2g')
+
+
 class DrawLayoutAbstract(object):
-    import spira
+    """ Class that generates output formates
+    for a layout or library containing layouts. """
+
+    def _wrapper(self, c, c2dmap):
+        for e in c.elementals.flat_elems():
+            G = c2dmap[c]
+            if isinstance(e, spira.SRef):
+                G.add(gdspy.CellReference(
+                    ref_cell=c2dmap[e.ref],
+                    midpoint=e.midpoint,
+                    rotation=e.rotation,
+                    magnification=e.magnification,
+                    x_reflection=e.reflection))
+
+    def _construct_gdspy_tree(self):
+        d = self.dependencies()
+        c2dmap = {}
+        for c in d:
+            G = c.commit_to_gdspy()
+            c2dmap.update({c:G})
+#             for p in c.get_ports():
+#                 p.commit_to_gdspy(cell=c2dmap[c])
+        for c in d:
+            self._wrapper(c, c2dmap)
+            glib.add(c2dmap[c])
+        for p in self.get_ports():
+            p.commit_to_gdspy(cell=c2dmap[self])
+        return c2dmap[self]
 
     def output(self, name=None, path='current'):
-        if name is None:
-            raise ValueError('GDS file not named.')
+        """ Plot the cell or library using gdspy viewer. """
 
-        library = settings.get_library()
-        library += self
-        library.to_gdspy
+        global glib
 
+        if isinstance(self, spira.Library):
+            # library = settings.get_library()
+            # library += self
+            # library.to_gdspy
+            glib = settings.get_library()
+            glib += self
+            glib.to_gdspy
+        elif isinstance(self, spira.Cell):
+            self._construct_gdspy_tree()
+        gdspy.LayoutViewer(library=glib)
+
+    # def writer(self, name=None, file_type='gdsii'):
+        # """ Write layout to gdsii file. """
         # writer = gdspy.GdsWriter('out-file.gds', unit=1.0e-6, precision=1.0e-9)
         # cell = self.gdspycell
         # writer.write_cell(cell)
@@ -36,8 +66,17 @@ class DrawLayoutAbstract(object):
 
         # gdspy.write_gds(outfile=write_path, name=name, unit=1.0e-6)
         # gdspy.LayoutViewer(library=library, cells=cell)
-        gdspy.LayoutViewer(library=library)
 
 
 class OutputMixin(DrawLayoutAbstract, DrawGraphAbstract):
     pass
+
+
+
+
+
+
+
+
+
+

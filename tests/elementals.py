@@ -3,53 +3,45 @@ import spira
 from spira import param
 
 
-# ======================================================================================================
+# ===================================================================================================
 # To run tests:
 # python -m pytest -v elementals.py 
-# ======================================================================================================
+# ===================================================================================================
 
-# ---------------------------------------------- Test Fiels --------------------------------------------
+# -------------------------------------------- Test Fiels -------------------------------------------
 
-def test_layerfield():
-    class TestCell(spira.Cell):
+def test_parameters():
+    class CellA(spira.Cell):
         layer = param.LayerField()
-    p = TestCell()
-    assert p.layer.number == 0
-
-    p.layer.number = 10
-    assert p.layer.number == 10
-
-    class TestCell(spira.Cell):
-        layer = param.LayerField(number=18)
-    p = TestCell()
-    assert p.layer.number == 18
-
-def test_boolfield():
-    class TestCell(spira.Cell):
         violate = param.BoolField()
-    p = TestCell()
-    assert p.violate == False
+    a = CellA()
+    assert a.layer.number == 0
+    assert a.violate == False
 
-    p.violate = True
-    assert p.violate == True
+    a.layer.number = 10
+    assert a.layer.number == 10
 
-    class TestCell(spira.Cell):
+def test_default_parameters():
+    class CellB(spira.Cell):
+        layer = param.LayerField(number=18)
         violate = param.BoolField(default=True)
-    p = TestCell()
-    assert p.violate == True
+    b = CellB()
+    assert b.layer.number == 18
+    assert b.violate == True
 
 
-# ---------------------------------------------- spira.Cell --------------------------------------------
 
-# ---------------------------------------------- spira.SRef --------------------------------------------
+# -------------------------------------------- spira.Cell -------------------------------------------
 
-# ---------------------------------------------- spira.Polygon -----------------------------------------
+# -------------------------------------------- spira.SRef -------------------------------------------
 
-# ---------------------------------------------- spira.Label -------------------------------------------
+# -------------------------------------------- spira.Polygon ----------------------------------------
 
-# ---------------------------------------------- spira.Port --------------------------------------------
+# -------------------------------------------- spira.Label ------------------------------------------
 
-# ---------------------------------------------- spira.Path --------------------------------------------
+# -------------------------------------------- spira.Port -------------------------------------------
+
+# -------------------------------------------- spira.Path -------------------------------------------
 
 
 

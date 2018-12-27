@@ -13,7 +13,7 @@ from spira.gdsii import utils
 from spira import param
 
 from spira import log as LOG
-from spira.core.initializer import BaseElement
+from spira.core.initializer import ElementalInitializer
 # from spira.rdd import get_rule_deck
 from copy import copy, deepcopy
 
@@ -24,13 +24,13 @@ from copy import copy, deepcopy
 # -------------------------------------------------------------------
 
 
-class __Mesh__(meshio.Mesh, BaseElement):
+class __Mesh__(meshio.Mesh, ElementalInitializer):
 
     def __init__(self, polygons, points, cells, **kwargs):
 
         self.polygons = polygons
 
-        BaseElement.__init__(self, **kwargs)
+        ElementalInitializer.__init__(self, **kwargs)
 
         meshio.Mesh.__init__(self, points, cells,
                              point_data=self.point_data,
@@ -294,7 +294,7 @@ class MeshLabeled(MeshAbstract):
         # for L in D.elementals.labels:
         #     lbl = deepcopy(L)
         #
-        #     lbl.move(origin=lbl.position, destination=S.origin)
+        #     lbl.move(midpoint=lbl.position, destination=S.midpoint)
         #
         #     if lbl.gdslayer.name == 'GROUND':
         #         if lbl.layer == self.layer.number:

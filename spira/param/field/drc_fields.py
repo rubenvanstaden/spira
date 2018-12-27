@@ -1,8 +1,8 @@
 from spira.core.descriptor import DataFieldDescriptor
-from spira.core.initializer import BaseElement
+from spira.core.initializer import ElementalInitializer
 
 
-# class __DesignRule__(BaseElement):
+# class __DesignRule__(ElementalInitializer):
 #     doc = param
 #
 #

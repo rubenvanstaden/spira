@@ -119,11 +119,11 @@ def start(name, text):
     print(Fore.LIGHTGREEN_EX + name, end='')
     print('] ', end='')
     print(text)
-    print('\n\n---------------------------------------------\n')
+    print('---------------------------------------------')
 
 
 def rdd(text):
-    print('')
+    print('\n---------------------------------------------')
     print('[', end='')
     print(Fore.LIGHTCYAN_EX + 'RDD', end='')
     print('] ', end='')

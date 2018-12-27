@@ -1,5 +1,6 @@
 import spira
 import pyclipper
+import numpy as np
 from spira import param
 from spira.gdsii.utils import *
 from spira.core.initializer import FieldInitializer
@@ -7,10 +8,13 @@ from spira.core.initializer import FieldInitializer
 
 class __Shape__(FieldInitializer):
 
+    center = param.PointField()
     gdslayer = param.LayerField()
+    clockwise = param.BoolField(default=False)
     points = param.PointArrayField(fdef_name='create_points')
     apply_merge = param.DataField(fdef_name='create_merged_points')
     simplify = param.DataField(fdef_name='create_simplified_points')
+    edges = param.DataField(fdef_name='create_edge_lines')
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -58,17 +62,24 @@ class __Shape__(FieldInitializer):
     def transform(self):
         pass
 
+    @property
     def area(self):
-        pass
-
-    def point_inside(self):
-        pass
+        """ Returns the area of the shape. """
+        pts = self.points[0]
+        T = np.roll(np.roll(pts, 1, 1), 1, 0)
+        return sum(abs(np.diff(pts * T, 1, 1))) * 0.5
 
     @property
     def orientation(self):
-        """ The point orientation, either clockwise
-        or counterclockwise"""
-        print(len(self.points))
+        """ Returns the orientation of the 
+        shape: +1(counterclock) or -1(clock) """
+        # FIXME: Error with multiple shapes: [[[s1], [s2]]]
+        pts = self.points[0]
+        T = np.roll(np.roll(pts, 1, 1), 1, 0)
+        return -np.sign(sum(np.diff(pts * T, 1, 1)))
+
+    def point_inside(self):
+        pass
 
     @property
     def count(self):
@@ -82,14 +93,14 @@ class __Shape__(FieldInitializer):
     def index(self, item):
         pass
 
-    def __repr__(self):
-        pass
-
-    def __str__(self):
-        return self.__repr__()
-
     def id_string(self):
         return self.__str__()
+
+    # def __repr__(self):
+    #     return 'Shape'
+
+    # def __str__(self):
+    #     return self.__repr__()
 
     def __eq__(self, other):
         if not isinstance(other, Shape):
@@ -106,18 +117,55 @@ class Shape(__Shape__):
 
     def __init__(self, points=None, **kwargs):
         super().__init__(**kwargs)
-        print(points)
         if points is not None:
+            # from spira.gdsii.utils import scale_polygon_up as spu
+            # self.points = spu(points)
             self.points = points
 
     def __deepcopy__(self, memo):
-        return Shape(points = deepcopy(self.points),
-                     closed = self.closed,
-                     start_face_angle = self.start_face_angle,
-                     end_face_angle = self.end_face_angle)
+        from copy import copy, deepcopy
+        from spira.gdsii.utils import scale_polygon_down as spd
+
+        shape = self.modified_copy(
+            # points = spd(self.points),
+            points = deepcopy(self.points),
+            gdslayer = deepcopy(self.gdslayer)
+        )
+
+        return shape
 
 
+# TODO: Add boolean operations of shapes.
+# An arrow can be a triangle + box>
+class Arrow(Shape):
 
+    rotation = param.FloatField()
+
+    wh = param.FloatField(default=0.2)
+    wb = param.FloatField(default=0.1)
+    hh = param.FloatField(default=0.6)
+    hb = param.FloatField(default=1)
+
+    arrow_head = param.PointField()
+
+    endpoints = param.DataField(fdef_name='create_endpoints')
+
+    def create_endpoints(self):
+        return (self.arrow_head, [self.wb/2, 0])
+
+    def create_points(self, points):
+        self.arrow_head = [self.wb/2, self.hb+self.hh]
+        pts = [[0,0], [self.wb,0], [self.wb,self.hb], 
+               [self.wh,self.hb], self.arrow_head, 
+               [-self.wb,self.hb], [0,self.hb]]
+        points += [pts]
+        return points
+
+    def __repr__(self):
+        return ("[SPiRA: Arrow] points {}").format(len(self.points[0]))
+
+    def __str__(self):
+        return self.__repr__()
 
 
 

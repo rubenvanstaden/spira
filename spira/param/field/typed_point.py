@@ -14,7 +14,6 @@ class PointField(DataFieldDescriptor):
         return self.__type__(value)
 
     def __set__(self, obj, value):
-        from spira.gdsii.utils import SCALE_UP
         if isinstance(value, (list, set, tuple, np.ndarray)):
             value = self.__type__(value)
         else:

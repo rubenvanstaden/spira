@@ -14,15 +14,14 @@ class BaseField(object):
     >>> via.layer.default
     [SPiRA: Layer] (name '', number 0, datatype 0)
     """
-    __keywords__ = ['default', 'fdef_name', 'locked']
+
+    __keywords__ = ['default', 'fdef_name', 'locked', 'doc']
 
     def __init__(self, **kwargs):
-
-        self.__doc__ = ''
+        self.__doc__ = 'No documenation generated'
         if 'doc' in kwargs:
             self.__doc__ = kwargs['doc']
             kwargs.pop('doc')
-
         for k, v in kwargs.items():
             if k in self.__keywords__:
                 object.__setattr__(self, k, v)
@@ -38,9 +37,14 @@ class DataFieldDescriptor(BaseField):
     __keywords__ = ['default', 'fdef_name']
 
     def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
         self.locked = False
 
-        super().__init__(**kwargs)
+        if 'constraint' in kwargs:
+            self.constraint = kwargs['constraint']
+        else:
+            self.constraint = None
 
         if 'fdef_name' not in kwargs:
             self.fdef_name = None
@@ -52,7 +56,7 @@ class DataFieldDescriptor(BaseField):
         """
         Called when retieving a value from an instance.
         Following from `via` in __set__, the following
-        ca be executed:
+        can be executed:
 
         Information:
         >>> via.layer
@@ -60,7 +64,6 @@ class DataFieldDescriptor(BaseField):
         """
         if obj is None:
             return self
-
         if not self.__field_was_stored__(obj):
             f = self.get_param_function(obj)
             if f is None:
@@ -70,10 +73,10 @@ class DataFieldDescriptor(BaseField):
                     value = self
             else:
                 value = self.call_param_function(obj)
-            return value
         else:
             value = self.get_stored_value(obj)
-            return value
+
+        return value
 
     def __set__(self, obj, value):
         """

@@ -3,7 +3,10 @@
 class __Float__(object):
 
     def __init__(self, val=0, **kwargs):
-        self._val = float(val)
+        if val is None:
+            self._val = None
+        else:
+            self._val = float(val)
 
     def __add__(self, val):
         if isinstance(val, Float):
@@ -45,46 +48,44 @@ class __Float__(object):
         return 'Float(%s)' % self._val
 
     def __str__(self):
-        return str(self._val)
+        return self.__repr__()
 
     def __float__(self):
         return self._val
 
 
-from spira.core.descriptor import DataFieldDescriptor
-class FloatField(DataFieldDescriptor):
-    __type__ = float
+class Float(__Float__):
+    pass
 
-    def __init__(self, default=0.0, **kwargs):
-        if default is None:
-            kwargs['default'] = None
-        else:
-            kwargs['default'] = self.__type__(default)
-        super().__init__(**kwargs)
 
-    def get_stored_value(self, obj):
-        value = obj.__store__[self.__name__]
-        return value.__float__()
+# from spira.core.descriptor import DataFieldDescriptor
+# class FloatField(DataFieldDescriptor):
+#     __type__ = Float
 
-    def __set__(self, obj, value):
-        from spira.gdsii.utils import SCALE_UP
+#     def __init__(self, default=0.0, **kwargs):
+#         if default is None:
+#             kwargs['default'] = None
+#         else:
+#             kwargs['default'] = self.__type__(val=default)
+#         print(kwargs['default'])
+#         super().__init__(**kwargs)
 
-        # s1 = abs(value/SCALE_UP)
-        # if (s1 < 1e-3):
-        #     value = SCALE_UP*value
+#     def get_stored_value(self, obj):
+#         value = obj.__store__[self.__name__]
+#         return value
+#         # return value.__float__()
 
-#         value = SCALE_UP*value
-
-        if isinstance(value, self.__type__):
-            obj.__store__[self.__name__] = value
-        elif isinstance(value, (int, float)):
-            obj.__store__[self.__name__] = self.__type__(value)
-        elif value is None:
-            return None
-        else:
-            raise TypeError("Invalid type in setting value " +
-                            "of {} (expected {}): {}"
-                            .format(self.__class_, type(value)))
+#     def __set__(self, obj, value):
+#         if isinstance(value, self.__type__):
+#             obj.__store__[self.__name__] = value
+#         elif isinstance(value, (int, float)):
+#             obj.__store__[self.__name__] = self.__type__(val=value)
+#         elif value is None:
+#             return None
+#         else:
+#             raise TypeError("Invalid type in setting value " +
+#                             "of {} (expected {}): {}"
+#                             .format(self.__class_, type(value)))
 
 
 

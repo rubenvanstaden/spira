@@ -1,20 +1,20 @@
 import gdspy
 import inspect
 
-from spira.core.initializer import BaseElement
+from spira.core.initializer import ElementalInitializer
 
 
-class ARef(gdspy.CellArray, BaseElement):
+class ARef(gdspy.CellArray, ElementalInitializer):
     """
 
     """
 
-    def __init__(self, structure, columns, rows, spacing, origin, **kwargs):
+    def __init__(self, structure, columns, rows, spacing, midpoint, **kwargs):
         ref_cell = structure.gdspycell
 
         required_params = {'rotation': None,
                            'magnification': None,
-                           'x_reflection': False}
+                           'reflection': False}
 
         s1 = set(required_params.keys())
         s2 = set(kwargs.keys())
@@ -29,16 +29,16 @@ class ARef(gdspy.CellArray, BaseElement):
                                  columns=columns, 
                                  rows=rows,
                                  spacing=spacing, 
-                                 origin=origin, 
+                                 midpoint=midpoint, 
                                  rotation=self.rotation,
                                  magnification=self.magnification, 
-                                 x_reflection=self.x_reflection)
+                                 reflection=self.reflection)
 
         Reference.__init__(self, reference=structure)
 
     def __repr__(self):
         name = self.ref.name
-        return ('[SPiRA: ARef] (\"{0}\", at ({1[0]}, {1[1]}), rotation {2}, magnification {3}, reflection {4})').format(name, self.origin, self.rotation, self.magnification, self.x_reflection)
+        return ('[SPiRA: ARef] (\"{0}\", at ({1[0]}, {1[1]}), rotation {2}, magnification {3}, reflection {4})').format(name, self.midpoint, self.rotation, self.magnification, self.reflection)
 
     def __str__(self):
         return self.__repr__()
@@ -49,10 +49,10 @@ class ARef(gdspy.CellArray, BaseElement):
             self.columns,
             self.rows,
             self.spacing,
-            self.origin,
+            self.midpoint,
             self.rotation,
             self.magnification,
-            self.x_reflection)
+            self.reflection)
         cell.add(A)
 
 
