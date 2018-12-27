@@ -149,15 +149,15 @@ class Label(LabelAbstract):
     def __init__(self, position, **kwargs):
         super().__init__(position, **kwargs)
 
-    def __repr__(self):
-        if self is None:
-            return 'Label is None!'
-        params = [ self.text, self.position, self.rotation,
-                   self.magnification, self.reflection,
-                   self.layer, self.texttype ]
-        return ("[SPiRA: Label] (\"{0}\", at ({1[0]}, {1[1]}), " +
-                "rot: {2}, mag: {3}, ref: {4}, layer: {5}, " +
-                "texttype: {6})").format(*params)
+    # def __repr__(self):
+    #     if self is None:
+    #         return 'Label is None!'
+    #     params = [ self.text, self.position, self.rotation,
+    #                self.magnification, self.reflection,
+    #                self.layer, self.texttype ]
+    #     return ("[SPiRA: Label] (\"{0}\", at ({1[0]}, {1[1]}), " +
+    #             "rot: {2}, mag: {3}, ref: {4}, layer: {5}, " +
+    #             "texttype: {6})").format(*params)
 
 
 

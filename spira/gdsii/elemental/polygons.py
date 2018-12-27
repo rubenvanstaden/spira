@@ -115,7 +115,6 @@ class PolygonAbstract(__Polygon__):
     def commit_to_gdspy(self, cell):
         if self.__repr__() not in list(PolygonAbstract.__committed__.keys()):
             ply = deepcopy(self.shape.points)
-            # ply = self.shape.points
             P = gdspy.PolygonSet(ply, self.gdslayer.number, self.gdslayer.datatype)
             cell.add(P)
             PolygonAbstract.__committed__.update({self.__repr__():P})
