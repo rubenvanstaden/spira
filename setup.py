@@ -3,12 +3,13 @@ import sys
 
 from pprint import pprint
 from setuptools import setup, find_packages
+from spira.settings import __version__, __release__
 
 sys.dont_write_bytecode = True
 
 setup(
     name="spira",
-    version='0.0.2',
+    version='{}-{}'.format(__version__, __release__),
     description="Superconducting Circuit Modeling and Verification",
     author="Ruben van Staden",
     author_email="rubenvanstaden@gmail.com",
