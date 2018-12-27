@@ -93,7 +93,7 @@ class PolygonAbstract(__Polygon__):
             raise ValueError('Shape type not supported!')
 
         ElementalInitializer.__init__(self, **kwargs)
-        gdspy.PolygonSet.__init__(self, 
+        gdspy.PolygonSet.__init__(self,
             self.shape.points,
             layer=self.gdslayer.number,
             datatype=self.gdslayer.datatype,
@@ -210,23 +210,26 @@ class PolygonAbstract(__Polygon__):
 
         self.translate(dx, dy)
 
-        # super().translate(dx, dy)
-
-        # print(destination)
-        # print(self.polygons)
-
-        # self.shape.points = self.polygons
-
         return self
 
     def fast_boolean(self, other, operation):
-        mm = gdspy.fast_boolean(self.shape.points, other.shape.points, operation=operation)
+        mm = gdspy.fast_boolean(
+            self.shape.points,
+            other.shape.points,
+            operation=operation
+        )
         return Polygons(shape=mm.points, gdslayer=self.gdslayer)
 
 
 class Polygons(PolygonAbstract):
-    """
+    """ Elemental that connects shapes to the GDSII file format.
+    Polygons are objects that represents the shapes in a layout.
 
+    Examples
+    --------
+    >>> layer = spira.Layer(number=99)
+    >>> rect_shape = spira.RectangleShape(p1=[0,0], p2=[1,1])
+    >>> ply = spira.Polygons(shape=rect_shape, gdslayer=layer)
     """
 
     def __init__(self, shape, **kwargs):

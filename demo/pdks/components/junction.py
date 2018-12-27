@@ -1,6 +1,6 @@
 import spira
 from spira import param
-from spira import Rectangle
+from spira import shapes
 from spira.rdd import get_rule_deck
 
 
@@ -14,9 +14,8 @@ class PhysicalLayer(spira.Cell):
 
       def create_elementals(self, elems):
             for pp in self.points:
-                  elems += Rectangle(point1=pp[0],
-                                     point2=pp[1],
-                                     layer=self.layer)
+                  shape = shapes.RectangleShape(point1=pp[0], point2=pp[1])
+                  elems += spira.Polygons(shape=shape, gdslayer=self.layer)
             return elems
 
 
@@ -59,11 +58,6 @@ class Junction(spira.Cell):
 
 
 if __name__ == '__main__':
-
-    from spira import settings
-    from spira.templates.library import library
-
-    settings.set_library(library)
 
     name = 'Junction_PCell'
 

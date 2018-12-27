@@ -55,8 +55,10 @@ class Term(PortAbstract):
 
     def __repr__(self):
         return ("[SPiRA: Term] (name {}, number {}, midpoint {}, " +
-                "width {}, orientation {})").format(self.name, self.gdslayer.number, self.midpoint,
-                                                    self.width, self.orientation)
+            "width {}, orientation {})").format(self.name,
+            self.gdslayer.number, self.midpoint,
+            self.width, self.orientation
+        )
 
     def _copy(self):
         new_port = Term(parent=self.parent,

@@ -1,7 +1,7 @@
 import os
 import spira
 import gdspy
-import pathlib 
+import pathlib
 import numpy as np
 from spira.gdsii.utils import c3d
 from spira.gdsii.utils import scale_coord_down as scd
@@ -42,7 +42,7 @@ def wrap_references(cell, c2dmap):
                             midpoint=scd(e.midpoint),
                             rotation=e.rotation,
                             magnification=e.magnification,
-                            reflection=e.reflection)
+                            reflection=e.x_reflection)
 
 
 def create_spira_cell(cell):

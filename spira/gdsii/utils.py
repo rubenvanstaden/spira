@@ -1,6 +1,5 @@
 import spira
 import pyclipper
-# from spira.settings import NM
 
 
 st = pyclipper.scale_to_clipper
@@ -296,44 +295,5 @@ def polygons_to_elements(sp, params={}):
     return elems
 
 
-# def polygon_inside_polygon(p1, p2):
-#     from spira.gdsii.elemental.polygons import Polygons
-#     from spira.core.lists import ElementList
-
-#     pp = p1 | p2
-
-#     if pp.area() == p1.area():
-#         print('{} inside {}'.format('p1', 'p2'))
-#     elif pp.area() == p2.area():
-#         print('{} inside {}'.format('p2', 'p1'))
-
-#     element = None
-#     if hasattr(p1, 'metals') and hasattr(p2, 'metals'):
-#         metals = list(set().union(list(p1.metals), list(p2.metals)))
-#         metals_string = ''.join('{}{}_'.format('l', e) for e in metals)
-#         text = '{}_{}'.format('jj', metals_string)
-#         params = {'metals': metals, 'text': text, 'color': '#EC7063'}
-#         element = Polygons(pp.polygons, gdslayer=99, gdsdatatype=2, **params)
-
-#     if element.polygons:
-#         return element
-#     else:
-#         return None
 
 
-# def isintersected(p1, p2):
-#     pp = p1 | p2
-#     return pp.polygons != []
-
-
-# def filter_mask_layers(topcell, masks):
-#     pass
-#     # from spira.gdsii.elemental.polygons import Polygons
-#     # from spira.param.field.typed_integer import Integer
-#     # new_masks = {}
-#     # for layer, name in masks.items():
-#     #     for e in topcell.elementals:
-#     #         if isinstance(e, Polygons):
-#     #             if layer == e.gdslayer:
-#     #                 new_masks[layer] = name
-#     # return new_masks

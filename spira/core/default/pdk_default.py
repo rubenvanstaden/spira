@@ -126,8 +126,8 @@ class TCellGC(DynamicDataTree):
         from spira.core.default.templates import ViaTemplate
         self.PCELL = ViaTemplate(
             name = 'GC',
-            via_layer = RDD.GC.LAYER, 
-            layer1 = RDD.GP.LAYER, 
+            via_layer = RDD.GC.LAYER,
+            layer1 = RDD.GP.LAYER,
             layer2 = RDD.BAS.LAYER
         )
 
@@ -138,8 +138,8 @@ class TCellBC(DynamicDataTree):
         from spira.core.default.templates import ViaTemplate
         self.PCELL = ViaTemplate(
             name = 'BC',
-            via_layer = RDD.BC.LAYER, 
-            layer1 = RDD.BAS.LAYER, 
+            via_layer = RDD.BC.LAYER,
+            layer1 = RDD.BAS.LAYER,
             layer2 = RDD.COU.LAYER
         )
 
@@ -150,8 +150,8 @@ class TCellJC(DynamicDataTree):
         from spira.core.default.templates import ViaTemplate
         self.PCELL = ViaTemplate(
             name = 'JC',
-            via_layer = RDD.JC.LAYER, 
-            layer1 = RDD.JJ.LAYER, 
+            via_layer = RDD.JC.LAYER,
+            layer1 = RDD.JJ.LAYER,
             layer2 = RDD.COU.LAYER
         )
 
@@ -162,8 +162,8 @@ class TCellCC(DynamicDataTree):
         from spira.core.default.templates import ViaTemplate
         self.PCELL = ViaTemplate(
             name = 'CC',
-            via_layer = RDD.CC.LAYER, 
-            layer1 = RDD.COU.LAYER, 
+            via_layer = RDD.CC.LAYER,
+            layer1 = RDD.COU.LAYER,
             layer2 = RDD.CTL.LAYER
         )
 
@@ -181,6 +181,11 @@ class TCellJunction(DynamicDataTree):
 RDD.DEVICES.JJ = TCellJunction()
 
 # --------------------------------- Finished -------------------------------------
+
+
+
+
+
 
 
 

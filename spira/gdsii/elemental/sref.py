@@ -98,18 +98,15 @@ class SRefAbstract(__SRef__):
         }
 
         el = self.ref.elementals.flat_copy(level-1)
-        # if self.stretching:
-        #     el.stretch(self.stretching)
         el.transform(transform)
         return el
 
     def transform(self, transform):
         if transform['reflection']:
             self.reflect(p1=[0,0], p2=[1,0])
+        if transform['rotation']:
             self.rotate(angle=transform['rotation'])
-            self.translate(dx=transform['midpoint'][0], dy=transform['midpoint'][1])
-        else:
-            self.rotate(angle=transform['rotation'])
+        if transform['midpoint']:
             self.translate(dx=transform['midpoint'][0], dy=transform['midpoint'][1])
         return self
 
@@ -251,8 +248,16 @@ class SRefAbstract(__SRef__):
 
 
 class SRef(SRefAbstract):
-    """
+    """ Cell reference (SRef) is the reference to a cell layout
+    to create a hierarchical layout structure. It creates copies
+    of the ports and terminals defined by the cell. These
+    copied ports can be used to connect different
+    cell reference instances.
 
+    Examples
+    --------
+    >>> cell = spira.Cell(name='Layout')
+    >>> sref = spira.SRef(structure=cell)
     """
 
     def __init__(self, structure, **kwargs):
@@ -266,12 +271,13 @@ class SRef(SRefAbstract):
     def __repr__(self):
         name = self.ref.name
         return ("[SPiRA: SRef] (\"{}\", at {}, srefs {}, " +
-               "polygons {}, ports {}, labels {})").format(
-                name, self.midpoint,
-                len(self.ref.elementals.sref),
-                len(self.ref.elementals.polygons),
-                len(self.ref.ports),
-                len(self.ref.elementals.labels))
+           "polygons {}, ports {}, labels {})").format(
+            name, self.midpoint,
+            len(self.ref.elementals.sref),
+            len(self.ref.elementals.polygons),
+            len(self.ref.ports),
+            len(self.ref.elementals.labels)
+        )
 
 
 

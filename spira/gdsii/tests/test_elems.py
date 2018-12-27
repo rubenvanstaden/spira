@@ -130,7 +130,6 @@ def test_elem_port():
     p1.translate(dx=10, dy=5)
     assert p1.midpoint == [12, 4]
 
-
 # -------------------------------------------- spira.Term -------------------------------------------
 
 def test_elem_terminal():

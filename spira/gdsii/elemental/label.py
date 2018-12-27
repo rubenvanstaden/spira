@@ -22,7 +22,7 @@ class __Label__(gdspy.Label, ElementalInitializer):
             raise ValueError('Position type not supported!')
 
         ElementalInitializer.__init__(self, **kwargs)
-        gdspy.Label.__init__(self, 
+        gdspy.Label.__init__(self,
             text=self.text,
             position=self.position,
             anchor=str('o'),
@@ -37,8 +37,10 @@ class __Label__(gdspy.Label, ElementalInitializer):
         return self.id == other.id
 
     def __deepcopy__(self, memo):
-        c_label = self.modified_copy(position=self.position, 
-                                     gdslayer=deepcopy(self.gdslayer))
+        c_label = self.modified_copy(
+            position=self.position,
+            gdslayer=deepcopy(self.gdslayer)
+        )
         return c_label
 
 

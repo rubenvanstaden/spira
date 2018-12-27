@@ -174,8 +174,7 @@ class Port(PortAbstract):
 
     def _copy(self):
         new_port = Port(parent=self.parent,
-            polygon=self.polygon,
-            # polygon=deepcopy(self.polygon),
+            polygon=deepcopy(self.polygon),
             name=self.name,
             midpoint=deepcopy(self.midpoint),
             edge_width=self.edge_width,
