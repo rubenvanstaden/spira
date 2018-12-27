@@ -7,6 +7,7 @@ scipy
 plotly
 pytest
 pyclipper
+pygmsh
 matplotlib
 termcolor
 shapely
