@@ -169,8 +169,10 @@ class Port(PortAbstract):
 
     def __repr__(self):
         return ("[SPiRA: Port] (name {}, number {}, midpoint {}, " +
-                "radius {}, orientation {})").format(self.name, self.gdslayer.number, self.midpoint,
-                                                    self.edge_width, self.orientation)
+            "radius {}, orientation {})").format(self.name,
+            self.gdslayer.number, self.midpoint,
+            self.edge_width, self.orientation
+        )
 
     def _copy(self):
         new_port = Port(parent=self.parent,
