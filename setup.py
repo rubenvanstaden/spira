@@ -30,6 +30,7 @@ setup(
         'scipy',
         'pytest',
         'numpy',
+        'sphinxcontrib-napoleon',
 
         # Core packages
         'gdspy',

@@ -12,3 +12,4 @@ termcolor
 shapely
 lxml
 colorama
+sphinxcontrib-napoleon
