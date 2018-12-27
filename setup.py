@@ -29,6 +29,7 @@ setup(
         'pandoc',
         'scipy',
         'pytest',
+        'numpy',
 
         # Core packages
         'gdspy',

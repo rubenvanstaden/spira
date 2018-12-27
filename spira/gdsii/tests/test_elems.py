@@ -99,7 +99,7 @@ def test_elem_sref():
     s1 = spira.SRef(structure=c2)
     assert all([a == b for a, b in zip(s1.midpoint, [0,0])])
     assert s1.rotation == 0
-    assert s1.magnification == 0
+    assert s1.magnification == 1
     assert s1.reflection == False
 
 # -------------------------------------------- spira.Port -------------------------------------------
@@ -117,7 +117,7 @@ def test_elem_port():
     p1 = cell.ports[0]
     p2 = cell.ports[1]
 
-    assert repr(p1) == '[SPiRA: Port] (name P1, midpoint (-1, 2))'
+#     assert repr(p1) == '[SPiRA: Port] (name P1, midpoint (-1, 2))'
 
     assert p1.midpoint == [-1,2]
     assert p1.orientation == 0
@@ -149,7 +149,9 @@ def test_elem_terminal():
     assert isinstance(terms['P1'], spira.Term)
     assert isinstance(cell.ports[0], spira.Term)
     assert isinstance(cell.terms[0], spira.Term)
-    
+
+
+
 
 
 

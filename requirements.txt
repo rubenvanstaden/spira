@@ -1,5 +1,5 @@
-docopt
 gdspy
+numpy
 networkx
 pandoc
 meshio
