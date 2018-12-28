@@ -49,6 +49,7 @@ Examples of using the PCell implementation is given in [examples](https://spira.
 ## History of changes
 
 ### Version 0.0.2 (Dec 27, 2018)
+* Integrated circleci.
 * Started adding unit tests using pytest.
 * Updated auto doc generation for classes.
 * Added MidPointField for port and terminal midpoints.

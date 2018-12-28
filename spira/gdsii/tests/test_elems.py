@@ -5,7 +5,7 @@ from spira import shapes
 
 UM = 1e6
 
-# -------------------------------------------- spira.Polygon ----------------------------------------
+# -------------------------------------------- spira.Library ----------------------------------------
 
 def test_library():
     l1 = spira.Library()
@@ -30,6 +30,33 @@ def test_library():
 
     assert len(l1) == 0
     assert l1 == l2
+
+# -------------------------------------------- spira.CellList ---------------------------------------
+
+def test_cell_list():
+    cl = spira.CellList()
+    assert cl.is_empty() == True
+
+    c1 = spira.Cell('C1')
+    c2 = spira.Cell('C2')
+    c3 = spira.Cell('C3')
+
+    cl += c1
+    cl += [c2, c3]
+
+    assert len(cl) == 3
+    assert cl['C2'] == c2
+    assert cl.index('C2') == 1
+    assert cl.index(c2) == 1
+
+    del cl['C1']
+
+    assert cl[0] == c2
+    assert len(cl) == 2
+
+    del cl[c3]
+
+    assert len(cl) == 1
 
 # -------------------------------------------- spira.Polygon ----------------------------------------
 

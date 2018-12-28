@@ -47,8 +47,8 @@ class TypedList(collections.abc.MutableSequence):
     def __getitem__(self, i):
         return self._list[i]
 
-    def __delitem__(self, i):
-        del self._list[i]
+    # def __delitem__(self, i):
+    #     del self._list[i]
 
     def __setitem__(self, i, v):
         self._list[i] = v

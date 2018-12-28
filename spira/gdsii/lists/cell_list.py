@@ -4,17 +4,10 @@ class CellList(TypedList):
 
     __item_type__ = Cell
 
-    def is_empty(self):
-        if (len(self._list) == 0): return True
-        for e in self._list:
-            if not e.is_empty(): return False
-        return True
-
     def __getitem__(self, key):
         if isinstance(key, str):
             for i in self._list:
-                if i.name == key: 
-                    return i
+                if i.name == key: return i
             raise IndexError("Structure " + key + " cannot be found in StructureList.")
         else:
             return list.__getitem__(self._list, key)
@@ -31,10 +24,13 @@ class CellList(TypedList):
     def __delitem__(self, key):
         if isinstance(key, str):
             for i in range(0, len(self._list)):
-                if self._list[i].name == key: 
+                if self._list[i].name == key:
                     return list.__delitem__(self._list, i)
                 return
             return list.__delitem__(self._list, key)
+        elif isinstance(key, Cell):
+            item = self.index(item=key.name)
+            return list.__delitem__(self._list, item)
         else:
             return list.__delitem__(self._list, key)
 
@@ -57,6 +53,14 @@ class CellList(TypedList):
                 return True
         return False
 
+    def is_empty(self):
+        if len(self._list) == 0:
+            return True
+        for e in self._list:
+            if not e.is_empty(): 
+                return False
+        return True
+
     def index(self, item):
         if isinstance(item, str):
             for i in range(0, len(self._list)):
@@ -64,7 +68,7 @@ class CellList(TypedList):
                     return i
             raise ValueError("Cell " + item + " is not in CellList")
         else:
-            list.index(self._list, item)
+             return list.index(self._list, item)
 
     def add(self, item, overwrite=False):
         if item == None:

@@ -11,6 +11,7 @@ from spira.gdsii.cell import Cell
 from spira.gdsii.primitive import *
 from spira.gdsii.io import import_gds
 from spira.gdsii.library import Library
+from spira.gdsii.lists.cell_list import CellList
 
 from spira.gdsii.layer import Layer
 
