@@ -1,4 +1,5 @@
 from spira import param
+from spira.rdd.layer import PurposeLayer
 from spira.core.initializer import ElementalInitializer
 
 
@@ -20,9 +21,6 @@ class Layer(__Layer__):
     #     string = '[SPiRA: Layer] (\'{}\', layer {}, datatype {})'
     #     return string.format(self.name, self.number, self.datatype)
 
-    # def __str__(self):
-    #     return self.__repr__()
-
     def __eq__(self, other):
         if isinstance(other, Layer):
             return self.key == other.key
@@ -40,14 +38,29 @@ class Layer(__Layer__):
             raise ValueError('Not Implemented!')
 
     def __add__(self, other):
-        assert isinstance(other, int)
-        self.number = self.number + other
+        if isinstance(other, Layer):
+            d = self.number + other.number
+        elif isinstance(other, int):
+            d = self.number + other
+        else:
+            raise ValueError('Not Implemented')
+        return Layer(datatype=d)
+
+    def __iadd__(self, other):
+        if isinstance(other, Layer):
+            self.number += other.number
+        elif isinstance(other, int):
+            self.number += other
+        else:
+            raise ValueError('Not Implemented')
         return self
 
     def __deepcopy__(self, memo):
-        return Layer(name=self.name,
-                     number=self.number,
-                     datatype=self.datatype)
+        return Layer(
+            name=self.name,
+            number=self.number,
+            datatype=self.datatype
+        )
 
     @property
     def key(self):

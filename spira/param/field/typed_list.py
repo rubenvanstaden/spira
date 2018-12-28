@@ -47,11 +47,15 @@ class TypedList(collections.abc.MutableSequence):
     def __getitem__(self, i):
         return self._list[i]
 
-    # def __delitem__(self, i):
-    #     del self._list[i]
-
     def __setitem__(self, i, v):
         self._list[i] = v
+
+    def __deepcopy__(self, memo):
+        from copy import deepcopy
+        L = self.__class__()
+        for item in self._list:
+            L.append(deepcopy(item))
+        return L
 
     def check(self, v):
         if not isinstance(v, self.oktypes):
@@ -74,13 +78,6 @@ class TypedList(collections.abc.MutableSequence):
 
     def clear(self):
         del self[:]
-
-    def __deepcopy__(self, memo):
-        from copy import deepcopy
-        L = self.__class__()
-        for item in self._list:
-            L.append(deepcopy(item))
-        return L
 
 
 from spira.core.descriptor import DataFieldDescriptor

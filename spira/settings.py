@@ -25,6 +25,9 @@ _current_library = None
 
 DEFAULT_LIBRARY = None
 
+SCALE_UP = 1.0e+6
+SCALE_DOWN = 1.0e-6
+
 # ----------------------------- Initialize Library -----------------------------
 
 def initialize():

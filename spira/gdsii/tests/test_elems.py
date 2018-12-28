@@ -2,6 +2,7 @@ import spira
 import pytest
 from spira import param
 from spira import shapes
+from spira.rdd.layer import PurposeLayer
 
 UM = 1e6
 
@@ -57,6 +58,17 @@ def test_cell_list():
     del cl[c3]
 
     assert len(cl) == 1
+
+# ----------------------------------------- spira.ElementalList ------------------------------------
+
+def test_elemental_list():
+    el = spira.ElementList()
+    assert len(el) == 0
+
+# -------------------------------------------- spira.Shapes ----------------------------------------
+
+def test_shapes():
+    pass
 
 # -------------------------------------------- spira.Polygon ----------------------------------------
 
@@ -202,6 +214,33 @@ def test_elem_terminal():
     assert isinstance(cell.ports[0], spira.Term)
     assert isinstance(cell.terms[0], spira.Term)
 
+# -------------------------------------------- spira.Layer -------------------------------------------
+
+def test_elem_layer():
+    l1 = spira.Layer()
+    l2 = spira.Layer(number=18, datatype=3)
+    l3 = spira.Layer(number=18, datatype=3)
+    assert l1.key == (0,0)
+    assert l2.key == (18,3)
+    assert l2.key != (18,0)
+    assert l1 != l2
+    assert l2 == l3
+
+    p1 = PurposeLayer(name='Metals')
+    p2 = PurposeLayer(name='Ground')
+    p3 = PurposeLayer(name='Skyplane', datatype=3)
+    p4 = PurposeLayer(name='Skyplane', datatype=2)
+    assert p1.name == 'Metals'
+    assert p1 == p2
+    assert p1 != p3
+
+    p5 = p3 + p4
+    assert p5.datatype == 5
+    assert p3.datatype == 3
+    p6 = p3 + 6
+    assert p6.datatype == 9
+    p6 += p3
+    assert p6.datatype == 12
 
 
 

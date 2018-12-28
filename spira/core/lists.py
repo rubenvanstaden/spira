@@ -129,10 +129,7 @@ class ElementFilterMixin(object):
         return subgraphs
 
 
-class ElementList(TypedList, ElementFilterMixin):
-    """
-
-    """
+class __ElementList__(TypedList, ElementFilterMixin):
 
     def __repr__(self):
         string = '\n'.join('{}'.format(k) for k in enumerate(self._list))
@@ -175,6 +172,12 @@ class ElementList(TypedList, ElementFilterMixin):
                 if item.name == name:
                     return True
         return False
+
+
+class ElementList(__ElementList__):
+    """
+
+    """
 
     def dependencies(self):
         import spira

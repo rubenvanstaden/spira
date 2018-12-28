@@ -21,9 +21,6 @@ class PurposeLayer(__Layer__):
     #     string = '[SPiRA: PurposeLayer] (\'{}\', datatype {}, symbol \'{}\')'
     #     return string.format(self.name, self.datatype, self.symbol)
 
-    def __str__(self):
-        return self.__repr__()
-
     def __eq__(self, other):
         if isinstance(other, PurposeLayer):
             return self.key == other.key
@@ -37,14 +34,29 @@ class PurposeLayer(__Layer__):
             raise ValueError('Not Implemented!')
 
     def __add__(self, other):
-        assert isinstance(other, int)
-        self.number = self.number + other
+        if isinstance(other, PurposeLayer):
+            d = self.datatype + other.datatype
+        elif isinstance(other, int):
+            d = self.datatype + other
+        else:
+            raise ValueError('Not Implemented')
+        return PurposeLayer(datatype=d)
+
+    def __iadd__(self, other):
+        if isinstance(other, PurposeLayer):
+            self.datatype += other.datatype
+        elif isinstance(other, int):
+            self.datatype += other
+        else:
+            raise ValueError('Not Implemented')
         return self
 
     def __deepcopy__(self, memo):
-        return PurposeLayer(name=self.name,
-                            datatype=self.datatype,
-                            symbol=self.symbol)
+        return PurposeLayer(
+            name=self.name,
+            datatype=self.datatype,
+            symbol=self.symbol
+        )
 
     @property
     def key(self):
@@ -96,6 +108,24 @@ class PhysicalLayer(__Layer__):
         else:
             raise ValueError('Not Implemented!')
     
+    # def __add__(self, other):
+    #     if isinstance(other, PhysicalLayer):
+    #         d = self.datatype + other.datatype
+    #     elif isinstance(other, int):
+    #         d = self.datatype + other
+    #     else:
+    #         raise ValueError('Not Implemented')
+    #     return PurposeLayer(datatype=d)
+
+    # def __iadd__(self, other):
+    #     if isinstance(other, PhysicalLayer):
+    #         self.datatype += other.datatype
+    #     elif isinstance(other, int):
+    #         self.datatype += other
+    #     else:
+    #         raise ValueError('Not Implemented')
+    #     return self
+
     @property
     def key(self):
         return (self.layer.number, self.purpose.symbol)
