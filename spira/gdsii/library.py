@@ -17,6 +17,40 @@ class __Library__(gdspy.GdsLibrary, FieldInitializer):
 
     __mixins__ = [OutputMixin]
 
+    def __add__(self, other):
+        if isinstance(other, spira.Cell):
+            self.cells.add(other)
+            for d in other.dependencies():
+                self.cells.add(d)
+        elif isinstance(other, spira.ElementList):
+            for d in other.dependencies():
+                self.cells.add(d)
+        return self
+
+    def __len__(self):
+        return len(self.cells)
+
+    def __getitem__(self, index):
+        return self.cells[index]
+
+    def __contains__(self, item):
+        return self.cells.__contains__(item)
+
+    def __eq__(self, other):
+        if not isinstance(other, Library):
+            return False
+        if len(self.cells) != len(other.cells):
+            return False
+        for struct1, struct2 in zip(self.cells, other.cells):
+            if (struct1.name != struct2.name):
+                return False
+            if (struct1 != struct2):
+                return False
+        return True
+
+    def __ne__(self, other):
+        return not self.__eq__(other)
+
 
 class LibraryAbstract(__Library__):
 
@@ -35,18 +69,11 @@ class LibraryAbstract(__Library__):
             raise Exception('The grid should be smaller than the unit.')
         return True
 
-    def __add__(self, other):
-        if isinstance(other, spira.Cell):
-            self.cells.add(other)
-            for d in other.dependencies():
-                self.cells.add(d)
-        elif isinstance(other, spira.ElementList):
-            for d in other.dependencies():
-                self.cells.add(d)
-        return self
-
-    def add_pcell(self, pcell):
-        self.pcells += pcell
+    def referenced_structures(self):
+        referred_to_list = list()
+        for s in self.cells:
+            referred_to_list.append(s.dependencies())
+        return referred_to_list
 
     def get_cell(self, cell_name):
         for C in self.cells:
@@ -54,36 +81,24 @@ class LibraryAbstract(__Library__):
                 return C
         return None
 
-    @property
-    def to_gdspy(self):
-        for c in self.cells:
-            cell = c.gdspycell
-            if c.name in self.cell_dict.keys():
-                self.cell_dict[c.name] = cell
-            else:
-                self.add(cell)
+    def is_empty(self):
+        return len(self.cells) == 0
 
-    def referenced_structures(self):
-        referred_to_list = list()
-        for s in self.structures:
-            referred_to_list.append(s.dependencies())
-        return referred_to_list
-
-    @property
-    def device_types(self):
-        devices = [0, 1]
-        for cell in self.structures:
-            devices.append(cell.gdsdatatype)
-        return devices
+    def clear(self):
+        self.cells.clear()
 
 
 class Library(LibraryAbstract):
     """ Library contains all the cell and pcell informartion
-    of a given layout connected to a RDD. """
+    of a given layout connected to a RDD. 
+    
+    Examples
+    --------
+    >>> lib = spira.Library(name='LIB')
+    """
     def __init__(self, name='spira_library', infile=None, **kwargs):
         super().__init__(name=name, infile=None, **kwargs)
         self.cells = CellList()
-        self.pcells = ElementList()
         self.graphs = list()
 
     def __repr__(self):

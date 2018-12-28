@@ -13,7 +13,8 @@ class CellList(TypedList):
     def __getitem__(self, key):
         if isinstance(key, str):
             for i in self._list:
-                if i.name == key: return i
+                if i.name == key: 
+                    return i
             raise IndexError("Structure " + key + " cannot be found in StructureList.")
         else:
             return list.__getitem__(self._list, key)
@@ -44,7 +45,8 @@ class CellList(TypedList):
             name = item
         if isinstance(name, str):
             for i in self._list:
-                if i.name == name: return True
+                if i.name == name:
+                    return True
             return False
         else:
             return list.__contains__(self._list, item)

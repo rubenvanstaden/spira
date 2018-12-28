@@ -68,9 +68,12 @@ class TypedList(collections.abc.MutableSequence):
     def value(self):
         value_list = []
         for i in self._list:
-            if isinstance(i, Float):
+            if isinstance(i, float):
                 value_list.append(i._val)
         return value_list
+
+    def clear(self):
+        del self[:]
 
     def __deepcopy__(self, memo):
         from copy import deepcopy

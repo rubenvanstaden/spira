@@ -214,10 +214,13 @@ class MaskGenerator(CircuitGenerator):
 
 
 class SLayout(MaskGenerator):
-    """
-    The StructureLayout is a converted layout that
-    takes designed elementals and wraps them with
-    different generators.
+    """ The StructureLayout is a converted layout 
+    that takes designed elementals and wraps them 
+    with different generators.
+
+    Examples
+    --------
+    >>> sl = SLayout()
     """
 
     def create_elementals(self, elems):

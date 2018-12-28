@@ -7,6 +7,32 @@ UM = 1e6
 
 # -------------------------------------------- spira.Polygon ----------------------------------------
 
+def test_library():
+    l1 = spira.Library()
+    l2 = spira.Library(name='library')
+    l3 = spira.Library()
+
+    assert l1.is_empty() == True
+
+    cell = spira.Cell(name='C1')
+    l1 += cell
+    l3 += cell
+
+    assert l1 == l3
+    assert l1 != l2
+    assert len(l1) == 1
+    assert l1.name == 'spira_library'
+    assert l2.name == 'library'
+    assert (cell in l1) == True
+    assert l1['C1'] == cell
+
+    l1.clear()
+
+    assert len(l1) == 0
+    assert l1 == l2
+
+# -------------------------------------------- spira.Polygon ----------------------------------------
+
 def test_elem_polygon():
     p1 = [[[0,0], [3,0], [3,1], [0,1]]]
     p2 = [[[4,0], [7,0], [7,1], [4,1]]]
