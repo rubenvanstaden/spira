@@ -72,6 +72,7 @@ class PortAbstract(__Port__):
             self.polygon.commit_to_gdspy(cell)
             self.label.commit_to_gdspy(cell)
             if self.arrow:
+                self.arrow.rotate(angle=90+self.orientation)
                 self.arrow.move(midpoint=self.arrow.center, destination=self.midpoint)
                 self.arrow.commit_to_gdspy(cell)
             __Port__.__committed__.update({self.__repr__():self})

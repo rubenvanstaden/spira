@@ -27,12 +27,23 @@ Database
 
 .. -----------------------------------------------------------------------------------
 
+Shapes
+------
+
+.. include:: ../demo/projects/tutorials/3-shapes/readme.rst
+
+.. literalinclude:: ../demo/projects/tutorials/3-shapes/run_shapes.py
+   :language: python
+   :linenos:
+
+.. -----------------------------------------------------------------------------------
+
 Elementals
 ----------
 
-.. include:: ../demo/projects/tutorials/3-elementals/readme.rst
+.. include:: ../demo/projects/tutorials/4-elementals/readme.rst
 
-.. literalinclude:: ../demo/projects/tutorials/3-elementals/run_elementals.py
+.. literalinclude:: ../demo/projects/tutorials/4-elementals/run_elementals.py
    :language: python
    :linenos:
 
@@ -41,9 +52,9 @@ Elementals
 Subcells
 --------
 
-.. include:: ../demo/projects/tutorials/4-subcells/readme.rst
+.. include:: ../demo/projects/tutorials/5-subcells/readme.rst
 
-.. literalinclude:: ../demo/projects/tutorials/4-subcells/run_subcells.py
+.. literalinclude:: ../demo/projects/tutorials/5-subcells/run_subcells.py
    :language: python
    :linenos:
 
@@ -52,13 +63,13 @@ Subcells
 Ports
 -----
 
-.. include:: ../demo/projects/tutorials/5-ports/readme.rst
+.. include:: ../demo/projects/tutorials/6-ports/readme.rst
 
-.. literalinclude:: ../demo/projects/tutorials/5-ports/run_ports.py
+.. literalinclude:: ../demo/projects/tutorials/6-ports/run_ports.py
    :language: python
    :linenos:
 
-.. literalinclude:: ../demo/projects/tutorials/5-ports/run_ports_1.py
+.. literalinclude:: ../demo/projects/tutorials/6-ports/run_ports_1.py
    :language: python
    :linenos:
 

@@ -65,11 +65,6 @@ def test_elemental_list():
     el = spira.ElementList()
     assert len(el) == 0
 
-# -------------------------------------------- spira.Shapes ----------------------------------------
-
-def test_shapes():
-    pass
-
 # -------------------------------------------- spira.Polygon ----------------------------------------
 
 def test_elem_polygon():

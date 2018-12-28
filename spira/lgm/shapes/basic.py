@@ -13,13 +13,24 @@ from spira.gdsii.utils import scale_coord_down as scd
 from spira.core.initializer import FieldInitializer
 
 
+class RectangleShape(Shape):
+
+    p1 = param.PointField()
+    p2 = param.PointField()
+
+    def create_points(self, points):
+        pts = [[self.p1[0], self.p1[1]], [self.p1[0], self.p2[1]],
+               [self.p2[0], self.p2[1]], [self.p2[0], self.p1[1]]]
+        points = np.array([pts])
+        return points
+
+
 class BoxShape(Shape):
 
     width = param.FloatField(default=1)
     height = param.FloatField(default=1)
 
     def create_points(self, points):
-
         cx = self.center[0]
         cy = self.center[1]
         dx = 0.5 * self.width
@@ -28,24 +39,7 @@ class BoxShape(Shape):
                (cx - dx, cy + dy),
                (cx - dx, cy - dy),
                (cx + dx, cy - dy)]
-
         points = np.array([pts])
-
-        return points
-
-
-class RectangleShape(Shape):
-
-    p1 = param.PointField()
-    p2 = param.PointField()
-
-    def create_points(self, points):
-
-        pts = [[self.p1[0], self.p1[1]], [self.p1[0], self.p2[1]],
-               [self.p2[0], self.p2[1]], [self.p2[0], self.p1[1]]]
-
-        points = np.array([pts])
-
         return points
 
 
@@ -107,16 +101,54 @@ class ConvexPolygon(Shape):
             x0 = self.radius * np.cos((i + 0.5) * angle_step + math.pi / 2)
             y0 = self.radius * np.sin((i + 0.5) * angle_step + math.pi / 2)
             pts.append((self.center[0] + x0, self.center[1] + y0))
-
         points = np.array([pts])
+        return points
 
+
+class BasicTriangle(Shape):
+
+    a = param.FloatField(default=2)
+    b = param.FloatField(default=0.5)
+    c = param.FloatField(default=1)
+
+    def create_points(self, points):
+        p1 = [0, 0]
+        p2 = [p1[0]+self.b, p1[1]]
+        p3 = [p1[0], p1[1]+self.a]
+        pts = np.array([p1, p2, p3])
+        points = [pts]
+        return points
+
+
+class TriangleShape(BasicTriangle):
+
+    def create_points(self, points):
+        points = super().create_points(points)
+        triangle = BasicTriangle(a=self.a, b=self.b, c=self.c)
+        triangle.reflect()
+        points.extend(triangle.points)
+        return points
+
+
+class ArrowShape(TriangleShape):
+
+    # TODO: Implement point_list properties.
+    def create_points(self, points):
+        points = super().create_points(points)
+        height = 3*self.c
+        box = BoxShape(width=self.b/2, height=height)
+        box.move(pos=(0,-height/2))
+        points.extend(box.points)
         return points
 
 
 if __name__ == '__main__':
     # shape = CircleShape()
-    shape = ConvexPolygon()
-    ply = spira.Polygons(shape=shape)
+    # shape = ConvexPolygon()
+    shape = ArrowShape()
+    shape.apply_merge
+
+    ply = spira.Polygons(shape=shape, gdslayer=spira.Layer(number=13))
     cell = spira.Cell(name='yTron')
     cell += ply
     cell.output()

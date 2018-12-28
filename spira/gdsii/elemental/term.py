@@ -40,13 +40,14 @@ class Term(PortAbstract):
         else:
             self.polygon = polygon
 
-        arrow_shape = shapes.Arrow(
-            rotation=self.orientation,
-            wh = self.width/20,
-            wb = self.width/40,
-            hh = self.width/4,
-            hb = self.width/2,
+        arrow_shape = shapes.ArrowShape(
+            a = self.width/10,
+            b = self.width/20,
+            c = self.width/5
         )
+
+        arrow_shape.apply_merge
+        arrow_shape.rotate(angle=self.orientation)
 
         self.arrow = spira.Polygons(
             shape=arrow_shape,
