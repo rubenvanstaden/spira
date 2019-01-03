@@ -10,7 +10,7 @@ were the connected parameters are not of critical importance.
 **Problems**
 
 1. Constraints cannot be placed on parameters.
-2. There is no overview places on the parameters that can or should 
+2. There is no overview places on the parameters that can or should
    connected to a specific instance.
 3. Creating hierarchical layouts becomes syntactically tedious.
 

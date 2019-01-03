@@ -35,7 +35,14 @@ class DrawLayoutAbstract(object):
 #                 p.commit_to_gdspy(cell=c2dmap[c])
         for c in d:
             self._wrapper(c, c2dmap)
-            glib.add(c2dmap[c])
+            # cell = c2dmap[c]
+            if c.name in glib.cell_dict.keys():
+                pass
+                # glib.cell_dict[c.name] = cell
+                # self.add(self.cell_dict[c.name])
+            else:
+                glib.add(c2dmap[c])
+            # glib.add(c2dmap[c])
         for p in self.get_ports():
             p.commit_to_gdspy(cell=c2dmap[self])
         return c2dmap[self]
