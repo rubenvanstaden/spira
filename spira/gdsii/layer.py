@@ -17,9 +17,9 @@ class Layer(__Layer__):
     def __init__(self, **kwargs):
         ElementalInitializer.__init__(self, **kwargs)
 
-    # def __repr__(self):
-    #     string = '[SPiRA: Layer] (\'{}\', layer {}, datatype {})'
-    #     return string.format(self.name, self.number, self.datatype)
+    def __repr__(self):
+        string = '[SPiRA: Layer] (\'{}\', layer {}, datatype {})'
+        return string.format(self.name, self.number, self.datatype)
 
     def __eq__(self, other):
         if isinstance(other, Layer):
