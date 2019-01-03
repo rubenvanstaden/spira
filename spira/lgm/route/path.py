@@ -1,19 +1,19 @@
 import spira
 import gdspy
 from spira import param
-from spira.lgm.shapes.shape import __Shape__
+from spira.lgm.shapes.shape import __Shape__, Shape
 
 
-class __Path__(gdspy.Path, __Shape__):
+class __Path__(gdspy.Path, Shape):
 
-    width = param.FloatField()
+    width = param.FloatField(default=1)
     initial_point = param.PointField()
     number_of_paths = param.IntegerField(default=1)
-    distance = param.FloatField()
+    distance = param.FloatField(default=0)
 
     def __init__(self, **kwargs):
 
-        __Shape__.__init__(self, **kwargs)
+        Shape.__init__(self, **kwargs)
         gdspy.Path.__init__(self,
             width=self.width,
             initial_point=self.initial_point,

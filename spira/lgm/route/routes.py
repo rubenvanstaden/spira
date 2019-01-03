@@ -11,6 +11,9 @@ class Route(__Path__):
     input_term = param.DataField(fdef_name='create_port_input')
     output_term = param.DataField(fdef_name='create_port_output')
 
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
     def create_port_input(self):
         return None
 
@@ -23,11 +26,13 @@ class Route(__Path__):
 
 class RouteToCell(spira.Cell):
 
-    shape = param.DataField()
+    shape = param.ShapeField()
 
     def create_elementals(self, elems):
-        elems += spira.Polygons(shape=self.shape.points,
-                                gdslayer=spira.Layer(number=88))
+        elems += spira.Polygons(
+            shape=self.shape,
+            gdslayer=spira.Layer(number=88)
+        )
         return elems
 
     def create_ports(self, ports):

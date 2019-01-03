@@ -3,10 +3,9 @@ import numpy as np
 from spira import param
 from spira.gdsii.utils import scale_coord_up as scu
 from spira.gdsii.utils import scale_polygon_up as spu
-from spira.lgm.route.routes import Route, RouteToCell
 
 
-class ArcRoute(Route):
+class ArcRoute(spira.Route):
 
     gdslayer = param.LayerField(name='ArcLayer', number=91)
     radius = param.FloatField(default=5)
@@ -28,13 +27,23 @@ class ArcRoute(Route):
     def create_port_input(self):
         midpoint = self.radius*np.cos(self.angle1), self.radius*np.sin(self.angle1)
         orientation = self.start_angle - 90 + 180*(self.theta<0)
-        port = spira.Term(name='P1', midpoint=midpoint, width=self.width, length=0.2, orientation=orientation)
+        port = spira.Term(name='P1',
+            midpoint=midpoint,
+            width=self.width,
+            length=0.2,
+            orientation=orientation
+        )
         return port
 
     def create_port_output(self):
         midpoint = self.radius*np.cos(self.angle2), self.radius*np.sin(self.angle2)
         orientation = self.start_angle + self.theta + 90 - 180*(self.theta<0)
-        port = spira.Term(name='P2', midpoint=midpoint, width=self.width, length=0.2, orientation=orientation)
+        port = spira.Term(name='P2',
+            midpoint=midpoint,
+            width=self.width,
+            length=0.2,
+            orientation=orientation
+        )
         return port
 
     def create_points(self, points):
@@ -55,7 +64,7 @@ class ArcRoute(Route):
         return points
 
 
-class Arc(RouteToCell):
+class Arc(spira.RouteToCell):
     pass
 
 
@@ -63,7 +72,7 @@ if __name__ == '__main__':
 
     arc_route = ArcRoute(theta=90)
     arc = Arc(shape=arc_route)
-    arc.construct_gdspy_tree()
+    arc.output()
 
 
 

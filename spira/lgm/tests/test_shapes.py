@@ -7,7 +7,7 @@ from spira import shapes
 UM = 1e12
 
 
-def test_shapes_basic():
+def test_shapes_rectangle():
 
     rect_shape = shapes.RectangleShape(p1=[0,0], p2=[2,2])
     assert all([a == b for a, b in zip(rect_shape.p1, [0,0])])
@@ -15,12 +15,16 @@ def test_shapes_basic():
     assert rect_shape.area == 4
     assert rect_shape.orientation == 1
 
+
+def test_shapes_box():
     box_shape = shapes.BoxShape(center=(0,0), width=2, height=2)
     assert box_shape.area == 4
     assert box_shape.orientation == -1
     assert box_shape.width == 2
     assert box_shape.height == 2
 
+
+def test_shapes_circle():
     circle_shape = shapes.CircleShape(center=(0,0), box_size=(4,4))
     # circle_shape = shapes.CircleShape(center=(0,0), radius=2)
     assert all([a == b for a, b in zip(circle_shape.center, [0,0])])

@@ -1,7 +1,7 @@
 import spira
 import numpy as np
 from spira import param
-from spira.routing.arc_bend import Arc, ArcRoute
+from spira.lgm.route.arc_bend import Arc, ArcRoute
 from spira.gdsii.utils import scale_coord_up as scu
 
 
@@ -198,7 +198,7 @@ if __name__ == '__main__':
 
     gradual.elementals
 
-    gradual.construct_gdspy_tree()
+    gradual.output()
     # gradual.output(name='gradual_bend')
 
 

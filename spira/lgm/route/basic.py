@@ -2,19 +2,12 @@ import spira
 import gdspy
 import numpy as np
 from spira import param
+from spira import shapes
 from numpy.linalg import norm
 from numpy import sqrt, pi, cos, sin, log, exp, sinh, mod
-from spira.core.initializer import ElementalInitializer
 
 
-class Shape(ElementalInitializer):
-    points = param.PointArrayField(fdef_name='create_points')
-
-    def create_points(self, points):
-        return points
-
-
-class RouteShape(Shape):
+class RouteShape(shapes.Shape):
 
     port1 = param.DataField()
     port2 = param.DataField()
@@ -23,8 +16,8 @@ class RouteShape(Shape):
 
     path_type = param.StringField(default='sine')
     width_type = param.StringField(default='straight')
-    width1 = param.FloatField(default=None)
-    width2 = param.FloatField(default=None)
+    width1 = param.FloatField(default=1)
+    width2 = param.FloatField(default=1)
     layer = param.LayerField()
 
     x_dist = param.FloatField()
@@ -71,8 +64,6 @@ class RouteShape(Shape):
         route_path.parametric(curve_fun, curve_deriv_fun, number_of_evaluations=self.num_path_pts,
                 max_points=199, final_width=width_fun, final_distance=None)
 
-        from spira.gdsii.utils import scale_polygon_up as spu
-        # points = spu(route_path.polygons)
         points = route_path.polygons
 
         return points
@@ -86,32 +77,25 @@ class RouteBasic(spira.Cell):
     port2 = param.DataField(fdef_name='create_port2')
 
     def create_elementals(self, elems):
-        from spira.gdsii.utils import scale_polygon_down as spd
-        elems += spira.Polygons(polygons=self.route.points)
-        # elems += spira.Polygons(polygons=spd(self.route.points))
+        elems += spira.Polygons(shape=self.route.points)
         return elems
 
     def create_port1(self):
         term = spira.Term(name='P1',
-                          midpoint=(0,0),
-                          width=self.route.width1,
-                          length=0.2,
-                        #   length=0.2 * 1e6,
-                          orientation=self.route.port1.orientation)
-                        #   orientation=90)
+            midpoint=(0,0),
+            width=self.route.width1,
+            length=0.2,
+            orientation=self.route.port1.orientation
+        )
         return term
 
     def create_port2(self):
-        from spira.gdsii.utils import scale_coord_up as scu
-        midpoint=[self.route.x_dist, self.route.y_dist],
         term = spira.Term(name='P2',
-                        #   midpoint=scu([self.route.x_dist, self.route.y_dist]),
-                          midpoint=[self.route.x_dist, self.route.y_dist],
-                          width=self.route.width2,
-                          length=0.2,
-                        #   length=0.2 * 1e6,
-                          orientation=self.route.port2.orientation)
-                        #   orientation=90)
+            midpoint=[self.route.x_dist, self.route.y_dist],
+            width=self.route.width2,
+            length=0.2,
+            orientation=self.route.port2.orientation
+        )
         return term
 
     def create_ports(self, ports):
@@ -123,16 +107,6 @@ class RouteBasic(spira.Cell):
 
 
 if __name__ == '__main__':
-
-#     p1 = spira.Term(name='P1', midpoint=(0,0), orientation=90, width=2*1e6)
-# #     p2 = spira.Term(name='P2', midpoint=(15,30), orientation=-90, width=1)
-#     p2 = spira.Term(name='P2', midpoint=(15*1e6,30*1e6), orientation=-90, width=1*1e6)
-
-#     route = RouteShape(port1=p1, port2=p2, path_type='sine', width_type='straight')
-
-#     route.points
-
-#     D = RouteBasic(route=route)
 
     p1 = spira.Term(name='P1', midpoint=(0,0), orientation=180, width=2)
     p2 = spira.Term(name='P2', midpoint=(0,30), orientation=0, width=1)
@@ -146,11 +120,24 @@ if __name__ == '__main__':
     # D.rotate(angle = 180 + p1.orientation - D.port1.orientation, center = D.port1.midpoint)
     # D.move(midpoint = p1, destination = D.port1)
 
-    D.construct_gdspy_tree()
+    D.output()
 
 
 
 
 
+# from spira.lgm.route.basic import RouteShape
+# p1 = spira.Term(name='P1', midpoint=(0,0), orientation=180, width=2)
+# p2 = spira.Term(name='P2', midpoint=(0,30), orientation=0, width=1)
 
+# route_shape = RouteShape(
+#     port1=p1, port2=p2, 
+#     path_type='straight', 
+#     width_type='straight'
+# )
+
+# D = spira.Cell(name='RouteConnect')
+# D += spira.Polygons(shape=route_shape)
+
+# D.output()
 

@@ -1,9 +1,9 @@
 import spira
 import numpy as np
 from spira import param
-from spira.routing.arc_bend import ArcRoute, Arc
-from spira.routing.basic import RouteShape
-from spira.routing.basic import RouteBasic
+from spira.lgm.route.arc_bend import ArcRoute, Arc
+from spira.lgm.route.basic import RouteShape
+from spira.lgm.route.basic import RouteBasic
 from spira.gdsii.utils import scale_coord_up as scu
 
 
@@ -208,10 +208,7 @@ if __name__ == '__main__':
     p2 = spira.Term(name='P2', midpoint=(30,45), orientation=0, width=1.5)
 
     rm = RouteManhattan(port1=p1, port2=p2, radius=10)
-
-    # print(rm.elementals)
-
-    rm.construct_gdspy_tree()
+    rm.output()
 
 
 

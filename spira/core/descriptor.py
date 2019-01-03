@@ -75,7 +75,6 @@ class DataFieldDescriptor(BaseField):
                 value = self.call_param_function(obj)
         else:
             value = self.get_stored_value(obj)
-
         return value
 
     def __set__(self, obj, value):
