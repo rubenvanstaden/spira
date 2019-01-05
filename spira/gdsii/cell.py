@@ -41,9 +41,20 @@ class __Cell__(gdspy.Cell, CellInitializer):
     def __add__(self, other):
         if other is None:
             return self
-        if isinstance(other, Cell):
-            raise ValueError('Use SRef to add to Cell')
-        self.elementals += other
+
+        # if issubclass(type(other), Cell):
+        #     for e in other.elementals:
+        #         self.elementals += e
+        #     for p in other.ports:
+        #         self.ports += p
+        # elif isinstance(other, (list, ElementList)):
+        #     raise ValueError('Not Implemented!')
+
+        if isinstance(other, Port):
+            self.ports += other
+        else:
+            self.elementals += other
+
         return self
 
     def __sub__(self, other):
@@ -79,7 +90,13 @@ class CellAbstract(__Cell__):
     def commit_to_gdspy(self):
         cell = gdspy.Cell(self.name, exclude_from_current=True)
         for e in self.elementals:
-            if not isinstance(e, (Cell, SRef, ElementList, Graph, Mesh)):
+            # if not isinstance(e, (Cell, SRef, ElementList, Graph, Mesh)):
+            if issubclass(type(e), Cell):
+                for elem in e.elementals:
+                    elem.commit_to_gdspy(cell=cell)
+                for port in e.ports:
+                    port.commit_to_gdspy(cell=cell)
+            elif not isinstance(e, (SRef, ElementList, Graph, Mesh)):
                 e.commit_to_gdspy(cell=cell)
         return cell
 

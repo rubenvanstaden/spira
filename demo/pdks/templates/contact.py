@@ -14,43 +14,37 @@ class __TempatePrimitive__(__TemplateCell__):
     pass
 
 
-class __TempateDevice__(__TemplateCell__):
-    pass
-
-
 class ViaTemplate(__TempatePrimitive__):
-    """
-    Via Template class to describe the boolean operations
-    to be applied create a Device.
-    """
 
-    via_layer = param.LayerField()
-    layer1 = param.LayerField()
-    layer2 = param.LayerField()
-
-    color = param.ColorField(default='#C0C0C0')
+    layer1 = param.LayerField(number=3)
+    layer2 = param.LayerField(number=8)
+    via_layer = param.LayerField(number=9)
 
     def create_elementals(self, elems):
+        M1 = spira.ElementList()
+        M2 = spira.ElementList()
+        contacts = spira.ElementList()
 
-        NLayers = elems.get_dlayer(layer=self.via_layer)
-        M1 = elems.get_mlayer(layer=self.layer1)
-        M2 = elems.get_mlayer(layer=self.layer2)
+        for e in elems:
+            if e.player.purpose == RDD.PURPOSE.METAL:
+                if e.player.layer == self.layer1:
+                    M1 += e
+                elif e.player.layer == self.layer2:
+                    M2 += e
+            if e.player.purpose == RDD.PURPOSE.PRIM.VIA:
+                if e.player.layer == self.via_layer:
+                    contacts += e
 
-        for D in NLayers:
-            overlap_poly = deepcopy(D.ref.player)
-
+        for D in contacts:
             for M in M1:
-                if overlap_poly | M.ref.player:
-                    overlap_poly = overlap_poly | M.ref.player
-                    D.ref.ports[0]._update(name=self.name, layer=M.ref.layer)
-
+                if D.polygon | M.polygon:
+                    pp = D.polygon | M.polygon
+                    # TODO: Apply DRC enclosure rule here.
+                    D.ports[0]._update(name=D.name, layer=M.player.layer)
             for M in M2:
-                if overlap_poly | M.ref.player:
-                    overlap_poly = overlap_poly | M.ref.player
-                    D.ref.ports[1]._update(name=self.name, layer=M.ref.layer)
+                if D.polygon | M.polygon:
+                    pp = D.polygon | M.polygon
+                    # TODO: Apply DRC enclosure rule here.
+                    D.ports[1]._update(name=D.name, layer=M.player.layer)
+        return elems
 
-
-if __name__ == '__main__':
-
-    jj = JunctionTemplate(pcell=True)
-    jj.construct_gdspy_tree()

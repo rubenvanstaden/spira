@@ -78,7 +78,7 @@ RDD.BC.M5_METAL = 1.0
 
 RDD.JC = ProcessTree()
 RDD.JC.LAYER = Layer(name='JC', number=10)
-RDD.JC.WIDTH = 0.5
+RDD.JC.WIDTH = 1.0
 RDD.JC.M5_METAL = 1.0
 
 RDD.CC = ProcessTree()
@@ -89,21 +89,21 @@ RDD.CC.M5_METAL = 1.0
 # ------------------------------- Physical Metals -------------------------------
 
 RDD.PLAYER = PhysicalTree()
-RDD.PLAYER.GP = PhysicalLayer(layer=RDD.GP.LAYER, purpose=RDD.PURPOSE.GROUND)
-RDD.PLAYER.RES = PhysicalLayer(layer=RDD.RES.LAYER, purpose=RDD.PURPOSE.METAL)
-RDD.PLAYER.BAS = PhysicalLayer(layer=RDD.BAS.LAYER, purpose=RDD.PURPOSE.METAL)
-RDD.PLAYER.COU = PhysicalLayer(layer=RDD.COU.LAYER, purpose=RDD.PURPOSE.METAL)
-RDD.PLAYER.CTL = PhysicalLayer(layer=RDD.CTL.LAYER, purpose=RDD.PURPOSE.METAL)
-RDD.PLAYER.JP = PhysicalLayer(layer=RDD.JP.LAYER, purpose=RDD.PURPOSE.PROTECTION)
-RDD.PLAYER.JJ = PhysicalLayer(layer=RDD.JJ.LAYER, purpose=RDD.PURPOSE.PRIM.JUNCTION)
+RDD.PLAYER.GP = PhysicalLayer(layer=RDD.GP.LAYER, purpose=RDD.PURPOSE.GROUND, data=RDD.GP)
+RDD.PLAYER.RES = PhysicalLayer(layer=RDD.RES.LAYER, purpose=RDD.PURPOSE.METAL, data=RDD.RES)
+RDD.PLAYER.BAS = PhysicalLayer(layer=RDD.BAS.LAYER, purpose=RDD.PURPOSE.METAL, data=RDD.BAS)
+RDD.PLAYER.COU = PhysicalLayer(layer=RDD.COU.LAYER, purpose=RDD.PURPOSE.METAL, data=RDD.COU)
+RDD.PLAYER.CTL = PhysicalLayer(layer=RDD.CTL.LAYER, purpose=RDD.PURPOSE.METAL, data=RDD.CTL)
+RDD.PLAYER.JP = PhysicalLayer(layer=RDD.JP.LAYER, purpose=RDD.PURPOSE.PROTECTION, data=RDD.JP)
+RDD.PLAYER.JJ = PhysicalLayer(layer=RDD.JJ.LAYER, purpose=RDD.PURPOSE.PRIM.JUNCTION, data=RDD.JJ)
 
 # ------------------------------- Physical Vias ----------------------------------
 
-RDD.PLAYER.RC = PhysicalLayer(layer=RDD.RC.LAYER, purpose=RDD.PURPOSE.PRIM.VIA)
-RDD.PLAYER.GC = PhysicalLayer(layer=RDD.GC.LAYER, purpose=RDD.PURPOSE.PRIM.VIA)
-RDD.PLAYER.BC = PhysicalLayer(layer=RDD.BC.LAYER, purpose=RDD.PURPOSE.PRIM.VIA)
-RDD.PLAYER.JC = PhysicalLayer(layer=RDD.JC.LAYER, purpose=RDD.PURPOSE.PRIM.VIA)
-RDD.PLAYER.CC = PhysicalLayer(layer=RDD.CC.LAYER, purpose=RDD.PURPOSE.PRIM.VIA)
+RDD.PLAYER.RC = PhysicalLayer(layer=RDD.RC.LAYER, purpose=RDD.PURPOSE.PRIM.VIA, data=RDD.RC)
+RDD.PLAYER.GC = PhysicalLayer(layer=RDD.GC.LAYER, purpose=RDD.PURPOSE.PRIM.VIA, data=RDD.GC)
+RDD.PLAYER.BC = PhysicalLayer(layer=RDD.BC.LAYER, purpose=RDD.PURPOSE.PRIM.VIA, data=RDD.BC)
+RDD.PLAYER.JC = PhysicalLayer(layer=RDD.JC.LAYER, purpose=RDD.PURPOSE.PRIM.VIA, data=RDD.JC)
+RDD.PLAYER.CC = PhysicalLayer(layer=RDD.CC.LAYER, purpose=RDD.PURPOSE.PRIM.VIA, data=RDD.CC)
 
 # ------------------------------ Primitive TCells -------------------------------
 
@@ -111,7 +111,7 @@ RDD.VIAS = ProcessTree()
 
 class TCellRC(DynamicDataTree):
     def initialize(self):
-        from spira.core.default.templates import ViaTemplate
+        from demo.pdks.templates.contact import ViaTemplate
         self.PCELL = ViaTemplate(
             name = 'RC',
             via_layer = RDD.RC.LAYER,
@@ -123,7 +123,7 @@ RDD.VIAS.RC = TCellRC()
 
 class TCellGC(DynamicDataTree):
     def initialize(self):
-        from spira.core.default.templates import ViaTemplate
+        from demo.pdks.templates.contact import ViaTemplate
         self.PCELL = ViaTemplate(
             name = 'GC',
             via_layer = RDD.GC.LAYER,
@@ -135,7 +135,7 @@ RDD.VIAS.GC = TCellGC()
 
 class TCellBC(DynamicDataTree):
     def initialize(self):
-        from spira.core.default.templates import ViaTemplate
+        from demo.pdks.templates.contact import ViaTemplate
         self.PCELL = ViaTemplate(
             name = 'BC',
             via_layer = RDD.BC.LAYER,
@@ -147,7 +147,7 @@ RDD.VIAS.BC = TCellBC()
 
 class TCellJC(DynamicDataTree):
     def initialize(self):
-        from spira.core.default.templates import ViaTemplate
+        from demo.pdks.templates.contact import ViaTemplate
         self.PCELL = ViaTemplate(
             name = 'JC',
             via_layer = RDD.JC.LAYER,
@@ -159,7 +159,7 @@ RDD.VIAS.JC = TCellJC()
 
 class TCellCC(DynamicDataTree):
     def initialize(self):
-        from spira.core.default.templates import ViaTemplate
+        from demo.pdks.templates.contact import ViaTemplate
         self.PCELL = ViaTemplate(
             name = 'CC',
             via_layer = RDD.CC.LAYER,
@@ -175,8 +175,8 @@ RDD.DEVICES = ProcessTree()
 
 class TCellJunction(DynamicDataTree):
     def initialize(self):
-        from spira.core.default.templates import JunctionTemplate
-        self.PCELL = JunctionTemplate(pcell=False)
+        from demo.pdks.components.junction import Junction
+        self.PCELL = Junction()
 
 RDD.DEVICES.JJ = TCellJunction()
 

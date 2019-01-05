@@ -47,12 +47,14 @@ class Term(PortAbstract):
         )
 
         arrow_shape.apply_merge
-        arrow_shape.rotate(angle=self.orientation)
+        # arrow_shape.rotate(angle=self.orientation)
 
         self.arrow = spira.Polygons(
             shape=arrow_shape,
             gdslayer=spira.Layer(number=77)
         )
+
+        self.arrow.rotate(angle=90-self.orientation)
 
     def __repr__(self):
         return ("[SPiRA: Term] (name {}, number {}, midpoint {}, " +

@@ -83,8 +83,8 @@ class DataTree(__DataTree__):
 class PhysicalTree(__DataTree__):
     """ A hierarchical tree for storing process layer settings. """
 
-    def __repr__(self):
-        return '[PhysicalTree] ({} keys, {} layers)'.format(len(self.keys), len(self.layers))
+    # def __repr__(self):
+    #     return '[PhysicalTree] ({} keys, {} layers)'.format(len(self.keys), len(self.layers))
 
     def get_physical_layers(self, purposes):
         plist = []
@@ -128,6 +128,12 @@ class ProcessTree(__DataTree__):
                     if 'LAYER' in value.keys:
                         items.append(value['LAYER'])
         return items
+
+
+# from spira.core.descriptor import DataFieldDescriptor
+# def ProcessTreeField(name='', datatype=0, symbol=''):
+#     F = ProcessTree(name=name, datatype=datatype, symbol='')
+#     return DataFieldDescriptor(default=F)
 
 
 class TechnologyLibrary(__DataTree__):

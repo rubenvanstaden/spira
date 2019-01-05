@@ -10,6 +10,7 @@ from .field.typed_point import PointField
 from spira.core.descriptor import DataField
 from spira.core.descriptor import DataFieldDescriptor
 from spira.core.descriptor import FunctionField
+
 import numpy as np
 
 
@@ -75,6 +76,12 @@ def FloatField(**kwargs):
 def CellField(name=None, elementals=None, library=None):
     from spira.gdsii.cell import Cell
     F = Cell(name=name, elementals=elementals, library=library)
+    return DataFieldDescriptor(default=F)
+
+
+def PhysicalLayerField(layer=None, purpose=None):
+    from spira.rdd.layer import PhysicalLayer
+    F = PhysicalLayer(layer=layer, purpose=purpose)
     return DataFieldDescriptor(default=F)
 
 

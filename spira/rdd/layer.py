@@ -1,6 +1,6 @@
-from spira.core.initializer import ElementalInitializer
-# from spira.gdsii.layer import Layer
 from spira import param
+from spira.rdd.technology import ProcessTree
+from spira.core.initializer import ElementalInitializer
 
 
 class __Layer__(ElementalInitializer):
@@ -77,6 +77,7 @@ class PhysicalLayer(__Layer__):
     doc = param.StringField()
     layer = param.LayerField()
     purpose = PurposeLayerField()
+    data = param.DataField(default=ProcessTree())
 
     def __init__(self, **kwargs):
         ElementalInitializer.__init__(self, **kwargs)
@@ -131,10 +132,10 @@ class PhysicalLayer(__Layer__):
         return (self.layer.number, self.purpose.symbol)
 
 
-from spira.core.descriptor import DataFieldDescriptor
-def PhysicalLayerField(layer, purpose):
-    F = PhysicalLayer(layer=layer, purpose=purpose)
-    return DataFieldDescriptor(default=F)
+# from spira.core.descriptor import DataFieldDescriptor
+# def PhysicalLayerField(layer, purpose):
+#     F = PhysicalLayer(layer=layer, purpose=purpose)
+#     return DataFieldDescriptor(default=F)
 
 
 
