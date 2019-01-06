@@ -12,6 +12,7 @@ from spira.core.initializer import CellInitializer
 from spira.core.mixin.property import CellMixin
 from spira.core.mixin.gdsii_output import OutputMixin
 from spira.gdsii.elemental.port import __Port__
+from spira.core.mixin.transform import TranformationMixin
 
 
 # ----------------------------------------------------------------------------------------------
@@ -19,7 +20,7 @@ from spira.gdsii.elemental.port import __Port__
 
 class __Cell__(gdspy.Cell, CellInitializer):
 
-    __mixins__ = [OutputMixin, CellMixin]
+    __mixins__ = [OutputMixin, CellMixin, TranformationMixin]
 
     def __init__(self, name=None, elementals=None, ports=None, library=None, **kwargs):
         CellInitializer.__init__(self, **kwargs)
@@ -37,6 +38,9 @@ class __Cell__(gdspy.Cell, CellInitializer):
 
         if ports is not None:
             self.ports = ports
+
+        # self.move(midpoint=self.center, destination=(0,0))
+        # self.center = (0,0)
 
     def __add__(self, other):
         if other is None:
@@ -146,7 +150,9 @@ class CellAbstract(__Cell__):
                 e.move(destination=d, midpoint=o)
 
         for p in self.ports:
-            p.midpoint = np.array(p.midpoint) + np.array(d) - np.array(o)
+            # p.midpoint = np.array(p.midpoint) + np.array(d) - np.array(o)
+            mc = np.array(p.midpoint) + np.array(d) - np.array(o)
+            p.move(midpoint=p.midpoint, destination=mc)
 
         return self
 
@@ -172,15 +178,13 @@ class CellAbstract(__Cell__):
             elif isinstance(e, SRef):
                 e.rotate(angle, center)
 
-        elements = self.elementals
-        self.elementals = ElementList()
-        for p in elements:
+        ports = self.ports
+        self.ports = ElementList()
+        for p in ports:
             if issubclass(type(p), __Port__):
                 p.midpoint = self.__rotate__(p.midpoint, angle, center)
                 p.orientation = np.mod(p.orientation + angle, 360)
-                self.elementals += p
-            else:
-                self.elementals += p
+                self.ports += p
 
         return self
 

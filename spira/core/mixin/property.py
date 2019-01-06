@@ -1,5 +1,7 @@
 import gdspy
+import spira
 import numpy as np
+from copy import deepcopy
 from spira.core.lists import ElementList
 
 
@@ -24,14 +26,48 @@ class __Properties__(object):
     @property
     def center(self):
         return np.sum(self.bbox, 0)/2
+    
+    @center.setter
+    def center(self, destination):
+        self.move(destination=destination, midpoint=self.center)
 
+glib = gdspy.GdsLibrary(name='test')
 
 class CellMixin(__Properties__):
 
+    def _wrapper(self, c, c2dmap):
+        for e in c.elementals.flat_elems():
+            G = c2dmap[c]
+            if isinstance(e, spira.SRef):
+                G.add(gdspy.CellReference(
+                    ref_cell=c2dmap[e.ref],
+                    midpoint=e.midpoint,
+                    rotation=e.rotation,
+                    magnification=e.magnification,
+                    x_reflection=e.reflection)
+                )
+
+    def _construct_gdspy_tree(self):
+        d = self.dependencies()
+        c2dmap = {}
+        for c in d:
+            G = c.commit_to_gdspy()
+            c2dmap.update({c:G})
+        for c in d:
+            self._wrapper(c, c2dmap)
+            if c.name not in glib.cell_dict.keys():
+                glib.add(c2dmap[c])
+        for p in self.get_ports():
+            p.commit_to_gdspy(cell=c2dmap[self])
+        return c2dmap[self]
+
     @property
     def bbox(self):
-        bbox = self.get_bounding_box()
-        if bbox is None:  bbox = ((0,0),(0,0))
+        cell = deepcopy(self)
+        cell = self._construct_gdspy_tree()
+        bbox = cell.get_bounding_box()
+        if bbox is None:  
+            bbox = ((0,0),(0,0))
         return np.array(bbox)
 
     @property
@@ -51,6 +87,14 @@ class CellMixin(__Properties__):
             if isinstance(p, Term):
                 terms[p.name] = p
         return terms
+
+    @property
+    def center(self):
+        return np.sum(self.bbox, 0)/2
+
+    @center.setter
+    def center(self, destination):
+        self.move(destination=destination, midpoint=self.center)
 
 
 class PolygonMixin(__Properties__):

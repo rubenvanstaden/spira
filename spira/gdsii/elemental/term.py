@@ -18,7 +18,7 @@ class Term(PortAbstract):
     >>> term = spira.Term()
     """
 
-    width = param.FloatField(default=2)
+    width = param.FloatField(default=1)
     length = param.FloatField(default=0.1)
 
     def __init__(self, port=None, polygon=None, **kwargs):

@@ -142,11 +142,21 @@ class PolygonAbstract(__Polygon__):
     def transform(self, transform):
         if transform['reflection']:
             self.reflect(p1=[0,0], p2=[1,0])
+        if transform['rotation']:
             self.rotate(angle=transform['rotation'])
+        if transform['midpoint']:
             self.translate(dx=transform['midpoint'][0], dy=transform['midpoint'][1])
-        else:
-            self.rotate(angle=transform['rotation'])
-            self.translate(dx=transform['midpoint'][0], dy=transform['midpoint'][1])
+            # self.move(midpoint=self.center, destination=transform['midpoint'])
+
+        # if transform['reflection']:
+        #     self.reflect(p1=[0,0], p2=[1,0])
+        #     self.rotate(angle=transform['rotation'])
+        #     self.translate(dx=transform['midpoint'][0], dy=transform['midpoint'][1])
+        # else:
+        #     self.rotate(angle=transform['rotation'])
+        #     self.translate(dx=transform['midpoint'][0], dy=transform['midpoint'][1])
+        #     # self.move(midpoint=self.center, destination=transform['midpoint'])
+
         self.shape.points = self.polygons
         return self
 

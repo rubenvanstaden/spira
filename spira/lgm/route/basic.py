@@ -16,8 +16,8 @@ class RouteShape(shapes.Shape):
 
     path_type = param.StringField(default='sine')
     width_type = param.StringField(default='straight')
-    width1 = param.FloatField(default=1)
-    width2 = param.FloatField(default=1)
+    width1 = param.FloatField(default=None)
+    width2 = param.FloatField(default=None)
     layer = param.LayerField()
 
     x_dist = param.FloatField()
@@ -53,7 +53,7 @@ class RouteShape(shapes.Shape):
             curve_deriv_fun = lambda t: [xf + t*0, 0 + t*0]
         if self.path_type == 'sine':
             curve_fun = lambda t: [xf*t, yf*(1-cos(t*pi))/2]
-            curve_deriv_fun = lambda t: [xf  + t*0, yf*(sin(t*pi)*pi)/2]
+            curve_deriv_fun = lambda t: [xf + t*0, yf*(sin(t*pi)*pi)/2]
 
         if self.width_type == 'straight':
             width_fun = lambda t: (self.width2 - self.width1)*t + self.width1
@@ -61,8 +61,14 @@ class RouteShape(shapes.Shape):
             width_fun = lambda t: (self.width2 - self.width1)*(1-cos(t*pi))/2 + self.width1
 
         route_path = gdspy.Path(width=self.width1, initial_point=(0,0))
-        route_path.parametric(curve_fun, curve_deriv_fun, number_of_evaluations=self.num_path_pts,
-                max_points=199, final_width=width_fun, final_distance=None)
+
+        route_path.parametric(
+            curve_fun, curve_deriv_fun, 
+            number_of_evaluations=self.num_path_pts,
+            max_points=199, 
+            final_width=width_fun, 
+            final_distance=None
+        )
 
         points = route_path.polygons
 
@@ -71,30 +77,36 @@ class RouteShape(shapes.Shape):
 
 class RouteBasic(spira.Cell):
 
-    route = param.DataField()
+    route = param.ShapeField()
 
     port1 = param.DataField(fdef_name='create_port1')
     port2 = param.DataField(fdef_name='create_port2')
 
     def create_elementals(self, elems):
-        elems += spira.Polygons(shape=self.route.points)
+        elems += spira.Polygons(shape=self.route)
         return elems
 
     def create_port1(self):
         term = spira.Term(name='P1',
             midpoint=(0,0),
+            # midpoint=self.port1.midpoint,
             width=self.route.width1,
             length=0.2,
-            orientation=self.route.port1.orientation
+            orientation=180,
+            gdslayer=spira.Layer(number=65)
+            # orientation=self.route.port1.orientation
         )
         return term
 
     def create_port2(self):
         term = spira.Term(name='P2',
             midpoint=[self.route.x_dist, self.route.y_dist],
+            # midpoint=self.port2.midpoint,
             width=self.route.width2,
             length=0.2,
-            orientation=self.route.port2.orientation
+            orientation=0,
+            gdslayer=spira.Layer(number=65)
+            # orientation=self.route.port2.orientation
         )
         return term
 
@@ -108,36 +120,25 @@ class RouteBasic(spira.Cell):
 
 if __name__ == '__main__':
 
-    p1 = spira.Term(name='P1', midpoint=(0,0), orientation=180, width=2)
-    p2 = spira.Term(name='P2', midpoint=(0,30), orientation=0, width=1)
+    # p1 = spira.Term(name='P1', midpoint=(0,0), orientation=90, width=2)
+    # p2 = spira.Term(name='P2', midpoint=(0,30), orientation=-90, width=1)
+
+    p1 = spira.Term(name='P1', midpoint=(0,0), orientation=0, width=2)
+    p2 = spira.Term(name='P2', midpoint=(30,0), orientation=180, width=2)
 
     route = RouteShape(port1=p1, port2=p2, path_type='straight', width_type='straight')
+
+    # p1 = spira.Term(name='P1', midpoint=(0,0), orientation=-90, width=1)
+    # p2 = spira.Term(name='P2', midpoint=(30,30), orientation=90, width=1)
+
+    # route = RouteShape(port1=p1, port2=p2, path_type='sine', width_type='straight')
 
     route.points
 
     D = RouteBasic(route=route)
 
-    # D.rotate(angle = 180 + p1.orientation - D.port1.orientation, center = D.port1.midpoint)
-    # D.move(midpoint = p1, destination = D.port1)
+    D.rotate(angle = p1.orientation - D.port1.orientation, center = D.port1.midpoint)
+    D.move(midpoint = p1, destination = D.port1)
 
     D.output()
-
-
-
-
-
-# from spira.lgm.route.basic import RouteShape
-# p1 = spira.Term(name='P1', midpoint=(0,0), orientation=180, width=2)
-# p2 = spira.Term(name='P2', midpoint=(0,30), orientation=0, width=1)
-
-# route_shape = RouteShape(
-#     port1=p1, port2=p2, 
-#     path_type='straight', 
-#     width_type='straight'
-# )
-
-# D = spira.Cell(name='RouteConnect')
-# D += spira.Polygons(shape=route_shape)
-
-# D.output()
 

@@ -15,7 +15,7 @@ class TranformationMixin(object):
             pts = np.array([2*(p1 + (p2-p1)*t) - p for p in points])
         return pts
 
-    def __rotate__(self, points, angle = 45, center = (0,0)):
+    def __rotate__(self, points, angle=45, center=(0,0)):
         angle = angle*np.pi/180
         ca = np.cos(angle)
         sa = np.sin(angle)
@@ -28,4 +28,5 @@ class TranformationMixin(object):
             pts = (points - c0) * ca + (points - c0)[::-1] * sa + c0
             pts = np.round(pts, 6)
         return pts
+
 

@@ -109,6 +109,49 @@ class PortAbstract(__Port__):
         self.midpoint = self.midpoint + np.array([dx, dy])
         return self
 
+    def move(self, midpoint=(0,0), destination=None, axis=None):
+        from spira.gdsii.elemental.port import __Port__
+
+        if destination is None:
+            destination = midpoint
+            midpoint = [0,0]
+
+        if issubclass(type(midpoint), __Port__):
+            o = midpoint.midpoint
+        elif np.array(midpoint).size == 2:
+            o = midpoint
+        elif midpoint in self.ports:
+            o = self.ports[midpoint].midpoint
+        else:
+            raise ValueError("[PHIDL] [DeviceReference.move()] ``midpoint`` " +
+                             "not array-like, a port, or port name")
+
+        if issubclass(type(destination), __Port__):
+            d = destination.midpoint
+        elif np.array(destination).size == 2:
+            d = destination
+        elif destination in self.ports:
+            d = self.ports[destination].midpoint
+        else:
+            raise ValueError("[PHIDL] [DeviceReference.move()] ``destination`` " +
+                             "not array-like, a port, or port name")
+
+        if axis == 'x':
+            d = (d[0], o[1])
+        if axis == 'y':
+            d = (o[0], d[1])
+
+        dx, dy = np.array(d) - o
+
+        self.translate(dx, dy)
+
+        self.label.move(midpoint=self.label.position, destination=self.midpoint)
+        self.polygon.move(midpoint=self.polygon.center, destination=self.midpoint)
+        if self.arrow:
+            self.arrow.move(midpoint=self.polygon.center, destination=self.midpoint)
+
+        return self
+
     def stretch(self, stretch_class):
         """ Stretch port by with the given strecth class. """
         p = stretch_class.apply(self.midpoint)

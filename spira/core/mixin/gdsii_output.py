@@ -23,7 +23,8 @@ class DrawLayoutAbstract(object):
                     midpoint=e.midpoint,
                     rotation=e.rotation,
                     magnification=e.magnification,
-                    x_reflection=e.reflection))
+                    x_reflection=e.reflection)
+                )
 
     def _construct_gdspy_tree(self):
         d = self.dependencies()

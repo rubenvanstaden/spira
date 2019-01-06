@@ -76,10 +76,11 @@ class SRefAbstract(__SRef__):
 
     def _copy(self, level=0):
         S = SRef(structure=self.ref,
-                 midpoint=self.midpoint,
-                 rotation=self.rotation,
-                 magnification=self.magnification,
-                 reflection=self.reflection)
+            midpoint=self.midpoint,
+            rotation=self.rotation,
+            magnification=self.magnification,
+            reflection=self.reflection
+        )
         return S
 
     def flat_copy(self, level=-1, commit_to_gdspy=False):
@@ -108,6 +109,7 @@ class SRefAbstract(__SRef__):
             self.rotate(angle=transform['rotation'])
         if transform['midpoint']:
             self.translate(dx=transform['midpoint'][0], dy=transform['midpoint'][1])
+            # self.move(midpoint=self.midpoint, destination=transform['midpoint'])
         return self
 
     def flatten(self):
@@ -278,6 +280,9 @@ class SRef(SRefAbstract):
             len(self.ref.ports),
             len(self.ref.elementals.labels)
         )
+
+    def __str__(self):
+        return self.__repr__()
 
 
 
