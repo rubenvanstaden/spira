@@ -31,11 +31,10 @@ class __Properties__(object):
     def center(self, destination):
         self.move(destination=destination, midpoint=self.center)
 
-glib = gdspy.GdsLibrary(name='test')
 
 class CellMixin(__Properties__):
 
-    def _wrapper(self, c, c2dmap):
+    def __wrapper__(self, c, c2dmap):
         for e in c.elementals.flat_elems():
             G = c2dmap[c]
             if isinstance(e, spira.SRef):
@@ -47,14 +46,14 @@ class CellMixin(__Properties__):
                     x_reflection=e.reflection)
                 )
 
-    def _construct_gdspy_tree(self):
+    def construct_gdspy_tree(self, glib):
         d = self.dependencies()
         c2dmap = {}
         for c in d:
             G = c.commit_to_gdspy()
             c2dmap.update({c:G})
         for c in d:
-            self._wrapper(c, c2dmap)
+            self.__wrapper__(c, c2dmap)
             if c.name not in glib.cell_dict.keys():
                 glib.add(c2dmap[c])
         for p in self.get_ports():
@@ -63,10 +62,11 @@ class CellMixin(__Properties__):
 
     @property
     def bbox(self):
+        glib = gdspy.GdsLibrary(name=self.name)
         cell = deepcopy(self)
-        cell = self._construct_gdspy_tree()
+        cell = self.construct_gdspy_tree(glib)
         bbox = cell.get_bounding_box()
-        if bbox is None:  
+        if bbox is None:
             bbox = ((0,0),(0,0))
         return np.array(bbox)
 
@@ -90,7 +90,10 @@ class CellMixin(__Properties__):
 
     @property
     def center(self):
-        return np.sum(self.bbox, 0)/2
+        c = np.sum(self.bbox, 0)/2
+        c = np.around(c, decimals=0)
+        # c = np.around(c, decimals=3)
+        return c
 
     @center.setter
     def center(self, destination):

@@ -15,9 +15,6 @@ from spira.gdsii.elemental.port import __Port__
 from spira.core.mixin.transform import TranformationMixin
 
 
-# ----------------------------------------------------------------------------------------------
-
-
 class __Cell__(gdspy.Cell, CellInitializer):
 
     __mixins__ = [OutputMixin, CellMixin, TranformationMixin]
@@ -29,13 +26,10 @@ class __Cell__(gdspy.Cell, CellInitializer):
         if name is not None:
             self.__dict__['__name__'] = name
             Cell.name.__set__(self, name)
-
         if library is not None:
             self.library = library
-
         if elementals is not None:
             self.elementals = elementals
-
         if ports is not None:
             self.ports = ports
 
@@ -94,7 +88,6 @@ class CellAbstract(__Cell__):
     def commit_to_gdspy(self):
         cell = gdspy.Cell(self.name, exclude_from_current=True)
         for e in self.elementals:
-            # if not isinstance(e, (Cell, SRef, ElementList, Graph, Mesh)):
             if issubclass(type(e), Cell):
                 for elem in e.elementals:
                     elem.commit_to_gdspy(cell=cell)
@@ -150,7 +143,6 @@ class CellAbstract(__Cell__):
                 e.move(destination=d, midpoint=o)
 
         for p in self.ports:
-            # p.midpoint = np.array(p.midpoint) + np.array(d) - np.array(o)
             mc = np.array(p.midpoint) + np.array(d) - np.array(o)
             p.move(midpoint=p.midpoint, destination=mc)
 
@@ -171,13 +163,11 @@ class CellAbstract(__Cell__):
         """ Rotates the cell with angle around a center. """
         if angle == 0:
             return self
-
         for e in self.elementals:
             if issubclass(type(e), PolygonAbstract):
                 e.rotate(angle=angle, center=center)
             elif isinstance(e, SRef):
                 e.rotate(angle, center)
-
         ports = self.ports
         self.ports = ElementList()
         for p in ports:
@@ -185,7 +175,6 @@ class CellAbstract(__Cell__):
                 p.midpoint = self.__rotate__(p.midpoint, angle, center)
                 p.orientation = np.mod(p.orientation + angle, 360)
                 self.ports += p
-
         return self
 
     def get_ports(self, level=None):

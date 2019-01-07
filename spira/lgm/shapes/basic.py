@@ -15,8 +15,8 @@ from spira.core.initializer import FieldInitializer
 
 class RectangleShape(Shape):
 
-    p1 = param.PointField()
-    p2 = param.PointField()
+    p1 = param.PointField(default=(0,0))
+    p2 = param.PointField(default=(2,2))
 
     def create_points(self, points):
         pts = [[self.p1[0], self.p1[1]], [self.p1[0], self.p2[1]],
@@ -143,14 +143,35 @@ class ArrowShape(TriangleShape):
 
 
 if __name__ == '__main__':
-    # shape = CircleShape()
-    # shape = ConvexPolygon()
-    shape = ArrowShape()
-    shape.apply_merge
+    circle_shape = CircleShape()
+    hexagon_shape = ConvexPolygon()
+    arrow_shape = ArrowShape()
+    arrow_shape.apply_merge
+    rect_shape = RectangleShape()
+    box_shape = BoxShape()
+    basic_tri_shape = BasicTriangle()
+    tri_shape = TriangleShape()
+    tri_shape.apply_merge
 
-    ply = spira.Polygons(shape=shape, gdslayer=spira.Layer(number=13))
-    cell = spira.Cell(name='yTron')
-    cell += ply
+    cell = spira.Cell(name='Basic Shapes')
+
+    circle = spira.Polygons(shape=circle_shape, gdslayer=spira.Layer(number=13))
+    circle.center = (0,0)
+    hexagon = spira.Polygons(shape=hexagon_shape, gdslayer=spira.Layer(number=14))
+    hexagon.center = (5,0)
+    arrow = spira.Polygons(shape=arrow_shape, gdslayer=spira.Layer(number=15))
+    arrow.center = (10,0)
+    rect = spira.Polygons(shape=rect_shape, gdslayer=spira.Layer(number=16))
+    rect.center = (15,0)
+    box = spira.Polygons(shape=box_shape, gdslayer=spira.Layer(number=17))
+    box.center = (20,0)
+    basic = spira.Polygons(shape=basic_tri_shape, gdslayer=spira.Layer(number=18))
+    basic.center = (25,0)
+    tri = spira.Polygons(shape=tri_shape, gdslayer=spira.Layer(number=19))
+    tri.center = (30,0)
+
+    cell += [circle, hexagon, arrow, rect, box, basic, tri]
+
     cell.output()
 
 

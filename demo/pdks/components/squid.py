@@ -21,8 +21,8 @@ class Squid(spira.Cell):
         s2 = spira.SRef(jj, midpoint=(20,0), rotation=-90)
 
         rm = RouteManhattan180(
-            port1=s2.ports['Output'], 
-            port2=s1.ports['Input'], 
+            port1=s2.ports['Output'],
+            port2=s1.ports['Input'],
             radius=1, length=5
         )
 

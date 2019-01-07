@@ -77,12 +77,16 @@ class RouteManhattan180(spira.Cell):
 
     port1 = param.DataField()
     port2 = param.DataField()
-    quadrant_one = param.DataField(fdef_name='create_quadrant_one')
 
     length = param.FloatField(default=2)
     layer = param.IntegerField(default=13)
     radius = param.IntegerField(default=1)
     bend_type = param.StringField(default='circular')
+
+    quadrant_one = param.DataField(fdef_name='create_quadrant_one')
+    quadrant_two = param.DataField(fdef_name='create_quadrant_two')
+    quadrant_three = param.DataField(fdef_name='create_quadrant_three')
+    quadrant_four = param.DataField(fdef_name='create_quadrant_four')
 
     def _generate_route(self, p1, p2):
         route = RouteShape(
@@ -121,145 +125,76 @@ class RouteManhattan180(spira.Cell):
 
         return [b1, b2, r1, r2, r3]
 
-    def create_elementals(self, elems):
-
-        width = self.port1.width
+    def create_quadrant_two(self):
 
         p1=[self.port1.midpoint[0], self.port1.midpoint[1]]
         p2=[self.port2.midpoint[0], self.port2.midpoint[1]]
 
-        if self.port1.orientation == self.port2.orientation:
-            if (p2[1] > p1[1]) & (p2[0] > p1[0]):
-                if self.bend_type == 'circular':
-                    ll = spira.Layer(number=self.layer)
-                    B1 = Arc(shape=ArcRoute(radius=self.radius, width=width, gdslayer=ll, start_angle=90, theta=90))
-                    B2 = Arc(shape=ArcRoute(radius=self.radius, width=width, gdslayer=ll, start_angle=0, theta=90))
-                    radiusEff = self.radius
+        if self.bend_type == 'circular':
+            ll = spira.Layer(number=self.layer)
+            B1 = Arc(shape=ArcRoute(radius=self.radius, width=self.port1.width, gdslayer=ll, start_angle=90, theta=90))
+            B2 = Arc(shape=ArcRoute(radius=self.radius, width=self.port1.width, gdslayer=ll, start_angle=0, theta=90))
+            radiusEff = self.radius
 
-                b1 = spira.SRef(B1)
-                b2 = spira.SRef(B2)
+        b1 = spira.SRef(B1)
+        b2 = spira.SRef(B2)
 
-                Total += b1
-                Total += b2
+        b2.connect(port=b2.ports['P1'], destination=self.term_ports['T1'])
+        h = (p2[1]-p1[1])/2 - radiusEff
+        b2.move(midpoint=b2.ports['P1'].midpoint, destination=[0, h])
 
-                b1.connect(port=b1.ports['P2'], destination=Total.term_ports['T1'])
-                h = (p2[1]-p1[1])/2 - radiusEff
-                b1.move(midpoint=b1.ports['P2'].midpoint, destination=[0, h])
+        b1.connect(port=b1.ports['P2'], destination=b2.ports['P2'])
+        h = (p2[0]-p1[0])
+        b1.move(midpoint=b1.ports['P1'].midpoint, destination=[h, b1.ports['P1'].midpoint[1]])
 
-                b2.connect(port=b2.ports['P1'], destination=b1.ports['P1'])
-                h = (p2[0]-p1[0])
-                b2.move(midpoint=b2.ports['P2'].midpoint, destination=[h, b2.ports['P2'].midpoint[1]])
+        r1 = self._generate_route(b1.ports['P1'], self.term_ports['T2'])
+        r2 = self._generate_route(b2.ports['P1'], self.term_ports['T1'])
+        r3 = self._generate_route(b2.ports['P2'], b1.ports['P2'])
 
-                route = RouteShape(port1=b1.ports['P2'],
-                                   port2=Total.term_ports['T1'],
-                                   path_type='straight',
-                                   width_type='straight',
-                                   layer=self.layer)
-                R1 = RouteBasic(route=route)
-                r1 = spira.SRef(R1)
-                r1.rotate(angle=route.port2.orientation,
-                          center=R1.port1.midpoint)
-                r1.move(midpoint=(0,0), destination=Total.term_ports['T1'].midpoint)
-                Total += r1
+        return [b1, b2, r1, r2, r3]
 
-                route = RouteShape(port1=b2.ports['P2'],
-                                   port2=Total.term_ports['T2'],
-                                   path_type='straight',
-                                   width_type='straight',
-                                   layer=self.layer)
-                R2 = RouteBasic(route=route)
-                r2 = spira.SRef(R2)
-                r2.rotate(angle=route.port2.orientation,
-                          center=R2.port1.midpoint)
-                r2.move(midpoint=(0,0), destination=Total.term_ports['T2'].midpoint)
-                Total += r2
+    def create_quadrant_three(self):
 
-                route = RouteShape(port1=b2.ports['P1'],
-                                port2=b1.ports['P1'],
-                                path_type='straight',
-                                width_type='straight',
-                                layer=self.layer)
-                R3 = RouteBasic(route=route)
-                r3 = spira.SRef(R3)
-                # r3.rotate(angle=route.port1.orientation,
-                #             center=R3.port1.midpoint)
-                r3.move(midpoint=(0,0), destination=b1.ports['P1'].midpoint)
-                Total += r3
+        p1=[self.port1.midpoint[0], self.port1.midpoint[1]]
+        p2=[self.port2.midpoint[0], self.port2.midpoint[1]]
 
+        if self.bend_type == 'circular':
+            ll = spira.Layer(number=self.layer)
+            B1 = Arc(shape=ArcRoute(radius=self.radius, width=self.port1.width, gdslayer=ll, start_angle=90, theta=90))
+            B2 = Arc(shape=ArcRoute(radius=self.radius, width=self.port1.width, gdslayer=ll, start_angle=0, theta=90))
+            radiusEff = self.radius
 
-                # Total.ports += r1.ports['P1']
-                # Total.ports += b2.ports['P2']
+        b1 = spira.SRef(B1)
+        b2 = spira.SRef(B2)
 
-                # Total.ports += r1.ports['P1']._copy()
-                # Total.ports += b2.ports['P2']._copy()
+        b1.connect(port=b1.ports['P2'], destination=self.term_ports['T1'])
+        h = (p2[1]-p1[1])/2 - radiusEff
+        b1.move(midpoint=b1.ports['P2'].midpoint, destination=[0, h])
 
-                # R1=route_basic(port1=Total.ports['t1'],port2=b1.ports[1],layer=layer)
-                # r1=Total.add_ref(R1)
+        b2.connect(port=b2.ports['P1'], destination=b1.ports['P1'])
+        h = (p2[0]-p1[0])
+        b2.move(midpoint=b2.ports['P2'].midpoint, destination=[h, b2.ports['P2'].midpoint[1]])
 
-                # R2=route_basic(port1=b1.ports[2],port2=b2.ports[1],layer=layer)
-                # r2=Total.add_ref(R2)
+        r1 = self._generate_route(b1.ports['P2'], self.term_ports['T1'])
+        r2 = self._generate_route(b2.ports['P2'], self.term_ports['T2'])
+        r3 = self._generate_route(b2.ports['P1'], b1.ports['P1'])
 
-                # Total.add_port(name=1,port=r1.ports[1])
-                # Total.add_port(name=2,port=b2.ports[2])
+        return [b1, b2, r1, r2, r3]
 
-            if (p2[1] > p1[1]) & (p2[0] < p1[0]):
+    def create_elementals(self, elems):
 
-                if self.bend_type == 'circular':
-                    ll = spira.Layer(number=self.layer)
-                    B1 = Arc(shape=ArcRoute(radius=self.radius, width=width, gdslayer=ll, start_angle=90, theta=90))
-                    B2 = Arc(shape=ArcRoute(radius=self.radius, width=width, gdslayer=ll, start_angle=0, theta=90))
-                    radiusEff = self.radius
+        p1=[self.port1.midpoint[0], self.port1.midpoint[1]]
+        p2=[self.port2.midpoint[0], self.port2.midpoint[1]]
 
-                b1 = spira.SRef(B1)
-                b2 = spira.SRef(B2)
+        # if self.port1.orientation == self.port2.orientation:
+        if (p2[1] > p1[1]) & (p2[0] > p1[0]):
+            elems += self.quadrant_three
 
-                Total += b1
-                Total += b2
+        if (p2[1] > p1[1]) & (p2[0] < p1[0]):
+            elems += self.quadrant_two
 
-                b2.connect(port=b2.ports['P1'], destination=Total.term_ports['T1'])
-                h = (p2[1]-p1[1])/2 - radiusEff
-                b2.move(midpoint=b2.ports['P1'].midpoint, destination=[0, h])
-
-                b1.connect(port=b1.ports['P2'], destination=b2.ports['P2'])
-                h = (p2[0]-p1[0])
-                b1.move(midpoint=b1.ports['P1'].midpoint, destination=[h, b1.ports['P1'].midpoint[1]])
-
-                route = RouteShape(port1=b1.ports['P1'],
-                                   port2=Total.term_ports['T2'],
-                                   path_type='straight',
-                                   width_type='straight',
-                                   layer=self.layer)
-                R1 = RouteBasic(route=route)
-                r1 = spira.SRef(R1)
-                r1.rotate(angle=route.port2.orientation,
-                          center=R1.port1.midpoint)
-                r1.move(midpoint=(0,0), destination=Total.term_ports['T2'].midpoint)
-                Total += r1
-
-                route = RouteShape(port1=b2.ports['P1'],
-                                   port2=Total.term_ports['T1'],
-                                   path_type='straight',
-                                   width_type='straight',
-                                   layer=self.layer)
-                R2 = RouteBasic(route=route)
-                r2 = spira.SRef(R2)
-                r2.rotate(angle=route.port2.orientation,
-                          center=R2.port1.midpoint)
-                r2.move(midpoint=(0,0), destination=Total.term_ports['T1'].midpoint)
-                Total += r2
-
-                route = RouteShape(port1=b2.ports['P2'],
-                                port2=b1.ports['P2'],
-                                path_type='straight',
-                                width_type='straight',
-                                layer=self.layer)
-                R3 = RouteBasic(route=route)
-                r3 = spira.SRef(R3)
-                r3.move(midpoint=(0,0), destination=b1.ports['P2'].midpoint)
-                Total += r3
-
-            if (p2[1] <= p1[1]) & (p2[0] < p1[0]):
-                elems += self.quadrant_one
+        if (p2[1] <= p1[1]) & (p2[0] < p1[0]):
+            elems += self.quadrant_one
 
         return elems
 
@@ -279,7 +214,6 @@ class RouteManhattan180(spira.Cell):
         else:
             ports += spira.Term(name='T2',
                 midpoint=list(np.subtract(p2, p1)),
-                #   orientation=-90,
                 orientation=90,
                 width=self.port2.width
             )
@@ -295,11 +229,13 @@ if __name__ == '__main__':
     p1 = spira.Term(name='P1', midpoint=(0,0), orientation=0, width=2)
 
     # 1st Quadrant
-    # p2 = spira.Term(name='P2', midpoint=(50,25), orientation=0, width=1.5)
+    p2 = spira.Term(name='P2', midpoint=(50,25), orientation=180, width=1.5)
+
     # 2nd Quadrant
-    # p2 = spira.Term(name='P2', midpoint=(-50,25), orientation=0, width=1.5)
+    # p2 = spira.Term(name='P2', midpoint=(-50,25), orientation=180, width=1.5)
+
     # 3rd Quadrant
-    p2 = spira.Term(name='P2', midpoint=(-50,0), orientation=0, width=2)
+    # p2 = spira.Term(name='P2', midpoint=(-50,0), orientation=0, width=2)
 
     rm = RouteManhattan180(port1=p1, port2=p2, radius=1)
     # rm = RouteManhattan(port1=p1, port2=p2, radius=1)

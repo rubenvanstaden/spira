@@ -1,5 +1,6 @@
 import spira
 import pytest
+import numpy as np
 from spira import param
 from spira import shapes
 from spira.rdd.layer import PurposeLayer
@@ -120,9 +121,12 @@ def test_elem_cell():
 
     c1.elementals += spira.Polygons(shape=[[[0,0], [1,0], [1,1], [0,1]]])
     assert len(c1.elementals) == 1
-    # assert c1.elementals[0].center == (0,0)
 
-    # c1.move(destination=)
+    c1.center = (0,0)
+    np.testing.assert_array_equal(c1.center, [0,0])
+
+    c1.move(midpoint=c1.center, destination=(5,0))
+    np.testing.assert_array_equal(c1.center, [5,0])
 
     class CellB(spira.Cell):
 

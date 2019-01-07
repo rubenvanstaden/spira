@@ -38,14 +38,23 @@ class YtronShape(shapes.Shape):
         arm_x_right = self.arm_lengths[1] * np.sin(theta)
         arm_y_right = self.arm_lengths[1] * np.cos(theta)
 
-        xpts = semicircle_x.tolist() + [xc+arm_x_right, xc+arm_x_right+self.arm_widths[1], 
-                                        xc+self.arm_widths[1], xc+self.arm_widths[1], 
-                                        0, -(xc+self.arm_widths[0]), -(xc+self.arm_widths[0]), 
-                                        -(xc+arm_x_left+self.arm_widths[0]), -(xc+arm_x_left)] 
-        ypts = semicircle_y.tolist() + [yc+arm_y_right, yc+arm_y_right, yc, yc-self.source_length, 
-                                        yc-self.source_length, yc-self.source_length, yc, 
+        xpts = semicircle_x.tolist() + [xc+arm_x_right, xc+arm_x_right+self.arm_widths[1],
+                                        xc+self.arm_widths[1], xc+self.arm_widths[1],
+                                        0, -(xc+self.arm_widths[0]), -(xc+self.arm_widths[0]),
+                                        -(xc+arm_x_left+self.arm_widths[0]), -(xc+arm_x_left)]
+        ypts = semicircle_y.tolist() + [yc+arm_y_right, yc+arm_y_right, yc, yc-self.source_length,
+                                        yc-self.source_length, yc-self.source_length, yc,
                                         yc+arm_y_left, yc+arm_y_left]
 
-        points = np.array([zip(xpts, ypts)])
+        points = np.array([list(zip(xpts, ypts))])
 
         return points
+
+
+if __name__ == "__main__":
+
+    ytron = YtronShape()
+    cell = spira.Cell(name='yTron')
+    cell += spira.Polygons(shape=ytron)
+    cell.output()
+

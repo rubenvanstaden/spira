@@ -189,8 +189,7 @@ class PortAbstract(__Port__):
 
 
 class Port(PortAbstract):
-    """
-    Ports are objects that connect different polygons
+    """ Ports are objects that connect different polygons
     or references in a layout. Ports represent veritical
     connection such as vias or junctions.
 
