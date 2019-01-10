@@ -4,84 +4,25 @@ from spira import param
 from spira.lgm.route.arc_bend import ArcRoute, Arc
 from spira.lgm.route.basic import RouteShape
 from spira.lgm.route.basic import RouteBasic
-from spira.gdsii.utils import scale_coord_up as scu
 
 
-class RouteManhattan(spira.Cell):
-    port1 = param.DataField()
-    port2 = param.DataField()
-
-    dx = param.DataField(fdef_name='create_x_distance')
-    dy = param.DataField(fdef_name='create_y_distance')
-
-    bend_type = param.StringField(default='circular')
-    layer = param.IntegerField(default=12)
-    radius = param.IntegerField(default=2)
-
-    def create_x_distance(self):
-        p1=[self.port1.midpoint[0], self.port1.midpoint[1]]
-        p2=[self.port2.midpoint[0], self.port2.midpoint[1]]
-        return abs(p2[0]-p1[0])/2
-
-    def create_y_distance(self):
-        p1=[self.port1.midpoint[0], self.port1.midpoint[1]]
-        p2=[self.port2.midpoint[0], self.port2.midpoint[1]]
-        return abs(p2[1]-p1[1])/2
-
-    # def validate_parameters(self):
-    #     if (self.radius > self.dx) or (self.radius > self.dy):
-    #         return False
-    #     return True
-
-    def create_elementals(self, elems):
-
-        # Total = spira.Cell(name='Device')
-        # width = self.port1.width
-
-        if self.port1.orientation==0:
-            p2=[self.port2.midpoint[0], self.port2.midpoint[1]]
-            p1=[self.port1.midpoint[0], self.port1.midpoint[1]]
-        if self.port1.orientation==90:
-            p2=[self.port2.midpoint[1], -self.port2.midpoint[0]]
-            p1=[self.port1.midpoint[1], -self.port1.midpoint[0]]
-        if self.port1.orientation==180:
-            p2=[-self.port2.midpoint[0], -self.port2.midpoint[1]]
-            p1=[-self.port1.midpoint[0], -self.port1.midpoint[1]]
-        if self.port1.orientation==270:
-            p2=[-self.port2.midpoint[1], self.port2.midpoint[0]]
-            p1=[-self.port1.midpoint[1], self.port1.midpoint[0]]
-
-        # if p2[1] == p1[1] or p2[0] == p1[0]:
-        #     raise ValueError('Error - ports must be at different x AND y values.')
-
-        if (np.round(np.abs(np.mod(self.port1.orientation - self.port2.orientation,360)),3) == 180) \
-            or (np.round(np.abs(np.mod(self.port1.orientation - self.port2.orientation,360)),3) == 0):
-            R1 = RouteManhattan180(
-                port1=self.port1, 
-                port2=self.port2,
-                bend_type=self.bend_type,
-                layer=self.layer,
-                radius=self.radius
-            )
-            elems += spira.SRef(R1)
-        return elems
-
-    def create_ports(self, ports):
-        ports += self.port1
-        ports += self.port2
-        return ports
-
-
-class RouteManhattan180(spira.Cell):
-    """ Route ports that has a 180 degree difference. """
+class __Manhattan__(spira.Cell):
 
     port1 = param.DataField()
     port2 = param.DataField()
 
-    length = param.FloatField(default=2)
-    layer = param.IntegerField(default=13)
+    length = param.FloatField(default=20)
+    gdslayer = param.LayerField(number=13)
     radius = param.IntegerField(default=1)
     bend_type = param.StringField(default='circular')
+
+    b1 = param.DataField(fdef_name='create_arc_bend_1')
+    b2 = param.DataField(fdef_name='create_arc_bend_2')
+    b3 = param.DataField(fdef_name='create_arc_bend_3')
+    b4 = param.DataField(fdef_name='create_arc_bend_4')
+
+    p1 = param.DataField(fdef_name='create_port1_position')
+    p2 = param.DataField(fdef_name='create_port2_position')
 
     quadrant_one = param.DataField(fdef_name='create_quadrant_one')
     quadrant_two = param.DataField(fdef_name='create_quadrant_two')
@@ -92,155 +33,74 @@ class RouteManhattan180(spira.Cell):
         route = RouteShape(
             port1=p1, port2=p2,
             path_type='straight',
-            width_type='straight',
-            layer=self.layer
+            width_type='straight'
         )
-        R1 = RouteBasic(route=route)
+        R1 = RouteBasic(route=route, connect_layer=self.gdslayer)
         r1 = spira.SRef(R1)
         r1.rotate(angle=p2.orientation-180, center=R1.port1.midpoint)
         r1.move(midpoint=(0,0), destination=p1.midpoint)
         return r1
 
-    def create_quadrant_one(self):
+    def create_port1_position(self):
+        p1 = [self.port1.midpoint[0], self.port1.midpoint[1]]
+        if self.port1.orientation == 90:
+            p1 = [self.port1.midpoint[1], -self.port1.midpoint[0]]
+        if self.port1.orientation == 180:
+            p1 = [-self.port1.midpoint[0], -self.port1.midpoint[1]]
+        if self.port1.orientation == 270:
+            p1 = [-self.port1.midpoint[1], self.port1.midpoint[0]]
+        return p1
+
+    def create_port2_position(self):
+        p2 = [self.port2.midpoint[0], self.port2.midpoint[1]]
+        if self.port1.orientation == 90:
+            p2 = [self.port2.midpoint[1], -self.port2.midpoint[0]]
+        if self.port1.orientation == 180:
+            p2 = [-self.port2.midpoint[0], -self.port2.midpoint[1]]
+        if self.port1.orientation == 270:
+            p2 = [-self.port2.midpoint[1], self.port2.midpoint[0]]
+        return p2
+
+    def create_arc_bend_1(self):
         if self.bend_type == 'circular':
-            ll = spira.Layer(number=self.layer)
-            B1 = Arc(shape=ArcRoute(radius=self.radius, width=self.port1.width, gdslayer=ll, start_angle=90, theta=-90))
-            B2 = Arc(shape=ArcRoute(radius=self.radius, width=self.port1.width, gdslayer=ll, start_angle=0, theta=90))
-            radiusEff = self.radius
-
-        b1 = spira.SRef(B1)
-        b2 = spira.SRef(B2)
-
-        b2.connect(port=b2.ports['P1'], destination=self.term_ports['T1'])
-        h = self.length - radiusEff
-        b2.move(midpoint=b2.ports['P1'].midpoint, destination=[0, h])
-
-        b1.connect(port=b1.ports['P2'], destination=b2.ports['P2'])
-        h = self.length - radiusEff
-        b1.move(midpoint=b1.ports['P1'].midpoint, destination=[self.term_ports['T2'].midpoint[0], h])
-
-        r1 = self._generate_route(b1.ports['P1'], self.term_ports['T2'])
-        r2 = self._generate_route(b2.ports['P1'], self.term_ports['T1'])
-        r3 = self._generate_route(b2.ports['P2'], b1.ports['P2'])
-
-        return [b1, b2, r1, r2, r3]
-
-    def create_quadrant_two(self):
-
-        p1=[self.port1.midpoint[0], self.port1.midpoint[1]]
-        p2=[self.port2.midpoint[0], self.port2.midpoint[1]]
-
-        if self.bend_type == 'circular':
-            ll = spira.Layer(number=self.layer)
-            B1 = Arc(shape=ArcRoute(radius=self.radius, width=self.port1.width, gdslayer=ll, start_angle=90, theta=90))
-            B2 = Arc(shape=ArcRoute(radius=self.radius, width=self.port1.width, gdslayer=ll, start_angle=0, theta=90))
-            radiusEff = self.radius
-
-        b1 = spira.SRef(B1)
-        b2 = spira.SRef(B2)
-
-        b2.connect(port=b2.ports['P1'], destination=self.term_ports['T1'])
-        h = (p2[1]-p1[1])/2 - radiusEff
-        b2.move(midpoint=b2.ports['P1'].midpoint, destination=[0, h])
-
-        b1.connect(port=b1.ports['P2'], destination=b2.ports['P2'])
-        h = (p2[0]-p1[0])
-        b1.move(midpoint=b1.ports['P1'].midpoint, destination=[h, b1.ports['P1'].midpoint[1]])
-
-        r1 = self._generate_route(b1.ports['P1'], self.term_ports['T2'])
-        r2 = self._generate_route(b2.ports['P1'], self.term_ports['T1'])
-        r3 = self._generate_route(b2.ports['P2'], b1.ports['P2'])
-
-        return [b1, b2, r1, r2, r3]
-
-    def create_quadrant_three(self):
-
-        p1=[self.port1.midpoint[0], self.port1.midpoint[1]]
-        p2=[self.port2.midpoint[0], self.port2.midpoint[1]]
-
-        if self.bend_type == 'circular':
-            ll = spira.Layer(number=self.layer)
-            B1 = Arc(shape=ArcRoute(radius=self.radius, width=self.port1.width, gdslayer=ll, start_angle=90, theta=90))
-            B2 = Arc(shape=ArcRoute(radius=self.radius, width=self.port1.width, gdslayer=ll, start_angle=0, theta=90))
-            radiusEff = self.radius
-
-        b1 = spira.SRef(B1)
-        b2 = spira.SRef(B2)
-
-        b1.connect(port=b1.ports['P2'], destination=self.term_ports['T1'])
-        h = (p2[1]-p1[1])/2 - radiusEff
-        b1.move(midpoint=b1.ports['P2'].midpoint, destination=[0, h])
-
-        b2.connect(port=b2.ports['P1'], destination=b1.ports['P1'])
-        h = (p2[0]-p1[0])
-        b2.move(midpoint=b2.ports['P2'].midpoint, destination=[h, b2.ports['P2'].midpoint[1]])
-
-        r1 = self._generate_route(b1.ports['P2'], self.term_ports['T1'])
-        r2 = self._generate_route(b2.ports['P2'], self.term_ports['T2'])
-        r3 = self._generate_route(b2.ports['P1'], b1.ports['P1'])
-
-        return [b1, b2, r1, r2, r3]
-
-    def create_elementals(self, elems):
-
-        p1=[self.port1.midpoint[0], self.port1.midpoint[1]]
-        p2=[self.port2.midpoint[0], self.port2.midpoint[1]]
-
-        # if self.port1.orientation == self.port2.orientation:
-        if (p2[1] > p1[1]) & (p2[0] > p1[0]):
-            elems += self.quadrant_three
-
-        if (p2[1] > p1[1]) & (p2[0] < p1[0]):
-            elems += self.quadrant_two
-
-        if (p2[1] <= p1[1]) & (p2[0] < p1[0]):
-            elems += self.quadrant_one
-
-        return elems
-
-    def create_ports(self, ports):
-
-        p1=[self.port1.midpoint[0], self.port1.midpoint[1]]
-        p2=[self.port2.midpoint[0], self.port2.midpoint[1]]
-
-        ports += spira.Term(name='T1', width=self.port1.width, orientation=90)
-
-        if self.port1.orientation != self.port2.orientation:
-            ports += spira.Term(name='T2',
-                midpoint=list(np.subtract(p2, p1)),
-                orientation=-90,
-                width=self.port2.width
+            B1 = Arc(shape=ArcRoute(radius=self.radius,
+                width=self.port1.width,
+                # gdslayer=self.gdslayer,
+                gdslayer=spira.Layer(number=18),
+                start_angle=0, theta=90)
             )
-        else:
-            ports += spira.Term(name='T2',
-                midpoint=list(np.subtract(p2, p1)),
-                orientation=90,
-                width=self.port2.width
+            return spira.SRef(B1)
+
+    def create_arc_bend_2(self):
+        if self.bend_type == 'circular':
+            B2 = Arc(shape=ArcRoute(radius=self.radius,
+                width=self.port1.width,
+                # gdslayer=self.gdslayer,
+                gdslayer=spira.Layer(number=18),
+                start_angle=0, theta=-90)
             )
-        return ports
+            return spira.SRef(B2)
 
+    def create_arc_bend_3(self):
+        if self.bend_type == 'circular':
+            B1 = Arc(shape=ArcRoute(radius=self.radius,
+                width=self.port1.width,
+                # gdslayer=self.gdslayer,
+                gdslayer=spira.Layer(number=18),
+                start_angle=0, theta=90)
+            )
+            return spira.SRef(B1)
 
-if __name__ == '__main__':
+    def create_arc_bend_4(self):
+        if self.bend_type == 'circular':
+            B2 = Arc(shape=ArcRoute(radius=self.radius,
+                width=self.port1.width,
+                # gdslayer=self.gdslayer,
+                gdslayer=spira.Layer(number=18),
+                start_angle=-90, theta=-90)
+            )
+            return spira.SRef(B2)
 
-    # p1 = spira.Term(name='P1', midpoint=(0,0), orientation=0, width=2*1e6)
-    # p2 = spira.Term(name='P2', midpoint=(30*1e6,45*1e6), orientation=0, width=1.5*1e6)
-    # rm = RouteManhattan(port1=p1, port2=p2, radius=7.5*1e6)
-
-    p1 = spira.Term(name='P1', midpoint=(0,0), orientation=0, width=2)
-
-    # 1st Quadrant
-    p2 = spira.Term(name='P2', midpoint=(50,25), orientation=180, width=1.5)
-
-    # 2nd Quadrant
-    # p2 = spira.Term(name='P2', midpoint=(-50,25), orientation=180, width=1.5)
-
-    # 3rd Quadrant
-    # p2 = spira.Term(name='P2', midpoint=(-50,0), orientation=0, width=2)
-
-    rm = RouteManhattan180(port1=p1, port2=p2, radius=1)
-    # rm = RouteManhattan(port1=p1, port2=p2, radius=1)
-
-    rm.output()
 
 
 

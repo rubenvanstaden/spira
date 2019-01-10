@@ -39,21 +39,19 @@ class __Cell__(gdspy.Cell, CellInitializer):
     def __add__(self, other):
         if other is None:
             return self
-
-        # if issubclass(type(other), Cell):
-        #     for e in other.elementals:
-        #         self.elementals += e
-        #     for p in other.ports:
-        #         self.ports += p
-        # elif isinstance(other, (list, ElementList)):
-        #     raise ValueError('Not Implemented!')
-
-        if isinstance(other, Port):
+        if issubclass(type(other), __Port__):
             self.ports += other
         else:
             self.elementals += other
-
         return self
+
+        # if issubclass(type(other), Cell):
+        #     print(other)
+        #     self.elementals += SRef(other)
+        #     # for e in other.elementals:
+        #     #     self.elementals += e
+        #     # for p in other.ports:
+        #     #     self.ports += p
 
     def __sub__(self, other):
         pass

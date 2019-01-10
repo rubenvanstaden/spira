@@ -17,32 +17,32 @@ class ArcRoute(spira.Route):
     angle2 = param.DataField(fdef_name='create_angle2')
 
     def create_angle1(self):
-        angle1 = (self.start_angle) * np.pi/180
+        angle1 = (self.start_angle + 0) * np.pi/180
         return angle1
 
     def create_angle2(self):
-        angle2 = (self.start_angle + self.theta) * np.pi/180
+        angle2 = (self.start_angle + self.theta + 0) * np.pi/180
         return angle2
 
     def create_port_input(self):
         midpoint = self.radius*np.cos(self.angle1), self.radius*np.sin(self.angle1)
-        orientation = self.start_angle - 90 + 180*(self.theta<0)
+        orientation = self.start_angle - 0 + 180*(self.theta<0)
         port = spira.Term(name='P1',
             midpoint=midpoint,
             width=self.width,
             length=0.2,
-            orientation=orientation
+            orientation=orientation + 180
         )
         return port
 
     def create_port_output(self):
         midpoint = self.radius*np.cos(self.angle2), self.radius*np.sin(self.angle2)
-        orientation = self.start_angle + self.theta + 90 - 180*(self.theta<0)
+        orientation = self.start_angle + self.theta + 180 - 180*(self.theta<0)
         port = spira.Term(name='P2',
             midpoint=midpoint,
             width=self.width,
             length=0.2,
-            orientation=orientation
+            orientation=orientation + 180
         )
         return port
 
@@ -50,7 +50,8 @@ class ArcRoute(spira.Route):
 
         inner_radius = self.radius - self.width/2.0
         outer_radius = self.radius + self.width/2.0
-        t = np.linspace(self.angle1, self.angle2, np.ceil(abs(self.theta) / self.angle_resolution))
+        z = int(np.ceil(abs(self.theta) / self.angle_resolution))
+        t = np.linspace(self.angle1, self.angle2, z)
 
         inner_points_x = (inner_radius*np.cos(t)).tolist()
         inner_points_y = (inner_radius*np.sin(t)).tolist()

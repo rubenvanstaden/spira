@@ -109,7 +109,6 @@ class SRefAbstract(__SRef__):
             self.rotate(angle=transform['rotation'])
         if transform['midpoint']:
             self.translate(dx=transform['midpoint'][0], dy=transform['midpoint'][1])
-            # self.move(midpoint=self.midpoint, destination=transform['midpoint'])
         return self
 
     def flatten(self):
@@ -131,6 +130,8 @@ class SRefAbstract(__SRef__):
                 'magnification': self.magnification,
                 'reflection': self.reflection
             }
+
+            # print(tf['rotation'])
 
             new_port = port._copy()
             self._local_ports[port.name] = new_port.transform(tf)

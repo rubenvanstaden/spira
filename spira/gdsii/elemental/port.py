@@ -15,6 +15,12 @@ class __Port__(ElementalInitializer):
 
     __committed__ = {}
 
+    def __add__(self, other):
+        if other is None:
+            return self
+        p1 = np.array(self.midpoint) + np.array(other)
+        return p1
+
 
 class PortAbstract(__Port__):
 
@@ -29,10 +35,13 @@ class PortAbstract(__Port__):
     def __init__(self, port=None, polygon=None, **kwargs):
         super().__init__(**kwargs)
 
+        self.orientation = np.mod(self.orientation, 360)
+
         L = spira.Label(position=self.midpoint,
-                        text=self.name,
-                        gdslayer=self.gdslayer,
-                        texttype=self.text_layer.number)
+            text=self.name,
+            gdslayer=self.gdslayer,
+            texttype=self.text_layer.number
+        )
         self.label = L
         self.arrow = None
 
@@ -88,6 +97,8 @@ class PortAbstract(__Port__):
         self.orientation = -self.orientation
         self.orientation = np.mod(self.orientation, 360)
 
+        self.polygon.reflect()
+
         if self.arrow:
             self.arrow.reflect()
 
@@ -99,8 +110,11 @@ class PortAbstract(__Port__):
         self.orientation += angle
         self.orientation = np.mod(self.orientation, 360)
 
+        self.polygon.rotate(angle=self.orientation)
+
         if self.arrow:
-            self.arrow.rotate(angle=90+angle)
+            # self.arrow.rotate(angle=angle)
+            self.arrow.rotate(angle=np.mod(angle, 90))
 
         return self
 

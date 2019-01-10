@@ -18,7 +18,7 @@ class Term(PortAbstract):
     >>> term = spira.Term()
     """
 
-    width = param.FloatField(default=1)
+    width = param.FloatField(default=2)
     length = param.FloatField(default=0.1)
 
     def __init__(self, port=None, polygon=None, **kwargs):
@@ -34,7 +34,8 @@ class Term(PortAbstract):
                 shape=rect_shape,
                 gdslayer=spira.Layer(number=65)
             )
-            pp.rotate(angle=90-self.orientation, center=self.midpoint)
+            pp.rotate(angle=self.orientation, center=self.midpoint)
+            # pp.rotate(angle=90-self.orientation, center=self.midpoint)
             pp.move(midpoint=pp.center, destination=self.midpoint)
             self.polygon = pp
         else:
@@ -54,7 +55,8 @@ class Term(PortAbstract):
             gdslayer=spira.Layer(number=77)
         )
 
-        self.arrow.rotate(angle=90-self.orientation)
+        self.arrow.rotate(angle=self.orientation)
+        # self.arrow.rotate(angle=90-self.orientation)
 
     def __repr__(self):
         return ("[SPiRA: Term] (name {}, number {}, midpoint {}, " +

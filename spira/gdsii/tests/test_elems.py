@@ -129,16 +129,12 @@ def test_elem_cell():
     np.testing.assert_array_equal(c1.center, [5,0])
 
     class CellB(spira.Cell):
-
         def create_elementals(self, elems):
-
             elems += spira.Polygons(
                 shape=[[[0,0], [3,0], [3,1], [0,1]]],
                 gdslayer=spira.Layer(number=77)
             )
-
             return elems
-
     c2 = CellB()
     assert c2.name == 'CellB-0'
     assert len(c1.elementals) == 1
@@ -148,18 +144,13 @@ def test_elem_cell():
 
 def test_elem_sref():
     class CellB(spira.Cell):
-
         def create_elementals(self, elems):
-
             elems += spira.Polygons(
                 shape=[[[0,0], [3,0], [3,1], [0,1]]],
                 gdslayer=spira.Layer(number=77)
             )
-
             return elems
-
     c2 = CellB()
-
     s1 = spira.SRef(structure=c2)
     assert all([a == b for a, b in zip(s1.midpoint, [0,0])])
     assert s1.rotation == 0
@@ -170,18 +161,13 @@ def test_elem_sref():
 
 def test_elem_port():
     class PortExample(spira.Cell):
-
         def create_ports(self, ports):
             ports += spira.Port(name='P1', midpoint=(-1,2))
             ports += spira.Port(name='P2', midpoint=(0,3))
             return ports
-
     cell = PortExample()
-
     p1 = cell.ports[0]
     p2 = cell.ports[1]
-
-#     assert repr(p1) == '[SPiRA: Port] (name P1, midpoint (-1, 2))'
 
     assert p1.midpoint == [-1,2]
     assert p1.orientation == 0
@@ -198,16 +184,17 @@ def test_elem_port():
 
 def test_elem_terminal():
     class TerminalExample(spira.Cell):
-
         width = param.FloatField(default=10)
         height = param.FloatField(default=1)
-
         def create_ports(self, ports):
-            ports += spira.Term(name='P1', midpoint=(10,0), width=self.height, orientation=180)
+            ports += spira.Term(
+                name='P1',
+                midpoint=(10,0), 
+                width=self.height, 
+                orientation=180
+            )
             return ports
-
     cell = TerminalExample()
-
     terms = cell.term_ports
     assert isinstance(terms['P1'], spira.Term)
     assert isinstance(cell.ports[0], spira.Term)

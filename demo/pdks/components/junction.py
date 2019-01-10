@@ -48,8 +48,8 @@ class Junction(spira.Cell):
         return elems
 
     def create_ports(self, ports):
-        ports += spira.Term(name='Input', midpoint=(3.6, 3.5), orientation=180)
-        ports += spira.Term(name='Output', midpoint=(0.25, 3.5), width=1)
+        ports += spira.Term(name='Input', midpoint=(0.25, 3.5), orientation=90, width=2)
+        ports += spira.Term(name='Output', midpoint=(3.6, 3.5), orientation=-90)
         return ports
 
 

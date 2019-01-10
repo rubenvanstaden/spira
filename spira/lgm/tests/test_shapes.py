@@ -26,10 +26,8 @@ def test_shapes_box():
 
 def test_shapes_circle():
     circle_shape = shapes.CircleShape(center=(0,0), box_size=(4,4))
-    # circle_shape = shapes.CircleShape(center=(0,0), radius=2)
     assert all([a == b for a, b in zip(circle_shape.center, [0,0])])
     assert int(circle_shape.area) == 12
-    # assert circle_shape.radius == 2
 
 
 def test_shape_triangle():

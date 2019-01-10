@@ -31,7 +31,7 @@ class RouteToCell(spira.Cell):
     def create_elementals(self, elems):
         elems += spira.Polygons(
             shape=self.shape,
-            gdslayer=spira.Layer(number=88)
+            gdslayer=self.shape.gdslayer
         )
         return elems
 

@@ -4,7 +4,11 @@ import numpy as np
 from spira import param
 from spira import shapes
 from numpy.linalg import norm
+from spira.rdd import get_rule_deck
 from numpy import sqrt, pi, cos, sin, log, exp, sinh, mod
+
+
+RDD = get_rule_deck()
 
 
 class RouteShape(shapes.Shape):
@@ -18,7 +22,6 @@ class RouteShape(shapes.Shape):
     width_type = param.StringField(default='straight')
     width1 = param.FloatField(default=None)
     width2 = param.FloatField(default=None)
-    layer = param.LayerField()
 
     x_dist = param.FloatField()
     y_dist = param.FloatField()
@@ -33,7 +36,7 @@ class RouteShape(shapes.Shape):
             self.width2 = self.port2.width
         if round(abs(mod(self.port1.orientation - self.port2.orientation, 360)), 3) != 180:
             raise ValueError('Ports do not face eachother.')
-        orientation = self.port1.orientation
+        orientation = self.port1.orientation - 90
 
         separation = point_b - point_a
         distance = norm(separation)
@@ -78,36 +81,42 @@ class RouteShape(shapes.Shape):
 class RouteBasic(spira.Cell):
 
     route = param.ShapeField()
+    connect_layer = param.LayerField(doc='GDSII layer to which the route connects.')
 
     port1 = param.DataField(fdef_name='create_port1')
     port2 = param.DataField(fdef_name='create_port2')
+    llayer = param.DataField(fdef_name='create_layer')
+
+    def create_layer(self):
+        ll = spira.Layer(number=self.connect_layer.number, datatype=RDD.PURPOSE.TERM.datatype)
+        return ll
 
     def create_elementals(self, elems):
-        elems += spira.Polygons(shape=self.route)
+        ply = spira.Polygons(shape=self.route, gdslayer=self.connect_layer)
+        ply.rotate(angle=-90)
+        elems += ply
         return elems
 
     def create_port1(self):
-        term = spira.Term(name='P1',
+        term = spira.Term(name='TERM1',
             midpoint=(0,0),
-            # midpoint=self.port1.midpoint,
             width=self.route.width1,
             length=0.2,
             orientation=180,
-            gdslayer=spira.Layer(number=65)
-            # orientation=self.route.port1.orientation
+            gdslayer=self.llayer
         )
+        term.rotate(angle=-90)
         return term
 
     def create_port2(self):
-        term = spira.Term(name='P2',
+        term = spira.Term(name='TERM2',
             midpoint=[self.route.x_dist, self.route.y_dist],
-            # midpoint=self.port2.midpoint,
             width=self.route.width2,
             length=0.2,
             orientation=0,
-            gdslayer=spira.Layer(number=65)
-            # orientation=self.route.port2.orientation
+            gdslayer=self.llayer
         )
+        term.rotate(angle=-90)
         return term
 
     def create_ports(self, ports):
@@ -116,6 +125,38 @@ class RouteBasic(spira.Cell):
         ports += self.port2
 
         return ports
+
+
+class Route(spira.Cell):
+
+    port1 = param.DataField()
+    port2 = param.DataField()
+    player = param.PhysicalLayerField()
+
+    def validate_parameters(self):
+        if self.port1.width < self.player.data.WIDTH:
+            return False
+        if self.port2.width < self.player.data.WIDTH:
+            return False
+        return True
+
+    def create_elementals(self, elems):
+
+        route = RouteShape(
+            port1=self.port1,
+            port2=self.port2,
+            path_type='straight',
+            width_type='straight'
+        )
+
+        R1 = RouteBasic(route=route, connect_layer=self.player.layer)
+        r1 = spira.SRef(R1)
+        r1.rotate(angle=self.port2.orientation-180, center=R1.port1.midpoint)
+        r1.move(midpoint=(0,0), destination=self.port1.midpoint)
+
+        elems += r1
+
+        return elems
 
 
 if __name__ == '__main__':

@@ -19,8 +19,10 @@ class MidPointField(DataFieldDescriptor):
     __type__ = Point
 
     def __init__(self, default=Point(0,0), **kwargs):
-        kwargs['default'] = [default.x, default.y]
-        # kwargs['default'] = self.__type__(default)
+        if isinstance(default, self.__type__):
+            kwargs['default'] = [default.x, default.y]
+        elif isinstance(default, (list, set, tuple, np.ndarray)):
+            kwargs['default'] = default
         super().__init__(**kwargs)
 
     def get_stored_value(self, obj):
