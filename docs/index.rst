@@ -9,18 +9,10 @@ Welcome to the SPiRA documentation!
    overview
    rdd_schema
    parameters
-   tutorials
-   pcell_examples
    developers
-
-..    installation
-..    overview
-..    rdd_schema
-..    gdsii
-..    parameters
-..    tutorials
 ..    pcell_examples
-..    developers
+..    tutorials
+..    gdsii
 
 Indices and tables
 ==================

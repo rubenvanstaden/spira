@@ -43,12 +43,14 @@ pip install -e .
 ## Documentation
 
 The complete framework [documentation](https://spira.readthedocs.io/en/latest/overview.html) explains the basics of the RDD and PCell API. Note that the DRC and LVS modules are still being developed.
-Examples of using the PCell implementation is given in [examples](https://spira.readthedocs.io/en/latest/pcell_examples.html).
+Examples of using the PCell implementation is given in [examples](https://github.com/rubenvanstaden/spira/tree/master/demo).
+<!-- Examples of using the PCell implementation is given in [examples](https://spira.readthedocs.io/en/latest/pcell_examples.html). -->
 
 
 ## History of changes
 
-### Version 0.0.2 (Dec 27, 2018)
+### Version 0.0.2 (Jan 11, 2019)
+* Implemented Manhattan routing between terminals.
 * Integrated circleci.
 * Started adding unit tests using pytest.
 * Updated auto doc generation for classes.
