@@ -2,7 +2,7 @@ import spira
 import pytest
 from spira import param
 from spira import shapes
-from spira.lgm.route.manhattan import RouteManhattan180
+from spira.lgm.route.manhattan180 import RouteManhattan180
 from spira.lgm.route.manhattan90 import RouteManhattan90
 
 

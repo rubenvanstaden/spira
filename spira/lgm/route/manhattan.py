@@ -18,8 +18,6 @@ class __Manhattan__(spira.Cell):
 
     b1 = param.DataField(fdef_name='create_arc_bend_1')
     b2 = param.DataField(fdef_name='create_arc_bend_2')
-    b3 = param.DataField(fdef_name='create_arc_bend_3')
-    b4 = param.DataField(fdef_name='create_arc_bend_4')
 
     p1 = param.DataField(fdef_name='create_port1_position')
     p2 = param.DataField(fdef_name='create_port2_position')
@@ -65,8 +63,8 @@ class __Manhattan__(spira.Cell):
         if self.bend_type == 'circular':
             B1 = Arc(shape=ArcRoute(radius=self.radius,
                 width=self.port1.width,
-                # gdslayer=self.gdslayer,
-                gdslayer=spira.Layer(number=18),
+                gdslayer=self.gdslayer,
+                # gdslayer=spira.Layer(number=18),
                 start_angle=0, theta=90)
             )
             return spira.SRef(B1)
@@ -75,33 +73,11 @@ class __Manhattan__(spira.Cell):
         if self.bend_type == 'circular':
             B2 = Arc(shape=ArcRoute(radius=self.radius,
                 width=self.port1.width,
-                # gdslayer=self.gdslayer,
-                gdslayer=spira.Layer(number=18),
+                gdslayer=self.gdslayer,
+                # gdslayer=spira.Layer(number=18),
                 start_angle=0, theta=-90)
             )
             return spira.SRef(B2)
-
-    def create_arc_bend_3(self):
-        if self.bend_type == 'circular':
-            B1 = Arc(shape=ArcRoute(radius=self.radius,
-                width=self.port1.width,
-                # gdslayer=self.gdslayer,
-                gdslayer=spira.Layer(number=18),
-                start_angle=0, theta=90)
-            )
-            return spira.SRef(B1)
-
-    def create_arc_bend_4(self):
-        if self.bend_type == 'circular':
-            B2 = Arc(shape=ArcRoute(radius=self.radius,
-                width=self.port1.width,
-                # gdslayer=self.gdslayer,
-                gdslayer=spira.Layer(number=18),
-                start_angle=-90, theta=-90)
-            )
-            return spira.SRef(B2)
-
-
 
 
 

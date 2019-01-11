@@ -37,13 +37,13 @@ class RouteManhattan(__Manhattan__):
                 gdslayer=self.gdslayer
             )
 
-        for e in R1.elementals:
-            print(e)
-        # for e in R1.flat_copy():
-        # for e in R1.flatten():
-            elems += e
         for p in R1.ports:
             self.ports += p
+
+        # for e in R1.elementals:
+        # for e in R1.flat_copy():
+        for e in R1.flatten():
+            elems += e
 
         return elems
 
