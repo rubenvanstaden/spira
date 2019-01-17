@@ -33,7 +33,7 @@ The following examples will illustrate each of the mentioned categories. First t
 
     RDD = get_rule_deck()
 
-    RDD.name = 'MiTLL'
+    RDD.name = 'MITLL'
 
     # Define new process tree.
     RDD.METALS = ProcessTree()
@@ -99,7 +99,7 @@ by simply importing the specific process RDD file.
     >>> from spira.rdd.settings import get_rule_deck
     >>> RDD = get_rule_deck()
     >>> RDD.name
-    'MiTLL'
+    'MITLL'
     >>> from pdks import aist
     >>> RDD.name
     'AiST'
