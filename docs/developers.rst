@@ -4,7 +4,7 @@ Developers
 Documentation for developers for maintaining and extending. Extra information is added
 to better understand specific code implementations.
 
-Distribtuion
+Distribution
 ------------
 
 Uploading package to PyPi using *twine*.
@@ -48,7 +48,7 @@ Coding standards for parsing the correct docs is given in:
 
 * https://github.com/numpy/numpy/blob/master/doc/HOWTO_DOCUMENT.rst.txt
 
-Introduction to Python Virtual Enviroments:
+Introduction to Python Virtual Environments:
 
 * https://realpython.com/python-virtual-environments-a-primer/
 * https://stackoverflow.com/questions/15746675/how-to-write-a-python-module-package

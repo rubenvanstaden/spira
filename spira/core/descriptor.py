@@ -18,7 +18,7 @@ class BaseField(object):
     __keywords__ = ['default', 'fdef_name', 'locked', 'doc']
 
     def __init__(self, **kwargs):
-        self.__doc__ = 'No documenation generated'
+        self.__doc__ = 'No documentation generated'
         if 'doc' in kwargs:
             self.__doc__ = kwargs['doc']
             kwargs.pop('doc')
@@ -54,7 +54,7 @@ class DataFieldDescriptor(BaseField):
 
     def __get__(self, obj, type=None):
         """
-        Called when retieving a value from an instance.
+        Called when retrieving a value from an instance.
         Following from `via` in __set__, the following
         can be executed:
 
@@ -81,7 +81,7 @@ class DataFieldDescriptor(BaseField):
         """
         Store the value of the object keyword argument
         in the __store__ variable of the instance. This
-        setter is calle from the FieldInitializer class.
+        setter is called from the FieldInitializer class.
         This is called when creating a class instance:
 
         self -> The Field being set.

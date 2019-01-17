@@ -10,7 +10,7 @@ RDD = get_rule_deck()
 
 
 class Junction(spira.Cell):
-    """ Josephon Junction component for the AIST process. """
+    """ Josephson Junction component for the AIST process. """
 
     metals = param.DataField(fdef_name='create_metal_layers')
     contacts = param.DataField(fdef_name='create_contact_layers')
