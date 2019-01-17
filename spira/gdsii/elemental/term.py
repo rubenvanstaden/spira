@@ -10,7 +10,7 @@ from spira.core.initializer import ElementalInitializer
 class Term(PortAbstract):
     """
     Terminals are horizontal ports that connect SRef instances
-    in the horizontal plane. They typcially represents the
+    in the horizontal plane. They typically represents the
     i/o ports of a components.
 
     Examples
