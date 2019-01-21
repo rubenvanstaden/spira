@@ -1,8 +1,6 @@
 import spira
 import numpy as np
 from spira import param
-from spira.gdsii.utils import scale_coord_up as scu
-from spira.gdsii.utils import scale_polygon_up as spu
 
 
 class ArcRoute(spira.Route):

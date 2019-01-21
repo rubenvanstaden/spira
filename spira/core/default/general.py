@@ -13,7 +13,7 @@ RDD.PURPOSE.GROUND = PurposeLayer(name='Ground plane polygons', datatype=21, sym
 RDD.PURPOSE.SKY = PurposeLayer(name='Sky plane polygons', datatype=21, symbol='SKY')
 RDD.PURPOSE.DUMMY = PurposeLayer(name='Sky plane polygons', datatype=21, symbol='DUM')
 RDD.PURPOSE.KINETIC = PurposeLayer(name='Sky plane polygons', datatype=21, symbol='KIN')
-RDD.PURPOSE.TERM = PurposeLayer(name='Terminal ports specified by the designer', datatype=21, symbol='TERM')
+RDD.PURPOSE.TERM = PurposeLayer(name='Terminal ports specified by the designer', datatype=63, symbol='TERM')
 RDD.PURPOSE.PROTECTION = PurposeLayer(name='Protection layer for via structures', datatype=21, symbol='PRO')
 
 # ---------------------------------- Primitive Layers --------------------------------

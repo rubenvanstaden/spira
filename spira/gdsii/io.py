@@ -5,7 +5,9 @@ import pathlib
 import numpy as np
 from spira.gdsii.utils import c3d
 from spira.gdsii.utils import scale_coord_down as scd
+from spira.gdsii.utils import scale_coord_up as scu
 from spira.gdsii.utils import scale_polygon_down as spd
+from spira.gdsii.utils import scale_polygon_up as spu
 from spira import LOG
 
 
@@ -30,7 +32,8 @@ def wrap_labels(cell, c2dmap):
             params['gdslayer'] = layer
             params['str_anchor'] = l.anchor
 
-            D += spira.Label(position=scd(l.position), **params)
+            # D += spira.Label(position=scd(l.position), **params)
+            D += spira.Label(position=scu(l.position), **params)
 
 
 def wrap_references(cell, c2dmap):
@@ -39,7 +42,8 @@ def wrap_references(cell, c2dmap):
             D = c2dmap[cell]
             ref_device = c2dmap[e.ref_cell]
             D += spira.SRef(structure=ref_device,
-                            midpoint=scd(e.midpoint),
+                            # midpoint=scd(e.midpoint),
+                            midpoint=scu(e.midpoint),
                             rotation=e.rotation,
                             magnification=e.magnification,
                             reflection=e.x_reflection)
@@ -92,12 +96,16 @@ def import_gds(filename, cellname=None, flatten=False, duplayer={}):
             if isinstance(e, gdspy.PolygonSet):
                 for points in e.polygons:
                     layer = spira.Layer(number=e.layers[0], datatype=e.datatypes[0])
-                    ply = spira.Polygons(shape=spd([points]),
+                    # ply = spira.Polygons(shape=spd([points]),
+                    ply = spira.Polygons(shape=spu([points]),
+                    # ply = spira.Polygons(shape=[points],
                                          gdslayer=layer)
                     D += ply
             elif isinstance(e, gdspy.Polygon):
                 layer = spira.Layer(number=e.layers, datatype=e.datatype)
-                ply = spira.Polygons(shape=spd([e.points]),
+                # ply = spira.Polygons(shape=spd([e.points]),
+                ply = spira.Polygons(shape=spu([e.points]),
+                # ply = spira.Polygons(shape=[e.points],
                                      gdslayer=layer)
                 D += ply
 

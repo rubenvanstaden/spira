@@ -67,7 +67,8 @@ class __ProcessLayer__(Cell):
     error_type = param.IntegerField()
 
     layer = param.DataField(fdef_name='create_layer')
-    player = param.DataField(fdef_name='create_polygon_layer')
+    polygon = param.DataField(fdef_name='create_polygon_layer')
+    player = param.PhysicalLayerField()
 
     def create_polygon_layer(self):
         return Polygons(shape=self.points, gdslayer=self.layer)
@@ -76,7 +77,7 @@ class __ProcessLayer__(Cell):
         return Layer(name=self.name, number=self.number, datatype=self.error_type)
 
     def create_elementals(self, elems):
-        elems += self.player
+        elems += self.polygon
         return elems
 
 
@@ -89,6 +90,7 @@ class __ConnectLayer__(__ProcessLayer__):
 
     port1 = param.DataField(fdef_name='create_port1')
     port2 = param.DataField(fdef_name='create_port2')
+    player = param.PhysicalLayerField()
 
     def create_port1(self):
         port = Port(name='P1', midpoint=self.midpoint, gdslayer=self.layer1)
@@ -108,9 +110,56 @@ class __ConnectLayer__(__ProcessLayer__):
         return elems
 
 
+# class DLayer(__DeviceLayer__):
+
+#     blayer = param.PolygonField()
+#     device_elems = param.ElementListField()
+#     box = param.DataField(fdef_name='create_box_layer')
+#     terms = param.DataField(fdef_name='create_labels')
+
+#     color = param.ColorField(default='#e54e7f')
+
+#     def create_labels(self):
+#         elems = ElementList()
+#         for p in self.device_elems.polygons:
+#             layer = p.gdslayer.number
+#             players = RDD.PLAYER.get_physical_layers(purposes='METAL')
+#             if layer in players:
+#                 l2 = Layer(name='BoundingBox', number=layer, datatype=8)
+#                 # FIXME: Ports with the same name overrides eachother.
+#                 elems += Port(name='P{}'.format(layer), midpoint=self.blayer.center, gdslayer=l2)
+#         return elems
+
+#     def create_box_layer(self):
+#         elems = ElementList()
+#         setter = {}
+
+#         for p in self.device_elems.polygons:
+#             layer = p.gdslayer.number
+#             setter[layer] = 'not_set'
+
+#         for p in self.device_elems.polygons:
+#             layer = p.gdslayer.number
+#             players = RDD.PLAYER.get_physical_layers(purposes=['METAL'])
+#             if layer in players and setter[layer] == 'not_set':
+#                 l1 = Layer(name='BoundingBox', number=layer, datatype=8)
+#                 elems += Polygons(shape=self.blayer.polygons, gdslayer=l1)
+#                 setter[layer] = 'already_set'
+#         return elems
+
+#     def create_elementals(self, elems):
+
+#         elems += self.box
+#         elems += self.terms
+
+#         elems = elems.flatten()
+
+#         return elems
+
+
 class DLayer(__DeviceLayer__):
 
-    blayer = param.PolygonField()
+    points = param.PointArrayField()
     device_elems = param.ElementListField()
     box = param.DataField(fdef_name='create_box_layer')
     terms = param.DataField(fdef_name='create_labels')
@@ -125,7 +174,7 @@ class DLayer(__DeviceLayer__):
             if layer in players:
                 l2 = Layer(name='BoundingBox', number=layer, datatype=8)
                 # FIXME: Ports with the same name overrides eachother.
-                elems += Port(name='P{}'.format(layer), midpoint=self.blayer.center, gdslayer=l2)
+                # elems += Port(name='P{}'.format(layer), midpoint=self.blayer.center, gdslayer=l2)
         return elems
 
     def create_box_layer(self):
@@ -137,20 +186,22 @@ class DLayer(__DeviceLayer__):
             setter[layer] = 'not_set'
 
         for p in self.device_elems.polygons:
-            layer = p.gdslayer.number
-            players = RDD.PLAYER.get_physical_layers(purposes=['METAL'])
-            if layer in players and setter[layer] == 'not_set':
-                l1 = Layer(name='BoundingBox', number=layer, datatype=8)
-                elems += Polygons(polygons=self.blayer.polygons, gdslayer=l1)
-                setter[layer] = 'already_set'
+            for pl in RDD.PLAYER.get_physical_layers(purposes=['METAL', 'GND']):
+                if pl.layer == p.gdslayer:
+                    if setter[pl.layer.number] == 'not_set':
+                        l1 = Layer(name='BoundingBox', number=pl.layer.number, datatype=0)
+                        # l1 = Layer(name='BoundingBox', number=pl.layer.number, datatype=8)
+                        elems += Polygons(shape=self.points, gdslayer=l1)
+                        setter[pl.layer.number] = 'already_set'
         return elems
 
     def create_elementals(self, elems):
 
-        elems += self.box
-        elems += self.terms
+        for e in self.box:
+            elems += e
+        # elems += self.terms
 
-        elems = elems.flatten()
+        # elems = elems.flatten()
 
         return elems
 

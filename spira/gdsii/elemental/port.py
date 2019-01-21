@@ -195,11 +195,15 @@ class PortAbstract(__Port__):
 
         return self
 
-    def _update(self, name, layer):
-        ll = deepcopy(layer)
-        ll.datatype = 65
-        self.polygon.gdslayer = ll
-        self.label.gdslayer = ll
+    # def _update(self, name, layer):
+    #     # print('wenifwebf')
+    #     ll = deepcopy(layer)
+    #     ll.datatype = 165
+    #     self.name = name
+    #     self.label.text = name
+    #     self.polygon.gdslayer = ll
+    #     self.label.gdslayer = ll
+    #     self.gdslayer = ll
 
 
 class Port(PortAbstract):
@@ -212,7 +216,7 @@ class Port(PortAbstract):
     >>> port = spira.Port()
     """
 
-    edge_width = param.FloatField(default=0.25)
+    edge_width = param.FloatField(default=0.25*1e6)
 
     def __init__(self, port=None, polygon=None, **kwargs):
         super().__init__(port=port, polygon=polygon, **kwargs)

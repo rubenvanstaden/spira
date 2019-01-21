@@ -22,6 +22,7 @@ class PurposeLayer(__Layer__):
     #     return string.format(self.name, self.datatype, self.symbol)
 
     def __eq__(self, other):
+        # print(other)
         if isinstance(other, PurposeLayer):
             return self.key == other.key
         else:

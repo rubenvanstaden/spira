@@ -11,11 +11,17 @@ class ElementFilterMixin(object):
                 self += elem
 
     def get_polygons(self, layer=None, datatype=None):
+        from spira.gdsii.layer import Layer
+        from spira.rdd.layer import PurposeLayer
         elems = ElementList()
         for ply in self.polygons:
             if layer is not None:
-                if ply.gdslayer == layer:
-                    elems += ply
+                if isinstance(layer, Layer):
+                    if ply.gdslayer == layer:
+                        elems += ply
+                elif isinstance(layer, PurposeLayer):
+                    if ply.gdslayer.number == layer.datatype:
+                        elems += ply
             if datatype is not None:
                 if ply.gdslyaer.datatype == datatype:
                     elems += ply
@@ -104,6 +110,15 @@ class ElementFilterMixin(object):
         return elems
 
     @property
+    def cells(self):
+        from spira.gdsii.cell import Cell
+        elems = ElementList()
+        for e in self._list:
+            if isinstance(e, Cell):
+                elems += e
+        return elems
+
+    @property
     def mesh(self):
         from spira.lne.mesh import Mesh
         for g in self._list:
@@ -124,8 +139,8 @@ class ElementFilterMixin(object):
         subgraphs = {}
         for e in self.sref:
             cell = e.ref
-            if cell.graph is not None:
-                subgraphs[cell.name] = cell.graph
+            if cell.elementals.graph is not None:
+                subgraphs[cell.name] = cell.elementals.graph
         return subgraphs
 
 

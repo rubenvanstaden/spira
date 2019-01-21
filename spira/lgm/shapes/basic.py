@@ -8,8 +8,6 @@ from spira.lgm.shapes.shape import Shape
 
 from spira.gdsii.elemental.polygons import PolygonAbstract
 from spira.gdsii.elemental.polygons import Polygons
-from spira.gdsii.utils import scale_polygon_up as spu
-from spira.gdsii.utils import scale_coord_down as scd
 from spira.core.initializer import FieldInitializer
 
 

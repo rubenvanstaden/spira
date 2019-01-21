@@ -51,8 +51,8 @@ class __SRef__(gdspy.CellReference, ElementalInitializer):
             midpoint=self.midpoint,
             rotation=self.rotation,
             magnification=self.magnification,
-            reflection=self.reflection,
-            gdspy_commit=deepcopy(self.gdspy_commit)
+            reflection=self.reflection
+            # gdspy_commit=deepcopy(self.gdspy_commit)
         )
 
     def __eq__(self, other):
@@ -130,8 +130,6 @@ class SRefAbstract(__SRef__):
                 'magnification': self.magnification,
                 'reflection': self.reflection
             }
-
-            # print(tf['rotation'])
 
             new_port = port._copy()
             self._local_ports[port.name] = new_port.transform(tf)
@@ -268,15 +266,21 @@ class SRef(SRefAbstract):
         ElementalInitializer.__init__(self, **kwargs)
 
         self.ref = structure
-        self._parent_ports = structure.terms
-        self._local_ports = {port.name:port._copy() for port in structure.terms}
+        self._parent_ports = spira.ElementList()
+        for p in structure.ports:
+            self._parent_ports += p
+        for t in structure.terms:
+            self._parent_ports += t
+        self._local_ports = {port.name:port._copy() for port in self._parent_ports}
+        # self._local_ports = {port.name:port._copy() for port in structure.terms}
 
     def __repr__(self):
         name = self.ref.name
-        return ("[SPiRA: SRef] (\"{}\", at {}, srefs {}, " +
+        return ("[SPiRA: SRef] (\"{}\", at {}, srefs {}, cells {}, " +
            "polygons {}, ports {}, labels {})").format(
             name, self.midpoint,
             len(self.ref.elementals.sref),
+            len(self.ref.elementals.cells),
             len(self.ref.elementals.polygons),
             len(self.ref.ports),
             len(self.ref.elementals.labels)

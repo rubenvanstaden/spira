@@ -56,6 +56,12 @@ class __Cell__(gdspy.Cell, CellInitializer):
     def __sub__(self, other):
         pass
 
+    def __deepcopy__(self, memo):
+        return Cell(name=self.name+'awe',
+            ports=deepcopy(self.ports),
+            elementals=deepcopy(self.elementals)
+        )
+
 
 class CellAbstract(__Cell__):
 
@@ -83,10 +89,19 @@ class CellAbstract(__Cell__):
         deps += self
         return deps
 
+    @property
+    def pbox(self):
+        # from spira.gdsii.elemental.polygons import Polygons
+        (a,b), (c,d) = self.bbox
+        points = [[[a,b], [c,b], [c,d], [a,d]]]
+        return points
+        # return Polygons(shape=points)
+
     def commit_to_gdspy(self):
         cell = gdspy.Cell(self.name, exclude_from_current=True)
         for e in self.elementals:
             if issubclass(type(e), Cell):
+                # pass
                 for elem in e.elementals:
                     elem.commit_to_gdspy(cell=cell)
                 for port in e.ports:
@@ -211,11 +226,12 @@ class Cell(CellAbstract):
         if hasattr(self, 'elementals'):
             elems = self.elementals
             return ("[SPiRA: Cell(\'{}\')] " +
-                    "({} elementals: {} sref, {} polygons, " +
+                    "({} elementals: {} sref, {} cells, {} polygons, " +
                     "{} labels, {} ports)").format(
                         self.name,
                         elems.__len__(),
                         elems.sref.__len__(),
+                        elems.cells.__len__(),
                         elems.polygons.__len__(),
                         elems.labels.__len__(),
                         self.ports.__len__()

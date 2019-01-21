@@ -29,6 +29,7 @@ class __Shape__(FieldInitializer):
         from spira.gdsii.utils import scale_polygon_up as spu
         from spira.gdsii.utils import scale_polygon_down as spd
         polygons = spu(self.points)
+        # polygons = self.points
         self.points = []
         for poly in polygons:
             if pyclipper.Orientation(poly) is False:

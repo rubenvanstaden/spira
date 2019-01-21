@@ -14,7 +14,6 @@ from spira import param
 
 from spira import log as LOG
 from spira.core.initializer import ElementalInitializer
-# from spira.rdd import get_rule_deck
 from copy import copy, deepcopy
 
 
@@ -22,6 +21,9 @@ from copy import copy, deepcopy
 # colormap: https://www.color-hex.com/color-palette/166
 # https://www.color-hex.com/color-palette/66223
 # -------------------------------------------------------------------
+
+
+RDD = spira.get_rule_deck()
 
 
 class __Mesh__(meshio.Mesh, ElementalInitializer):
@@ -145,11 +147,9 @@ class MeshAbstract(__Mesh__):
 
     def __triangle_nodes__(self):
         """ Get triangle field_data in list form. """
-
         nodes = []
         for v in self.__layer_triangles_dict__().values():
             nodes.extend(v)
-
         triangles = {}
         for n in nodes:
             for node, triangle in enumerate(self.__triangles__()):
@@ -174,8 +174,6 @@ class MeshAbstract(__Mesh__):
 
 
 class MeshLabeled(MeshAbstract):
-
-    RDD = spira.get_rule_deck()
 
     primitives = param.ElementListField()
 
@@ -207,15 +205,15 @@ class MeshLabeled(MeshAbstract):
                 pid = utils.labeled_polygon_id(position, self.polygons)
 
                 if pid is not None:
-                    params = {}
-                    params['text'] = self.name
-                    params['gdslayer'] = self.layer
-                    params['color'] = RDD.METALS.get_key_by_layer(self.layer)['COLOR']
-
-                    label = spira.Label(position=position, **params)
-                    label.id = '{}_{}'.format(key[0], pid)
-
-                    self.g.node[n]['surface'] = label
+                    for pl in RDD.PLAYER.get_physical_layers(purposes='METAL'):
+                        if pl.layer == self.layer:
+                            label = spira.Label(position=position,
+                                text=self.name,
+                                gdslayer=self.layer,
+                                color=pl.data.COLOR
+                            )
+                            # label.id = '{}_{}'.format(key[0], pid)
+                            self.g.node[n]['surface'] = label
 
             node_count += 1
 
@@ -228,102 +226,117 @@ class MeshLabeled(MeshAbstract):
         for node, triangle in self.__triangle_nodes__().items():
             points = [utils.c2d(self.points[i]) for i in triangle]
             for S in self.primitives:
-                if isinstance(S, spira.Port):
-                    self.add_port_label(node, S, points)
-                else:
-                    self.add_device_label(node, S, points)
+                # print(S)
+                pass
+                # self.add_device_label(node, S, points)
 
-    def add_new_node(self, n, D, pos):
-        params = {}
-        params['text'] = 'new'
-        l1 = spira.Layer(name='Label', number=104)
-        params['gdslayer'] = l1
-        # params['color'] = RDD.METALS.get_key_by_layer(self.layer)['COLOR']
+                # if isinstance(S, spira.Port):
+                #     self.add_port_label(node, S, points)
+                # else:
+                #     self.add_device_label(node, S, points)
 
-        label = spira.Label(position=pos, **params)
-        label.id = '{}_{}'.format(n, n)
+    # def add_new_node(self, n, D, pos):
+    #     params = {}
+    #     params['text'] = 'new'
+    #     l1 = spira.Layer(name='Label', number=104)
+    #     params['gdslayer'] = l1
+    #     # params['color'] = RDD.METALS.get_key_by_layer(self.layer)['COLOR']
 
-        num = self.g.number_of_nodes()
+    #     label = spira.Label(position=pos, **params)
+    #     label.id = '{}_{}'.format(n, n)
 
-        self.g.add_node(num+1, pos=pos, pin=D, surface=label)
-        self.g.add_edge(n, num+1)
+    #     num = self.g.number_of_nodes()
 
-    def add_port_label(self, n, D, points):
-        if D.point_inside(points):
-            P = spira.PortNode(name=D.name, elementals=D)
-            self.g.node[n]['pin'] = P
+    #     self.g.add_node(num+1, pos=pos, pin=D, surface=label)
+    #     self.g.add_edge(n, num+1)
+
+    # def add_port_label(self, n, D, points):
+    #     if D.point_inside(points):
+    #         P = spira.PortNode(name=D.name, elementals=D)
+    #         self.g.node[n]['pin'] = P
 
     def add_device_label(self, n, S, points):
+
         for name, p in S.ports.items():
-            if p.gdslayer.name == 'GROUND':
-                pass
-                # if lbl.layer == self.layer.number:
-                #     params = {}
-                #     params['text'] = 'GROUND'
-                #     l1 = spira.Layer(name='GND', number=104)
-                #     params['gdslayer'] = l1
-                #
-                #     label = spira.Label(position=lbl.position, **params)
-                #     label.id = '{}_{}'.format(n, n)
-                #
-                #     ply = spira.Polygons(gdslayer=l1)
-                #
-                #     D_gnd = BaseVia(name='BaseVIA_GND',
-                #                     ply=ply,
-                #                     m2=l1, m1=l1)
-                #
-                #     num = self.g.number_of_nodes()
-                #
-                #     self.g.add_node(num+1, pos=lbl.position, pin=D_gnd, surface=label)
-                #     self.g.add_edge(n, num+1)
-            else:
-                # print(S.flat_copy())
-                # print(p.gdslayer.number)
-                # print(self.layer.number)
-                # print('')
-                if p.gdslayer.number == self.layer.number:
-                    if p.point_inside(points):
-                        self.g.node[n]['pin'] = S
-                        # if 'pin' in self.g.node[n]:
-                        #     self.add_new_node(n, D, lbl.position)
-                        # else:
-                        #     self.g.node[n]['pin'] = D
+            if p.gdslayer.number == self.layer.number:
+                # print(S)
+                if p.point_inside(points):
+                    self.g.node[n]['pin'] = S
 
 
-        # D = S.ref
-        # for L in D.elementals.labels:
-        #     lbl = deepcopy(L)
-        #
-        #     lbl.move(midpoint=lbl.position, destination=S.midpoint)
-        #
-        #     if lbl.gdslayer.name == 'GROUND':
-        #         if lbl.layer == self.layer.number:
-        #             params = {}
-        #             params['text'] = 'GROUND'
-        #             l1 = spira.Layer(name='GND', number=104)
-        #             params['gdslayer'] = l1
-        #
-        #             label = spira.Label(position=lbl.position, **params)
-        #             label.id = '{}_{}'.format(n, n)
-        #
-        #             ply = spira.Polygons(gdslayer=l1)
-        #
-        #             D_gnd = BaseVia(name='BaseVIA_GND',
-        #                             ply=ply,
-        #                             m2=l1, m1=l1)
-        #
-        #             num = self.g.number_of_nodes()
-        #
-        #             self.g.add_node(num+1, pos=lbl.position, pin=D_gnd, surface=label)
-        #             self.g.add_edge(n, num+1)
+        # for name, p in S.ports.items():
+        #     if p.gdslayer.name == 'GROUND':
+        #         pass
+        #         # if lbl.layer == self.layer.number:
+        #         #     params = {}
+        #         #     params['text'] = 'GROUND'
+        #         #     l1 = spira.Layer(name='GND', number=104)
+        #         #     params['gdslayer'] = l1
+        #         #
+        #         #     label = spira.Label(position=lbl.position, **params)
+        #         #     label.id = '{}_{}'.format(n, n)
+        #         #
+        #         #     ply = spira.Polygons(gdslayer=l1)
+        #         #
+        #         #     D_gnd = BaseVia(name='BaseVIA_GND',
+        #         #                     ply=ply,
+        #         #                     m2=l1, m1=l1)
+        #         #
+        #         #     num = self.g.number_of_nodes()
+        #         #
+        #         #     self.g.add_node(num+1, pos=lbl.position, pin=D_gnd, surface=label)
+        #         #     self.g.add_edge(n, num+1)
         #     else:
-        #         if lbl.layer == self.layer.number:
-        #             if lbl.point_inside(points):
-        #                 self.g.node[n]['pin'] = D
+        #         # print(S.flat_copy())
+        #         # print(p.gdslayer.number)
+        #         # print(self.layer.number)
+        #         # print('')
+        #         if p.gdslayer.number == self.layer.number:
+        #             if p.point_inside(points):
+        #                 self.g.node[n]['pin'] = S
         #                 # if 'pin' in self.g.node[n]:
         #                 #     self.add_new_node(n, D, lbl.position)
         #                 # else:
         #                 #     self.g.node[n]['pin'] = D
+
+
+
+
+
+    #     # D = S.ref
+    #     # for L in D.elementals.labels:
+    #     #     lbl = deepcopy(L)
+    #     #
+    #     #     lbl.move(midpoint=lbl.position, destination=S.midpoint)
+    #     #
+    #     #     if lbl.gdslayer.name == 'GROUND':
+    #     #         if lbl.layer == self.layer.number:
+    #     #             params = {}
+    #     #             params['text'] = 'GROUND'
+    #     #             l1 = spira.Layer(name='GND', number=104)
+    #     #             params['gdslayer'] = l1
+    #     #
+    #     #             label = spira.Label(position=lbl.position, **params)
+    #     #             label.id = '{}_{}'.format(n, n)
+    #     #
+    #     #             ply = spira.Polygons(gdslayer=l1)
+    #     #
+    #     #             D_gnd = BaseVia(name='BaseVIA_GND',
+    #     #                             ply=ply,
+    #     #                             m2=l1, m1=l1)
+    #     #
+    #     #             num = self.g.number_of_nodes()
+    #     #
+    #     #             self.g.add_node(num+1, pos=lbl.position, pin=D_gnd, surface=label)
+    #     #             self.g.add_edge(n, num+1)
+    #     #     else:
+    #     #         if lbl.layer == self.layer.number:
+    #     #             if lbl.point_inside(points):
+    #     #                 self.g.node[n]['pin'] = D
+    #     #                 # if 'pin' in self.g.node[n]:
+    #     #                 #     self.add_new_node(n, D, lbl.position)
+    #     #                 # else:
+    #     #                 #     self.g.node[n]['pin'] = D
 
 
 class Mesh(MeshLabeled):

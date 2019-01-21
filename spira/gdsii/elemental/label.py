@@ -1,3 +1,4 @@
+import spira
 import gdspy
 import pyclipper
 import numpy as np
@@ -38,7 +39,7 @@ class __Label__(gdspy.Label, ElementalInitializer):
 
     def __deepcopy__(self, memo):
         c_label = self.modified_copy(
-            position=self.position,
+            position=deepcopy(self.position),
             gdslayer=deepcopy(self.gdslayer)
         )
         return c_label
@@ -47,7 +48,9 @@ class __Label__(gdspy.Label, ElementalInitializer):
 class LabelAbstract(__Label__):
 
     gdslayer = param.LayerField()
+    color = param.StringField(default='#g54eff')
     text = param.StringField()
+    id = param.StringField()
     str_anchor = param.StringField(default='o')
     rotation = param.FloatField(default=0)
     magnification = param.FloatField(default=1)
@@ -86,8 +89,13 @@ class LabelAbstract(__Label__):
         self.rotation = np.mod(self.rotation, 360)
         return self
 
-    def point_inside(self, polygon):
-        return pyclipper.PointInPolygon(self.position, polygon) != 0
+    def point_inside(self, ply):
+        if isinstance(ply, spira.Polygons):
+            return pyclipper.PointInPolygon(self.position, ply.shape.points) != 0
+        elif isinstance(ply, (list, set, np.ndarray)):
+            return pyclipper.PointInPolygon(self.position, ply) != 0
+        else:
+            raise ValueError('Not Implemented!')
 
     def transform(self, transform):
         if transform['reflection']:

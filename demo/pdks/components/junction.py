@@ -36,13 +36,15 @@ class Junction(spira.Cell):
         return elems
 
     def create_elementals(self, elems):
-        for e in self.metals:
-            elems += e
-        for e in self.contacts:
-            elems += e
+        # if len(elems) == 0:
+        #     for e in self.metals:
+        #         elems += e
+        #     for e in self.contacts:
+        #         elems += e
 
         for key in RDD.VIAS.keys:
-            RDD.VIAS[key].PCELL.create_elementals(elems)
+            elems += spira.SRef(RDD.VIAS[key].PCELL, midpoint=(0,0))
+            # RDD.VIAS[key].PCELL.create_elementals(elems)
 
         return elems
 

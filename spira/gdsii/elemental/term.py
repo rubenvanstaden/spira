@@ -21,6 +21,12 @@ class Term(PortAbstract):
     width = param.FloatField(default=2)
     length = param.FloatField(default=0.1)
 
+    layer1 = param.LayerField()
+    layer2 = param.LayerField()
+
+    port1 = param.DataField(fdef_name='create_port1')
+    port2 = param.DataField(fdef_name='create_port2')
+
     def __init__(self, port=None, polygon=None, **kwargs):
         super().__init__(port=port, polygon=polygon, **kwargs)
 
@@ -77,6 +83,13 @@ class Term(PortAbstract):
             orientation=self.orientation)
         return new_port
 
+    def create_port1(self):
+        port = spira.Port(name='P1', midpoint=self.midpoint, gdslayer=self.layer1)
+        return port
+
+    def create_port2(self):
+        port = spira.Port(name='P2', midpoint=self.midpoint, gdslayer=self.layer2)
+        return port
 
 
 

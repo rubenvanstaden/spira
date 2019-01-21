@@ -140,7 +140,7 @@ class __Graph__(ElementalInitializer):
 
         self.subgraphs = subgraphs
 
-        self.union_subgraphs
+        # self.union_subgraphs
         # self.combine_nodes
         # self.connect_subgraphs
 

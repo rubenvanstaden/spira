@@ -24,6 +24,14 @@ class __Properties__(object):
         return self.bbox[0][1]
 
     @property
+    def dx(self):
+        return (self.xmax - self.xmin)
+
+    @property
+    def dy(self):
+        return (self.ymax - self.ymin)
+
+    @property
     def center(self):
         return np.sum(self.bbox, 0)/2
     
