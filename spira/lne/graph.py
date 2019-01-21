@@ -291,7 +291,9 @@ class GraphAbstract(__Graph__):
         super().__init__(subgraphs, data=None, val=None, **kwargs)
 
     def create_union_subgraphs(self):
-        self.g = nx.disjoint_union_all(self.subgraphs.values())
+        # self.g = nx.disjoint_union_all(self.subgraphs.values())
+        print(self.subgraphs)
+        self.g = nx.disjoint_union_all(self.subgraphs)
 
     def create_connect_subgraphs(self):
         graphs = list(nx.connected_component_subgraphs(self.g))

@@ -31,20 +31,91 @@ RDD = get_rule_deck()
 
 class __Device__(__StructureCell__):
 
+    level = param.IntegerField(default=1)
+    lcar = param.IntegerField(default=0.01)
+    algorithm = param.IntegerField(default=6)
+
     def create_elementals(self, elems):
         super().create_elementals(elems)
-
-        # TODO: Do DRC and ERC checking here.
-        # sref_elems = self.cell.get_srefs()
-#         for S in self.cell.get_srefs():
-#             if isinstance(S.ref, DLayer):
-#                 elems += S
-
-#         for S in self.cell.elementals:
-#             if isinstance(S.ref, TLayer):
-#                 elems += S
-
         return elems
+
+    def create_nets(self, nets):
+
+        print('\n---------------- Nets --------------------')
+
+        ports = self.ports
+        elems = self.elementals
+
+        prim_elems = ElementList()
+        for S in elems.sref:
+            if isinstance(S.ref, (CNLayers, spira.Port, spira.Term)):
+                for N in S.ref.elementals:
+                    prim_elems += N
+
+        if ports is not None:
+            for P in ports:
+                prim_elems += P
+
+        print(self.cell.elementals)
+        # print(elems)
+        # print(ports)
+        # print(prim_elems)
+
+        device_elems = ElementList()
+        for e in self.cell.elementals.sref:
+            if isinstance(e.ref, BoundingDevice):
+                print(e.ref.elementals.sref)
+                # (0, [SPiRA: SRef] ("DLayer-2", at [0, 0], srefs 0, cells 0, polygons 3, ports 0, labels 0))
+                for s in e.ref.elementals.sref:
+                    for p in s.ref.elementals:
+                        # p.center = p.center + s.midpoint
+                        p.move(midpoint=p.center, destination=e.midpoint)
+                        p.move(midpoint=p.center, destination=s.midpoint)
+                        device_elems += p
+
+        print('--- Device Elementals ===')
+        print(device_elems)
+        print('')
+
+        for pl in RDD.PLAYER.get_physical_layers(purposes='METAL'):
+            ply_elems = ElementList()
+            for S in elems.sref:
+                if isinstance(S.ref, CMLayers):
+                    for M in S.ref.elementals:
+                        if M.layer.is_equal_number(pl.layer):
+                            if M.polygon.gdslayer.datatype == 2:
+                            # if M.polygon.gdslayer.datatype == 1:
+                                ply_elems += M.polygon
+
+            if ply_elems:
+                geom = Geometry(
+                    name='{}'.format(pl.layer.number),
+                    lcar=self.lcar,
+                    algorithm=self.algorithm,
+                    layer=pl.layer,
+                    polygons=ply_elems
+                )
+
+                mesh_data = geom.create_mesh
+
+                params = {
+                    'name': '{}_{}'.format(pl.layer.name, pl.layer),
+                    'layer': pl.layer,
+                    'point_data': [mesh_data[2]],
+                    'cell_data': [mesh_data[3]],
+                    'field_data': [mesh_data[4]]
+                }
+
+                mesh = Mesh(
+                    polygons=ply_elems,
+                    device_polygon=device_elems,
+                    primitives=prim_elems,
+                    points=mesh_data[0],
+                    cells=mesh_data[1],
+                    **params
+                )
+                nets += mesh.g
+        return nets
 
 
 class Device(__Device__):
@@ -117,72 +188,13 @@ class BoundingDevice(__CellContainer__):
 class __Generator__(__CellContainer__):
 
     level = param.IntegerField(default=1)
-    lcar = param.IntegerField(default=0.1)
-    algorithm = param.IntegerField(default=6)
+    # lcar = param.IntegerField(default=0.01)
+    # algorithm = param.IntegerField(default=6)
 
     generate_devices = param.DataField(fdef_name='create_devices')
     device_layers = param.DataField(fdef_name='create_device_layers')
 
     dev = param.CellField()
-
-    def create_graph(self, elems, ports=None):
-
-        prim_elems = ElementList()
-        for S in elems.sref:
-            if isinstance(S.ref, (CNLayers, spira.Port, spira.Term)):
-                for N in S.ref.elementals:
-                    prim_elems += N
-
-        if ports is not None:
-            for P in ports:
-                prim_elems += P
-
-        print(prim_elems)
-
-        subgraphs = {}
-        for pl in RDD.PLAYER.get_physical_layers(purposes='METAL'):
-
-            ply_elems = ElementList()
-
-            for S in elems.sref:
-                if isinstance(S.ref, CMLayers):
-                    for M in S.ref.elementals:
-                        if M.layer.is_equal_number(pl.layer):
-                            if M.polygon.gdslayer.datatype == 2:
-                                ply_elems += M.polygon
-
-            if ply_elems:
-                geom = Geometry(
-                    name='{}'.format(pl.layer.number),
-                    lcar=self.lcar,
-                    algorithm=self.algorithm,
-                    layer=pl.layer,
-                    polygons=ply_elems
-                )
-
-                mesh_data = geom.create_mesh
-
-                params = {
-                    'name': '{}'.format(pl.layer),
-                    'layer': pl.layer,
-                    'point_data': [mesh_data[2]],
-                    'cell_data': [mesh_data[3]],
-                    'field_data': [mesh_data[4]]
-                }
-
-                mesh = Mesh(
-                    polygons=ply_elems,
-                    primitives=prim_elems,
-                    points=mesh_data[0],
-                    cells=mesh_data[1],
-                    **params
-                )
-
-                subgraphs[pl.layer.name] = mesh.g
-
-        ng = Graph(subgraphs=subgraphs)
-        ng.write_graph(graphname='{}'.format(pl.layer.name))
-        elems += ng
 
     def wrap_references(self, c, c2dmap):
         for e in c.elementals:
@@ -197,15 +209,11 @@ class __Generator__(__CellContainer__):
         for key in RDD.DEVICES.keys:
             DeviceTCell = RDD.DEVICES[key].PCELL
             for C in deps:
-
                 D = Device(cell=C, cell_elems=C.elementals, level=1)
-
                 for P in DeviceTCell.elementals.sref:
                     P.ref.create_elementals(D.elementals)
-
                 c2dmap.update({C: D})
-
-                # self.create_graph(elems=D.elementals)
+                # D.netlist
 
         for c in self.cell.dependencies():
             self.wrap_references(c, c2dmap)
@@ -226,20 +234,6 @@ class __Generator__(__CellContainer__):
             self.wrap_references(c, c2dmap)
 
         return SRef(self.dev)
-
-    # def create_device_M_layers(self):
-    #     c2dmap = {}
-    #     self.M = deepcopy(self.cell)
-
-    #     for key in RDD.DEVICES.keys:
-    #         for s in self.M.sref:
-    #             B = DeviceMLayers(cell=s)
-    #             c2dmap.update({s: B})
-
-    #     for c in self.M.dependencies():
-    #         self.wrap_references(c, c2dmap)
-
-    #     return SRef(self.M)
 
 
 def add_ports_to_bounding_device(cell, gate):
@@ -286,34 +280,25 @@ class GateGenerator(__Generator__):
     structure_gate = param.DataField(fdef_name='create_structure_gate')
 
     def create_structure_gate(self):
-        # self.generate_devices
-
-        # mask = Gate(cell=self.cell, cell_elems=self.cell.elementals)
 
         dev = self.create_device_layers()
         mask = self.create_devices()
 
         self.cell.name += 'gate'
 
-        # self.lcar = 0.01
+        gate = Gate(cell=dev.ref, cell_elems=dev.ref.elementals, level=2)
 
-        gate = Gate(cell=self.dev, cell_elems=self.dev.elementals, level=2)
+        # for e in mask.ref.elementals:
+        #     if isinstance(e, SRef):
+        #         gate += e
 
-        for e in mask.ref.elementals:
-            if isinstance(e, SRef):
-                gate += e
-
-        print(gate)
         add_ports_to_bounding_device(self.cell, gate)
-        print(gate)
-        print('')
-        print(gate.elementals)
 
-        self.create_graph(elems=gate.elementals, ports=gate.ports)
+        gate.netlist
 
         return SRef(gate)
         # return SRef(dev.ref)
-        # return SRef(mask.ref)
+        # return SRef(self.dev)
 
 
 class CircuitGenerator(GateGenerator):

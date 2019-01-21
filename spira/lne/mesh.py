@@ -28,9 +28,10 @@ RDD = spira.get_rule_deck()
 
 class __Mesh__(meshio.Mesh, ElementalInitializer):
 
-    def __init__(self, polygons, points, cells, **kwargs):
+    def __init__(self, polygons, points, cells, device_polygon=None, **kwargs):
 
         self.polygons = polygons
+        self.device_polygon = device_polygon
 
         ElementalInitializer.__init__(self, **kwargs)
 
@@ -64,10 +65,13 @@ class MeshAbstract(__Mesh__):
     node_sets = param.ElementListField()
     gmsh_periodic = param.ElementListField()
 
+    # boundary_device_polygon = param.PolygonField()
+
     mesh_graph = param.DataField(fdef_name='create_mesh_graph')
 
-    def __init__(self, polygons, points, cells, **kwargs):
-        super().__init__(polygons, points, cells, **kwargs)
+    # def __init__(self, polygons, points, cells, **kwargs):
+    def __init__(self, polygons, points, cells, device_polygon=None, **kwargs):
+        super().__init__(polygons, points, cells, device_polygon, **kwargs)
 
     def create_mesh_graph(self):
         """ Create a graph from the meshed geometry. """
@@ -179,43 +183,37 @@ class MeshLabeled(MeshAbstract):
 
     surface_nodes = param.DataField(fdef_name='create_surface_nodes')
     pinlabel_nodes = param.DataField(fdef_name='create_pinlabel_nodes')
+    device_nodes = param.DataField(fdef_name='create_device_nodes')
 
-    def __init__(self, polygons, points, cells, **kwargs):
-        print('\nPinLabels object')
+    def __init__(self, polygons, points, cells, device_polygon=None, **kwargs):
+        super().__init__(polygons, points, cells, device_polygon, **kwargs)
 
-        super().__init__(polygons, points, cells, **kwargs)
+    # def __init__(self, polygons, points, cells, **kwargs):
+    #     print('\nPinLabels object')
+    #     super().__init__(polygons, points, cells, **kwargs)
 
         self.points = points
         self.cells = cells
 
         self.surface_nodes
         self.pinlabel_nodes
+        self.device_nodes
 
     def create_surface_nodes(self):
-
-        LOG.header('Adding surface labels')
-
-        node_count = 0
-
         triangles = self.__layer_triangles_dict__()
         for key, nodes in triangles.items():
             for n in nodes:
-                position = self.g.node[n]['pos']
 
-                pid = utils.labeled_polygon_id(position, self.polygons)
-
-                # label = spira.Label(position=position,
-                #     text=self.name,
-                #     gdslayer=self.layer,
-                #     color='#FFFFFF'
-                # )
-                # label.id0 = '{}_{}'.format(key[0], pid)
-                # self.g.node[n]['surface'] = label
+                pid = utils.labeled_polygon_id(
+                    self.g.node[n]['pos'], 
+                    self.polygons
+                )
 
                 if pid is not None:
                     for pl in RDD.PLAYER.get_physical_layers(purposes='METAL'):
                         if pl.layer == self.layer:
-                            label = spira.Label(position=position,
+                            label = spira.Label(
+                                position=self.g.node[n]['pos'],
                                 text=self.name,
                                 gdslayer=self.layer,
                                 color=pl.data.COLOR
@@ -223,14 +221,7 @@ class MeshLabeled(MeshAbstract):
                             label.id0 = '{}_{}'.format(key[0], pid)
                             self.g.node[n]['surface'] = label
 
-            node_count += 1
-
-        print('# surface nodes added: {}'.format(node_count))
-
     def create_pinlabel_nodes(self):
-
-        LOG.header('Adding pin labels')
-
         for node, triangle in self.__triangle_nodes__().items():
             points = [utils.c2d(self.points[i]) for i in triangle]
             for S in self.primitives:
@@ -238,6 +229,38 @@ class MeshLabeled(MeshAbstract):
                     self.add_port_label(node, S, points)
                 else:
                     self.add_device_label(node, S, points)
+
+    def create_device_nodes(self):
+        # print(self.device_polygon)
+        if self.device_polygon:
+
+            ply = self.device_polygon[0]
+
+            bnodes = []
+            for n in self.g.nodes():
+                s = self.g.node[n]['surface']
+                # print(ply.polygons)
+                # print(s)
+                # print('')
+                if s.point_inside(ply.polygons[0]):
+                    bnodes.append(n)
+
+            pinlabel = None
+            for n in bnodes:
+                self.g.node[n]['surface'].color = '#ffffff'
+                if 'pin' in self.g.node[n]:
+                    self.g.node[n]['pin'].color = '#ffffff'
+            # for n in self.g.nodes():
+                # if 'pin' in self.g.node[n]:
+                #     if pinlabel is None:
+                #         pinlabel = self.g.node[n]['pin']
+                #     else:
+                #         raise ValueError('Pinlabel already assigned!')
+
+            # print(pinlabel)
+            # if pinlabel is not None:
+            #     for n in bnodes:
+            #         self.g.node[n]['pin'] = pinlabel
 
     def add_new_node(self, n, D, pos):
         params = {}
