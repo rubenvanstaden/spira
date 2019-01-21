@@ -50,7 +50,7 @@ class LabelAbstract(__Label__):
     gdslayer = param.LayerField()
     color = param.StringField(default='#g54eff')
     text = param.StringField()
-    id = param.StringField()
+    id0 = param.StringField()
     str_anchor = param.StringField(default='o')
     rotation = param.FloatField(default=0)
     magnification = param.FloatField(default=1)

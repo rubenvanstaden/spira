@@ -10,21 +10,19 @@ class ElementFilterMixin(object):
             if sref.ref.name == cellname:
                 self += elem
 
-    def get_polygons(self, layer=None, datatype=None):
+    def get_polygons(self, layer=None):
         from spira.gdsii.layer import Layer
         from spira.rdd.layer import PurposeLayer
         elems = ElementList()
         for ply in self.polygons:
             if layer is not None:
                 if isinstance(layer, Layer):
-                    if ply.gdslayer == layer:
+                    # if ply.gdslayer == layer:
+                    if layer.is_equal_number(ply.gdslayer):
                         elems += ply
                 elif isinstance(layer, PurposeLayer):
                     if ply.gdslayer.number == layer.datatype:
                         elems += ply
-            if datatype is not None:
-                if ply.gdslyaer.datatype == datatype:
-                    elems += ply
         return elems
 
     @property

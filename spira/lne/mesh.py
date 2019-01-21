@@ -204,6 +204,14 @@ class MeshLabeled(MeshAbstract):
 
                 pid = utils.labeled_polygon_id(position, self.polygons)
 
+                # label = spira.Label(position=position,
+                #     text=self.name,
+                #     gdslayer=self.layer,
+                #     color='#FFFFFF'
+                # )
+                # label.id0 = '{}_{}'.format(key[0], pid)
+                # self.g.node[n]['surface'] = label
+
                 if pid is not None:
                     for pl in RDD.PLAYER.get_physical_layers(purposes='METAL'):
                         if pl.layer == self.layer:
@@ -212,7 +220,7 @@ class MeshLabeled(MeshAbstract):
                                 gdslayer=self.layer,
                                 color=pl.data.COLOR
                             )
-                            # label.id = '{}_{}'.format(key[0], pid)
+                            label.id0 = '{}_{}'.format(key[0], pid)
                             self.g.node[n]['surface'] = label
 
             node_count += 1
@@ -226,42 +234,41 @@ class MeshLabeled(MeshAbstract):
         for node, triangle in self.__triangle_nodes__().items():
             points = [utils.c2d(self.points[i]) for i in triangle]
             for S in self.primitives:
-                # print(S)
-                pass
-                # self.add_device_label(node, S, points)
+                if isinstance(S, (spira.Port, spira.Term)):
+                    self.add_port_label(node, S, points)
+                else:
+                    self.add_device_label(node, S, points)
 
-                # if isinstance(S, spira.Port):
-                #     self.add_port_label(node, S, points)
-                # else:
-                #     self.add_device_label(node, S, points)
+    def add_new_node(self, n, D, pos):
+        params = {}
+        params['text'] = 'new'
+        l1 = spira.Layer(name='Label', number=104)
+        params['gdslayer'] = l1
+        # params['color'] = RDD.METALS.get_key_by_layer(self.layer)['COLOR']
 
-    # def add_new_node(self, n, D, pos):
-    #     params = {}
-    #     params['text'] = 'new'
-    #     l1 = spira.Layer(name='Label', number=104)
-    #     params['gdslayer'] = l1
-    #     # params['color'] = RDD.METALS.get_key_by_layer(self.layer)['COLOR']
+        label = spira.Label(position=pos, **params)
+        label.id0 = '{}_{}'.format(n, n)
 
-    #     label = spira.Label(position=pos, **params)
-    #     label.id = '{}_{}'.format(n, n)
+        num = self.g.number_of_nodes()
 
-    #     num = self.g.number_of_nodes()
+        self.g.add_node(num+1, pos=pos, pin=D, surface=label)
+        self.g.add_edge(n, num+1)
 
-    #     self.g.add_node(num+1, pos=pos, pin=D, surface=label)
-    #     self.g.add_edge(n, num+1)
+    def add_port_label(self, n, D, points):
+        if D.point_inside(points):
+            self.g.node[n]['pin'] = D
+            # P = spira.PortNode(name=D.name, elementals=D)
+            # self.g.node[n]['pin'] = P
 
-    # def add_port_label(self, n, D, points):
-    #     if D.point_inside(points):
-    #         P = spira.PortNode(name=D.name, elementals=D)
-    #         self.g.node[n]['pin'] = P
+    def add_device_label(self, n, D, points):
 
-    def add_device_label(self, n, S, points):
-
-        for name, p in S.ports.items():
+        for p in D.ports:
             if p.gdslayer.number == self.layer.number:
-                # print(S)
                 if p.point_inside(points):
-                    self.g.node[n]['pin'] = S
+                    if 'pin' in self.g.node[n]:
+                        self.add_new_node(n, D, p.midpoint)
+                    else:
+                        self.g.node[n]['pin'] = D
 
 
         # for name, p in S.ports.items():
@@ -274,7 +281,7 @@ class MeshLabeled(MeshAbstract):
         #         #     params['gdslayer'] = l1
         #         #
         #         #     label = spira.Label(position=lbl.position, **params)
-        #         #     label.id = '{}_{}'.format(n, n)
+        #         #     label.id0 = '{}_{}'.format(n, n)
         #         #
         #         #     ply = spira.Polygons(gdslayer=l1)
         #         #
@@ -317,7 +324,7 @@ class MeshLabeled(MeshAbstract):
     #     #             params['gdslayer'] = l1
     #     #
     #     #             label = spira.Label(position=lbl.position, **params)
-    #     #             label.id = '{}_{}'.format(n, n)
+    #     #             label.id0 = '{}_{}'.format(n, n)
     #     #
     #     #             ply = spira.Polygons(gdslayer=l1)
     #     #

@@ -158,7 +158,8 @@ class TCellJC(DynamicDataTree):
         self.PCELL = ViaTemplate(
             name = 'JC',
             via_layer = RDD.JC.LAYER,
-            layer1 = RDD.JJ.LAYER,
+            # layer1 = RDD.JJ.LAYER,
+            layer1 = RDD.BAS.LAYER,
             layer2 = RDD.COU.LAYER
         )
 

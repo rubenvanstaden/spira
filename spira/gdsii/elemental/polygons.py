@@ -71,6 +71,11 @@ class __Polygon__(gdspy.PolygonSet, ElementalInitializer):
         else:
             return None
 
+    def is_equal_layers(self, other):
+        if self.gdslayer.number == other.gdslayer.number:
+            return True
+        return False
+
 
 class PolygonAbstract(__Polygon__):
 

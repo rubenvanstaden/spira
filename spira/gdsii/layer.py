@@ -66,5 +66,10 @@ class Layer(__Layer__):
     def key(self):
         return (self.number, self.datatype)
 
+    def is_equal_number(self, other):
+        if self.number == other.number:
+            return True
+        return False
+
 
 

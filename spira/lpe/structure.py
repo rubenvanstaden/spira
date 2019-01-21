@@ -28,6 +28,7 @@ class ComposeMLayers(__CellContainer__):
         points = []
         elems = spira.ElementList()
         for p in flat_metals:
+            assert isinstance(p, spira.Polygons)
             for pp in p.polygons:
                 points.append(pp)
         if points:
@@ -68,7 +69,8 @@ class ComposeMLayers(__CellContainer__):
                                                                     self.cell.id, i),
                                     player=player,
                                     points=ply.polygons,
-                                    number=pl.layer.number)
+                                    number=pl.layer.number,
+                                    level=self.level)
                         # c_mlayer += spira.SRef(ml)
                         c_mlayer += ml
 
@@ -117,7 +119,7 @@ class ComposeNLayer(ComposeMLayers):
         elems = ElementList()
         flat_elems = self.cell_elems.flat_copy()
         # TODO: Add JJ purpose also.
-        for pl in RDD.PLAYER.get_physical_layers(purposes='VIA'):
+        for pl in RDD.PLAYER.get_physical_layers(purposes=['VIA', 'JUNCTION']):
 
             via_elems = flat_elems.get_polygons(layer=pl.layer)
 
@@ -134,11 +136,12 @@ class ComposeNLayer(ComposeMLayers):
                             player = v
 
                     if player is not None:
-                        ml = NLayer(name='Via_NLayer_{}_{}_{}'.format(pl.layer.number, self.cell.name, i),
+                        ml = NLayer(name='Via_NLayer_{}_{}_{}'.format(pl.layer.name, self.cell.name, i),
                                     points=ply.polygons,
                                     player=player,
                                     midpoint=ply.center,
-                                    number=pl.layer.number)
+                                    number=pl.layer.number,
+                                    level=self.level)
                         # c_nlayer += spira.SRef(ml)
                         c_nlayer += ml
 

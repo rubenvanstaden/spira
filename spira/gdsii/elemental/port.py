@@ -40,7 +40,8 @@ class PortAbstract(__Port__):
         L = spira.Label(position=self.midpoint,
             text=self.name,
             gdslayer=self.gdslayer,
-            texttype=self.text_layer.number
+            texttype=self.text_layer.number,
+            color='#808080'
         )
         self.label = L
         self.arrow = None

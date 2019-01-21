@@ -65,6 +65,7 @@ class __ProcessLayer__(Cell):
     # points = param.PointArrayField()
     number = param.IntegerField()
     error_type = param.IntegerField()
+    level = param.IntegerField()
 
     layer = param.DataField(fdef_name='create_layer')
     polygon = param.DataField(fdef_name='create_polygon_layer')
@@ -74,7 +75,10 @@ class __ProcessLayer__(Cell):
         return Polygons(shape=self.points, gdslayer=self.layer)
 
     def create_layer(self):
-        return Layer(name=self.name, number=self.number, datatype=self.error_type)
+        if self.error_type != 0:
+            return Layer(name=self.name, number=self.number, datatype=self.error_type)
+        else:
+            return Layer(name=self.name, number=self.number, datatype=self.level)
 
     def create_elementals(self, elems):
         elems += self.polygon
@@ -196,14 +200,17 @@ class DLayer(__DeviceLayer__):
         return elems
 
     def create_elementals(self, elems):
-
         for e in self.box:
             elems += e
         # elems += self.terms
-
         # elems = elems.flatten()
-
         return elems
+    
+    def create_ports(self, ports):
+
+
+
+        return ports
 
 
 class GLayer(__ProcessLayer__):
