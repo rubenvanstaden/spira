@@ -193,7 +193,7 @@ class DLayer(__DeviceLayer__):
             for pl in RDD.PLAYER.get_physical_layers(purposes=['METAL', 'GND']):
                 if pl.layer == p.gdslayer:
                     if setter[pl.layer.number] == 'not_set':
-                        l1 = Layer(name='BoundingBox', number=pl.layer.number, datatype=0)
+                        l1 = Layer(name='BoundingBox', number=pl.layer.number, datatype=9)
                         # l1 = Layer(name='BoundingBox', number=pl.layer.number, datatype=8)
                         elems += Polygons(shape=self.points, gdslayer=l1)
                         setter[pl.layer.number] = 'already_set'

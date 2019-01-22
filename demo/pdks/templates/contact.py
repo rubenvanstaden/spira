@@ -46,8 +46,8 @@ class ViaTemplate(__TempatePrimitive__):
                             M1 += e
                         elif e.player.layer == self.layer2:
                             M2 += e
-                        
-                    if e.player.purpose == RDD.PURPOSE.PRIM.VIA:
+
+                    if e.player.purpose in [RDD.PURPOSE.PRIM.VIA, RDD.PURPOSE.PRIM.JUNCTION]:
                         if e.player.layer == self.via_layer:
                             for M in M1:
                                 if e.polygon | M.polygon:

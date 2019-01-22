@@ -239,28 +239,24 @@ class MeshLabeled(MeshAbstract):
             bnodes = []
             for n in self.g.nodes():
                 s = self.g.node[n]['surface']
-                # print(ply.polygons)
-                # print(s)
-                # print('')
                 if s.point_inside(ply.polygons[0]):
                     bnodes.append(n)
 
             pinlabel = None
             for n in bnodes:
-                self.g.node[n]['surface'].color = '#ffffff'
-                if 'pin' in self.g.node[n]:
-                    self.g.node[n]['pin'].color = '#ffffff'
-            # for n in self.g.nodes():
+                # self.g.node[n]['surface'].color = '#ffffff'
                 # if 'pin' in self.g.node[n]:
-                #     if pinlabel is None:
-                #         pinlabel = self.g.node[n]['pin']
-                #     else:
-                #         raise ValueError('Pinlabel already assigned!')
+                #     self.g.node[n]['pin'].color = '#ffffff'
+                if 'pin' in self.g.node[n]:
+                    if pinlabel is None:
+                        pinlabel = self.g.node[n]['pin']
+                    else:
+                        raise ValueError('Pinlabel already assigned!')
 
-            # print(pinlabel)
-            # if pinlabel is not None:
-            #     for n in bnodes:
-            #         self.g.node[n]['pin'] = pinlabel
+            print(pinlabel)
+            if pinlabel is not None:
+                for n in bnodes:
+                    self.g.node[n]['pin'] = pinlabel
 
     def add_new_node(self, n, D, pos):
         params = {}

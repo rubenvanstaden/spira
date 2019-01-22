@@ -13,6 +13,7 @@ if __name__ == '__main__':
     # cell.output()
 
     # layout = SLayout(cell=cell, dev=deepcopy(cell), level=2)
+    # layout = SLayout(cell=cell, level=1)
     layout = SLayout(cell=cell, level=2)
 
     # layout.netlist()

@@ -74,6 +74,7 @@ class Netlist(__Cell__):
 
     merge = param.DataField(fdef_name='create_merge_nets')
     combine = param.DataField(fdef_name='create_combine_nodes')
+    combine_pinlabels = param.DataField(fdef_name='create_combine_pinlabel_nodes')
     connect = param.DataField(fdef_name='create_connect_subgraphs')
 
     def create_nets(self, nets):
@@ -82,6 +83,60 @@ class Netlist(__Cell__):
     def create_merge_nets(self):
         g = nx.disjoint_union_all(self.nets)
         return g
+
+    def create_combine_pinlabel_nodes(self):
+        """
+        Combine all nodes of the same type into one node.
+        """
+
+        def partition_nodes(u, v):
+            if ('pin' in self.g.node[u]) and ('pin' in self.g.node[v]):
+                # if self.g.node[u]['pin'].id == self.g.node[v]['pin'].id:
+                if self.g.node[u]['pin'] == self.g.node[v]['pin']:
+                    return True
+
+        def sub_nodes(b):
+            S = self.g.subgraph(b)
+
+            pin = nx.get_node_attributes(S, 'pin')
+            surface = nx.get_node_attributes(S, 'surface')
+            center = nx.get_node_attributes(S, 'pos')
+
+            sub_pos = list()
+            for key, value in center.items():
+                sub_pos = [value[0], value[1]]
+
+            return dict(pin=pin, surface=surface, pos=sub_pos)
+
+        Q = nx.quotient_graph(self.g, partition_nodes, node_data=sub_nodes)
+
+        Pos = nx.get_node_attributes(Q, 'pos')
+        Label = nx.get_node_attributes(Q, 'pin')
+        Polygon = nx.get_node_attributes(Q, 'surface')
+
+        Edges = nx.get_edge_attributes(Q, 'weight')
+
+        g1 = nx.Graph()
+
+        for key, value in Edges.items():
+            n1, n2 = list(key[0]), list(key[1])
+            g1.add_edge(n1[0], n2[0])
+
+        for n in g1.nodes():
+            for key, value in Pos.items():
+                if n == list(key)[0]:
+                    g1.node[n]['pos'] = [value[0], value[1]]
+
+            for key, value in Label.items():
+                if n == list(key)[0]:
+                    if n in value:
+                        g1.node[n]['pin'] = value[n]
+
+            for key, value in Polygon.items():
+                if n == list(key)[0]:
+                    g1.node[n]['surface'] = value[n]
+        return g1
+
 
     def create_combine_nodes(self):
         """
@@ -95,11 +150,6 @@ class Netlist(__Cell__):
                     if self.g.node[u]['surface'].id0 == self.g.node[v]['surface'].id0:
                     # if self.g.node[u]['surface'] == self.g.node[v]['surface']:
                         return True
-
-            if ('pin' in self.g.node[u]) and ('pin' in self.g.node[v]):
-                # if self.g.node[u]['pin'].id0 == self.g.node[v]['pin'].id0:
-                if self.g.node[u]['pin'] == self.g.node[v]['pin']:
-                    return True
 
         def sub_nodes(b):
             S = self.g.subgraph(b)
@@ -151,7 +201,7 @@ class Netlist(__Cell__):
     def create_netlist(self):
 
         self.g = self.merge
-        # self.g = self.combine
+        # self.g = self.combine_pinlabels
 
         self._plotly_graph(G=self.g, graphname=self.name, labeltext='id')
 
