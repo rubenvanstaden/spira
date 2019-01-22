@@ -26,7 +26,7 @@ class PortAbstract(__Port__):
 
     name = param.StringField()
     midpoint = param.MidPointField()
-    orientation = param.IntegerField()
+    orientation = param.IntegerField(default=0)
     parent = param.DataField()
     gdslayer = param.LayerField(name='PortLayer', number=64)
     poly_layer = param.LayerField(name='PortLayer', number=64)

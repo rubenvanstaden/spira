@@ -65,11 +65,8 @@ class MeshAbstract(__Mesh__):
     node_sets = param.ElementListField()
     gmsh_periodic = param.ElementListField()
 
-    # boundary_device_polygon = param.PolygonField()
-
     mesh_graph = param.DataField(fdef_name='create_mesh_graph')
 
-    # def __init__(self, polygons, points, cells, **kwargs):
     def __init__(self, polygons, points, cells, device_polygon=None, **kwargs):
         super().__init__(polygons, points, cells, device_polygon, **kwargs)
 
@@ -188,10 +185,6 @@ class MeshLabeled(MeshAbstract):
     def __init__(self, polygons, points, cells, device_polygon=None, **kwargs):
         super().__init__(polygons, points, cells, device_polygon, **kwargs)
 
-    # def __init__(self, polygons, points, cells, **kwargs):
-    #     print('\nPinLabels object')
-    #     super().__init__(polygons, points, cells, **kwargs)
-
         self.points = points
         self.cells = cells
 
@@ -218,7 +211,8 @@ class MeshLabeled(MeshAbstract):
                                 gdslayer=self.layer,
                                 color=pl.data.COLOR
                             )
-                            label.id0 = '{}_{}'.format(key[0], pid)
+                            # label.id0 = '{}_{}'.format(key[0], pid)
+                            label.id0 = '{}'.format(pid)
                             self.g.node[n]['surface'] = label
 
     def create_pinlabel_nodes(self):
@@ -231,7 +225,6 @@ class MeshLabeled(MeshAbstract):
                     self.add_device_label(node, S, points)
 
     def create_device_nodes(self):
-        # print(self.device_polygon)
         if self.device_polygon:
 
             ply = self.device_polygon[0]

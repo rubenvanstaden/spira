@@ -1,0 +1,48 @@
+import spira
+from spira import param
+from spira import shapes
+from demo.pdks.ply.base import Base
+
+
+class Polygon(Base):
+
+    # w = param.FloatField(default=1)
+    # h = param.FloatField(default=1)
+    # center = param.PointField()
+    points = param.ElementListField()
+
+    color = param.ColorField(default='#C0C0C0')
+
+    # def validate_parameters(self):
+    #     if self.w < self.player.data.WIDTH:
+    #         return False
+    #     if self.h < self.player.data.WIDTH:
+    #         return False
+    #     return True
+
+    def create_layer(self):
+        if self.error != 0:
+            layer = spira.Layer(
+                name=self.name,
+                number=self.player.layer.number,
+                datatype=self.error
+            )
+        elif self.level != 0:
+            layer = spira.Layer(
+                name=self.name,
+                number=self.player.layer.number,
+                datatype=self.level
+            )
+        else:
+            layer = spira.Layer(
+                name=self.name,
+                number=self.player.layer.number,
+                datatype=self.player.layer.datatype
+            )
+        return layer
+
+    def create_polygon(self):
+        ply = spira.Polygons(shape=self.points, gdslayer=self.layer)
+        return ply
+
+

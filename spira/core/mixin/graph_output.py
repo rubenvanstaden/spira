@@ -184,6 +184,7 @@ class DrawGraphAbstract(object):
                     elif isinstance(label, (spira.Port, spira.Term)):
                         nodes['text'].append(label.name)
                     else:
+                        # nodes['text'].append(label.id)
                         nodes['text'].append(label.id0)
 
                 if isinstance(label, spira.SRef):

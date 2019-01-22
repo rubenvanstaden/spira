@@ -24,6 +24,7 @@ from spira.core.lists import ElementList
 from spira.lpe.layers import *
 from spira.lpe.structure import __StructureCell__
 from spira.lpe.containers import __CellContainer__
+from spira.lpe import mask
 
 
 RDD = get_rule_deck()
@@ -35,84 +36,70 @@ class __Device__(__StructureCell__):
     lcar = param.IntegerField(default=0.1)
     algorithm = param.IntegerField(default=6)
 
+    devices = param.DataField(fdef_name='create_devices')
+    primitives = param.DataField(fdef_name='create_primitives')
+
     dev = param.CellField()
 
     def create_elementals(self, elems):
         super().create_elementals(elems)
         return elems
 
-    def create_nets(self, nets):
-
-        print('\n---------------- Nets --------------------')
-
+    def create_primitives(self):
         ports = self.ports
         elems = self.elementals
-
         prim_elems = ElementList()
         for S in elems.sref:
-            if isinstance(S.ref, (CNLayers, spira.Port, spira.Term)):
+            if isinstance(S.ref, mask.Native):
                 for N in S.ref.elementals:
                     prim_elems += N
-
         if ports is not None:
             for P in ports:
                 prim_elems += P
+        return prim_elems
 
-        print(self.cell.elementals)
-        # print(elems)
-        # print(ports)
-        # print(prim_elems)
-
-        # device_elems = ElementList()
-        # flat_elems = self.dev.flat_copy()
-        # # for e in self.cell.elementals.sref:
-        # for e in flat_elems:
-        #     # if isinstance(e.ref, BoundingDevice):
-        #     print(e)
-        #     # if isinstance(e, spira.Polygons):
-        #     #     print(e)
-        #         # print(e.ref.elementals.sref)
-        #         # # (0, [SPiRA: SRef] ("DLayer-2", at [0, 0], srefs 0, cells 0, polygons 3, ports 0, labels 0))
-        #         # for s in e.ref.elementals.sref:
-        #         #     for p in s.ref.elementals:
-        #         #         # p.center = p.center + s.midpoint
-        #         #         p.move(midpoint=p.center, destination=e.midpoint)
-        #         #         p.move(midpoint=p.center, destination=s.midpoint)
-        #         #         device_elems += p
-
+    def create_devices(self):
         device_elems = ElementList()
         for e in self.dev.elementals:
-            print(e)
             device_elems += e
             self.elementals += e
+        return device_elems
 
-        print('--- Device Elementals ===')
-        print(device_elems)
-        print('')
+    def _metal_polygons(self, pl):
+        elems = self.elementals
+        ply_elems = ElementList()
+        for S in elems.sref:
+            if isinstance(S.ref, mask.Metal):
+                for M in S.ref.elementals:
+                    if M.layer.is_equal_number(pl.layer):
+                        # if M.polygon.gdslayer.datatype == 2:
+                        # if M.polygon.gdslayer.datatype == 1:
+                        if M.polygon.gdslayer.datatype in (1, 2):
+                            ply_elems += M.polygon
+        return ply_elems
+
+    def create_nets(self, nets):
+
+        prim_elems = self.primitives
+        device_elems = self.devices
 
         for pl in RDD.PLAYER.get_physical_layers(purposes='METAL'):
-            ply_elems = ElementList()
-            for S in elems.sref:
-                if isinstance(S.ref, CMLayers):
-                    for M in S.ref.elementals:
-                        if M.layer.is_equal_number(pl.layer):
-                            if M.polygon.gdslayer.datatype == 2:
-                            # if M.polygon.gdslayer.datatype == 1:
-                                ply_elems += M.polygon
 
-            if ply_elems:
+            metal_elems = self._metal_polygons(pl)
+
+            if metal_elems:
                 geom = Geometry(
                     name='{}'.format(pl.layer.number),
                     lcar=self.lcar,
                     algorithm=self.algorithm,
                     layer=pl.layer,
-                    polygons=ply_elems
+                    polygons=metal_elems
                 )
 
                 mesh_data = geom.create_mesh
 
                 params = {
-                    'name': '{}_{}'.format(pl.layer.name, pl.layer),
+                    'name': '{}'.format(pl.layer),
                     'layer': pl.layer,
                     'point_data': [mesh_data[2]],
                     'cell_data': [mesh_data[3]],
@@ -120,7 +107,7 @@ class __Device__(__StructureCell__):
                 }
 
                 mesh = Mesh(
-                    polygons=ply_elems,
+                    polygons=metal_elems,
                     device_polygon=device_elems,
                     primitives=prim_elems,
                     points=mesh_data[0],
@@ -129,6 +116,16 @@ class __Device__(__StructureCell__):
                 )
                 nets += mesh.g
         return nets
+
+    def create_netlist(self):
+
+        self.g = self.merge
+        self.g = self.combine_pinlabels
+        self.g = self.combine_surfaces
+
+        self._plotly_graph(G=self.g, graphname=self.name, labeltext='id')
+
+        return self.g
 
 
 class Device(__Device__):
@@ -184,13 +181,8 @@ class BoundingDevice(__CellContainer__):
     devices = param.DataField(fdef_name='create_device_layers')
 
     def create_device_layers(self):
-        # box = self.cell.bbox
-        # box.move(midpoint=box.center, destination=(0,0))
-
         B = DLayer(points=self.cell.pbox, device_elems=self.cell.elementals.flat_copy())
         Bs = SRef(B)
-        # Bs.move(midpoint=(0,0), destination=self.cell.bbox.center)
-
         return Bs
 
     def create_elementals(self, elems):
@@ -201,9 +193,6 @@ class BoundingDevice(__CellContainer__):
 class __Generator__(__CellContainer__):
 
     level = param.IntegerField(default=1)
-    # lcar = param.IntegerField(default=0.01)
-    # algorithm = param.IntegerField(default=6)
-
     generate_devices = param.DataField(fdef_name='create_devices')
     device_layers = param.DataField(fdef_name='create_device_layers')
 
@@ -212,9 +201,6 @@ class __Generator__(__CellContainer__):
     def wrap_references(self, c, c2dmap):
         for e in c.elementals:
             if isinstance(e, SRef):
-                print(e)
-                print(e.midpoint)
-                print('')
                 if e.ref in c2dmap:
                     e.ref = c2dmap[e.ref]
 
@@ -225,7 +211,7 @@ class __Generator__(__CellContainer__):
         for key in RDD.DEVICES.keys:
             DeviceTCell = RDD.DEVICES[key].PCELL
             for C in deps:
-                D = Device(cell=C, cell_elems=C.elementals, level=1)
+                D = Device(cell=C, cell_elems=C.elementals, level=1, lcar=0.01)
                 for P in DeviceTCell.elementals.sref:
                     P.ref.create_elementals(D.elementals)
                 c2dmap.update({C: D})
@@ -247,73 +233,39 @@ class __Generator__(__CellContainer__):
                 c2dmap.update({C: B})
 
         for c in self.dev.dependencies():
-            print(c)
             self.wrap_references(c, c2dmap)
 
         return SRef(self.dev)
 
     def create_bounding_layers(self):
-        cell = spira.Cell(name='Box')
-        print(self.cell.elementals.sref)
+        cell = spira.Cell(name='DeviceLayer')
         for s in self.cell.elementals.sref:
-
-            # setter = {}
-
-            # for p in self.cell.elementals.polygons:
-            #     layer = p.gdslayer.number
-            #     setter[layer] = 'not_set'
-
-            # for p in self.cell.elementals.polygons:
-            #     for pl in RDD.PLAYER.get_physical_layers(purposes=['METAL', 'GND']):
-            #         if pl.layer == p.gdslayer:
-            #             if setter[pl.layer.number] == 'not_set':
-            #                 l1 = Layer(name='BoundingBox', number=pl.layer.number, datatype=9)
-            #                 # l1 = Layer(name='BoundingBox', number=pl.layer.number, datatype=8)
-            #                 elems += Polygons(shape=self.points, gdslayer=l1)
-            #                 setter[pl.layer.number] = 'already_set'
-
             ply = spira.Polygons(
                 shape=s.ref.pbox,
                 gdslayer=spira.Layer(name='Boundary', number=80)
             )
-            # FIXME:Why from the origin?
+            # FIXME: Why from the origin?
             ply.move(midpoint=(0,0), destination=s.midpoint)
-            # ply.move(midpoint=ply.center, destination=s.midpoint)
             cell += ply
         return cell
 
 
 def add_ports_to_bounding_device(cell, gate):
 
-    # flat_elems = cell.elementals.flat_copy()
-    # for pl in RDD.PLAYER.get_physical_layers(purposes='METAL'):
-    #     metal_elems = flat_elems.get_polygons(layer=pl.layer)
-    #     if metal_elems:
-    #         for e in metal_elems:
-    #             print(e)
-
     for g in cell.elementals:
         if isinstance(g, spira.Polygons):
-            print(g)
             for c in cell.elementals.sref:
                 for S in c.ref.elementals:
-                    if isinstance(S.ref, CMLayers):
+                    if isinstance(S.ref, mask.Metal):
                         for M in S.ref.elementals:
                             if (M.polygon & g) and (g.is_equal_layers(M.polygon)):
                                 gate.ports += spira.Port(
-                                    name=M.polygon.gdslayer.name, 
+                                    # name='{}'.format(M.polygon.gdslayer),
+                                    name='{}'.format(M.polygon),
                                     midpoint=M.polygon.center + c.midpoint,
+                                    # midpoint=M.polygon.center,
                                     gdslayer=spira.Layer(number=g.gdslayer.number, datatype=100)
                                 )
-                                print(M.polygon)
-            print('')
-
-    # for c in cell.elementals.sref:
-    #     print(c)
-    #     for S in c.ref.elementals:
-    #         if isinstance(S.ref, CMLayers):
-    #             for M in S.ref.elementals:
-    #                 print(M)
 
 
 class GateGenerator(__Generator__):
@@ -334,19 +286,21 @@ class GateGenerator(__Generator__):
 
         self.cell.name += 'gate'
 
-        gate = Gate(dev=cell, cell=dev.ref, cell_elems=dev.ref.elementals, level=2)
+        Layout = spira.Cell(name='Layout')
 
-        # for e in mask.ref.elementals:
-        #     if isinstance(e, SRef):
-        #         gate += e
+        MaskCell = Gate(dev=cell, cell=dev.ref, cell_elems=dev.ref.elementals, level=2)
 
-        add_ports_to_bounding_device(self.cell, gate)
+        Layout += spira.SRef(MaskCell)
 
-        gate.netlist
+        for e in mask.ref.elementals:
+            if isinstance(e, SRef):
+                Layout += e
 
-        return SRef(gate)
-        # return SRef(dev.ref)
-        # return SRef(self.dev)
+        add_ports_to_bounding_device(self.cell, MaskCell)
+
+        Layout.netlist
+
+        return SRef(Layout)
 
 
 class CircuitGenerator(GateGenerator):

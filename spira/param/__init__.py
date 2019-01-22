@@ -1,5 +1,5 @@
-from .field.typed_integer import IntegerField
 from .field.typed_string import StringField
+# from .field.typed_integer import IntegerField
 # from .field.typed_float import FloatField
 from .field.typed_bool import BoolField
 from .field.typed_list import ListField
@@ -74,6 +74,10 @@ def FloatField(**kwargs):
     from .variables import FLOAT
     return DataFieldDescriptor(constraint=FLOAT, **kwargs)
 
+
+def IntegerField(**kwargs):
+    from .variables import INTEGER
+    return DataFieldDescriptor(constraint=INTEGER, **kwargs)
 
 def CellField(name=None, elementals=None, library=None):
     from spira.gdsii.cell import Cell

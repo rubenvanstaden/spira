@@ -11,7 +11,7 @@ class PurposeLayer(__Layer__):
 
     doc = param.StringField()
     name = param.StringField()
-    datatype = param.IntegerField()
+    datatype = param.IntegerField(default=0)
     symbol = param.StringField()
 
     def __init__(self, **kwargs):

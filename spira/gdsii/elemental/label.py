@@ -55,7 +55,7 @@ class LabelAbstract(__Label__):
     rotation = param.FloatField(default=0)
     magnification = param.FloatField(default=1)
     reflection = param.BoolField(default=False)
-    texttype = param.IntegerField()
+    texttype = param.IntegerField(default=0)
     gdspy_commit = param.BoolField()
 
     def __init__(self, position, **kwargs):

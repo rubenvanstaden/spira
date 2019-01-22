@@ -24,26 +24,26 @@ from spira.core.lists import ElementList
 RDD = get_rule_deck()
 
 
-class CMLayers(Cell):
+# class mask.Metal(Cell):
 
-    layer = param.LayerField()
+#     layer = param.LayerField()
 
-    def create_elementals(self, elems):
-        return elems
+#     def create_elementals(self, elems):
+#         return elems
 
-    def set_net(self):
-        pass
+#     def set_net(self):
+#         pass
 
-    def get_net(self):
-        pass
+#     def get_net(self):
+#         pass
 
 
-class CNLayers(Cell):
+# class mask.Native(Cell):
 
-    layer = param.LayerField()
+#     layer = param.LayerField()
 
-    def create_elementals(self, elems):
-        return elems
+#     def create_elementals(self, elems):
+#         return elems
 
 
 class CGLayers(Cell):
@@ -63,9 +63,9 @@ class __ProcessLayer__(Cell):
     doc = param.StringField()
     points = param.ElementListField()
     # points = param.PointArrayField()
-    number = param.IntegerField()
-    error_type = param.IntegerField()
-    level = param.IntegerField()
+    number = param.IntegerField(default=0)
+    error_type = param.IntegerField(default=0)
+    level = param.IntegerField(default=0)
 
     layer = param.DataField(fdef_name='create_layer')
     polygon = param.DataField(fdef_name='create_polygon_layer')

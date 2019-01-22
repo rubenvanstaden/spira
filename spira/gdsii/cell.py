@@ -73,8 +73,9 @@ class Netlist(__Cell__):
     netlist = param.DataField(fdef_name='create_netlist')
 
     merge = param.DataField(fdef_name='create_merge_nets')
-    combine = param.DataField(fdef_name='create_combine_nodes')
+    combine_surfaces = param.DataField(fdef_name='create_combine_nodes')
     combine_pinlabels = param.DataField(fdef_name='create_combine_pinlabel_nodes')
+    combine = param.DataField(fdef_name='create_sp_nodes')
     connect = param.DataField(fdef_name='create_connect_subgraphs')
 
     def create_nets(self, nets):
@@ -83,6 +84,62 @@ class Netlist(__Cell__):
     def create_merge_nets(self):
         g = nx.disjoint_union_all(self.nets)
         return g
+
+    def create_sp_nodes(self):
+        """
+        Combine all nodes of the same type into one node.
+        """
+
+        def partition_nodes(u, v):
+            if ('pin' in self.g.node[u]):
+                if self.g.node[u]['pin'].name == self.g.node[v]['surface'].id0:
+                    return True
+
+            if ('pin' in self.g.node[v]):
+                if self.g.node[v]['pin'].name == self.g.node[u]['surface'].id0:
+                    return True
+
+        def sub_nodes(b):
+            S = self.g.subgraph(b)
+
+            pin = nx.get_node_attributes(S, 'pin')
+            surface = nx.get_node_attributes(S, 'surface')
+            center = nx.get_node_attributes(S, 'pos')
+
+            sub_pos = list()
+            for key, value in center.items():
+                sub_pos = [value[0], value[1]]
+
+            return dict(pin=pin, surface=surface, pos=sub_pos)
+
+        Q = nx.quotient_graph(self.g, partition_nodes, node_data=sub_nodes)
+
+        Pos = nx.get_node_attributes(Q, 'pos')
+        Label = nx.get_node_attributes(Q, 'pin')
+        Polygon = nx.get_node_attributes(Q, 'surface')
+
+        Edges = nx.get_edge_attributes(Q, 'weight')
+
+        g1 = nx.Graph()
+
+        for key, value in Edges.items():
+            n1, n2 = list(key[0]), list(key[1])
+            g1.add_edge(n1[0], n2[0])
+
+        for n in g1.nodes():
+            for key, value in Pos.items():
+                if n == list(key)[0]:
+                    g1.node[n]['pos'] = [value[0], value[1]]
+
+            for key, value in Label.items():
+                if n == list(key)[0]:
+                    if n in value:
+                        g1.node[n]['pin'] = value[n]
+
+            for key, value in Polygon.items():
+                if n == list(key)[0]:
+                    g1.node[n]['surface'] = value[n]
+        return g1
 
     def create_combine_pinlabel_nodes(self):
         """
@@ -136,7 +193,6 @@ class Netlist(__Cell__):
                 if n == list(key)[0]:
                     g1.node[n]['surface'] = value[n]
         return g1
-
 
     def create_combine_nodes(self):
         """
@@ -200,8 +256,15 @@ class Netlist(__Cell__):
 
     def create_netlist(self):
 
+        print('----------- Netlist -------------')
+
+        for s in self.elementals.sref:
+            self.nets += s.ref.netlist
+
         self.g = self.merge
+        self.g = self.combine
         # self.g = self.combine_pinlabels
+        # self.g = self.combine_surfaces
 
         self._plotly_graph(G=self.g, graphname=self.name, labeltext='id')
 
@@ -234,17 +297,14 @@ class CellAbstract(Netlist):
 
     @property
     def pbox(self):
-        # from spira.gdsii.elemental.polygons import Polygons
         (a,b), (c,d) = self.bbox
         points = [[[a,b], [c,b], [c,d], [a,d]]]
         return points
-        # return Polygons(shape=points)
 
     def commit_to_gdspy(self):
         cell = gdspy.Cell(self.name, exclude_from_current=True)
         for e in self.elementals:
             if issubclass(type(e), Cell):
-                # pass
                 for elem in e.elementals:
                     elem.commit_to_gdspy(cell=cell)
                 for port in e.ports:

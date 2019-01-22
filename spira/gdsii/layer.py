@@ -11,8 +11,8 @@ class Layer(__Layer__):
 
     doc = param.StringField()
     name = param.StringField()
-    number = param.IntegerField()
-    datatype = param.IntegerField()
+    number = param.IntegerField(default=0)
+    datatype = param.IntegerField(default=0)
 
     def __init__(self, **kwargs):
         ElementalInitializer.__init__(self, **kwargs)

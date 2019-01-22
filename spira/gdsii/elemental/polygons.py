@@ -251,6 +251,9 @@ class Polygons(PolygonAbstract):
                 self.center, sum([len(p) for p in self.shape.points]),
                 self.gdslayer.number, self.gdslayer.datatype)
 
+    def __str__(self):
+        return self.__repr__()
+
 
 
 

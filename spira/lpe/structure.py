@@ -9,20 +9,17 @@ from spira.lpe.containers import __CellContainer__
 from spira.lne.graph import Graph
 from spira.lne.mesh import Mesh
 from spira.lne.geometry import Geometry
+from demo.pdks import ply
+from spira.lpe import mask
 
 
 RDD = spira.get_rule_deck()
 
 
-class ComposeMLayers(__CellContainer__):
-    """
-    Decorates all elementas with purpose metal with
-    LCells and add them as elementals to the new class.
-    """
+class __ProcessLayer__(__CellContainer__):
 
     cell_elems = param.ElementListField()
-
-    mlayers = param.DataField(fdef_name='create_mlayers')
+    level = param.IntegerField(default=1)
 
     def _merge_layers(self, flat_metals):
         points = []
@@ -32,29 +29,33 @@ class ComposeMLayers(__CellContainer__):
             for pp in p.polygons:
                 points.append(pp)
         if points:
-            # from spira.gdsii.utils import scale_polygon_down as spd
-            # points = spd(points)
             shape = shapes.Shape(points=points)
             shape.apply_merge
             for pts in shape.points:
-                # pts = spd([pts])
-                pts = [pts]
-                elems += spira.Polygons(shape=pts)
+                elems += spira.Polygons(shape=[pts])
         return elems
+
+
+class ComposeMLayers(__ProcessLayer__):
+    """
+    Decorates all elementas with purpose metal with
+    LCells and add them as elementals to the new class.
+    """
+
+    mlayers = param.DataField(fdef_name='create_mlayers')
 
     def create_mlayers(self):
         elems = spira.ElementList()
-        # players = RDD.PLAYER.get_physical_layers(purpose_symbol=['METAL', 'GROUND', 'MOAT'])
         flat_elems = self.cell_elems.flat_copy()
         for pl in RDD.PLAYER.get_physical_layers(purposes='METAL'):
 
             metal_elems = flat_elems.get_polygons(layer=pl.layer)
 
             if metal_elems:
-                c_mlayer = CMLayers(layer=pl.layer)
-                for i, ply in enumerate(self._merge_layers(metal_elems)):
+                c_mlayer = mask.Metal(layer=pl.layer)
+                for i, poly in enumerate(self._merge_layers(metal_elems)):
 
-                    assert isinstance(ply, spira.Polygons)
+                    assert isinstance(poly, spira.Polygons)
                     # TODO: Map the gdslayer to a physical layer in the RDD.
                     # print(ply.gdslayer)
                     player = None
@@ -63,22 +64,24 @@ class ComposeMLayers(__CellContainer__):
                             player = v
 
                     if player is not None:
-                        # print('wenfuiwbwefwefk')
-                        ml = MLayer(name='MLayer_{}_{}_{}_{}'.format(pl.layer.number,
-                                                                    self.cell.name,
-                                                                    self.cell.id, i),
-                                    player=player,
-                                    points=ply.polygons,
-                                    number=pl.layer.number,
-                                    level=self.level)
-                        # c_mlayer += spira.SRef(ml)
-                        c_mlayer += ml
+                        ml_name = 'MLayer_{}_{}_{}_{}'.format(
+                            pl.layer.number,
+                            self.cell.name,
+                            self.cell.id, i
+                        )
 
+                        ml = ply.Polygon(
+                            name=ml_name,
+                            player=player,
+                            points=poly.polygons,
+                            level=self.level
+                        )
+
+                        c_mlayer += ml
                 elems += spira.SRef(c_mlayer)
         return elems
 
     def create_elementals(self, elems):
-
         # TODO: Apply DRC checking between metals, before being placed.
         for lcell in self.mlayers:
             elems += lcell
@@ -91,29 +94,7 @@ class ComposeNLayer(ComposeMLayers):
     LCells and add them as elementals to the new class.
     """
 
-    cell_elems = param.ElementListField()
-
-    level = param.IntegerField(default=1)
-
     nlayers = param.DataField(fdef_name='create_nlayers')
-
-    def _merge_layers(self, flat_metals):
-        points = []
-        elems = spira.ElementList()
-        for p in flat_metals:
-            for pp in p.polygons:
-                points.append(pp)
-        if points:
-            # from spira.gdsii.utils import scale_polygon_down as spd
-            # points = spd(points)
-            shape = shapes.Shape(points=points)
-            shape.apply_merge
-            for pts in shape.points:
-                # pts = spd([pts])
-                pts = [pts]
-                elems += spira.Polygons(shape=pts)
-        # print(elems)
-        return elems
 
     def create_nlayers(self):
         elems = ElementList()
@@ -124,11 +105,10 @@ class ComposeNLayer(ComposeMLayers):
             via_elems = flat_elems.get_polygons(layer=pl.layer)
 
             if via_elems:
-                c_nlayer = CNLayers(layer=pl.layer)
-                # for i, ply in enumerate(via_elems):
-                for i, ply in enumerate(self._merge_layers(via_elems)):
+                c_nlayer = mask.Native(layer=pl.layer)
+                for i, poly in enumerate(self._merge_layers(via_elems)):
 
-                    assert isinstance(ply, spira.Polygons)
+                    assert isinstance(poly, spira.Polygons)
                     # TODO: Map the gdslayer to a physical layer in the RDD.
                     player = None
                     for k, v in RDD.PLAYER.items:
@@ -136,28 +116,28 @@ class ComposeNLayer(ComposeMLayers):
                             player = v
 
                     if player is not None:
-                        ml = NLayer(name='Via_NLayer_{}_{}_{}'.format(pl.layer.name, self.cell.name, i),
-                                    points=ply.polygons,
-                                    player=player,
-                                    midpoint=ply.center,
-                                    number=pl.layer.number,
-                                    level=self.level)
-                        # c_nlayer += spira.SRef(ml)
+                        ml_name = 'NLayer_{}_{}_{}'.format(
+                            pl.layer.number,
+                            self.cell.name, i,
+                        )
+
+                        ml = ply.Polygon(
+                            name=ml_name,
+                            player=player,
+                            points=poly.polygons,
+                            level=self.level
+                        )
+
                         c_nlayer += ml
-
                 elems += SRef(c_nlayer)
-
         return elems
 
     def create_elementals(self, elems):
-
         super().create_elementals(elems)
-
         # Only add it if its a Device.
         if self.level == 1:
             for lcell in self.nlayers:
                 elems += lcell
-
         return elems
 
 
@@ -240,7 +220,6 @@ class __StructureCell__(ConnectDesignRules):
 
     def create_elementals(self, elems):
         super().create_elementals(elems)
-#         elems += self.devices
         return elems
 
     def create_ports(self, ports):
