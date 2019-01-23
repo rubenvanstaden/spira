@@ -1,23 +1,71 @@
 import spira
-from spira import param
+from spira import param, shapes
+from demo.pdks import ply
 from spira.rdd import get_rule_deck
+from spira.lpe.containers import __CellContainer__
 
 
 RDD = get_rule_deck()
 
 
-class __Mask__(spira.Cell):
+class __Mask__(__CellContainer__):
 
-    layer = param.LayerField()
+    player = param.PhysicalLayerField()
+    level = param.IntegerField(default=1)
+    cell_elems = param.ElementListField()
 
-    def create_elementals(self, elems):
+    metals = param.DataField(fdef_name='create_flatten_metals')
+    merged_layers = param.DataField(fdef_name='create_merged_layers')
+    # merged_layers = param.DataField(fdef_name='create_merged_layers')
+
+    def create_flatten_metals(self):
+        flat_elems = self.cell_elems.flat_copy()
+        metal_elems = flat_elems.get_polygons(layer=self.player.layer)
+        return metal_elems
+
+    def create_merged_layers(self):
+        points = []
+        elems = spira.ElementList()
+        for p in self.metals:
+            assert isinstance(p, spira.Polygons)
+            for pp in p.polygons:
+                points.append(pp)
+        if points:
+            shape = shapes.Shape(points=points)
+            shape.apply_merge
+            for pts in shape.points:
+                elems += spira.Polygons(shape=[pts])
         return elems
 
-    def set_net(self):
-        pass
+    def create_elementals(self, elems):
 
-    def get_net(self):
-        pass
+        for i, poly in enumerate(self.merged_layers):
+
+            assert isinstance(poly, spira.Polygons)
+
+            # TODO: Map the gdslayer to a physical layer in the RDD.
+            player = None
+            for k, v in RDD.PLAYER.items:
+                if v.layer == self.player.layer:
+                    player = v
+
+            if player is not None:
+                ml_name = 'MLayer_{}_{}_{}_{}'.format(
+                    self.player.layer.number,
+                    self.cell.name,
+                    self.cell.id, i
+                )
+
+                ml = ply.Polygon(
+                    name=ml_name,
+                    player=player,
+                    points=poly.polygons,
+                    level=self.level
+                )
+
+                elems += ml
+
+        return elems
 
 
 class Metal(__Mask__):
@@ -26,6 +74,9 @@ class Metal(__Mask__):
 
 class Native(__Mask__):
     pass
+
+
+
 
 
 

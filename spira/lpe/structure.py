@@ -21,127 +21,64 @@ class __ProcessLayer__(__CellContainer__):
     cell_elems = param.ElementListField()
     level = param.IntegerField(default=1)
 
-    def _merge_layers(self, flat_metals):
-        points = []
-        elems = spira.ElementList()
-        for p in flat_metals:
-            assert isinstance(p, spira.Polygons)
-            for pp in p.polygons:
-                points.append(pp)
-        if points:
-            shape = shapes.Shape(points=points)
-            shape.apply_merge
-            for pts in shape.points:
-                elems += spira.Polygons(shape=[pts])
-        return elems
 
-
-class ComposeMLayers(__ProcessLayer__):
+class MetalLayers(__ProcessLayer__):
     """
     Decorates all elementas with purpose metal with
     LCells and add them as elementals to the new class.
     """
 
-    mlayers = param.DataField(fdef_name='create_mlayers')
+    metal_layers = param.DataField(fdef_name='create_metal_layers')
 
-    def create_mlayers(self):
+    def create_metal_layers(self):
         elems = spira.ElementList()
-        flat_elems = self.cell_elems.flat_copy()
         for pl in RDD.PLAYER.get_physical_layers(purposes='METAL'):
-
-            metal_elems = flat_elems.get_polygons(layer=pl.layer)
-
-            if metal_elems:
-                c_mlayer = mask.Metal(layer=pl.layer)
-                for i, poly in enumerate(self._merge_layers(metal_elems)):
-
-                    assert isinstance(poly, spira.Polygons)
-                    # TODO: Map the gdslayer to a physical layer in the RDD.
-                    # print(ply.gdslayer)
-                    player = None
-                    for k, v in RDD.PLAYER.items:
-                        if v.layer == pl.layer:
-                            player = v
-
-                    if player is not None:
-                        ml_name = 'MLayer_{}_{}_{}_{}'.format(
-                            pl.layer.number,
-                            self.cell.name,
-                            self.cell.id, i
-                        )
-
-                        ml = ply.Polygon(
-                            name=ml_name,
-                            player=player,
-                            points=poly.polygons,
-                            level=self.level
-                        )
-
-                        c_mlayer += ml
-                elems += spira.SRef(c_mlayer)
+            metal = mask.Metal(
+                cell=self.cell,
+                cell_elems=self.cell_elems,
+                player=pl,
+                level=self.level
+            )
+            elems += spira.SRef(metal)
         return elems
 
     def create_elementals(self, elems):
         # TODO: Apply DRC checking between metals, before being placed.
-        for lcell in self.mlayers:
+        for lcell in self.metal_layers:
             elems += lcell
         return elems
 
 
-class ComposeNLayer(ComposeMLayers):
+class NativeLayers(MetalLayers):
     """
     Decorates all elementas with purpose via with
     LCells and add them as elementals to the new class.
     """
 
-    nlayers = param.DataField(fdef_name='create_nlayers')
+    native_layers = param.DataField(fdef_name='create_native_layers')
 
-    def create_nlayers(self):
-        elems = ElementList()
-        flat_elems = self.cell_elems.flat_copy()
-        # TODO: Add JJ purpose also.
+    def create_native_layers(self):
+        elems = spira.ElementList()
         for pl in RDD.PLAYER.get_physical_layers(purposes=['VIA', 'JUNCTION']):
-
-            via_elems = flat_elems.get_polygons(layer=pl.layer)
-
-            if via_elems:
-                c_nlayer = mask.Native(layer=pl.layer)
-                for i, poly in enumerate(self._merge_layers(via_elems)):
-
-                    assert isinstance(poly, spira.Polygons)
-                    # TODO: Map the gdslayer to a physical layer in the RDD.
-                    player = None
-                    for k, v in RDD.PLAYER.items:
-                        if v.layer == pl.layer:
-                            player = v
-
-                    if player is not None:
-                        ml_name = 'NLayer_{}_{}_{}'.format(
-                            pl.layer.number,
-                            self.cell.name, i,
-                        )
-
-                        ml = ply.Polygon(
-                            name=ml_name,
-                            player=player,
-                            points=poly.polygons,
-                            level=self.level
-                        )
-
-                        c_nlayer += ml
-                elems += SRef(c_nlayer)
+            native = mask.Native(
+                cell=self.cell,
+                cell_elems=self.cell_elems,
+                player=pl,
+                level=self.level
+            )
+            elems += spira.SRef(native)
         return elems
 
     def create_elementals(self, elems):
         super().create_elementals(elems)
         # Only add it if its a Device.
         if self.level == 1:
-            for lcell in self.nlayers:
+            for lcell in self.native_layers:
                 elems += lcell
         return elems
 
 
-class ComposeGLayer(ComposeNLayer):
+class GroundLayers(NativeLayers):
 
     plane_elems = param.ElementListField() # Elementals like skyplanes and groundplanes.
     ground_layer = param.DataField(fdef_name='create_merged_ground_layers')
@@ -176,7 +113,7 @@ class ComposeGLayer(ComposeNLayer):
         return elems
 
 
-class ConnectDesignRules(ComposeGLayer):
+class ConnectDesignRules(GroundLayers):
 
     metal_elems = param.ElementListField()
 
@@ -197,26 +134,8 @@ class ConnectDesignRules(ComposeGLayer):
 
 
 class __StructureCell__(ConnectDesignRules):
-    """
-    Add a GROUND bbox to Device for primitive and
-    DRC detection, since GROUND is only in Mask Cell.
-    """
-
-    # level = param.IntegerField(default=1)
-
-    # device_elems = param.ElementListField()
-
-    # devices = param.DataField(fdef_name='create_device_layers')
-
-    # def create_device_layers(self):
-    #     box = self.cell.bbox
-    #     box.move(midpoint=box.center, destination=(0,0))
-
-    #     B = DLayer(blayer=box, device_elems=self.cell.elementals)
-    #     Bs = SRef(B)
-    #     Bs.move(midpoint=(0,0), destination=self.cell.bbox.center)
-
-    #     return Bs
+    """ Add a GROUND bbox to Device for primitive and DRC 
+    detection, since GROUND is only in Mask Cell. """
 
     def create_elementals(self, elems):
         super().create_elementals(elems)

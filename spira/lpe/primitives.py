@@ -117,6 +117,9 @@ class Gate(__Device__):
 
         self.g = self.merge
         self.g = self.combine_device_nodes
+
+        # self.g = self.generate_paths
+
         # self.g = self.combine_surfaces
 
         self.plot_netlist(G=self.g, graphname=self.name, labeltext='id')
