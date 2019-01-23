@@ -74,7 +74,7 @@ class Netlist(__Cell__):
 
     merge = param.DataField(fdef_name='create_merge_nets')
     combine_surfaces = param.DataField(fdef_name='create_combine_nodes')
-    combine_pinlabels = param.DataField(fdef_name='create_combine_pinlabel_nodes')
+    combine_device_nodes = param.DataField(fdef_name='create_combine_device_node_nodes')
     combine = param.DataField(fdef_name='create_sp_nodes')
     connect = param.DataField(fdef_name='create_connect_subgraphs')
 
@@ -91,18 +91,24 @@ class Netlist(__Cell__):
         """
 
         def partition_nodes(u, v):
-            if ('pin' in self.g.node[u]):
-                if self.g.node[u]['pin'].name == self.g.node[v]['surface'].id0:
-                    return True
+            # if ('device' in self.g.node[u]):
+            #     if self.g.node[u]['device'].name == self.g.node[v]['surface'].id0:
+            #         return True
 
-            if ('pin' in self.g.node[v]):
-                if self.g.node[v]['pin'].name == self.g.node[u]['surface'].id0:
-                    return True
+            if ('device' in self.g.node[u]):
+                # print(self.g.node[u]['device'].name, self.g.node[v]['surface'].id0)
+                if ('device' not in self.g.node[v]):
+                    if self.g.node[u]['device'].name == self.g.node[v]['surface'].id0:
+                        return True
+
+            # if ('device' in self.g.node[v]):
+            #     if self.g.node[v]['device'].name == self.g.node[u]['surface'].id0:
+            #         return True
 
         def sub_nodes(b):
             S = self.g.subgraph(b)
 
-            pin = nx.get_node_attributes(S, 'pin')
+            device = nx.get_node_attributes(S, 'device')
             surface = nx.get_node_attributes(S, 'surface')
             center = nx.get_node_attributes(S, 'pos')
 
@@ -110,12 +116,12 @@ class Netlist(__Cell__):
             for key, value in center.items():
                 sub_pos = [value[0], value[1]]
 
-            return dict(pin=pin, surface=surface, pos=sub_pos)
+            return dict(device=device, surface=surface, pos=sub_pos)
 
         Q = nx.quotient_graph(self.g, partition_nodes, node_data=sub_nodes)
 
         Pos = nx.get_node_attributes(Q, 'pos')
-        Label = nx.get_node_attributes(Q, 'pin')
+        Device = nx.get_node_attributes(Q, 'device')
         Polygon = nx.get_node_attributes(Q, 'surface')
 
         Edges = nx.get_edge_attributes(Q, 'weight')
@@ -131,31 +137,31 @@ class Netlist(__Cell__):
                 if n == list(key)[0]:
                     g1.node[n]['pos'] = [value[0], value[1]]
 
-            for key, value in Label.items():
+            for key, value in Device.items():
                 if n == list(key)[0]:
                     if n in value:
-                        g1.node[n]['pin'] = value[n]
+                        g1.node[n]['device'] = value[n]
 
             for key, value in Polygon.items():
                 if n == list(key)[0]:
                     g1.node[n]['surface'] = value[n]
         return g1
 
-    def create_combine_pinlabel_nodes(self):
+    def create_combine_device_node_nodes(self):
         """
         Combine all nodes of the same type into one node.
         """
 
         def partition_nodes(u, v):
-            if ('pin' in self.g.node[u]) and ('pin' in self.g.node[v]):
-                # if self.g.node[u]['pin'].id == self.g.node[v]['pin'].id:
-                if self.g.node[u]['pin'] == self.g.node[v]['pin']:
+            if ('device' in self.g.node[u]) and ('device' in self.g.node[v]):
+                # if self.g.node[u]['device'].id == self.g.node[v]['device'].id:
+                if self.g.node[u]['device'] == self.g.node[v]['device']:
                     return True
 
         def sub_nodes(b):
             S = self.g.subgraph(b)
 
-            pin = nx.get_node_attributes(S, 'pin')
+            device = nx.get_node_attributes(S, 'device')
             surface = nx.get_node_attributes(S, 'surface')
             center = nx.get_node_attributes(S, 'pos')
 
@@ -163,12 +169,24 @@ class Netlist(__Cell__):
             for key, value in center.items():
                 sub_pos = [value[0], value[1]]
 
-            return dict(pin=pin, surface=surface, pos=sub_pos)
+            return dict(device=device, surface=surface, pos=sub_pos)
+        # def sub_nodes(b):
+        #     S = self.g.subgraph(b)
+
+        #     pin = nx.get_node_attributes(S, 'device')
+        #     surface = nx.get_node_attributes(S, 'surface')
+        #     center = nx.get_node_attributes(S, 'pos')
+
+        #     sub_pos = list()
+        #     for key, value in center.items():
+        #         sub_pos = [value[0], value[1]]
+
+        #     return dict(pin=pin, surface=surface, pos=sub_pos)
 
         Q = nx.quotient_graph(self.g, partition_nodes, node_data=sub_nodes)
 
         Pos = nx.get_node_attributes(Q, 'pos')
-        Label = nx.get_node_attributes(Q, 'pin')
+        Device = nx.get_node_attributes(Q, 'device')
         Polygon = nx.get_node_attributes(Q, 'surface')
 
         Edges = nx.get_edge_attributes(Q, 'weight')
@@ -184,10 +202,10 @@ class Netlist(__Cell__):
                 if n == list(key)[0]:
                     g1.node[n]['pos'] = [value[0], value[1]]
 
-            for key, value in Label.items():
+            for key, value in Device.items():
                 if n == list(key)[0]:
                     if n in value:
-                        g1.node[n]['pin'] = value[n]
+                        g1.node[n]['device'] = value[n]
 
             for key, value in Polygon.items():
                 if n == list(key)[0]:
@@ -202,7 +220,7 @@ class Netlist(__Cell__):
         def partition_nodes(u, v):
 
             if ('surface' in self.g.node[u]) and ('surface' in self.g.node[v]):
-                if ('pin' not in self.g.node[u]) and ('pin' not in self.g.node[v]):
+                if ('device' not in self.g.node[u]) and ('device' not in self.g.node[v]):
                     if self.g.node[u]['surface'].id0 == self.g.node[v]['surface'].id0:
                     # if self.g.node[u]['surface'] == self.g.node[v]['surface']:
                         return True
@@ -210,7 +228,7 @@ class Netlist(__Cell__):
         def sub_nodes(b):
             S = self.g.subgraph(b)
 
-            pin = nx.get_node_attributes(S, 'pin')
+            device = nx.get_node_attributes(S, 'device')
             surface = nx.get_node_attributes(S, 'surface')
             center = nx.get_node_attributes(S, 'pos')
 
@@ -218,12 +236,24 @@ class Netlist(__Cell__):
             for key, value in center.items():
                 sub_pos = [value[0], value[1]]
 
-            return dict(pin=pin, surface=surface, pos=sub_pos)
+            return dict(device=device, surface=surface, pos=sub_pos)
+        # def sub_nodes(b):
+        #     S = self.g.subgraph(b)
+
+        #     pin = nx.get_node_attributes(S, 'device')
+        #     surface = nx.get_node_attributes(S, 'surface')
+        #     center = nx.get_node_attributes(S, 'pos')
+
+        #     sub_pos = list()
+        #     for key, value in center.items():
+        #         sub_pos = [value[0], value[1]]
+
+        #     return dict(pin=pin, surface=surface, pos=sub_pos)
 
         Q = nx.quotient_graph(self.g, partition_nodes, node_data=sub_nodes)
 
         Pos = nx.get_node_attributes(Q, 'pos')
-        Label = nx.get_node_attributes(Q, 'pin')
+        Device = nx.get_node_attributes(Q, 'device')
         Polygon = nx.get_node_attributes(Q, 'surface')
 
         Edges = nx.get_edge_attributes(Q, 'weight')
@@ -239,10 +269,10 @@ class Netlist(__Cell__):
                 if n == list(key)[0]:
                     g1.node[n]['pos'] = [value[0], value[1]]
 
-            for key, value in Label.items():
+            for key, value in Device.items():
                 if n == list(key)[0]:
                     if n in value:
-                        g1.node[n]['pin'] = value[n]
+                        g1.node[n]['device'] = value[n]
 
             for key, value in Polygon.items():
                 if n == list(key)[0]:
@@ -263,10 +293,10 @@ class Netlist(__Cell__):
 
         self.g = self.merge
         self.g = self.combine
-        # self.g = self.combine_pinlabels
+        # self.g = self.combine_device_nodes
         # self.g = self.combine_surfaces
 
-        self._plotly_graph(G=self.g, graphname=self.name, labeltext='id')
+        self.plot_netlist(G=self.g, graphname=self.name, labeltext='id')
 
 
 class CellAbstract(Netlist):

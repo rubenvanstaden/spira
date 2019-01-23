@@ -43,7 +43,7 @@ def wrap_references(cell, c2dmap):
             ref_device = c2dmap[e.ref_cell]
             D += spira.SRef(structure=ref_device,
                             # midpoint=scd(e.midpoint),
-                            midpoint=scu(e.midpoint),
+                            midpoint=scu(e.origin),
                             rotation=e.rotation,
                             magnification=e.magnification,
                             reflection=e.x_reflection)

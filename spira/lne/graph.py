@@ -61,20 +61,20 @@ from spira.core.mixin.gdsii_output import OutputMixin
 #         def partition_nodes(u, v):
 
 #             if ('surface' in self.g.node[u]) and ('surface' in self.g.node[v]):
-#                 if ('pin' not in self.g.node[u]) and ('pin' not in self.g.node[v]):
+#                 if ('device' not in self.g.node[u]) and ('device' not in self.g.node[v]):
 #                     if self.g.node[u]['surface'].id0 == self.g.node[v]['surface'].id0:
 #                     # if self.g.node[u]['surface'] == self.g.node[v]['surface']:
 #                         return True
 
-#             if ('pin' in self.g.node[u]) and ('pin' in self.g.node[v]):
-#                 # if self.g.node[u]['pin'].id0 == self.g.node[v]['pin'].id0:
-#                 if self.g.node[u]['pin'] == self.g.node[v]['pin']:
+#             if ('device' in self.g.node[u]) and ('device' in self.g.node[v]):
+#                 # if self.g.node[u]['device'].id0 == self.g.node[v]['device'].id0:
+#                 if self.g.node[u]['device'] == self.g.node[v]['device']:
 #                     return True
 
 #         def sub_nodes(b):
 #             S = self.g.subgraph(b)
 
-#             pin = nx.get_node_attributes(S, 'pin')
+#             pin = nx.get_node_attributes(S, 'device')
 #             surface = nx.get_node_attributes(S, 'surface')
 #             center = nx.get_node_attributes(S, 'pos')
 
@@ -87,7 +87,7 @@ from spira.core.mixin.gdsii_output import OutputMixin
 #         Q = nx.quotient_graph(self.g, partition_nodes, node_data=sub_nodes)
 
 #         Pos = nx.get_node_attributes(Q, 'pos')
-#         Label = nx.get_node_attributes(Q, 'pin')
+#         Label = nx.get_node_attributes(Q, 'device')
 #         Polygon = nx.get_node_attributes(Q, 'surface')
 
 #         Edges = nx.get_edge_attributes(Q, 'weight')
@@ -106,7 +106,7 @@ from spira.core.mixin.gdsii_output import OutputMixin
 #             for key, value in Label.items():
 #                 if n == list(key)[0]:
 #                     if n in value:
-#                         g1.node[n]['pin'] = value[n]
+#                         g1.node[n]['device'] = value[n]
 
 #             for key, value in Polygon.items():
 #                 if n == list(key)[0]:
@@ -141,8 +141,8 @@ def _loops(g):
     def _is_valid_cycle(g, cycle, devices):
         if len(cycle) > 2:
             for n in cycle:
-                if 'pin' in g.node[n]:
-                    lbl = g.node[n]['pin']
+                if 'device' in g.node[n]:
+                    lbl = g.node[n]['device']
                     if _is_device(lbl):
                         devices.append(lbl)
 
@@ -162,7 +162,7 @@ def _loops(g):
         if _is_valid_cycle(g, cycle, devices):
             for n in cycle:
                 if len(devices) > 0:
-                    g.node[n]['pin'] = devices[0]
+                    g.node[n]['device'] = devices[0]
             valid_cycle_count += 1
 
     if valid_cycle_count != 0:
@@ -174,7 +174,7 @@ def _loops(g):
 
 
 # def _is_master(g, n):
-#     lbl = g.node[n]['pin']
+#     lbl = g.node[n]['device']
 
 #     if lbl.text.startswith('via'):
 #         if len([i for i in g[n]]) > 2:
@@ -212,10 +212,10 @@ def _valid_path(g, path, master_nodes):
     if path[-1] not in master_nodes: valid = False
 
     for n in path[1:-1]:
-        if 'pin' in g.node[n]:
+        if 'device' in g.node[n]:
             # if _is_master(g, n):
             # masternodes = (spira.JunctionDevice, spira.UserNode, spira.PortNode)
-            if isinstance(g.node[n]['pin'], BaseVia):
+            if isinstance(g.node[n]['device'], BaseVia):
                 valid = False
     return valid
 
@@ -223,11 +223,11 @@ def _valid_path(g, path, master_nodes):
 def store_master_nodes(g):
     master_nodes = list()
     for n in g.nodes():
-        if 'pin' in g.node[n]:
+        if 'device' in g.node[n]:
             # if _is_master(g, n):
             # masternodes = (spira.JunctionDevice, spira.UserNode, spira.PortNode)
-            # if issubclass(type(g.node[n]['pin']), masternodes):
-            if isinstance(g.node[n]['pin'], BaseVia):
+            # if issubclass(type(g.node[n]['device']), masternodes):
+            if isinstance(g.node[n]['device'], BaseVia):
                 master_nodes.append(n)
     return master_nodes
 
@@ -242,8 +242,8 @@ def subgraphs(lgraph):
     for graph in graphs:
         save = False
         for n in graph.nodes():
-            if 'pin' in graph.node[n]:
-                label = graph.node[n]['pin']
+            if 'device' in graph.node[n]:
+                label = graph.node[n]['device']
                 if isinstance(label, Terminal):
                     save = True
 
@@ -307,20 +307,20 @@ class GraphAbstract(__Graph__):
         def partition_nodes(u, v):
 
             if ('surface' in self.g.node[u]) and ('surface' in self.g.node[v]):
-                if ('pin' not in self.g.node[u]) and ('pin' not in self.g.node[v]):
+                if ('device' not in self.g.node[u]) and ('device' not in self.g.node[v]):
                     if self.g.node[u]['surface'].id0 == self.g.node[v]['surface'].id0:
                     # if self.g.node[u]['surface'] == self.g.node[v]['surface']:
                         return True
 
-            if ('pin' in self.g.node[u]) and ('pin' in self.g.node[v]):
-                # if self.g.node[u]['pin'].id0 == self.g.node[v]['pin'].id0:
-                if self.g.node[u]['pin'] == self.g.node[v]['pin']:
+            if ('device' in self.g.node[u]) and ('device' in self.g.node[v]):
+                # if self.g.node[u]['device'].id0 == self.g.node[v]['device'].id0:
+                if self.g.node[u]['device'] == self.g.node[v]['device']:
                     return True
 
         def sub_nodes(b):
             S = self.g.subgraph(b)
 
-            pin = nx.get_node_attributes(S, 'pin')
+            device = nx.get_node_attributes(S, 'device')
             surface = nx.get_node_attributes(S, 'surface')
             center = nx.get_node_attributes(S, 'pos')
 
@@ -328,12 +328,12 @@ class GraphAbstract(__Graph__):
             for key, value in center.items():
                 sub_pos = [value[0], value[1]]
 
-            return dict(pin=pin, surface=surface, pos=sub_pos)
+            return dict(device=device, surface=surface, pos=sub_pos)
 
         Q = nx.quotient_graph(self.g, partition_nodes, node_data=sub_nodes)
 
         Pos = nx.get_node_attributes(Q, 'pos')
-        Label = nx.get_node_attributes(Q, 'pin')
+        Device = nx.get_node_attributes(Q, 'device')
         Polygon = nx.get_node_attributes(Q, 'surface')
 
         Edges = nx.get_edge_attributes(Q, 'weight')
@@ -349,10 +349,10 @@ class GraphAbstract(__Graph__):
                 if n == list(key)[0]:
                     g1.node[n]['pos'] = [value[0], value[1]]
 
-            for key, value in Label.items():
+            for key, value in Device.items():
                 if n == list(key)[0]:
                     if n in value:
-                        g1.node[n]['pin'] = value[n]
+                        g1.node[n]['device'] = value[n]
 
             for key, value in Polygon.items():
                 if n == list(key)[0]:
@@ -403,18 +403,18 @@ class UserGraph(GraphAbstract):
 
         for n in self.g.nodes():
             if len([i for i in self.g[n]]) > 2:
-                if 'pin' not in self.g.node[n]:
+                if 'device' not in self.g.node[n]:
 
-                    self.g.node[n]['pin'] = _usernode_label(
+                    self.g.node[n]['device'] = _usernode_label(
                         position=self.g.node[n]['pos'],
                         id0=self.g.node[n]['surface'].id
                     )
 
                     self.usernodes.append(n)
                 else:
-                    if not issubclass(type(self.g.node[n]['pin']), spira.Cell):
+                    if not issubclass(type(self.g.node[n]['device']), spira.Cell):
 
-                        self.g.node[n]['pin'] = _usernode_label(
+                        self.g.node[n]['device'] = _usernode_label(
                             position=self.g.node[n]['pos'],
                             id0=self.g.node[n]['surface'].id
                         )
@@ -434,12 +434,12 @@ class UserGraph(GraphAbstract):
         for n in self.usernodes:
             neighbor_nodes = [i for i in self.g[n]]
             for nn in neighbor_nodes:
-                if 'pin' in self.g.node[nn]:
-                    if issubclass(type(self.g.node[nn]['pin']), spira.JunctionDevice):
-                        changed[n] = self.g.node[nn]['pin']
+                if 'device' in self.g.node[nn]:
+                    if issubclass(type(self.g.node[nn]['device']), spira.JunctionDevice):
+                        changed[n] = self.g.node[nn]['device']
 
         for n, usernode in changed.items():
-            self.g.node[n]['pin'] = usernode
+            self.g.node[n]['device'] = usernode
 
         self.create_combine_nodes()
 
@@ -512,13 +512,13 @@ class SeriesGraph(UserGraph):
                     for n in path[1:-1]:
                         lbl = self.g.node[n]['surface']
                         if not issubclass(type(lbl), spira.RemoveNode):
-                            self.g.node[n]['pin'] = _none_label(lbl, id0=i)
+                            self.g.node[n]['device'] = _none_label(lbl, id0=i)
 
     def create_remove_lonely_nodes(self):
         remove = list()
         for n in self.g.nodes():
             if len([i for i in self.g[n]]) == 1:
-                if 'pin' not in self.g.node[n]:
+                if 'device' not in self.g.node[n]:
                     remove.append(n)
         self.g.remove_nodes_from(remove)
 
@@ -527,8 +527,8 @@ class SeriesGraph(UserGraph):
 
         remove = list()
         for n in self.g.nodes():
-            if 'pin' in self.g.node[n]:
-                lbl = self.g.node[n]['pin']
+            if 'device' in self.g.node[n]:
+                lbl = self.g.node[n]['device']
                 # if lbl.text.startswith('remove'):
                 if issubclass(type(lbl), spira.RemoveNode):
                     e = tuple([i for i in self.g[n]])

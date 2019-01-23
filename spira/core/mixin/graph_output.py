@@ -33,7 +33,7 @@ class DrawGraphAbstract(object):
         cell = self.abstract_collector()
 
         for name, g in cell.subgraphs.items():
-            self._plotly_graph(g, name, labeltext='id')
+            self.plot_netlist(g, name, labeltext='id')
 
     def write_graph(self, graphname=None, labeltext='id'):
         if isinstance(self, spira.Cell):
@@ -51,13 +51,13 @@ class DrawGraphAbstract(object):
 
             if graphname is not None:
                 if name == graphname:
-                    self._plotly_graph(g, graphname, labeltext)
+                    self.plot_netlist(g, graphname, labeltext)
             else:
-                self._plotly_graph(g, self.name, labeltext)
+                self.plot_netlist(g, self.name, labeltext)
         elif isinstance(self, spira.Graph):
-            self._plotly_graph(self.g, graphname, labeltext)
+            self.plot_netlist(self.g, graphname, labeltext)
 
-    def _plotly_graph(self, G, graphname, labeltext):
+    def plot_netlist(self, G, graphname, labeltext):
         edges = self._create_edges(G)
         nodes = self._create_nodes(G, labeltext)
 
@@ -168,8 +168,8 @@ class DrawGraphAbstract(object):
 
             label = None
 
-            if 'pin' in G.node[n]:
-                label = G.node[n]['pin']
+            if 'device' in G.node[n]:
+                label = G.node[n]['device']
             elif 'surface' in G.node[n]:
                 label = G.node[n]['surface']
 

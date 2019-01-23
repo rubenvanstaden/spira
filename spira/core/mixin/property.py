@@ -46,12 +46,15 @@ class CellMixin(__Properties__):
         for e in c.elementals.flat_elems():
             G = c2dmap[c]
             if isinstance(e, spira.SRef):
-                G.add(gdspy.CellReference(
-                    ref_cell=c2dmap[e.ref],
-                    midpoint=e.midpoint,
-                    rotation=e.rotation,
-                    magnification=e.magnification,
-                    x_reflection=e.reflection)
+                G.add(
+                    gdspy.CellReference(
+                        ref_cell=c2dmap[e.ref],
+                        origin=e.midpoint,
+                        # midpoint=e.midpoint,
+                        rotation=e.rotation,
+                        magnification=e.magnification,
+                        x_reflection=e.reflection
+                    )
                 )
 
     def construct_gdspy_tree(self, glib):

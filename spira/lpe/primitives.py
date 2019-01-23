@@ -17,14 +17,13 @@ from spira.gdsii.elemental.label import Label
 from spira.gdsii.elemental.port import Port
 from spira.gdsii.elemental.sref import SRef
 from spira.lne.graph import Graph
-from spira.lne.mesh import Mesh
-from spira.lne.geometry import Geometry
 from spira.core.lists import ElementList
 
 from spira.lpe.layers import *
 from spira.lpe.structure import __StructureCell__
 from spira.lpe.containers import __CellContainer__
 from spira.lpe import mask
+from spira.lne.net import Net
 
 
 RDD = get_rule_deck()
@@ -80,60 +79,49 @@ class __Device__(__StructureCell__):
 
     def create_nets(self, nets):
 
-        prim_elems = self.primitives
-        device_elems = self.devices
+        primitives = self.primitives
+        bounding_boxes = self.devices
 
         for pl in RDD.PLAYER.get_physical_layers(purposes='METAL'):
-
             metal_elems = self._metal_polygons(pl)
-
             if metal_elems:
-                geom = Geometry(
+                net = Net(
                     name='{}'.format(pl.layer.number),
                     lcar=self.lcar,
                     algorithm=self.algorithm,
                     layer=pl.layer,
-                    polygons=metal_elems
-                )
-
-                mesh_data = geom.create_mesh
-
-                params = {
-                    'name': '{}'.format(pl.layer),
-                    'layer': pl.layer,
-                    'point_data': [mesh_data[2]],
-                    'cell_data': [mesh_data[3]],
-                    'field_data': [mesh_data[4]]
-                }
-
-                mesh = Mesh(
                     polygons=metal_elems,
-                    device_polygon=device_elems,
-                    primitives=prim_elems,
-                    points=mesh_data[0],
-                    cells=mesh_data[1],
-                    **params
+                    primitives=primitives,
+                    bounding_boxes=bounding_boxes
                 )
-                nets += mesh.g
+                nets += net.graph
         return nets
+
+
+class Device(__Device__):
 
     def create_netlist(self):
 
         self.g = self.merge
-        self.g = self.combine_pinlabels
+        self.g = self.combine_device_nodes
         self.g = self.combine_surfaces
 
-        self._plotly_graph(G=self.g, graphname=self.name, labeltext='id')
+        self.plot_netlist(G=self.g, graphname=self.name, labeltext='id')
 
         return self.g
 
 
-class Device(__Device__):
-    pass
-
-
 class Gate(__Device__):
-    pass
+
+    def create_netlist(self):
+
+        self.g = self.merge
+        self.g = self.combine_device_nodes
+        # self.g = self.combine_surfaces
+
+        self.plot_netlist(G=self.g, graphname=self.name, labeltext='id')
+
+        return self.g
 
 
 class Circuit(__Device__):
@@ -291,7 +279,6 @@ class GateGenerator(__Generator__):
         MaskCell = Gate(dev=cell, cell=dev.ref, cell_elems=dev.ref.elementals, level=2)
 
         Layout += spira.SRef(MaskCell)
-
         for e in mask.ref.elementals:
             if isinstance(e, SRef):
                 Layout += e

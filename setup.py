@@ -21,7 +21,7 @@ setup(
         # Visual packages
         'matplotlib',
         'plotly',
-        'pyqt5'
+        'pyqt5',
         'lxml',
 
         # Basic packages

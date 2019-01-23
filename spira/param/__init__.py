@@ -35,7 +35,8 @@ class MidPointField(DataFieldDescriptor):
         if isinstance(value, self.__type__):
             value = self.__type__()
         elif isinstance(value, (list, set, tuple, np.ndarray)):
-            value = self.__type__(value)
+            value = self.__type__(value[0], value[1])
+            # value = self.__type__(value)
         else:
             raise TypeError("Invalid type in setting value " +
                             "of {} (expected {}): {}"
