@@ -1,7 +1,5 @@
-from spira.rdd import get_rule_deck
-from spira.rdd.technology import DataTree
-from spira.rdd.technology import ProcessTree
 from spira.rdd.layer import PurposeLayer
+from spira.rdd.technology import ProcessTree
 from spira.rdd import RULE_DECK_DATABASE as RDD
 
 # ---------------------------------- Purpose Layers ----------------------------------

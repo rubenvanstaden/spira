@@ -2,10 +2,11 @@ import os
 import spira
 from spira.gdsii.io import current_path
 from spira.lpe.primitives import SLayout
+from demo.pdks.process.mitll_pdk.database import RDD
 
 
 if __name__ == '__main__':
-    name = 'aist_junction'
+    name = 'jj_mitll_drc_errors'
     filename = current_path(name)
     cell = spira.import_gds(filename=filename)
     # cell.output()

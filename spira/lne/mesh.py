@@ -30,6 +30,7 @@ class __Mesh__(meshio.Mesh, ElementalInitializer):
 
     data = param.ElementListField()
     gmsh_periodic = param.ElementListField()
+    level = param.IntegerField(default=1)
 
     points = param.DataField(fdef_name='create_points')
     cells = param.DataField(fdef_name='create_cells')
@@ -215,7 +216,9 @@ class MeshLabeled(MeshAbstract):
                             )
                             # label.id0 = '{}_{}'.format(key[0], pid)
                             label.id0 = '{}'.format(pid)
+                            display = '{}'.format(pl.layer.name)
                             self.g.node[n]['surface'] = label
+                            self.g.node[n]['display'] = display
 
     def create_device_node_nodes(self):
         for node, triangle in self.__triangle_nodes__().items():
@@ -227,45 +230,49 @@ class MeshLabeled(MeshAbstract):
                     self.add_device_label(node, S, points)
 
     def create_device_nodes(self):
-        if self.bounding_boxes:
+        if self.level > 1:
+            for S in self.bounding_boxes:
+                for p in S.ref.elementals.polygons:
+                    ply = deepcopy(p)
+                    ply.center = S.midpoint
+                    bnodes = []
+                    for n in self.g.nodes():
+                        s = self.g.node[n]['surface']
+                        if s.point_inside(ply.polygons[0]):
+                            bnodes.append(n)
 
-            ply = self.bounding_boxes[0]
+                    device_node = None
+                    for n in bnodes:
+                        # self.g.node[n]['surface'].color = '#ffffff'
+                        # if 'device' in self.g.node[n]:
+                        #     self.g.node[n]['device'].color = '#ffffff'
+                        if 'device' in self.g.node[n]:
+                            print('******************\n\n\n')
+                            if device_node is None:
+                                device_node = self.g.node[n]['device']
+                                # self.g.node[n]['device'] = device_node
+                            # else:
+                            #     raise ValueError('device_node already assigned!')
 
-            bnodes = []
-            for n in self.g.nodes():
-                s = self.g.node[n]['surface']
-                if s.point_inside(ply.polygons[0]):
-                    bnodes.append(n)
-
-            device_node = None
-            for n in bnodes:
-                # self.g.node[n]['surface'].color = '#ffffff'
-                # if 'device' in self.g.node[n]:
-                #     self.g.node[n]['device'].color = '#ffffff'
-                if 'device' in self.g.node[n]:
-                    if device_node is None:
-                        device_node = self.g.node[n]['device']
-                    else:
-                        raise ValueError('device_node already assigned!')
-
-            if device_node is not None:
-                for n in bnodes:
-                    # self.g.node[n]['surface'] = device_node
-                    self.g.node[n]['device'] = device_node
+                    if device_node is not None:
+                        for n in bnodes:
+                            self.g.node[n]['device'] = device_node
+                            # self.g.node[n]['surface'] = device_node
+                            # display = '{}_{}'.format(pl.layer.name, pid)
+                            # self.g.node[n]['display'] = display
 
     def add_new_node(self, n, D, pos):
         params = {}
         params['text'] = 'new'
         l1 = spira.Layer(name='Label', number=104)
         params['gdslayer'] = l1
-        # params['color'] = RDD.METALS.get_key_by_layer(self.layer)['COLOR']
 
         label = spira.Label(position=pos, **params)
         label.id0 = '{}_{}'.format(n, n)
 
         num = self.g.number_of_nodes()
 
-        self.g.add_node(num+1, pos=pos, device=D, surface=label)
+        self.g.add_node(num+1, pos=pos, device=D, surface=label, display='{}'.format(l1.name))
         self.g.add_edge(n, num+1)
 
     def add_port_label(self, n, D, points):
@@ -275,7 +282,6 @@ class MeshLabeled(MeshAbstract):
             # self.g.node[n]['device'] = P
 
     def add_device_label(self, n, D, points):
-
         for p in D.ports:
             if p.gdslayer.number == self.layer.number:
                 if p.point_inside(points):

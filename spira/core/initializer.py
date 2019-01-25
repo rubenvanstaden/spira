@@ -367,12 +367,24 @@ class CellInitializer(FieldInitializer, metaclass=MetaCell):
     def id(self):
         return self.__str__()
 
+    @property
+    def id0(self):
+        _id = '{}_{}'.format(self.__str__(), self.name)
+        return _id
+
+    @id0.setter
+    def id0(self, string):
+        self.name = string
 
 
-# from spira import param
+
+
+
+from spira import param
 class ElementalInitializer(FieldInitializer, metaclass=MetaElemental):
 
-    # gdspy_commit = param.BoolField()
+    display_label = param.StringField()
+    cell_name = param.StringField()
 
     def flatten(self):
         return [self]
@@ -386,9 +398,19 @@ class ElementalInitializer(FieldInitializer, metaclass=MetaElemental):
     def __str__(self):
         return self.__repr__()
 
+    # @property
+    # def id0(self):
+        # _id = '{}_{}'.format(self.__str__(), self.cell_name)
+        # return _id
+
+    # @id0.setter
+    # def id0(self, string):
+    #     self.cell_name = string
+
     @property
     def id(self):
         return self.__str__()
+
 
 
 

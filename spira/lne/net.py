@@ -12,6 +12,7 @@ class Net(ElementalInitializer):
     name = param.StringField()
     layer = param.LayerField()
     lcar = param.FloatField()
+    level = param.IntegerField(default=1)
     dimension = param.IntegerField(default=2)
     algorithm = param.IntegerField(default=6)
 
@@ -37,6 +38,7 @@ class Net(ElementalInitializer):
 
         mesh = Mesh(
             name='{}'.format(self.layer),
+            level=self.level,
             layer=self.layer,
             polygons=self.polygons,
             primitives=self.primitives,

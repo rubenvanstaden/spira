@@ -47,7 +47,8 @@ class __SRef__(gdspy.CellReference, ElementalInitializer):
         return new_reference
 
     def __deepcopy__(self, memo):
-        return SRef(structure=deepcopy(self.ref),
+        return SRef(
+            structure=deepcopy(self.ref),
             midpoint=self.midpoint,
             rotation=self.rotation,
             magnification=self.magnification,
@@ -107,7 +108,8 @@ class SRefAbstract(__SRef__):
             self.reflect(p1=[0,0], p2=[1,0])
         if transform['rotation']:
             self.rotate(angle=transform['rotation'])
-        if transform['midpoint']:
+        if len(transform['midpoint']) != 0:
+        # if transform['midpoint']:
             self.translate(dx=transform['midpoint'][0], dy=transform['midpoint'][1])
         return self
 
@@ -134,6 +136,32 @@ class SRefAbstract(__SRef__):
             new_port = port._copy()
             self._local_ports[port.name] = new_port.transform(tf)
         return self._local_ports
+
+    # @property
+    # def p_polygons(self):
+    #     """
+    #     This property allows you to access
+    #     my_device_reference.ports, and receive a
+    #     copy of the ports dict which is correctly
+    #     rotated and translated
+    #     """
+    #     # for ply in self._parent_polygons:
+    #     for i, ply in enumerate(self._parent_polygons):
+    #         # print(ply)
+
+    #         tf = {
+    #             'midpoint': self.midpoint,
+    #             'rotation': self.rotation,
+    #             'magnification': self.magnification,
+    #             'reflection': self.reflection
+    #         }
+
+    #         new_ply = ply._copy()
+    #         # self._local_polygons[ply.gdslayer.name] = new_ply.transform(tf)
+    #         name = '{}_{}'.format(ply.name, i)
+    #         self._local_polygons[name] = new_ply.transform(tf)
+    #     # print()
+    #     return self._local_polygons
 
     def move(self, midpoint=(0,0), destination=None, axis=None):
         """
@@ -177,8 +205,9 @@ class SRefAbstract(__SRef__):
 
     def translate(self, dx=0, dy=0):
         """ Translate port by dx and dy. """
+        self.origin = self.midpoint
         super().translate(dx=dx, dy=dy)
-        self.midpoint = self.midpoint
+        self.midpoint = self.origin
         return self
 
     def rotate(self, angle=45, center=(0,0)):
@@ -267,11 +296,18 @@ class SRef(SRefAbstract):
 
         self.ref = structure
         self._parent_ports = spira.ElementList()
+
+        # self._parent_polygons = structure.elementals.polygons
+        # print(self._parent_polygons)
+
+        # self._parent_polygons = spira.ElementList()
         for p in structure.ports:
             self._parent_ports += p
         for t in structure.terms:
             self._parent_ports += t
         self._local_ports = {port.name:port._copy() for port in self._parent_ports}
+        # self._local_polygons = {port.name:port._copy() for port in self._parent_polygons}
+        # print(self._local_polygons)
         # self._local_ports = {port.name:port._copy() for port in structure.terms}
 
     def __repr__(self):

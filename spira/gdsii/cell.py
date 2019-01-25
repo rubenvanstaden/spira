@@ -20,7 +20,7 @@ class __Cell__(gdspy.Cell, CellInitializer):
 
     __mixins__ = [OutputMixin, CellMixin, TranformationMixin]
 
-    def __init__(self, name=None, elementals=None, ports=None, library=None, **kwargs):
+    def __init__(self, name=None, elementals=None, ports=None, nets=None, library=None, **kwargs):
         CellInitializer.__init__(self, **kwargs)
         gdspy.Cell.__init__(self, name, exclude_from_current=True)
 
@@ -35,6 +35,8 @@ class __Cell__(gdspy.Cell, CellInitializer):
             self.elementals = elementals
         if ports is not None:
             self.ports = ports
+        if nets is not None:
+            self.nets = nets
 
         # self.move(midpoint=self.center, destination=(0,0))
         # self.center = (0,0)
@@ -46,6 +48,15 @@ class __Cell__(gdspy.Cell, CellInitializer):
             self.ports += other
         else:
             self.elementals += other
+
+            # if isinstance(other, SRef):
+            #     for e in self.elementals:
+            #         if isinstance(e, SRef):
+            #             if e.id != other.id:
+            #                 self.elementals += other
+            # else:
+            #     self.elementals += other
+
         return self
 
         # if issubclass(type(other), Cell):
@@ -60,9 +71,10 @@ class __Cell__(gdspy.Cell, CellInitializer):
         pass
 
     def __deepcopy__(self, memo):
-        return Cell(name=self.name+'awe',
+        return Cell(name=self.name+'_deepcopy',
             ports=deepcopy(self.ports),
-            elementals=deepcopy(self.elementals)
+            elementals=deepcopy(self.elementals),
+            nets=deepcopy(self.nets)
         )
 
 
@@ -91,6 +103,7 @@ class Netlist(__Cell__):
         """
 
         def partition_nodes(u, v):
+            # return False
             # if ('device' in self.g.node[u]):
             #     if self.g.node[u]['device'].name == self.g.node[v]['surface'].id0:
             #         return True
@@ -99,6 +112,7 @@ class Netlist(__Cell__):
                 # print(self.g.node[u]['device'].name, self.g.node[v]['surface'].id0)
                 if ('device' not in self.g.node[v]):
                     if self.g.node[u]['device'].name == self.g.node[v]['surface'].id0:
+                    # if self.g.node[u]['device'].id == self.g.node[v]['surface'].id0:
                         return True
 
             # if ('device' in self.g.node[v]):
@@ -111,17 +125,19 @@ class Netlist(__Cell__):
             device = nx.get_node_attributes(S, 'device')
             surface = nx.get_node_attributes(S, 'surface')
             center = nx.get_node_attributes(S, 'pos')
+            display = nx.get_node_attributes(S, 'display')
 
             sub_pos = list()
             for key, value in center.items():
                 sub_pos = [value[0], value[1]]
 
-            return dict(device=device, surface=surface, pos=sub_pos)
+            return dict(device=device, surface=surface, display=display, pos=sub_pos)
 
         Q = nx.quotient_graph(self.g, partition_nodes, node_data=sub_nodes)
 
         Pos = nx.get_node_attributes(Q, 'pos')
         Device = nx.get_node_attributes(Q, 'device')
+        Display = nx.get_node_attributes(Q, 'display')
         Polygon = nx.get_node_attributes(Q, 'surface')
 
         Edges = nx.get_edge_attributes(Q, 'weight')
@@ -141,6 +157,10 @@ class Netlist(__Cell__):
                 if n == list(key)[0]:
                     if n in value:
                         g1.node[n]['device'] = value[n]
+
+            for key, value in Display.items():
+                if n == list(key)[0]:
+                    g1.node[n]['display'] = value[n]
 
             for key, value in Polygon.items():
                 if n == list(key)[0]:
@@ -156,6 +176,8 @@ class Netlist(__Cell__):
             if ('device' in self.g.node[u]) and ('device' in self.g.node[v]):
                 # if self.g.node[u]['device'].id == self.g.node[v]['device'].id:
                 if self.g.node[u]['device'] == self.g.node[v]['device']:
+                # print(self.g.node[u]['device'])
+                # if self.g.node[u]['device'].id0 == self.g.node[v]['device'].id0:
                     return True
 
         def sub_nodes(b):
@@ -163,30 +185,20 @@ class Netlist(__Cell__):
 
             device = nx.get_node_attributes(S, 'device')
             surface = nx.get_node_attributes(S, 'surface')
+            display = nx.get_node_attributes(S, 'display')
             center = nx.get_node_attributes(S, 'pos')
 
             sub_pos = list()
             for key, value in center.items():
                 sub_pos = [value[0], value[1]]
 
-            return dict(device=device, surface=surface, pos=sub_pos)
-        # def sub_nodes(b):
-        #     S = self.g.subgraph(b)
-
-        #     pin = nx.get_node_attributes(S, 'device')
-        #     surface = nx.get_node_attributes(S, 'surface')
-        #     center = nx.get_node_attributes(S, 'pos')
-
-        #     sub_pos = list()
-        #     for key, value in center.items():
-        #         sub_pos = [value[0], value[1]]
-
-        #     return dict(pin=pin, surface=surface, pos=sub_pos)
+            return dict(device=device, surface=surface, display=display, pos=sub_pos)
 
         Q = nx.quotient_graph(self.g, partition_nodes, node_data=sub_nodes)
 
         Pos = nx.get_node_attributes(Q, 'pos')
         Device = nx.get_node_attributes(Q, 'device')
+        Display = nx.get_node_attributes(Q, 'display')
         Polygon = nx.get_node_attributes(Q, 'surface')
 
         Edges = nx.get_edge_attributes(Q, 'weight')
@@ -206,6 +218,10 @@ class Netlist(__Cell__):
                 if n == list(key)[0]:
                     if n in value:
                         g1.node[n]['device'] = value[n]
+
+            for key, value in Display.items():
+                if n == list(key)[0]:
+                    g1.node[n]['display'] = value[n]
 
             for key, value in Polygon.items():
                 if n == list(key)[0]:
@@ -230,30 +246,20 @@ class Netlist(__Cell__):
 
             device = nx.get_node_attributes(S, 'device')
             surface = nx.get_node_attributes(S, 'surface')
+            display = nx.get_node_attributes(S, 'display')
             center = nx.get_node_attributes(S, 'pos')
 
             sub_pos = list()
             for key, value in center.items():
                 sub_pos = [value[0], value[1]]
 
-            return dict(device=device, surface=surface, pos=sub_pos)
-        # def sub_nodes(b):
-        #     S = self.g.subgraph(b)
-
-        #     pin = nx.get_node_attributes(S, 'device')
-        #     surface = nx.get_node_attributes(S, 'surface')
-        #     center = nx.get_node_attributes(S, 'pos')
-
-        #     sub_pos = list()
-        #     for key, value in center.items():
-        #         sub_pos = [value[0], value[1]]
-
-        #     return dict(pin=pin, surface=surface, pos=sub_pos)
+            return dict(device=device, surface=surface, display=display, pos=sub_pos)
 
         Q = nx.quotient_graph(self.g, partition_nodes, node_data=sub_nodes)
 
         Pos = nx.get_node_attributes(Q, 'pos')
         Device = nx.get_node_attributes(Q, 'device')
+        Display = nx.get_node_attributes(Q, 'display')
         Polygon = nx.get_node_attributes(Q, 'surface')
 
         Edges = nx.get_edge_attributes(Q, 'weight')
@@ -274,6 +280,10 @@ class Netlist(__Cell__):
                     if n in value:
                         g1.node[n]['device'] = value[n]
 
+            for key, value in Display.items():
+                if n == list(key)[0]:
+                    g1.node[n]['display'] = value[n]
+
             for key, value in Polygon.items():
                 if n == list(key)[0]:
                     g1.node[n]['surface'] = value[n]
@@ -285,18 +295,33 @@ class Netlist(__Cell__):
         return g
 
     def create_netlist(self):
+        pass
 
-        print('----------- Netlist -------------')
+        # print('----------- Netlist -------------')
 
-        for s in self.elementals.sref:
-            self.nets += s.ref.netlist
+        # # for s in self.elementals.sref:
 
-        self.g = self.merge
-        self.g = self.combine
-        # self.g = self.combine_device_nodes
-        # self.g = self.combine_surfaces
+        # elems = deepcopy(self.elementals)
 
-        self.plot_netlist(G=self.g, graphname=self.name, labeltext='id')
+        # for s in elems.sref:
+        #     print(s)
+        #     g = s.ref.netlist
+        #     print(len(g.nodes()))
+
+        #     if g is not None:
+        #         print(',mjebejf')
+        #         # for n in g.nodes():
+        #         #     print(s.midpoint)
+        #         #     g.node[n]['pos'] += s.midpoint
+
+        #         # self.nets += g
+
+        # # self.g = self.merge
+        # # self.g = self.combine
+        # # # self.g = self.combine_device_nodes
+        # # # self.g = self.combine_surfaces
+
+        # # self.plot_netlist(G=self.g, graphname=self.name, labeltext='id')
 
 
 class CellAbstract(Netlist):
@@ -332,15 +357,43 @@ class CellAbstract(Netlist):
         return points
 
     def commit_to_gdspy(self):
+        # from spira.lpe.mask import __Mask__
+        from demo.pdks.ply.base import Base
         cell = gdspy.Cell(self.name, exclude_from_current=True)
         for e in self.elementals:
-            if issubclass(type(e), Cell):
-                for elem in e.elementals:
-                    elem.commit_to_gdspy(cell=cell)
-                for port in e.ports:
-                    port.commit_to_gdspy(cell=cell)
+            if issubclass(type(e), Base):
+                e.polygon.commit_to_gdspy(cell=cell)
+                for p in e.ports:
+                    p.commit_to_gdspy(cell=cell)
             elif not isinstance(e, (SRef, ElementList, Graph, Mesh)):
                 e.commit_to_gdspy(cell=cell)
+        # for p in self.ports:
+        #     p.commit_to_gdspy(cell=cell)
+
+        # for e in self.elementals:
+        #     # if issubclass(type(e), Base):
+        #     #     e = SRef(e)
+
+        #     # if not isinstance(e, (SRef, ElementList, Graph, Mesh)):
+        #     #     e.commit_to_gdspy(cell=cell)
+
+        #     # if issubclass(type(e), Cell):
+        #     #     for elem in e.elementals:
+        #     #         elem.commit_to_gdspy(cell=cell)
+        #     #     # for port in e.ports:
+        #     #     #     port.commit_to_gdspy(cell=cell)
+        #     #     for p in e.get_ports():
+        #     #         p.commit_to_gdspy(cell=cell)
+
+        #     # if issubclass(type(e), Cell):
+        #     if issubclass(type(e), Base):
+        #         # e.polygon.commit_to_gdspy(cell=cell)
+        #         # for p in e.get_ports():
+        #         #     p.commit_to_gdspy(cell=cell)
+        #         # # e.ports.commit_to_gdspy(cell=cell)
+        #     elif not isinstance(e, (SRef, ElementList, Graph, Mesh)):
+        #         e.commit_to_gdspy(cell=cell)
+
         return cell
 
     def move(self, midpoint=(0,0), destination=None, axis=None):
@@ -479,7 +532,23 @@ class Cell(CellAbstract):
     def id(self):
         return self.__str__()
 
+    def _copy(self):
+        cell = Cell(
+            name=self.name,
+            elementals=deepcopy(self.elementals),
+            ports=deepcopy(self.ports),
+            nets=self.nets
+        )
+        return cell
 
+    def transform(self, transform):
+        if transform['reflection']:
+            self.reflect(p1=[0,0], p2=[1,0])
+        if transform['rotation']:
+            self.rotate(angle=transform['rotation'])
+        if transform['midpoint']:
+            self.move(midpoint=self.center, destination=transform['midpoint'])
+        return self
 
 
 

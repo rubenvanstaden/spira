@@ -1,5 +1,7 @@
 import gdspy
+import numpy as np
 import networkx as nx
+from demo.pdks import ply
 
 from copy import copy, deepcopy
 from spira import settings
@@ -20,7 +22,7 @@ from spira.lne.graph import Graph
 from spira.core.lists import ElementList
 
 from spira.lpe.layers import *
-from spira.lpe.structure import __StructureCell__
+from spira.lpe.structure import __ConstructLayers__
 from spira.lpe.containers import __CellContainer__
 from spira.lpe import mask
 from spira.lne.net import Net
@@ -29,16 +31,14 @@ from spira.lne.net import Net
 RDD = get_rule_deck()
 
 
-class __Device__(__StructureCell__):
+class __Layout__(__ConstructLayers__):
 
     level = param.IntegerField(default=1)
     lcar = param.IntegerField(default=0.1)
     algorithm = param.IntegerField(default=6)
 
-    devices = param.DataField(fdef_name='create_devices')
+    metals = param.DataField(fdef_name='create_metals')
     primitives = param.DataField(fdef_name='create_primitives')
-
-    dev = param.CellField()
 
     def create_elementals(self, elems):
         super().create_elementals(elems)
@@ -57,13 +57,6 @@ class __Device__(__StructureCell__):
                 prim_elems += P
         return prim_elems
 
-    def create_devices(self):
-        device_elems = ElementList()
-        for e in self.dev.elementals:
-            device_elems += e
-            self.elementals += e
-        return device_elems
-
     def _metal_polygons(self, pl):
         elems = self.elementals
         ply_elems = ElementList()
@@ -78,118 +71,186 @@ class __Device__(__StructureCell__):
         return ply_elems
 
     def create_nets(self, nets):
-
-        primitives = self.primitives
-        bounding_boxes = self.devices
-
         for pl in RDD.PLAYER.get_physical_layers(purposes='METAL'):
             metal_elems = self._metal_polygons(pl)
             if metal_elems:
                 net = Net(
                     name='{}'.format(pl.layer.number),
                     lcar=self.lcar,
+                    level=self.level,
                     algorithm=self.algorithm,
                     layer=pl.layer,
                     polygons=metal_elems,
-                    primitives=primitives,
-                    bounding_boxes=bounding_boxes
+                    primitives=self.primitives,
+                    bounding_boxes=self.bounding_boxes
                 )
                 nets += net.graph
         return nets
 
 
-class Device(__Device__):
+class Device(__Layout__):
 
     def create_netlist(self):
-
         self.g = self.merge
         self.g = self.combine_device_nodes
         self.g = self.combine_surfaces
 
+        if self.g is not None:
+            for n in self.g.nodes():
+                # self.g.node[n]['pos'] += self.midpoint
+                self.g.node[n]['surface'].id0 = '{}_{}'.format(self.name, self.g.node[n]['surface'].id0)
+                if 'device' in self.g.node[n]:
+                    self.g.node[n]['device'].id0 = '{}_{}'.format(self.name, self.g.node[n]['device'].id0)
+
         self.plot_netlist(G=self.g, graphname=self.name, labeltext='id')
 
         return self.g
 
 
-class Gate(__Device__):
+class Gate(__Layout__):
+
+    original = param.CellField()
+    devices = param.CellField()
+
+    get_device_refs = param.DataField(fdef_name='create_get_device_references')
+    device_ports = param.DataField(fdef_name='create_device_ports')
+    terminals = param.DataField(fdef_name='create_terminals')
+
+    def create_get_device_references(self):
+        elems = spira.ElementList()
+        for e in self.devices.elementals.sref:
+            elems += e
+        return elems
+
+    def create_terminals(self):
+        ports = spira.ElementList()
+        flat_elems = self.original.elementals.flat_copy()
+        port_elems = flat_elems.get_polygons(layer=RDD.PURPOSE.TERM)
+        label_elems = flat_elems.labels
+
+        for port in port_elems:
+            for label in label_elems:
+
+                lbls = label.text.split(' ')
+                s_p1, s_p2 = lbls[1], lbls[2]
+                p1, p2 = None, None
+
+                for m1 in RDD.PLAYER.get_physical_layers(purposes=['METAL', 'GND']):
+                    if m1.layer.name == s_p1:
+                        p1 = spira.Layer(name=lbls[0], 
+                            number=m1.layer.number, 
+                            datatype=RDD.GDSII.TEXT
+                        )
+                        if label.point_inside(ply=port.polygons[0]):
+                            ports += spira.Term(
+                                name=lbls[0],
+                                layer1=p1,
+                                midpoint=label.position,
+                                width=port.dx,
+                                length=port.dy
+                            )
+                    if m1.layer.name == s_p2:
+                        p2 = spira.Layer(name=lbls[0], 
+                            number=m1.layer.number, 
+                            datatype=RDD.GDSII.TEXT
+                        )
+                        if label.point_inside(ply=port.polygons[0]):
+                            ports += spira.Term(
+                                name=lbls[1],
+                                layer2=p2,
+                                midpoint=label.position,
+                                width=port.dy
+                            )
+        return ports
+
+    def create_device_ports(self):
+        ports = spira.ElementList()
+        for g in self.original.elementals.polygons:
+            for c in self.devices.elementals.sref:
+                for S in c.ref.elementals:
+                    if isinstance(S.ref, mask.Metal):
+                        for M in S.ref.elementals:
+                            if (M.polygon & g) and (g.is_equal_layers(M.polygon)):
+
+                                P = M.metal_port._copy()
+                                d = M.polygon.center + c.midpoint
+                                # P.translate(dx=d[0], dy=d[1])
+                                P.move(midpoint=P.midpoint, destination=d)
+
+                                # P = spira.Port(
+                                #     name='{}'.format(M.polygon),
+                                #     midpoint=M.polygon.center + c.midpoint,
+                                #     gdslayer=spira.Layer(number=g.gdslayer.number, datatype=100)
+                                # )
+
+                                ports += P
+        return ports
+
+    def create_ports(self, ports):
+        for p in self.device_ports:
+            ports += p
+        for p in self.terminals:
+            ports += p
+        return ports
 
     def create_netlist(self):
-
         self.g = self.merge
         self.g = self.combine_device_nodes
-
         # self.g = self.generate_paths
-
         # self.g = self.combine_surfaces
-
         self.plot_netlist(G=self.g, graphname=self.name, labeltext='id')
-
         return self.g
-
-
-class Circuit(__Device__):
-    pass
-
-
-class DeviceMLayers(__CellContainer__):
-    """
-    Add a GROUND bbox to Device for primitive and
-    DRC detection, since GROUND is only in Mask Cell.
-    """
-
-    level = param.IntegerField(default=1)
-
-    device_elems = param.ElementListField()
-
-    devices = param.DataField(fdef_name='create_device_layers')
-
-    def create_device_layers(self):
-        # box = self.cell.bbox
-        # box.move(midpoint=box.center, destination=(0,0))
-
-        B = DLayer(points=self.cell.pbox, device_elems=self.cell.elementals.flat_copy())
-        Bs = SRef(B)
-        # Bs.move(midpoint=(0,0), destination=self.cell.bbox.center)
-
-        return Bs
-
-    def create_elementals(self, elems):
-        # super().create_elementals(elems)
-        elems += self.devices
-        return elems
 
 
 class BoundingDevice(__CellContainer__):
-    """
-    Add a GROUND bbox to Device for primitive and
-    DRC detection, since GROUND is only in Mask Cell.
-    """
-
-    level = param.IntegerField(default=1)
-
-    device_elems = param.ElementListField()
-
-    devices = param.DataField(fdef_name='create_device_layers')
-
-    def create_device_layers(self):
-        B = DLayer(points=self.cell.pbox, device_elems=self.cell.elementals.flat_copy())
-        Bs = SRef(B)
-        return Bs
-
+    """ Add a GROUND bbox to Device for primitive and DRC 
+    detection, since GROUND is only in Mask Cell. """
     def create_elementals(self, elems):
-        elems += self.devices
+        setter = {}
+        for p in self.cell.elementals.polygons:
+            layer = p.gdslayer.number
+            setter[layer] = 'not_set'
+        for p in self.cell.elementals.polygons:
+            for pl in RDD.PLAYER.get_physical_layers(purposes=['METAL', 'GND']):
+                if pl.layer == p.gdslayer:
+                    if setter[pl.layer.number] == 'not_set':
+                        l1 = Layer(name='BoundingBox', number=pl.layer.number, datatype=9)
+                        ply = Polygons(shape=self.cell.pbox, gdslayer=l1)
+                        ply.center = (0,0)
+                        elems += ply
+                        setter[pl.layer.number] = 'already_set'
         return elems
 
 
 class __Generator__(__CellContainer__):
 
-    level = param.IntegerField(default=1)
     generate_devices = param.DataField(fdef_name='create_devices')
-    device_layers = param.DataField(fdef_name='create_device_layers')
 
-    dev = param.CellField()
+    level = param.IntegerField(default=1)
 
-    def wrap_references(self, c, c2dmap):
+    def create_device_layers(self):
+        c2dmap = {}
+        dev = deepcopy(self.cell)
+        deps = dev.dependencies()
+        for key in RDD.DEVICES.keys:
+            for C in deps:
+                B = BoundingDevice(cell=C)
+                c2dmap.update({C: B})
+        for c in dev.dependencies():
+            self.w2c(c, c2dmap)
+        return SRef(dev)
+
+    def w2n(self, new_cell, c, c2dmap):
+        for e in c.elementals:
+            if isinstance(e, SRef):
+                S = deepcopy(e)
+                if e.ref in c2dmap:
+                    S.ref = c2dmap[e.ref]
+                    # e.ref = c2dmap[e.ref]
+                    new_cell += S
+                # new_cell += e
+
+    def w2c(self, c, c2dmap):
         for e in c.elementals:
             if isinstance(e, SRef):
                 if e.ref in c2dmap:
@@ -198,7 +259,6 @@ class __Generator__(__CellContainer__):
     def create_devices(self):
         deps = self.cell.dependencies()
         c2dmap = {}
-
         for key in RDD.DEVICES.keys:
             DeviceTCell = RDD.DEVICES[key].PCELL
             for C in deps:
@@ -206,57 +266,57 @@ class __Generator__(__CellContainer__):
                 for P in DeviceTCell.elementals.sref:
                     P.ref.create_elementals(D.elementals)
                 c2dmap.update({C: D})
-                # D.netlist
 
+        devices = spira.Cell(name='Devices')
         for c in self.cell.dependencies():
-            self.wrap_references(c, c2dmap)
+            self.w2n(devices, c, c2dmap)
 
-        return SRef(self.cell)
+        return devices
 
-    def create_device_layers(self):
-        c2dmap = {}
-        self.dev = deepcopy(self.cell)
-        deps = self.dev.dependencies()
+    def create_gates(self):
+        dev = self.create_device_layers()
 
-        for key in RDD.DEVICES.keys:
-            for C in deps:
-                B = BoundingDevice(cell=C)
-                c2dmap.update({C: B})
+        gate = Gate(
+            original=self.cell,
+            devices=self.generate_devices,
+            cell=dev.ref,
+            cell_elems=dev.ref.elementals,
+            level=2, lcar=0.1
+        )
 
-        for c in self.dev.dependencies():
-            self.wrap_references(c, c2dmap)
-
-        return SRef(self.dev)
-
-    def create_bounding_layers(self):
-        cell = spira.Cell(name='DeviceLayer')
-        for s in self.cell.elementals.sref:
-            ply = spira.Polygons(
-                shape=s.ref.pbox,
-                gdslayer=spira.Layer(name='Boundary', number=80)
-            )
-            # FIXME: Why from the origin?
-            ply.move(midpoint=(0,0), destination=s.midpoint)
-            cell += ply
-        return cell
+        return gate
 
 
-def add_ports_to_bounding_device(cell, gate):
+class Layout(spira.Cell):
+    """  """
 
-    for g in cell.elementals:
-        if isinstance(g, spira.Polygons):
-            for c in cell.elementals.sref:
-                for S in c.ref.elementals:
-                    if isinstance(S.ref, mask.Metal):
-                        for M in S.ref.elementals:
-                            if (M.polygon & g) and (g.is_equal_layers(M.polygon)):
-                                gate.ports += spira.Port(
-                                    # name='{}'.format(M.polygon.gdslayer),
-                                    name='{}'.format(M.polygon),
-                                    midpoint=M.polygon.center + c.midpoint,
-                                    # midpoint=M.polygon.center,
-                                    gdslayer=spira.Layer(number=g.gdslayer.number, datatype=100)
-                                )
+    gate = param.CellField()
+
+    def create_elementals(self, elems):
+        super().create_elementals(elems)
+        elems += spira.SRef(self.gate)
+        for e in self.gate.get_device_refs:
+            elems += e
+        return elems
+
+    def create_nets(self, nets):
+        for s in self.elementals.sref:
+            g = s.ref.netlist
+            if g is not None:
+                for n in g.nodes():
+                    p = np.array(g.node[n]['pos'])
+                    m = np.array(s.midpoint)
+                    g.node[n]['pos'] = p + m
+                nets += g
+        return nets
+
+    def create_netlist(self):
+        self.g = self.merge
+        self.g = self.combine
+        # self.g = self.combine_device_nodes
+        # self.g = self.combine_surfaces
+
+        self.plot_netlist(G=self.g, graphname=self.name, labeltext='id')
 
 
 class GateGenerator(__Generator__):
@@ -271,54 +331,16 @@ class GateGenerator(__Generator__):
 
     def create_structure_gate(self):
 
-        dev = self.create_device_layers()
-        mask = self.create_devices()
-        cell = self.create_bounding_layers()
+        L = Layout(
+            gate=self.create_gates()
+        )
 
-        self.cell.name += 'gate'
+        L.netlist
 
-        Layout = spira.Cell(name='Layout')
-
-        MaskCell = Gate(dev=cell, cell=dev.ref, cell_elems=dev.ref.elementals, level=2)
-
-        Layout += spira.SRef(MaskCell)
-        for e in mask.ref.elementals:
-            if isinstance(e, SRef):
-                Layout += e
-
-        add_ports_to_bounding_device(self.cell, MaskCell)
-
-        Layout.netlist
-
-        return SRef(Layout)
+        return SRef(L)
 
 
-class CircuitGenerator(GateGenerator):
-
-    structure_circuit = param.DataField(fdef_name='create_structure_circuit')
-
-    def create_structure_circuit(self):
-        self.structure_gate
-
-        mask = Circuit(cell=self.cell, cell_elems=self.cell.elementals)
-        return SRef(mask)
-
-
-class MaskGenerator(CircuitGenerator):
-
-    structure_mask = param.DataField(fdef_name='create_structure_mask')
-
-    def create_structure_mask(self):
-        self.structure_circuit
-
-        mask = Mask(cell=self.cell, cell_elems=self.cell.elementals)
-        return SRef(mask)
-
-    def create_elementals(self, elems):
-        return elems
-
-
-class SLayout(MaskGenerator):
+class SLayout(GateGenerator):
     """ The StructureLayout is a converted layout
     that takes designed elementals and wraps them
     with different generators.
@@ -347,7 +369,6 @@ class SLayout(MaskGenerator):
             elems += self.structure_mask
 
         return elems
-
 
 
 

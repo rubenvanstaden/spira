@@ -26,38 +26,53 @@ def wrap_labels(cell, c2dmap):
     for l in cell.get_labels():
         D = c2dmap[cell]
         if isinstance(l, gdspy.Label):
-            layer = spira.Layer(name='', number=l.layer)
-            params = {}
-            params['text'] = l.text
-            params['gdslayer'] = layer
-            params['str_anchor'] = l.anchor
-
-            # D += spira.Label(position=scd(l.position), **params)
-            D += spira.Label(position=scu(l.position), **params)
+            D += spira.Label(
+                position=scu(l.position),
+                text=l.text,
+                gdslayer=spira.Layer(number=l.layer),
+                str_anchor=l.anchor
+            )
 
 
 def wrap_references(cell, c2dmap):
+    """ Move all cell centers to the origin. """
     for e in cell.elements:
         if isinstance(e, gdspy.CellReference):
             D = c2dmap[cell]
             ref_device = c2dmap[e.ref_cell]
-            D += spira.SRef(structure=ref_device,
-                            # midpoint=scd(e.midpoint),
-                            midpoint=scu(e.origin),
-                            rotation=e.rotation,
-                            magnification=e.magnification,
-                            reflection=e.x_reflection)
+            o = ref_device.center
+            print(o)
+            ref_device.move(midpoint=o, destination=(0,0))
 
+            if e.rotation is None:
+                e.rotation = 0
 
-def create_spira_cell(cell):
-    # TODO: Detect cell type before assignment.
-    if cell.name.startswith('jj'):
-        D = spira.Junction(name=cell.name)
-    elif cell.name.startswith('via'):
-        D = spira.Via(name=cell.name)
-    else:
-        D = spira.Cell(name=cell.name)
-    return D
+            S = spira.SRef(structure=ref_device)
+
+            pos = [0, 0]
+
+            # Q1
+            if (o[0] >= 0) and (o[1] > 0):
+                pos = -o
+            # Q2
+            elif (o[0] < 0) and (o[1] >= 0):
+                pos = o
+            # Q3
+            elif (o[0] <= 0) and (o[1] < 0):
+                pos = -o
+            # Q4
+            elif (o[0] > 0) and (o[1] <= 0):
+                pos = o
+
+            tf = {
+                'midpoint': scu(e.origin) + pos,
+                'rotation': e.rotation,
+                'magnification': e.magnification,
+                'reflection': e.x_reflection
+            }
+
+            S.transform(tf)
+            D += S
 
 
 def import_gds(filename, cellname=None, flatten=False, duplayer={}):
@@ -90,25 +105,15 @@ def import_gds(filename, cellname=None, flatten=False, duplayer={}):
     cell_list = spira.ElementList()
     c2dmap = {}
     for cell in gdsii_lib.cell_dict.values():
-        D = create_spira_cell(cell)
-
+        D = spira.Cell(name=cell.name)
         for e in cell.elements:
             if isinstance(e, gdspy.PolygonSet):
                 for points in e.polygons:
                     layer = spira.Layer(number=e.layers[0], datatype=e.datatypes[0])
-                    # ply = spira.Polygons(shape=spd([points]),
-                    ply = spira.Polygons(shape=spu([points]),
-                    # ply = spira.Polygons(shape=[points],
-                                         gdslayer=layer)
-                    D += ply
+                    D += spira.Polygons(shape=spu([points]), gdslayer=layer)
             elif isinstance(e, gdspy.Polygon):
                 layer = spira.Layer(number=e.layers, datatype=e.datatype)
-                # ply = spira.Polygons(shape=spd([e.points]),
-                ply = spira.Polygons(shape=spu([e.points]),
-                # ply = spira.Polygons(shape=[e.points],
-                                     gdslayer=layer)
-                D += ply
-
+                D += spira.Polygons(shape=spu([e.points]), gdslayer=layer)
         c2dmap.update({cell:D})
         cell_list += cell
 
@@ -117,31 +122,8 @@ def import_gds(filename, cellname=None, flatten=False, duplayer={}):
         wrap_labels(cell, c2dmap)
 
     top_spira_cell = c2dmap[topcell]
-
-    # print('Toplevel Cell: {}\n'.format(top_spira_cell))
-    # print('\n---------- Cells --------------')
-    # for i, D in enumerate(top_spira_cell.dependencies()):
-    #     print('{}. {}'.format(i, D.name))
-    # print('')
-
     if flatten == True:
         D = spira.Cell(name='import_gds')
-
-        # for key, polygon in top_spira_cell.get_polygons(True).items():
-        #     layer, datatype = key[0], key[1]
-        #     for l1, l2 in duplayer.items():
-        #         if layer == l1: layer = l2
-        #     poly = spira.Polygons(polygons=polygon, gdslayer=layer, gdsdatatype=datatype)
-        #     poly.scale_up()
-        #     D += poly
-
-        # for l in top_spira_cell.lbls:
-        #     params = {}
-        #     params['text'] = l.text
-        #     params['gdslayer'] = l.gdslayer
-        #     params['str_anchor'] = l.str_anchor
-
-        #     D += spira.Label(position=scu(l.position), **params)
         return D
     else:
         return top_spira_cell

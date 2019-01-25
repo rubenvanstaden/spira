@@ -31,14 +31,6 @@ class __Properties__(object):
     def dy(self):
         return (self.ymax - self.ymin)
 
-    @property
-    def center(self):
-        return np.sum(self.bbox, 0)/2
-    
-    @center.setter
-    def center(self, destination):
-        self.move(destination=destination, midpoint=self.center)
-
 
 class CellMixin(__Properties__):
 
@@ -50,7 +42,6 @@ class CellMixin(__Properties__):
                     gdspy.CellReference(
                         ref_cell=c2dmap[e.ref],
                         origin=e.midpoint,
-                        # midpoint=e.midpoint,
                         rotation=e.rotation,
                         magnification=e.magnification,
                         x_reflection=e.reflection
@@ -58,15 +49,18 @@ class CellMixin(__Properties__):
                 )
 
     def construct_gdspy_tree(self, glib):
+        from demo.pdks.ply.base import Base
         d = self.dependencies()
         c2dmap = {}
         for c in d:
+            # if not issubclass(type(c), Base):
             G = c.commit_to_gdspy()
             c2dmap.update({c:G})
         for c in d:
             self.__wrapper__(c, c2dmap)
             if c.name not in glib.cell_dict.keys():
                 glib.add(c2dmap[c])
+        # print(self.get_ports())
         for p in self.get_ports():
             p.commit_to_gdspy(cell=c2dmap[self])
         return c2dmap[self]
@@ -128,6 +122,15 @@ class PolygonMixin(__Properties__):
         bb = self.get_bounding_box()
         assert len(bb) == 2
         return bb
+
+    @property
+    def center(self):
+        return np.sum(self.bbox, 0)/2
+    
+    @center.setter
+    def center(self, destination):
+        self.move(destination=destination, midpoint=self.center)
+
 
     # def __wrapper__(self, c, c2dmap):
     #     for e in c.elementals.flat_elems():

@@ -207,9 +207,12 @@ class DLayer(__DeviceLayer__):
         return elems
     
     def create_ports(self, ports):
-
-
-
+        for i, e in enumerate(self.box):
+            ports += Port(
+                name='Device Port {}'.format(i), 
+                midpoint=e.center,
+                gdslayer=e.gdslayer
+            )
         return ports
 
 

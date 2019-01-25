@@ -90,7 +90,6 @@ def labeled_polygon_id(position, polygons):
     for i, spira_polygon in enumerate(polygons):
         for j, points in enumerate(spira_polygon.polygons):
             if point_inside(points, position):
-                # return (i, j)
                 return spira_polygon.id
     return None
 

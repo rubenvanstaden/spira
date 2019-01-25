@@ -31,19 +31,25 @@ class PortAbstract(__Port__):
     gdslayer = param.LayerField(name='PortLayer', number=64)
     poly_layer = param.LayerField(name='PortLayer', number=64)
     text_layer = param.LayerField(name='PortLayer', number=63)
+    # id0 = param.StringField()
 
-    def __init__(self, port=None, polygon=None, **kwargs):
+    def __init__(self, port=None, polygon=None, label=None, **kwargs):
         super().__init__(**kwargs)
 
         self.orientation = np.mod(self.orientation, 360)
 
-        L = spira.Label(position=self.midpoint,
-            text=self.name,
-            gdslayer=self.gdslayer,
-            texttype=self.text_layer.number,
-            color='#808080'
-        )
-        self.label = L
+        if polygon is None:
+            L = spira.Label(
+                position=self.midpoint,
+                text=self.name,
+                gdslayer=self.gdslayer,
+                texttype=self.text_layer.number,
+                color='#808080'
+            )
+            self.label = L
+        else:
+            self.label = label
+
         self.arrow = None
 
     @property
@@ -81,8 +87,8 @@ class PortAbstract(__Port__):
         if self.__repr__() not in list(__Port__.__committed__.keys()):
             # self.polygon.rotate(angle=self.orientation)
             # self.polygon.move(midpoint=self.polygon.center, destination=self.midpoint)
-            self.polygon.commit_to_gdspy(cell)
-            self.label.commit_to_gdspy(cell)
+            self.polygon.commit_to_gdspy(cell=cell)
+            self.label.commit_to_gdspy(cell=cell)
             if self.arrow:
                 # print(self.orientation)
                 # self.arrow.rotate(angle=45)
@@ -90,7 +96,14 @@ class PortAbstract(__Port__):
                 # self.arrow.rotate(angle=90-self.orientation)
                 self.arrow.move(midpoint=self.arrow.center, destination=self.midpoint)
                 self.arrow.commit_to_gdspy(cell)
-            __Port__.__committed__.update({self.__repr__():self})
+            __Port__.__committed__.update({self.__repr__(): self})
+        else:
+            p = __Port__.__committed__[self.__repr__()]
+            p.polygon.commit_to_gdspy(cell=cell)
+            p.label.commit_to_gdspy(cell=cell)
+            if p.arrow:
+                p.arrow.move(midpoint=p.arrow.center, destination=p.midpoint)
+                p.arrow.commit_to_gdspy(cell)
 
     def reflect(self):
         """ Reflect around the x-axis. """
@@ -122,6 +135,8 @@ class PortAbstract(__Port__):
     def translate(self, dx, dy):
         """ Translate port by dx and dy. """
         self.midpoint = self.midpoint + np.array([dx, dy])
+        self.label.move(midpoint=self.label.position, destination=self.midpoint)
+        self.polygon.move(midpoint=self.polygon.center, destination=self.midpoint)
         return self
 
     def move(self, midpoint=(0,0), destination=None, axis=None):
@@ -160,10 +175,10 @@ class PortAbstract(__Port__):
 
         self.translate(dx, dy)
 
-        self.label.move(midpoint=self.label.position, destination=self.midpoint)
-        self.polygon.move(midpoint=self.polygon.center, destination=self.midpoint)
-        if self.arrow:
-            self.arrow.move(midpoint=self.polygon.center, destination=self.midpoint)
+        # self.label.move(midpoint=self.label.position, destination=self.midpoint)
+        # self.polygon.move(midpoint=self.polygon.center, destination=self.midpoint)
+        # if self.arrow:
+        #     self.arrow.move(midpoint=self.polygon.center, destination=self.midpoint)
 
         return self
 
@@ -177,34 +192,24 @@ class PortAbstract(__Port__):
         """ Transform port with the given transform class. """
         if T['reflection']:
             self.reflect()
-            self.label.reflect()
-            self.polygon.reflect()
-            if self.arrow:
-                self.arrow.reflect()
+            # self.label.reflect()
+            # self.polygon.reflect()
+            # if self.arrow:
+            #     self.arrow.reflect()
         if T['rotation']:
             self.rotate(angle=T['rotation'], center=(0,0))
-            self.label.rotate(angle=T['rotation'])
-            self.polygon.rotate(angle=T['rotation'])
-            if self.arrow:
-                self.arrow.rotate(angle=T['rotation'])
+            # self.label.rotate(angle=T['rotation'])
+            # self.polygon.rotate(angle=T['rotation'])
+            # if self.arrow:
+            #     self.arrow.rotate(angle=T['rotation'])
         if T['midpoint']:
             self.translate(dx=T['midpoint'][0], dy=T['midpoint'][1])
-            self.label.move(midpoint=self.label.position, destination=self.midpoint)
-            self.polygon.move(midpoint=self.polygon.center, destination=self.midpoint)
-            if self.arrow:
-                self.arrow.move(midpoint=self.polygon.center, destination=self.midpoint)
+            # self.label.move(midpoint=self.label.position, destination=self.midpoint)
+            # self.polygon.move(midpoint=self.polygon.center, destination=self.midpoint)
+            # if self.arrow:
+            #     self.arrow.move(midpoint=self.polygon.center, destination=self.midpoint)
 
         return self
-
-    # def _update(self, name, layer):
-    #     # print('wenifwebf')
-    #     ll = deepcopy(layer)
-    #     ll.datatype = 165
-    #     self.name = name
-    #     self.label.text = name
-    #     self.polygon.gdslayer = ll
-    #     self.label.gdslayer = ll
-    #     self.gdslayer = ll
 
 
 class Port(PortAbstract):
@@ -218,6 +223,7 @@ class Port(PortAbstract):
     """
 
     edge_width = param.FloatField(default=0.25*1e6)
+    # edge_width = param.FloatField(default=0.25)
 
     def __init__(self, port=None, polygon=None, **kwargs):
         super().__init__(port=port, polygon=polygon, **kwargs)
@@ -242,15 +248,18 @@ class Port(PortAbstract):
         )
 
     def _copy(self):
-        new_port = Port(parent=self.parent,
+        new_port = Port(
+            parent=self.parent,
             polygon=deepcopy(self.polygon),
+            label=deepcopy(self.label),
             name=self.name,
             midpoint=deepcopy(self.midpoint),
             edge_width=self.edge_width,
             gdslayer=deepcopy(self.gdslayer),
             poly_layer=deepcopy(self.poly_layer),
             text_layer=deepcopy(self.text_layer),
-            orientation=deepcopy(self.orientation))
+            orientation=deepcopy(self.orientation)
+        )
         return new_port
 
 

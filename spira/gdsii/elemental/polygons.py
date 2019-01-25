@@ -151,13 +151,13 @@ class PolygonAbstract(__Polygon__):
             self.rotate(angle=transform['rotation'])
         if transform['midpoint']:
             self.translate(dx=transform['midpoint'][0], dy=transform['midpoint'][1])
-        self.shape.points = self.polygons
+        # self.shape.points = self.polygons
         return self
 
     def reflect(self, p1=(0,1), p2=(0,0)):
         for n, points in enumerate(self.shape.points):
             self.shape.points[n] = self.__reflect__(points, p1, p2)
-        self.shape.points = self.polygons
+        # self.shape.points = self.polygons
         return self
 
     def rotate(self, angle=45, center=(0,0)):
@@ -166,6 +166,7 @@ class PolygonAbstract(__Polygon__):
         return self
 
     def translate(self, dx, dy):
+        # self.polygons = self.shape.points
         super().translate(dx=dx, dy=dy)
         self.shape.points = self.polygons
         return self
@@ -254,7 +255,12 @@ class Polygons(PolygonAbstract):
     def __str__(self):
         return self.__repr__()
 
-
+    def _copy(self):
+        ply = Polygons(
+            shape=deepcopy(self.shape),
+            gdslayer=deepcopy(self.gdslayer)
+        )
+        return ply
 
 
 

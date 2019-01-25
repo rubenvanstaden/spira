@@ -1,9 +1,4 @@
-from spira.rdd.technology import DataTree
-from spira.rdd.technology import ProcessTree
-from spira.rdd.technology import PhysicalTree
-from spira.rdd.technology import DynamicDataTree
-from spira.gdsii.layer import Layer
-from spira.rdd.layer import PhysicalLayer
+from spira.rdd.all import *
 from spira.rdd import RULE_DECK_DATABASE as RDD
 
 # -------------------------------- Initialize ------------------------------------

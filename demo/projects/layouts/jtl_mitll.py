@@ -5,12 +5,12 @@ from spira.lpe.primitives import SLayout
 
 
 if __name__ == '__main__':
-    name = 'aist_junction'
+    name = 'jtl_mitll'
     filename = current_path(name)
     cell = spira.import_gds(filename=filename)
-    # cell.output()
+    cell.output()
 
-    layout = SLayout(cell=cell, level=2)
-    layout.output()
+    # layout = SLayout(cell=cell, level=2)
+    # layout.output()
 
 

@@ -22,7 +22,8 @@ class DrawLayoutAbstract(object):
             glib.to_gdspy
         elif isinstance(self, spira.Cell):
             self.construct_gdspy_tree(glib)
-        gdspy.LayoutViewer(library=glib)
+        # gdspy.LayoutViewer(library=glib, cells='Layout-4')
+        gdspy.LayoutViewer(library=glib, cells='SLayout-4')
 
     # def writer(self, name=None, file_type='gdsii'):
         # """ Write layout to gdsii file. """

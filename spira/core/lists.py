@@ -35,6 +35,15 @@ class ElementFilterMixin(object):
         return elems
 
     @property
+    def cells(self):
+        from spira.gdsii.cell import Cell
+        elems = ElementList()
+        for e in self._list:
+            if issubclass(type(e), Cell):
+                elems += e
+        return elems
+
+    @property
     def metals(self):
         from spira.rdd import get_rule_deck
         from spira.gdsii.elemental.polygons import PolygonAbstract

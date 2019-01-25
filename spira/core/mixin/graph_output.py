@@ -174,6 +174,8 @@ class DrawGraphAbstract(object):
                 label = G.node[n]['surface']
 
             if label:
+                # nodes['text'].append(G.node[n]['display'])
+
                 if labeltext == 'number':
                     nodes['text'].append(n)
                 else:

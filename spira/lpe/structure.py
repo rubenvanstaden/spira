@@ -32,11 +32,17 @@ class MetalLayers(__ProcessLayer__):
 
     def create_metal_layers(self):
         elems = spira.ElementList()
-        for pl in RDD.PLAYER.get_physical_layers(purposes='METAL'):
+        for player in RDD.PLAYER.get_physical_layers(purposes='METAL'):
+            m_name = 'Metal Layer_{}_{}_{}'.format(
+                player.layer.number,
+                self.cell.name,
+                self.cell.id
+            )
             metal = mask.Metal(
+                m_name=m_name,
                 cell=self.cell,
                 cell_elems=self.cell_elems,
-                player=pl,
+                player=player,
                 level=self.level
             )
             elems += spira.SRef(metal)
@@ -59,11 +65,17 @@ class NativeLayers(MetalLayers):
 
     def create_native_layers(self):
         elems = spira.ElementList()
-        for pl in RDD.PLAYER.get_physical_layers(purposes=['VIA', 'JUNCTION']):
+        for player in RDD.PLAYER.get_physical_layers(purposes=['VIA', 'JJ']):
+            m_name = 'Native Layer_{}_{}_{}'.format(
+                player.layer.number,
+                self.cell.name,
+                self.cell.id
+            )
             native = mask.Native(
+                m_name=m_name,
                 cell=self.cell,
                 cell_elems=self.cell_elems,
-                player=pl,
+                player=player,
                 level=self.level
             )
             elems += spira.SRef(native)
@@ -78,7 +90,39 @@ class NativeLayers(MetalLayers):
         return elems
 
 
-class GroundLayers(NativeLayers):
+class BoundingLayers(NativeLayers):
+
+    bounding_boxes = param.DataField(fdef_name='create_bounding_boxes')
+
+    def create_bounding_boxes(self):
+        print('------ devices --------')
+        device_elems = ElementList()
+        # for e in self.dev.elementals:
+        for S in self.cell_elems.sref:
+            # self.elementals += S
+            for ply in S.ref.elementals:
+                print(ply)
+            device_elems += S
+            print('')
+            # for p in S.ref.elementals:
+            #     device_elems += p
+        # for e in self.dev.ports:
+        #     print('------------- Ports ------------------')
+        #     print(e)
+        #     device_elems += e
+        #     self.ports += e
+        return device_elems
+
+    def create_elementals(self, elems):
+        super().create_elementals(elems)
+
+        for ply in self.bounding_boxes:
+            elems += ply
+
+        return elems
+
+
+class GroundLayers(BoundingLayers):
 
     plane_elems = param.ElementListField() # Elementals like skyplanes and groundplanes.
     ground_layer = param.DataField(fdef_name='create_merged_ground_layers')
@@ -133,58 +177,8 @@ class ConnectDesignRules(GroundLayers):
         return elems
 
 
-class __StructureCell__(ConnectDesignRules):
-    """ Add a GROUND bbox to Device for primitive and DRC 
-    detection, since GROUND is only in Mask Cell. """
-
-    def create_elementals(self, elems):
-        super().create_elementals(elems)
-        return elems
-
-    def create_ports(self, ports):
-        flat_elems = self.cell_elems.flat_copy()
-        port_elems = flat_elems.get_polygons(layer=RDD.PURPOSE.TERM)
-        label_elems = flat_elems.labels
-
-        for port in port_elems:
-            for label in label_elems:
-
-                lbls = label.text.split(' ')
-                s_p1, s_p2 = lbls[1], lbls[2]
-                p1, p2 = None, None
-
-                for m1 in RDD.PLAYER.get_physical_layers(purposes=['METAL', 'GND']):
-                    if m1.layer.name == s_p1:
-                        p1 = spira.Layer(name=lbls[0], 
-                            number=m1.layer.number, 
-                            datatype=RDD.GDSII.TEXT
-                        )
-                        if label.point_inside(ply=port.polygons[0]):
-                            ports += spira.Term(
-                                name=lbls[0],
-                                layer1=p1,
-                                layer2=p2,
-                                midpoint=label.position,
-                                width=port.dx,
-                                length=port.dy
-                            )
-                    if m1.layer.name == s_p2:
-                        p2 = spira.Layer(name=lbls[0], 
-                            number=m1.layer.number, 
-                            datatype=RDD.GDSII.TEXT
-                        )
-                        if label.point_inside(ply=port.polygons[0]):
-                            ports += spira.Term(
-                                name=lbls[1],
-                                layer1=p1,
-                                layer2=p2,
-                                midpoint=label.position,
-                                width=port.dy
-                            )
-        return ports
-
-
-
+class __ConstructLayers__(ConnectDesignRules):
+    pass
 
 
 
