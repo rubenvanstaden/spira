@@ -3,11 +3,11 @@
 class EdgeCapacitor(object):
     _ID = 0
 
-    def __init__(self, id0=None):
-        if id0 is None:
+    def __init__(self, node_id=None):
+        if node_id is None:
             self.id = 'C{}'.format(EdgeCapacitor._ID)
         else:
-            self.id = id0
+            self.id = node_id
 
         EdgeCapacitor._ID += 1
 
@@ -15,11 +15,11 @@ class EdgeCapacitor(object):
 class EdgeInductor(object):
     _ID = 0
 
-    def __init__(self, id0=None):
-        if id0 is None:
+    def __init__(self, node_id=None):
+        if node_id is None:
             self.id = 'L{}'.format(EdgeInductor._ID)
         else:
-            self.id = id0
+            self.id = node_id
 
         EdgeInductor._ID += 1
 

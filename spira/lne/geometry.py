@@ -50,7 +50,7 @@ class GeometryAbstract(__Geometry__):
     name = param.StringField()
     layer = param.LayerField()
     dimension = param.IntegerField(default=2)
-    polygons = param.ElementListField()
+    polygons = param.ElementalListField()
 
     def __init__(self, lcar=0.01, **kwargs):
         super().__init__(lcar=lcar, **kwargs)

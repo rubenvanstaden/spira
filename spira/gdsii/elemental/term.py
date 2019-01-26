@@ -78,8 +78,6 @@ class Term(PortAbstract):
             width=self.width,
             length=self.length,
             gdslayer=deepcopy(self.gdslayer),
-            poly_layer=deepcopy(self.poly_layer),
-            text_layer=deepcopy(self.text_layer),
             orientation=self.orientation)
         return new_port
 

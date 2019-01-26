@@ -37,7 +37,6 @@ class __Layout__(__ConstructLayers__):
     lcar = param.IntegerField(default=0.1)
     algorithm = param.IntegerField(default=6)
 
-    metals = param.DataField(fdef_name='create_metals')
     primitives = param.DataField(fdef_name='create_primitives')
 
     def create_elementals(self, elems):
@@ -57,22 +56,20 @@ class __Layout__(__ConstructLayers__):
                 prim_elems += P
         return prim_elems
 
-    def _metal_polygons(self, pl):
+    def get_metal_polygons(self, pl):
         elems = self.elementals
         ply_elems = ElementList()
         for S in elems.sref:
             if isinstance(S.ref, mask.Metal):
                 for M in S.ref.elementals:
                     if M.layer.is_equal_number(pl.layer):
-                        # if M.polygon.gdslayer.datatype == 2:
-                        # if M.polygon.gdslayer.datatype == 1:
                         if M.polygon.gdslayer.datatype in (1, 2):
                             ply_elems += M.polygon
         return ply_elems
 
     def create_nets(self, nets):
         for pl in RDD.PLAYER.get_physical_layers(purposes='METAL'):
-            metal_elems = self._metal_polygons(pl)
+            metal_elems = self.get_metal_polygons(pl)
             if metal_elems:
                 net = Net(
                     name='{}'.format(pl.layer.number),
@@ -92,15 +89,15 @@ class Device(__Layout__):
 
     def create_netlist(self):
         self.g = self.merge
-        self.g = self.combine_device_nodes
-        self.g = self.combine_surfaces
+        self.g = self.nodes_combine(algorithm='d2d')
+        self.g = self.nodes_combine(algorithm='s2s')
 
         if self.g is not None:
             for n in self.g.nodes():
                 # self.g.node[n]['pos'] += self.midpoint
-                self.g.node[n]['surface'].id0 = '{}_{}'.format(self.name, self.g.node[n]['surface'].id0)
+                self.g.node[n]['surface'].node_id = '{}_{}'.format(self.name, self.g.node[n]['surface'].node_id)
                 if 'device' in self.g.node[n]:
-                    self.g.node[n]['device'].id0 = '{}_{}'.format(self.name, self.g.node[n]['device'].id0)
+                    self.g.node[n]['device'].node_id = '{}_{}'.format(self.name, self.g.node[n]['device'].node_id)
 
         self.plot_netlist(G=self.g, graphname=self.name, labeltext='id')
 
@@ -166,23 +163,15 @@ class Gate(__Layout__):
     def create_device_ports(self):
         ports = spira.ElementList()
         for g in self.original.elementals.polygons:
-            for c in self.devices.elementals.sref:
-                for S in c.ref.elementals:
+            for D in self.devices.elementals.sref:
+                for S in D.ref.elementals:
                     if isinstance(S.ref, mask.Metal):
                         for M in S.ref.elementals:
                             if (M.polygon & g) and (g.is_equal_layers(M.polygon)):
-
                                 P = M.metal_port._copy()
-                                d = M.polygon.center + c.midpoint
-                                # P.translate(dx=d[0], dy=d[1])
+                                P.connect(D, M.polygon)
+                                d = M.polygon.center + D.midpoint
                                 P.move(midpoint=P.midpoint, destination=d)
-
-                                # P = spira.Port(
-                                #     name='{}'.format(M.polygon),
-                                #     midpoint=M.polygon.center + c.midpoint,
-                                #     gdslayer=spira.Layer(number=g.gdslayer.number, datatype=100)
-                                # )
-
                                 ports += P
         return ports
 
@@ -195,9 +184,9 @@ class Gate(__Layout__):
 
     def create_netlist(self):
         self.g = self.merge
-        self.g = self.combine_device_nodes
+        self.g = self.nodes_combine(algorithm='d2d')
         # self.g = self.generate_paths
-        # self.g = self.combine_surfaces
+        # self.g = self.nodes_combine(algorithm='s2s')
         self.plot_netlist(G=self.g, graphname=self.name, labeltext='id')
         return self.g
 
@@ -312,9 +301,9 @@ class Layout(spira.Cell):
 
     def create_netlist(self):
         self.g = self.merge
-        self.g = self.combine
-        # self.g = self.combine_device_nodes
-        # self.g = self.combine_surfaces
+        self.g = self.nodes_combine(algorithm='d2s')
+        # self.g = self.nodes_combine(algorithm='d2d')
+        # self.g = self.nodes_combine(algorithm='s2s')
 
         self.plot_netlist(G=self.g, graphname=self.name, labeltext='id')
 

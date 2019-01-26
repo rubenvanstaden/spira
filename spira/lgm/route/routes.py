@@ -5,7 +5,7 @@ from spira.lgm.route.path import __Path__
 
 class Route(__Path__):
 
-    ports = param.ElementListField(fdef_name='create_ports')
+    ports = param.ElementalListField(fdef_name='create_ports')
     # ports = param.PortListField(fdef_name='create_ports')
 
     input_term = param.DataField(fdef_name='create_port_input')

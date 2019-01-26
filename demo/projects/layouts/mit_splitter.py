@@ -7,6 +7,8 @@ from demo.pdks.process.mitll_pdk.database import RDD
 
 if __name__ == '__main__':
     name = 'splitt_v0.3'
+    # name = 'mitll_dsndo_xic' # FIXME!
+    # name = 'mitll_SFQDC_draft' # FIXME!
     filename = current_path(name)
     cell = spira.import_gds(filename=filename)
     # cell.output()

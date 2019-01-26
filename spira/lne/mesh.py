@@ -28,8 +28,8 @@ RDD = spira.get_rule_deck()
 
 class __Mesh__(meshio.Mesh, ElementalInitializer):
 
-    data = param.ElementListField()
-    gmsh_periodic = param.ElementListField()
+    data = param.ElementalListField()
+    gmsh_periodic = param.ElementalListField()
     level = param.IntegerField(default=1)
 
     points = param.DataField(fdef_name='create_points')
@@ -182,18 +182,18 @@ class MeshAbstract(__Mesh__):
 
 class MeshLabeled(MeshAbstract):
 
-    primitives = param.ElementListField()
+    primitives = param.ElementalListField()
 
     surface_nodes = param.DataField(fdef_name='create_surface_nodes')
-    device_node_nodes = param.DataField(fdef_name='create_device_node_nodes')
     device_nodes = param.DataField(fdef_name='create_device_nodes')
+    boundary_nodes = param.DataField(fdef_name='create_boundary_nodes')
 
     def __init__(self, polygons, bounding_boxes=None, **kwargs):
         super().__init__(polygons, bounding_boxes, **kwargs)
 
         self.surface_nodes
-        self.device_node_nodes
         self.device_nodes
+        self.boundary_nodes
 
     def create_surface_nodes(self):
         triangles = self.__layer_triangles_dict__()
@@ -214,22 +214,18 @@ class MeshLabeled(MeshAbstract):
                                 gdslayer=self.layer,
                                 color=pl.data.COLOR
                             )
-                            # label.id0 = '{}_{}'.format(key[0], pid)
-                            label.id0 = '{}'.format(pid)
+                            label.node_id = '{}'.format(pid)
                             display = '{}'.format(pl.layer.name)
                             self.g.node[n]['surface'] = label
                             self.g.node[n]['display'] = display
 
-    def create_device_node_nodes(self):
+    def create_device_nodes(self):
         for node, triangle in self.__triangle_nodes__().items():
             points = [utils.c2d(self.points[i]) for i in triangle]
             for S in self.primitives:
-                if isinstance(S, (spira.Port, spira.Term)):
-                    self.add_port_label(node, S, points)
-                else:
-                    self.add_device_label(node, S, points)
+                self.add_device_label(node, S, points)
 
-    def create_device_nodes(self):
+    def create_boundary_nodes(self):
         if self.level > 1:
             for S in self.bounding_boxes:
                 for p in S.ref.elementals.polygons:
@@ -247,49 +243,44 @@ class MeshLabeled(MeshAbstract):
                         # if 'device' in self.g.node[n]:
                         #     self.g.node[n]['device'].color = '#ffffff'
                         if 'device' in self.g.node[n]:
-                            print('******************\n\n\n')
                             if device_node is None:
                                 device_node = self.g.node[n]['device']
-                                # self.g.node[n]['device'] = device_node
-                            # else:
-                            #     raise ValueError('device_node already assigned!')
-
                     if device_node is not None:
                         for n in bnodes:
                             self.g.node[n]['device'] = device_node
-                            # self.g.node[n]['surface'] = device_node
-                            # display = '{}_{}'.format(pl.layer.name, pid)
-                            # self.g.node[n]['display'] = display
 
     def add_new_node(self, n, D, pos):
-        params = {}
-        params['text'] = 'new'
         l1 = spira.Layer(name='Label', number=104)
-        params['gdslayer'] = l1
-
-        label = spira.Label(position=pos, **params)
-        label.id0 = '{}_{}'.format(n, n)
-
+        label = spira.Label(
+            position=pos,
+            text='new',
+            gdslayer = l1
+        )
+        label.node_id = '{}_{}'.format(n, n)
         num = self.g.number_of_nodes()
-
-        self.g.add_node(num+1, pos=pos, device=D, surface=label, display='{}'.format(l1.name))
+        self.g.add_node(num+1,
+            pos=pos,
+            device=D,
+            surface=label,
+            display='{}'.format(l1.name)
+        )
         self.g.add_edge(n, num+1)
 
-    def add_port_label(self, n, D, points):
-        if D.point_inside(points):
-            self.g.node[n]['device'] = D
-            # P = spira.PortNode(name=D.name, elementals=D)
-            # self.g.node[n]['device'] = P
-
     def add_device_label(self, n, D, points):
-        for p in D.ports:
-            if p.gdslayer.number == self.layer.number:
-                if p.point_inside(points):
-                    if 'device' in self.g.node[n]:
-                        self.add_new_node(n, D, p.midpoint)
-                    else:
-                        self.g.node[n]['device'] = D
+        if isinstance(D, (spira.Port, spira.Term)):
+            if D.point_inside(points):
+                self.g.node[n]['device'] = D
+        else:
+            for p in D.ports:
+                if p.gdslayer.number == self.layer.number:
+                    if p.point_inside(points):
+                        if 'device' in self.g.node[n]:
+                            self.add_new_node(n, D, p.midpoint)
+                        else:
+                            self.g.node[n]['device'] = D
 
 
 class Mesh(MeshLabeled):
     pass
+
+

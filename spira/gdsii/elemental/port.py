@@ -29,9 +29,6 @@ class PortAbstract(__Port__):
     orientation = param.IntegerField(default=0)
     parent = param.DataField()
     gdslayer = param.LayerField(name='PortLayer', number=64)
-    poly_layer = param.LayerField(name='PortLayer', number=64)
-    text_layer = param.LayerField(name='PortLayer', number=63)
-    # id0 = param.StringField()
 
     def __init__(self, port=None, polygon=None, label=None, **kwargs):
         super().__init__(**kwargs)
@@ -43,7 +40,7 @@ class PortAbstract(__Port__):
                 position=self.midpoint,
                 text=self.name,
                 gdslayer=self.gdslayer,
-                texttype=self.text_layer.number,
+                texttype=64,
                 color='#808080'
             )
             self.label = L
@@ -211,6 +208,10 @@ class PortAbstract(__Port__):
 
         return self
 
+    def connect(self, S, P):
+        """ Connects the port to a specific polygon in a cell reference. """
+        self.node_id = '{}_{}'.format(S.ref.name, P.id)
+
 
 class Port(PortAbstract):
     """ Ports are objects that connect different polygons
@@ -256,8 +257,6 @@ class Port(PortAbstract):
             midpoint=deepcopy(self.midpoint),
             edge_width=self.edge_width,
             gdslayer=deepcopy(self.gdslayer),
-            poly_layer=deepcopy(self.poly_layer),
-            text_layer=deepcopy(self.text_layer),
             orientation=deepcopy(self.orientation)
         )
         return new_port

@@ -18,7 +18,7 @@ RDD = spira.get_rule_deck()
 
 class __ProcessLayer__(__CellContainer__):
 
-    cell_elems = param.ElementListField()
+    cell_elems = param.ElementalListField()
     level = param.IntegerField(default=1)
 
 
@@ -33,13 +33,12 @@ class MetalLayers(__ProcessLayer__):
     def create_metal_layers(self):
         elems = spira.ElementList()
         for player in RDD.PLAYER.get_physical_layers(purposes='METAL'):
-            m_name = 'Metal Layer_{}_{}_{}'.format(
+            alias = '{}_{}'.format(
                 player.layer.number,
-                self.cell.name,
                 self.cell.id
             )
             metal = mask.Metal(
-                m_name=m_name,
+                alias=alias,
                 cell=self.cell,
                 cell_elems=self.cell_elems,
                 player=player,
@@ -66,13 +65,12 @@ class NativeLayers(MetalLayers):
     def create_native_layers(self):
         elems = spira.ElementList()
         for player in RDD.PLAYER.get_physical_layers(purposes=['VIA', 'JJ']):
-            m_name = 'Native Layer_{}_{}_{}'.format(
+            alias = '{}_{}'.format(
                 player.layer.number,
-                self.cell.name,
                 self.cell.id
             )
             native = mask.Native(
-                m_name=m_name,
+                alias=alias,
                 cell=self.cell,
                 cell_elems=self.cell_elems,
                 player=player,
@@ -124,7 +122,7 @@ class BoundingLayers(NativeLayers):
 
 class GroundLayers(BoundingLayers):
 
-    plane_elems = param.ElementListField() # Elementals like skyplanes and groundplanes.
+    plane_elems = param.ElementalListField() # Elementals like skyplanes and groundplanes.
     ground_layer = param.DataField(fdef_name='create_merged_ground_layers')
 
     def create_merged_ground_layers(self):
@@ -159,7 +157,7 @@ class GroundLayers(BoundingLayers):
 
 class ConnectDesignRules(GroundLayers):
 
-    metal_elems = param.ElementListField()
+    metal_elems = param.ElementalListField()
 
     def create_elementals(self, elems):
         super().create_elementals(elems)

@@ -132,31 +132,32 @@ class DataFieldDescriptor(BaseField):
 
 
 class FunctionField(BaseField):
-    """
-    Property which calls a get and set method to set the variables.
-    the get and set method are specified by name, so it supports
-    override, but is slower than FunctionProperty.
-    If set method is not specified, then the property is
-    considered locked and cannot be set.
+    """ Property which calls a get and set method to set the variables.
+    the get and set method are specified by name, so it supports override, 
+    but is slower than FunctionProperty. If set method is not specified, 
+    then the property is considered locked and cannot be set. 
+    
+    Examples
+    --------
     """
 
-    def __init__(self, fget_name, fset_name=None, **kwargs):
-        self.fget_name = fget_name
-        if fset_name is None:
+    def __init__(self, fget, fset=None, **kwargs):
+        self.fget = fget
+        if fset is None:
             self.locked = True
         else:
-            self.fset_name = fset_name
+            self.fset = fset
             self.locked = False
         BaseField.__init__(self, **kwargs)
 
     def __get__(self, obj, type=None):
         if obj is None:
             return self
-        return getattr(obj, self.fget_name)()
+        return self.fget(obj)
 
     def __set__(self, obj, value):
         if not self.locked:
-            return getattr(obj, self.fset_name)(value)
+            return self.fset(obj, value)
         else:
             raise ValueError('Cannot assign property')
 

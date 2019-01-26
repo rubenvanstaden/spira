@@ -6,11 +6,7 @@ from demo.pdks.ply.base import Base
 
 class Polygon(Base):
 
-    # w = param.FloatField(default=1)
-    # h = param.FloatField(default=1)
-    # center = param.PointField()
-    points = param.ElementListField()
-
+    points = param.ElementalListField()
     color = param.ColorField(default='#C0C0C0')
 
     # def validate_parameters(self):

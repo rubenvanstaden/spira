@@ -16,9 +16,9 @@ class Net(ElementalInitializer):
     dimension = param.IntegerField(default=2)
     algorithm = param.IntegerField(default=6)
 
-    polygons = param.ElementListField()
-    primitives = param.ElementListField()
-    bounding_boxes = param.ElementListField()
+    polygons = param.ElementalListField()
+    primitives = param.ElementalListField()
+    bounding_boxes = param.ElementalListField()
 
     graph = param.DataField(fdef_name='create_netlist_graph')
 

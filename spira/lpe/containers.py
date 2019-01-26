@@ -39,7 +39,7 @@ class __CellContainerWithPlanes__(__CellContainer__):
 
 class __ElementalContainer__(Cell):
 
-    received_elementals = param.ElementListField()
+    received_elementals = param.ElementalListField()
 
     def create_elementals(self, elems):
         return elems

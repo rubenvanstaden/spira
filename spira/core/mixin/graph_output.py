@@ -18,44 +18,6 @@ from spira import settings
 
 
 class DrawGraphAbstract(object):
-    def abstract_collector(self):
-        from spira.gdsii.elemental.port import __Port__
-
-        for p in self.get_ports():
-            p.commit_to_gdspy(cell=self)
-
-        for e in self.elementals.flat_copy(level=-1):
-            if not issubclass(type(e), __Port__):
-                e.commit_to_gdspy(cell=self)
-        return self
-
-    def plot_subgraphs(self, combine=False):
-        cell = self.abstract_collector()
-
-        for name, g in cell.subgraphs.items():
-            self.plot_netlist(g, name, labeltext='id')
-
-    def write_graph(self, graphname=None, labeltext='id'):
-        if isinstance(self, spira.Cell):
-            cell = self.abstract_collector()
-
-            import networkx as nx
-            from spira.gdsii.elemental.graph import GraphAbstract
-            def graph(cell):
-                for geom in cell.elementals:
-                    if issubclass(type(geom), GraphAbstract):
-                        return geom.g
-                return None
-
-            g = graph(cell)
-
-            if graphname is not None:
-                if name == graphname:
-                    self.plot_netlist(g, graphname, labeltext)
-            else:
-                self.plot_netlist(g, self.name, labeltext)
-        elif isinstance(self, spira.Graph):
-            self.plot_netlist(self.g, graphname, labeltext)
 
     def plot_netlist(self, G, graphname, labeltext):
         edges = self._create_edges(G)
@@ -152,6 +114,7 @@ class DrawGraphAbstract(object):
 
     def _create_nodes(self, G, labeltext):
         import spira
+        from spira.lpe.mask import Native
 
         nodes = {}
 
@@ -179,15 +142,10 @@ class DrawGraphAbstract(object):
                 if labeltext == 'number':
                     nodes['text'].append(n)
                 else:
-                    if issubclass(type(label), spira.Cell):
-                        nodes['text'].append(label.name)
-                    elif isinstance(label, spira.SRef):
-                        nodes['text'].append(label.ref.name)
-                    elif isinstance(label, (spira.Port, spira.Term)):
-                        nodes['text'].append(label.name)
+                    if isinstance(label, (spira.Port, spira.Term)):
+                        nodes['text'].append(label.id)
                     else:
-                        # nodes['text'].append(label.id)
-                        nodes['text'].append(label.id0)
+                        nodes['text'].append(label.id)
 
                 if isinstance(label, spira.SRef):
                     nodes['color'].append(label.ref.color)

@@ -1,6 +1,6 @@
 # from spira.gdsii.lists.elemental_list import ElementList
 # from spira.core.descriptor import DataFieldDescriptor
-# class ElementListField(DataFieldDescriptor):
+# class ElementalListField(DataFieldDescriptor):
 #     __type__ = ElementList
 
 #     def __init__(self, default=[], **kwargs):

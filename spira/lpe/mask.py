@@ -10,10 +10,10 @@ RDD = get_rule_deck()
 
 class __Mask__(__CellContainer__):
 
-    m_name = param.StringField()
+    alias = param.StringField()
     player = param.PhysicalLayerField()
     level = param.IntegerField(default=1)
-    cell_elems = param.ElementListField()
+    cell_elems = param.ElementalListField()
 
     metals = param.DataField(fdef_name='create_flatten_metals')
     merged_layers = param.DataField(fdef_name='create_merged_layers')
@@ -49,7 +49,7 @@ class __Mask__(__CellContainer__):
             assert isinstance(poly, spira.Polygons)
             if player is not None:
                 ml = ply.Polygon(
-                    name='ply_{}_{}'.format(self.m_name, i),
+                    name='ply_{}_{}'.format(self.alias, i),
                     layer1=player.layer,
                     player=player,
                     points=poly.polygons,

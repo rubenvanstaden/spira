@@ -266,11 +266,16 @@ class FieldInitializer(__Field__):
     object for API usage.
     """
 
+    __id__ = ''
+
     def __init__(self, **kwargs):
         if not hasattr(self, '__store__'):
             self.__store__ = dict()
         self.__store_fields__(kwargs)
         self.__validation_check__()
+
+    def __str__(self):
+        return self.__repr__()
 
     def __repr__(self):
         class_string = '[SPiRA: {}]'.format(self.__class__.__name__)
@@ -282,6 +287,21 @@ class FieldInitializer(__Field__):
             c = ', '.join(_repr)
             class_string = '{} ({})'.format(class_string, c)
         return class_string
+
+    @property
+    def id(self):
+        return self.__str__()
+
+    @property
+    def node_id(self):
+        if self.__id__:
+            return self.__id__
+        else:
+            return self.__str__()
+
+    @node_id.setter
+    def node_id(self, value):
+        self.__id__ = value
 
     def __store_fields__(self, kwargs):
         props = self.__fields__()
@@ -341,16 +361,16 @@ class MetaCell(MetaInitializer):
             lib = settings.get_library()
 
         if kwargs['name'] is None:
-            kwargs['name'] = '{}-{}'.format(cls.__name__, cls._ID)
-            cls._ID += 1
-
-        name = kwargs['name']
+            if cls.__name__ in cls.registry.keys():
+                kwargs['name'] = '{}-{}'.format(cls.__name__, cls._ID)
+                cls._ID += 1
+            else:
+                kwargs['name'] = cls.__name__
 
         cls.__keywords__ = kwargs
-
         cls = super().__call__(**kwargs)
 
-        retrieved_cell = lib.get_cell(cell_name=name)
+        retrieved_cell = lib.get_cell(cell_name=kwargs['name'])
         if retrieved_cell is None:
             lib += cls
             return cls
@@ -359,32 +379,29 @@ class MetaCell(MetaInitializer):
             return retrieved_cell
 
 class CellInitializer(FieldInitializer, metaclass=MetaCell):
+    pass
 
-    def __str__(self):
-        return self.__repr__()
+    # def __str__(self):
+    #     return self.__repr__()
 
-    @property
-    def id(self):
-        return self.__str__()
+    # @property
+    # def id(self):
+    #     return self.__str__()
 
-    @property
-    def id0(self):
-        _id = '{}_{}'.format(self.__str__(), self.name)
-        return _id
+    # @property
+    # def node_id(self):
+    #     _id = '{}_{}'.format(self.__str__(), self.name)
+    #     return _id
 
-    @id0.setter
-    def id0(self, string):
-        self.name = string
-
-
-
+    # @node_id.setter
+    # def node_id(self, string):
+    #     self.name = string
 
 
 from spira import param
 class ElementalInitializer(FieldInitializer, metaclass=MetaElemental):
 
     display_label = param.StringField()
-    cell_name = param.StringField()
 
     def flatten(self):
         return [self]
@@ -394,23 +411,6 @@ class ElementalInitializer(FieldInitializer, metaclass=MetaElemental):
 
     def dependencies(self):
         return None
-
-    def __str__(self):
-        return self.__repr__()
-
-    # @property
-    # def id0(self):
-        # _id = '{}_{}'.format(self.__str__(), self.cell_name)
-        # return _id
-
-    # @id0.setter
-    # def id0(self, string):
-    #     self.cell_name = string
-
-    @property
-    def id(self):
-        return self.__str__()
-
 
 
 

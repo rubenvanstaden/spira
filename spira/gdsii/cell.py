@@ -48,15 +48,6 @@ class __Cell__(gdspy.Cell, CellInitializer):
             self.ports += other
         else:
             self.elementals += other
-
-            # if isinstance(other, SRef):
-            #     for e in self.elementals:
-            #         if isinstance(e, SRef):
-            #             if e.id != other.id:
-            #                 self.elementals += other
-            # else:
-            #     self.elementals += other
-
         return self
 
         # if issubclass(type(other), Cell):
@@ -80,104 +71,53 @@ class __Cell__(gdspy.Cell, CellInitializer):
 
 class Netlist(__Cell__):
 
-    nets = param.ElementListField(fdef_name='create_nets')
-
+    nets = param.ElementalListField(fdef_name='create_nets')
     netlist = param.DataField(fdef_name='create_netlist')
-
     merge = param.DataField(fdef_name='create_merge_nets')
-    combine_surfaces = param.DataField(fdef_name='create_combine_nodes')
-    combine_device_nodes = param.DataField(fdef_name='create_combine_device_node_nodes')
-    combine = param.DataField(fdef_name='create_sp_nodes')
     connect = param.DataField(fdef_name='create_connect_subgraphs')
 
     def create_nets(self, nets):
         return nets
 
+    def create_netlist(self):
+        pass
+
     def create_merge_nets(self):
         g = nx.disjoint_union_all(self.nets)
         return g
 
-    def create_sp_nodes(self):
-        """
-        Combine all nodes of the same type into one node.
-        """
+    def create_connect_subgraphs(self):
+        graphs = list(nx.connected_component_subgraphs(self.g))
+        g = nx.disjoint_union_all(graphs)
+        return g
 
-        def partition_nodes(u, v):
-            # return False
-            # if ('device' in self.g.node[u]):
-            #     if self.g.node[u]['device'].name == self.g.node[v]['surface'].id0:
+    def nodes_combine(self, algorithm):
+        """ Combine all nodes of the same type into one node. """
+
+        def compare_d2s(u, v):
+            if ('device' in self.g.node[u]):
+                if ('device' not in self.g.node[v]):
+                    # if self.g.node[u]['device'].ply_id == self.g.node[v]['surface'].node_id:
+                    if self.g.node[u]['device'].node_id == self.g.node[v]['surface'].node_id:
+                    # if self.g.node[u]['device'].id == self.g.node[v]['surface'].node_id:
+                        return True
+            # if ('device' in self.g.node[v]):
+            #     if self.g.node[v]['device'].name == self.g.node[u]['surface'].node_id:
             #         return True
 
-            if ('device' in self.g.node[u]):
-                # print(self.g.node[u]['device'].name, self.g.node[v]['surface'].id0)
-                if ('device' not in self.g.node[v]):
-                    if self.g.node[u]['device'].name == self.g.node[v]['surface'].id0:
-                    # if self.g.node[u]['device'].id == self.g.node[v]['surface'].id0:
+        def compare_s2s(u, v):
+            if ('surface' in self.g.node[u]) and ('surface' in self.g.node[v]):
+                if ('device' not in self.g.node[u]) and ('device' not in self.g.node[v]):
+                    if self.g.node[u]['surface'].node_id == self.g.node[v]['surface'].node_id:
+                    # if self.g.node[u]['surface'] == self.g.node[v]['surface']:
                         return True
 
-            # if ('device' in self.g.node[v]):
-            #     if self.g.node[v]['device'].name == self.g.node[u]['surface'].id0:
-            #         return True
-
-        def sub_nodes(b):
-            S = self.g.subgraph(b)
-
-            device = nx.get_node_attributes(S, 'device')
-            surface = nx.get_node_attributes(S, 'surface')
-            center = nx.get_node_attributes(S, 'pos')
-            display = nx.get_node_attributes(S, 'display')
-
-            sub_pos = list()
-            for key, value in center.items():
-                sub_pos = [value[0], value[1]]
-
-            return dict(device=device, surface=surface, display=display, pos=sub_pos)
-
-        Q = nx.quotient_graph(self.g, partition_nodes, node_data=sub_nodes)
-
-        Pos = nx.get_node_attributes(Q, 'pos')
-        Device = nx.get_node_attributes(Q, 'device')
-        Display = nx.get_node_attributes(Q, 'display')
-        Polygon = nx.get_node_attributes(Q, 'surface')
-
-        Edges = nx.get_edge_attributes(Q, 'weight')
-
-        g1 = nx.Graph()
-
-        for key, value in Edges.items():
-            n1, n2 = list(key[0]), list(key[1])
-            g1.add_edge(n1[0], n2[0])
-
-        for n in g1.nodes():
-            for key, value in Pos.items():
-                if n == list(key)[0]:
-                    g1.node[n]['pos'] = [value[0], value[1]]
-
-            for key, value in Device.items():
-                if n == list(key)[0]:
-                    if n in value:
-                        g1.node[n]['device'] = value[n]
-
-            for key, value in Display.items():
-                if n == list(key)[0]:
-                    g1.node[n]['display'] = value[n]
-
-            for key, value in Polygon.items():
-                if n == list(key)[0]:
-                    g1.node[n]['surface'] = value[n]
-        return g1
-
-    def create_combine_device_node_nodes(self):
-        """
-        Combine all nodes of the same type into one node.
-        """
-
-        def partition_nodes(u, v):
+        def compare_d2d(u, v):
             if ('device' in self.g.node[u]) and ('device' in self.g.node[v]):
                 # if self.g.node[u]['device'].id == self.g.node[v]['device'].id:
                 if self.g.node[u]['device'] == self.g.node[v]['device']:
                 # print(self.g.node[u]['device'])
-                # if self.g.node[u]['device'].id0 == self.g.node[v]['device'].id0:
+                # if self.g.node[u]['device'].node_id == self.g.node[v]['device'].node_id:
                     return True
 
         def sub_nodes(b):
@@ -185,16 +125,23 @@ class Netlist(__Cell__):
 
             device = nx.get_node_attributes(S, 'device')
             surface = nx.get_node_attributes(S, 'surface')
-            display = nx.get_node_attributes(S, 'display')
             center = nx.get_node_attributes(S, 'pos')
+            display = nx.get_node_attributes(S, 'display')
 
             sub_pos = list()
-            for key, value in center.items():
+            for value in center.values():
                 sub_pos = [value[0], value[1]]
 
             return dict(device=device, surface=surface, display=display, pos=sub_pos)
 
-        Q = nx.quotient_graph(self.g, partition_nodes, node_data=sub_nodes)
+        if algorithm == 'd2s':
+            Q = nx.quotient_graph(self.g, compare_d2s, node_data=sub_nodes)
+        elif algorithm == 's2s':
+            Q = nx.quotient_graph(self.g, compare_s2s, node_data=sub_nodes)
+        elif algorithm == 'd2d':
+            Q = nx.quotient_graph(self.g, compare_d2d, node_data=sub_nodes)
+        else:
+            raise ValueError('Compare algorithm not implemented!')
 
         Pos = nx.get_node_attributes(Q, 'pos')
         Device = nx.get_node_attributes(Q, 'device')
@@ -227,108 +174,13 @@ class Netlist(__Cell__):
                 if n == list(key)[0]:
                     g1.node[n]['surface'] = value[n]
         return g1
-
-    def create_combine_nodes(self):
-        """
-        Combine all nodes of the same type into one node.
-        """
-
-        def partition_nodes(u, v):
-
-            if ('surface' in self.g.node[u]) and ('surface' in self.g.node[v]):
-                if ('device' not in self.g.node[u]) and ('device' not in self.g.node[v]):
-                    if self.g.node[u]['surface'].id0 == self.g.node[v]['surface'].id0:
-                    # if self.g.node[u]['surface'] == self.g.node[v]['surface']:
-                        return True
-
-        def sub_nodes(b):
-            S = self.g.subgraph(b)
-
-            device = nx.get_node_attributes(S, 'device')
-            surface = nx.get_node_attributes(S, 'surface')
-            display = nx.get_node_attributes(S, 'display')
-            center = nx.get_node_attributes(S, 'pos')
-
-            sub_pos = list()
-            for key, value in center.items():
-                sub_pos = [value[0], value[1]]
-
-            return dict(device=device, surface=surface, display=display, pos=sub_pos)
-
-        Q = nx.quotient_graph(self.g, partition_nodes, node_data=sub_nodes)
-
-        Pos = nx.get_node_attributes(Q, 'pos')
-        Device = nx.get_node_attributes(Q, 'device')
-        Display = nx.get_node_attributes(Q, 'display')
-        Polygon = nx.get_node_attributes(Q, 'surface')
-
-        Edges = nx.get_edge_attributes(Q, 'weight')
-
-        g1 = nx.Graph()
-
-        for key, value in Edges.items():
-            n1, n2 = list(key[0]), list(key[1])
-            g1.add_edge(n1[0], n2[0])
-
-        for n in g1.nodes():
-            for key, value in Pos.items():
-                if n == list(key)[0]:
-                    g1.node[n]['pos'] = [value[0], value[1]]
-
-            for key, value in Device.items():
-                if n == list(key)[0]:
-                    if n in value:
-                        g1.node[n]['device'] = value[n]
-
-            for key, value in Display.items():
-                if n == list(key)[0]:
-                    g1.node[n]['display'] = value[n]
-
-            for key, value in Polygon.items():
-                if n == list(key)[0]:
-                    g1.node[n]['surface'] = value[n]
-        return g1
-
-    def create_connect_subgraphs(self):
-        graphs = list(nx.connected_component_subgraphs(self.g))
-        g = nx.disjoint_union_all(graphs)
-        return g
-
-    def create_netlist(self):
-        pass
-
-        # print('----------- Netlist -------------')
-
-        # # for s in self.elementals.sref:
-
-        # elems = deepcopy(self.elementals)
-
-        # for s in elems.sref:
-        #     print(s)
-        #     g = s.ref.netlist
-        #     print(len(g.nodes()))
-
-        #     if g is not None:
-        #         print(',mjebejf')
-        #         # for n in g.nodes():
-        #         #     print(s.midpoint)
-        #         #     g.node[n]['pos'] += s.midpoint
-
-        #         # self.nets += g
-
-        # # self.g = self.merge
-        # # self.g = self.combine
-        # # # self.g = self.combine_device_nodes
-        # # # self.g = self.combine_surfaces
-
-        # # self.plot_netlist(G=self.g, graphname=self.name, labeltext='id')
 
 
 class CellAbstract(Netlist):
 
     name = param.StringField()
-    ports = param.ElementListField(fdef_name='create_ports')
-    elementals = param.ElementListField(fdef_name='create_elementals')
+    ports = param.ElementalListField(fdef_name='create_ports')
+    elementals = param.ElementalListField(fdef_name='create_elementals')
 
     def create_elementals(self, elems):
         result = ElementList()
@@ -525,12 +377,8 @@ class Cell(CellAbstract):
         else:
             return "[SPiRA: Cell(\'{}\')]".format(self.__class__.__name__)
 
-    def __str__(self):
-        return self.__repr__()
-
-    @property
-    def id(self):
-        return self.__str__()
+    # def __str__(self):
+    #     return self.__repr__()
 
     def _copy(self):
         cell = Cell(
@@ -541,14 +389,14 @@ class Cell(CellAbstract):
         )
         return cell
 
-    def transform(self, transform):
-        if transform['reflection']:
-            self.reflect(p1=[0,0], p2=[1,0])
-        if transform['rotation']:
-            self.rotate(angle=transform['rotation'])
-        if transform['midpoint']:
-            self.move(midpoint=self.center, destination=transform['midpoint'])
-        return self
+    # def transform(self, transform):
+    #     if transform['reflection']:
+    #         self.reflect(p1=[0,0], p2=[1,0])
+    #     if transform['rotation']:
+    #         self.rotate(angle=transform['rotation'])
+    #     if transform['midpoint']:
+    #         self.move(midpoint=self.center, destination=transform['midpoint'])
+    #     return self
 
 
 

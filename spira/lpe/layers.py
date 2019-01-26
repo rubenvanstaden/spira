@@ -61,7 +61,7 @@ class __DeviceLayer__(Cell):
 
 class __ProcessLayer__(Cell):
     doc = param.StringField()
-    points = param.ElementListField()
+    points = param.ElementalListField()
     # points = param.PointArrayField()
     number = param.IntegerField(default=0)
     error_type = param.IntegerField(default=0)
@@ -117,7 +117,7 @@ class __ConnectLayer__(__ProcessLayer__):
 # class DLayer(__DeviceLayer__):
 
 #     blayer = param.PolygonField()
-#     device_elems = param.ElementListField()
+#     device_elems = param.ElementalListField()
 #     box = param.DataField(fdef_name='create_box_layer')
 #     terms = param.DataField(fdef_name='create_labels')
 
@@ -164,7 +164,7 @@ class __ConnectLayer__(__ProcessLayer__):
 class DLayer(__DeviceLayer__):
 
     points = param.PointArrayField()
-    device_elems = param.ElementListField()
+    device_elems = param.ElementalListField()
     box = param.DataField(fdef_name='create_box_layer')
     terms = param.DataField(fdef_name='create_labels')
 
@@ -220,7 +220,7 @@ class GLayer(__ProcessLayer__):
     """ Ground Plane layer. """
 
     blayer = param.PolygonField()
-    device_elems = param.ElementListField()
+    device_elems = param.ElementalListField()
     box = param.DataField(fdef_name='create_box_layer')
     terms = param.DataField(fdef_name='create_labels')
 
