@@ -3,6 +3,10 @@ from spira import param, shapes
 from demo.pdks import ply
 from spira.rdd import get_rule_deck
 from spira.lpe.containers import __CellContainer__
+from copy import copy, deepcopy
+
+from spira.gdsii.utils import scale_polygon_down as spd
+from spira.gdsii.utils import scale_polygon_up as spu
 
 
 RDD = get_rule_deck()
@@ -13,14 +17,20 @@ class __Mask__(__CellContainer__):
     alias = param.StringField()
     player = param.PhysicalLayerField()
     level = param.IntegerField(default=1)
-    cell_elems = param.ElementalListField()
 
     metals = param.DataField(fdef_name='create_flatten_metals')
     merged_layers = param.DataField(fdef_name='create_merged_layers')
 
     def create_flatten_metals(self):
-        flat_elems = self.cell_elems.flat_copy()
-        metal_elems = flat_elems.get_polygons(layer=self.player.layer)
+        E = self.cell.elementals.flat_copy()
+        R = self.cell.routes.flat_copy()
+        Em = E.get_polygons(layer=self.player.layer)
+        Rm = R.get_polygons(layer=self.player.layer)
+        metal_elems = spira.ElementList()
+        for e in Em:
+            metal_elems += e
+        for e in Rm:
+            metal_elems += e
         return metal_elems
 
     def create_merged_layers(self):
@@ -38,7 +48,6 @@ class __Mask__(__CellContainer__):
         return elems
 
     def create_elementals(self, elems):
-
         # TODO: Map the gdslayer to a physical layer in the RDD.
         player = None
         for k, v in RDD.PLAYER.items:
@@ -46,11 +55,19 @@ class __Mask__(__CellContainer__):
                 player = v
 
         for i, poly in enumerate(self.merged_layers):
+        # for i, poly in enumerate(self.metals):
+
+        # R = self.cell.routes.flat_copy()
+        # Rm = R.get_polygons(layer=self.player.layer)
+        # for i, poly in enumerate(Rm):
+
+        # R = self.cell.elementals.flat_copy()
+        # Rm = R.get_polygons(layer=self.player.layer)
+        # for i, poly in enumerate(Rm):
             assert isinstance(poly, spira.Polygons)
             if player is not None:
                 ml = ply.Polygon(
                     name='ply_{}_{}'.format(self.alias, i),
-                    layer1=player.layer,
                     player=player,
                     points=poly.polygons,
                     level=self.level

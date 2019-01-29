@@ -1,10 +1,10 @@
 import spira
 from spira import param
 from spira import shapes
-from demo.pdks.ply.base import Base
+from demo.pdks.ply.base import ProcessLayer
 
 
-class Polygon(Base):
+class Polygon(ProcessLayer):
 
     points = param.ElementalListField()
     color = param.ColorField(default='#C0C0C0')

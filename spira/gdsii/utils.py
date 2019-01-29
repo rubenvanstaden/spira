@@ -170,7 +170,7 @@ def scale_polygon_down(polygons, value=None):
 def numpy_to_list(points, start_height, unit=None):
     if unit is None:
         raise ValueError('Unit value not implemented!')
-    unit = unit * 10
+    # unit = unit * 10
     return [[float(p[0]*unit), float(p[1]*unit), start_height] for p in points]
 
 

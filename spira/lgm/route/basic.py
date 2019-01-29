@@ -64,7 +64,6 @@ class RouteShape(shapes.Shape):
             width_fun = lambda t: (self.width2 - self.width1)*(1-cos(t*pi))/2 + self.width1
 
         route_path = gdspy.Path(width=self.width1, initial_point=(0,0))
-
         route_path.parametric(
             curve_fun, curve_deriv_fun, 
             number_of_evaluations=self.num_path_pts,
@@ -72,9 +71,7 @@ class RouteShape(shapes.Shape):
             final_width=width_fun, 
             final_distance=None
         )
-
         points = route_path.polygons
-
         return points
 
 
@@ -88,7 +85,10 @@ class RouteBasic(spira.Cell):
     llayer = param.DataField(fdef_name='create_layer')
 
     def create_layer(self):
-        ll = spira.Layer(number=self.connect_layer.number, datatype=RDD.PURPOSE.TERM.datatype)
+        ll = spira.Layer(
+            number=self.connect_layer.number, 
+            datatype=RDD.PURPOSE.TERM.datatype
+        )
         return ll
 
     def create_elementals(self, elems):
@@ -120,10 +120,8 @@ class RouteBasic(spira.Cell):
         return term
 
     def create_ports(self, ports):
-
         ports += self.port1
         ports += self.port2
-
         return ports
 
 

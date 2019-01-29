@@ -13,6 +13,7 @@ class DrawLayoutAbstract(object):
 
     def output(self, name=None, path='current'):
         """ Plot the cell or library using gdspy viewer. """
+        from spira.gdsii.cell import __Cell__
 
         glib = gdspy.GdsLibrary(name=self.name)
 
@@ -20,10 +21,10 @@ class DrawLayoutAbstract(object):
             glib = settings.get_library()
             glib += self
             glib.to_gdspy
-        elif isinstance(self, spira.Cell):
+        elif issubclass(type(self), __Cell__):
             self.construct_gdspy_tree(glib)
-        # gdspy.LayoutViewer(library=glib, cells='Layout-4')
-        gdspy.LayoutViewer(library=glib, cells='SLayout-4')
+        gdspy.LayoutViewer(library=glib)
+        # gdspy.LayoutViewer(library=glib, cells='SLayout-4')
 
     # def writer(self, name=None, file_type='gdsii'):
         # """ Write layout to gdsii file. """

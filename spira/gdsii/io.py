@@ -41,7 +41,6 @@ def wrap_references(cell, c2dmap):
             D = c2dmap[cell]
             ref_device = c2dmap[e.ref_cell]
             o = ref_device.center
-            print(o)
             ref_device.move(midpoint=o, destination=(0,0))
 
             if e.rotation is None:

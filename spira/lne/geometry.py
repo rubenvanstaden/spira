@@ -85,18 +85,20 @@ class GeometryAbstract(__Geometry__):
         return mesh_data
 
     def create_pygmsh_elementals(self):
+        from spira.gdsii.utils import scale_polygon_down as spd
+        from spira.gdsii.utils import scale_polygon_up as spu
 
         elems = ElementList()
         for ply in self.polygons:
             for i, points in enumerate(ply.polygons):
-                pp = numpy_to_list(points, self.height, unit=RDD.GDSII.PRECISION)
+                pp = numpy_to_list(points, self.height, unit=RDD.GDSII.GRID)
                 surface_label = '{}_{}_{}_{}'.format(
                     ply.gdslayer.number,
                     ply.gdslayer.datatype,
                     GeometryAbstract._ID, i
                 )
                 gp = self.geom.add_polygon(
-                    pp, lcar=1.0,
+                    pp, lcar=0.01,
                     make_surface=True,
                     holes=self.holes
                 )

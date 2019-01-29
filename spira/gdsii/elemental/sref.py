@@ -53,7 +53,6 @@ class __SRef__(gdspy.CellReference, ElementalInitializer):
             rotation=self.rotation,
             magnification=self.magnification,
             reflection=self.reflection
-            # gdspy_commit=deepcopy(self.gdspy_commit)
         )
 
     def __eq__(self, other):
@@ -100,7 +99,9 @@ class SRefAbstract(__SRef__):
         }
 
         el = self.ref.elementals.flat_copy(level-1)
-        el.transform(transform)
+        # el.transform(transform)
+        flat_elems = el.flatten()
+        flat_elems.transform(transform)
         return el
 
     def transform(self, transform):
@@ -261,13 +262,12 @@ class SRefAbstract(__SRef__):
             p = port
         else:
             raise ValueError("[SPiRA] connect() did not receive a Port or " +
-                             "valid port name - received ({}), ports available " +
-                             "are ({})").format(port, self.ports.keys())
-
+                "valid port name - received ({}), ports available " +
+                "are ({})").format(port, self.ports.keys()
+            )
         angle = 180 + destination.orientation - p.orientation
         self.rotate(angle=angle, center=p.midpoint)
         self.move(midpoint=p, destination=destination)
-
         return self
 
     def stretch(self, port, center=[0,0], vector=[1,1]):

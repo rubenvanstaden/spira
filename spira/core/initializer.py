@@ -10,7 +10,7 @@ from spira.core.descriptor import DataField
 
 class MetaBase(type):
     """
-    Base Metaclass to register and bind class to property
+    ProcessLayer Metaclass to register and bind class to property
     functions. All elements connect to this metaclass.
     """
 
@@ -41,8 +41,8 @@ class MetaBase(type):
 
         super().__init__(name, bases, attrs)
 
-        cls.__props__ = []
         cls.__params__ = {}
+        cls.__props__ = ['__name_prefix__']
 
         locked_fields = []
         unlocked_fields = []
@@ -132,9 +132,10 @@ class MetaInitializer(MetaBase):
                         docparam += '---------\n'
                         for p in params:
                             docparam += p + ' : ' + str(type(p)) + '\n'
-                            param_attr = getattr(cls, p)
-                            if hasattr(param_attr, '__doc__'):
-                                docparam += '\t' + param_attr.__doc__ + '\n'
+                            if hasattr(cls, p):
+                                param_attr = getattr(cls, p)
+                                if hasattr(param_attr, '__doc__'):
+                                    docparam += '\t' + param_attr.__doc__ + '\n'
                 else:
                     docparam += '{}\n{}\n'.format(key, '\n'.join(value))
                 docparam += '\n'
@@ -346,8 +347,6 @@ class MetaCell(MetaInitializer):
     >>> via = Via(layer=50)
     """
 
-    _ID = 0
-
     def __call__(cls, *params, **keyword_params):
 
         kwargs = cls.__map_parameters__(*params, **keyword_params)
@@ -360,23 +359,20 @@ class MetaCell(MetaInitializer):
         if lib is None:
             lib = settings.get_library()
 
-        if kwargs['name'] is None:
-            if cls.__name__ in cls.registry.keys():
-                kwargs['name'] = '{}-{}'.format(cls.__name__, cls._ID)
-                cls._ID += 1
-            else:
-                kwargs['name'] = cls.__name__
+        if 'name' not in kwargs:
+            kwargs['__name_prefix__'] = cls.__name__
 
         cls.__keywords__ = kwargs
         cls = super().__call__(**kwargs)
 
-        retrieved_cell = lib.get_cell(cell_name=kwargs['name'])
+        retrieved_cell = lib.get_cell(cell_name=cls.name)
         if retrieved_cell is None:
             lib += cls
             return cls
         else:
             del cls
             return retrieved_cell
+
 
 class CellInitializer(FieldInitializer, metaclass=MetaCell):
     pass

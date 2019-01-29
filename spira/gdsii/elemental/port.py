@@ -223,8 +223,8 @@ class Port(PortAbstract):
     >>> port = spira.Port()
     """
 
-    edge_width = param.FloatField(default=0.25*1e6)
-    # edge_width = param.FloatField(default=0.25)
+    # edge_width = param.FloatField(default=0.25*1e6)
+    edge_width = param.FloatField(default=0.25)
 
     def __init__(self, port=None, polygon=None, **kwargs):
         super().__init__(port=port, polygon=polygon, **kwargs)
@@ -250,11 +250,11 @@ class Port(PortAbstract):
 
     def _copy(self):
         new_port = Port(
+            name=self.name,
             parent=self.parent,
+            midpoint=deepcopy(self.midpoint),
             polygon=deepcopy(self.polygon),
             label=deepcopy(self.label),
-            name=self.name,
-            midpoint=deepcopy(self.midpoint),
             edge_width=self.edge_width,
             gdslayer=deepcopy(self.gdslayer),
             orientation=deepcopy(self.orientation)

@@ -1,14 +1,8 @@
-
 import collections
 from spira.param.field.typed_list import TypedList
 
 
 class ElementFilterMixin(object):
-
-    def add_elem_to_cell(self, elem, cellname):
-        for sref in self.sref:
-            if sref.ref.name == cellname:
-                self += elem
 
     def get_polygons(self, layer=None):
         from spira.gdsii.layer import Layer
@@ -17,7 +11,6 @@ class ElementFilterMixin(object):
         for ply in self.polygons:
             if layer is not None:
                 if isinstance(layer, Layer):
-                    # if ply.gdslayer == layer:
                     if layer.is_equal_number(ply.gdslayer):
                         elems += ply
                 elif isinstance(layer, PurposeLayer):
@@ -35,15 +28,6 @@ class ElementFilterMixin(object):
         return elems
 
     @property
-    def cells(self):
-        from spira.gdsii.cell import Cell
-        elems = ElementList()
-        for e in self._list:
-            if issubclass(type(e), Cell):
-                elems += e
-        return elems
-
-    @property
     def metals(self):
         from spira.rdd import get_rule_deck
         from spira.gdsii.elemental.polygons import PolygonAbstract
@@ -52,50 +36,6 @@ class ElementFilterMixin(object):
         for p in self.polygons:
             if p.gdslayer.number in RDD.METALS.layers:
                 elems += p
-        return elems
-
-    @property
-    def mlayers(self):
-        from spira.lpe.primitives import MLayer
-        elems = ElementList()
-        for S in self._list:
-            for Sm in S.ref.elementals.sref:
-                if isinstance(Sm.ref, MLayer):
-                    elems += Sm
-        return elems
-
-    @property
-    def dlayers(self):
-        from spira.lpe.primitives import NLayer
-        elems = ElementList()
-        for S in self._list:
-            for Sn in S.ref.elementals.sref:
-                if isinstance(Sn.ref, NLayer):
-                    elems += Sn
-        return elems
-
-    def get_dlayer(self, layer):
-        elems = ElementList()
-        for S in self.dlayers:
-            for p in S.ref.elementals.polygons:
-                if isinstance(layer, int):
-                    if p.gdslayer.number == layer:
-                        elems += S
-                else:
-                    if p.gdslayer == layer:
-                        elems += S
-        return elems
-
-    def get_mlayer(self, layer):
-        elems = ElementList()
-        for S in self.mlayers:
-            for p in S.ref.elementals.polygons:
-                if isinstance(layer, int):
-                    if p.gdslayer.number == layer:
-                        elems += S
-                else:
-                    if p.gdslayer.number == layer.number:
-                        elems += S
         return elems
 
     @property
@@ -125,30 +65,30 @@ class ElementFilterMixin(object):
                 elems += e
         return elems
 
-    @property
-    def mesh(self):
-        from spira.lne.mesh import Mesh
-        for g in self._list:
-            if isinstance(g, Mesh):
-                return g
-        raise ValueError('No graph was generate for Cell')
+    # @property
+    # def mesh(self):
+    #     from spira.lne.mesh import Mesh
+    #     for g in self._list:
+    #         if isinstance(g, Mesh):
+    #             return g
+    #     raise ValueError('No graph was generate for Cell')
 
-    @property
-    def graph(self):
-        from spira.lne.mesh import MeshAbstract
-        for e in self._list:
-            if issubclass(type(e), MeshAbstract):
-                return e.g
-        return None
+    # @property
+    # def graph(self):
+    #     from spira.lne.mesh import MeshAbstract
+    #     for e in self._list:
+    #         if issubclass(type(e), MeshAbstract):
+    #             return e.g
+    #     return None
 
-    @property
-    def subgraphs(self):
-        subgraphs = {}
-        for e in self.sref:
-            cell = e.ref
-            if cell.elementals.graph is not None:
-                subgraphs[cell.name] = cell.elementals.graph
-        return subgraphs
+    # @property
+    # def subgraphs(self):
+    #     subgraphs = {}
+    #     for e in self.sref:
+    #         cell = e.ref
+    #         if cell.elementals.graph is not None:
+    #             subgraphs[cell.name] = cell.elementals.graph
+    #     return subgraphs
 
 
 class __ElementList__(TypedList, ElementFilterMixin):
@@ -204,16 +144,16 @@ class ElementList(__ElementList__):
     def dependencies(self):
         import spira
         from spira.gdsii.lists.cell_list import CellList
-
+        from demo.pdks.ply.base import ProcessLayer
         cells = CellList()
         for e in self._list:
-            cells.add(e.dependencies())
+            if not issubclass(type(e), ProcessLayer):
+                cells.add(e.dependencies())
         return cells
 
     def add(self, item):
         import spira
         from spira.gdsii.lists.cell_list import CellList
-
         cells = CellList()
         for e in self._list:
             cells.add(e.dependencies())
@@ -237,7 +177,6 @@ class ElementList(__ElementList__):
                         yield x
                 else:
                     yield elem
-
         return _flatten(self._list)
 
     def flat_copy(self, level=-1, commit_to_gdspy=False):
@@ -265,13 +204,6 @@ class ElementList(__ElementList__):
             return flat_list
         else:
             return [self._list]
-
-    def generate_cell(self, name):
-        from spira.gdsii.elemental.sref import SRef
-        from spira.gdsii.cell import Cell
-        cc = Cell(name=name)
-        for e in self._list: cc += e
-        return SRef(cc)
 
     def isstored(self, pp):
         for e in self._list:

@@ -1,8 +1,6 @@
-from spira.gdsii.cell import Cell
+from spira.gdsii.cell import __Cell__
 from spira.param.field.typed_list import TypedList
 class CellList(TypedList):
-
-    __item_type__ = Cell
 
     def __getitem__(self, key):
         if isinstance(key, str):
@@ -73,7 +71,8 @@ class CellList(TypedList):
     def add(self, item, overwrite=False):
         if item == None:
             return
-        if isinstance(item, Cell):
+        # if isinstance(item, (Cell, PCell)):
+        if issubclass(type(item), __Cell__):
             if overwrite:
                 self._list[item.name] = item
                 return

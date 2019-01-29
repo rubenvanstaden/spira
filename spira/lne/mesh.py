@@ -137,8 +137,8 @@ class MeshAbstract(__Mesh__):
     def add_positions(self, n, tri):
         pp = self.points
         n1, n2, n3 = pp[tri[0]], pp[tri[1]], pp[tri[2]]
-        sum_x = 1e+8*(n1[0] + n2[0] + n3[0]) / 3.0
-        sum_y = 1e+8*(n1[1] + n2[1] + n3[1]) / 3.0
+        sum_x = (n1[0] + n2[0] + n3[0]) / (3.0*RDD.GDSII.GRID)
+        sum_y = (n1[1] + n2[1] + n3[1]) / (3.0*RDD.GDSII.GRID)
         self.g.node[n]['vertex'] = tri
         self.g.node[n]['pos'] = [sum_x, sum_y]
 

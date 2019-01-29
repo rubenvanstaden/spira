@@ -129,8 +129,10 @@ class PolygonAbstract(__Polygon__):
     def flat_copy(self, level=-1, commit_to_gdspy=False):
         elems = []
         for points in self.shape.points:
-            c_poly = self.modified_copy(shape=deepcopy([points]),
-                                        gdspy_commit=self.gdspy_commit)
+            c_poly = self.modified_copy(
+                shape=deepcopy([points]),
+                gdspy_commit=self.gdspy_commit
+            )
             elems.append(c_poly)
             if commit_to_gdspy:
                 self.gdspy_commit = True

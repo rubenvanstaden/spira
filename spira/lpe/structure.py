@@ -17,8 +17,6 @@ RDD = spira.get_rule_deck()
 
 
 class __ProcessLayer__(__CellContainer__):
-
-    cell_elems = param.ElementalListField()
     level = param.IntegerField(default=1)
 
 
@@ -40,7 +38,6 @@ class MetalLayers(__ProcessLayer__):
             metal = mask.Metal(
                 alias=alias,
                 cell=self.cell,
-                cell_elems=self.cell_elems,
                 player=player,
                 level=self.level
             )
@@ -49,8 +46,8 @@ class MetalLayers(__ProcessLayer__):
 
     def create_elementals(self, elems):
         # TODO: Apply DRC checking between metals, before being placed.
-        for lcell in self.metal_layers:
-            elems += lcell
+        for e in self.metal_layers:
+            elems += e
         return elems
 
 
@@ -72,7 +69,6 @@ class NativeLayers(MetalLayers):
             native = mask.Native(
                 alias=alias,
                 cell=self.cell,
-                cell_elems=self.cell_elems,
                 player=player,
                 level=self.level
             )
@@ -81,10 +77,9 @@ class NativeLayers(MetalLayers):
 
     def create_elementals(self, elems):
         super().create_elementals(elems)
-        # Only add it if its a Device.
         if self.level == 1:
-            for lcell in self.native_layers:
-                elems += lcell
+            for e in self.native_layers:
+                elems += e
         return elems
 
 
@@ -96,12 +91,11 @@ class BoundingLayers(NativeLayers):
         print('------ devices --------')
         device_elems = ElementList()
         # for e in self.dev.elementals:
-        for S in self.cell_elems.sref:
+        for S in self.cell.elementals.sref:
             # self.elementals += S
-            for ply in S.ref.elementals:
-                print(ply)
+            # for ply in S.ref.elementals:
+            #     print(ply)
             device_elems += S
-            print('')
             # for p in S.ref.elementals:
             #     device_elems += p
         # for e in self.dev.ports:
@@ -114,8 +108,8 @@ class BoundingLayers(NativeLayers):
     def create_elementals(self, elems):
         super().create_elementals(elems)
 
-        for ply in self.bounding_boxes:
-            elems += ply
+        # for ply in self.bounding_boxes:
+        #     elems += ply
 
         return elems
 

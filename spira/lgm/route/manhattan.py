@@ -1,7 +1,7 @@
 import spira
 import numpy as np
 from spira import param
-from spira.lgm.route.arc_bend import ArcRoute, Arc
+from spira.lgm.route.arc_bend import ArcRoute, Arc, Rect, RectRoute, RectRouteTwo
 from spira.lgm.route.basic import RouteShape
 from spira.lgm.route.basic import RouteBasic
 
@@ -61,23 +61,37 @@ class __Manhattan__(spira.Cell):
 
     def create_arc_bend_1(self):
         if self.bend_type == 'circular':
-            B1 = Arc(shape=ArcRoute(radius=self.radius,
-                width=self.port1.width,
-                gdslayer=self.gdslayer,
-                # gdslayer=spira.Layer(number=18),
-                start_angle=0, theta=90)
+            B1 = Rect(shape=RectRoute(
+                    width=self.port1.width,
+                    gdslayer=self.gdslayer,
+                )
             )
             return spira.SRef(B1)
 
+            # B1 = Arc(shape=ArcRoute(radius=self.radius,
+            #     width=self.port1.width,
+            #     gdslayer=self.gdslayer,
+            #     # gdslayer=spira.Layer(number=18),
+            #     start_angle=0, theta=90)
+            # )
+            # return spira.SRef(B1)
+
     def create_arc_bend_2(self):
         if self.bend_type == 'circular':
-            B2 = Arc(shape=ArcRoute(radius=self.radius,
-                width=self.port1.width,
-                gdslayer=self.gdslayer,
-                # gdslayer=spira.Layer(number=18),
-                start_angle=0, theta=-90)
+            B2 = Rect(shape=RectRouteTwo(
+                    width=self.port1.width,
+                    gdslayer=self.gdslayer,
+                )
             )
             return spira.SRef(B2)
+
+            # B2 = Arc(shape=ArcRoute(radius=self.radius,
+            #     width=self.port1.width,
+            #     gdslayer=self.gdslayer,
+            #     # gdslayer=spira.Layer(number=18),
+            #     start_angle=0, theta=-90)
+            # )
+            # return spira.SRef(B2)
 
 
 

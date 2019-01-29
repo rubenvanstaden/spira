@@ -185,6 +185,17 @@ RDD.DEVICES.JJ = TCellJunction()
 
 # --------------------------------- Finished -------------------------------------
 
+class TechAdminTree(DynamicDataTree):
+    """ A technology tree with a name generator. """
+    def initialize(self):
+        from spira.gdsii.generators import NameGenerator
+        self.NAME_GENERATOR = NameGenerator(
+            prefix_attribute='__name_prefix__',
+            counter_zero=0,
+            process_name='AiST_CELL'
+        )
+        
+RDD.ADMIN = TechAdminTree()
 
 
 

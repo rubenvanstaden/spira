@@ -14,21 +14,23 @@ from spira.core.mixin.property import CellMixin
 from spira.core.mixin.gdsii_output import OutputMixin
 from spira.gdsii.elemental.port import __Port__
 from spira.core.mixin.transform import TranformationMixin
+from spira.rdd import get_rule_deck
+
+
+RDD = get_rule_deck()
 
 
 class __Cell__(gdspy.Cell, CellInitializer):
 
+    __name_generator__ = RDD.ADMIN.NAME_GENERATOR
     __mixins__ = [OutputMixin, CellMixin, TranformationMixin]
 
-    def __init__(self, name=None, elementals=None, ports=None, nets=None, library=None, **kwargs):
+    def __init__(self, elementals=None, ports=None, nets=None, library=None, **kwargs):
         CellInitializer.__init__(self, **kwargs)
-        gdspy.Cell.__init__(self, name, exclude_from_current=True)
+        gdspy.Cell.__init__(self, self.name, exclude_from_current=True)
 
         self.g = nx.Graph()
 
-        if name is not None:
-            self.__dict__['__name__'] = name
-            Cell.name.__set__(self, name)
         if library is not None:
             self.library = library
         if elementals is not None:
@@ -37,9 +39,6 @@ class __Cell__(gdspy.Cell, CellInitializer):
             self.ports = ports
         if nets is not None:
             self.nets = nets
-
-        # self.move(midpoint=self.center, destination=(0,0))
-        # self.center = (0,0)
 
     def __add__(self, other):
         if other is None:
@@ -50,23 +49,13 @@ class __Cell__(gdspy.Cell, CellInitializer):
             self.elementals += other
         return self
 
-        # if issubclass(type(other), Cell):
-        #     print(other)
-        #     self.elementals += SRef(other)
-        #     # for e in other.elementals:
-        #     #     self.elementals += e
-        #     # for p in other.ports:
-        #     #     self.ports += p
-
-    def __sub__(self, other):
-        pass
-
     def __deepcopy__(self, memo):
-        return Cell(name=self.name+'_deepcopy',
-            ports=deepcopy(self.ports),
-            elementals=deepcopy(self.elementals),
-            nets=deepcopy(self.nets)
-        )
+        from copy import deepcopy
+        kwargs = {}
+        for p in self.__external_fields__():
+            if p != 'name':
+                kwargs[p] = deepcopy(getattr(self, p), memo)
+        return self.__class__(**kwargs)
 
 
 class Netlist(__Cell__):
@@ -178,7 +167,7 @@ class Netlist(__Cell__):
 
 class CellAbstract(Netlist):
 
-    name = param.StringField()
+    name = param.DataField(fdef_name='create_name')
     ports = param.ElementalListField(fdef_name='create_ports')
     elementals = param.ElementalListField(fdef_name='create_elementals')
 
@@ -189,16 +178,25 @@ class CellAbstract(Netlist):
     def create_ports(self, ports):
         return ports
 
+    def create_name(self):
+        if not hasattr(self, '__name__'):
+            self.__name__ = self.__name_generator__(self)
+        return self.__name__
+
     def flatten(self):
         self.elementals = self.elementals.flatten()
         return self.elementals
 
     def flat_copy(self, level=-1, commit_to_gdspy=False):
+        # print(self.elementals)
+        # print('')
         self.elementals = self.elementals.flat_copy(level, commit_to_gdspy)
         return self.elementals
 
     def dependencies(self):
         deps = self.elementals.dependencies()
+        # if hasattr(self, 'routes'):
+        #     deps += self.routes.dependencies()
         deps += self
         return deps
 
@@ -209,21 +207,39 @@ class CellAbstract(Netlist):
         return points
 
     def commit_to_gdspy(self):
-        # from spira.lpe.mask import __Mask__
-        from demo.pdks.ply.base import Base
+        from demo.pdks.ply.base import ProcessLayer
         cell = gdspy.Cell(self.name, exclude_from_current=True)
+
         for e in self.elementals:
-            if issubclass(type(e), Base):
-                e.polygon.commit_to_gdspy(cell=cell)
-                for p in e.ports:
-                    p.commit_to_gdspy(cell=cell)
-            elif not isinstance(e, (SRef, ElementList, Graph, Mesh)):
+            if not isinstance(e, (SRef, ElementList, Graph, Mesh)):
                 e.commit_to_gdspy(cell=cell)
+
+
+            # if issubclass(type(e), ProcessLayer):
+            #     e.polygon.commit_to_gdspy(cell=cell)
+            #     for p in e.ports:
+            #         p.commit_to_gdspy(cell=cell)
+            # elif not isinstance(e, (SRef, ElementList, Graph, Mesh)):
+            #     e.commit_to_gdspy(cell=cell)
+
+        # if hasattr(self, 'routes'):
+        #     # print(self.routes)
+        #     for e in self.routes:
+        #         if issubclass(type(e), Cell):
+        #             e.polygon.commit_to_gdspy(cell=cell)
+        #             for p in e.ports:
+        #                 p.commit_to_gdspy(cell=cell)
+        #         # elif not isinstance(e, (SRef, ElementList, Graph, Mesh)):
+        #         elif isinstance(e, SRef):
+        #             e.commit_to_gdspy(cell=e.ref)
+
+
+
         # for p in self.ports:
         #     p.commit_to_gdspy(cell=cell)
 
         # for e in self.elementals:
-        #     # if issubclass(type(e), Base):
+        #     # if issubclass(type(e), ProcessLayer):
         #     #     e = SRef(e)
 
         #     # if not isinstance(e, (SRef, ElementList, Graph, Mesh)):
@@ -238,7 +254,7 @@ class CellAbstract(Netlist):
         #     #         p.commit_to_gdspy(cell=cell)
 
         #     # if issubclass(type(e), Cell):
-        #     if issubclass(type(e), Base):
+        #     if issubclass(type(e), ProcessLayer):
         #         # e.polygon.commit_to_gdspy(cell=cell)
         #         # for p in e.get_ports():
         #         #     p.commit_to_gdspy(cell=cell)
@@ -287,11 +303,21 @@ class CellAbstract(Netlist):
 
         dx, dy = np.array(d) - o
 
+        from demo.pdks.ply.base import ProcessLayer
         for e in self.elementals:
             if issubclass(type(e), (LabelAbstract, PolygonAbstract)):
                 e.translate(dx, dy)
-            if isinstance(e, (Cell, SRef)):
+            if issubclass(type(e), ProcessLayer):
                 e.move(destination=d, midpoint=o)
+            if isinstance(e, SRef):
+                e.move(destination=d, midpoint=o)
+
+        # if hasattr(self, 'routes'):
+        #     for e in self.routes:
+        #         if issubclass(type(e), (LabelAbstract, PolygonAbstract)):
+        #             e.translate(dx, dy)
+        #         if isinstance(e, (Cell, SRef)):
+        #             e.move(destination=d, midpoint=o)
 
         for p in self.ports:
             mc = np.array(p.midpoint) + np.array(d) - np.array(o)
@@ -302,7 +328,7 @@ class CellAbstract(Netlist):
     def reflect(self, p1=(0,1), p2=(0,0)):
         """ Reflects the cell around the line [p1, p2]. """
         for e in self.elementals:
-            if not issubclass(type(e), (LabelAbstract, __Port__)):
+            if not issubclass(type(e), LabelAbstract):
                 e.reflect(p1, p2)
         for p in self.ports:
             p.midpoint = self.__reflect__(p.midpoint, p1, p2)
@@ -312,6 +338,7 @@ class CellAbstract(Netlist):
 
     def rotate(self, angle=45, center=(0,0)):
         """ Rotates the cell with angle around a center. """
+        from demo.pdks.ply.base import ProcessLayer
         if angle == 0:
             return self
         for e in self.elementals:
@@ -319,6 +346,16 @@ class CellAbstract(Netlist):
                 e.rotate(angle=angle, center=center)
             elif isinstance(e, SRef):
                 e.rotate(angle, center)
+            elif issubclass(type(e), ProcessLayer):
+                e.rotate(angle, center)
+
+        # if hasattr(self, 'routes'):
+        #     for e in self.routes:
+        #         if issubclass(type(e), PolygonAbstract):
+        #             e.rotate(angle=angle, center=center)
+        #         elif isinstance(e, SRef):
+        #             e.rotate(angle, center)
+
         ports = self.ports
         self.ports = ElementList()
         for p in ports:
@@ -332,6 +369,30 @@ class CellAbstract(Netlist):
         """ Returns copies of all the ports of the Device """
         port_list = [p._copy() for p in self.ports]
         if level is None or level > 0:
+
+            # if hasattr(self, 'routes'):
+            #     for r in self.routes.sref:
+            #         if level is None:
+            #             new_level = None
+            #         else:
+            #             new_level = level - 1
+
+            #         ref_ports = r.ref.get_ports(level=new_level)
+
+            #         tf = {
+            #             'midpoint': r.midpoint,
+            #             'rotation': r.rotation,
+            #             'magnification': r.magnification,
+            #             'reflection': r.reflection
+            #         }
+
+            #         ref_ports_transformed = []
+            #         for rp in ref_ports:
+            #             new_port = rp._copy()
+            #             new_port = new_port.transform(tf)
+            #             ref_ports_transformed.append(new_port)
+            #         port_list += ref_ports_transformed
+
             for r in self.elementals.sref:
                 if level is None:
                     new_level = None
@@ -377,8 +438,9 @@ class Cell(CellAbstract):
         else:
             return "[SPiRA: Cell(\'{}\')]".format(self.__class__.__name__)
 
-    # def __str__(self):
-    #     return self.__repr__()
+    # FIXME: Has to be placed here for deepcopy().
+    def __str__(self):
+        return self.__repr__()
 
     def _copy(self):
         cell = Cell(
@@ -397,6 +459,93 @@ class Cell(CellAbstract):
     #     if transform['midpoint']:
     #         self.move(midpoint=self.center, destination=transform['midpoint'])
     #     return self
+
+
+class PCell(CellAbstract):
+    """ A Cell encapsulates a set of elementals that
+    describes the layout being generated. """
+
+    def __repr__(self):
+        if hasattr(self, 'elementals'):
+            elems = self.elementals
+            return ("[SPiRA: Parameterized Cell(\'{}\')] " +
+                    "({} elementals: {} sref, {} cells, {} polygons, " +
+                    "{} labels, {} ports)").format(
+                        self.name,
+                        elems.__len__(),
+                        elems.sref.__len__(),
+                        elems.cells.__len__(),
+                        elems.polygons.__len__(),
+                        elems.labels.__len__(),
+                        self.ports.__len__()
+                    )
+        else:
+            return "[SPiRA: Cell(\'{}\')]".format(self.__class__.__name__)
+
+    # FIXME: Has to be placed here for deepcopy().
+    def __str__(self):
+        return self.__repr__()
+
+    def _copy(self):
+        cell = PCell(
+            name=self.name,
+            elementals=deepcopy(self.elementals),
+            ports=deepcopy(self.ports),
+            nets=self.nets
+        )
+        return cell
+
+
+class Device(CellAbstract):
+    pass
+
+
+class Circuit(CellAbstract):
+    """ A Cell encapsulates a set of elementals that
+    describes the layout being generated. """
+
+    routes = param.ElementalListField(fdef_name='create_routes')
+
+    def __init__(self, elementals=None, ports=None, nets=None, routes=None, library=None, **kwargs):
+        super().__init__(elementals=None, ports=None, nets=None, library=None, **kwargs)
+
+        if routes is not None:
+            self.routes = routes
+
+    def create_routes(self, routes):
+        return routes
+
+    def __repr__(self):
+        if hasattr(self, 'elementals'):
+            elems = self.elementals
+            return ("[SPiRA: Circuit(\'{}\')] " +
+                    "({} elementals: {} sref, {} cells, {} polygons, " +
+                    "{} labels, {} ports)").format(
+                        self.name,
+                        elems.__len__(),
+                        elems.sref.__len__(),
+                        elems.cells.__len__(),
+                        elems.polygons.__len__(),
+                        elems.labels.__len__(),
+                        self.ports.__len__()
+                    )
+        else:
+            return "[SPiRA: Cell(\'{}\')]".format(self.__class__.__name__)
+
+    # FIXME: Has to be placed here for deepcopy().
+    def __str__(self):
+        return self.__repr__()
+
+    def _copy(self):
+        cell = Circuit(
+            name=self.name,
+            elementals=deepcopy(self.elementals),
+            routes=deepcopy(self.routes),
+            ports=deepcopy(self.ports),
+            nets=self.nets
+        )
+        return cell
+
 
 
 

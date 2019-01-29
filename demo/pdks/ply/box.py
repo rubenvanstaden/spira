@@ -1,10 +1,10 @@
 import spira
 from spira import param
 from spira import shapes
-from demo.pdks.ply.base import Base
+from demo.pdks.ply.base import ProcessLayer
 
 
-class Box(Base):
+class Box(ProcessLayer):
 
     w = param.FloatField(default=1)
     h = param.FloatField(default=1)
