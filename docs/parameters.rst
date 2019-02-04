@@ -11,7 +11,7 @@ Constraints
 Variables
 ---------
 
-Variables are primitive parameters such as intergers and strings.
+Variables are primitive parameters such as integers and strings.
 The following variables are supported and initialized as shown.
 
 * Integer

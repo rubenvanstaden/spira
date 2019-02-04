@@ -167,7 +167,7 @@ class PortAbstract(__Port__):
         return self
 
     def stretch(self, stretch_class):
-        """ Stretch port by with the given strecth class. """
+        """ Stretch port by with the given stretch class. """
         p = stretch_class.apply(self.midpoint)
         self.midpoint = p
         return self
@@ -204,7 +204,7 @@ class PortAbstract(__Port__):
 
 class Port(PortAbstract):
     """ Ports are objects that connect different polygons
-    or references in a layout. Ports represent veritical
+    or references in a layout. Ports represent vertical
     connection such as vias or junctions.
 
     Examples

@@ -1,10 +1,10 @@
 # SPiRA
 
-The goal of SPiRA is develop a framework for IC designers to create and verify cicuit layouts. The framework uses a parameterized methodology that allows designers to generate PCells, apply rule checking, and LVS verification. The framework allows the following, though some parts are still under active development:
+The goal of SPiRA is develop a framework for IC designers to create and verify circuit layouts. The framework uses a parameterized methodology that allows designers to generate PCells, apply rule checking, and LVS verification. The framework allows the following, though some parts are still under active development:
 
 * **RDD**: The newly proposed Python-based PDK schema, called Rule Deck Database. This schema allows connecting directly to Python object trees for advance data manipulation.
 * **PCells**: Layout generators can be created using basic Python. The framework focusses on reducing native Python boiler-plate code to improve design efficiency.
-* **DRC** (experimental): Rule checking are done by placing parameter rescritions, and connecting to a Template Cell created defined in the RDD. 
+* **DRC** (experimental): Rule checking are done by placing parameter descriptions, and connecting to a Template Cell created defined in the RDD. 
 * **LVS** (experimental): A graph network can be extracted using a mesh-to-graph methodology. 
 
 ## Depenencies

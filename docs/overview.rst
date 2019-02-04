@@ -4,7 +4,7 @@ Overview
 **SPiRA**: A parameterized design framework using Python in conjunction 
 with metaprogramming techniques to allow designers to create superconducting 
 and quantum parameterized circuits, while simultaneously checking for design 
-rule errors. Using this parameterized gdsii a new LVS methodology is proposed 
+rule errors. Using this parameterization of GDSII structures, a new LVS methodology is proposed 
 that follows a parameterized hierarchical approach to effectively detect layout 
 primitives and devices. A mesh-to-netlist algorithm is presented that extracts 
 a graph netlist from a circuit layout by first meshing the conducting polygons 
@@ -31,11 +31,11 @@ coherent fashion. The `demo` folder is an example workspace. A workspace consist
 parts:
 
 * PDKs: Folder containing all the fabrication specific data.
-* Projects: Folder containing the Python source file createed using SPiRA.
+* Projects: Folder containing the Python source file created using SPiRA.
 
 **PDKs**
 
-The folder tree of the demo workspace for the pdks are as follows:
+The folder tree of the demo workspace for the PDKs are as follows:
 
 .. code-block:: bash
 
@@ -64,15 +64,15 @@ defined in the `pdks` folder.
         |__ scripts
         |__ tutorials
 
-The *layouts* diretory contains hand-designed-layouts. The SPiRA framework can be used 
-to apply physical design verifiction methods on these layouts, such as DRC and LVS checks.
-The *scripts* folder largly encapsulates layout generators, while the *tutorials* folder 
+The *layouts* directory contains hand-designed-layouts. The SPiRA framework can be used 
+to apply physical design verification methods on these layouts, such as DRC and LVS checks.
+The *scripts* folder largely encapsulates layout generators, while the *tutorials* folder 
 contains extra data.
 
-Each workspace is linked to a single fabrication process, but using mutliple
+Each workspace is linked to a single fabrication process, but using multiple
 fabs is also possible due to the simplicity of the workspace tree. In essence, 
 the workspace can have any structure given that the user compensates for 
-the necessary import changes. But it is highly adviced to use this structure.
+the necessary import changes. But it is highly advised to use this structure.
 
 
 

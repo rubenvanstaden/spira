@@ -8,8 +8,8 @@ from spira.rdd import RULE_DECK_DATABASE as RDD
 
 # -------------------------------- Initialize ------------------------------------
 
-RDD.name = 'MiTLL'
-RDD.desc = 'Process fabrication data for the MiTLL process from the USA.'
+RDD.name = 'MITLL'
+RDD.desc = 'Process fabrication data for the MITLL process from the USA.'
 
 # ---------------------------------- GDSII ---------------------------------------
 
