@@ -16,7 +16,7 @@ RDD = spira.get_rule_deck()
 
 class ComposeMLayers(__CellContainer__):
     """
-    Decorates all elementas with purpose metal with
+    Decorates all elementals with purpose metal with
     LCells and add them as elementals to the new class.
     """
 
