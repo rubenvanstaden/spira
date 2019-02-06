@@ -28,7 +28,7 @@ class __Shape__(FieldInitializer):
         """  """
         from spira.gdsii.utils import scale_polygon_up as spu
         from spira.gdsii.utils import scale_polygon_down as spd
-        polygons = spu(self.points)
+        polygons = spd(self.points, value=1e-4)
         # polygons = self.points
         self.points = []
         for poly in polygons:
@@ -37,10 +37,13 @@ class __Shape__(FieldInitializer):
                 solution = pyclipper.SimplifyPolygon(reverse_poly)
             else:
                 solution = pyclipper.SimplifyPolygon(poly)
+            # solution = pyclipper.CleanPolygons(solution)
+            # solution = spd(solution, value=1e-4)
             for sol in solution:
                 self.points.append(sol)
         self.points = bool_operation(subj=self.points, method='union')
-        self.points = spd(self.points)
+        self.points = spu(self.points, value=1e4)
+        # self.points = spd(self.points)
         return self
 
     def create_simplified_points(self):

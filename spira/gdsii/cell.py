@@ -500,52 +500,6 @@ class Device(CellAbstract):
     pass
 
 
-class Circuit(CellAbstract):
-    """ A Cell encapsulates a set of elementals that
-    describes the layout being generated. """
-
-    routes = param.ElementalListField(fdef_name='create_routes')
-
-    def __init__(self, elementals=None, ports=None, nets=None, routes=None, library=None, **kwargs):
-        super().__init__(elementals=None, ports=None, nets=None, library=None, **kwargs)
-
-        if routes is not None:
-            self.routes = routes
-
-    def create_routes(self, routes):
-        return routes
-
-    def __repr__(self):
-        if hasattr(self, 'elementals'):
-            elems = self.elementals
-            return ("[SPiRA: Circuit(\'{}\')] " +
-                    "({} elementals: {} sref, {} cells, {} polygons, " +
-                    "{} labels, {} ports)").format(
-                        self.name,
-                        elems.__len__(),
-                        elems.sref.__len__(),
-                        elems.cells.__len__(),
-                        elems.polygons.__len__(),
-                        elems.labels.__len__(),
-                        self.ports.__len__()
-                    )
-        else:
-            return "[SPiRA: Cell(\'{}\')]".format(self.__class__.__name__)
-
-    # FIXME: Has to be placed here for deepcopy().
-    def __str__(self):
-        return self.__repr__()
-
-    def _copy(self):
-        cell = Circuit(
-            name=self.name,
-            elementals=deepcopy(self.elementals),
-            routes=deepcopy(self.routes),
-            ports=deepcopy(self.ports),
-            nets=self.nets
-        )
-        return cell
-
 
 
 

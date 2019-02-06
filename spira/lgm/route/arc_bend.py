@@ -6,11 +6,11 @@ from spira import param
 class ArcRoute(spira.Route):
 
     gdslayer = param.LayerField(name='ArcLayer', number=91)
-    radius = param.FloatField(default=5)
-    width = param.FloatField(default=1)
+    radius = param.FloatField(default=5*1e6)
+    width = param.FloatField(default=1*1e6)
     theta = param.FloatField(default=45)
     start_angle = param.FloatField(default=0)
-    angle_resolution = param.FloatField(default=1)
+    angle_resolution = param.FloatField(default=20)
     angle1 = param.DataField(fdef_name='create_angle1')
     angle2 = param.DataField(fdef_name='create_angle2')
 
@@ -28,7 +28,7 @@ class ArcRoute(spira.Route):
         port = spira.Term(name='P1',
             midpoint=midpoint,
             width=self.width,
-            length=0.2,
+            length=0.2*1e6,
             orientation=orientation + 180
         )
         return port
@@ -39,7 +39,7 @@ class ArcRoute(spira.Route):
         port = spira.Term(name='P2',
             midpoint=midpoint,
             width=self.width,
-            length=0.2,
+            length=0.2*1e6,
             orientation=orientation + 180
         )
         return port
@@ -49,6 +49,7 @@ class ArcRoute(spira.Route):
         inner_radius = self.radius - self.width/2.0
         outer_radius = self.radius + self.width/2.0
         z = int(np.ceil(abs(self.theta) / self.angle_resolution))
+        # z = abs(self.theta) / self.angle_resolution
         t = np.linspace(self.angle1, self.angle2, z)
 
         inner_points_x = (inner_radius*np.cos(t)).tolist()
@@ -66,15 +67,15 @@ class ArcRoute(spira.Route):
 class RectRoute(spira.Route):
 
     gdslayer = param.LayerField(name='ArcLayer', number=91)
-    radius = param.FloatField(default=5)
-    width = param.FloatField(default=1)
-    size = param.MidPointField(default=(3,3))
+    radius = param.FloatField(default=5*1e6)
+    width = param.FloatField(default=1*1e6)
+    size = param.MidPointField(default=(3*1e6,3*1e6))
 
     def create_port_input(self):
         port = spira.Term(name='P1',
             midpoint=[0, -self.size[1]],
             width=self.width,
-            length=0.2,
+            length=0.2*1e6,
             orientation=180
         )
         return port
@@ -83,7 +84,7 @@ class RectRoute(spira.Route):
         port = spira.Term(name='P2',
             midpoint=[-self.size[0], 0],
             width=self.width,
-            length=0.2,
+            length=0.2*1e6,
             orientation=90
         )
         return port
@@ -102,15 +103,15 @@ class RectRoute(spira.Route):
 class RectRouteTwo(spira.Route):
 
     gdslayer = param.LayerField(name='ArcLayer', number=91)
-    radius = param.FloatField(default=5)
-    width = param.FloatField(default=1)
-    size = param.MidPointField(default=(3,3))
+    radius = param.FloatField(default=5*1e6)
+    width = param.FloatField(default=1*1e6)
+    size = param.MidPointField(default=(3*1e6,3*1e6))
 
     def create_port_input(self):
         port = spira.Term(name='P1',
             midpoint=[0, self.size[1]],
             width=self.width,
-            length=0.2,
+            length=0.2*1e6,
             orientation=0
         )
         return port
@@ -119,7 +120,7 @@ class RectRouteTwo(spira.Route):
         port = spira.Term(name='P2',
             midpoint=[-self.size[0], 0],
             width=self.width,
-            length=0.2,
+            length=0.2*1e6,
             orientation=90
         )
         return port

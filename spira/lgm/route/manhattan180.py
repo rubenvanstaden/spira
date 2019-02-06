@@ -391,7 +391,7 @@ class RouteManhattan180(Route180, RouteParallel):
                 width=self.port2.width,
                 orientation=0
             )
-        elif np.round(np.abs(np.mod(angle_diff,360)), 3) != 180:
+        elif np.round(np.abs(np.mod(angle_diff, 360)), 3) != 180:
             raise ValueError("2. [DEVICE] route() error: Ports do not " +
                 "face each other (orientations must be 180 apart)")
         else:

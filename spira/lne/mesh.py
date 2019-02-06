@@ -193,7 +193,9 @@ class MeshLabeled(MeshAbstract):
 
         self.surface_nodes
         self.device_nodes
-        self.boundary_nodes
+
+        if bounding_boxes is not None:
+            self.boundary_nodes
 
     def create_surface_nodes(self):
         triangles = self.__layer_triangles_dict__()
@@ -227,10 +229,12 @@ class MeshLabeled(MeshAbstract):
 
     def create_boundary_nodes(self):
         if self.level > 1:
-            for S in self.bounding_boxes:
-                for p in S.ref.elementals.polygons:
+            for B in self.bounding_boxes:
+                # print('Box NODES')
+                # for p in S.ref.elementals.polygons:
+                for p in B.elementals.polygons:
                     ply = deepcopy(p)
-                    ply.center = S.midpoint
+                    ply.center = B.midpoint
                     bnodes = []
                     for n in self.g.nodes():
                         s = self.g.node[n]['surface']
@@ -250,6 +254,7 @@ class MeshLabeled(MeshAbstract):
                             self.g.node[n]['device'] = device_node
 
     def add_new_node(self, n, D, pos):
+        # print(D)
         l1 = spira.Layer(name='Label', number=104)
         label = spira.Label(
             position=pos,
@@ -274,6 +279,9 @@ class MeshLabeled(MeshAbstract):
             for p in D.ports:
                 if p.gdslayer.number == self.layer.number:
                     if p.point_inside(points):
+
+                        # self.g.node[n]['device'] = D
+
                         if 'device' in self.g.node[n]:
                             self.add_new_node(n, D, p.midpoint)
                         else:

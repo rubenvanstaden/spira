@@ -11,9 +11,9 @@ class __Manhattan__(spira.Cell):
     port1 = param.DataField()
     port2 = param.DataField()
 
-    length = param.FloatField(default=20)
+    length = param.FloatField(default=20*1e6)
     gdslayer = param.LayerField(number=13)
-    radius = param.IntegerField(default=1)
+    radius = param.IntegerField(default=1*1e6)
     bend_type = param.StringField(default='circular')
 
     b1 = param.DataField(fdef_name='create_arc_bend_1')
@@ -61,37 +61,37 @@ class __Manhattan__(spira.Cell):
 
     def create_arc_bend_1(self):
         if self.bend_type == 'circular':
-            B1 = Rect(shape=RectRoute(
-                    width=self.port1.width,
-                    gdslayer=self.gdslayer,
-                )
-            )
-            return spira.SRef(B1)
-
-            # B1 = Arc(shape=ArcRoute(radius=self.radius,
-            #     width=self.port1.width,
-            #     gdslayer=self.gdslayer,
-            #     # gdslayer=spira.Layer(number=18),
-            #     start_angle=0, theta=90)
+            # B1 = Rect(shape=RectRoute(
+            #         width=self.port1.width,
+            #         gdslayer=self.gdslayer,
+            #     )
             # )
             # return spira.SRef(B1)
 
+            B1 = Arc(shape=ArcRoute(radius=self.radius,
+                width=self.port1.width,
+                gdslayer=self.gdslayer,
+                # gdslayer=spira.Layer(number=18),
+                start_angle=0, theta=90)
+            )
+            return spira.SRef(B1)
+
     def create_arc_bend_2(self):
         if self.bend_type == 'circular':
-            B2 = Rect(shape=RectRouteTwo(
-                    width=self.port1.width,
-                    gdslayer=self.gdslayer,
-                )
-            )
-            return spira.SRef(B2)
-
-            # B2 = Arc(shape=ArcRoute(radius=self.radius,
-            #     width=self.port1.width,
-            #     gdslayer=self.gdslayer,
-            #     # gdslayer=spira.Layer(number=18),
-            #     start_angle=0, theta=-90)
+            # B2 = Rect(shape=RectRouteTwo(
+            #         width=self.port1.width,
+            #         gdslayer=self.gdslayer,
+            #     )
             # )
             # return spira.SRef(B2)
+
+            B2 = Arc(shape=ArcRoute(radius=self.radius,
+                width=self.port1.width,
+                gdslayer=self.gdslayer,
+                # gdslayer=spira.Layer(number=18),
+                start_angle=0, theta=-90)
+            )
+            return spira.SRef(B2)
 
 
 

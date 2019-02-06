@@ -9,7 +9,7 @@ from spira.rdd import *
 
 from spira.gdsii.cell import Cell
 from spira.gdsii.cell import PCell
-from spira.gdsii.cell import Device, Circuit
+from spira.gdsii.cell import Device
 from spira.gdsii.primitive import *
 from spira.gdsii.io import import_gds
 from spira.gdsii.library import Library

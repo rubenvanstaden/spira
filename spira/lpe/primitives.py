@@ -87,7 +87,8 @@ class __Layout__(__ConstructLayers__):
                     layer=pl.layer,
                     polygons=metal_elems,
                     primitives=self.get_primitives,
-                    bounding_boxes=self.bounding_boxes
+                    bounding_boxes=self.cell.boxes
+                    # bounding_boxes=self.bounding_boxes
                 )
                 nets += net.graph
         return nets
@@ -189,9 +190,11 @@ class Gate(__Layout__):
             # print(R)
             # print(R.ref.elementals.polygons)
             pp = R.ref.elementals.polygons
+            # print(pp)
             if len(pp) > 0:
                 g = R.ref.elementals.polygons[0]
                 for D in self.devices.elementals.sref:
+                    # print(D)
                     for S in D.ref.elementals:
                         if isinstance(S.ref, mask.Metal):
                             for M in S.ref.elementals:
@@ -232,65 +235,23 @@ class Gate(__Layout__):
     def create_ports(self, ports):
         for p in self.device_ports:
             ports += p
-        for p in self.terminals:
+
+        for p in self.original.terms:
             ports += p
+
+        # for p in self.terminals:
+        #     ports += p
+
         return ports
 
     def create_netlist(self):
         self.g = self.merge
-        # self.g = self.nodes_combine(algorithm='d2d')
+        self.g = self.nodes_combine(algorithm='d2d')
         # self.g = self.generate_paths
         # self.g = self.nodes_combine(algorithm='s2s')
         self.plot_netlist(G=self.g, graphname=self.name, labeltext='id')
         return self.g
         # self.nets
-
-
-class Box(__CellContainer__):
-    """ Add a GROUND bbox to Device for primitive and DRC
-    detection, since GROUND is only in Mask Cell. """
-    def create_elementals(self, elems):
-
-        c_cell = deepcopy(self.cell)
-
-        polygons = spira.ElementList()
-        Em = c_cell.elementals.flat_copy()
-        for e in Em:
-            polygons += e
-        # Rm = c_cell.routes.flat_copy()
-        # for e in Rm:
-        #     polygons += e
-
-        setter = {}
-        for p in polygons:
-            layer = p.gdslayer.number
-            setter[layer] = 'not_set'
-
-        for p in polygons:
-            for pl in RDD.PLAYER.get_physical_layers(purposes=['METAL', 'GND']):
-                if pl.layer == p.gdslayer:
-                    if setter[pl.layer.number] == 'not_set':
-                        l1 = Layer(name='BoundingBox', number=pl.layer.number, datatype=9)
-                        ply = Polygons(shape=self.cell.pbox, gdslayer=l1)
-                        ply.center = (0,0)
-                        elems += ply
-                        setter[pl.layer.number] = 'already_set'
-
-        # setter = {}
-        # for p in self.cell.elementals.polygons:
-        #     layer = p.gdslayer.number
-        #     setter[layer] = 'not_set'
-        # for p in self.cell.elementals.polygons:
-        #     for pl in RDD.PLAYER.get_physical_layers(purposes=['METAL', 'GND']):
-        #         if pl.layer == p.gdslayer:
-        #             if setter[pl.layer.number] == 'not_set':
-        #                 l1 = Layer(name='BoundingBox', number=pl.layer.number, datatype=9)
-        #                 ply = Polygons(shape=self.cell.pbox, gdslayer=l1)
-        #                 ply.center = (0,0)
-        #                 elems += ply
-        #                 setter[pl.layer.number] = 'already_set'
-
-        return elems
 
 
 class __Generator__(__CellContainer__):
@@ -300,37 +261,37 @@ class __Generator__(__CellContainer__):
 
     level = param.IntegerField(default=1)
 
-    def w2n(self, new_cell, c, c2dmap):
-        for e in c.elementals:
-            if isinstance(e, SRef):
-                S = deepcopy(e)
-                if e.ref in c2dmap:
-                    S.ref = c2dmap[e.ref]
-                    new_cell += S
+    # def w2n(self, new_cell, c, c2dmap):
+    #     for e in c.elementals:
+    #         if isinstance(e, SRef):
+    #             S = deepcopy(e)
+    #             if e.ref in c2dmap:
+    #                 S.ref = c2dmap[e.ref]
+    #                 new_cell += S
 
-    def w2c(self, c, c2dmap):
-        for S in c.elementals.sref:
-            if issubclass(type(S.ref), Device):
-                if S.ref in c2dmap:
-                    S.ref = c2dmap[S.ref]
+    # def w2c(self, c, c2dmap):
+    #     for S in c.elementals.sref:
+    #         if issubclass(type(S.ref), Device):
+    #             if S.ref in c2dmap:
+    #                 S.ref = c2dmap[S.ref]
 
-    def create_device_layers(self):
-        c2dmap = {}
-        dev = deepcopy(self.cell)
-        deps = dev.dependencies()
-        for C in deps:
-            if issubclass(type(C), Device):
-                B = Box(cell=C)
-                c2dmap.update({C: B})
-        # for key in RDD.DEVICES.keys:
-        #     for C in deps:
-        #         # if not issubclass(type(C), RouteManhattan):
-        #         if 'RouteManhattan' not in C.name:
-        #             B = Box(cell=C)
-        #             c2dmap.update({C: B})
-        for c in dev.dependencies():
-            self.w2c(c, c2dmap)
-        return dev
+    # def create_device_layers(self):
+    #     c2dmap = {}
+    #     dev = deepcopy(self.cell)
+    #     deps = dev.dependencies()
+    #     for C in deps:
+    #         if issubclass(type(C), Device):
+    #             B = Box(cell=C)
+    #             c2dmap.update({C: B})
+    #     # for key in RDD.DEVICES.keys:
+    #     #     for C in deps:
+    #     #         # if not issubclass(type(C), RouteManhattan):
+    #     #         if 'RouteManhattan' not in C.name:
+    #     #             B = Box(cell=C)
+    #     #             c2dmap.update({C: B})
+    #     for c in dev.dependencies():
+    #         self.w2c(c, c2dmap)
+    #     return dev
 
     def create_devices(self):
         devices = spira.Cell(name='Devices')
@@ -339,6 +300,8 @@ class __Generator__(__CellContainer__):
             if isinstance(S.ref, Device):
             # if not issubclass(type(S.ref), (__Manhattan__, Route)):
                 devices += S
+
+                # S.ref.netlist
 
         # elif isinstance(self.cell, spira.Cell):
         #     deps = self.cell.dependencies()
@@ -358,13 +321,16 @@ class __Generator__(__CellContainer__):
         return devices
 
     def create_gates(self):
-        B = self.create_device_layers()
+        # B = self.create_device_layers()
+
+        # print(self.cell.ports)
 
         gate = Gate(
+            original=self.cell,
             devices=self.generate_devices,
-            cell=B,
-            # cell=self.cell,
-            level=2, lcar=0.1
+            # cell=B,
+            cell=self.cell,
+            level=2, lcar=0.01
         )
 
         gate.netlist

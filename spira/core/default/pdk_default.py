@@ -11,7 +11,8 @@ RDD.desc = 'Process fabrication data for the AIST process from Japan.'
 RDD.GDSII = DataTree()
 RDD.GDSII.TEXT = 64
 RDD.GDSII.UNIT = 1e-6
-RDD.GDSII.GRID = 1e-6
+RDD.GDSII.GRID = 1e-12
+# RDD.GDSII.GRID = 1e-6
 RDD.GDSII.PRECISION = 1e-9
 
 # --------------------------------- Metals --------------------------------------
@@ -46,7 +47,7 @@ RDD.JP = ProcessTree()
 RDD.JP.LAYER = Layer(name='JP', number=5)
 RDD.JP.WIDTH = 0.5
 RDD.JP.M5_METAL = 1.0
-RDD.CTL.COLOR = '#B6EBE6'
+RDD.JP.COLOR = '#B6EBE6'
 
 # --------------------------------- Vias ----------------------------------------
 
@@ -54,19 +55,19 @@ RDD.RC = ProcessTree()
 RDD.RC.LAYER = Layer(name='RC', number=9)
 RDD.RC.WIDTH = 0.5
 RDD.RC.M5_METAL = 1.0
-RDD.CTL.COLOR = '#B6EBE6'
+RDD.RC.COLOR = '#B6EBE6'
 
 RDD.GC = ProcessTree()
 RDD.GC.LAYER = Layer(name='GC', number=2)
 RDD.GC.WIDTH = 0.5
 RDD.GC.M5_METAL = 1.0
-RDD.CTL.COLOR = '#B6EBE6'
+RDD.GC.COLOR = '#B6EBE6'
 
 RDD.JJ = ProcessTree()
 RDD.JJ.LAYER = Layer(name='JJ', number=6)
 RDD.JJ.WIDTH = 0.5
 RDD.JJ.M5_METAL = 1.0
-RDD.CTL.COLOR = '#B6EBE6'
+RDD.JJ.COLOR = '#B6EBE6'
 
 RDD.BC = ProcessTree()
 RDD.BC.WIDTH = 0.5
@@ -74,19 +75,19 @@ RDD.BC.SPACING = 0.5
 RDD.BC.LAYER = Layer(name='BC', number=7)
 RDD.BC.WIDTH = 0.5
 RDD.BC.M5_METAL = 1.0
-RDD.CTL.COLOR = '#B6EBE6'
+RDD.BC.COLOR = '#B6EBE6'
 
 RDD.JC = ProcessTree()
 RDD.JC.LAYER = Layer(name='JC', number=10)
 RDD.JC.WIDTH = 1.0
 RDD.JC.M5_METAL = 1.0
-RDD.CTL.COLOR = '#B6EBE6'
+RDD.JC.COLOR = '#B6EBE6'
 
 RDD.CC = ProcessTree()
 RDD.CC.LAYER = Layer(name='CC', number=11)
 RDD.CC.WIDTH = 0.5
 RDD.CC.M5_METAL = 1.0
-RDD.CTL.COLOR = '#B6EBE6'
+RDD.CC.COLOR = '#B6EBE6'
 
 # ------------------------------- Physical Metals -------------------------------
 

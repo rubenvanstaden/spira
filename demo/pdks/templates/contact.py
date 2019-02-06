@@ -67,7 +67,8 @@ class ViaTemplate(__TemplateCell__):
                                 if e.polygon | M.polygon:
                                     prev_port = e.ports[0]
                                     e.ports[0] = spira.Port(
-                                        name=e.name, 
+                                        name=e.name,
+                                        # name=e.ports[0].name,
                                         midpoint=prev_port.midpoint,
                                         orientation=prev_port.orientation,
                                         gdslayer=M.player.layer
@@ -77,7 +78,8 @@ class ViaTemplate(__TemplateCell__):
                                 if e.polygon | M.polygon:
                                     prev_port = e.ports[1]
                                     e.ports[1] = spira.Port(
-                                        name=e.name, 
+                                        name=e.name,
+                                        # name=e.ports[1].name,
                                         midpoint=prev_port.midpoint,
                                         orientation=prev_port.orientation,
                                         gdslayer=M.player.layer

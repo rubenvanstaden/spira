@@ -72,6 +72,7 @@ class PortAbstract(__Port__):
         return np.array([self.midpoint, self.midpoint + np.array([dx,dy])])
 
     def point_inside(self, polygon):
+        # return pyclipper.PointInPolygon(self.midpoint, polygon) > 0
         return pyclipper.PointInPolygon(self.midpoint, polygon) != 0
 
     def flat_copy(self, level=-1, commit_to_gdspy=False):
@@ -223,8 +224,8 @@ class Port(PortAbstract):
     >>> port = spira.Port()
     """
 
-    # edge_width = param.FloatField(default=0.25*1e6)
-    edge_width = param.FloatField(default=0.25)
+    edge_width = param.FloatField(default=0.25*1e6)
+    # edge_width = param.FloatField(default=0.25)
 
     def __init__(self, port=None, polygon=None, **kwargs):
         super().__init__(port=port, polygon=polygon, **kwargs)

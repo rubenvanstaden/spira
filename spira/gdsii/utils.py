@@ -6,6 +6,7 @@ import numpy as np
 from spira.settings import SCALE_DOWN, SCALE_UP
 
 
+
 st = pyclipper.scale_to_clipper
 sf = pyclipper.scale_from_clipper
 
@@ -58,7 +59,7 @@ def bool_operation(subj, clip=None, method=None, closed=True):
         raise ValueError('Please specify a clipping method')
 
     sp = pyclipper.SimplifyPolygons(subj)
-#     cp = pyclipper.CleanPolygons(sf(sp, scale))
+    # cp = pyclipper.CleanPolygons(sf(sp, scale))
     return sp
 
 
@@ -128,8 +129,11 @@ def snap_points(points, grids_per_unit=None):
 
 
 def c2d(coord):
+    RDD = spira.get_rule_deck()
+
     """ Convert coordinate to 2D. """
-    pp = [coord[i]*1e+8 for i in range(len(list(coord))-1)]
+    # pp = [coord[i]*1e+8 for i in range(len(list(coord))-1)]
+    pp = [(coord[i]/RDD.GDSII.GRID) for i in range(len(list(coord))-1)]
     return pp
 
 
@@ -152,7 +156,9 @@ def scale_polygon_up(polygons, value=None):
         value = SCALE_UP
     new_poly = []
     for points in polygons:
-        pp = [[float(p[0]*value), float(p[1]*value)] for p in points]
+        # pp = [[float(p[0]*value), float(p[1]*value)] for p in points]
+        # pp = np.array([np.array([float(p[0]*value), float(p[1]*value)]) for p in points])
+        pp = np.array([np.array([np.floor(float(p[0]*value)), np.floor(float(p[1]*value))]) for p in points])
         new_poly.append(pp)
     return new_poly
 
@@ -162,7 +168,9 @@ def scale_polygon_down(polygons, value=None):
         value = SCALE_DOWN
     new_poly = []
     for points in polygons:
-        pp = [[float(p[0]*value), float(p[1]*value)] for p in points]
+        # pp = [[float(p[0]*value), float(p[1]*value)] for p in points]
+        # pp = np.array([np.array([float(p[0]*value), float(p[1]*value)]) for p in points])
+        pp = np.array([np.array([np.floor(float(p[0]*value)), np.floor(float(p[1]*value))]) for p in points])
         new_poly.append(pp)
     return new_poly
 

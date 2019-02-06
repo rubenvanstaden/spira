@@ -143,9 +143,12 @@ class DrawGraphAbstract(object):
                     nodes['text'].append(n)
                 else:
                     if isinstance(label, (spira.Port, spira.Term)):
-                        nodes['text'].append(label.id)
+                        print(label)
+                        # nodes['text'].append(label.id)
+                        nodes['text'].append(label.node_id)
                     else:
-                        nodes['text'].append(label.id)
+                        # nodes['text'].append(label.id)
+                        nodes['text'].append(label.node_id)
 
                 if isinstance(label, spira.SRef):
                     nodes['color'].append(label.ref.color)

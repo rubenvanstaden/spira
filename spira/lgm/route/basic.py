@@ -72,6 +72,7 @@ class RouteShape(shapes.Shape):
             final_distance=None
         )
         points = route_path.polygons
+        # print(points)
         return points
 
 
@@ -92,8 +93,10 @@ class RouteBasic(spira.Cell):
         return ll
 
     def create_elementals(self, elems):
+        # print(self.route.points)
         ply = spira.Polygons(shape=self.route, gdslayer=self.connect_layer)
         ply.rotate(angle=-90)
+        # print(ply.polygons)
         elems += ply
         return elems
 
@@ -101,7 +104,7 @@ class RouteBasic(spira.Cell):
         term = spira.Term(name='TERM1',
             midpoint=(0,0),
             width=self.route.width1,
-            length=0.2,
+            length=0.2*1e6,
             orientation=180,
             gdslayer=self.llayer
         )
@@ -112,7 +115,7 @@ class RouteBasic(spira.Cell):
         term = spira.Term(name='TERM2',
             midpoint=[self.route.x_dist, self.route.y_dist],
             width=self.route.width2,
-            length=0.2,
+            length=0.2*1e6,
             orientation=0,
             gdslayer=self.llayer
         )
@@ -162,8 +165,8 @@ if __name__ == '__main__':
     # p1 = spira.Term(name='P1', midpoint=(0,0), orientation=90, width=2)
     # p2 = spira.Term(name='P2', midpoint=(0,30), orientation=-90, width=1)
 
-    p1 = spira.Term(name='P1', midpoint=(0,0), orientation=0, width=2)
-    p2 = spira.Term(name='P2', midpoint=(30,0), orientation=180, width=2)
+    p1 = spira.Term(name='P1', midpoint=(0,0), orientation=180, width=2*1e6)
+    p2 = spira.Term(name='P2', midpoint=(30*1e6,0), orientation=0, width=2*1e6)
 
     route = RouteShape(port1=p1, port2=p2, path_type='straight', width_type='straight')
 
@@ -176,8 +179,8 @@ if __name__ == '__main__':
 
     D = RouteBasic(route=route)
 
-    D.rotate(angle = p1.orientation - D.port1.orientation, center = D.port1.midpoint)
-    D.move(midpoint = p1, destination = D.port1)
+    D.rotate(angle=p1.orientation-D.port1.orientation, center=D.port1.midpoint)
+    D.move(midpoint=p1, destination=D.port1)
 
     D.output()
 

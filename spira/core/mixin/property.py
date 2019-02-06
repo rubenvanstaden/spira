@@ -3,6 +3,9 @@ import spira
 import numpy as np
 from copy import deepcopy
 from spira.core.lists import ElementList
+from spira.gdsii.utils import scale_polygon_down as spd
+from spira.gdsii.utils import scale_polygon_up as spu
+from spira.gdsii.utils import scale_coord_down as scd
 
 
 class __Properties__(object):
@@ -128,9 +131,17 @@ class PolygonMixin(__Properties__):
     @property
     def bbox(self):
         self.polygons = np.array(self.points)
+        # self.polygons = spu(np.array(self.points))
+        # print(self.polygons)
         bb = self.get_bounding_box()
-        assert len(bb) == 2
+        # self.polygons = spd(np.array(self.polygons))
+        # print(self.polygons)
+        # assert len(bb) == 2
         return bb
+        # print(bb)
+        # print(scd(bb))
+        # print('')
+        # return scd(bb)
 
     @property
     def center(self):

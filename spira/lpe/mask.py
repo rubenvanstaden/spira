@@ -21,15 +21,22 @@ class __Mask__(__CellContainer__):
     metals = param.DataField(fdef_name='create_flatten_metals')
     merged_layers = param.DataField(fdef_name='create_merged_layers')
 
+    # def create_boxes(self, boxes):
+    #     return boxes
+
     def create_flatten_metals(self):
-        E = self.cell.elementals.flat_copy()
+        # E = self.cell.elementals.flat_copy()
         R = self.cell.routes.flat_copy()
-        Em = E.get_polygons(layer=self.player.layer)
+        B = self.cell.boxes.flat_copy()
+        # Em = E.get_polygons(layer=self.player.layer)
         Rm = R.get_polygons(layer=self.player.layer)
+        Bm = B.get_polygons(layer=self.player.layer)
         metal_elems = spira.ElementList()
-        for e in Em:
-            metal_elems += e
+        # for e in Em:
+        #     metal_elems += e
         for e in Rm:
+            metal_elems += e
+        for e in Bm:
             metal_elems += e
         return metal_elems
 

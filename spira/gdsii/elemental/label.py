@@ -90,6 +90,13 @@ class LabelAbstract(__Label__):
         return self
 
     def point_inside(self, ply):
+        # if isinstance(ply, spira.Polygons):
+        #     return pyclipper.PointInPolygon(self.position, ply.shape.points) > 0
+        # elif isinstance(ply, (list, set, np.ndarray)):
+        #     return pyclipper.PointInPolygon(self.position, ply) > 0
+        # else:
+        #     raise ValueError('Not Implemented!')
+
         if isinstance(ply, spira.Polygons):
             return pyclipper.PointInPolygon(self.position, ply.shape.points) != 0
         elif isinstance(ply, (list, set, np.ndarray)):

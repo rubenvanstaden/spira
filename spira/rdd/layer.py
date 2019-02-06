@@ -90,6 +90,9 @@ class PhysicalLayer(__Layer__):
     def __str__(self):
         return self.__repr__()
 
+    def __hash__(self):
+        return hash(self.id)
+
     def __eq__(self, other):
         if isinstance(other, PhysicalLayer):
             return other.key == self.key

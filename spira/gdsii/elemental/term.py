@@ -18,8 +18,8 @@ class Term(PortAbstract):
     >>> term = spira.Term()
     """
 
-    width = param.FloatField(default=2)
-    length = param.FloatField(default=0.1)
+    width = param.FloatField(default=2*1e6)
+    length = param.FloatField(default=0.1*1e6)
 
     layer1 = param.LayerField()
     layer2 = param.LayerField()
@@ -38,7 +38,7 @@ class Term(PortAbstract):
             )
             pp = spira.Polygons(
                 shape=rect_shape,
-                gdslayer=spira.Layer(number=65)
+                gdslayer=spira.Layer(number=63)
             )
             pp.rotate(angle=self.orientation, center=self.midpoint)
             # pp.rotate(angle=90-self.orientation, center=self.midpoint)
