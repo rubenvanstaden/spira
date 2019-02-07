@@ -54,33 +54,33 @@ class __Mask__(__CellContainer__):
                 elems += spira.Polygons(shape=[pts])
         return elems
 
-    def create_elementals(self, elems):
-        # TODO: Map the gdslayer to a physical layer in the RDD.
-        player = None
-        for k, v in RDD.PLAYER.items:
-            if v.layer == self.player.layer:
-                player = v
+    # def create_elementals(self, elems):
+    #     # TODO: Map the gdslayer to a physical layer in the RDD.
+    #     player = None
+    #     for k, v in RDD.PLAYER.items:
+    #         if v.layer == self.player.layer:
+    #             player = v
 
-        for i, poly in enumerate(self.merged_layers):
-        # for i, poly in enumerate(self.metals):
+    #     for i, poly in enumerate(self.merged_layers):
+    #     # for i, poly in enumerate(self.metals):
 
-        # R = self.cell.routes.flat_copy()
-        # Rm = R.get_polygons(layer=self.player.layer)
-        # for i, poly in enumerate(Rm):
+    #     # R = self.cell.routes.flat_copy()
+    #     # Rm = R.get_polygons(layer=self.player.layer)
+    #     # for i, poly in enumerate(Rm):
 
-        # R = self.cell.elementals.flat_copy()
-        # Rm = R.get_polygons(layer=self.player.layer)
-        # for i, poly in enumerate(Rm):
-            assert isinstance(poly, spira.Polygons)
-            if player is not None:
-                ml = ply.Polygon(
-                    name='ply_{}_{}'.format(self.alias, i),
-                    player=player,
-                    points=poly.polygons,
-                    level=self.level
-                )
-                elems += ml
-        return elems
+    #     # R = self.cell.elementals.flat_copy()
+    #     # Rm = R.get_polygons(layer=self.player.layer)
+    #     # for i, poly in enumerate(Rm):
+    #         assert isinstance(poly, spira.Polygons)
+    #         if player is not None:
+    #             ml = ply.Polygon(
+    #                 name='ply_{}_{}'.format(self.alias, i),
+    #                 player=player,
+    #                 points=poly.polygons,
+    #                 level=self.level
+    #             )
+    #             elems += ml
+    #     return elems
 
 
 class Metal(__Mask__):

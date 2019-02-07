@@ -5,8 +5,13 @@ from spira.lpe import mask
 from demo.pdks import ply
 from spira.lpe.containers import __CellContainer__
 from spira.lne.net import Net
-from demo.pdks.templates.devices import Device
 from copy import copy, deepcopy
+from spira.lpe.mask_layers import Metal
+from spira.lpe.devices import __Device__, DeviceLayout
+from spira.lpe.devices import Gate
+
+from spira.lgm.route.manhattan_base import RouteManhattan
+from spira.lgm.route.basic import RouteShape, RouteBasic, Route
 
 
 RDD = spira.get_rule_deck()
@@ -43,173 +48,7 @@ class BoundingBox(__CellContainer__):
         return elems
 
 
-class __Mask__(__CellContainer__):
-    level = param.IntegerField(default=1)
-
-    alias = param.StringField()
-    player = param.PhysicalLayerField()
-    level = param.IntegerField(default=1)
-    lcar = param.IntegerField(default=0.1)
-    algorithm = param.IntegerField(default=6)
-
-    metals = param.DataField(fdef_name='create_flatten_metals')
-    merged_layers = param.DataField(fdef_name='create_merged_layers')
-
-    def create_flatten_metals(self):
-        metal_elems = spira.ElementList()
-        R = self.cell.routes.flat_copy()
-        B = self.cell.boxes.flat_copy()
-        Rm = R.get_polygons(layer=self.player.layer)
-        Bm = B.get_polygons(layer=self.player.layer)
-        for e in Rm:
-            metal_elems += e
-        for e in Bm:
-            metal_elems += e
-        return metal_elems
-
-    def create_merged_layers(self):
-        points = []
-        elems = spira.ElementList()
-        for p in self.metals:
-            assert isinstance(p, spira.Polygons)
-            for pp in p.polygons:
-                points.append(pp)
-        if points:
-            shape = shapes.Shape(points=points)
-            shape.apply_merge
-            for pts in shape.points:
-                elems += spira.Polygons(shape=[pts])
-        return elems
-
-    def create_elementals(self, elems):
-        player = None
-        for k, v in RDD.PLAYER.items:
-            if v.layer == self.player.layer:
-                player = v
-
-        for i, poly in enumerate(self.merged_layers):
-            assert isinstance(poly, spira.Polygons)
-            if player is not None:
-                ml = ply.Polygon(
-                    name='ply_{}_{}'.format(self.alias, i),
-                    player=player,
-                    points=poly.polygons,
-                    level=self.level
-                )
-                elems += ml
-        return elems
-
-
-class Metal(__Mask__):
-    pass
-
-
-class Native(__Mask__):
-    pass
-
-
-class Gate(__CellContainer__):
-    """
-    Decorates all elementas with purpose metal with
-    LCells and add them as elementals to the new class.
-    """
-
-    metal_layers = param.DataField(fdef_name='create_metal_layers')
-    level = param.IntegerField(default=2)
-    device_ports = param.DataField(fdef_name='create_device_ports')
-    lcar = param.IntegerField(default=0.1)
-    algorithm = param.IntegerField(default=6)
-
-    def create_device_ports(self):
-        ports = spira.ElementList()
-        for R in self.cell.routes:
-            pp = R.ref.elementals.polygons
-            if len(pp) > 0:
-                g = R.ref.elementals.polygons[0]
-                for D in self.cell.elementals.sref:
-                    if issubclass(type(D.ref), Device):
-                        for S in D.ref.elementals:
-                            if isinstance(S.ref, mask.Metal):
-                                for M in S.ref.elementals:
-
-                                    ply = deepcopy(M.polygon)
-                                    ply.move(midpoint=ply.center, destination=S.midpoint)
-
-                                    P = M.metal_port._copy()
-                                    P.connect(D, ply)
-                                    d = D.midpoint
-                                    P.move(midpoint=P.midpoint, destination=d)
-                                    ports += P
-
-        return ports
-
-    def get_metal_polygons(self, pl):
-        elems = self.elementals
-        ply_elems = spira.ElementList()
-        for S in elems.sref:
-            if isinstance(S.ref, Metal):
-                for M in S.ref.elementals:
-                    if M.layer.is_equal_number(pl.layer):
-                        if M.polygon.gdslayer.datatype in (1, 2):
-                            ply_elems += M.polygon
-        return ply_elems
-
-    def create_nets(self, nets):
-        for pl in RDD.PLAYER.get_physical_layers(purposes='METAL'):
-            metal_elems = self.get_metal_polygons(pl)
-            if metal_elems:
-                print('boxxxx')
-                print(self.cell.boxes)
-                net = Net(
-                    name='{}'.format(pl.layer.number),
-                    lcar=self.lcar,
-                    level=self.level,
-                    algorithm=self.algorithm,
-                    layer=pl.layer,
-                    polygons=metal_elems,
-                    primitives=self.ports,
-                    bounding_boxes=self.cell.boxes
-                )
-                nets += net.graph
-        return nets
-
-    def create_netlist(self):
-        self.g = self.merge
-        self.g = self.nodes_combine(algorithm='d2d')
-        # self.g = self.nodes_combine(algorithm='s2s')
-        self.plot_netlist(G=self.g, graphname=self.name, labeltext='id')
-        return self.g
-
-    def create_metal_layers(self):
-        elems = spira.ElementList()
-        for player in RDD.PLAYER.get_physical_layers(purposes='METAL'):
-            alias = '{}_{}'.format(
-                player.layer.number,
-                self.cell.id
-            )
-            metal = Metal(
-                alias=alias,
-                cell=self.cell,
-                player=player,
-                level=self.level
-            )
-            elems += spira.SRef(metal)
-        return elems
-
-    def create_elementals(self, elems):
-        for e in self.metal_layers:
-            elems += e
-        return elems
-
-    def create_ports(self, ports):
-        for p in self.device_ports:
-            ports += p
-        for p in self.cell.terms:
-            ports += p
-        return ports
-
-
-class Circuit(spira.Cell):
+class Circuit(__CellContainer__):
     """ A Cell encapsulates a set of elementals that
     describes the layout being generated. """
 
@@ -228,12 +67,6 @@ class Circuit(spira.Cell):
             self.routes = routes
         if boxes is not None:
             self.boxes = boxes
-
-    def create_routes(self, routes):
-        return routes
-
-    def create_boxes(self, boxes):
-        return boxes
 
     def __repr__(self):
         if hasattr(self, 'elementals'):
@@ -266,34 +99,63 @@ class Circuit(spira.Cell):
         )
         return cell
 
+    def create_netlist(self):
+        self.mask.netlist
+
+    def create_routes(self, routes):
+        if self.cell.name is not None:
+            for e in self.cell.elementals:
+                if issubclass(type(e), spira.Polygons):
+                    routes += e
+        return routes
+
     def create_mask(self):
         cell = None
         if self.level == 2:
             cell = Layout(cell=self)
+            # cell = Gate(cell=self, level=2)
         elif self.level == 3:
             pass
         elif self.level == 4:
             pass
         return cell
 
-    def create_netlist(self):
-        self.mask.netlist
+    def w2n(self, new_cell, c, c2dmap):
+        for e in c.elementals:
+            if isinstance(e, spira.SRef):
+                S = deepcopy(e)
+                if e.ref in c2dmap:
+                    S.ref = c2dmap[e.ref]
+                    new_cell += S
 
     def create_devices(self):
-        """ Generate bounding boxes around each Device. """
         # FIXME: Assumes level 1 hierarchical cell.
         elems = spira.ElementList()
-        for S in self.elementals.sref:
-            if issubclass(type(S.ref), Device):
-                elems += S
+        if self.cell.name is None:
+            for S in self.elementals.sref:
+                if issubclass(type(S.ref), __Device__):
+                    elems += S
+        else:
+            deps = self.cell.dependencies()
+            c2dmap = {}
+            for key in RDD.DEVICES.keys:
+                D = RDD.DEVICES[key].PCELL
+                # FIXME!!!
+                D.center = (0,0)
+                for C in deps:
+                    L = DeviceLayout(cell=C, level=1)
+                    D.metals = L.metals
+                    D.contacts = L.contacts
+                    c2dmap.update({C: D})
+            for c in self.cell.dependencies():
+                self.w2n(elems, c, c2dmap)
         return elems
 
     def create_boxes(self, boxes):
         """ Generate bounding boxes around each Device. """
         # FIXME: Assumes level 1 hierarchical cell.
-        for S in self.elementals.sref:
-            if issubclass(type(S.ref), Device):
-                boxes += BoundingBox(cell=S.ref, midpoint=S.midpoint)
+        for S in self.devices:
+            boxes += BoundingBox(cell=S.ref, midpoint=S.midpoint)
         return boxes
 
 

@@ -139,8 +139,6 @@ if __name__ == '__main__':
     # jj_q3 = Jtl(m2=(-30,-30), rotation=0)
     jj_q4 = Jtl(m2=(30*1e6,-30*1e6), rotation=0, level=2)
 
-    # print(jj_q4.mask)
-
     jj_q4.netlist
     jj_q4.mask.output()
 

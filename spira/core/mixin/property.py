@@ -131,6 +131,7 @@ class PolygonMixin(__Properties__):
     @property
     def bbox(self):
         self.polygons = np.array(self.points)
+        # self.polygons = self.points
         # self.polygons = spu(np.array(self.points))
         # print(self.polygons)
         bb = self.get_bounding_box()

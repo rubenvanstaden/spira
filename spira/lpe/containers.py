@@ -6,10 +6,6 @@ from spira import param
 class __CellContainer__(Cell):
 
     cell = param.CellField()
-    # boxes = param.ElementalListField(fdef_name='create_boxes')
-
-    # def create_boxes(self, boxes):
-    #     return boxes
 
     def create_elementals(self, elems):
         elems += SRef(structure=self.cell)

@@ -16,7 +16,7 @@ class ProcessLayer(__ProcessLayer__):
     layer2 = param.LayerField()
     player = param.PhysicalLayerField()
 
-    level = param.IntegerField(default=1)
+    level = param.IntegerField(default=10)
     error = param.IntegerField(default=0)
 
     layer = param.DataField(fdef_name='create_layer')

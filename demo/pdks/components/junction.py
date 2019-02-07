@@ -4,13 +4,14 @@ from spira import shapes
 from spira.rdd import get_rule_deck
 from spira.rdd.technology import ProcessTree
 from demo.pdks import ply
-from demo.pdks.templates.devices import Device
+# from demo.pdks.templates.devices impmrt Device
+from spira.lpe.devices import __Device__
 
 
 RDD = get_rule_deck()
 
 
-class Junction(Device):
+class Junction(__Device__):
     """ Josephon Junction component for the AIST process. """
 
     um = param.FloatField(default=1e+6)

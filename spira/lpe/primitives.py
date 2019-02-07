@@ -29,7 +29,6 @@ from spira.lpe import mask
 from spira.lgm.route.manhattan_base import RouteManhattan
 from spira.lne.net import Net
 from spira.lgm.route.basic import RouteShape, RouteBasic, Route
-from demo.pdks.templates.devices import Device
 
 
 RDD = get_rule_deck()

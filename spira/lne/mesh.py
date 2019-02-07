@@ -109,7 +109,7 @@ class MeshAbstract(__Mesh__):
         if 'triangle' not in self.cell_data[0]:
             raise ValueError('Triangle not in meshio cell_data')
         if 'gmsh:physical' not in self.cell_data[0]['triangle']:
-            raise ValueError('Physical not found ing meshio triangle')
+            raise ValueError('Physical not found in meshio triangle')
         return self.cell_data[0]['triangle']['gmsh:physical'].tolist()
 
     def create_mesh_graph(self):

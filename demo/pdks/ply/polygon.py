@@ -17,6 +17,13 @@ class Polygon(ProcessLayer):
     #     return True
 
     def create_layer(self):
+        # print(self.level)
+        # layer = spira.Layer(
+        #     name=self.name,
+        #     number=self.player.layer.number,
+        #     datatype=self.player.layer.datatype
+        # )
+
         if self.error != 0:
             layer = spira.Layer(
                 name=self.name,
@@ -35,6 +42,7 @@ class Polygon(ProcessLayer):
                 number=self.player.layer.number,
                 datatype=self.player.layer.datatype
             )
+
         return layer
 
     def create_polygon(self):
