@@ -25,11 +25,19 @@ class __Cell__(gdspy.Cell, CellInitializer):
     __name_generator__ = RDD.ADMIN.NAME_GENERATOR
     __mixins__ = [OutputMixin, CellMixin, TranformationMixin]
 
-    def __init__(self, elementals=None, ports=None, nets=None, library=None, **kwargs):
+    name = param.DataField(fdef_name='create_name')
+
+    def __init__(self, name=None, elementals=None, ports=None, nets=None, library=None, **kwargs):
         CellInitializer.__init__(self, **kwargs)
         gdspy.Cell.__init__(self, self.name, exclude_from_current=True)
 
         self.g = nx.Graph()
+ 
+        if name is not None:
+            s = '{}_{}'.format(name, self.__class__._ID)
+            self.__dict__['__name__'] = s
+            __Cell__.name.__set__(self, s)
+            self.__class__._ID += 1
 
         if library is not None:
             self.library = library
@@ -167,7 +175,7 @@ class Netlist(__Cell__):
 
 class CellAbstract(Netlist):
 
-    name = param.DataField(fdef_name='create_name')
+    # name = param.DataField(fdef_name='create_name')
     ports = param.ElementalListField(fdef_name='create_ports')
     elementals = param.ElementalListField(fdef_name='create_elementals')
 
@@ -188,8 +196,6 @@ class CellAbstract(Netlist):
         return self.elementals
 
     def flat_copy(self, level=-1, commit_to_gdspy=False):
-        # print(self.elementals)
-        # print('')
         self.elementals = self.elementals.flat_copy(level, commit_to_gdspy)
         return self.elementals
 
@@ -213,7 +219,6 @@ class CellAbstract(Netlist):
         for e in self.elementals:
             if not isinstance(e, (SRef, ElementList, Graph, Mesh)):
                 e.commit_to_gdspy(cell=cell)
-
 
             # if issubclass(type(e), ProcessLayer):
             #     e.polygon.commit_to_gdspy(cell=cell)

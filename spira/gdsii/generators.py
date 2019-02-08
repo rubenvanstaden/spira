@@ -2,6 +2,7 @@
 
 class NameGenerator(object):
     """ Generate a unique name based on a counter for every prefix. """
+
     def __init__(self, prefix_attribute='__name_prefix__', process_name='DEFAULT', counter_zero=0):
         self.prefix_attribute = prefix_attribute
         self.counter_zero = counter_zero
@@ -11,6 +12,8 @@ class NameGenerator(object):
     def __call__(self, obj):
         if hasattr(obj, self.prefix_attribute):
             prefix = getattr(obj, self.prefix_attribute)
+        else:
+            prefix = '__'
         prefix = '{}_{}'.format(prefix, self.process_name)
         c = self.names_counters.get(prefix, self.counter_zero)
         c += 1

@@ -347,6 +347,8 @@ class MetaCell(MetaInitializer):
     >>> via = Via(layer=50)
     """
 
+    _ID = 0
+
     def __call__(cls, *params, **keyword_params):
 
         kwargs = cls.__map_parameters__(*params, **keyword_params)
@@ -361,6 +363,28 @@ class MetaCell(MetaInitializer):
 
         if 'name' not in kwargs:
             kwargs['__name_prefix__'] = cls.__name__
+
+        # # print(kwargs)
+
+        # # if kwargs is not None:
+        # #     if 'name' not in kwargs:
+        # #         kwargs['__name_prefix__'] = cls.__name__
+        # #     else:
+        # #         print(kwargs['name'])
+        # #         if kwargs['name'] is not None:
+        # #             kwargs['__name_prefix__'] = cls.__name__
+        # #             # kwargs['__name_prefix__'] = '{}_{}'.format(cls.__name__, cls._ID)
+        # #             kwargs['name'] = '{}_{}'.format(cls.__name__, cls._ID)
+        # #     cls._ID += 1
+
+        # if 'name' not in kwargs:
+        #     kwargs['__name_prefix__'] = cls.__name__
+        # # else:
+        # #     print(kwargs['name'])
+        # #     # kwargs['__name_prefix__'] = cls.__name__
+        # #     kwargs['__name_prefix__'] = '{}_{}'.format(cls.__name__, cls._ID)
+        # #     # kwargs['name'] = '{}_{}'.format(cls.__name__, cls._ID)
+        # # cls._ID += 
 
         cls.__keywords__ = kwargs
         cls = super().__call__(**kwargs)

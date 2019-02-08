@@ -14,12 +14,14 @@ class Route180(__Manhattan__):
 
         self.b1.connect(port=self.b1.ports['P2'], destination=self.term_ports['T1'])
         # h = self.p1[1] + (self.p2[1]-self.p1[1])/2 - self.radius
-        h = (self.p2[0]-self.p1[0])/2 - self.radius
+        # h = (self.p2[0]-self.p1[0])/2 - self.radius
+        h = (self.p2[1]-self.p1[1])/2 - self.radius
         self.b1.move(midpoint=self.b1.ports['P2'], destination=[0, h])
 
         self.b2.connect(port=self.b1.ports['P2'], destination=self.b2.ports['P1'])
         # h = self.p1[1] + (self.p2[1]-self.p1[1])/2 + self.radius
-        h = (self.p2[0]-self.p1[0])/2 + self.radius
+        # h = (self.p2[0]-self.p1[0])/2 + self.radius
+        h = (self.p2[1]-self.p1[1])/2 + self.radius
         self.b2.move(midpoint=self.b2.ports['P1'], destination=[self.term_ports['T2'].midpoint[0], h])
 
         r1 = self._generate_route(self.b1.ports['P2'], self.term_ports['T1'])
@@ -130,41 +132,50 @@ class RouteParallel(__Manhattan__):
 
     def create_parallel_route(self):
 
-        p1 = [self.port1.midpoint[0], self.port1.midpoint[1]]
-        p2 = [self.port2.midpoint[0], self.port2.midpoint[1]]
+        # p1 = [self.port1.midpoint[0], self.port1.midpoint[1]]
+        # p2 = [self.port2.midpoint[0], self.port2.midpoint[1]]
+
+        p1 = self.p1
+        p2 = self.p2
 
         b1, b2 = self.b2, self.b1
 
         dx = max(p1[0], p2[0])
         dy = max(p1[1], p2[1])
 
-        if self.port1.orientation == 0:
-            if p2[0] > p1[0]:
-                b1, b2 = self.b1, self.b2
-            h = p2[1] + self.length
-            d1 = [0, h]
-            d2 = [self.term_ports['T2'].midpoint[0], h] 
-        elif self.port1.orientation == 90:
-            if p2[1] > p1[1]:
-                b1, b2 = self.b1, self.b2
-            h = p2[0] - self.length
-            d1 = [h, 0]
-            d2 = [h, self.term_ports['T2'].midpoint[1]]
-        elif self.port1.orientation == -90:
-            if p1[1] > p2[1]:
-                b1, b2 = self.b1, self.b2
-            h = p2[0] + self.length
-            d1 = [h, 0]
-            d2 = [h, self.term_ports['T2'].midpoint[1]]
-        elif self.port1.orientation == 180:
-            if p1[0] > p2[0]:
-                b1, b2 = self.b1, self.b2
-                h = p2[1] + (p1[1]-p2[1]) - self.length
-            elif p2[0] > p1[0]:
-                b1, b2 = self.b2, self.b1
-                h = dy - 2*self.length
-            d1 = [0, h]
-            d2 = [self.term_ports['T2'].midpoint[0], h] 
+        if p2[0] > p1[0]:
+            b1, b2 = self.b1, self.b2
+        h = p2[1] + self.length
+        d1 = [0, h]
+        d2 = [self.term_ports['T2'].midpoint[0], h]
+
+        # if self.port1.orientation == 0:
+        #     if p2[0] > p1[0]:
+        #         b1, b2 = self.b1, self.b2
+        #     h = p2[1] + self.length
+        #     d1 = [0, h]
+        #     d2 = [self.term_ports['T2'].midpoint[0], h] 
+        # elif self.port1.orientation == 90:
+        #     if p2[1] > p1[1]:
+        #         b1, b2 = self.b1, self.b2
+        #     h = p2[0] - self.length
+        #     d1 = [h, 0]
+        #     d2 = [h, self.term_ports['T2'].midpoint[1]]
+        # elif self.port1.orientation == -90:
+        #     if p1[1] > p2[1]:
+        #         b1, b2 = self.b1, self.b2
+        #     h = p2[0] + self.length
+        #     d1 = [h, 0]
+        #     d2 = [h, self.term_ports['T2'].midpoint[1]]
+        # elif self.port1.orientation == 180:
+        #     if p1[0] > p2[0]:
+        #         b1, b2 = self.b1, self.b2
+        #         h = p2[1] + (p1[1]-p2[1]) - self.length
+        #     elif p2[0] > p1[0]:
+        #         b1, b2 = self.b2, self.b1
+        #         h = dy - 2*self.length
+        #     d1 = [0, h]
+        #     d2 = [self.term_ports['T2'].midpoint[0], h] 
 
         b1.connect(port=b1.ports['P2'], destination=self.term_ports['T1'])
         b1.move(midpoint=b1.ports['P2'], destination=d1)
@@ -176,7 +187,22 @@ class RouteParallel(__Manhattan__):
         r2 = self._generate_route(b2.ports['P2'], self.term_ports['T2'])
         r3 = self._generate_route(b1.ports['P1'], b2.ports['P1'])
 
-        return [self.b1, self.b2, r1, r2, r3]
+        # return [self.b1, self.b2, r1, r2, r3]
+
+        D = spira.Cell(name='Parallel')
+        # D += [self.b1, self.b2, r1, r2, r3]
+        D += [self.b1, self.b2, r1]
+
+        t1 = self.term_ports['T1']
+        t2 = self.term_ports['T2']
+
+        t1.rotate(angle=self.port1.orientation)
+        t2.rotate(angle=self.port1.orientation)
+
+        D.rotate(angle=self.port1.orientation, center=self.p1)
+        D.move(midpoint=self.term_ports['T1'], destination=self.port1)
+
+        return spira.SRef(D)
 
     def create_quadrant_one_parallel(self):
 
@@ -347,6 +373,7 @@ class RouteManhattan180(Route180, RouteParallel):
         p2 = self.p2
 
         if self.port1.orientation == self.port2.orientation:
+            print('Angle: Equal')
             if (p1[1] == p2[1]) or (p1[0] == p2[0]):
                 elems += self.parallel
             if (p2[1] > p1[1]) and (p2[0] > p1[0]):
@@ -364,6 +391,7 @@ class RouteManhattan180(Route180, RouteParallel):
         elif np.round(np.abs(np.mod(self.port1.orientation - self.port2.orientation,360)),3) != 180:
             raise ValueError('[DEVICE] route() error: Ports do not face each other (orientations must be 180 apart)')    
         else:
+            print('Angle: 180 Difference')
             if (p2[1] > p1[1]) and (p2[0] > p1[0]):
                 print('Q1')
                 elems += self.quadrant_one

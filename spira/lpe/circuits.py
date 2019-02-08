@@ -131,7 +131,8 @@ class Circuit(__CellContainer__):
     def create_devices(self):
         # FIXME: Assumes level 1 hierarchical cell.
         elems = spira.ElementList()
-        if self.cell.name is None:
+        if self.cell is None:
+            print('A')
             for S in self.elementals.sref:
                 if issubclass(type(S.ref), __Device__):
                     elems += S

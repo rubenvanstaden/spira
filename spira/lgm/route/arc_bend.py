@@ -10,7 +10,7 @@ class ArcRoute(spira.Route):
     width = param.FloatField(default=1*1e6)
     theta = param.FloatField(default=45)
     start_angle = param.FloatField(default=0)
-    angle_resolution = param.FloatField(default=20)
+    angle_resolution = param.FloatField(default=15)
     angle1 = param.DataField(fdef_name='create_angle1')
     angle2 = param.DataField(fdef_name='create_angle2')
 
@@ -49,7 +49,6 @@ class ArcRoute(spira.Route):
         inner_radius = self.radius - self.width/2.0
         outer_radius = self.radius + self.width/2.0
         z = int(np.ceil(abs(self.theta) / self.angle_resolution))
-        # z = abs(self.theta) / self.angle_resolution
         t = np.linspace(self.angle1, self.angle2, z)
 
         inner_points_x = (inner_radius*np.cos(t)).tolist()

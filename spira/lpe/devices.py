@@ -35,7 +35,6 @@ class __Device__(__PCell__):
         return boxes
 
     def create_elementals(self, elems):
-        print('elementals----')
 
         metals = Metal(elementals=self.merged_layers, level=1)
         natives = Native(elementals=self.contacts, level=1)
@@ -165,6 +164,8 @@ class Gate(__PCell__):
             B = self.cell.boxes.flat_copy()
             Rm = R.get_polygons(layer=player.layer)
             Bm = B.get_polygons(layer=player.layer)
+
+            print(self.boxes)
 
             for i, e in enumerate([*Rm, *Bm]):
                 elems += ply.Polygon(

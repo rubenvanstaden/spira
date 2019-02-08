@@ -8,8 +8,11 @@ from spira.lgm.route.basic import RouteBasic
 
 class __Manhattan__(spira.Cell):
 
-    port1 = param.DataField()
-    port2 = param.DataField()
+    # port1 = param.DataField()
+    # port2 = param.DataField()
+
+    port1 = param.PortField()
+    port2 = param.PortField()
 
     length = param.FloatField(default=20*1e6)
     gdslayer = param.LayerField(number=13)

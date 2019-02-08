@@ -48,6 +48,12 @@ def PolygonField(shape=[]):
     return DataFieldDescriptor(default=F)
 
 
+def PortField():
+    from spira.gdsii.elemental.port import Port
+    F = Port()
+    return DataFieldDescriptor(default=F)
+
+
 def ShapeField(points=[]):
     from spira.lgm.shapes.shape import Shape
     F = Shape(points)
@@ -70,9 +76,12 @@ def IntegerField(**kwargs):
     return DataFieldDescriptor(constraint=INTEGER, **kwargs)
 
 
-def CellField(name=None, elementals=None, library=None):
+def CellField(default=None, name=None, elementals=None, ports=None, library=None):
     from spira.gdsii.cell import Cell
-    F = Cell(name=name, elementals=elementals, library=library)
+    if default is None:
+        F = None
+    else:
+        F = Cell(name=name, elementals=elementals, library=library)
     return DataFieldDescriptor(default=F)
 
 
