@@ -65,14 +65,13 @@ class RouteShape(shapes.Shape):
 
         route_path = gdspy.Path(width=self.width1, initial_point=(0,0))
         route_path.parametric(
-            curve_fun, curve_deriv_fun, 
+            curve_fun, curve_deriv_fun,
             number_of_evaluations=self.num_path_pts,
-            max_points=199, 
-            final_width=width_fun, 
+            max_points=199,
+            final_width=width_fun,
             final_distance=None
         )
         points = route_path.polygons
-        # print(points)
         return points
 
 
@@ -93,10 +92,8 @@ class RouteBasic(spira.Cell):
         return ll
 
     def create_elementals(self, elems):
-        # print(self.route.points)
         ply = spira.Polygons(shape=self.route, gdslayer=self.connect_layer)
         ply.rotate(angle=-90)
-        # print(ply.polygons)
         elems += ply
         return elems
 

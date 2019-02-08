@@ -34,8 +34,14 @@ class RouteManhattan(__Manhattan__):
 
     def create_elementals(self, elems):
 
+        # p2 = [self.port2.midpoint[0], self.port2.midpoint[1]]
+
+        # if p2[1] == p1[1] or p2[0] == p1[0]:
+        #     raise ValueError('Error - ports must be at different x AND y values.')
+
         angle_diff = self.port1.orientation - self.port2.orientation
         angle = np.round(np.abs(np.mod(angle_diff, 360)), 3)
+        # print(angle)
         if (angle == 180) or (angle == 0):
             R1 = RouteManhattan180(
                 port1=self.port1,
@@ -57,7 +63,6 @@ class RouteManhattan(__Manhattan__):
             self.ports += p
 
         for e in R1.elementals:
-            print(e)
         # for e in R1.flat_copy():
         # for e in R1.flatten():
             elems += e

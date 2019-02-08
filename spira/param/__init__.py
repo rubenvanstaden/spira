@@ -85,9 +85,12 @@ def CellField(default=None, name=None, elementals=None, ports=None, library=None
     return DataFieldDescriptor(default=F)
 
 
-def PhysicalLayerField(layer=None, purpose=None):
+def PhysicalLayerField(default=None, layer=None, purpose=None):
     from spira.rdd.layer import PhysicalLayer
-    F = PhysicalLayer(layer=layer, purpose=purpose)
+    if default is None:
+        F = PhysicalLayer(layer=layer, purpose=purpose)
+    else:
+        F = default
     return DataFieldDescriptor(default=F)
 
 

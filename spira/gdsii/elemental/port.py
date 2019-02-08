@@ -120,13 +120,18 @@ class PortAbstract(__Port__):
         """ Rotate port around the center with angle. """
         self.midpoint = self.__rotate__(self.midpoint, angle=angle, center=center)
         self.orientation += angle
+        # self.orientation = angle
         self.orientation = np.mod(self.orientation, 360)
 
-        self.polygon.rotate(angle=self.orientation)
+        self.polygon.rotate(angle=angle)
+        # print(angle)
+        # print(self.orientation)
+        # print('')
+        # self.polygon.rotate(angle=self.orientation)
 
         if self.arrow:
-            # self.arrow.rotate(angle=angle)
-            self.arrow.rotate(angle=np.mod(angle, 90))
+            self.arrow.rotate(angle=angle)
+            # self.arrow.rotate(angle=np.mod(angle, 90))
 
         return self
 

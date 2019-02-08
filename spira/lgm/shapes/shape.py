@@ -28,6 +28,7 @@ class __Shape__(FieldInitializer):
         """  """
         from spira.gdsii.utils import scale_polygon_up as spu
         from spira.gdsii.utils import scale_polygon_down as spd
+        # polygons = spd(self.points, value=1e-0)
         polygons = spd(self.points, value=1e-4)
         # polygons = self.points
         self.points = []
@@ -42,6 +43,7 @@ class __Shape__(FieldInitializer):
             for sol in solution:
                 self.points.append(sol)
         self.points = bool_operation(subj=self.points, method='union')
+        # self.points = spu(self.points, value=1e0)
         self.points = spu(self.points, value=1e4)
         # self.points = spd(self.points)
         return self

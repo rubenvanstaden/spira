@@ -190,8 +190,8 @@ class RouteParallel(__Manhattan__):
         # return [self.b1, self.b2, r1, r2, r3]
 
         D = spira.Cell(name='Parallel')
-        # D += [self.b1, self.b2, r1, r2, r3]
-        D += [self.b1, self.b2, r1]
+        D += [self.b1, self.b2, r1, r2, r3]
+        # D += [self.b1, self.b2, r1]
 
         t1 = self.term_ports['T1']
         t2 = self.term_ports['T2']

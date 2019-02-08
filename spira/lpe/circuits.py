@@ -103,7 +103,7 @@ class Circuit(__CellContainer__):
         self.mask.netlist
 
     def create_routes(self, routes):
-        if self.cell.name is not None:
+        if self.cell is not None:
             for e in self.cell.elementals:
                 if issubclass(type(e), spira.Polygons):
                     routes += e
