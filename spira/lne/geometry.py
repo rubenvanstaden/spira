@@ -91,14 +91,15 @@ class GeometryAbstract(__Geometry__):
         elems = ElementList()
         for ply in self.polygons:
             for i, points in enumerate(ply.polygons):
-                pp = numpy_to_list(points, self.height, unit=RDD.GDSII.GRID)
+                c_points = numpy_to_list(points, self.height, unit=RDD.GDSII.GRID)
                 surface_label = '{}_{}_{}_{}'.format(
                     ply.gdslayer.number,
                     ply.gdslayer.datatype,
                     GeometryAbstract._ID, i
                 )
                 gp = self.geom.add_polygon(
-                    pp, lcar=0.01,
+                    c_points, 
+                    lcar=0.1,
                     make_surface=True,
                     holes=self.holes
                 )

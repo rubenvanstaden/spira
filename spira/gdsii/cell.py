@@ -5,6 +5,7 @@ from copy import copy, deepcopy
 
 from spira import param
 
+
 from spira.core.lists import ElementList
 from spira.lne import *
 from spira.gdsii import *
@@ -57,13 +58,21 @@ class __Cell__(gdspy.Cell, CellInitializer):
             self.elementals += other
         return self
 
-    def __deepcopy__(self, memo):
-        from copy import deepcopy
-        kwargs = {}
-        for p in self.__external_fields__():
-            if p != 'name':
-                kwargs[p] = deepcopy(getattr(self, p), memo)
-        return self.__class__(**kwargs)
+    # def __deepcopy__(self, memo):
+
+    #     cell = self.modified_copy(
+    #         name=self.name + '_d',
+    #         # node_id=deepcopy(self.node_id)
+    #     )
+    #     return cell
+
+        # from copy import deepcopy
+        # kwargs = {}
+        # for p in self.__external_fields__():
+        #     # kwargs[p] = deepcopy(getattr(self, p), memo)
+        #     # if p != 'name':
+        #     #     kwargs[p] = deepcopy(getattr(self, p), memo)
+        # return self.__class__(**kwargs)
 
 
 class Netlist(__Cell__):
@@ -80,13 +89,13 @@ class Netlist(__Cell__):
         pass
 
     def create_merge_nets(self):
-        g = nx.disjoint_union_all(self.nets)
-        return g
+        self.g = nx.disjoint_union_all(self.nets)
+        return self.g
 
     def create_connect_subgraphs(self):
         graphs = list(nx.connected_component_subgraphs(self.g))
-        g = nx.disjoint_union_all(graphs)
-        return g
+        self.g = nx.disjoint_union_all(graphs)
+        return self.g
 
     def nodes_combine(self, algorithm):
         """ Combine all nodes of the same type into one node. """
@@ -111,8 +120,8 @@ class Netlist(__Cell__):
 
         def compare_d2d(u, v):
             if ('device' in self.g.node[u]) and ('device' in self.g.node[v]):
-                # if self.g.node[u]['device'].id == self.g.node[v]['device'].id:
-                if self.g.node[u]['device'] == self.g.node[v]['device']:
+                if self.g.node[u]['device'].node_id == self.g.node[v]['device'].node_id:
+                # if self.g.node[u]['device'] == self.g.node[v]['device']:
                 # print(self.g.node[u]['device'])
                 # if self.g.node[u]['device'].node_id == self.g.node[v]['device'].node_id:
                     return True
@@ -170,6 +179,9 @@ class Netlist(__Cell__):
             for key, value in Polygon.items():
                 if n == list(key)[0]:
                     g1.node[n]['surface'] = value[n]
+
+        self.g = g1
+
         return g1
 
 

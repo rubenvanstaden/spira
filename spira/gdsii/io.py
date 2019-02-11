@@ -8,7 +8,39 @@ from spira.gdsii.utils import scale_coord_down as scd
 from spira.gdsii.utils import scale_coord_up as scu
 from spira.gdsii.utils import scale_polygon_down as spd
 from spira.gdsii.utils import scale_polygon_up as spu
+from copy import copy, deepcopy
 from spira import LOG
+
+
+
+import numpy as np
+from numpy.linalg import norm
+
+
+def __reflect__(points, p1=(0,0), p2=(1,0)):
+    points = np.array(points); p1 = np.array(p1); p2 = np.array(p2)
+    if np.asarray(points).ndim == 1:
+        t = np.dot((p2-p1), (points-p1))/norm(p2-p1)**2
+        pts = 2*(p1 + (p2-p1)*t) - points
+    if np.asarray(points).ndim == 2:
+        t = np.dot((p2-p1), (p2-p1))/norm(p2-p1)**2
+        pts = np.array([2*(p1 + (p2-p1)*t) - p for p in points])
+    return pts
+
+
+def __rotate__(points, angle=45, center=(0,0)):
+    angle = angle*np.pi/180
+    ca = np.cos(angle)
+    sa = np.sin(angle)
+    sa = np.array((-sa, sa))
+    c0 = np.array(center)
+    if np.asarray(points).ndim == 2:
+        pts = (points - c0) * ca + (points - c0)[:,::-1] * sa + c0
+        pts = np.round(pts, 6)
+    if np.asarray(points).ndim == 1:
+        pts = (points - c0) * ca + (points - c0)[::-1] * sa + c0
+        pts = np.round(pts, 6)
+    return pts
 
 
 def current_path(filename):
@@ -38,40 +70,27 @@ def wrap_references(cell, c2dmap):
     """ Move all cell centers to the origin. """
     for e in cell.elements:
         if isinstance(e, gdspy.CellReference):
-            D = c2dmap[cell]
-            ref_device = c2dmap[e.ref_cell]
-            o = ref_device.center
-            ref_device.move(midpoint=o, destination=(0,0))
+            ref_device = deepcopy(c2dmap[e.ref_cell])
+            center = ref_device.center
+            ref_device.move(midpoint=center, destination=(0,0))
 
-            if e.rotation is None:
-                e.rotation = 0
-
+            midpoint = np.array(scu(e.origin))
             S = spira.SRef(structure=ref_device)
 
-            pos = [0, 0]
-
-            # Q1
-            if (o[0] >= 0) and (o[1] > 0):
-                pos = -o
-            # Q2
-            elif (o[0] < 0) and (o[1] >= 0):
-                pos = o
-            # Q3
-            elif (o[0] <= 0) and (o[1] < 0):
-                pos = -o
-            # Q4
-            elif (o[0] > 0) and (o[1] <= 0):
-                pos = o
+            if e.x_reflection == True:
+                center = __reflect__(points=center)
+            if e.rotation is not None:
+                center = __rotate__(points=center, angle=e.rotation)
 
             tf = {
-                'midpoint': scu(e.origin) + pos,
+                'midpoint': midpoint + center,
                 'rotation': e.rotation,
                 'magnification': e.magnification,
                 'reflection': e.x_reflection
             }
 
             S.transform(tf)
-            D += S
+            c2dmap[cell] += S
 
 
 def import_gds(filename, cellname=None, flatten=False, duplayer={}):

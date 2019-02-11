@@ -1,4 +1,5 @@
 import spira
+import pyclipper
 import numpy as np
 
 from spira import param
@@ -89,6 +90,56 @@ class Term(PortAbstract):
         port = spira.Port(name='P2', midpoint=self.midpoint, gdslayer=self.layer2)
         return port
 
+    def point_inside(self, polygon):
+        if pyclipper.PointInPolygon(self.endpoints[0], polygon) != 0:
+            return True
+        elif pyclipper.PointInPolygon(self.endpoints[1], polygon) != 0:
+            return True
+
+    @property
+    def endpoints(self):
+        dx = self.width/2*np.cos((self.orientation - 90)*np.pi/180)
+        dy = self.width/2*np.sin((self.orientation - 90)*np.pi/180)
+        left_point = self.midpoint - np.array([dx,dy])
+        right_point = self.midpoint + np.array([dx,dy])
+        return np.array([left_point, right_point])
+
+    @endpoints.setter
+    def endpoints(self, points):
+        p1, p2 = np.array(points[0]), np.array(points[1])
+        self.midpoint = (p1+p2)/2
+        dx, dy = p2-p1
+        self.orientation = np.arctan2(dx,dy)*180/np.pi
+        self.width = np.sqrt(dx**2 + dy**2)
+
+
+class Dummy(Term):
+    """
+    Terminals are horizontal ports that connect SRef instances
+    in the horizontal plane. They typcially represents the
+    i/o ports of a components.
+
+    Examples
+    --------
+    >>> term = spira.Term()
+    """
+
+    def __repr__(self):
+        return ("[SPiRA: Dummy] (name {}, number {}, midpoint {}, " +
+            "width {}, orientation {})").format(self.name,
+            self.gdslayer.number, self.midpoint,
+            self.width, self.orientation
+        )
+
+    def _copy(self):
+        new_port = Dummy(parent=self.parent,
+            name=self.name,
+            midpoint=self.midpoint,
+            width=self.width,
+            length=self.length,
+            gdslayer=deepcopy(self.gdslayer),
+            orientation=self.orientation)
+        return new_port
 
 
 

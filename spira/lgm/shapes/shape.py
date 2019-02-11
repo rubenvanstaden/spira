@@ -14,6 +14,7 @@ class __Shape__(FieldInitializer):
     gdslayer = param.LayerField()
     clockwise = param.BoolField(default=False)
     points = param.PointArrayField(fdef_name='create_points')
+
     apply_merge = param.DataField(fdef_name='create_merged_points')
     simplify = param.DataField(fdef_name='create_simplified_points')
     edges = param.DataField(fdef_name='create_edge_lines')
@@ -157,8 +158,10 @@ class Shape(__Shape__):
     #     return self.__repr__()
 
     def __deepcopy__(self, memo):
+        # self.points = np.array(self.points)
         shape = self.modified_copy(
             points = deepcopy(self.points),
+            # points = np.copy(self.points),
             gdslayer = deepcopy(self.gdslayer)
         )
         return shape

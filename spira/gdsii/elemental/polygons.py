@@ -23,10 +23,17 @@ class __Polygon__(gdspy.PolygonSet, ElementalInitializer):
         return hash(self.id)
 
     def __deepcopy__(self, memo):
+        # ply = Polygons(
+        #     shape=deepcopy(self.shape),
+        #     gdslayer=deepcopy(self.gdslayer)
+        # )
         ply = self.modified_copy(
             shape=deepcopy(self.shape),
+            # shape=self.shape,
             gdslayer=deepcopy(self.gdslayer),
-            gdspy_commit=deepcopy(self.gdspy_commit))
+            # node_id=deepcopy(self.node_id)
+            # gdspy_commit=deepcopy(self.gdspy_commit)
+        )
         return ply
 
     def __add__(self, other):
@@ -98,11 +105,12 @@ class PolygonAbstract(__Polygon__):
             raise ValueError('Shape type not supported!')
 
         ElementalInitializer.__init__(self, **kwargs)
-        gdspy.PolygonSet.__init__(self,
-            self.shape.points,
+        gdspy.PolygonSet.__init__(
+            self, self.shape.points,
             layer=self.gdslayer.number,
             datatype=self.gdslayer.datatype,
-            verbose=False)
+            verbose=False
+        )
 
     def create_nodes(self):
         """ Created nodes of each point in the polygon array.
@@ -153,7 +161,7 @@ class PolygonAbstract(__Polygon__):
             self.rotate(angle=transform['rotation'])
         if transform['midpoint']:
             self.translate(dx=transform['midpoint'][0], dy=transform['midpoint'][1])
-        # self.shape.points = self.polygons
+        self.shape.points = self.polygons
         return self
 
     def reflect(self, p1=(0,1), p2=(0,0)):
@@ -163,12 +171,13 @@ class PolygonAbstract(__Polygon__):
         return self
 
     def rotate(self, angle=45, center=(0,0)):
+        self.polygons = self.shape.points
         super().rotate(angle=angle*np.pi/180, center=center)
         self.shape.points = self.polygons
         return self
 
     def translate(self, dx, dy):
-        # self.polygons = self.shape.points
+        self.polygons = self.shape.points
         super().translate(dx=dx, dy=dy)
         self.shape.points = self.polygons
         return self
@@ -249,9 +258,9 @@ class Polygons(PolygonAbstract):
         #         "{} vertices, layer {}, datatype {})").format(
         #         sum([len(p) for p in self.shape.points]),
         #         self.gdslayer.number, self.gdslayer.datatype)
-        return ("[SPiRA: Polygon] ({} center, " +
+        return ("[SPiRA: Polygon] ({} center, {} area " +
                 "{} vertices, layer {}, datatype {})").format(
-                self.center, sum([len(p) for p in self.shape.points]),
+                self.center, self.ply_area, sum([len(p) for p in self.shape.points]),
                 self.gdslayer.number, self.gdslayer.datatype)
 
     def __str__(self):

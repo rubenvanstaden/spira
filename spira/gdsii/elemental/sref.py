@@ -49,7 +49,7 @@ class __SRef__(gdspy.CellReference, ElementalInitializer):
     def __deepcopy__(self, memo):
         return SRef(
             structure=deepcopy(self.ref),
-            midpoint=self.midpoint,
+            midpoint=deepcopy(self.midpoint),
             rotation=self.rotation,
             magnification=self.magnification,
             reflection=self.reflection
@@ -109,9 +109,11 @@ class SRefAbstract(__SRef__):
             self.reflect(p1=[0,0], p2=[1,0])
         if transform['rotation']:
             self.rotate(angle=transform['rotation'])
-        if len(transform['midpoint']) != 0:
-        # if transform['midpoint']:
-            self.translate(dx=transform['midpoint'][0], dy=transform['midpoint'][1])
+        # if len(transform['midpoint']) != 0:
+        # # if transform['midpoint']:
+        #     self.translate(dx=transform['midpoint'][0], dy=transform['midpoint'][1])
+        # self.translate(dx=transform['midpoint'][0], dy=transform['midpoint'][1])
+        self.move(midpoint=self.midpoint, destination=transform['midpoint'])
         return self
 
     def flatten(self):
@@ -137,32 +139,6 @@ class SRefAbstract(__SRef__):
             new_port = port._copy()
             self._local_ports[port.name] = new_port.transform(tf)
         return self._local_ports
-
-    # @property
-    # def p_polygons(self):
-    #     """
-    #     This property allows you to access
-    #     my_device_reference.ports, and receive a
-    #     copy of the ports dict which is correctly
-    #     rotated and translated
-    #     """
-    #     # for ply in self._parent_polygons:
-    #     for i, ply in enumerate(self._parent_polygons):
-    #         # print(ply)
-
-    #         tf = {
-    #             'midpoint': self.midpoint,
-    #             'rotation': self.rotation,
-    #             'magnification': self.magnification,
-    #             'reflection': self.reflection
-    #         }
-
-    #         new_ply = ply._copy()
-    #         # self._local_polygons[ply.gdslayer.name] = new_ply.transform(tf)
-    #         name = '{}_{}'.format(ply.name, i)
-    #         self._local_polygons[name] = new_ply.transform(tf)
-    #     # print()
-    #     return self._local_polygons
 
     def move(self, midpoint=(0,0), destination=None, axis=None):
         """

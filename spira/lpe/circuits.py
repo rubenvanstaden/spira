@@ -38,6 +38,7 @@ class BoundingBox(__CellContainer__):
 
         for p in polygons:
             for pl in RDD.PLAYER.get_physical_layers(purposes=['METAL', 'GND']):
+                print(pl)
                 if pl.layer == p.gdslayer:
                     if setter[pl.layer.number] == 'not_set':
                         l1 = spira.Layer(name='BoundingBox', number=pl.layer.number, datatype=9)
@@ -106,6 +107,7 @@ class Circuit(__CellContainer__):
         if self.cell is not None:
             for e in self.cell.elementals:
                 if issubclass(type(e), spira.Polygons):
+                    print(e)
                     routes += e
         return routes
 
@@ -132,15 +134,17 @@ class Circuit(__CellContainer__):
         # FIXME: Assumes level 1 hierarchical cell.
         elems = spira.ElementList()
         if self.cell is None:
-            print('A')
+            print('A: Devices')
             for S in self.elementals.sref:
                 if issubclass(type(S.ref), __Device__):
                     elems += S
         else:
+            print('B: Devices')
             deps = self.cell.dependencies()
             c2dmap = {}
             for key in RDD.DEVICES.keys:
                 D = RDD.DEVICES[key].PCELL
+                print(key)
                 # FIXME!!!
                 D.center = (0,0)
                 for C in deps:
@@ -155,8 +159,12 @@ class Circuit(__CellContainer__):
     def create_boxes(self, boxes):
         """ Generate bounding boxes around each Device. """
         # FIXME: Assumes level 1 hierarchical cell.
+        print('--- Creating boxes ---')
         for S in self.devices:
+            # print(S)
             boxes += BoundingBox(cell=S.ref, midpoint=S.midpoint)
+        # print('boxes')
+        # print(boxes)
         return boxes
 
 

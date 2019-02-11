@@ -29,6 +29,7 @@ class PortAbstract(__Port__):
     orientation = param.IntegerField(default=0)
     parent = param.DataField()
     gdslayer = param.LayerField(name='PortLayer', number=64)
+    color = param.StringField(default='#000000')
 
     def __init__(self, port=None, polygon=None, label=None, **kwargs):
         super().__init__(**kwargs)
@@ -48,22 +49,6 @@ class PortAbstract(__Port__):
             self.label = label
 
         self.arrow = None
-
-    @property
-    def endpoints(self):
-        dx = self.width/2*np.cos((self.orientation - 90)*np.pi/180)
-        dy = self.width/2*np.sin((self.orientation - 90)*np.pi/180)
-        left_point = self.midpoint - np.array([dx,dy])
-        right_point = self.midpoint + np.array([dx,dy])
-        return np.array([left_point, right_point])
-
-    @endpoints.setter
-    def endpoints(self, points):
-        p1, p2 = np.array(points[0]), np.array(points[1])
-        self.midpoint = (p1+p2)/2
-        dx, dy = p2-p1
-        self.orientation = np.arctan2(dx,dy)*180/np.pi
-        self.width = np.sqrt(dx**2 + dy**2)
 
     @property
     def normal(self):

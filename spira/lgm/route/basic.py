@@ -127,8 +127,12 @@ class RouteBasic(spira.Cell):
 
 class Route(spira.Cell):
 
-    port1 = param.DataField()
-    port2 = param.DataField()
+    # port1 = param.DataField()
+    # port2 = param.DataField()
+
+    port1 = param.PortField()
+    port2 = param.PortField()
+
     player = param.PhysicalLayerField()
 
     def validate_parameters(self):
@@ -153,6 +157,9 @@ class Route(spira.Cell):
         r1.move(midpoint=(0,0), destination=self.port1.midpoint)
 
         elems += r1
+
+        # for e in r1.flatten():
+        #     elems += e
 
         return elems
 

@@ -135,7 +135,7 @@ if __name__ == '__main__':
     jj = Jtl(level=2)
 
     # jj.output()
-    # jj.netlist
+    jj.netlist
     jj.mask.output()
 
     spira.LOG.end_print('JTL example finished')

@@ -133,7 +133,7 @@ def c2d(coord):
 
     """ Convert coordinate to 2D. """
     # pp = [coord[i]*1e+8 for i in range(len(list(coord))-1)]
-    pp = [(coord[i]/RDD.GDSII.GRID) for i in range(len(list(coord))-1)]
+    pp = [(coord[i]/(RDD.GDSII.GRID)) for i in range(len(list(coord))-1)]
     return pp
 
 

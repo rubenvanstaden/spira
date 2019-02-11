@@ -255,7 +255,8 @@ class __Field__(metaclass=MetaInitializer):
         override properties using. """
         kwargs = {}
         for p in self.__external_fields__():
-            kwargs[p] = getattr(self, p)
+            # kwargs[p] = getattr(self, p)
+            kwargs[p] = deepcopy(getattr(self, p))
         kwargs.update(override_kwargs)
         return self.__class__(**kwargs)
 

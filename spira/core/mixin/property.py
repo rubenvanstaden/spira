@@ -93,8 +93,10 @@ class CellMixin(__Properties__):
     def terms(self):
         from spira.gdsii.elemental.term import Term
         terms = ElementList()
+        # print('\nTERMS')
         for p in self.ports:
             if isinstance(p, Term):
+                # print(p)
                 terms += p
         return terms
 

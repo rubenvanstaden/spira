@@ -90,8 +90,8 @@ class Jtl(Circuit):
         routes += spira.SRef(r1)
 
         r2 = Route(
-            port1=self.term_ports['T2'],
-            port2=s2.ports['Output'],
+            port1=s2.ports['Output'],
+            port2=self.term_ports['T2'],
             player=RDD.PLAYER.BAS
         )
         routes += spira.SRef(r2)

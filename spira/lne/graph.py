@@ -167,7 +167,7 @@ class GraphAbstract(__Graph__):
 
     def create_union_subgraphs(self):
         # self.g = nx.disjoint_union_all(self.subgraphs.values())
-        print(self.subgraphs)
+        # print(self.subgraphs)
         self.g = nx.disjoint_union_all(self.subgraphs)
 
     def create_connect_subgraphs(self):

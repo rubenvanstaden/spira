@@ -15,7 +15,7 @@ from demo.pdks.components.via import ViaBC
 RDD = get_rule_deck()
 
 
-class JtlVia(Circuit):
+class Jtl2Vias1Crossing(Circuit):
 
     um = param.FloatField(default=1e+6)
 
@@ -27,7 +27,9 @@ class JtlVia(Circuit):
 
     jj1 = param.DataField(fdef_name='create_junction_one')
     jj2 = param.DataField(fdef_name='create_junction_two')
+
     via = param.DataField(fdef_name='create_via')
+    via2 = param.DataField(fdef_name='create_via_two')
 
     def create_junction_one(self):
         jj = Junction()
@@ -45,10 +47,17 @@ class JtlVia(Circuit):
         midpoint = np.array(self.jj1.ports['Output'].midpoint) + np.array([self.dx, 0])
         return spira.SRef(via, midpoint=midpoint)
 
+    def create_via_two(self):
+        via = ViaBC()
+        via.center = (0,0)
+        midpoint = np.array(self.jj1.ports['Output'].midpoint) + np.array([2*self.dx, -2*self.dx])
+        return spira.SRef(via, midpoint=midpoint, rotation=-90)
+
     def create_elementals(self, elems):
         elems += self.jj1
         elems += self.jj2
         elems += self.via
+        elems += self.via2
 
         # for r in self.routes:
         #     elems += r
@@ -62,20 +71,26 @@ class JtlVia(Circuit):
 
         R0 = RouteManhattan(
             port1=self.via.ports['Output'],
+            port2=self.via2.ports['Input'],
+            radius=3*self.um, length=1*self.um,
+            gdslayer=RDD.BAS.LAYER
+        )
+        routes += spira.SRef(R0)
+
+        R1 = RouteManhattan(
+            port1=self.via2.ports['Output'],
             port2=s2.ports['Input'],
             radius=3*self.um, length=1*self.um,
             gdslayer=RDD.BAS.LAYER
         )
-        s3 = spira.SRef(R0)
-        s3.move(midpoint=s3.ports['T1'], destination=R0.port1)
-        routes += s3
+        routes += spira.SRef(R1)
 
-        R1 = Route(
+        R2 = Route(
             port1=s1.ports['Output'],
             port2=self.via.ports['Input'],
             player=RDD.PLAYER.COU
         )
-        routes += spira.SRef(R1)
+        routes += spira.SRef(R2)
 
         r1 = Route(
             port1=self.term_ports['T1'],
@@ -90,6 +105,13 @@ class JtlVia(Circuit):
             player=RDD.PLAYER.BAS
         )
         routes += spira.SRef(r2)
+
+        R3 = RouteManhattan(
+            port1=self.term_ports['D0'],
+            port2=self.term_ports['T3'],
+            player=RDD.PLAYER.BAS
+        )
+        routes += spira.SRef(R3)
 
         return routes
 
@@ -106,6 +128,16 @@ class JtlVia(Circuit):
             orientation=90
         )
 
+        m1 = self.jj2.ports['Output'] + [10*self.um, 10*1e6]
+        # m2 = self.jj2.ports['Output'] + [0*self.um, 10*1e6]
+        m2 = [self.jj1.ports['Output'].midpoint[0] + 2*self.dx, self.jj2.ports['Output'].midpoint[1] +  10*1e6]
+        ports += spira.Term(
+            name='T3',
+            midpoint=m1,
+            orientation=90
+        )
+        ports += spira.Dummy(name='D0', midpoint=m2, orientation=-90)
+
         return ports
 
 
@@ -114,7 +146,7 @@ if __name__ == '__main__':
     name = 'JTL with a Via connection.'
     spira.LOG.header('Running example: {}'.format(name))
 
-    jtl = JtlVia(m2=(30*1e6,-30*1e6), rotation=0, level=2)
+    jtl = Jtl2Vias1Crossing(m2=(50*1e6,-50*1e6), rotation=0, level=2)
 
     jtl.netlist
     jtl.mask.output()

@@ -74,6 +74,7 @@ if __name__ == '__main__':
 
     jj = Junction()
     jj.output(name=name)
+    jj.netlist
 
     spira.LOG.end_print('Junction example finished')
 

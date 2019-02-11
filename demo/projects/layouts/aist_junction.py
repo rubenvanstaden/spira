@@ -10,6 +10,8 @@ if __name__ == '__main__':
     # name = 'aist_dff'
     filename = current_path(name)
     cell = spira.import_gds(filename=filename)
+
+    # FIXME!!!
     # cell.output()
 
     layout = Circuit(cell=cell, level=2)
