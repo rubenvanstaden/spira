@@ -162,11 +162,11 @@ class Gate(__PolygonOperator__):
     def create_netlist(self):
         self.g = self.merge
 
-        # self.g = self.nodes_combine(algorithm='d2d')
-        # self.g = self.generate_branches()
-        # self.detect_dummy_nodes()
-        # self.g = self.generate_branches()
-        # self.g = self.nodes_combine(algorithm='d2d')
+        self.g = self.nodes_combine(algorithm='d2d')
+        self.g = self.generate_branches()
+        self.detect_dummy_nodes()
+        self.g = self.generate_branches()
+        self.g = self.nodes_combine(algorithm='d2d')
 
         self.plot_netlist(G=self.g, graphname=self.name, labeltext='id')
         return self.g

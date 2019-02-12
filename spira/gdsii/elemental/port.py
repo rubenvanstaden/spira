@@ -50,12 +50,6 @@ class PortAbstract(__Port__):
 
         self.arrow = None
 
-    @property
-    def normal(self):
-        dx = np.cos((self.orientation)*np.pi/180)
-        dy = np.sin((self.orientation)*np.pi/180)
-        return np.array([self.midpoint, self.midpoint + np.array([dx,dy])])
-
     def point_inside(self, polygon):
         return pyclipper.PointInPolygon(self.midpoint, polygon) != 0
 
@@ -66,6 +60,12 @@ class PortAbstract(__Port__):
         )
         return c_port
 
+    @property
+    def normal(self):
+        dx = np.cos((self.orientation)*np.pi/180)
+        dy = np.sin((self.orientation)*np.pi/180)
+        return np.array([self.midpoint, self.midpoint + np.array([dx,dy])])
+
     def commit_to_gdspy(self, cell):
         if self.__repr__() not in list(__Port__.__committed__.keys()):
 
@@ -74,7 +74,7 @@ class PortAbstract(__Port__):
             # self.polygon.move(midpoint=self.polygon.center, destination=self.midpoint)
 
             self.polygon.commit_to_gdspy(cell=cell)
-            # self.label.commit_to_gdspy(cell=cell)
+            self.label.commit_to_gdspy(cell=cell)
             if self.arrow:
                 self.arrow.commit_to_gdspy(cell)
             #     self.arrow.move(midpoint=self.arrow.center, destination=self.midpoint)
@@ -87,7 +87,7 @@ class PortAbstract(__Port__):
             # p.polygon.move(midpoint=p.polygon.center, destination=p.midpoint)
 
             p.polygon.commit_to_gdspy(cell=cell)
-            # p.label.commit_to_gdspy(cell=cell)
+            p.label.commit_to_gdspy(cell=cell)
             if p.arrow:
                 p.arrow.commit_to_gdspy(cell)
             #     p.arrow.move(midpoint=p.arrow.center, destination=p.midpoint)
@@ -97,6 +97,9 @@ class PortAbstract(__Port__):
         self.midpoint = [self.midpoint[0], -self.midpoint[1]]
         self.orientation = -self.orientation
         self.orientation = np.mod(self.orientation, 360)
+
+        self.label.reflect()
+        self.label.move(midpoint=self.label.position, destination=self.midpoint)
 
         self.polygon.reflect()
         self.polygon.move(midpoint=self.polygon.center, destination=self.midpoint)
@@ -112,6 +115,9 @@ class PortAbstract(__Port__):
         self.midpoint = self.__rotate__(self.midpoint, angle=angle, center=center)
         self.orientation += angle
         self.orientation = np.mod(self.orientation, 360)
+
+        self.label.rotate(angle=angle)
+        self.label.move(midpoint=self.label.position, destination=self.midpoint)
 
         self.polygon.rotate(angle=angle)
         self.polygon.move(midpoint=self.polygon.center, destination=self.midpoint)
@@ -129,6 +135,7 @@ class PortAbstract(__Port__):
         # self.polygon.translate(dx=dx, dy=dy)
         # self.label.move(midpoint=self.label.position, destination=self.midpoint)
         self.polygon.move(midpoint=self.polygon.center, destination=self.midpoint)
+        self.label.move(midpoint=self.label.position, destination=self.midpoint)
         return self
 
     def move(self, midpoint=(0,0), destination=None, axis=None):

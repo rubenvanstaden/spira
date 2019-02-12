@@ -11,7 +11,7 @@ RDD.desc = 'Process fabrication data for the AIST process from Japan.'
 RDD.GDSII = DataTree()
 RDD.GDSII.TEXT = 64
 RDD.GDSII.UNIT = 1e-6
-RDD.GDSII.GRID = 1e-12
+RDD.GDSII.GRID = 1e-11
 # RDD.GDSII.GRID = 1e-6
 RDD.GDSII.PRECISION = 1e-9
 

@@ -113,6 +113,8 @@ class Circuit(__CircuitContainer__):
                             ports += spira.Term(
                                 name=label.text,
                                 layer1=p1, layer2=p2,
+                                width=port.dx,
+                                length=port.dy,
                                 midpoint=label.position
                             )
         return ports
