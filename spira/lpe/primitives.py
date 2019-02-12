@@ -39,13 +39,13 @@ class __Layout__(__ConstructLayers__):
     lcar = param.IntegerField(default=0.1)
     algorithm = param.IntegerField(default=6)
 
-    get_primitives = param.DataField(fdef_name='get_primitives_function')
+    local_devices = param.DataField(fdef_name='local_devices')
 
     def create_elementals(self, elems):
         super().create_elementals(elems)
         return elems
 
-    def get_primitives_function(self):
+    def get_local_devices(self):
         ports = self.ports
         elems = self.elementals
         prim_elems = ElementList()
@@ -85,7 +85,7 @@ class __Layout__(__ConstructLayers__):
                     algorithm=self.algorithm,
                     layer=pl.layer,
                     polygons=metal_elems,
-                    primitives=self.get_primitives,
+                    primitives=self.local_devices,
                     bounding_boxes=self.cell.boxes
                     # bounding_boxes=self.bounding_boxes
                 )

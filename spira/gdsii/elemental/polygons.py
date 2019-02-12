@@ -23,16 +23,9 @@ class __Polygon__(gdspy.PolygonSet, ElementalInitializer):
         return hash(self.id)
 
     def __deepcopy__(self, memo):
-        # ply = Polygons(
-        #     shape=deepcopy(self.shape),
-        #     gdslayer=deepcopy(self.gdslayer)
-        # )
         ply = self.modified_copy(
             shape=deepcopy(self.shape),
-            # shape=self.shape,
             gdslayer=deepcopy(self.gdslayer),
-            # node_id=deepcopy(self.node_id)
-            # gdspy_commit=deepcopy(self.gdspy_commit)
         )
         return ply
 
@@ -51,28 +44,33 @@ class __Polygon__(gdspy.PolygonSet, ElementalInitializer):
         return self
 
     def __sub__(self, other):
-        pp = bool_operation(subj=self.shape.points,
-                            clip=other.shape.points,
-                            method='difference')
+        pp = bool_operation(
+            subj=self.shape.points,
+            clip=other.shape.points,
+            method='difference'
+        )
         if len(pp) > 0:
             return Polygons(shape=pp, gdslayer=self.gdslayer)
         else:
             return None
 
     def __and__(self, other):
-        pp = bool_operation(subj=other.shape.points,
-                            clip=self.shape.points,
-                            method='intersection')
+        pp = bool_operation(
+            subj=other.shape.points,
+            clip=self.shape.points,
+            method='intersection'
+        )
         if len(pp) > 0:
             return Polygons(shape=pp, gdslayer=self.gdslayer)
         else:
             return None
 
     def __or__(self, other):
-        pp = bool_operation(subj=other.shape.points,
-                            clip=self.shape.points,
-                            method='union')
-
+        pp = bool_operation(
+            subj=other.shape.points,
+            clip=self.shape.points,
+            method='union'
+        )
         if len(pp) > 0:
             return Polygons(shape=pp, gdslayer=self.gdslayer)
         else:
@@ -87,43 +85,6 @@ class __Polygon__(gdspy.PolygonSet, ElementalInitializer):
 class PolygonAbstract(__Polygon__):
 
     gdslayer = param.LayerField()
-    gdspy_commit = param.BoolField()
-    clockwise = param.BoolField(default=True)
-
-    nodes = param.DataField(fdef_name='create_nodes')
-    edges = param.DataField(fdef_name='create_edges')
-
-    def __init__(self, shape, **kwargs):
-        from spira.lgm.shapes.shape import __Shape__
-        from spira.lgm.shapes.shape import Shape
-
-        if issubclass(type(shape), __Shape__):
-            self.shape = shape
-        elif isinstance(shape, (list, set, np.ndarray)):
-            self.shape = Shape(points=shape)
-        else:
-            raise ValueError('Shape type not supported!')
-
-        ElementalInitializer.__init__(self, **kwargs)
-        gdspy.PolygonSet.__init__(
-            self, self.shape.points,
-            layer=self.gdslayer.number,
-            datatype=self.gdslayer.datatype,
-            verbose=False
-        )
-
-    def create_nodes(self):
-        """ Created nodes of each point in the polygon array.
-        Converting a point to a node allows us to bind
-        other objects to that specific node or point. """
-        pass
-
-    def create_edges(self):
-        """ A list of tuples containing two nodes. """
-        pass
-
-    def move_edge(self):
-        pass
 
     def commit_to_gdspy(self, cell):
         if self.__repr__() not in list(PolygonAbstract.__committed__.keys()):
@@ -139,20 +100,9 @@ class PolygonAbstract(__Polygon__):
         for points in self.shape.points:
             c_poly = self.modified_copy(
                 shape=deepcopy([points]),
-                gdspy_commit=self.gdspy_commit
             )
             elems.append(c_poly)
-            if commit_to_gdspy:
-                self.gdspy_commit = True
         return elems
-
-    def merge(self, other):
-        if isinstance(other, (list, set)):
-            pass
-        elif isinstance(other, Polygons):
-            pass
-        else:
-            raise ValueError('Type is not supported for Polygon merging.')
 
     def transform(self, transform):
         if transform['reflection']:
@@ -164,34 +114,31 @@ class PolygonAbstract(__Polygon__):
         self.shape.points = self.polygons
         return self
 
-    def reflect(self, p1=(0,1), p2=(0,0)):
+    # def reflect(self, p1=(0,1), p2=(0,0)):
+    def reflect(self, p1=(0,0), p2=(1,0)):
         for n, points in enumerate(self.shape.points):
             self.shape.points[n] = self.__reflect__(points, p1, p2)
-        # self.shape.points = self.polygons
         return self
 
     def rotate(self, angle=45, center=(0,0)):
-        self.polygons = self.shape.points
+        # self.polygons = self.shape.points
         super().rotate(angle=angle*np.pi/180, center=center)
         self.shape.points = self.polygons
         return self
 
     def translate(self, dx, dy):
-        self.polygons = self.shape.points
+        # self.polygons = self.shape.points
         super().translate(dx=dx, dy=dy)
         self.shape.points = self.polygons
         return self
 
-    def stretch(self, stretch_class):
-        p = stretch_class.apply_to_polygon(self.points[0])
-        self.shape.points = [np.array(p)]
-        return self
-
     def move(self, midpoint=(0,0), destination=None, axis=None):
+        """ Moves elements of the Device from the midpoint point 
+        to the destination. Both midpoint and destination can be 
+        1x2 array-like, Port, or a key corresponding to one of 
+        the Ports in this device """
+
         from spira.gdsii.elemental.port import __Port__
-        """ Moves elements of the Device from the midpoint point to the destination. Both
-         midpoint and destination can be 1x2 array-like, Port, or a key
-         corresponding to one of the Ports in this device """
 
         if destination is None:
             destination = midpoint
@@ -249,15 +196,27 @@ class Polygons(PolygonAbstract):
     """
 
     def __init__(self, shape, **kwargs):
-        super().__init__(shape, **kwargs)
+        from spira.lgm.shapes.shape import __Shape__
+        from spira.lgm.shapes.shape import Shape
+
+        if issubclass(type(shape), __Shape__):
+            self.shape = shape
+        elif isinstance(shape, (list, set, np.ndarray)):
+            self.shape = Shape(points=shape)
+        else:
+            raise ValueError('Shape type not supported!')
+
+        ElementalInitializer.__init__(self, **kwargs)
+        gdspy.PolygonSet.__init__(
+            self, self.shape.points,
+            layer=self.gdslayer.number,
+            datatype=self.gdslayer.datatype,
+            verbose=False
+        )
 
     def __repr__(self):
         if self is None:
             return 'Polygon is None!'
-        # return ("[SPiRA: Polygon] (" +
-        #         "{} vertices, layer {}, datatype {})").format(
-        #         sum([len(p) for p in self.shape.points]),
-        #         self.gdslayer.number, self.gdslayer.datatype)
         return ("[SPiRA: Polygon] ({} center, {} area " +
                 "{} vertices, layer {}, datatype {})").format(
                 self.center, self.ply_area, sum([len(p) for p in self.shape.points]),
@@ -266,12 +225,6 @@ class Polygons(PolygonAbstract):
     def __str__(self):
         return self.__repr__()
 
-    def _copy(self):
-        ply = Polygons(
-            shape=deepcopy(self.shape),
-            gdslayer=deepcopy(self.gdslayer)
-        )
-        return ply
 
 
 

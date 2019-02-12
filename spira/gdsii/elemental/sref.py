@@ -67,21 +67,14 @@ class SRefAbstract(__SRef__):
     magnification = param.FloatField(default=1)
 
     def dependencies(self):
-        """  """
         from spira.gdsii.lists.cell_list import CellList
         d = CellList()
         d.add(self.ref)
         d.add(self.ref.dependencies())
         return d
 
-    def _copy(self, level=0):
-        S = SRef(structure=self.ref,
-            midpoint=self.midpoint,
-            rotation=self.rotation,
-            magnification=self.magnification,
-            reflection=self.reflection
-        )
-        return S
+    def flatten(self):
+        return self.ref.flatten()
 
     def flat_copy(self, level=-1, commit_to_gdspy=False):
         """  """
@@ -99,9 +92,12 @@ class SRefAbstract(__SRef__):
         }
 
         el = self.ref.elementals.flat_copy(level-1)
-        # el.transform(transform)
-        flat_elems = el.flatten()
-        flat_elems.transform(transform)
+        el.transform(transform)
+
+        # el = self.ref.elementals.flat_copy(level-1)
+        # flat_elems = el.flatten()
+        # flat_elems.transform(transform)
+
         return el
 
     def transform(self, transform):
@@ -109,15 +105,18 @@ class SRefAbstract(__SRef__):
             self.reflect(p1=[0,0], p2=[1,0])
         if transform['rotation']:
             self.rotate(angle=transform['rotation'])
-        # if len(transform['midpoint']) != 0:
-        # # if transform['midpoint']:
-        #     self.translate(dx=transform['midpoint'][0], dy=transform['midpoint'][1])
-        # self.translate(dx=transform['midpoint'][0], dy=transform['midpoint'][1])
-        self.move(midpoint=self.midpoint, destination=transform['midpoint'])
+        if len(transform['midpoint']) != 0:
+            self.move(midpoint=self.midpoint, destination=transform['midpoint'])
         return self
 
-    def flatten(self):
-        return self.ref.flatten()
+    # def transform(self, transform):
+    #     if 'reflection' in transform:
+    #         self.reflect(p1=[0,0], p2=[1,0])
+    #     if 'rotation' in transform:
+    #         self.rotate(angle=transform['rotation'])
+    #     if 'midpoint' in transform:
+    #         self.move(midpoint=self.midpoint, destination=transform['midpoint'])
+    #     return self
 
     @property
     def ports(self):
@@ -200,7 +199,7 @@ class SRefAbstract(__SRef__):
 
         return self
 
-    def reflect(self, p1=(0,1), p2=(0,0)):
+    def reflect(self, p1=(0,0), p2=(1,0)):
         """  """
         if issubclass(type(p1), __Port__):
             p1 = p1.midpoint
@@ -273,18 +272,11 @@ class SRef(SRefAbstract):
         self.ref = structure
         self._parent_ports = spira.ElementList()
 
-        # self._parent_polygons = structure.elementals.polygons
-        # print(self._parent_polygons)
-
-        # self._parent_polygons = spira.ElementList()
         for p in structure.ports:
             self._parent_ports += p
         for t in structure.terms:
             self._parent_ports += t
         self._local_ports = {port.name:port._copy() for port in self._parent_ports}
-        # self._local_polygons = {port.name:port._copy() for port in self._parent_polygons}
-        # print(self._local_polygons)
-        # self._local_ports = {port.name:port._copy() for port in structure.terms}
 
     def __repr__(self):
         name = self.ref.name

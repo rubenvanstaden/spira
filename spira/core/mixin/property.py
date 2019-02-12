@@ -37,6 +37,29 @@ class __Properties__(object):
 
 class CellMixin(__Properties__):
 
+    __gdspy_cell__ = None
+    __gdspy_cell__witout_posts__ = None
+
+    def __get_gdspy_cell__(self):
+        # TODO: Test gdspy cell here.
+        if self.__gdspy_cell__ is None:
+            self.__set_gdspy_cell__()
+        return self.__gdspy_cell__
+
+    def __set_gdspy_cell__(self):
+        glib = gdspy.GdsLibrary(name=self.name)
+        # cell = deepcopy(self)
+        cell = spira.Cell(name=self.name, elementals=self.elementals)
+        # print(cell.terms)
+        self.__gdspy_cell__ = cell.construct_gdspy_tree(glib)
+
+    def __set_gdspy_cell_withut_ports__(self):
+        glib = gdspy.GdsLibrary(name=self.name)
+        cell = deepcopy(self)
+        print(cell.terms)
+        # self.__gdspy_cell__witout_posts__ = cell.construct_gdspy_tree(glib)
+        self.__gdspy_cell__ = cell.construct_gdspy_tree(glib)
+
     def __wrapper__(self, c, c2dmap):
         # if hasattr(c, 'routes'):
         #     for e in c.routes.flat_elems():
@@ -81,13 +104,29 @@ class CellMixin(__Properties__):
 
     @property
     def bbox(self):
-        glib = gdspy.GdsLibrary(name=self.name)
-        cell = deepcopy(self)
-        cell = self.construct_gdspy_tree(glib)
+        # cell = self.__set_gdspy_cell_withut_ports__()
+
+        cell = self.__get_gdspy_cell__()
         bbox = cell.get_bounding_box()
         if bbox is None:
             bbox = ((0,0),(0,0))
         return np.array(bbox)
+
+    # @property
+    # def bbox(self):
+    #     glib = gdspy.GdsLibrary(name=self.name)
+    #     cell = deepcopy(self)
+    #     cell = self.construct_gdspy_tree(glib)
+    #     bbox = cell.get_bounding_box()
+    #     if bbox is None:
+    #         bbox = ((0,0),(0,0))
+    #     return np.array(bbox)
+
+    @property
+    def pbox(self):
+        (a,b), (c,d) = self.bbox
+        points = [[[a,b], [c,b], [c,d], [a,d]]]
+        return points
 
     @property
     def terms(self):
@@ -153,7 +192,6 @@ class PolygonMixin(__Properties__):
     @center.setter
     def center(self, destination):
         self.move(destination=destination, midpoint=self.center)
-
 
     # def __wrapper__(self, c, c2dmap):
     #     for e in c.elementals.flat_elems():

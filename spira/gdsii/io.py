@@ -110,12 +110,10 @@ def import_gds(filename, cellname=None, flatten=False, duplayer={}):
     elif cellname is None and len(top_level_cells) == 1:
         topcell = top_level_cells[0]
     elif cellname is None and len(top_level_cells) > 1:
-
         # TODO: Add this to logger.
         print('Multiple toplevel cells found:')
         for cell in top_level_cells:
             print(cell)
-
         raise ValueError('[SPiRA] import_gds() There are multiple' +
                          'top-level cells, you must specify cellname' +
                          'to select of one of them')

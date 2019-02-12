@@ -179,10 +179,10 @@ class ElementList(__ElementList__):
                     yield elem
         return _flatten(self._list)
 
-    def flat_copy(self, level=-1, commit_to_gdspy=False):
+    def flat_copy(self, level=-1):
         el = ElementList()
         for e in self._list:
-            el += e.flat_copy(level, commit_to_gdspy)
+            el += e.flat_copy(level)
         if level == -1:
             return el.flatten()
         else:

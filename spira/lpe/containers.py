@@ -1,6 +1,7 @@
 from spira.gdsii.cell import Cell
 from spira.gdsii.elemental.sref import SRef
 from spira import param
+from copy import deepcopy
 
 
 class __CellContainer__(Cell):
@@ -12,35 +13,57 @@ class __CellContainer__(Cell):
         return elems
 
 
-class __CellContainerWithTerminals__(__CellContainer__):
+class __NetContainer__(__CellContainer__):
+    netlist = param.DataField(fdef_name='create_netlist')
+    nets = param.ElementalListField(fdef_name='create_nets')
 
-    # terms = param.TerminalListField()
+    def create_netlist(self):
+        return None
 
-    def create_terminals(self, terms):
-        return terms
-
-
-class __CellContainerWithPorts__(__CellContainer__):
-
-    # ports = param.PortListField()
-
-    def create_ports(self, ports):
-        return ports
+    def create_nets(self, nets):
+        return nets
 
 
-class __CellContainerWithPlanes__(__CellContainer__):
-    """ Extending a Cell with Ground/Sky Planes. """
+class __CircuitContainer__(__NetContainer__):
+    """ Circuit topolgy description: routes, devcies and boudning boxes. """
 
-    # planes = param.PlaneListField()
+    boxes = param.ElementalListField(fdef_name='create_boxes')
+    routes = param.ElementalListField(fdef_name='create_routes')
+    devices = param.ElementalListField(fdef_name='create_devices')
 
-    def create_planes(self, planes):
-        return planes
+    def create_routes(self, routes):
+        return routes
+
+    def create_devices(self, devices):
+        return devices
+
+    def create_boxes(self, boxes):
+        return boxes
+
+    def __cell_swapper__(self, new_cell, c, c2dmap):
+        for e in c.elementals.sref:
+            S = deepcopy(e)
+            print(S)
+            print(S.reflection)
+            print(S.rotation)
+            print('')
+            if e.ref in c2dmap.keys():
+                S.ref = c2dmap[e.ref]
+                new_cell += S
 
 
-class __ElementalContainer__(Cell):
-
-    received_elementals = param.ElementalListField()
-
-    def create_elementals(self, elems):
-        return elems
-
+    # def __cell_swapper__(self, new_cell, c, c2dmap):
+    #     for e in c.elementals.sref:
+    #         # S = deepcopy(e)
+    #         S = e
+    #         # print(S)
+    #         # print(S.rotation)
+    #         # print(S.reflection)
+    #         if e.ref in c2dmap.keys():
+    #             # S.ref = c2dmap[e.ref]
+    #             print(e)
+    #             e.ref = c2dmap[e.ref]
+    #             new_cell += e
+    #             # new_cell += S
+    #             print(e)
+    #         print('')

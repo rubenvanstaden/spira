@@ -21,7 +21,6 @@ class Jtl2Vias1Crossing(Circuit):
 
     m1 = param.MidPointField(default=(0,0))
     m2 = param.MidPointField(default=(0,0))
-    # m3 = param.MidPointField(default=(0,0))
     dx = param.FloatField(default=10*1e6)
     rotation = param.FloatField(default=0)
 

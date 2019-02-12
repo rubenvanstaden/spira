@@ -4,13 +4,17 @@ from spira import shapes
 from spira.rdd import get_rule_deck
 from spira.rdd.technology import ProcessTree
 from demo.pdks import ply
-from spira.lpe.devices import __Via__
+from spira.lpe.devices import Device
 
 
 RDD = get_rule_deck()
 
 
-class ViaBC(__Via__):
+class Via(Device):
+    pass
+
+
+class ViaBC(Via):
     """ Via component for the AIST process. """
 
     __name_prefix__ = 'BC'
@@ -38,7 +42,7 @@ class ViaBC(__Via__):
         return ports
 
 
-# class Via(__Device__):
+# class Via(Device):
 #     """ Via component for the AIST process. """
 
 #     um = param.FloatField(default=1e+6)

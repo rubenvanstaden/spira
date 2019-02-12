@@ -158,7 +158,7 @@ class RouteManhattan90(Route90):
 
         a1 = self.port1.orientation
         a2 = self.port2.orientation
-        print(a1, a2)
+        # print(a1, a2)
 
         # angle_diff = self.port1.orientation - self.port2.orientation
         # angle = np.round(np.abs(np.mod(angle_diff, 360)), 3)
@@ -166,7 +166,7 @@ class RouteManhattan90(Route90):
         angle_diff = self.port2.orientation - self.port1.orientation
         angle = np.round(np.abs(np.mod(angle_diff, 360)), 3)
 
-        print(angle)
+        # print(angle)
 
         # if (a2 == a1-90) or (a2 == a1+270):
         if angle == 90:

@@ -3,178 +3,132 @@ import numpy as np
 from spira import param, shapes
 from spira.lpe import mask
 from demo.pdks import ply
-from spira.lpe.containers import __CellContainer__
+from spira.lpe.containers import __CellContainer__, __NetContainer__, __CircuitContainer__
 from spira.lne.net import Net
 from copy import copy, deepcopy
 from spira.lpe.mask_layers import Metal
-from spira.lpe.devices import __Device__, DeviceLayout
+from spira.lpe.devices import Device, DeviceLayout
 from spira.lpe.devices import Gate
+from spira.lpe.pcells import __PolygonOperator__
 
 from spira.lgm.route.manhattan_base import RouteManhattan
 from spira.lgm.route.basic import RouteShape, RouteBasic, Route
+from spira.lpe.pcells import  __NetlistCell__
+from spira.lpe.boxes import BoundingBox
 
 
 RDD = spira.get_rule_deck()
 
 
-class BoundingBox(__CellContainer__):
-    """ Add a GROUND bbox to Device for primitive and DRC
-    detection, since GROUND is only in Mask Cell. """
+class Circuit(__CircuitContainer__):
+    """ Deconstructs the different hierarchies in the cell. """
 
-    midpoint = param.MidPointField()
-
-    def create_elementals(self, elems):
-        c_cell = deepcopy(self.cell)
-
-        polygons = spira.ElementList()
-        Em = c_cell.elementals.flat_copy()
-        for e in Em:
-            polygons += e
-
-        setter = {}
-        for p in polygons:
-            layer = p.gdslayer.number
-            setter[layer] = 'not_set'
-
-        for p in polygons:
-            for pl in RDD.PLAYER.get_physical_layers(purposes=['METAL', 'GND']):
-                print(pl)
-                if pl.layer == p.gdslayer:
-                    if setter[pl.layer.number] == 'not_set':
-                        l1 = spira.Layer(name='BoundingBox', number=pl.layer.number, datatype=9)
-                        ply = spira.Polygons(shape=self.cell.pbox, gdslayer=l1)
-                        ply.center = self.midpoint
-                        elems += ply
-                        setter[pl.layer.number] = 'already_set'
-        return elems
-
-
-class Circuit(__CellContainer__):
-    """ A Cell encapsulates a set of elementals that
-    describes the layout being generated. """
-
-    routes = param.ElementalListField(fdef_name='create_routes')
-    boxes = param.ElementalListField(fdef_name='create_boxes')
     lcar = param.IntegerField(default=0.1)
     algorithm = param.IntegerField(default=6)
     level = param.IntegerField(default=1)
+
     mask = param.DataField(fdef_name='create_mask')
-    devices = param.DataField(fdef_name='create_devices')
-
-    def __init__(self, elementals=None, ports=None, nets=None, routes=None, boxes=None, library=None, **kwargs):
-        super().__init__(elementals=None, ports=None, nets=None, library=None, **kwargs)
-
-        if routes is not None:
-            self.routes = routes
-        if boxes is not None:
-            self.boxes = boxes
-
-    def __repr__(self):
-        if hasattr(self, 'elementals'):
-            elems = self.elementals
-            return ("[SPiRA: Circuit(\'{}\')] " +
-                    "({} elementals: {} sref, {} cells, {} polygons, " +
-                    "{} labels, {} ports)").format(
-                        self.name,
-                        elems.__len__(),
-                        elems.sref.__len__(),
-                        elems.cells.__len__(),
-                        elems.polygons.__len__(),
-                        elems.labels.__len__(),
-                        self.ports.__len__()
-                    )
-        else:
-            return "[SPiRA: Cell(\'{}\')]".format(self.__class__.__name__)
-
-    # FIXME: Has to be placed here for deepcopy().
-    def __str__(self):
-        return self.__repr__()
-
-    def _copy(self):
-        cell = Circuit(
-            name=self.name,
-            elementals=deepcopy(self.elementals),
-            routes=deepcopy(self.routes),
-            ports=deepcopy(self.ports),
-            nets=self.nets
-        )
-        return cell
-
-    def create_netlist(self):
-        self.mask.netlist
-
-    def create_routes(self, routes):
-        if self.cell is not None:
-            for e in self.cell.elementals:
-                if issubclass(type(e), spira.Polygons):
-                    print(e)
-                    routes += e
-        return routes
 
     def create_mask(self):
         cell = None
         if self.level == 2:
-            cell = Layout(cell=self)
-            # cell = Gate(cell=self, level=2)
+            cell = LayoutConstructor(cell=self)
         elif self.level == 3:
             pass
         elif self.level == 4:
             pass
         return cell
 
-    def w2n(self, new_cell, c, c2dmap):
-        for e in c.elementals:
-            if isinstance(e, spira.SRef):
-                S = deepcopy(e)
-                if e.ref in c2dmap:
-                    S.ref = c2dmap[e.ref]
-                    new_cell += S
-
-    def create_devices(self):
+    def create_devices(self, elems):
         # FIXME: Assumes level 1 hierarchical cell.
-        elems = spira.ElementList()
         if self.cell is None:
-            print('A: Devices')
             for S in self.elementals.sref:
-                if issubclass(type(S.ref), __Device__):
+                if issubclass(type(S.ref), Device):
                     elems += S
         else:
-            print('B: Devices')
-            deps = self.cell.dependencies()
             c2dmap = {}
+            deps = self.cell.dependencies()
             for key in RDD.DEVICES.keys:
-                D = RDD.DEVICES[key].PCELL
-                print(key)
-                # FIXME!!!
-                D.center = (0,0)
+                DeviceTCell = deepcopy(RDD.DEVICES[key].PCELL)
+                DeviceTCell.center = (0,0)
                 for C in deps:
-                    L = DeviceLayout(cell=C, level=1)
-                    D.metals = L.metals
-                    D.contacts = L.contacts
-                    c2dmap.update({C: D})
+                    if 'jj' in C.name:
+                        L = DeviceLayout(name=C.name, cell=C, level=1)
+                        D = DeviceTCell(metals=L.metals, contacts=L.contacts)
+                        c2dmap.update({C: D})
+                    elif 'via' in C.name:
+                        L = DeviceLayout(name=C.name, cell=C, level=1)
+                        D = DeviceTCell(metals=L.metals, contacts=L.contacts)
+                        c2dmap.update({C: D})
             for c in self.cell.dependencies():
-                self.w2n(elems, c, c2dmap)
+                self.__cell_swapper__(elems, c, c2dmap)
         return elems
 
     def create_boxes(self, boxes):
         """ Generate bounding boxes around each Device. """
         # FIXME: Assumes level 1 hierarchical cell.
-        print('--- Creating boxes ---')
         for S in self.devices:
-            # print(S)
-            boxes += BoundingBox(cell=S.ref, midpoint=S.midpoint)
-        # print('boxes')
-        # print(boxes)
+            boxes += BoundingBox(
+                cell=S.ref,
+                midpoint=S.midpoint,
+                rotation=S.rotation,
+                reflection=S.reflection,
+                magnification=S.magnification
+            )
         return boxes
 
+    def create_routes(self, routes):
+        if self.cell is not None:
+            elems = spira.ElementList()
+            for e in self.cell.elementals:
+                if issubclass(type(e), spira.Polygons):
+                    elems += e
+            R = RouteManhattan(elementals=elems)
+            routes += spira.SRef(R)
+        return routes
 
-class Layout(__CellContainer__):
-    """  """
+    def create_ports(self, ports):
+        if self.cell is not None:
+            flat_elems = self.cell.flat_copy()
+            port_elems = flat_elems.get_polygons(layer=RDD.PURPOSE.TERM)
+            label_elems = flat_elems.labels
+            for port in port_elems:
+                for label in label_elems:
+                    lbls = label.text.split(' ')
+                    s_p1, s_p2 = lbls[1], lbls[2]
+                    p1, p2 = None, None
+                    for m1 in RDD.PLAYER.get_physical_layers(purposes=['METAL', 'GND']):
+                        if m1.layer.name == s_p1:
+                            p1 = spira.Layer(name=lbls[0],
+                                number=m1.layer.number,
+                                datatype=RDD.GDSII.TEXT
+                            )
+                        if m1.layer.name == s_p2:
+                            p2 = spira.Layer(name=lbls[0],
+                                number=m1.layer.number,
+                                datatype=RDD.GDSII.TEXT
+                            )
+                    if p1 and p2 :
+                        if label.point_inside(ply=port.polygons[0]):
+                            ports += spira.Term(
+                                name=label.text,
+                                layer1=p1, layer2=p2,
+                                midpoint=label.position
+                            )
+        return ports
+
+    def create_netlist(self):
+        self.mask.netlist
+
+
+class LayoutConstructor(__NetlistCell__):
+    """ Constructs a single cell from the hierarchical 
+    levels generated by the Circuit class. """
 
     def create_elementals(self, elems):
         elems += spira.SRef(Gate(cell=self.cell))
-        for e in self.cell.devices:
-            elems += e
+        # for e in self.cell.devices:
+            # elems += e
         return elems
 
     def create_nets(self, nets):
@@ -190,7 +144,8 @@ class Layout(__CellContainer__):
 
     def create_netlist(self):
         self.g = self.merge
-        self.g = self.nodes_combine(algorithm='d2s')
+
+        # self.g = self.nodes_combine(algorithm='d2s')
         # self.g = self.nodes_combine(algorithm='d2d')
         # self.g = self.nodes_combine(algorithm='s2s')
 

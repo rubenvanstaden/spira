@@ -180,7 +180,7 @@ RDD.DEVICES = ProcessTree()
 class TCellJunction(DynamicDataTree):
     def initialize(self):
         from demo.pdks.components.junction import Junction
-        self.PCELL = Junction()
+        self.PCELL = Junction
 
 RDD.DEVICES.JJ = TCellJunction()
 

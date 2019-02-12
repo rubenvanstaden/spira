@@ -8,6 +8,10 @@ from spira.gdsii.elemental.port import PortAbstract
 from spira.core.initializer import ElementalInitializer
 
 
+# FIXME!
+# RDD = spira.get_rule_deck()
+
+
 class Term(PortAbstract):
     """
     Terminals are horizontal ports that connect SRef instances
@@ -37,14 +41,12 @@ class Term(PortAbstract):
                 p1=[0, 0],
                 p2=[self.width, self.length]
             )
-            pp = spira.Polygons(
+            self.polygon = spira.Polygons(
                 shape=rect_shape,
                 gdslayer=spira.Layer(number=63)
             )
-            pp.rotate(angle=self.orientation, center=self.midpoint)
-            # pp.rotate(angle=90-self.orientation, center=self.midpoint)
-            pp.move(midpoint=pp.center, destination=self.midpoint)
-            self.polygon = pp
+            self.polygon.rotate(angle=self.orientation+90, center=self.midpoint)
+            self.polygon.move(midpoint=self.polygon.center, destination=self.midpoint)
         else:
             self.polygon = polygon
 
@@ -55,14 +57,14 @@ class Term(PortAbstract):
         )
 
         arrow_shape.apply_merge
-        # arrow_shape.rotate(angle=self.orientation)
 
         self.arrow = spira.Polygons(
             shape=arrow_shape,
             gdslayer=spira.Layer(number=77)
         )
 
-        self.arrow.rotate(angle=self.orientation)
+        self.arrow.rotate(angle=self.orientation+90)
+        self.arrow.move(midpoint=self.arrow.center, destination=self.midpoint)
         # self.arrow.rotate(angle=90-self.orientation)
 
     def __repr__(self):
@@ -73,13 +75,15 @@ class Term(PortAbstract):
         )
 
     def _copy(self):
-        new_port = Term(parent=self.parent,
+        new_port = Term(
+            parent=self.parent,
             name=self.name,
-            midpoint=self.midpoint,
-            width=self.width,
+            midpoint=deepcopy(self.midpoint),
+            width=deepcopy(self.width),
             length=self.length,
             gdslayer=deepcopy(self.gdslayer),
-            orientation=self.orientation)
+            orientation=deepcopy(self.orientation)
+        )
         return new_port
 
     def create_port1(self):

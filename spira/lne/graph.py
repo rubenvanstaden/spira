@@ -77,14 +77,14 @@ def _loops(g):
 #     return False
 
 
-def _valid_path(g, path, master_nodes):
+def _valid_path(g, path, branch_nodes):
     """
     Test if path contains masternodes.
     """
     valid = True
 
-    if path[0] not in master_nodes: valid = False
-    if path[-1] not in master_nodes: valid = False
+    if path[0] not in branch_nodes: valid = False
+    if path[-1] not in branch_nodes: valid = False
 
     for n in path[1:-1]:
         if 'device' in g.node[n]:
@@ -96,15 +96,15 @@ def _valid_path(g, path, master_nodes):
 
 
 def store_master_nodes(g):
-    master_nodes = list()
+    branch_nodes = list()
     for n in g.nodes():
         if 'device' in g.node[n]:
             # if _is_master(g, n):
             # masternodes = (spira.JunctionDevice, spira.UserNode, spira.PortNode)
             # if issubclass(type(g.node[n]['device']), masternodes):
             if isinstance(g.node[n]['device'], BaseVia):
-                master_nodes.append(n)
-    return master_nodes
+                branch_nodes.append(n)
+    return branch_nodes
 
 
 def subgraphs(lgraph):
@@ -146,7 +146,7 @@ class __Graph__(ElementalInitializer):
 
         self.usernodes = []
         self.seriesnodes = []
-        self.master_nodes = []
+        self.branch_nodes = []
 
     def __repr__(self):
         return ("[SPiRA: Graph] ({} nodes, {} edges)").format(self.g.number_of_nodes(),
@@ -318,7 +318,7 @@ class UserGraph(GraphAbstract):
 
         self.create_combine_nodes()
 
-        self.master_nodes = store_master_nodes(self.g)
+        self.branch_nodes = store_master_nodes(self.g)
 
 
 class SeriesGraph(UserGraph):
@@ -338,7 +338,7 @@ class SeriesGraph(UserGraph):
         print('running series graph node filtering')
         sub_graphs = nx.connected_component_subgraphs(self.g, copy=True)
 
-        self.master_nodes = store_master_nodes(self.g)
+        self.branch_nodes = store_master_nodes(self.g)
 
         def _remove_label(lbl, node_id=None):
             params = {}
@@ -371,13 +371,13 @@ class SeriesGraph(UserGraph):
         def _update_paths(g, paths, s, t):
             if nx.has_path(g, s, t):
                 for p in nx.all_simple_paths(g, source=s, target=t):
-                    if _valid_path(g, p, self.master_nodes):
+                    if _valid_path(g, p, self.branch_nodes):
                         paths.append(p)
 
         for sg in sub_graphs:
             paths = PathList()
-            for s in self.master_nodes:
-                targets = filter(lambda x: x not in [s], self.master_nodes)
+            for s in self.branch_nodes:
+                targets = filter(lambda x: x not in [s], self.branch_nodes)
                 for t in targets:
                     _update_paths(self.g, paths, s, t)
 

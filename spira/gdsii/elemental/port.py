@@ -57,36 +57,40 @@ class PortAbstract(__Port__):
         return np.array([self.midpoint, self.midpoint + np.array([dx,dy])])
 
     def point_inside(self, polygon):
-        # return pyclipper.PointInPolygon(self.midpoint, polygon) > 0
         return pyclipper.PointInPolygon(self.midpoint, polygon) != 0
 
-    def flat_copy(self, level=-1, commit_to_gdspy=False):
-        c_port = self.modified_copy(midpoint=self.midpoint)
-        if commit_to_gdspy:
-            self.gdspy_write = True
+    def flat_copy(self, level=-1):
+        c_port = self.modified_copy(
+            midpoint=self.midpoint,
+            orientation=self.orientation
+        )
         return c_port
 
     def commit_to_gdspy(self, cell):
         if self.__repr__() not in list(__Port__.__committed__.keys()):
+
+            # self.polygon.reflect()
             # self.polygon.rotate(angle=self.orientation)
             # self.polygon.move(midpoint=self.polygon.center, destination=self.midpoint)
+
             self.polygon.commit_to_gdspy(cell=cell)
-            self.label.commit_to_gdspy(cell=cell)
+            # self.label.commit_to_gdspy(cell=cell)
             if self.arrow:
-                # print(self.orientation)
-                # self.arrow.rotate(angle=45)
-                # self.arrow.rotate(angle=90)
-                # self.arrow.rotate(angle=90-self.orientation)
-                self.arrow.move(midpoint=self.arrow.center, destination=self.midpoint)
                 self.arrow.commit_to_gdspy(cell)
+            #     self.arrow.move(midpoint=self.arrow.center, destination=self.midpoint)
             __Port__.__committed__.update({self.__repr__(): self})
         else:
             p = __Port__.__committed__[self.__repr__()]
+
+            # p.polygon.reflect()
+            # p.polygon.rotate(angle=p.orientation)
+            # p.polygon.move(midpoint=p.polygon.center, destination=p.midpoint)
+
             p.polygon.commit_to_gdspy(cell=cell)
-            p.label.commit_to_gdspy(cell=cell)
+            # p.label.commit_to_gdspy(cell=cell)
             if p.arrow:
-                p.arrow.move(midpoint=p.arrow.center, destination=p.midpoint)
                 p.arrow.commit_to_gdspy(cell)
+            #     p.arrow.move(midpoint=p.arrow.center, destination=p.midpoint)
 
     def reflect(self):
         """ Reflect around the x-axis. """
@@ -95,9 +99,11 @@ class PortAbstract(__Port__):
         self.orientation = np.mod(self.orientation, 360)
 
         self.polygon.reflect()
+        self.polygon.move(midpoint=self.polygon.center, destination=self.midpoint)
 
         if self.arrow:
             self.arrow.reflect()
+            self.arrow.move(midpoint=self.arrow.center, destination=self.midpoint)
 
         return self
 
@@ -105,25 +111,23 @@ class PortAbstract(__Port__):
         """ Rotate port around the center with angle. """
         self.midpoint = self.__rotate__(self.midpoint, angle=angle, center=center)
         self.orientation += angle
-        # self.orientation = angle
         self.orientation = np.mod(self.orientation, 360)
 
         self.polygon.rotate(angle=angle)
-        # print(angle)
-        # print(self.orientation)
-        # print('')
-        # self.polygon.rotate(angle=self.orientation)
+        self.polygon.move(midpoint=self.polygon.center, destination=self.midpoint)
 
         if self.arrow:
             self.arrow.rotate(angle=angle)
             # self.arrow.rotate(angle=np.mod(angle, 90))
+            self.arrow.move(midpoint=self.arrow.center, destination=self.midpoint)
 
         return self
 
     def translate(self, dx, dy):
         """ Translate port by dx and dy. """
         self.midpoint = self.midpoint + np.array([dx, dy])
-        self.label.move(midpoint=self.label.position, destination=self.midpoint)
+        # self.polygon.translate(dx=dx, dy=dy)
+        # self.label.move(midpoint=self.label.position, destination=self.midpoint)
         self.polygon.move(midpoint=self.polygon.center, destination=self.midpoint)
         return self
 
@@ -165,19 +169,15 @@ class PortAbstract(__Port__):
 
         # self.label.move(midpoint=self.label.position, destination=self.midpoint)
         # self.polygon.move(midpoint=self.polygon.center, destination=self.midpoint)
+        # self.polygon.move(midpoint=(100000000000,0), destination=self.midpoint)
         # if self.arrow:
         #     self.arrow.move(midpoint=self.polygon.center, destination=self.midpoint)
 
         return self
 
-    def stretch(self, stretch_class):
-        """ Stretch port by with the given strecth class. """
-        p = stretch_class.apply(self.midpoint)
-        self.midpoint = p
-        return self
-
     def transform(self, T):
         """ Transform port with the given transform class. """
+
         if T['reflection']:
             self.reflect()
             # self.label.reflect()
@@ -185,17 +185,21 @@ class PortAbstract(__Port__):
             # if self.arrow:
             #     self.arrow.reflect()
         if T['rotation']:
-            self.rotate(angle=T['rotation'], center=(0,0))
+            self.rotate(angle=T['rotation'])
+            # self.rotate(angle=T['rotation'], center=(0,0))
             # self.label.rotate(angle=T['rotation'])
             # self.polygon.rotate(angle=T['rotation'])
             # if self.arrow:
             #     self.arrow.rotate(angle=T['rotation'])
         if T['midpoint']:
             self.translate(dx=T['midpoint'][0], dy=T['midpoint'][1])
+            # self.move(midpoint=self.midpoint, destination=T['midpoint'])
             # self.label.move(midpoint=self.label.position, destination=self.midpoint)
-            # self.polygon.move(midpoint=self.polygon.center, destination=self.midpoint)
+            # self.polygon.move(midpoint=self.polygon.center, destination=T['midpoint'])
             # if self.arrow:
             #     self.arrow.move(midpoint=self.polygon.center, destination=self.midpoint)
+
+        # self.polygon.move(midpoint=self.polygon.center, destination=self.midpoint)
 
         return self
 
@@ -215,7 +219,6 @@ class Port(PortAbstract):
     """
 
     edge_width = param.FloatField(default=0.25*1e6)
-    # edge_width = param.FloatField(default=0.25)
 
     def __init__(self, port=None, polygon=None, **kwargs):
         super().__init__(port=port, polygon=polygon, **kwargs)
