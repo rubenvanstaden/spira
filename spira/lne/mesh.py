@@ -236,7 +236,7 @@ class MeshLabeled(MeshAbstract):
                     bnodes = []
                     for n in self.g.nodes():
                         s = self.g.node[n]['surface']
-                        if s.point_inside(ply.polygons[0]):
+                        if s.encloses(ply.polygons[0]):
                             bnodes.append(n)
 
                     device_node = None
@@ -271,12 +271,12 @@ class MeshLabeled(MeshAbstract):
     def add_device_label(self, n, D, points):
         if isinstance(D, (spira.Port, spira.Term)):
             if not isinstance(D, spira.Dummy):
-                if D.point_inside(points):
+                if D.encloses(points):
                     self.g.node[n]['device'] = D
         else:
             for p in D.ports:
                 if p.gdslayer.number == self.layer.number:
-                    if p.point_inside(points):
+                    if p.encloses(points):
                         if 'device' in self.g.node[n]:
                             self.add_new_node(n, D, p.midpoint)
                         else:

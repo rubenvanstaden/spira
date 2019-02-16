@@ -319,7 +319,7 @@ class FieldInitializer(__Field__):
 
     def __validation_check__(self):
         if not self.validate_parameters():
-            raise AttributeError('Width is not large enough.')
+            raise AttributeError('Invalid parameter!')
 
     def validate_parameters(self):
         return True

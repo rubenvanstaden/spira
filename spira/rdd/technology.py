@@ -145,7 +145,19 @@ class TechnologyLibrary(__DataTree__):
         self.desc = description
 
     def __repr__(self):
-        return "< RDD %s>" % self.name
+        return '<RDD {}>'.format(self.name)
+
+    def __eq__(self, other):
+        if isinstance(other, str):
+            return self.name == other
+        else:
+            raise ValueError('Not Implemented!')
+
+    def __neq__(self, other):
+        if isinstance(other, str):
+            return self.name != other
+        else:
+            raise ValueError('Not Implemented!')
 
 
 class DynamicDataTree(__DataTree__):

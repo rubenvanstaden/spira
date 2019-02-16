@@ -20,6 +20,8 @@ class PortList(TypedList):
             for port in self._list:
                 if port.name == i:
                     return port._copy()
+                    # return copy(port)
+                    # return deepcopy(port)
         else:
             return self._list[i]
 

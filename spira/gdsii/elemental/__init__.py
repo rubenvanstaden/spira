@@ -3,7 +3,6 @@ from spira.gdsii.elemental.term import Term
 from spira.gdsii.elemental.term import Dummy
 from spira.gdsii.elemental.sref import SRef
 from spira.gdsii.elemental.aref import ARef
-# from spira.gdsii.elemental.path import Path
 from spira.gdsii.elemental.label import Label
 from spira.gdsii.elemental.polygons import Polygons
 

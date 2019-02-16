@@ -6,7 +6,6 @@ from spira.rdd import get_rule_deck
 from demo.pdks.components.junction import Junction
 from spira.lgm.route.manhattan_base import RouteManhattan
 from spira.lgm.route.basic import RouteShape, RouteBasic, Route
-from spira.lpe.primitives import SLayout
 from spira.lpe.containers import __CellContainer__
 from spira.lpe.circuits import Circuit
 from demo.pdks.components.via import ViaBC
@@ -59,8 +58,8 @@ class JtlVia(Circuit):
         elems += self.via
         elems += self.via2
 
-        # for r in self.routes:
-        #     elems += r
+        for r in self.routes:
+            elems += r
 
         return elems
 
@@ -76,7 +75,6 @@ class JtlVia(Circuit):
             gdslayer=RDD.BAS.LAYER
         )
         s3 = spira.SRef(R0)
-        # s3.move(midpoint=s3.ports['T1'], destination=R0.port1)
         routes += s3
 
         R1 = RouteManhattan(
@@ -86,24 +84,23 @@ class JtlVia(Circuit):
             gdslayer=RDD.BAS.LAYER
         )
         r4 = spira.SRef(R1)
-        # r4.move(midpoint=r4.ports['T1'], destination=R1.port1)
         routes += r4
 
-        R2 = Route(
+        R2 = RouteManhattan(
             port1=s1.ports['Output'],
             port2=self.via.ports['Input'],
             player=RDD.PLAYER.COU
         )
         routes += spira.SRef(R2)
 
-        r1 = Route(
+        r1 = RouteManhattan(
             port1=self.term_ports['T1'],
             port2=s1.ports['Input'],
             player=RDD.PLAYER.BAS
         )
         routes += spira.SRef(r1)
 
-        r2 = Route(
+        r2 = RouteManhattan(
             port1=self.term_ports['T2'],
             port2=s2.ports['Output'],
             player=RDD.PLAYER.BAS

@@ -6,7 +6,6 @@ from spira.rdd import get_rule_deck
 from demo.pdks.components.junction import Junction
 from spira.lgm.route.manhattan_base import RouteManhattan
 from spira.lgm.route.basic import RouteShape, RouteBasic, Route
-from spira.lpe.primitives import SLayout
 from spira.lpe.containers import __CellContainer__
 from spira.lpe.circuits import Circuit
 from demo.pdks.components.via import ViaBC

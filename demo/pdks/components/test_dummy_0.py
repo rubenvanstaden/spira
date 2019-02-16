@@ -6,7 +6,6 @@ from spira.rdd import get_rule_deck
 from demo.pdks.components.junction import Junction
 from spira.lgm.route.manhattan_base import RouteManhattan
 from spira.lgm.route.basic import RouteShape, RouteBasic, Route
-from spira.lpe.primitives import SLayout
 from spira.lpe.containers import __CellContainer__
 from spira.lpe.circuits import Circuit
 
@@ -18,7 +17,7 @@ class TIntersection(Circuit):
 
     um = param.FloatField(default=1e+6)
     num = param.IntegerField(default=2)
-    dx = param.FloatField(default=1000*1e+6)
+    dx = param.FloatField(default=100*1e+6)
     dy = param.FloatField(default=10*1e+6)
 
     pos = param.DataField(fdef_name='get_position')

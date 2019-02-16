@@ -11,7 +11,7 @@ class DrawLayoutAbstract(object):
     """ Class that generates output formates
     for a layout or library containing layouts. """
 
-    def output(self, name=None, path='current'):
+    def output(self, name=None, show_edge_ports=False, path='current'):
         """ Plot the cell or library using gdspy viewer. """
         from spira.gdsii.cell import __Cell__
 

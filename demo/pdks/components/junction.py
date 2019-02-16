@@ -33,8 +33,8 @@ class Junction(Device):
         return elems
 
     def create_ports(self, ports):
-        ports += spira.Term(name='Input', midpoint=(0.25*self.um, 3.5*self.um), orientation=90, width=2*self.um)
-        ports += spira.Term(name='Output', midpoint=(3.6*self.um, 3.5*self.um), orientation=-90)
+        # ports += spira.Term(name='Input', midpoint=(0.25*self.um, 3.5*self.um), orientation=90, width=2*self.um)
+        # ports += spira.Term(name='Output', midpoint=(3.6*self.um, 3.5*self.um), orientation=-90)
         return ports
 
 
@@ -45,20 +45,22 @@ if __name__ == '__main__':
 
     jj = Junction()
 
-    # jj.output(name=name)
-    # jj.netlist
+    jj.center = (0,0)
 
     cell = spira.Cell('Junction Test')
-    cell += spira.SRef(jj, midpoint=(50*1e6,0), rotation=90, reflection=True)
+    cell += spira.SRef(jj, midpoint=(0*1e6,0), rotation=0, reflection=True)
+    cell += spira.SRef(jj, midpoint=(20*1e6,0), rotation=90, reflection=True)
+    cell += spira.SRef(jj, midpoint=(40*1e6,0), rotation=180, reflection=True)
+    cell += spira.SRef(jj, midpoint=(60*1e6,0), rotation=270, reflection=True)
+    cell += spira.SRef(jj, midpoint=(80*1e6,0), rotation=360, reflection=True)
 
-    c2 = spira.Cell('Junction Test 2')
-    c2 += spira.SRef(cell, midpoint=(50*1e6,0))
+    cell += spira.SRef(jj, midpoint=(0*1e6,-20*1e6), rotation=0)
+    cell += spira.SRef(jj, midpoint=(20*1e6,-20*1e6), rotation=90)
+    cell += spira.SRef(jj, midpoint=(40*1e6,-20*1e6), rotation=180)
+    cell += spira.SRef(jj, midpoint=(60*1e6,-20*1e6), rotation=270)
+    cell += spira.SRef(jj, midpoint=(80*1e6,-20*1e6), rotation=360)
 
-    # cell.output(name=name)
-    # cell.netlist
-
-    c2.output(name=name)
-    c2.netlist
+    cell.output(name=name)
 
     spira.LOG.end_print('Junction example finished')
 

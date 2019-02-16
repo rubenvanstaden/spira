@@ -80,7 +80,7 @@ def offset_operation(layer, size):
         raise ValueError('please select the Offset function to use')
 
 
-def point_inside(points, position):
+def encloses(points, position):
     assert position is not None, 'No label position found.'
     if pyclipper.PointInPolygon(position, points) != 0:
         return True
@@ -90,7 +90,7 @@ def point_inside(points, position):
 def labeled_polygon_id(position, polygons):
     for i, spira_polygon in enumerate(polygons):
         for j, points in enumerate(spira_polygon.polygons):
-            if point_inside(points, position):
+            if encloses(points, position):
                 return spira_polygon.id
     return None
 

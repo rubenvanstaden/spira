@@ -13,23 +13,16 @@ class Route90(__Manhattan__):
 
     def create_quadrant_one(self):
 
-        # p1=[self.port1.midpoint[0], self.port1.midpoint[1]]
-        # p2=[self.port2.midpoint[0], self.port2.midpoint[1]]
-
         p1, p2 = self.p1, self.p2
 
         self.b1.connect(port=self.b1.ports['P2'], destination=self.term_ports['T1'])
         h = (p2[1]-p1[1]) - self.radius
         self.b1.move(midpoint=self.b1.ports['P2'], destination=[0, h])
-        # h = 2*(p2[0]-p1[0]) - self.radius
-        # h = (p2[1]-p1[1]) - self.radius
-        # self.b1.move(midpoint=self.b1.ports['P2'], destination=[h, 0])
 
         r1 = self._generate_route(self.b1.ports['P2'], self.term_ports['T1'])
         r2 = self._generate_route(self.b1.ports['P1'], self.term_ports['T2'])
 
         D = spira.Cell(name='Route_Q1_90')
-        # D += [self.b1, r1]
         D += [self.b1, r1, r2]
 
         D += self.term_ports['T1']
@@ -40,12 +33,7 @@ class Route90(__Manhattan__):
 
         return spira.SRef(D)
 
-        # return [self.b1, r1, r2]
-
     def create_quadrant_two(self):
-
-        # p1=[self.port1.midpoint[0], self.port1.midpoint[1]]
-        # p2=[self.port2.midpoint[0], self.port2.midpoint[1]]
 
         p1, p2 = self.p1, self.p2
 
@@ -57,7 +45,6 @@ class Route90(__Manhattan__):
         r2 = self._generate_route(self.b1.ports['P2'], self.term_ports['T2'])
 
         D = spira.Cell(name='Route_Q2_90')
-        # D += [self.b1, r1]
         D += [self.b1, r1, r2]
 
         D += self.term_ports['T1']
@@ -68,12 +55,7 @@ class Route90(__Manhattan__):
 
         return spira.SRef(D)
 
-        # return [self.b1, r1, r2]
-
     def create_quadrant_three(self):
-
-        # p1=[self.port1.midpoint[0], self.port1.midpoint[1]]
-        # p2=[self.port2.midpoint[0], self.port2.midpoint[1]]
 
         p1, p2 = self.p1, self.p2
 
@@ -83,25 +65,6 @@ class Route90(__Manhattan__):
 
         r1 = self._generate_route(self.b2.ports['P1'], self.term_ports['T1'])
         r2 = self._generate_route(self.b2.ports['P2'], self.term_ports['T2'])
-
-        return [self.b2, r1, r2]
-
-    def create_quadrant_four(self):
-
-        # p1=[self.port1.midpoint[0], self.port1.midpoint[1]]
-        # p2=[self.port2.midpoint[0], self.port2.midpoint[1]]
-
-        p1, p2 = self.p1, self.p2
-
-        self.b2.connect(port=self.b2.ports['P2'], destination=self.term_ports['T1'])
-        h = p2[1] + self.radius
-        self.b2.move(midpoint=self.b2.ports['P2'], destination=[0, h])
-        # h = self.term_ports['T1'][1]
-        # print(h)
-        # self.b2.move(midpoint=self.b2.ports['P2'], destination=[0, h])
-
-        r1 = self._generate_route(self.b2.ports['P2'], self.term_ports['T1'])
-        r2 = self._generate_route(self.b2.ports['P1'], self.term_ports['T2'])
 
         D = spira.Cell(name='Route_Q4_90')
         D += [self.b1, r1, r2]
@@ -114,16 +77,32 @@ class Route90(__Manhattan__):
 
         return spira.SRef(D)
 
-        # return [self.b2, r2]
-        # return [self.b2, r1, r2]
+    def create_quadrant_four(self):
+
+        p1, p2 = self.p1, self.p2
+
+        self.b2.connect(port=self.b2.ports['P2'], destination=self.term_ports['T1'])
+        h = p2[1] + self.radius
+        self.b2.move(midpoint=self.b2.ports['P2'], destination=[0, h])
+
+        r1 = self._generate_route(self.b2.ports['P2'], self.term_ports['T1'])
+        r2 = self._generate_route(self.b2.ports['P1'], self.term_ports['T2'])
+
+        D = spira.Cell(name='Route_Q4_90')
+        D += [self.b2, r1, r2]
+
+        D += self.term_ports['T1']
+        D += self.term_ports['T2']
+
+        D.rotate(angle=self.port1.orientation, center=self.p1)
+        D.move(midpoint=self.term_ports['T1'], destination=self.port1)
+
+        return spira.SRef(D)
 
 
 class RouteManhattan90(Route90):
 
     def create_elementals(self, elems):
-
-        # p1 = [self.port1.midpoint[0], self.port1.midpoint[1]]
-        # p2 = [self.port2.midpoint[0], self.port2.midpoint[1]]
 
         p1, p2 = self.p1, self.p2
 
@@ -147,53 +126,94 @@ class RouteManhattan90(Route90):
 
     def create_ports(self, ports):
 
-        # FIXME!!!!
-        # p1 = [self.port1.midpoint[0], self.port1.midpoint[1]]
-        # p2 = [self.port2.midpoint[0], self.port2.midpoint[1]]
-
         p1, p2 = self.p1, self.p2
-
-        # angle = self.port1.orientation
-        # if np.round(np.abs(np.mod(angle, 360)), 3) != 180:
 
         a1 = self.port1.orientation
         a2 = self.port2.orientation
-        # print(a1, a2)
-
-        # angle_diff = self.port1.orientation - self.port2.orientation
-        # angle = np.round(np.abs(np.mod(angle_diff, 360)), 3)
 
         angle_diff = self.port2.orientation - self.port1.orientation
         angle = np.round(np.abs(np.mod(angle_diff, 360)), 3)
+        a = np.mod(self.port1.orientation, 360)
 
-        # print(angle)
+        p1_angle = np.mod(self.port1.orientation, 360)
 
-        # if (a2 == a1-90) or (a2 == a1+270):
+        # if (p1_angle == 90) or (p1_angle == 270):
+        #     if (a2 == a1-90) or (a2 == a1+270):
+        #         print('1. YES!!!')
+        #         ports += spira.Term(name='T1',
+        #             width=self.port1.width,
+        #             orientation=0
+        #             # orientation=self.port1.orientation
+        #         )
+        #         ports += spira.Term(name='T2',
+        #             midpoint=list(np.subtract(p2, p1)),
+        #             width=self.port2.width,
+        #             orientation=90
+        #             # orientation=self.port2.orientation
+        #         )
+        #     if (a2 == a1+90) or (a2 == a1-270):
+        #         print('2. YES!!!')
+        #         ports += spira.Term(name='T1',
+        #             width=self.port1.width,
+        #             # orientation=180
+        #             orientation=0
+        #         )
+        #         ports += spira.Term(name='T2',
+        #             midpoint=list(np.subtract(p2, p1)),
+        #             width=self.port2.width,
+        #             # orientation=90
+        #             orientation=90
+        #         )
+
+        # if (p1_angle == 0) or (p1_angle == 180):
+        #     if angle == 90:
+        #         print('A')
+        #         ports += spira.Term(name='T1',
+        #             width=self.port1.width,
+        #             orientation=0
+        #             # orientation=self.port1.orientation
+        #         )
+        #         ports += spira.Term(name='T2',
+        #             midpoint=list(np.subtract(p2, p1)),
+        #             width=self.port2.width,
+        #             orientation=90
+        #             # orientation=self.port2.orientation
+        #         )
+        #     else:
+        #         print('B')
+        #         ports += spira.Term(name='T1',
+        #             width=self.port1.width,
+        #             orientation=0
+        #             # orientation=self.port1.orientation
+        #         )
+        #         ports += spira.Term(name='T2',
+        #             midpoint=list(np.subtract(p2, p1)),
+        #             width=self.port2.width,
+        #             orientation=-90
+        #             # orientation=self.port2.orientation
+        #         )
+
         if angle == 90:
             print('A')
-            ports += spira.Term(name='T1', 
-                width=self.port1.width, 
+            ports += spira.Term(name='T1',
+                width=self.port1.width,
                 orientation=0
-                # orientation=self.port1.orientation
             )
             ports += spira.Term(name='T2',
                 midpoint=list(np.subtract(p2, p1)),
                 width=self.port2.width,
                 orientation=90
-                # orientation=self.port2.orientation
             )
         else:
             print('B')
-            ports += spira.Term(name='T1', 
-                width=self.port1.width, 
+            ports += spira.Term(name='T1',
+                width=self.port1.width,
                 orientation=0
-                # orientation=self.port1.orientation
             )
             ports += spira.Term(name='T2',
                 midpoint=list(np.subtract(p2, p1)),
                 width=self.port2.width,
                 orientation=-90
-                # orientation=self.port2.orientation
             )
 
         return ports

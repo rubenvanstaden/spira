@@ -3,7 +3,7 @@ import numpy
 import inspect
 import numpy as np
 import spira
-from copy import deepcopy
+from copy import copy, deepcopy
 
 from spira import param
 from spira.gdsii.elemental.port import __Port__
@@ -62,7 +62,7 @@ class __SRef__(gdspy.CellReference, ElementalInitializer):
 class SRefAbstract(__SRef__):
 
     midpoint = param.MidPointField()
-    rotation = param.FloatField(default=0)
+    rotation = param.FloatField(default=None)
     reflection = param.BoolField(default=False)
     magnification = param.FloatField(default=1)
 
@@ -93,30 +93,7 @@ class SRefAbstract(__SRef__):
 
         el = self.ref.elementals.flat_copy(level-1)
         el.transform(transform)
-
-        # el = self.ref.elementals.flat_copy(level-1)
-        # flat_elems = el.flatten()
-        # flat_elems.transform(transform)
-
         return el
-
-    def transform(self, transform):
-        if transform['reflection']:
-            self.reflect(p1=[0,0], p2=[1,0])
-        if transform['rotation']:
-            self.rotate(angle=transform['rotation'])
-        if len(transform['midpoint']) != 0:
-            self.move(midpoint=self.midpoint, destination=transform['midpoint'])
-        return self
-
-    # def transform(self, transform):
-    #     if 'reflection' in transform:
-    #         self.reflect(p1=[0,0], p2=[1,0])
-    #     if 'rotation' in transform:
-    #         self.rotate(angle=transform['rotation'])
-    #     if 'midpoint' in transform:
-    #         self.move(midpoint=self.midpoint, destination=transform['midpoint'])
-    #     return self
 
     @property
     def ports(self):
@@ -136,45 +113,13 @@ class SRefAbstract(__SRef__):
             }
 
             new_port = port._copy()
+            # new_port = copy(port)
+            # new_port = deepcopy(port)
             self._local_ports[port.name] = new_port.transform(tf)
         return self._local_ports
 
     def move(self, midpoint=(0,0), destination=None, axis=None):
-        """
-        Moves the DeviceReference from the midpoint point to the destination. Both
-        midpoint and destination can be 1x2 array-like, Port, or a key
-        corresponding to one of the Ports in this device_ref
-        """
-
-        if destination is None:
-            destination = midpoint
-            midpoint = (0,0)
-
-        if issubclass(type(midpoint), __Port__):
-            o = midpoint.midpoint
-        elif np.array(midpoint).size == 2:
-            o = midpoint
-        elif midpoint in self.ports:
-            o = self.ports[midpoint].midpoint
-        else:
-            raise ValueError("[DeviceReference.move()] ``midpoint`` " +
-                             "not array-like, a port, or port name")
-
-        if issubclass(type(destination), __Port__):
-            d = destination.midpoint
-        elif np.array(destination).size == 2:
-            d = destination
-        elif destination in self.ports:
-            d = self.ports[destination].midpoint
-        else:
-            raise ValueError("[DeviceReference.move()] ``destination`` " +
-                             "not array-like, a port, or port name")
-
-        if axis == 'x':
-            d = (d[0], o[1])
-        if axis == 'y':
-            d = (o[0], d[1])
-
+        d, o = super().move(midpoint=midpoint, destination=destination, axis=axis)
         dxdy = np.array(d) - np.array(o)
         self.midpoint = np.array(self.midpoint) + dxdy
         return self
@@ -187,25 +132,23 @@ class SRefAbstract(__SRef__):
         return self
 
     def rotate(self, angle=45, center=(0,0)):
-        """  """
         if angle == 0:
             return self
-
+        if self.rotation is None:
+            self.rotation = 0
         if issubclass(type(center), __Port__):
             center = center.midpoint
-
         self.rotation += angle
         self.midpoint = self.__rotate__(self.midpoint, angle, center)
-
         return self
 
     def reflect(self, p1=(0,0), p2=(1,0)):
-        """  """
         if issubclass(type(p1), __Port__):
             p1 = p1.midpoint
         if issubclass(type(p2), __Port__):
             p2 = p2.midpoint
-
+        if self.rotation is None:
+            self.rotation = 0
         p1 = np.array(p1)
         p2 = np.array(p2)
 
@@ -276,7 +219,8 @@ class SRef(SRefAbstract):
             self._parent_ports += p
         for t in structure.terms:
             self._parent_ports += t
-        self._local_ports = {port.name:port._copy() for port in self._parent_ports}
+        # self._local_ports = {port.name:copy(port) for port in self._parent_ports}
+        self._local_ports = {port.name:deepcopy(port) for port in self._parent_ports}
 
     def __repr__(self):
         name = self.ref.name

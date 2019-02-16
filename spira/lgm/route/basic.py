@@ -135,12 +135,12 @@ class Route(spira.Cell):
 
     player = param.PhysicalLayerField()
 
-    def validate_parameters(self):
-        if self.port1.width < self.player.data.WIDTH:
-            return False
-        if self.port2.width < self.player.data.WIDTH:
-            return False
-        return True
+    # def validate_parameters(self):
+    #     if self.port1.width < self.player.data.WIDTH:
+    #         return False
+    #     if self.port2.width < self.player.data.WIDTH:
+    #         return False
+    #     return True
 
     def create_elementals(self, elems):
 

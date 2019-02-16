@@ -48,6 +48,24 @@ def PolygonField(shape=[]):
     return DataFieldDescriptor(default=F)
 
 
+# def OrientedPolygonField(shape=[]):
+#     from spira.gdsii.elemental.polygons import OrientedPolygon
+#     F = OrientedPolygon(shape)
+#     return DataFieldDescriptor(default=F)
+
+
+def LabelField(position=[]):
+    from spira.gdsii.elemental.label import Label
+    F = Label(position)
+    return DataFieldDescriptor(default=F)
+
+
+def GroupElementalField(default=None):
+    from spira.gdsii.group import GroupElementals
+    F = GroupElementals(elementals=default)
+    return DataFieldDescriptor(default=F)
+
+
 def PortField():
     from spira.gdsii.elemental.port import Port
     F = Port()
@@ -61,7 +79,7 @@ def ShapeField(points=[]):
 
 
 def LayerField(name='', number=0, datatype=0, **kwargs):
-    from spira.gdsii.layer import Layer
+    from spira.layers.layer import Layer
     F = Layer(name=name, number=number, datatype=datatype, **kwargs)
     return DataFieldDescriptor(default=F, **kwargs)
 
@@ -81,7 +99,7 @@ def CellField(default=None, name=None, elementals=None, ports=None, library=None
     if default is None:
         F = None
     else:
-        F = Cell(name=name, elementals=elementals, library=library)
+        F = Cell(name=default, elementals=elementals, library=library)
     return DataFieldDescriptor(default=F)
 
 

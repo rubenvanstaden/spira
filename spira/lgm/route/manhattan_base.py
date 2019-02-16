@@ -41,16 +41,11 @@ class RouteManhattan(__Manhattan__):
         # if self.p2[1] == self.p1[1] or self.p2[0] == self.p1[0]:
         #     raise ValueError('Error - ports must be at different x AND y values.')
 
-        if (self.p2[1] == self.p1[1]) or (self.p2[0] == self.p1[0]):
-            R1 = Route(
-                port1=self.port1,
-                port2=self.port2,
-                player=self.player
-            )
-        else:
-            angle_diff = self.port1.orientation - self.port2.orientation
-            angle = np.round(np.abs(np.mod(angle_diff, 360)), 3)
-            if (angle == 180) or (angle == 0):
+        angle_diff = self.port1.orientation - self.port2.orientation
+        angle = np.round(np.abs(np.mod(angle_diff, 360)), 3)
+
+        if (angle == 0) or (angle == 180):
+            if (self.p2[1] != self.p1[1]) or (self.p2[0] != self.p1[0]):
                 R1 = RouteManhattan180(
                     port1=self.port1,
                     port2=self.port2,
@@ -58,14 +53,49 @@ class RouteManhattan(__Manhattan__):
                     length=self.length,
                     gdslayer=self.gdslayer
                 )
-            else:
-                R1 = RouteManhattan90(
+
+        if angle == 180:
+            if (self.p2[1] == self.p1[1]) or (self.p2[0] == self.p1[0]):
+                R1 = Route(
                     port1=self.port1,
                     port2=self.port2,
-                    radius=self.radius,
-                    length=self.length,
-                    gdslayer=self.gdslayer
+                    player=self.player
                 )
+
+        if (angle == 90) or (angle == 270):
+            R1 = RouteManhattan90(
+                port1=self.port1,
+                port2=self.port2,
+                radius=self.radius,
+                length=self.length,
+                gdslayer=self.gdslayer
+            )
+
+
+
+        # if (self.p2[1] == self.p1[1]) or (self.p2[0] == self.p1[0]):
+        #     R1 = Route(
+        #         port1=self.port1,
+        #         port2=self.port2,
+        #         player=self.player
+        #     )
+        # else:
+        #     if (angle == 180) or (angle == 0):
+        #         R1 = RouteManhattan180(
+        #             port1=self.port1,
+        #             port2=self.port2,
+        #             radius=self.radius,
+        #             length=self.length,
+        #             gdslayer=self.gdslayer
+        #         )
+        #     else:
+        #         R1 = RouteManhattan90(
+        #             port1=self.port1,
+        #             port2=self.port2,
+        #             radius=self.radius,
+        #             length=self.length,
+        #             gdslayer=self.gdslayer
+        #         )
 
         for p in R1.ports:
             self.ports += p

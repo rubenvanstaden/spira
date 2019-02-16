@@ -14,7 +14,7 @@ from spira.core.initializer import FieldInitializer
 class RectangleShape(Shape):
 
     p1 = param.PointField(default=(0,0))
-    p2 = param.PointField(default=(2,2))
+    p2 = param.PointField(default=(2*1e6,2*1e6))
 
     def create_points(self, points):
         pts = [[self.p1[0], self.p1[1]], [self.p1[0], self.p2[1]],
@@ -87,7 +87,7 @@ class CircleShape(Shape):
 
 class ConvexPolygon(Shape):
 
-    radius = param.FloatField(default=1.0)
+    radius = param.FloatField(default=1.0*1e6)
     num_sides = param.IntegerField(default=6)
     
     def create_points(self, pts):
@@ -130,12 +130,19 @@ class TriangleShape(BasicTriangle):
 
 class ArrowShape(TriangleShape):
 
+    endpoints = param.DataField(fdef_name='create_endpoints')
+
+    def create_endpoints(self):
+        print(self.c)
+        p = [0, -3*self.c]
+        return p
+
     # TODO: Implement point_list properties.
     def create_points(self, points):
         points = super().create_points(points)
         height = 3*self.c
         box = BoxShape(width=self.b/2, height=height)
-        box.move(pos=(0,-height/2))
+        box.move(pos=(0, -height/2))
         points.extend(box.points)
         return points
 

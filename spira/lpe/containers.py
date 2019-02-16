@@ -25,7 +25,7 @@ class __NetContainer__(__CellContainer__):
 
 
 class __CircuitContainer__(__NetContainer__):
-    """ Circuit topolgy description: routes, devcies and boudning boxes. """
+    """ Circuit topology description: routes, devcies and boudning boxes. """
 
     boxes = param.ElementalListField(fdef_name='create_boxes')
     routes = param.ElementalListField(fdef_name='create_routes')

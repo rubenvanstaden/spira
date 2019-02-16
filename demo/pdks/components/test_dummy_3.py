@@ -7,17 +7,15 @@ from demo.pdks.components.junction import Junction
 from spira.lgm.route.manhattan_base import RouteManhattan
 from demo.pdks import ply
 from spira.lgm.route.basic import RouteShape, RouteBasic, Route
-from spira.lpe.primitives import SLayout
-from spira.lpe.containers import __CellContainer__
 from spira.lpe.circuits import Circuit
-from spira.lpe.devices import DeviceLayout, __Device__
+from spira.lpe.devices import DeviceLayout, Device
 from spira.lgm.shapes.advance import YtronShape
 
 
 RDD = get_rule_deck()
 
 
-class YtronDevice(__Device__):
+class YtronDevice(Device):
 
     um = param.FloatField(default=1e+6)
 

@@ -57,7 +57,7 @@ class Device(__PolygonOperator__):
         self.g = self.nodes_combine(algorithm='d2d')
         self.g = self.nodes_combine(algorithm='s2s')
 
-        self.plot_netlist(G=self.g, graphname=self.name, labeltext='id')
+        # self.plot_netlist(G=self.g, graphname=self.name, labeltext='id')
 
         return self.g
 
@@ -107,6 +107,8 @@ class Gate(__PolygonOperator__):
                             for M in S.ref.elementals:
                                 ply = deepcopy(M.polygon)
                                 ply.move(midpoint=ply.center, destination=S.midpoint)
+                                # P = copy(M.metal_port)
+                                # P = deepcopy(M.metal_port)
                                 P = M.metal_port._copy()
                                 P.connect(D, ply)
                                 d = D.midpoint
@@ -168,7 +170,7 @@ class Gate(__PolygonOperator__):
         self.g = self.generate_branches()
         self.g = self.nodes_combine(algorithm='d2d')
 
-        self.plot_netlist(G=self.g, graphname=self.name, labeltext='id')
+        # self.plot_netlist(G=self.g, graphname=self.name, labeltext='id')
         return self.g
 
 

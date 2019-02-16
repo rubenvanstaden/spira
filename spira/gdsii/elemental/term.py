@@ -4,12 +4,12 @@ import numpy as np
 
 from spira import param
 from copy import copy, deepcopy
-from spira.gdsii.elemental.port import PortAbstract
+from spira.gdsii.elemental.port import PortAbstract, __Port__
 from spira.core.initializer import ElementalInitializer
+from spira.gdsii.group import GroupElementals
 
 
-# FIXME!
-# RDD = spira.get_rule_deck()
+RDD = spira.get_rule_deck()
 
 
 class Term(PortAbstract):
@@ -23,6 +23,9 @@ class Term(PortAbstract):
     >>> term = spira.Term()
     """
 
+    edgelayer = param.LayerField(name='Edge', number=63)
+    arrowlayer = param.LayerField(name='Arrow', number=77)
+
     width = param.FloatField(default=2*1e6)
     length = param.FloatField(default=0.1*1e6)
 
@@ -32,59 +35,73 @@ class Term(PortAbstract):
     port1 = param.DataField(fdef_name='create_port1')
     port2 = param.DataField(fdef_name='create_port2')
 
-    def __init__(self, port=None, polygon=None, **kwargs):
-        super().__init__(port=port, polygon=polygon, **kwargs)
+    edge_polygon = param.DataField(fdef_name='create_edge_polygon')
+    arrow_polygon = param.DataField(fdef_name='create_arrow_polygon')
 
-        from spira import shapes
-        if polygon is None:
-            rect_shape = shapes.RectangleShape(
-                p1=[0, 0],
-                p2=[self.width, self.length]
-            )
-            self.polygon = spira.Polygons(
-                shape=rect_shape,
-                gdslayer=spira.Layer(number=63)
-            )
-            self.polygon.rotate(angle=self.orientation+90, center=self.midpoint)
-            self.polygon.move(midpoint=self.polygon.center, destination=self.midpoint)
-        else:
-            self.polygon = polygon
+    def __init__(self, port=None, elementals=None, polygon=None, **kwargs):
+        ElementalInitializer.__init__(self, **kwargs)
 
-        arrow_shape = shapes.ArrowShape(
-            a = self.width/10,
-            b = self.width/20,
-            c = self.width/5
-        )
-
-        arrow_shape.apply_merge
-
-        self.arrow = spira.Polygons(
-            shape=arrow_shape,
-            gdslayer=spira.Layer(number=77)
-        )
-
-        self.arrow.rotate(angle=self.orientation+90)
-        self.arrow.move(midpoint=self.arrow.center, destination=self.midpoint)
-        # self.arrow.rotate(angle=90-self.orientation)
+        if elementals is not None:
+            self.elementals = elementals
 
     def __repr__(self):
         return ("[SPiRA: Term] (name {}, number {}, midpoint {}, " +
-            "width {}, orientation {})").format(self.name,
+            "width {}, orientation {}, length {})").format(self.name,
             self.gdslayer.number, self.midpoint,
-            self.width, self.orientation
+            self.width, self.orientation, self.length
         )
 
-    def _copy(self):
-        new_port = Term(
-            parent=self.parent,
-            name=self.name,
-            midpoint=deepcopy(self.midpoint),
-            width=deepcopy(self.width),
-            length=self.length,
-            gdslayer=deepcopy(self.gdslayer),
-            orientation=deepcopy(self.orientation)
+    def __str__(self):
+        return self.__repr__()
+
+    def create_elementals(self, elems):
+
+        elems += self.create_edge_polygon()
+        elems += self.create_arrow_polygon()
+        elems += spira.Label(
+            position=self.midpoint,
+            text=self.name,
+            gdslayer=self.gdslayer,
+            texttype=64,
+            color='#808080'
         )
-        return new_port
+
+        return elems
+
+    def create_edge_polygon(self):
+        from spira import shapes
+        rect_shape = shapes.RectangleShape(
+            p1=[0, 0],
+            p2=[self.width, self.length]
+        )
+        ply = spira.Polygons(
+            shape=rect_shape,
+            gdslayer=self.edgelayer,
+        )
+        if self.relfection:
+            ply.reflect()
+        ply.rotate(angle=self.orientation, center=self.midpoint)
+        ply.move(midpoint=ply.center, destination=self.midpoint)
+        return ply
+
+    def create_arrow_polygon(self):
+        from spira import shapes
+        arrow_shape = shapes.ArrowShape(
+            a = self.length,
+            b = self.length/2,
+            c = self.length*2
+        )
+        # arrow_shape.apply_merge
+        ply = spira.Polygons(
+            shape=arrow_shape,
+            gdslayer=self.arrowlayer,
+            direction=90
+        )
+        if self.relfection:
+            ply.reflect()
+        ply.rotate(angle=self.orientation)
+        ply.move(midpoint=ply.center, destination=self.midpoint)
+        return ply
 
     def create_port1(self):
         port = spira.Port(name='P1', midpoint=self.midpoint, gdslayer=self.layer1)
@@ -94,7 +111,7 @@ class Term(PortAbstract):
         port = spira.Port(name='P2', midpoint=self.midpoint, gdslayer=self.layer2)
         return port
 
-    def point_inside(self, polygon):
+    def encloses(self, polygon):
         if pyclipper.PointInPolygon(self.endpoints[0], polygon) != 0:
             return True
         elif pyclipper.PointInPolygon(self.endpoints[1], polygon) != 0:
@@ -116,6 +133,22 @@ class Term(PortAbstract):
         self.orientation = np.arctan2(dx,dy)*180/np.pi
         self.width = np.sqrt(dx**2 + dy**2)
 
+    def _copy(self):
+        new_port = Term(parent=self.parent,
+            name=self.name,
+            # midpoint=self.midpoint,
+            midpoint=deepcopy(self.midpoint),
+            # elementals=deepcopy(self.elementals),
+            # elementals=self.elementals,
+            width=self.width,
+            length=self.length,
+            gdslayer=deepcopy(self.gdslayer),
+            edgelayer=deepcopy(self.edgelayer),
+            arrowlayer=deepcopy(self.arrowlayer),
+            orientation=self.orientation
+        )
+        return new_port
+
 
 class Dummy(Term):
     """
@@ -135,15 +168,27 @@ class Dummy(Term):
             self.width, self.orientation
         )
 
-    def _copy(self):
-        new_port = Dummy(parent=self.parent,
-            name=self.name,
-            midpoint=self.midpoint,
-            width=self.width,
-            length=self.length,
-            gdslayer=deepcopy(self.gdslayer),
-            orientation=self.orientation)
-        return new_port
+    # def _copy(self):
+    #     new_port = Dummy(parent=self.parent,
+    #         name=self.name,
+    #         midpoint=self.midpoint,
+    #         width=self.width,
+    #         length=self.length,
+    #         gdslayer=deepcopy(self.gdslayer),
+    #         orientation=self.orientation)
+    #     return new_port
+
+
+if __name__ == '__main__':
+
+    cell = spira.Cell('Terminal Test')
+
+    term = Term()
+
+    cell += term
+
+    # print(cell.ports)
+    cell.output()
 
 
 

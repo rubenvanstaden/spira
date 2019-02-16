@@ -76,6 +76,7 @@ class CellMixin(__Properties__):
         #             )
 
         for e in c.elementals.flat_elems():
+            # print(e)
             G = c2dmap[c]
             if isinstance(e, spira.SRef):
                 G.add(
@@ -99,6 +100,8 @@ class CellMixin(__Properties__):
             if c.name not in glib.cell_dict.keys():
                 glib.add(c2dmap[c])
         for p in self.get_ports():
+            # print('C')
+            # print(p.ge)
             p.commit_to_gdspy(cell=c2dmap[self])
         return c2dmap[self]
 

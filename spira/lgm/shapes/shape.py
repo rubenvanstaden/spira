@@ -129,7 +129,7 @@ class __Shape__(FieldInitializer):
     def transform(self):
         pass
 
-    def point_inside(self):
+    def encloses(self):
         pass
 
     def index(self, item):
@@ -157,14 +157,19 @@ class Shape(__Shape__):
     # def __str__(self):
     #     return self.__repr__()
 
-    def __deepcopy__(self, memo):
-        # self.points = np.array(self.points)
-        shape = self.modified_copy(
-            points = deepcopy(self.points),
-            # points = np.copy(self.points),
-            gdslayer = deepcopy(self.gdslayer)
-        )
-        return shape
+    # def __deepcopy__(self, memo):
+    #     # self.points = np.array(self.points)
+    #     # shape = self.modified_copy(
+    #     #     points = deepcopy(self.points),
+    #     #     # points = np.copy(self.points),
+    #     #     gdslayer = self.gdslayer
+    #     # )
+    #     shape = self.modified_copy(
+    #         points = deepcopy(self.points),
+    #         # gdslayer = deepcopy(self.gdslayer)
+    #         # gdslayer = self.gdslayer
+    #     )
+    #     return shape
 
     def __contains__(self, point):
         """ Checks if point is on the shape. """

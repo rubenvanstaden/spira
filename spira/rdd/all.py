@@ -4,5 +4,5 @@ from .technology import ProcessTree
 from .technology import PhysicalTree
 from .technology import DynamicDataTree
 
-from spira.gdsii.layer import Layer
+from spira.layers.layer import Layer
 

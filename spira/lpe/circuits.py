@@ -109,12 +109,12 @@ class Circuit(__CircuitContainer__):
                                 datatype=RDD.GDSII.TEXT
                             )
                     if p1 and p2 :
-                        if label.point_inside(ply=port.polygons[0]):
+                        if label.encloses(ply=port.polygons[0]):
                             ports += spira.Term(
                                 name=label.text,
                                 layer1=p1, layer2=p2,
-                                width=port.dx,
-                                length=port.dy,
+                                width=port.dy,
+                                length=port.dx,
                                 midpoint=label.position
                             )
         return ports
@@ -129,8 +129,8 @@ class LayoutConstructor(__NetlistCell__):
 
     def create_elementals(self, elems):
         elems += spira.SRef(Gate(cell=self.cell))
-        # for e in self.cell.devices:
-            # elems += e
+        for e in self.cell.devices:
+            elems += e
         return elems
 
     def create_nets(self, nets):

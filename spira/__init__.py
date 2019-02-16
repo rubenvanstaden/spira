@@ -13,8 +13,8 @@ from spira.gdsii.io import import_gds
 from spira.gdsii.library import Library
 from spira.gdsii.lists.cell_list import CellList
 
-from spira.gdsii.layer import Layer
-
+from spira.gdsii.elemental import *
+from spira.layers import *
 from spira.gdsii import *
 from spira.lne import *
 from spira.lgm import *

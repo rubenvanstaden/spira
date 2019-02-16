@@ -6,7 +6,6 @@ from spira.rdd import get_rule_deck
 from demo.pdks.components.junction import Junction
 from spira.lgm.route.manhattan_base import RouteManhattan
 from spira.lgm.route.basic import RouteShape, RouteBasic, Route
-from spira.lpe.primitives import SLayout
 from spira.lpe.containers import __CellContainer__
 from spira.lpe.circuits import Circuit
 
@@ -58,18 +57,10 @@ class Jtl(Circuit):
         s1 = self.jj1
         s3 = self.jj3
 
-        route = Route(
-            port1=self.term_ports['T1'],
-            port2=s1.ports['Input'],
-            player=RDD.PLAYER.BAS
-        )
+        route = RouteManhattan(port1=self.term_ports['T1'], port2=s1.ports['Input'], player=RDD.PLAYER.BAS)
         r1 = spira.SRef(route)
 
-        route = Route(
-            port1=self.term_ports['T2'],
-            port2=s3.ports['Output'],
-            player=RDD.PLAYER.BAS
-        )
+        route = RouteManhattan(port1=self.term_ports['T2'], port2=s3.ports['Output'], player=RDD.PLAYER.BAS)
         r2 = spira.SRef(route)
 
         return [r1, r2]
@@ -79,21 +70,11 @@ class Jtl(Circuit):
         s2 = self.jj2
         s3 = self.jj3
 
-        R1 = RouteManhattan(
-            port1=s1.ports['Output'],
-            port2=s2.ports['Input'],
-            radius=3*self.um, length=1*self.um,
-            gdslayer=RDD.BAS.LAYER
-        )
+        R1 = RouteManhattan(port1=s1.ports['Output'], port2=s2.ports['Input'], radius=3*self.um, length=1*self.um, gdslayer=RDD.BAS.LAYER)
         r1 = spira.SRef(R1)
         r1.move(midpoint=r1.ports['T1'], destination=R1.port1)
 
-        R2 = RouteManhattan(
-            port1=s2.ports['Output'],
-            port2=s3.ports['Input'],
-            radius=3*self.um, length=1*self.um,
-            gdslayer=RDD.BAS.LAYER
-        )
+        R2 = RouteManhattan(port1=s2.ports['Output'], port2=s3.ports['Input'], radius=3*self.um, length=1*self.um, gdslayer=RDD.BAS.LAYER)
         r2 = spira.SRef(R2)
         r2.move(midpoint=r2.ports['T1'], destination=R2.port1)
 
@@ -104,25 +85,14 @@ class Jtl(Circuit):
         routes += self.term_routes
         routes += self.device_routes
 
-        # for r in self.term_routes:
-        #     routes += r
-        # for r in self.device_routes:
-        #     routes += r
-
         return routes
 
     def create_ports(self, ports):
 
-        ports += spira.Term(
-            name='T1',
-            midpoint=self.jj1.ports['Input'] + [-10*self.um,0],
-            orientation=-90
-        )
-        ports += spira.Term(
-            name='T2',
-            midpoint=self.jj3.ports['Output'] + [10*self.um,0],
-            orientation=90
-        )
+        m1 = self.jj1.ports['Input'] + [-10*self.um,0]
+        m2 = self.jj3.ports['Output'] + [10*self.um,0]
+        ports += spira.Term(name='T1', midpoint=m1, orientation=-90)
+        ports += spira.Term(name='T2', midpoint=m2, orientation=90)
 
         return ports
 

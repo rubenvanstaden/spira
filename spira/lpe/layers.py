@@ -10,7 +10,7 @@ from spira import param
 from spira.gdsii import utils
 
 from spira.gdsii.cell import Cell
-from spira.gdsii.layer import Layer
+from spira.layers.layer import Layer
 from spira.gdsii.elemental.polygons import Polygons
 from spira.gdsii.elemental.label import Label
 from spira.gdsii.elemental.port import Port

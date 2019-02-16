@@ -6,7 +6,6 @@ from spira.rdd import get_rule_deck
 from demo.pdks.components.junction import Junction
 from spira.lgm.route.manhattan_base import RouteManhattan
 from spira.lgm.route.basic import RouteShape, RouteBasic, Route
-from spira.lpe.primitives import SLayout
 from spira.lpe.containers import __CellContainer__
 from spira.lpe.circuits import Circuit
 
@@ -82,14 +81,14 @@ class Jtl(Circuit):
         s3.move(midpoint=s3.ports['T1'], destination=route.port1)
         routes += s3
 
-        r1 = Route(
+        r1 = RouteManhattan(
             port1=self.term_ports['T1'],
             port2=s1.ports['Input'],
             player=RDD.PLAYER.BAS
         )
         routes += spira.SRef(r1)
 
-        r2 = Route(
+        r2 = RouteManhattan(
             port1=s2.ports['Output'],
             port2=self.term_ports['T2'],
             player=RDD.PLAYER.BAS
@@ -134,24 +133,29 @@ if __name__ == '__main__':
 
     jtl = spira.Cell(name='JTL')
 
-    # jj_q1 = Jtl(m2=(30,30), rotation=0)
-    # jj_q2 = Jtl(m2=(-30,30), rotation=0)
-    # jj_q3 = Jtl(m2=(-30,-30), rotation=0)
-    jj_q4 = Jtl(m2=(30*1e6,-30*1e6), rotation=0, level=2)
+    # jj_q1 = Jtl(m2=(30*1e6,30*1e6), rotation=0, level=2)
+    # jj_q2 = Jtl(m2=(-30*1e6,30*1e6), rotation=0, level=2)
+    jj_q3 = Jtl(m2=(-30*1e6,-30*1e6), rotation=0, level=2)
+    # jj_q4 = Jtl(m2=(30*1e6,-30*1e6), rotation=0, level=2)
 
-    # print(jj_q4.mask)
+    # jj_q1.netlist
+    # jj_q1.mask.output()
 
-    jj_q4.netlist
-    jj_q4.mask.output()
+    # jj_q2.netlist
+    # jj_q2.mask.output()
+
+    # jj_q3.netlist
+    # jj_q3.mask.output()
+
+    # jj_q4.netlist
+    # jj_q4.mask.output()
 
     # jj_q4.routes
 
-    # jtl += spira.SRef(jj_q4)
-    # jtl.output(name=name)
+    jtl += spira.SRef(jj_q3, rotation=90)
 
-    # # layout = SLayout(cell=jj_q4, level=1)
-    # layout = SLayout(cell=jj_q4, level=2)
-    # layout.output(name=name)
+    # jtl.netlist
+    jtl.output()
 
     # # jtl += spira.SRef(jj_q1, midpoint=(0,0))
     # # jtl += spira.SRef(jj_q2, midpoint=(100,0))

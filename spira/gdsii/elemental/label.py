@@ -49,7 +49,7 @@ class LabelAbstract(__Label__):
 
     gdslayer = param.LayerField()
     color = param.StringField(default='#g54eff')
-    text = param.StringField()
+    text = param.StringField(default='notext')
     node_id = param.StringField()
     str_anchor = param.StringField(default='o')
     rotation = param.FloatField(default=0)
@@ -77,7 +77,7 @@ class LabelAbstract(__Label__):
         else:
             cell.add(LabelAbstract.__committed__[self.__repr__()])
 
-    def reflect(self, p1=(0,1), p2=(0,0)):
+    def reflect(self, p1=(0,1), p2=(0,0), angle=None):
         self.position = [self.position[0], -self.position[1]]
         self.rotation = self.rotation * (-1)
         self.rotation = np.mod(self.rotation, 360)
@@ -89,29 +89,13 @@ class LabelAbstract(__Label__):
         self.rotation = np.mod(self.rotation, 360)
         return self
 
-    def point_inside(self, ply):
-        # if isinstance(ply, spira.Polygons):
-        #     return pyclipper.PointInPolygon(self.position, ply.shape.points) > 0
-        # elif isinstance(ply, (list, set, np.ndarray)):
-        #     return pyclipper.PointInPolygon(self.position, ply) > 0
-        # else:
-        #     raise ValueError('Not Implemented!')
-
+    def encloses(self, ply):
         if isinstance(ply, spira.Polygons):
             return pyclipper.PointInPolygon(self.position, ply.shape.points) != 0
         elif isinstance(ply, (list, set, np.ndarray)):
             return pyclipper.PointInPolygon(self.position, ply) != 0
         else:
             raise ValueError('Not Implemented!')
-
-    def transform(self, transform):
-        if transform['reflection']:
-            self.reflect(p1=[0,0], p2=[1,0])
-        if transform['rotation']:
-            self.rotate(angle=transform['rotation'])
-        if transform['midpoint']:
-            self.translate(dx=transform['midpoint'][0], dy=transform['midpoint'][1])
-        return self
 
     def flat_copy(self, level=-1, commit_to_gdspy=False):
         c_label = self.modified_copy(position=self.position)
@@ -120,41 +104,9 @@ class LabelAbstract(__Label__):
         return c_label
 
     def move(self, midpoint=(0,0), destination=None, axis=None):
-        from spira.gdsii.elemental.port import __Port__
-
-        if destination is None:
-            destination = midpoint
-            midpoint = [0,0]
-
-        if issubclass(type(midpoint), __Port__):
-            o = midpoint.midpoint
-        elif np.array(midpoint).size == 2:
-            o = midpoint
-        elif midpoint in self.ports:
-            o = self.ports[midpoint].midpoint
-        else:
-            raise ValueError("[PHIDL] [DeviceReference.move()] ``midpoint`` " +
-                             "not array-like, a port, or port name")
-
-        if issubclass(type(destination), __Port__):
-            d = destination.midpoint
-        elif np.array(destination).size == 2:
-            d = destination
-        elif destination in self.ports:
-            d = self.ports[destination].midpoint
-        else:
-            raise ValueError("[PHIDL] [DeviceReference.move()] ``destination`` " +
-                             "not array-like, a port, or port name")
-
-        if axis == 'x':
-            d = (d[0], o[1])
-        if axis == 'y':
-            d = (o[0], d[1])
-
+        d, o = super().move(midpoint=midpoint, destination=destination, axis=axis)
         dx, dy = np.array(d) - o
-
         super().translate(dx, dy)
-
         return self
 
 
@@ -166,15 +118,15 @@ class Label(LabelAbstract):
     def __init__(self, position, **kwargs):
         super().__init__(position, **kwargs)
 
-    # def __repr__(self):
-    #     if self is None:
-    #         return 'Label is None!'
-    #     params = [ self.text, self.position, self.rotation,
-    #                self.magnification, self.reflection,
-    #                self.layer, self.texttype ]
-    #     return ("[SPiRA: Label] (\"{0}\", at ({1[0]}, {1[1]}), " +
-    #             "rot: {2}, mag: {3}, ref: {4}, layer: {5}, " +
-    #             "texttype: {6})").format(*params)
+    def __repr__(self):
+        if self is None:
+            return 'Label is None!'
+        params = [ self.text, self.position, self.rotation,
+                   self.magnification, self.reflection,
+                   self.layer, self.texttype ]
+        return ("[SPiRA: Label] (\"{0}\", at ({1[0]}, {1[1]}), " +
+                "rot: {2}, mag: {3}, ref: {4}, layer: {5}, " +
+                "texttype: {6})").format(*params)
 
 
 

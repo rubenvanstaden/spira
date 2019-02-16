@@ -29,4 +29,51 @@ class TranformationMixin(object):
             pts = np.round(pts, 6)
         return pts
 
+    def transform(self, transform):
+        """ Transform port with the given transform class. """
+        if transform['reflection']:
+            self.reflect()
+        if transform['rotation'] is not None:
+            self.rotate(angle=transform['rotation'])
+        if len(transform['midpoint']) != 0:
+            self.translate(dx=transform['midpoint'][0], dy=transform['midpoint'][1])
+        return self
 
+    def move(self, midpoint=(0,0), destination=None, axis=None):
+        """ Moves elements of the Device from the midpoint point 
+        to the destination. Both midpoint and destination can be 
+        1x2 array-like, Port, or a key corresponding to one of 
+        the Ports in this device """
+
+        from spira.gdsii.elemental.port import __Port__
+
+        if destination is None:
+            destination = midpoint
+            midpoint = [0,0]
+
+        if issubclass(type(midpoint), __Port__):
+            o = midpoint.midpoint
+        elif np.array(midpoint).size == 2:
+            o = midpoint
+        elif midpoint in self.ports:
+            o = self.ports[midpoint].midpoint
+        else:
+            raise ValueError("[PHIDL] [DeviceReference.move()] ``midpoint`` " +
+                             "not array-like, a port, or port name")
+
+        if issubclass(type(destination), __Port__):
+            d = destination.midpoint
+        elif np.array(destination).size == 2:
+            d = destination
+        elif destination in self.ports:
+            d = self.ports[destination].midpoint
+        else:
+            raise ValueError("[PHIDL] [DeviceReference.move()] ``destination`` " +
+                             "not array-like, a port, or port name")
+
+        if axis == 'x':
+            d = (d[0], o[1])
+        if axis == 'y':
+            d = (o[0], d[1])
+
+        return d, o

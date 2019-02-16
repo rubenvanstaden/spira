@@ -12,7 +12,7 @@ RDD.desc = 'Process fabrication data for the MiTLL process from the USA.'
 RDD.GDSII = DataTree()
 RDD.GDSII.TEXT = 18
 RDD.GDSII.UNIT = 1e-6
-RDD.GDSII.GRID = 1e-6
+RDD.GDSII.GRID = 1e-11
 RDD.GDSII.PRECISION = 1e-9
 
 # Overwrite default general rules
@@ -88,6 +88,8 @@ RDD.M8.COLOR = '#E4B1E2'
 RDD.R5 = ProcessTree()
 RDD.R5.LAYER = Layer(name='R5', number=52)
 RDD.R5.MIN_SIZE = 0.5
+# FIXME: Validation is processlayer.py
+RDD.R5.MAX_WIDTH = 5.0
 RDD.R5.COLOR = '#D2B48C'
 
 # --------------------------------- Vias ----------------------------------------
@@ -223,8 +225,8 @@ class TCellI5(DynamicDataTree):
         from demo.pdks.templates.contact import ViaTemplate
         self.PCELL = ViaTemplate(
             name = 'I5',
-            via_layer = RDD.I5.LAYER, 
-            layer1 = RDD.M5.LAYER, 
+            via_layer = RDD.I5.LAYER,
+            layer1 = RDD.M5.LAYER,
             layer2 = RDD.M6.LAYER
         )
 
@@ -260,8 +262,8 @@ RDD.DEVICES = ProcessTree()
 
 class TCellJunction(DynamicDataTree):
     def initialize(self):
-        from demo.pdks.components.junction import Junction
-        self.PCELL = Junction()
+        from demo.pdks.components.mitll.junction import Junction
+        self.PCELL = Junction
 
 RDD.DEVICES.JJ = TCellJunction()
 

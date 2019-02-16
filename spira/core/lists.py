@@ -5,7 +5,7 @@ from spira.param.field.typed_list import TypedList
 class ElementFilterMixin(object):
 
     def get_polygons(self, layer=None):
-        from spira.gdsii.layer import Layer
+        from spira.layers.layer import Layer
         from spira.rdd.layer import PurposeLayer
         elems = ElementList()
         for ply in self.polygons:
@@ -64,31 +64,6 @@ class ElementFilterMixin(object):
             if isinstance(e, Cell):
                 elems += e
         return elems
-
-    # @property
-    # def mesh(self):
-    #     from spira.lne.mesh import Mesh
-    #     for g in self._list:
-    #         if isinstance(g, Mesh):
-    #             return g
-    #     raise ValueError('No graph was generate for Cell')
-
-    # @property
-    # def graph(self):
-    #     from spira.lne.mesh import MeshAbstract
-    #     for e in self._list:
-    #         if issubclass(type(e), MeshAbstract):
-    #             return e.g
-    #     return None
-
-    # @property
-    # def subgraphs(self):
-    #     subgraphs = {}
-    #     for e in self.sref:
-    #         cell = e.ref
-    #         if cell.elementals.graph is not None:
-    #             subgraphs[cell.name] = cell.elementals.graph
-    #     return subgraphs
 
 
 class __ElementList__(TypedList, ElementFilterMixin):

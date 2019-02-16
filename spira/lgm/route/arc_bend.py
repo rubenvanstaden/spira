@@ -1,9 +1,10 @@
 import spira
 import numpy as np
 from spira import param
+from spira.lgm.route.routes import Route, RouteToCell
 
 
-class ArcRoute(spira.Route):
+class ArcRoute(Route):
 
     gdslayer = param.LayerField(name='ArcLayer', number=91)
     radius = param.FloatField(default=5*1e6)
@@ -63,7 +64,7 @@ class ArcRoute(spira.Route):
         return points
 
 
-class RectRoute(spira.Route):
+class RectRoute(Route):
 
     gdslayer = param.LayerField(name='ArcLayer', number=91)
     radius = param.FloatField(default=5*1e6)
@@ -99,7 +100,7 @@ class RectRoute(spira.Route):
         return points
 
 
-class RectRouteTwo(spira.Route):
+class RectRouteTwo(Route):
 
     gdslayer = param.LayerField(name='ArcLayer', number=91)
     radius = param.FloatField(default=5*1e6)
@@ -135,11 +136,11 @@ class RectRouteTwo(spira.Route):
         return points
 
 
-class Arc(spira.RouteToCell):
+class Arc(RouteToCell):
     pass
 
 
-class Rect(spira.RouteToCell):
+class Rect(RouteToCell):
     pass
 
 

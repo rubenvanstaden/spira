@@ -8,9 +8,6 @@ from spira.lgm.route.basic import RouteBasic
 
 class __Manhattan__(spira.Cell):
 
-    # port1 = param.DataField()
-    # port2 = param.DataField()
-
     port1 = param.PortField()
     port2 = param.PortField()
 
@@ -43,23 +40,47 @@ class __Manhattan__(spira.Cell):
         return r1
 
     def create_port1_position(self):
+
+        angle = np.mod(self.port1.orientation, 360)
+
         p1 = [self.port1.midpoint[0], self.port1.midpoint[1]]
-        if self.port1.orientation == 90:
+        if angle == 90:
             p1 = [self.port1.midpoint[1], -self.port1.midpoint[0]]
-        if self.port1.orientation == 180:
+        if angle == 180:
             p1 = [-self.port1.midpoint[0], -self.port1.midpoint[1]]
-        if self.port1.orientation == 270:
+        if angle == 270:
             p1 = [-self.port1.midpoint[1], self.port1.midpoint[0]]
+
+        # p1 = [self.port1.midpoint[0], self.port1.midpoint[1]]
+        # if self.port1.orientation == 90:
+        #     p1 = [self.port1.midpoint[1], -self.port1.midpoint[0]]
+        # if self.port1.orientation == 180:
+        #     p1 = [-self.port1.midpoint[0], -self.port1.midpoint[1]]
+        # if self.port1.orientation == 270:
+        #     p1 = [-self.port1.midpoint[1], self.port1.midpoint[0]]
+
         return p1
 
     def create_port2_position(self):
+
+        angle = np.mod(self.port1.orientation, 360)
+
         p2 = [self.port2.midpoint[0], self.port2.midpoint[1]]
-        if self.port1.orientation == 90:
+        if angle == 90:
             p2 = [self.port2.midpoint[1], -self.port2.midpoint[0]]
-        if self.port1.orientation == 180:
+        if angle == 180:
             p2 = [-self.port2.midpoint[0], -self.port2.midpoint[1]]
-        if self.port1.orientation == 270:
+        if angle == 270:
             p2 = [-self.port2.midpoint[1], self.port2.midpoint[0]]
+
+        # p2 = [self.port2.midpoint[0], self.port2.midpoint[1]]
+        # if self.port1.orientation == 90:
+        #     p2 = [self.port2.midpoint[1], -self.port2.midpoint[0]]
+        # if self.port1.orientation == 180:
+        #     p2 = [-self.port2.midpoint[0], -self.port2.midpoint[1]]
+        # if self.port1.orientation == 270:
+        #     p2 = [-self.port2.midpoint[1], self.port2.midpoint[0]]
+
         return p2
 
     def create_arc_bend_1(self):
@@ -71,10 +92,10 @@ class __Manhattan__(spira.Cell):
             # )
             # return spira.SRef(B1)
 
-            B1 = Arc(shape=ArcRoute(radius=self.radius,
+            B1 = Arc(shape=ArcRoute(
+                radius=self.radius,
                 width=self.port1.width,
                 gdslayer=self.gdslayer,
-                # gdslayer=spira.Layer(number=18),
                 start_angle=0, theta=90)
             )
             return spira.SRef(B1)
@@ -88,10 +109,10 @@ class __Manhattan__(spira.Cell):
             # )
             # return spira.SRef(B2)
 
-            B2 = Arc(shape=ArcRoute(radius=self.radius,
+            B2 = Arc(shape=ArcRoute(
+                radius=self.radius,
                 width=self.port1.width,
                 gdslayer=self.gdslayer,
-                # gdslayer=spira.Layer(number=18),
                 start_angle=0, theta=-90)
             )
             return spira.SRef(B2)

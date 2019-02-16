@@ -7,6 +7,7 @@ from copy import copy, deepcopy
 from spira import param
 from spira.core.initializer import ElementalInitializer
 from spira.core.mixin.transform import TranformationMixin
+from spira.gdsii.group import GroupElementals
 
 
 class __Port__(ElementalInitializer):
@@ -27,30 +28,14 @@ class PortAbstract(__Port__):
     name = param.StringField()
     midpoint = param.MidPointField()
     orientation = param.IntegerField(default=0)
+    relfection = param.BoolField(default=False)
     parent = param.DataField()
     gdslayer = param.LayerField(name='PortLayer', number=64)
     color = param.StringField(default='#000000')
 
-    def __init__(self, port=None, polygon=None, label=None, **kwargs):
-        super().__init__(**kwargs)
+    __mixins__ = [GroupElementals]
 
-        self.orientation = np.mod(self.orientation, 360)
-
-        if polygon is None:
-            L = spira.Label(
-                position=self.midpoint,
-                text=self.name,
-                gdslayer=self.gdslayer,
-                texttype=64,
-                color='#808080'
-            )
-            self.label = L
-        else:
-            self.label = label
-
-        self.arrow = None
-
-    def point_inside(self, polygon):
+    def encloses(self, polygon):
         return pyclipper.PointInPolygon(self.midpoint, polygon) != 0
 
     def flat_copy(self, level=-1):
@@ -60,54 +45,29 @@ class PortAbstract(__Port__):
         )
         return c_port
 
-    @property
-    def normal(self):
-        dx = np.cos((self.orientation)*np.pi/180)
-        dy = np.sin((self.orientation)*np.pi/180)
-        return np.array([self.midpoint, self.midpoint + np.array([dx,dy])])
-
     def commit_to_gdspy(self, cell):
         if self.__repr__() not in list(__Port__.__committed__.keys()):
-
-            # self.polygon.reflect()
-            # self.polygon.rotate(angle=self.orientation)
-            # self.polygon.move(midpoint=self.polygon.center, destination=self.midpoint)
-
-            self.polygon.commit_to_gdspy(cell=cell)
-            self.label.commit_to_gdspy(cell=cell)
-            if self.arrow:
-                self.arrow.commit_to_gdspy(cell)
-            #     self.arrow.move(midpoint=self.arrow.center, destination=self.midpoint)
+            for e in self.elementals:
+                e.commit_to_gdspy(cell=cell)
             __Port__.__committed__.update({self.__repr__(): self})
         else:
             p = __Port__.__committed__[self.__repr__()]
+            for e in p.elementals:
+                e.commit_to_gdspy(cell=cell)
 
-            # p.polygon.reflect()
-            # p.polygon.rotate(angle=p.orientation)
-            # p.polygon.move(midpoint=p.polygon.center, destination=p.midpoint)
-
-            p.polygon.commit_to_gdspy(cell=cell)
-            p.label.commit_to_gdspy(cell=cell)
-            if p.arrow:
-                p.arrow.commit_to_gdspy(cell)
-            #     p.arrow.move(midpoint=p.arrow.center, destination=p.midpoint)
+    @property
+    def label(self):
+        for e in self.elementals:
+            if isinstance(e, spira.Label):
+                return e
+        return None
 
     def reflect(self):
         """ Reflect around the x-axis. """
         self.midpoint = [self.midpoint[0], -self.midpoint[1]]
         self.orientation = -self.orientation
         self.orientation = np.mod(self.orientation, 360)
-
-        self.label.reflect()
-        self.label.move(midpoint=self.label.position, destination=self.midpoint)
-
-        self.polygon.reflect()
-        self.polygon.move(midpoint=self.polygon.center, destination=self.midpoint)
-
-        if self.arrow:
-            self.arrow.reflect()
-            self.arrow.move(midpoint=self.arrow.center, destination=self.midpoint)
-
+        self.relfection = True
         return self
 
     def rotate(self, angle=45, center=(0,0)):
@@ -115,104 +75,33 @@ class PortAbstract(__Port__):
         self.midpoint = self.__rotate__(self.midpoint, angle=angle, center=center)
         self.orientation += angle
         self.orientation = np.mod(self.orientation, 360)
-
-        self.label.rotate(angle=angle)
-        self.label.move(midpoint=self.label.position, destination=self.midpoint)
-
-        self.polygon.rotate(angle=angle)
-        self.polygon.move(midpoint=self.polygon.center, destination=self.midpoint)
-
-        if self.arrow:
-            self.arrow.rotate(angle=angle)
-            # self.arrow.rotate(angle=np.mod(angle, 90))
-            self.arrow.move(midpoint=self.arrow.center, destination=self.midpoint)
-
         return self
 
     def translate(self, dx, dy):
         """ Translate port by dx and dy. """
         self.midpoint = self.midpoint + np.array([dx, dy])
-        # self.polygon.translate(dx=dx, dy=dy)
-        # self.label.move(midpoint=self.label.position, destination=self.midpoint)
-        self.polygon.move(midpoint=self.polygon.center, destination=self.midpoint)
-        self.label.move(midpoint=self.label.position, destination=self.midpoint)
+        for e in self.elementals:
+            if isinstance(e, spira.Label):
+                e.move(midpoint=e.position, destination=self.midpoint)
+            else:
+                e.move(midpoint=e.center, destination=self.midpoint)
         return self
 
     def move(self, midpoint=(0,0), destination=None, axis=None):
-        from spira.gdsii.elemental.port import __Port__
-
-        if destination is None:
-            destination = midpoint
-            midpoint = [0,0]
-
-        if issubclass(type(midpoint), __Port__):
-            o = midpoint.midpoint
-        elif np.array(midpoint).size == 2:
-            o = midpoint
-        elif midpoint in self.ports:
-            o = self.ports[midpoint].midpoint
-        else:
-            raise ValueError("[PHIDL] [DeviceReference.move()] ``midpoint`` " +
-                             "not array-like, a port, or port name")
-
-        if issubclass(type(destination), __Port__):
-            d = destination.midpoint
-        elif np.array(destination).size == 2:
-            d = destination
-        elif destination in self.ports:
-            d = self.ports[destination].midpoint
-        else:
-            raise ValueError("[PHIDL] [DeviceReference.move()] ``destination`` " +
-                             "not array-like, a port, or port name")
-
-        if axis == 'x':
-            d = (d[0], o[1])
-        if axis == 'y':
-            d = (o[0], d[1])
-
+        d, o = super().move(midpoint=midpoint, destination=destination, axis=axis)
         dx, dy = np.array(d) - o
-
         self.translate(dx, dy)
-
-        # self.label.move(midpoint=self.label.position, destination=self.midpoint)
-        # self.polygon.move(midpoint=self.polygon.center, destination=self.midpoint)
-        # self.polygon.move(midpoint=(100000000000,0), destination=self.midpoint)
-        # if self.arrow:
-        #     self.arrow.move(midpoint=self.polygon.center, destination=self.midpoint)
-
-        return self
-
-    def transform(self, T):
-        """ Transform port with the given transform class. """
-
-        if T['reflection']:
-            self.reflect()
-            # self.label.reflect()
-            # self.polygon.reflect()
-            # if self.arrow:
-            #     self.arrow.reflect()
-        if T['rotation']:
-            self.rotate(angle=T['rotation'])
-            # self.rotate(angle=T['rotation'], center=(0,0))
-            # self.label.rotate(angle=T['rotation'])
-            # self.polygon.rotate(angle=T['rotation'])
-            # if self.arrow:
-            #     self.arrow.rotate(angle=T['rotation'])
-        if T['midpoint']:
-            self.translate(dx=T['midpoint'][0], dy=T['midpoint'][1])
-            # self.move(midpoint=self.midpoint, destination=T['midpoint'])
-            # self.label.move(midpoint=self.label.position, destination=self.midpoint)
-            # self.polygon.move(midpoint=self.polygon.center, destination=T['midpoint'])
-            # if self.arrow:
-            #     self.arrow.move(midpoint=self.polygon.center, destination=self.midpoint)
-
-        # self.polygon.move(midpoint=self.polygon.center, destination=self.midpoint)
-
         return self
 
     def connect(self, S, P):
         """ Connects the port to a specific polygon in a cell reference. """
         self.node_id = '{}_{}'.format(S.ref.name, P.id)
+
+    @property
+    def normal(self):
+        dx = np.cos((self.orientation)*np.pi/180)
+        dy = np.sin((self.orientation)*np.pi/180)
+        return np.array([self.midpoint, self.midpoint + np.array([dx,dy])])
 
 
 class Port(PortAbstract):
@@ -225,43 +114,62 @@ class Port(PortAbstract):
     >>> port = spira.Port()
     """
 
-    edge_width = param.FloatField(default=0.25*1e6)
+    radius = param.FloatField(default=0.25*1e6)
 
-    def __init__(self, port=None, polygon=None, **kwargs):
-        super().__init__(port=port, polygon=polygon, **kwargs)
+    surface_polygon = param.DataField(fdef_name='create_surface_polygon')
 
-        if polygon is None:
-            from spira import shapes
-            shape = shapes.CircleShape(
-                center=self.midpoint,
-                box_size=[self.edge_width, self.edge_width]
-            )
-            pp = spira.Polygons(shape=shape, gdslayer=self.gdslayer)
-            pp.move(midpoint=pp.center, destination=self.midpoint)
-            self.polygon = pp
-        else:
-            self.polygon = polygon
+    def __init__(self, port=None, elementals=None, polygon=None, **kwargs):
+
+        ElementalInitializer.__init__(self, **kwargs)
+
+        if elementals is not None:
+            self.elementals = elementals
 
     def __repr__(self):
         return ("[SPiRA: Port] (name {}, number {}, midpoint {}, " +
             "radius {}, orientation {})").format(self.name,
             self.gdslayer.number, self.midpoint,
-            self.edge_width, self.orientation
+            self.radius, self.orientation
         )
+
+    def create_elementals(self, elems):
+        elems += self.create_surface_polygon()
+        elems += spira.Label(
+            position=self.midpoint,
+            text=self.name,
+            gdslayer=self.gdslayer,
+            texttype=64,
+            color='#808080'
+        )
+        return elems
+
+    def create_surface_polygon(self):
+        from spira import shapes
+        shape = shapes.CircleShape(
+            center=self.midpoint,
+            box_size=[self.radius, self.radius]
+        )
+        ply = spira.Polygons(shape=shape, gdslayer=self.gdslayer)
+        ply.move(midpoint=ply.center, destination=self.midpoint)
+        return ply
 
     def _copy(self):
         new_port = Port(
-            name=self.name,
             parent=self.parent,
+            name=self.name,
             midpoint=deepcopy(self.midpoint),
-            polygon=deepcopy(self.polygon),
-            label=deepcopy(self.label),
-            edge_width=self.edge_width,
+            # elementals=deepcopy(self.elementals),
+            # elementals=self.elementals,
             gdslayer=deepcopy(self.gdslayer),
-            orientation=deepcopy(self.orientation)
+            orientation=self.orientation
         )
         return new_port
 
+
+if __name__ == '__main__':
+
+    p = Port()
+    print(p)
 
 
 
