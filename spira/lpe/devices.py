@@ -74,8 +74,17 @@ class DeviceLayout(__CellContainer__):
         R = self.cell.elementals.flat_copy()
         Rm = R.get_polygons(layer=pl.layer)
         for i, e in enumerate(Rm):
-            alias = 'ply_{}_{}_{}'.format(pl.layer.number, self.cell.id, i)
-            elems += ply.Polygon(name=alias, player=pl, points=e.polygons, level=self.level)
+
+            # print(type(e))
+            # print(len(e.polygons[0]))
+
+            if len(e.polygons[0]) == 4:
+                alias = 'box_{}_{}_{}'.format(pl.layer.number, self.cell.id, i)
+                poly = spira.Polygons(shape=e.polygons)
+                elems += ply.Box(name=alias, player=pl, center=poly.center, w=poly.dx, h=poly.dy, level=self.level)
+            else:
+                alias = 'ply_{}_{}_{}'.format(pl.layer.number, self.cell.id, i)
+                elems += ply.Polygon(name=alias, player=pl, points=e.polygons, level=self.level)
         return elems
 
     def create_metals(self, elems):

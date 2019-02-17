@@ -65,7 +65,7 @@ class Box(ProcessLayer):
             name = self.__port_compass__[i]
             x = np.sign(clockwise) * (xpts[i+1] - xpts[i])
             y = np.sign(clockwise) * (ypts[i] - ypts[i+1])
-            orientation = (np.arctan2(x, y) * 180/np.pi) - 90
+            orientation = (np.arctan2(x, y) * 180/np.pi)
             midpoint = [(xpts[i+1] + xpts[i])/2, (ypts[i+1] + ypts[i])/2]
             width = np.abs(np.sqrt((xpts[i+1] - xpts[i])**2 + (ypts[i+1]-ypts[i])**2))
 
@@ -73,9 +73,11 @@ class Box(ProcessLayer):
                 name=name,
                 midpoint=midpoint,
                 width=width,
+                gdslayer=self.player.layer,
                 edgelayer=spira.Layer(number=65),
                 arrowlayer=spira.Layer(number=78),
-                orientation=orientation
+                orientation=orientation,
+                is_edge=True
             )
 
         return edges

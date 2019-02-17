@@ -133,9 +133,9 @@ class DataFieldDescriptor(BaseField):
 
 class FunctionField(BaseField):
     """ Property which calls a get and set method to set the variables.
-    the get and set method are specified by name, so it supports override, 
-    but is slower than FunctionProperty. If set method is not specified, 
-    then the property is considered locked and cannot be set. 
+    the get and set method are specified by name, so it supports override,
+    but is slower than FunctionProperty. If set method is not specified,
+    then the property is considered locked and cannot be set.
     
     Examples
     --------
@@ -159,7 +159,7 @@ class FunctionField(BaseField):
         if not self.locked:
             return self.fset(obj, value)
         else:
-            raise ValueError('Cannot assign property')
+            raise ValueError('Cannot assign parameter.')
 
 
 class DataField(DataFieldDescriptor):

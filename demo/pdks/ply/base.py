@@ -72,7 +72,7 @@ class __PortConstructor__(__ProcessLayer__):
             name = 'e{}'.format(i)
             x = np.sign(clockwise) * (xpts[i+1] - xpts[i])
             y = np.sign(clockwise) * (ypts[i] - ypts[i+1])
-            orientation = (np.arctan2(x, y) * 180/np.pi) - 90
+            orientation = (np.arctan2(x, y) * 180/np.pi)
             midpoint = [(xpts[i+1] + xpts[i])/2, (ypts[i+1] + ypts[i])/2]
             width = np.abs(np.sqrt((xpts[i+1] - xpts[i])**2 + (ypts[i+1]-ypts[i])**2))
 
@@ -82,7 +82,8 @@ class __PortConstructor__(__ProcessLayer__):
                 width=width,
                 edgelayer=spira.Layer(number=65),
                 arrowlayer=spira.Layer(number=78),
-                orientation=orientation
+                orientation=orientation,
+                is_edge=True
             )
 
         return edges
@@ -129,8 +130,7 @@ class ProcessLayer(__PortConstructor__):
         elif self.player.purpose == RDD.PURPOSE.METAL:
             if self.level == 1:
                 ports += self.metal_port
-
-        # for edge in self.edge_ports:
-        #     ports += edge
+            for edge in self.edge_ports:
+                ports += edge
 
         return ports

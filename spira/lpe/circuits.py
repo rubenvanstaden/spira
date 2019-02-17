@@ -88,35 +88,41 @@ class Circuit(__CircuitContainer__):
         return routes
 
     def create_ports(self, ports):
-        if self.cell is not None:
-            flat_elems = self.cell.flat_copy()
-            port_elems = flat_elems.get_polygons(layer=RDD.PURPOSE.TERM)
-            label_elems = flat_elems.labels
-            for port in port_elems:
-                for label in label_elems:
-                    lbls = label.text.split(' ')
-                    s_p1, s_p2 = lbls[1], lbls[2]
-                    p1, p2 = None, None
-                    for m1 in RDD.PLAYER.get_physical_layers(purposes=['METAL', 'GND']):
-                        if m1.layer.name == s_p1:
-                            p1 = spira.Layer(name=lbls[0],
-                                number=m1.layer.number,
-                                datatype=RDD.GDSII.TEXT
-                            )
-                        if m1.layer.name == s_p2:
-                            p2 = spira.Layer(name=lbls[0],
-                                number=m1.layer.number,
-                                datatype=RDD.GDSII.TEXT
-                            )
-                    if p1 and p2 :
-                        if label.encloses(ply=port.polygons[0]):
-                            ports += spira.Term(
-                                name=label.text,
-                                layer1=p1, layer2=p2,
-                                width=port.dy,
-                                length=port.dx,
-                                midpoint=label.position
-                            )
+
+        # for pl in RDD.PLAYER.get_physical_layers(purposes='METAL'):
+        #     for m in self.get_metal_polygons(pl):
+        #         print(m)
+
+        # if self.cell is not None:
+        #     flat_elems = self.cell.flat_copy()
+        #     port_elems = flat_elems.get_polygons(layer=RDD.PURPOSE.TERM)
+        #     label_elems = flat_elems.labels
+        #     for port in port_elems:
+        #         for label in label_elems:
+        #             lbls = label.text.split(' ')
+        #             s_p1, s_p2 = lbls[1], lbls[2]
+        #             p1, p2 = None, None
+        #             for m1 in RDD.PLAYER.get_physical_layers(purposes=['METAL', 'GND']):
+        #                 if m1.layer.name == s_p1:
+        #                     p1 = spira.Layer(name=lbls[0],
+        #                         number=m1.layer.number,
+        #                         datatype=RDD.GDSII.TEXT
+        #                     )
+        #                 if m1.layer.name == s_p2:
+        #                     p2 = spira.Layer(name=lbls[0],
+        #                         number=m1.layer.number,
+        #                         datatype=RDD.GDSII.TEXT
+        #                     )
+        #             if p1 and p2 :
+        #                 if label.encloses(ply=port.polygons[0]):
+        #                     ports += spira.Term(
+        #                         name=label.text,
+        #                         layer1=p1, layer2=p2,
+        #                         width=port.dy,
+        #                         length=port.dx,
+        #                         midpoint=label.position
+        #                     )
+
         return ports
 
     def create_netlist(self):
@@ -153,3 +159,66 @@ class LayoutConstructor(__NetlistCell__):
 
         self.plot_netlist(G=self.g, graphname=self.name, labeltext='id')
 
+    def create_ports(self, ports):
+
+        gate = Gate(cell=self.cell)
+
+        terminals = spira.ElementList()
+        if self.cell is not None:
+            flat_elems = self.cell.flat_copy()
+            port_elems = flat_elems.get_polygons(layer=RDD.PURPOSE.TERM)
+            label_elems = flat_elems.labels
+            for port in port_elems:
+                for label in label_elems:
+                    lbls = label.text.split(' ')
+                    s_p1, s_p2 = lbls[1], lbls[2]
+                    p1, p2 = None, None
+                    for m1 in RDD.PLAYER.get_physical_layers(purposes=['METAL', 'GND']):
+                        if m1.layer.name == s_p1:
+                            p1 = spira.Layer(name=lbls[0],
+                                number=m1.layer.number,
+                                datatype=RDD.GDSII.TEXT
+                            )
+                        if m1.layer.name == s_p2:
+                            p2 = spira.Layer(name=lbls[0],
+                                number=m1.layer.number,
+                                datatype=RDD.GDSII.TEXT
+                            )
+                    if p1 and p2 :
+                        if label.encloses(ply=port.polygons[0]):
+                            terminals += spira.Term(
+                                name=label.text,
+                                layer1=p1, layer2=p2,
+                                width=port.dy,
+                                length=port.dx,
+                                midpoint=label.position
+                            )
+
+        for pl in RDD.PLAYER.get_physical_layers(purposes='METAL'):
+            for m in gate.get_metal_polygons(pl):
+                for p in m.ports:
+                    for t in terminals:
+                        # print(t)
+                        # print(t.edge_polygon)
+                        # ports += spira.Term(
+                        #     name=t.name,
+                        #     midpoint=p.midpoint,
+                        #     orientation=p.orientation,
+                        #     edgelayer=spira.Layer(number=89),
+                        #     width=p.width,
+                        #     length=p.length
+                        # )
+                        # if p.encloses(polygon=t.edge_polygon):
+                        #     print('YESSSSSSSSS')
+                        #     ports += p
+                        if t.edge & p.edge:
+                            ports += spira.Term(
+                                name=t.name,
+                                midpoint=p.midpoint,
+                                orientation=p.orientation,
+                                edgelayer=spira.Layer(number=89),
+                                width=p.width,
+                                length=p.length
+                            )
+
+        return ports

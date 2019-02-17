@@ -130,13 +130,6 @@ class TriangleShape(BasicTriangle):
 
 class ArrowShape(TriangleShape):
 
-    endpoints = param.DataField(fdef_name='create_endpoints')
-
-    def create_endpoints(self):
-        print(self.c)
-        p = [0, -3*self.c]
-        return p
-
     # TODO: Implement point_list properties.
     def create_points(self, points):
         points = super().create_points(points)

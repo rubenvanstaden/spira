@@ -41,8 +41,6 @@ class PolygonEdges(spira.Cell):
             orientation_n = np.arctan2(np.sign(cc) * (xpts[i+1]-xpts[i]), np.sign(cc) * (ypts[i]-ypts[i+1])) * 180/np.pi
             width_n = np.abs(np.sqrt((xpts[i+1] - xpts[i])**2 + (ypts[i+1]-ypts[i])**2))    
 
-            print(width_n)
-
             ports += spira.Term(
                 name=str(i+1),
                 midpoint=midpoint_n,

@@ -32,11 +32,99 @@ class Term(PortAbstract):
     layer1 = param.LayerField()
     layer2 = param.LayerField()
 
+    is_edge = param.BoolField(default=False)
+
     port1 = param.DataField(fdef_name='create_port1')
     port2 = param.DataField(fdef_name='create_port2')
 
-    edge_polygon = param.DataField(fdef_name='create_edge_polygon')
-    arrow_polygon = param.DataField(fdef_name='create_arrow_polygon')
+    def get_edge_polygon(self):
+        if not hasattr(self, '__edge__'):
+            from spira import shapes
+            rect_shape = shapes.RectangleShape(
+                p1=[0, 0],
+                p2=[self.width, self.length]
+            )
+
+            ply = spira.Polygons(
+                shape=rect_shape,
+                gdslayer=self.edgelayer,
+            )
+
+            if self.reflection:
+                ply.reflect()
+            ply.rotate(angle=self.orientation+90)
+            ply.move(midpoint=ply.center, destination=self.midpoint)
+
+            _edge = ply
+        else:
+            _edge = self.__edge__
+        return _edge
+        
+    def set_edge_polygon(self, value):
+
+        if self.reflection:
+            value.reflect()
+        value.rotate(angle=self.orientation)
+        value.move(midpoint=value.center, destination=self.midpoint)
+
+        self.__edge__ = value
+
+    def get_arrow_polygon(self):
+        if not hasattr(self, '__arrow__'):
+            # print('jqkdwqdk')
+            print(self.orientation)
+            from spira import shapes
+            arrow_shape = shapes.ArrowShape(
+                a = self.length,
+                b = self.length/2,
+                c = self.length*2
+            )
+
+            # arrow_shape.apply_merge
+            ply = spira.Polygons(
+                shape=arrow_shape,
+                gdslayer=self.arrowlayer,
+                direction=-90
+            )
+
+            if not self.is_edge:
+                ply.rotate(angle=self.orientation-90)
+
+            # if self.reflection:
+            #     ply.reflect()
+            ply.rotate(angle=self.orientation)
+            ply.move(midpoint=ply.center, destination=self.midpoint)
+
+            self.__arrow__ = ply
+        return self.__arrow__
+
+    def set_arrow_polygon(self, value):
+
+        if self.reflection:
+            value.reflect()
+        value.rotate(angle=self.orientation+180)
+        value.move(midpoint=value.center, destination=self.midpoint)
+
+        self.__arrow__ = value
+
+    def get_label(self):
+        if not hasattr(self, '__label__'):
+            label = spira.Label(
+                position=self.midpoint,
+                text=self.name,
+                gdslayer=self.gdslayer,
+                texttype=64,
+                color='#808080'
+            )
+            self.__label__ = label
+        return self.__label__
+
+    def set_label(self, value):
+        self.__label__ = value
+
+    edge = param.FunctionField(get_edge_polygon, set_edge_polygon, doc='The edge of a polygon that the terminal connects to.')
+    arrow = param.FunctionField(get_arrow_polygon, set_arrow_polygon, doc='Arrow polygon that shows the terminal direction.')
+    label = param.FunctionField(get_label, set_label, doc='The terminal label to filtering purposes.')
 
     def __init__(self, port=None, elementals=None, polygon=None, **kwargs):
         ElementalInitializer.__init__(self, **kwargs)
@@ -53,55 +141,6 @@ class Term(PortAbstract):
 
     def __str__(self):
         return self.__repr__()
-
-    def create_elementals(self, elems):
-
-        elems += self.create_edge_polygon()
-        elems += self.create_arrow_polygon()
-        elems += spira.Label(
-            position=self.midpoint,
-            text=self.name,
-            gdslayer=self.gdslayer,
-            texttype=64,
-            color='#808080'
-        )
-
-        return elems
-
-    def create_edge_polygon(self):
-        from spira import shapes
-        rect_shape = shapes.RectangleShape(
-            p1=[0, 0],
-            p2=[self.width, self.length]
-        )
-        ply = spira.Polygons(
-            shape=rect_shape,
-            gdslayer=self.edgelayer,
-        )
-        if self.relfection:
-            ply.reflect()
-        ply.rotate(angle=self.orientation, center=self.midpoint)
-        ply.move(midpoint=ply.center, destination=self.midpoint)
-        return ply
-
-    def create_arrow_polygon(self):
-        from spira import shapes
-        arrow_shape = shapes.ArrowShape(
-            a = self.length,
-            b = self.length/2,
-            c = self.length*2
-        )
-        # arrow_shape.apply_merge
-        ply = spira.Polygons(
-            shape=arrow_shape,
-            gdslayer=self.arrowlayer,
-            direction=90
-        )
-        if self.relfection:
-            ply.reflect()
-        ply.rotate(angle=self.orientation)
-        ply.move(midpoint=ply.center, destination=self.midpoint)
-        return ply
 
     def create_port1(self):
         port = spira.Port(name='P1', midpoint=self.midpoint, gdslayer=self.layer1)
@@ -133,19 +172,29 @@ class Term(PortAbstract):
         self.orientation = np.arctan2(dx,dy)*180/np.pi
         self.width = np.sqrt(dx**2 + dy**2)
 
+    def create_elementals(self, elems):
+        elems += self.edge
+        elems += self.arrow
+        # elems += self.label
+        return elems
+
     def _copy(self):
-        new_port = Term(parent=self.parent,
+        new_port = Term(
+            parent=self.parent,
             name=self.name,
-            # midpoint=self.midpoint,
             midpoint=deepcopy(self.midpoint),
+            orientation=self.orientation,
+            reflection=self.reflection,
             # elementals=deepcopy(self.elementals),
-            # elementals=self.elementals,
+            edge=deepcopy(self.edge),
+            arrow=deepcopy(self.arrow),
             width=self.width,
             length=self.length,
             gdslayer=deepcopy(self.gdslayer),
             edgelayer=deepcopy(self.edgelayer),
             arrowlayer=deepcopy(self.arrowlayer),
-            orientation=self.orientation
+            color=self.color,
+            is_edge=self.is_edge
         )
         return new_port
 

@@ -42,9 +42,12 @@ class MidPointField(DataFieldDescriptor):
         obj.__store__[self.__name__] = [value.x, value.y]
 
 
-def PolygonField(shape=[]):
+def PolygonField(default='', shape=[]):
     from spira.gdsii.elemental.polygons import Polygons
-    F = Polygons(shape)
+    if default is None:
+        F = None
+    else:
+        F = Polygons(shape)
     return DataFieldDescriptor(default=F)
 
 

@@ -70,7 +70,6 @@ class CellAbstract(__Cell__):
         from spira.gdsii.elemental.sref import SRef
         cell = gdspy.Cell(self.name, exclude_from_current=True)
         for e in self.elementals:
-            print(e)
             if not isinstance(e, (SRef, ElementList)):
                 e.commit_to_gdspy(cell=cell)
         return cell

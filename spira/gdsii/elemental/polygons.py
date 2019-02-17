@@ -109,7 +109,7 @@ class PolygonAbstract(__Polygon__):
         return self
 
     def rotate(self, angle=45, center=(0,0)):
-        super().rotate(angle=angle*np.pi/180, center=center)
+        super().rotate(angle=(angle-self.direction)*np.pi/180, center=center)
         self.shape.points = self.polygons
         return self
 
