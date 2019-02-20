@@ -48,11 +48,12 @@ if __name__ == '__main__':
     # jj.center = (0,0)
 
     cell = spira.Cell('Junction Test')
-    cell += spira.SRef(jj, midpoint=(0*1e6,0), rotation=0, reflection=True)
-    cell += spira.SRef(jj, midpoint=(20*1e6,0), rotation=90, reflection=True)
-    cell += spira.SRef(jj, midpoint=(40*1e6,0), rotation=180, reflection=True)
-    cell += spira.SRef(jj, midpoint=(60*1e6,0), rotation=270, reflection=True)
-    cell += spira.SRef(jj, midpoint=(80*1e6,0), rotation=360, reflection=True)
+
+    # cell += spira.SRef(jj, midpoint=(0*1e6,0), rotation=0, reflection=True)
+    # cell += spira.SRef(jj, midpoint=(20*1e6,0), rotation=90, reflection=True)
+    # cell += spira.SRef(jj, midpoint=(40*1e6,0), rotation=180, reflection=True)
+    # cell += spira.SRef(jj, midpoint=(60*1e6,0), rotation=270, reflection=True)
+    # cell += spira.SRef(jj, midpoint=(80*1e6,0), rotation=360, reflection=True)
 
     cell += spira.SRef(jj, midpoint=(0*1e6,-20*1e6), rotation=0)
     cell += spira.SRef(jj, midpoint=(20*1e6,-20*1e6), rotation=90)
@@ -60,9 +61,9 @@ if __name__ == '__main__':
     cell += spira.SRef(jj, midpoint=(60*1e6,-20*1e6), rotation=270)
     cell += spira.SRef(jj, midpoint=(80*1e6,-20*1e6), rotation=360)
 
-    jj.output()
+    # jj.output()
 
-    # cell.output(name=name)
+    cell.output(name=name)
 
     spira.LOG.end_print('Junction example finished')
 

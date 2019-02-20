@@ -6,17 +6,19 @@ from demo.pdks.process.mitll_pdk.database import RDD
 
 if __name__ == '__main__':
 
-    # name = 'jj_mitll_2'
-    name = 'mitll_jtl_double'
+    name = 'jj_mitll_2'
+    # name = 'mitll_jtl_double'
     # name = 'mitll_dsndo_xic'
     # name = 'mitll_SFQDC_draft'
+    # name = 'splitt_v0.3'
+    # name = 'LSmitll_jtlt_new'
 
     filename = current_path(name)
     cell = spira.import_gds(filename=filename)
     # cell.output()
 
     layout = Circuit(cell=cell, level=2)
-    # layout.netlist
+    layout.netlist
     layout.mask.output()
 
 

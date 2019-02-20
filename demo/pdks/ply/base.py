@@ -72,9 +72,15 @@ class __PortConstructor__(__ProcessLayer__):
             name = 'e{}'.format(i)
             x = np.sign(clockwise) * (xpts[i+1] - xpts[i])
             y = np.sign(clockwise) * (ypts[i] - ypts[i+1])
-            orientation = (np.arctan2(x, y) * 180/np.pi)
+            # orientation = (np.arctan2(x, y) * 180/np.pi) + 180
+            orientation = (np.arctan2(x, y) * 180/np.pi) - 90
             midpoint = [(xpts[i+1] + xpts[i])/2, (ypts[i+1] + ypts[i])/2]
             width = np.abs(np.sqrt((xpts[i+1] - xpts[i])**2 + (ypts[i+1]-ypts[i])**2))
+
+            # print(orientation)
+            # print(x)
+            # print(y)
+            # print('')
 
             edges += spira.Term(
                 name=name,

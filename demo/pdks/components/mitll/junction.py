@@ -1,4 +1,5 @@
 import spira
+import numpy as np
 from spira import param
 from spira import shapes
 from copy import deepcopy
@@ -50,103 +51,37 @@ class Junction(Device):
 
         print('------------------------')
         for p in self.jj_metal:
+
             edgelayer = deepcopy(p.gdslayer)
             edgelayer.datatype = 80
+
+            # new_edge = deepcopy(p.edge)
+            # new_edge.gdslayer = edgelayer
+            # # new_edge.rotate(angle=p.orientation)
 
             arrowlayer = deepcopy(p.gdslayer)
             arrowlayer.datatype = 81
 
-            new_edge = deepcopy(p.edge)
-            new_edge.gdslayer = edgelayer
-
-            new_arrow = deepcopy(p.arrow)
-            new_arrow.gdslayer = arrowlayer
+            # new_arrow = deepcopy(p.arrow)
+            # new_arrow.gdslayer = arrowlayer
+            # # new_arrow.rotate(angle=p.orientation)
 
             term = spira.Term(
                 name=p.name,
                 midpoint=p.midpoint,
-                orientation=deepcopy(p.orientation),
+                orientation=deepcopy(p.orientation)-90,
                 reflection=p.reflection,
-                edge=new_edge,
-                arrow=new_arrow,
+                edgelayer=edgelayer,
+                arrowlayer=arrowlayer,
+                # edge=new_edge,
+                # arrow=new_arrow,
                 # is_edge=True
                 # label=p.label,
-                # width=0.1*1e6
+                width=p.width,
+                length=p.length
             )
 
             ports += term
-
-            # if p.name == 'West':
-            #     ports += spira.Term(
-            #         name='P1',
-            #         midpoint=p.midpoint,
-            #         orientation=p.orientation,
-            #         edgelayer=layer,
-            #         width=p.width,
-            #         length=p.length
-            #     )
-            # if p.name == 'East':
-            #     ports += spira.Term(
-            #         name='P2',
-            #         midpoint=p.midpoint,
-            #         orientation=p.orientation,
-            #         edgelayer=layer,
-            #         width=p.width,
-            #         length=p.length
-            #     )
-        print('\n')
-
-
-        # for i, m in enumerate(self.metals):
-        #     for j, p in enumerate(m.ports):
-        #         layer = deepcopy(m.layer)
-        #         layer.datatype = 80
-        #         if isinstance(p, spira.Term):
-        #             name='P{}{}_{}'.format(i, j, m.player.layer.name)
-        #             if name in ['P31_M6', 'P33_M6']:
-        #                 ports += spira.Term(
-        #                     name=name,
-        #                     midpoint=p.midpoint,
-        #                     orientation=p.orientation,
-        #                     edgelayer=layer,
-        #                     width=p.width,
-        #                     length=p.length
-                        # )
-
-        # for i, m in enumerate(self.metals):
-        #     for j, p in enumerate(m.ports):
-        #         layer = deepcopy(m.layer)
-        #         layer.datatype = 80
-        #         if isinstance(p, spira.Term):
-        #             name='P{}{}_{}'.format(i, j, m.player.layer.name)
-        #             ports += spira.Term(
-        #                 name=name,
-        #                 midpoint=p.midpoint,
-        #                 orientation=p.orientation,
-        #                 edgelayer=layer,
-        #                 width=p.width,
-        #                 length=p.length
-        #             )
-        #             # ports += p.modified_copy(
-        #             #     name=name,
-        #             #     edgelayer=layer
-        #             # )
-
-        # for m in self.metals:
-        #     for p in m.ports:
-        #         if p.name == 'West':
-        #             ports += p.modified_copy(
-        #                 name='P1',
-        #                 edgelayer=spira.Layer(number=80)
-        #             )
-        #         if p.name == 'East':
-        #             ports += p.modified_copy(
-        #                 name='P2',
-        #                 edgelayer=spira.Layer(number=80)
-        #             )
-
-        # ports += spira.Term(name='Input', midpoint=(-1.0*self.um, 0.8*self.um), orientation=90, width=2*self.um)
-        # ports += spira.Term(name='Output', midpoint=(1.0*self.um, 0.8*self.um), orientation=-90, width=2*self.um)
 
         return ports
 

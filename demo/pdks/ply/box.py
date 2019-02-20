@@ -65,9 +65,14 @@ class Box(ProcessLayer):
             name = self.__port_compass__[i]
             x = np.sign(clockwise) * (xpts[i+1] - xpts[i])
             y = np.sign(clockwise) * (ypts[i] - ypts[i+1])
-            orientation = (np.arctan2(x, y) * 180/np.pi)
+            orientation = (np.arctan2(x, y) * 180/np.pi) + 180
             midpoint = [(xpts[i+1] + xpts[i])/2, (ypts[i+1] + ypts[i])/2]
             width = np.abs(np.sqrt((xpts[i+1] - xpts[i])**2 + (ypts[i+1]-ypts[i])**2))
+
+            # print(orientation)
+            # print(x)
+            # print(y)
+            # print('')
 
             edges += spira.Term(
                 name=name,
@@ -90,3 +95,7 @@ class Box(ProcessLayer):
 
     def create_points(self):
         return self.polygon.shape.points
+
+    # def create_ports(self, ports):
+    #     ports = super().create_ports(ports)
+    #     return ports

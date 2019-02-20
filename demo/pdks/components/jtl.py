@@ -144,24 +144,18 @@ if __name__ == '__main__':
     # jj_q2.netlist
     # jj_q2.mask.output()
 
-    # jj_q3.netlist
-    # jj_q3.mask.output()
+    jj_q3.netlist
+    jj_q3.mask.output()
 
     # jj_q4.netlist
     # jj_q4.mask.output()
 
     # jj_q4.routes
 
-    jtl += spira.SRef(jj_q3, rotation=90)
+    # jtl += spira.SRef(jj_q3, rotation=90)
 
-    # jtl.netlist
-    jtl.output()
-
-    # # jtl += spira.SRef(jj_q1, midpoint=(0,0))
-    # # jtl += spira.SRef(jj_q2, midpoint=(100,0))
-    # # jtl += spira.SRef(jj_q3, midpoint=(100,0))
-    # jtl += spira.SRef(jj_q4, midpoint=(100,0))
-    # jtl.output(name=name)
+    # # jtl.netlist
+    # jtl.output()
 
     spira.LOG.end_print('JTL example finished')
 

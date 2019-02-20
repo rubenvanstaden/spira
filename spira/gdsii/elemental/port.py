@@ -47,58 +47,121 @@ class PortAbstract(__Port__):
 
     def commit_to_gdspy(self, cell):
         if self.__repr__() not in list(__Port__.__committed__.keys()):
-            for e in self.elementals:
-                e.commit_to_gdspy(cell=cell)
+
+            # from spira import shapes
+            # rect_shape = shapes.RectangleShape(
+            #     p1=[0, 0],
+            #     p2=[self.length, self.width]
+            # )
+
+            # ply_edge = spira.Polygons(
+            #     shape=rect_shape,
+            #     gdslayer=self.edgelayer,
+            #     direction=90
+            # )
+
+            # if self.reflection:
+            #     ply_edge.reflect()
+            #     # ply_edge.rotate(angle=180)
+            # ply_edge.rotate(angle=self.orientation)
+            # ply_edge.move(midpoint=ply_edge.center, destination=self.midpoint)
+
+            # ply_edge.commit_to_gdspy(cell=cell)
+
+            # for e in self.elementals:
+            #     # if isinstance(e, spira.Polygons) and (e.direction == 0):
+            #     #     e.rotate(angle=self.orientation)
+            #     # else:
+            #     #     e.rotate(angle=self.orientation)
+
+            #     # e.rotate(angle=self.orientation)
+            #     # if self.reflection:
+            #     #     e.reflect()
+            #     #     # e.rotate(angle=self.orientation+90)
+            #     e.move(midpoint=e.center, destination=self.midpoint)
+            #     e.commit_to_gdspy(cell=cell)
+
             __Port__.__committed__.update({self.__repr__(): self})
         else:
             p = __Port__.__committed__[self.__repr__()]
-            for e in p.elementals:
-                e.commit_to_gdspy(cell=cell)
+
+            # for e in p.elementals:
+            #     # if isinstance(e, spira.Polygons) and (e.direction == 0):
+            #     #     e.rotate(angle=self.orientation)
+            #     # else:
+            #     #     e.rotate(angle=self.orientation)
+
+            #     # e.rotate(angle=self.orientation)
+            #     # if self.reflection:
+            #     #     e.reflect()
+            #     #     # e.rotate(angle=self.orientation+90)
+            #     e.move(midpoint=e.center, destination=self.midpoint)
+            #     e.commit_to_gdspy(cell=cell)
+
+    # @property
+    # def label(self):
+    #     for e in self.elementals:
+    #         if isinstance(e, spira.Label):
+    #             return e
+    #     return None
 
     @property
     def label(self):
-        for e in self.elementals:
-            if isinstance(e, spira.Label):
-                return e
-        return None
+        lbl = spira.Label(
+            position=self.midpoint,
+            text=self.name,
+            gdslayer=self.gdslayer,
+            texttype=64,
+            color='#808080'
+        )
+        return lbl
 
     def reflect(self):
         """ Reflect around the x-axis. """
-        print('Reflection')
         self.midpoint = [self.midpoint[0], -self.midpoint[1]]
-        # self.orientation = -self.orientation
-        self.orientation = np.mod(self.orientation, 360)
+        self.orientation = -self.orientation
+        # self.orientation = np.mod(self.orientation, 360)
         self.reflection = True
 
         for e in self.elementals:
-            if isinstance(e, spira.Label):
-                e.reflect()
-                e.rotate(angle=180)
-                e.move(midpoint=e.position, destination=self.midpoint)
-            elif isinstance(e, spira.Polygons) and (e.direction == 0):
-                e.reflect()
-                e.rotate(angle=180)
-                e.move(midpoint=e.center, destination=self.midpoint)
-            else:
-                e.reflect()
-                e.rotate(angle=180+e.direction)
-                e.move(midpoint=e.center, destination=self.midpoint)
+            e.reflect()
+            e.rotate(angle=180)
+            e.move(midpoint=e.position, destination=self.midpoint)
+
+            # if isinstance(e, spira.Label):
+            #     e.reflect()
+            #     e.rotate(angle=180)
+            #     # e.rotate(angle=self.orientation)
+            #     e.move(midpoint=e.position, destination=self.midpoint)
+            # else:
+            #     e.reflect()
+            #     e.rotate(angle=180)
+            #     # e.rotate(angle=self.orientation)
+            #     e.move(midpoint=e.center, destination=self.midpoint)
 
         return self
 
     def rotate(self, angle=45, center=(0,0)):
         """ Rotate port around the center with angle. """
-        print('Rotation')
+
         self.midpoint = self.__rotate__(self.midpoint, angle=angle, center=center)
         self.orientation += angle
         self.orientation = np.mod(self.orientation, 360)
 
         for e in self.elementals:
-            e.rotate(angle=self.orientation)
-            if isinstance(e, spira.Label):
-                e.move(midpoint=e.position, destination=self.midpoint)
+            if isinstance(e, spira.Polygons) and (e.direction == 0):
+                e.rotate(angle=angle-90)
             else:
-                e.move(midpoint=e.center, destination=self.midpoint)
+                e.rotate(angle=angle)
+
+            # e.rotate(angle=self.orientation)
+            # e.rotate(angle=angle)
+            # if isinstance(e, spira.Label):
+            #     e.move(midpoint=e.position, destination=self.midpoint)
+            # elif isinstance(e, spira.Polygons) and (e.direction == 0):
+            #     e.move(midpoint=e.center, destination=self.midpoint)
+            # else:
+            #     e.move(midpoint=e.center, destination=self.midpoint)
 
         return self
 
@@ -141,7 +204,7 @@ class Port(PortAbstract):
 
     radius = param.FloatField(default=0.25*1e6)
 
-    surface_polygon = param.DataField(fdef_name='create_surface_polygon')
+    # surface = param.DataField(fdef_name='create_surface_polygon')
 
     def __init__(self, port=None, elementals=None, polygon=None, **kwargs):
         ElementalInitializer.__init__(self, **kwargs)
@@ -156,7 +219,9 @@ class Port(PortAbstract):
             self.radius, self.orientation
         )
 
-    def create_surface_polygon(self):
+    # def create_surface_polygon(self):
+    @property
+    def surface(self):
         from spira import shapes
         shape = shapes.CircleShape(
             center=self.midpoint,
@@ -166,23 +231,23 @@ class Port(PortAbstract):
         ply.move(midpoint=ply.center, destination=self.midpoint)
         return ply
 
-    def create_elementals(self, elems):
-        elems += self.create_surface_polygon()
-        elems += spira.Label(
-            position=self.midpoint,
-            text=self.name,
-            gdslayer=self.gdslayer,
-            texttype=64,
-            color='#808080'
-        )
-        return elems
+    # def create_elementals(self, elems):
+    #     elems += self.create_surface_polygon()
+    #     # elems += spira.Label(
+    #     #     position=self.midpoint,
+    #     #     text=self.name,
+    #     #     gdslayer=self.gdslayer,
+    #     #     texttype=64,
+    #     #     color='#808080'
+    #     # )
+    #     return elems
 
     def _copy(self):
         new_port = Port(
             parent=self.parent,
             name=self.name,
             midpoint=deepcopy(self.midpoint),
-            elementals=deepcopy(self.elementals),
+            # elementals=deepcopy(self.elementals),
             gdslayer=deepcopy(self.gdslayer),
             orientation=self.orientation,
             color=self.color

@@ -195,11 +195,10 @@ class LayoutConstructor(__NetlistCell__):
                             )
 
         for pl in RDD.PLAYER.get_physical_layers(purposes='METAL'):
-            for m in gate.get_metal_polygons(pl):
+            # for m in gate.get_metal_polygons(pl):
+            for m in gate.get_metal_polygons_for_ports(pl):
                 for p in m.ports:
                     for t in terminals:
-                        # print(t)
-                        # print(t.edge_polygon)
                         # ports += spira.Term(
                         #     name=t.name,
                         #     midpoint=p.midpoint,
@@ -211,12 +210,26 @@ class LayoutConstructor(__NetlistCell__):
                         # if p.encloses(polygon=t.edge_polygon):
                         #     print('YESSSSSSSSS')
                         #     ports += p
+
+                        edgelayer = deepcopy(p.gdslayer)
+                        edgelayer.datatype = 82
+
+                        # new_edge = deepcopy(p.edge)
+                        # new_edge.gdslayer = edgelayer
+
+                        arrowlayer = deepcopy(p.gdslayer)
+                        arrowlayer.datatype = 83
+
+                        # new_arrow = deepcopy(p.arrow)
+                        # new_arrow.gdslayer = arrowlayer
+
                         if t.edge & p.edge:
                             ports += spira.Term(
                                 name=t.name,
                                 midpoint=p.midpoint,
                                 orientation=p.orientation,
-                                edgelayer=spira.Layer(number=89),
+                                edgelayer=edgelayer,
+                                arrowlayer=arrowlayer,
                                 width=p.width,
                                 length=p.length
                             )
