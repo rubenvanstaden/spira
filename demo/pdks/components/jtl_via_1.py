@@ -132,7 +132,7 @@ if __name__ == '__main__':
 
     jtl = JtlVia(m2=(50*1e6,-50*1e6), rotation=0, level=2)
 
-    jtl.netlist
+    # jtl.netlist
     jtl.mask.output()
 
     spira.LOG.end_print('JTL example finished')

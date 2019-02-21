@@ -65,7 +65,7 @@ if __name__ == '__main__':
     jj.output()
     # jj.mask.output()
 
-    # cell.output(name=name)
+    cell.output(name=name)
 
     spira.LOG.end_print('Junction example finished')
 

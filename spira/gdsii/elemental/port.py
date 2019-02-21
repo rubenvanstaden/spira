@@ -45,6 +45,80 @@ class PortAbstract(__Port__):
         )
         return c_port
 
+<<<<<<< HEAD
+=======
+    def commit_to_gdspy(self, cell):
+        if self.__repr__() not in list(__Port__.__committed__.keys()):
+
+            # from spira import shapes
+            # rect_shape = shapes.RectangleShape(
+            #     p1=[0, 0],
+            #     p2=[self.length, self.width]
+            # )
+
+            # ply_edge = spira.Polygons(
+            #     shape=rect_shape,
+            #     gdslayer=self.edgelayer,
+            #     direction=90
+            # )
+
+            # if self.reflection:
+            #     ply_edge.reflect()
+            #     # ply_edge.rotate(angle=180)
+            # ply_edge.rotate(angle=self.orientation)
+            # ply_edge.move(midpoint=ply_edge.center, destination=self.midpoint)
+
+            # ply_edge.commit_to_gdspy(cell=cell)
+
+            # for e in self.elementals:
+            #     # if isinstance(e, spira.Polygons) and (e.direction == 0):
+            #     #     e.rotate(angle=self.orientation)
+            #     # else:
+            #     #     e.rotate(angle=self.orientation)
+
+            #     # e.rotate(angle=self.orientation)
+            #     # if self.reflection:
+            #     #     e.reflect()
+            #     #     # e.rotate(angle=self.orientation+90)
+            #     e.move(midpoint=e.center, destination=self.midpoint)
+            #     e.commit_to_gdspy(cell=cell)
+
+            __Port__.__committed__.update({self.__repr__(): self})
+        else:
+            p = __Port__.__committed__[self.__repr__()]
+
+            # for e in p.elementals:
+            #     # if isinstance(e, spira.Polygons) and (e.direction == 0):
+            #     #     e.rotate(angle=self.orientation)
+            #     # else:
+            #     #     e.rotate(angle=self.orientation)
+
+            #     # e.rotate(angle=self.orientation)
+            #     # if self.reflection:
+            #     #     e.reflect()
+            #     #     # e.rotate(angle=self.orientation+90)
+            #     e.move(midpoint=e.center, destination=self.midpoint)
+            #     e.commit_to_gdspy(cell=cell)
+
+    # @property
+    # def label(self):
+    #     for e in self.elementals:
+    #         if isinstance(e, spira.Label):
+    #             return e
+    #     return None
+
+    @property
+    def label(self):
+        lbl = spira.Label(
+            position=self.midpoint,
+            text=self.name,
+            gdslayer=self.gdslayer,
+            texttype=64,
+            color='#808080'
+        )
+        return lbl
+
+>>>>>>> ce012f99233b24ead45bf82a89e736d98fef5141
     def reflect(self):
         """ Reflect around the x-axis. """
         self.midpoint = [self.midpoint[0], -self.midpoint[1]]
@@ -125,6 +199,11 @@ class Port(PortAbstract):
 
     radius = param.FloatField(default=0.25*1e6)
 
+<<<<<<< HEAD
+=======
+    # surface = param.DataField(fdef_name='create_surface_polygon')
+
+>>>>>>> ce012f99233b24ead45bf82a89e736d98fef5141
     def __init__(self, port=None, elementals=None, polygon=None, **kwargs):
         ElementalInitializer.__init__(self, **kwargs)
 
@@ -138,6 +217,7 @@ class Port(PortAbstract):
             self.radius, self.orientation
         )
 
+<<<<<<< HEAD
     def commit_to_gdspy(self, cell):
         if self.__repr__() not in list(__Port__.__committed__.keys()):
             self.surface.commit_to_gdspy(cell=cell)
@@ -148,6 +228,9 @@ class Port(PortAbstract):
             p.surface.commit_to_gdspy(cell=cell)
             p.label.commit_to_gdspy(cell=cell)
 
+=======
+    # def create_surface_polygon(self):
+>>>>>>> ce012f99233b24ead45bf82a89e736d98fef5141
     @property
     def surface(self):
         from spira import shapes
@@ -159,11 +242,29 @@ class Port(PortAbstract):
         ply.move(midpoint=ply.center, destination=self.midpoint)
         return ply
 
+<<<<<<< HEAD
+=======
+    # def create_elementals(self, elems):
+    #     elems += self.create_surface_polygon()
+    #     # elems += spira.Label(
+    #     #     position=self.midpoint,
+    #     #     text=self.name,
+    #     #     gdslayer=self.gdslayer,
+    #     #     texttype=64,
+    #     #     color='#808080'
+    #     # )
+    #     return elems
+
+>>>>>>> ce012f99233b24ead45bf82a89e736d98fef5141
     def _copy(self):
         new_port = Port(
             parent=self.parent,
             name=self.name,
             midpoint=deepcopy(self.midpoint),
+<<<<<<< HEAD
+=======
+            # elementals=deepcopy(self.elementals),
+>>>>>>> ce012f99233b24ead45bf82a89e736d98fef5141
             gdslayer=deepcopy(self.gdslayer),
             orientation=self.orientation,
             color=self.color
