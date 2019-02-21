@@ -35,6 +35,7 @@ class ViaTemplate(__TemplateCell__):
                             for M in M1:
                                 if e.polygon | M.polygon:
                                     prev_port = e.ports[0]
+                                    # FIXME: Maybe detelte P_metal port here!!!
                                     e.ports[0] = spira.Port(
                                         name=e.name,
                                         # name=e.ports[0].name,
@@ -42,6 +43,7 @@ class ViaTemplate(__TemplateCell__):
                                         orientation=prev_port.orientation,
                                         gdslayer=M.player.layer
                                     )
+                                    # print(e.ports[0])
 
                             for M in M2:
                                 if e.polygon | M.polygon:

@@ -40,7 +40,8 @@ class __NetlistSimplifier__(object):
             valid = False
         for n in path[1:-1]:
             if 'device' in self.g.node[n]:
-                if issubclass(type(self.g.node[n]['device']), __Port__):
+                D = self.g.node[n]['device']
+                if issubclass(type(D), (__Port__, spira.SRef)):
                     valid = False
         return valid
 
@@ -81,7 +82,8 @@ class NetlistSimplifier(__NetlistSimplifier__):
             if 'device' in self.g.node[n]:
                 # if isinstance(self.g.node[n]['device'], spira.Dummy):
                 #     branch_nodes.append(n)
-                if issubclass(type(self.g.node[n]['device']), __Port__):
+                D = self.g.node[n]['device']
+                if issubclass(type(D), (__Port__, spira.SRef)):
                     branch_nodes.append(n)
         return branch_nodes
 

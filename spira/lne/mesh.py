@@ -48,8 +48,8 @@ class __Mesh__(meshio.Mesh, ElementalInitializer):
 
         ElementalInitializer.__init__(self, **kwargs)
 
-        meshio.Mesh.__init__(self, 
-            points=self.points, 
+        meshio.Mesh.__init__(self,
+            points=self.points,
             cells=self.cells,
             point_data=self.point_data,
             cell_data=self.cell_data,
@@ -232,7 +232,7 @@ class MeshLabeled(MeshAbstract):
             for B in self.bounding_boxes:
                 for p in B.elementals.polygons:
                     ply = deepcopy(p)
-                    ply.center = B.midpoint
+                    ply.center = B.S.midpoint
                     bnodes = []
                     for n in self.g.nodes():
                         s = self.g.node[n]['surface']
@@ -241,15 +241,20 @@ class MeshLabeled(MeshAbstract):
 
                     device_node = None
                     for n in bnodes:
+                        # self.g.node[n]['surface'].color = '#FFA07A'
+                        self.g.node[n]['device'] = B.S
+                        self.g.node[n]['device'].color = '#FFA07A'
+                        self.g.node[n]['device'].node_id = '{}_{}'.format(B.S.ref.name, B.S.midpoint)
+
                         # self.g.node[n]['surface'].color = '#ffffff'
                         # if 'device' in self.g.node[n]:
                         #     self.g.node[n]['device'].color = '#ffffff'
-                        if 'device' in self.g.node[n]:
-                            if device_node is None:
-                                device_node = self.g.node[n]['device']
-                    if device_node is not None:
-                        for n in bnodes:
-                            self.g.node[n]['device'] = device_node
+                    #     if 'device' in self.g.node[n]:
+                    #         if device_node is None:
+                    #             device_node = self.g.node[n]['device']
+                    # if device_node is not None:
+                    #     for n in bnodes:
+                    #         self.g.node[n]['device'] = device_node
 
     def add_new_node(self, n, D, pos):
         l1 = spira.Layer(name='Label', number=104)

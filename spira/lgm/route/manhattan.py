@@ -8,13 +8,13 @@ from spira.lgm.route.basic import RouteBasic
 
 class __Manhattan__(spira.Cell):
 
-    port1 = param.PortField()
-    port2 = param.PortField()
+    port1 = param.PortField(default=None)
+    port2 = param.PortField(default=None)
 
     length = param.FloatField(default=20*1e6)
     gdslayer = param.LayerField(number=13)
-    radius = param.IntegerField(default=1*1e6)
-    bend_type = param.StringField(default='circular')
+    bend_type = param.StringField(default='rectangle')
+    # bend_type = param.StringField(default='circular')
 
     b1 = param.DataField(fdef_name='create_arc_bend_1')
     b2 = param.DataField(fdef_name='create_arc_bend_2')
@@ -26,6 +26,27 @@ class __Manhattan__(spira.Cell):
     quadrant_two = param.DataField(fdef_name='create_quadrant_two')
     quadrant_three = param.DataField(fdef_name='create_quadrant_three')
     quadrant_four = param.DataField(fdef_name='create_quadrant_four')
+
+    def get_radius(self):
+        if hasattr(self, '__radius__'):
+            return self.__radius__
+        else:
+            dx = abs(self.p2[0] - self.p1[0])
+            dy = abs(self.p2[1] - self.p1[1])
+            # if dx <= dy:
+            #     self.__radius__ = dx/2
+            # elif dy <= dx:
+            #     self.__radius__ = dy/2
+            if dx <= dy:
+                self.__radius__ = dx
+            elif dy <= dx:
+                self.__radius__ = dy
+            return self.__radius__
+
+    def set_radius(self, value):
+        self.__radius__ = value
+    
+    radius = param.FunctionField(get_radius, set_radius)
 
     def _generate_route(self, p1, p2):
         route = RouteShape(
@@ -40,9 +61,7 @@ class __Manhattan__(spira.Cell):
         return r1
 
     def create_port1_position(self):
-
         angle = np.mod(self.port1.orientation, 360)
-
         p1 = [self.port1.midpoint[0], self.port1.midpoint[1]]
         if angle == 90:
             p1 = [self.port1.midpoint[1], -self.port1.midpoint[0]]
@@ -50,21 +69,10 @@ class __Manhattan__(spira.Cell):
             p1 = [-self.port1.midpoint[0], -self.port1.midpoint[1]]
         if angle == 270:
             p1 = [-self.port1.midpoint[1], self.port1.midpoint[0]]
-
-        # p1 = [self.port1.midpoint[0], self.port1.midpoint[1]]
-        # if self.port1.orientation == 90:
-        #     p1 = [self.port1.midpoint[1], -self.port1.midpoint[0]]
-        # if self.port1.orientation == 180:
-        #     p1 = [-self.port1.midpoint[0], -self.port1.midpoint[1]]
-        # if self.port1.orientation == 270:
-        #     p1 = [-self.port1.midpoint[1], self.port1.midpoint[0]]
-
         return p1
 
     def create_port2_position(self):
-
         angle = np.mod(self.port1.orientation, 360)
-
         p2 = [self.port2.midpoint[0], self.port2.midpoint[1]]
         if angle == 90:
             p2 = [self.port2.midpoint[1], -self.port2.midpoint[0]]
@@ -72,50 +80,41 @@ class __Manhattan__(spira.Cell):
             p2 = [-self.port2.midpoint[0], -self.port2.midpoint[1]]
         if angle == 270:
             p2 = [-self.port2.midpoint[1], self.port2.midpoint[0]]
-
-        # p2 = [self.port2.midpoint[0], self.port2.midpoint[1]]
-        # if self.port1.orientation == 90:
-        #     p2 = [self.port2.midpoint[1], -self.port2.midpoint[0]]
-        # if self.port1.orientation == 180:
-        #     p2 = [-self.port2.midpoint[0], -self.port2.midpoint[1]]
-        # if self.port1.orientation == 270:
-        #     p2 = [-self.port2.midpoint[1], self.port2.midpoint[0]]
-
         return p2
 
     def create_arc_bend_1(self):
         if self.bend_type == 'circular':
-            # B1 = Rect(shape=RectRoute(
-            #         width=self.port1.width,
-            #         gdslayer=self.gdslayer,
-            #     )
-            # )
-            # return spira.SRef(B1)
-
             B1 = Arc(shape=ArcRoute(
                 radius=self.radius,
                 width=self.port1.width,
                 gdslayer=self.gdslayer,
                 start_angle=0, theta=90)
             )
-            return spira.SRef(B1)
+        if self.bend_type == 'rectangle':
+            B1 = Rect(shape=RectRoute(
+                    width=self.port1.width,
+                    gdslayer=self.gdslayer,
+                    size=(self.radius,self.radius)
+                )
+            )
+        return spira.SRef(B1)
 
     def create_arc_bend_2(self):
         if self.bend_type == 'circular':
-            # B2 = Rect(shape=RectRouteTwo(
-            #         width=self.port1.width,
-            #         gdslayer=self.gdslayer,
-            #     )
-            # )
-            # return spira.SRef(B2)
-
             B2 = Arc(shape=ArcRoute(
                 radius=self.radius,
                 width=self.port1.width,
                 gdslayer=self.gdslayer,
                 start_angle=0, theta=-90)
             )
-            return spira.SRef(B2)
+        if self.bend_type == 'rectangle':
+            B2 = Rect(shape=RectRouteTwo(
+                    width=self.port1.width,
+                    gdslayer=self.gdslayer,
+                    size=(self.radius,self.radius)
+                )
+            )
+        return spira.SRef(B2)
 
 
 

@@ -39,6 +39,7 @@ class CellAbstract(__Cell__):
 
     ports = param.ElementalListField(fdef_name='create_ports')
     elementals = param.ElementalListField(fdef_name='create_elementals')
+    color = param.StringField(default='#FFA07A')
 
     def create_elementals(self, elems):
         return elems

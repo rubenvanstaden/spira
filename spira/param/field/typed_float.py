@@ -19,10 +19,6 @@ class __Float__(object):
 
     def __sub__(self, other):
         pass
-        # print(other)
-        # if isinstance(other, __Float__):
-        #     return Float(self._val - other._val)
-        # return Float(self._val - other)
 
     def __isub__(self, other):
         if isinstance(other, Float):
@@ -67,7 +63,6 @@ class Float(__Float__):
 #             kwargs['default'] = None
 #         else:
 #             kwargs['default'] = self.__type__(val=default)
-#         print(kwargs['default'])
 #         super().__init__(**kwargs)
 
 #     def get_stored_value(self, obj):

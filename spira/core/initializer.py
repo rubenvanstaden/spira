@@ -275,6 +275,7 @@ class FieldInitializer(__Field__):
             self.__store__ = dict()
         self.__store_fields__(kwargs)
         self.__validation_check__()
+        self.__determine_type__()
 
     def __str__(self):
         return self.__repr__()
@@ -294,16 +295,16 @@ class FieldInitializer(__Field__):
     def id(self):
         return self.__str__()
 
-    @property
-    def node_id(self):
-        if self.__id__:
-            return self.__id__
-        else:
-            return self.__str__()
+    # @property
+    # def node_id(self):
+    #     if self.__id__:
+    #         return self.__id__
+    #     else:
+    #         return self.__str__()
 
-    @node_id.setter
-    def node_id(self, value):
-        self.__id__ = value
+    # @node_id.setter
+    # def node_id(self, value):
+    #     self.__id__ = value
 
     def __store_fields__(self, kwargs):
         props = self.__fields__()
@@ -320,6 +321,12 @@ class FieldInitializer(__Field__):
     def __validation_check__(self):
         if not self.validate_parameters():
             raise AttributeError('Invalid parameter!')
+
+    def __determine_type__(self):
+        self.determine_type()
+
+    def determine_type(self):
+        self.__type__ = None
 
     def validate_parameters(self):
         return True
@@ -378,8 +385,19 @@ class MetaCell(MetaInitializer):
             return retrieved_cell
 
 
+from spira import param
 class CellInitializer(FieldInitializer, metaclass=MetaCell):
-    pass
+
+    def get_node_id(self):
+        if self.__id__:
+            return self.__id__
+        else:
+            return self.__str__()
+
+    def set_node_id(self, value):
+        self.__id__ = value
+
+    node_id = param.FunctionField(get_node_id, set_node_id)
 
     # def __str__(self):
     #     return self.__repr__()
@@ -398,10 +416,20 @@ class CellInitializer(FieldInitializer, metaclass=MetaCell):
     #     self.name = string
 
 
-from spira import param
 class ElementalInitializer(FieldInitializer, metaclass=MetaElemental):
 
     display_label = param.StringField()
+
+    def get_node_id(self):
+        if self.__id__:
+            return self.__id__
+        else:
+            return self.__str__()
+
+    def set_node_id(self, value):
+        self.__id__ = value
+
+    node_id = param.FunctionField(get_node_id, set_node_id)
 
     def flatten(self):
         return [self]

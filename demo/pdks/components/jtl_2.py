@@ -4,7 +4,7 @@ from copy import copy, deepcopy
 from spira import param, shapes
 from spira.rdd import get_rule_deck
 from demo.pdks.components.junction import Junction
-from spira.lgm.route.manhattan_base import RouteManhattan
+from spira.lgm.route.manhattan_base import Route
 from spira.lgm.route.basic import RouteShape, RouteBasic, Route
 from spira.lpe.containers import __CellContainer__
 from spira.lpe.circuits import Circuit
@@ -57,10 +57,10 @@ class Jtl(Circuit):
         s1 = self.jj1
         s3 = self.jj3
 
-        route = RouteManhattan(port1=self.term_ports['T1'], port2=s1.ports['Input'], player=RDD.PLAYER.BAS)
+        route = Route(port1=self.term_ports['T1'], port2=s1.ports['Input'], player=RDD.PLAYER.BAS)
         r1 = spira.SRef(route)
 
-        route = RouteManhattan(port1=self.term_ports['T2'], port2=s3.ports['Output'], player=RDD.PLAYER.BAS)
+        route = Route(port1=self.term_ports['T2'], port2=s3.ports['Output'], player=RDD.PLAYER.BAS)
         r2 = spira.SRef(route)
 
         return [r1, r2]
@@ -70,11 +70,11 @@ class Jtl(Circuit):
         s2 = self.jj2
         s3 = self.jj3
 
-        R1 = RouteManhattan(port1=s1.ports['Output'], port2=s2.ports['Input'], radius=3*self.um, length=1*self.um, gdslayer=RDD.BAS.LAYER)
+        R1 = Route(port1=s1.ports['Output'], port2=s2.ports['Input'], radius=3*self.um, length=1*self.um, gdslayer=RDD.BAS.LAYER)
         r1 = spira.SRef(R1)
         r1.move(midpoint=r1.ports['T1'], destination=R1.port1)
 
-        R2 = RouteManhattan(port1=s2.ports['Output'], port2=s3.ports['Input'], radius=3*self.um, length=1*self.um, gdslayer=RDD.BAS.LAYER)
+        R2 = Route(port1=s2.ports['Output'], port2=s3.ports['Input'], radius=3*self.um, length=1*self.um, gdslayer=RDD.BAS.LAYER)
         r2 = spira.SRef(R2)
         r2.move(midpoint=r2.ports['T1'], destination=R2.port1)
 

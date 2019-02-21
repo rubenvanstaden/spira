@@ -43,27 +43,7 @@ class __CircuitContainer__(__NetContainer__):
     def __cell_swapper__(self, new_cell, c, c2dmap):
         for e in c.elementals.sref:
             S = deepcopy(e)
-            print(S)
-            print(S.reflection)
-            print(S.rotation)
-            print('')
             if e.ref in c2dmap.keys():
                 S.ref = c2dmap[e.ref]
                 new_cell += S
 
-
-    # def __cell_swapper__(self, new_cell, c, c2dmap):
-    #     for e in c.elementals.sref:
-    #         # S = deepcopy(e)
-    #         S = e
-    #         # print(S)
-    #         # print(S.rotation)
-    #         # print(S.reflection)
-    #         if e.ref in c2dmap.keys():
-    #             # S.ref = c2dmap[e.ref]
-    #             print(e)
-    #             e.ref = c2dmap[e.ref]
-    #             new_cell += e
-    #             # new_cell += S
-    #             print(e)
-    #         print('')

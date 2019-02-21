@@ -53,8 +53,6 @@ class Surround(__DoubleLayerDesignRule__):
         pos_elems = spira.ElementList()
         neg_elems = spira.ElementList()
 
-        # print(elems)
-
         for C in elems.dependencies():
             for S in C.elementals.sref:
                 if S.ref.layer.number == self.layer1.number:
@@ -83,7 +81,6 @@ class Surround(__DoubleLayerDesignRule__):
                                     p_scale = p_copy.scale(scalex=sx, scaley=sx, center=P.center)
 
                                     p_overlap = p_scale | M
-                                    # print(M)
 
                                     if p_overlap:
                                         a1 = round(p_scale.ply_area*10e-9)

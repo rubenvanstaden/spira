@@ -167,7 +167,6 @@ class GraphAbstract(__Graph__):
 
     def create_union_subgraphs(self):
         # self.g = nx.disjoint_union_all(self.subgraphs.values())
-        # print(self.subgraphs)
         self.g = nx.disjoint_union_all(self.subgraphs)
 
     def create_connect_subgraphs(self):
@@ -381,7 +380,6 @@ class SeriesGraph(UserGraph):
                 for t in targets:
                     _update_paths(self.g, paths, s, t)
 
-            # print(paths)
             for i, path in enumerate(paths):
                 if i == 2:
                     for n in path[1:-1]:

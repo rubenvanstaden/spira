@@ -37,95 +37,6 @@ class Term(PortAbstract):
     port1 = param.DataField(fdef_name='create_port1')
     port2 = param.DataField(fdef_name='create_port2')
 
-    def get_edge_polygon(self):
-        if not hasattr(self, '__edge__'):
-            from spira import shapes
-            rect_shape = shapes.RectangleShape(
-                p1=[0, 0],
-                p2=[self.width, self.length]
-            )
-
-            ply = spira.Polygons(
-                shape=rect_shape,
-                gdslayer=self.edgelayer,
-            )
-
-            if self.reflection:
-                ply.reflect()
-            ply.rotate(angle=self.orientation+90)
-            ply.move(midpoint=ply.center, destination=self.midpoint)
-
-            _edge = ply
-        else:
-            _edge = self.__edge__
-        return _edge
-        
-    def set_edge_polygon(self, value):
-
-        if self.reflection:
-            value.reflect()
-        value.rotate(angle=self.orientation)
-        value.move(midpoint=value.center, destination=self.midpoint)
-
-        self.__edge__ = value
-
-    def get_arrow_polygon(self):
-        if not hasattr(self, '__arrow__'):
-            # print('jqkdwqdk')
-            print(self.orientation)
-            from spira import shapes
-            arrow_shape = shapes.ArrowShape(
-                a = self.length,
-                b = self.length/2,
-                c = self.length*2
-            )
-
-            # arrow_shape.apply_merge
-            ply = spira.Polygons(
-                shape=arrow_shape,
-                gdslayer=self.arrowlayer,
-                direction=-90
-            )
-
-            if not self.is_edge:
-                ply.rotate(angle=self.orientation-90)
-
-            # if self.reflection:
-            #     ply.reflect()
-            ply.rotate(angle=self.orientation)
-            ply.move(midpoint=ply.center, destination=self.midpoint)
-
-            self.__arrow__ = ply
-        return self.__arrow__
-
-    def set_arrow_polygon(self, value):
-
-        if self.reflection:
-            value.reflect()
-        value.rotate(angle=self.orientation+180)
-        value.move(midpoint=value.center, destination=self.midpoint)
-
-        self.__arrow__ = value
-
-    def get_label(self):
-        if not hasattr(self, '__label__'):
-            label = spira.Label(
-                position=self.midpoint,
-                text=self.name,
-                gdslayer=self.gdslayer,
-                texttype=64,
-                color='#808080'
-            )
-            self.__label__ = label
-        return self.__label__
-
-    def set_label(self, value):
-        self.__label__ = value
-
-    edge = param.FunctionField(get_edge_polygon, set_edge_polygon, doc='The edge of a polygon that the terminal connects to.')
-    arrow = param.FunctionField(get_arrow_polygon, set_arrow_polygon, doc='Arrow polygon that shows the terminal direction.')
-    label = param.FunctionField(get_label, set_label, doc='The terminal label to filtering purposes.')
-
     def __init__(self, port=None, elementals=None, polygon=None, **kwargs):
         ElementalInitializer.__init__(self, **kwargs)
 
@@ -156,10 +67,15 @@ class Term(PortAbstract):
         elif pyclipper.PointInPolygon(self.endpoints[1], polygon) != 0:
             return True
 
+    def encloses_midpoint(self, polygon):
+        return pyclipper.PointInPolygon(self.midpoint, polygon[0]) != 0
+
     @property
     def endpoints(self):
         dx = self.width/2*np.cos((self.orientation - 90)*np.pi/180)
         dy = self.width/2*np.sin((self.orientation - 90)*np.pi/180)
+        # dx = self.length/2*np.cos((self.orientation - 90)*np.pi/180)
+        # dy = self.length/2*np.sin((self.orientation - 90)*np.pi/180)
         left_point = self.midpoint - np.array([dx,dy])
         right_point = self.midpoint + np.array([dx,dy])
         return np.array([left_point, right_point])
@@ -172,11 +88,40 @@ class Term(PortAbstract):
         self.orientation = np.arctan2(dx,dy)*180/np.pi
         self.width = np.sqrt(dx**2 + dy**2)
 
-    def create_elementals(self, elems):
-        elems += self.edge
-        elems += self.arrow
-        # elems += self.label
-        return elems
+    @property
+    def edge(self):
+        from spira import shapes
+        rect_shape = shapes.RectangleShape(p1=[0, 0], p2=[self.length, self.width])
+        ply = spira.Polygons(shape=rect_shape, gdslayer=self.edgelayer, direction=90)
+        if self.reflection:
+            ply.reflect()
+        ply.rotate(angle=self.orientation)
+        ply.move(midpoint=ply.center, destination=self.midpoint)
+        return ply
+
+    @property
+    def arrow(self):
+        from spira import shapes
+        arrow_shape = shapes.ArrowShape(a=self.length, b=self.length/2, c=self.length*2)
+        # arrow_shape.apply_merge
+        ply = spira.Polygons(shape=arrow_shape, gdslayer=self.arrowlayer)
+        if self.reflection:
+            ply.reflect()
+        ply.rotate(angle=self.orientation)
+        ply.move(midpoint=ply.center, destination=self.midpoint)
+        return ply
+
+    def commit_to_gdspy(self, cell):
+        if self.__repr__() not in list(__Port__.__committed__.keys()):
+            self.edge.commit_to_gdspy(cell=cell)
+            self.arrow.commit_to_gdspy(cell=cell)
+            self.label.commit_to_gdspy(cell=cell)
+            __Port__.__committed__.update({self.__repr__(): self})
+        else:
+            p = __Port__.__committed__[self.__repr__()]
+            p.edge.commit_to_gdspy(cell=cell)
+            p.arrow.commit_to_gdspy(cell=cell)
+            p.label.commit_to_gdspy(cell=cell)
 
     def _copy(self):
         new_port = Term(
@@ -185,9 +130,6 @@ class Term(PortAbstract):
             midpoint=deepcopy(self.midpoint),
             orientation=self.orientation,
             reflection=self.reflection,
-            # elementals=deepcopy(self.elementals),
-            edge=deepcopy(self.edge),
-            arrow=deepcopy(self.arrow),
             width=self.width,
             length=self.length,
             gdslayer=deepcopy(self.gdslayer),
@@ -236,7 +178,6 @@ if __name__ == '__main__':
 
     cell += term
 
-    # print(cell.ports)
     cell.output()
 
 

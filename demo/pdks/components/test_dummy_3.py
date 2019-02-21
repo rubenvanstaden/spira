@@ -4,7 +4,7 @@ from copy import copy, deepcopy
 from spira import param, shapes
 from spira.rdd import get_rule_deck
 from demo.pdks.components.junction import Junction
-from spira.lgm.route.manhattan_base import RouteManhattan
+from spira.lgm.route.manhattan_base import Route
 from demo.pdks import ply
 from spira.lgm.route.basic import RouteShape, RouteBasic, Route
 from spira.lpe.circuits import Circuit

@@ -2,7 +2,7 @@ import spira
 from spira import param, shapes
 from spira.rdd import get_rule_deck
 from demo.pdks.components.junction import Junction
-from spira.lgm.route.manhattan_base import RouteManhattan
+from spira.lgm.route.manhattan_base import Route
 from spira.lpe.primitives import SLayout
 
 
@@ -28,14 +28,14 @@ class Squid(spira.PCell):
         s1 = spira.SRef(jj, midpoint=self.m1, rotation=self.rotation)
         s2 = spira.SRef(jj, midpoint=self.m2, rotation=-self.rotation)
 
-        r1 = RouteManhattan(
+        r1 = Route(
             port1=s1.ports['Output'],
             port2=s2.ports['Output'],
             gdslayer=RDD.COU.LAYER,
             radius=1, length=1
         )
 
-        r2 = RouteManhattan(
+        r2 = Route(
             port1=s1.ports['Input'],
             port2=s2.ports['Input'],
             gdslayer=RDD.COU.LAYER,

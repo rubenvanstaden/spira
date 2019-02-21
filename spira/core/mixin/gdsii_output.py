@@ -24,7 +24,8 @@ class DrawLayoutAbstract(object):
         elif issubclass(type(self), __Cell__):
             self.construct_gdspy_tree(glib)
         gdspy.LayoutViewer(library=glib)
-        # gdspy.LayoutViewer(library=glib, cells='SLayout-4')
+        # gdspy.LayoutViewer(library=glib, cells='LayoutConstructor_AiST_CELL_1')
+        # gdspy.LayoutViewer(library=glib, cells='extract_cfd1bsttt_13')
 
     # def writer(self, name=None, file_type='gdsii'):
         # """ Write layout to gdsii file. """

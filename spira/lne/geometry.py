@@ -74,12 +74,13 @@ class GeometryAbstract(__Geometry__):
             dim=self.dimension,
             prune_vertices=False,
             remove_faces=False,
-            geo_filename=geo_file
+            # geo_filename=geo_file
         )
 
         mm = meshio.Mesh(*mesh_data)
 
-        meshio.write(mesh_file, mm)
+        # FIXME: WARNING:root:Binary Gmsh needs c_int (typically numpy.int32) integers (got int64). Converting.
+        # meshio.write(mesh_file, mm)
         meshio.write(vtk_file, mm)
 
         return mesh_data
@@ -100,6 +101,7 @@ class GeometryAbstract(__Geometry__):
                 gp = self.geom.add_polygon(
                     c_points, 
                     lcar=0.1,
+                    # lcar=100,
                     make_surface=True,
                     holes=self.holes
                 )

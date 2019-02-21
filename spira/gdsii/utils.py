@@ -166,11 +166,14 @@ def scale_polygon_up(polygons, value=None):
 def scale_polygon_down(polygons, value=None):
     if value is None:
         value = SCALE_DOWN
+        # value = 1
+    # value = 1
     new_poly = []
     for points in polygons:
         # pp = [[float(p[0]*value), float(p[1]*value)] for p in points]
         # pp = np.array([np.array([float(p[0]*value), float(p[1]*value)]) for p in points])
-        pp = np.array([np.array([np.floor(float(p[0]*value)), np.floor(float(p[1]*value))]) for p in points])
+        # pp = np.array([np.array([np.floor(float(p[0]*value)), np.floor(float(p[1]*value))]) for p in points])
+        pp = np.array([np.array([np.floor(np.int32(p[0]*value)), np.floor(np.int32(p[1]*value))]) for p in points])
         new_poly.append(pp)
     return new_poly
 
@@ -178,8 +181,9 @@ def scale_polygon_down(polygons, value=None):
 def numpy_to_list(points, start_height, unit=None):
     if unit is None:
         raise ValueError('Unit value not implemented!')
-    # unit = unit * 10
+    # unit = 1
     return [[float(p[0]*unit), float(p[1]*unit), start_height] for p in points]
+    # return np.array([[p[0]*unit, p[1]*unit, start_height] for p in points], dtype=np.int64)
 
 
 

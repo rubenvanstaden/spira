@@ -48,15 +48,12 @@ class CellMixin(__Properties__):
 
     def __set_gdspy_cell__(self):
         glib = gdspy.GdsLibrary(name=self.name)
-        # cell = deepcopy(self)
         cell = spira.Cell(name=self.name, elementals=self.elementals)
-        # print(cell.terms)
         self.__gdspy_cell__ = cell.construct_gdspy_tree(glib)
 
     def __set_gdspy_cell_withut_ports__(self):
         glib = gdspy.GdsLibrary(name=self.name)
         cell = deepcopy(self)
-        print(cell.terms)
         # self.__gdspy_cell__witout_posts__ = cell.construct_gdspy_tree(glib)
         self.__gdspy_cell__ = cell.construct_gdspy_tree(glib)
 
@@ -132,10 +129,8 @@ class CellMixin(__Properties__):
     def terms(self):
         from spira.gdsii.elemental.term import Term
         terms = ElementList()
-        # print('\nTERMS')
         for p in self.ports:
             if isinstance(p, Term):
-                # print(p)
                 terms += p
         return terms
 
@@ -166,7 +161,7 @@ class PolygonMixin(__Properties__):
 
     @property
     def ply_area(self):
-        ply = gdspy.PolygonSet(self.shape.points)
+        ply = gdspy.PolygonSet(self.shape.points, verbose=False)
         return ply.area()
 
     @property
@@ -174,16 +169,10 @@ class PolygonMixin(__Properties__):
         self.polygons = np.array(self.points)
         # self.polygons = self.points
         # self.polygons = spu(np.array(self.points))
-        # print(self.polygons)
         bb = self.get_bounding_box()
         # self.polygons = spd(np.array(self.polygons))
-        # print(self.polygons)
         # assert len(bb) == 2
         return bb
-        # print(bb)
-        # print(scd(bb))
-        # print('')
-        # return scd(bb)
 
     @property
     def center(self):

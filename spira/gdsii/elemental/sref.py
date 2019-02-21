@@ -237,6 +237,11 @@ class SRef(SRefAbstract):
     def __str__(self):
         return self.__repr__()
 
+    # def get_node_id(self):
+    #     if self.__id__:
+    #         return self.__id__
+    #     else:
+    #         return '{}_{}'.format(self.ref.name, self.midpoint)
 
 
 

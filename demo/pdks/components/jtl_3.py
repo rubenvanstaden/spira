@@ -4,7 +4,7 @@ from copy import copy, deepcopy
 from spira import param, shapes
 from spira.rdd import get_rule_deck
 from demo.pdks.components.junction import Junction
-from spira.lgm.route.manhattan_base import RouteManhattan
+from spira.lgm.route.manhattan_base import Route
 from spira.lgm.route.basic import RouteShape, RouteBasic, Route
 from spira.lpe.containers import __CellContainer__
 from spira.lpe.circuits import Circuit
@@ -25,7 +25,7 @@ class Jtl(Circuit):
         jj = Junction()
         jj.center = (0,0)
 
-        for i in range(0, 40, 1):
+        for i in range(0, 10, 1):
             elems += spira.SRef(jj, midpoint=(20*i*self.um, 0))
 
         return elems
@@ -45,7 +45,7 @@ class Jtl(Circuit):
             s1 = junctions[i]
             s2 = junctions[i+1]
 
-            R1 = RouteManhattan(
+            R1 = Route(
                 port1=s1.ports['Output'],
                 port2=s2.ports['Input'],
                 player=RDD.PLAYER.BAS
@@ -53,14 +53,14 @@ class Jtl(Circuit):
             r1 = spira.SRef(R1)
             routes += r1
 
-        R2 = RouteManhattan(
+        R2 = Route(
             port1=self.term_ports['T1'],
             port2=self.jj[0].ports['Input'],
             player=RDD.PLAYER.BAS
         )
         routes += spira.SRef(R2)
 
-        R3 = RouteManhattan(
+        R3 = Route(
             port1=self.jj[-1].ports['Output'],
             port2=self.term_ports['T2'],
             player=RDD.PLAYER.BAS
@@ -97,7 +97,7 @@ if __name__ == '__main__':
 
     # jj.output()
     jj.netlist
-    jj.mask.output()
+    # jj.mask.output()
 
     spira.LOG.end_print('JTL example finished')
 

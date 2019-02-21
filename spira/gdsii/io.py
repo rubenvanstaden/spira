@@ -12,7 +12,6 @@ from copy import copy, deepcopy
 from spira import LOG
 
 
-
 import numpy as np
 from numpy.linalg import norm
 

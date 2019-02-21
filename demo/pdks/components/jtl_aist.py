@@ -4,7 +4,7 @@ from copy import copy, deepcopy
 from spira import param, shapes
 from spira.rdd import get_rule_deck
 from demo.pdks.components.junction import Junction
-from spira.lgm.route.manhattan_base import RouteManhattan
+from spira.lgm.route.manhattan_base import Route
 from spira.lgm.route.basic import RouteShape, RouteBasic, Route
 from spira.lpe.containers import __CellContainer__
 from spira.lpe.circuits import Circuit
@@ -50,21 +50,21 @@ class Jtl(Circuit):
         s1 = self.jj1
         s2 = self.jj2
 
-        route = RouteManhattan(
+        route = Route(
             port1=self.term_ports['T1'],
             port2=s1.ports['Input'],
             player=RDD.PLAYER.BAS
         )
         r1 = spira.SRef(route)
 
-        route = RouteManhattan(
+        route = Route(
             port1=self.term_ports['T2'],
             port2=s2.ports['Output'],
             player=RDD.PLAYER.BAS
         )
         r2 = spira.SRef(route)
 
-        route = RouteManhattan(
+        route = Route(
             port1=self.term_ports['T3'],
             port2=self.term_ports['D1'],
             player=RDD.PLAYER.BAS
@@ -77,7 +77,7 @@ class Jtl(Circuit):
         s1 = self.jj1
         s2 = self.jj2
 
-        R1 = RouteManhattan(
+        R1 = Route(
             port1=s1.ports['Output'],
             port2=s2.ports['Input'],
             player=RDD.PLAYER.BAS

@@ -18,7 +18,6 @@ from spira.core.initializer import ElementalInitializer
 #         return self.__type__(value)
 #
 #     # def __eq__(self, other):
-#     #     print('Updating value {}'.format(self))
 #     #     return obj.__store__[self.__name__] == other.value
 #
 #     def __set__(self, obj, value):

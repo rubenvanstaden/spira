@@ -22,7 +22,6 @@ class PurposeLayer(__Layer__):
     #     return string.format(self.name, self.datatype, self.symbol)
 
     def __eq__(self, other):
-        # print(other)
         if isinstance(other, PurposeLayer):
             return self.key == other.key
         else:
@@ -83,12 +82,12 @@ class PhysicalLayer(__Layer__):
     def __init__(self, **kwargs):
         ElementalInitializer.__init__(self, **kwargs)
 
-    def __repr__(self):
-        string = '[SPiRA: PhysicalLayer] (layer \'{}\', symbol \'{}\')'
-        return string.format(self.layer.name, self.purpose.symbol)
+    # def __repr__(self):
+    #     string = '[SPiRA: PhysicalLayer] (layer \'{}\', symbol \'{}\')'
+    #     return string.format(self.layer.name, self.purpose.symbol)
 
-    def __str__(self):
-        return self.__repr__()
+    # def __str__(self):
+    #     return self.__repr__()
 
     def __hash__(self):
         return hash(self.id)

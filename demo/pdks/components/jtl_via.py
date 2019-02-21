@@ -4,7 +4,7 @@ from copy import copy, deepcopy
 from spira import param, shapes
 from spira.rdd import get_rule_deck
 from demo.pdks.components.junction import Junction
-from spira.lgm.route.manhattan_base import RouteManhattan
+from spira.lgm.route.manhattan_base import Route
 from spira.lgm.route.basic import RouteShape, RouteBasic, Route
 from spira.lpe.containers import __CellContainer__
 from spira.lpe.circuits import Circuit
@@ -20,7 +20,6 @@ class JtlVia(Circuit):
 
     m1 = param.MidPointField(default=(0,0))
     m2 = param.MidPointField(default=(0,0))
-    # m3 = param.MidPointField(default=(0,0))
     dx = param.FloatField(default=10*1e6)
     rotation = param.FloatField(default=0)
 
@@ -59,7 +58,7 @@ class JtlVia(Circuit):
         s1 = self.jj1
         s2 = self.jj2
 
-        R0 = RouteManhattan(
+        R0 = Route(
             port1=self.via.ports['Output'],
             port2=s2.ports['Input'],
             radius=3*self.um, length=1*self.um,
@@ -69,21 +68,21 @@ class JtlVia(Circuit):
         s3.move(midpoint=s3.ports['T1'], destination=R0.port1)
         routes += s3
 
-        R1 = RouteManhattan(
+        R1 = Route(
             port1=s1.ports['Output'],
             port2=self.via.ports['Input'],
             player=RDD.PLAYER.COU
         )
         routes += spira.SRef(R1)
 
-        r1 = RouteManhattan(
+        r1 = Route(
             port1=self.term_ports['T1'],
             port2=s1.ports['Input'],
             player=RDD.PLAYER.BAS
         )
         routes += spira.SRef(r1)
 
-        r2 = RouteManhattan(
+        r2 = Route(
             port1=self.term_ports['T2'],
             port2=s2.ports['Output'],
             player=RDD.PLAYER.BAS
@@ -115,7 +114,7 @@ if __name__ == '__main__':
 
     jtl = JtlVia(m2=(30*1e6,-30*1e6), rotation=0, level=2)
 
-    # jtl.netlist
+    jtl.netlist
     jtl.mask.output()
 
     spira.LOG.end_print('JTL example finished')

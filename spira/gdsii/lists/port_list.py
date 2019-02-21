@@ -5,7 +5,8 @@ class PortList(TypedList):
     """
 
     def __repr__(self):
-        if len(self._list) == 0: print('PortList is empty')
+        if len(self._list) == 0: 
+            print('PortList is empty')
         return '\n'.join('{}'.format(k) for k in enumerate(self._list))
 
     def __str__(self):

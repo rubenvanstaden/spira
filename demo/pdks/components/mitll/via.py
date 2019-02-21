@@ -1,0 +1,116 @@
+import spira
+from spira import param
+from spira import shapes
+from spira.rdd import get_rule_deck
+from spira.rdd.technology import ProcessTree
+from demo.pdks import ply
+from spira.lpe.devices import Device
+
+
+RDD = get_rule_deck()
+
+
+class Via(Device):
+    pass
+
+
+class ViaC5R(Via):
+    """ Via component for the AIST process. """
+
+    __name_prefix__ = 'C5R'
+
+    um = param.FloatField(default=1e+6)
+    w = param.FloatField(default=2*1e6)
+    h = param.FloatField(default=2*1e6)
+
+    m1 = param.PhysicalLayerField(default=RDD.PLAYER.R5)
+    m2 = param.PhysicalLayerField(default=RDD.PLAYER.M6)
+    cc = param.PhysicalLayerField(default=RDD.PLAYER.C5R)
+
+    def create_metals(self, elems):
+        elems += ply.Box(player=self.m1, center=(0,0), w=self.w, h=self.h)
+        elems += ply.Box(player=self.m2, center=(0,0), w=self.w, h=self.h)
+        return elems
+
+    def create_contacts(self, elems):
+        elems += ply.Box(player=self.cc, center=(0,0), w=RDD.C5R.MIN_SIZE*1e6, h=RDD.C5R.MIN_SIZE*1e6)
+        return elems
+
+    def create_ports(self, ports):
+        ports += spira.Term(name='Input', midpoint=(-self.w/2, 0), orientation=90, width=self.w/2)
+        ports += spira.Term(name='Output', midpoint=(self.w/2, 0), orientation=-90, width=self.w/2)
+        ports += spira.Term(name='North', midpoint=(0, self.h/2), orientation=0, width=self.w/2)
+        ports += spira.Term(name='South', midpoint=(0, -self.h/2), orientation=180, width=self.w/2)
+        return ports
+
+
+class ViaI5(Via):
+    """ Via component for the AIST process. """
+
+    __name_prefix__ = 'I5'
+
+    um = param.FloatField(default=1e+6)
+    w = param.FloatField(default=2*1e6)
+    h = param.FloatField(default=2*1e6)
+
+    m1 = param.PhysicalLayerField(default=RDD.PLAYER.M5)
+    m2 = param.PhysicalLayerField(default=RDD.PLAYER.M6)
+    cc = param.PhysicalLayerField(default=RDD.PLAYER.I5)
+
+    def create_metals(self, elems):
+        elems += ply.Box(player=self.m1, center=(0,0), w=self.w, h=self.h)
+        elems += ply.Box(player=self.m2, center=(0,0), w=self.w, h=self.h)
+        return elems
+
+    def create_contacts(self, elems):
+        elems += ply.Box(player=self.cc, center=(0,0), w=RDD.I5.MIN_SIZE*self.um, h=RDD.I5.MIN_SIZE*self.um)
+        return elems
+
+    def create_ports(self, ports):
+        ports += spira.Term(name='Input', midpoint=(-self.w/2, 0), orientation=90, width=self.w/2)
+        ports += spira.Term(name='Output', midpoint=(self.w/2, 0), orientation=-90, width=self.w/2)
+        ports += spira.Term(name='North', midpoint=(0, self.h/2), orientation=0, width=self.w/2)
+        ports += spira.Term(name='South', midpoint=(0, -self.h/2), orientation=180, width=self.w/2)
+        return ports
+
+
+class ViaI6(Via):
+    """ Via component for the AIST process. """
+
+    __name_prefix__ = 'I6'
+
+    um = param.FloatField(default=1e+6)
+    w = param.FloatField(default=2*1e6)
+    h = param.FloatField(default=2*1e6)
+
+    m1 = param.PhysicalLayerField(default=RDD.PLAYER.M6)
+    m2 = param.PhysicalLayerField(default=RDD.PLAYER.M7)
+    cc = param.PhysicalLayerField(default=RDD.PLAYER.I6)
+
+    def create_metals(self, elems):
+        elems += ply.Box(player=self.m1, center=(0,0), w=self.w, h=self.h)
+        elems += ply.Box(player=self.m2, center=(0,0), w=self.w, h=self.h)
+        return elems
+
+    def create_contacts(self, elems):
+        elems += ply.Box(player=self.cc, center=(0,0), w=RDD.I6.MIN_SIZE*self.um, h=RDD.I6.MIN_SIZE*self.um)
+        return elems
+
+    def create_ports(self, ports):
+        ports += spira.Term(name='Input', midpoint=(-self.w/2, 0), orientation=90, width=self.w/2)
+        ports += spira.Term(name='Output', midpoint=(self.w/2, 0), orientation=-90, width=self.w/2)
+        ports += spira.Term(name='North', midpoint=(0, self.h/2), orientation=0, width=self.w/2)
+        ports += spira.Term(name='South', midpoint=(0, -self.h/2), orientation=180, width=self.w/2)
+        return ports
+
+
+if __name__ == '__main__':
+
+    name = 'Via PCell'
+    spira.LOG.header('Running example: {}'.format(name))
+
+    via = ViaBC()
+    via.output(name=name)
+
+    spira.LOG.end_print('Junction example finished')
+

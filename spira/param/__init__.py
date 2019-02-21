@@ -12,36 +12,6 @@ from spira.core.descriptor import FunctionField
 import numpy as np
 
 
-class MidPointField(DataFieldDescriptor):
-    from .field.point import Point
-    __type__ = Point
-
-    def __init__(self, default=Point(0,0), **kwargs):
-        if isinstance(default, self.__type__):
-            kwargs['default'] = [default.x, default.y]
-        elif isinstance(default, (list, set, tuple, np.ndarray)):
-            kwargs['default'] = default
-        super().__init__(**kwargs)
-
-    def get_stored_value(self, obj):
-        value = obj.__store__[self.__name__]
-        if not isinstance(value, (list, set, tuple, np.ndarray)):
-            raise ValueError('Correct MidPoint type to retreived.')
-        return list(value)
-
-    def __set__(self, obj, value):
-        if isinstance(value, self.__type__):
-            value = self.__type__()
-        elif isinstance(value, (list, set, tuple, np.ndarray)):
-            value = self.__type__(value[0], value[1])
-        else:
-            raise TypeError("Invalid type in setting value " +
-                            "of {} (expected {}): {}"
-                            .format(self.__class__, type(value)))
-
-        obj.__store__[self.__name__] = [value.x, value.y]
-
-
 def PolygonField(default='', shape=[]):
     from spira.gdsii.elemental.polygons import Polygons
     if default is None:
@@ -49,12 +19,6 @@ def PolygonField(default='', shape=[]):
     else:
         F = Polygons(shape)
     return DataFieldDescriptor(default=F)
-
-
-# def OrientedPolygonField(shape=[]):
-#     from spira.gdsii.elemental.polygons import OrientedPolygon
-#     F = OrientedPolygon(shape)
-#     return DataFieldDescriptor(default=F)
 
 
 def LabelField(position=[]):
@@ -69,9 +33,12 @@ def GroupElementalField(default=None):
     return DataFieldDescriptor(default=F)
 
 
-def PortField():
+def PortField(default=None):
     from spira.gdsii.elemental.port import Port
-    F = Port()
+    if default is None:
+        F = None
+    else:
+        F = Port()
     return DataFieldDescriptor(default=F)
 
 
@@ -81,7 +48,7 @@ def ShapeField(points=[]):
     return DataFieldDescriptor(default=F)
 
 
-def LayerField(name='', number=0, datatype=0, **kwargs):
+def LayerField(name='noname', number=0, datatype=0, **kwargs):
     from spira.layers.layer import Layer
     F = Layer(name=name, number=number, datatype=datatype, **kwargs)
     return DataFieldDescriptor(default=F, **kwargs)
@@ -90,6 +57,11 @@ def LayerField(name='', number=0, datatype=0, **kwargs):
 def FloatField(**kwargs):
     from .variables import FLOAT
     return DataFieldDescriptor(constraint=FLOAT, **kwargs)
+
+
+def NumpyArrayField(**kwargs):
+    from .variables import NUMPY_ARRAY
+    return DataFieldDescriptor(constraint=NUMPY_ARRAY, **kwargs)
 
 
 def IntegerField(**kwargs):
@@ -136,6 +108,36 @@ class ElementalListField(DataFieldDescriptor):
             value = self.__type__()
         obj.__store__[self.__name__] = value
         return value
+
+
+class MidPointField(DataFieldDescriptor):
+    from .field.point import Point
+    __type__ = Point
+
+    def __init__(self, default=Point(0,0), **kwargs):
+        if isinstance(default, self.__type__):
+            kwargs['default'] = [default.x, default.y]
+        elif isinstance(default, (list, set, tuple, np.ndarray)):
+            kwargs['default'] = default
+        super().__init__(**kwargs)
+
+    def get_stored_value(self, obj):
+        value = obj.__store__[self.__name__]
+        if not isinstance(value, (list, set, tuple, np.ndarray)):
+            raise ValueError('Correct MidPoint type to retreived.')
+        return list(value)
+
+    def __set__(self, obj, value):
+        if isinstance(value, self.__type__):
+            value = self.__type__()
+        elif isinstance(value, (list, set, tuple, np.ndarray)):
+            value = self.__type__(value[0], value[1])
+        else:
+            raise TypeError("Invalid type in setting value " +
+                            "of {} (expected {}): {}"
+                            .format(self.__class__, type(value)))
+
+        obj.__store__[self.__name__] = [value.x, value.y]
 
 
 class PointArrayField(DataFieldDescriptor):

@@ -114,8 +114,8 @@ class __PolygonOperator__(__NetlistCell__):
     boxes = param.ElementalListField()
 
     level = param.IntegerField(default=2)
-    lcar = param.IntegerField(default=0.1)
     algorithm = param.IntegerField(default=6)
+    # lcar = param.IntegerField(default=0.1)
 
     metal_layers = param.DataField(fdef_name='create_metal_layers')
     merged_layers = param.DataField(fdef_name='create_merged_layers')
@@ -134,6 +134,15 @@ class __PolygonOperator__(__NetlistCell__):
         return None
 
     def get_metal_polygons(self, pl):
+        elems = self.merged_layers
+        ply_elems = spira.ElementList()
+        for M in elems:
+            if M.layer.is_equal_number(pl.layer):
+                # ply_elems += M
+                ply_elems += M.polygon
+        return ply_elems
+
+    def get_metal_polygons_for_ports(self, pl):
         elems = self.merged_layers
         ply_elems = spira.ElementList()
         for M in elems:
@@ -159,19 +168,19 @@ class __PolygonOperator__(__NetlistCell__):
                 elems += ply.Polygon(name=name, player=player, points=[pts], level=self.level)
         return elems
 
-    # def create_nets(self, nets):
-    #     for pl in RDD.PLAYER.get_physical_layers(purposes='METAL'):
-    #         metal_elems = self.get_metal_polygons(pl)
-    #         if metal_elems:
-    #             net = Net(
-    #                 name='{}'.format(pl.layer.number),
-    #                 lcar=self.lcar,
-    #                 level=self.level,
-    #                 algorithm=self.algorithm,
-    #                 layer=pl.layer,
-    #                 polygons=metal_elems,
-    #                 primitives=self.local_devices,
-    #                 bounding_boxes=self.boxes
-    #             )
-    #             nets += net.graph
-        # return nets
+    def create_nets(self, nets):
+        for pl in RDD.PLAYER.get_physical_layers(purposes='METAL'):
+            metal_elems = self.get_metal_polygons(pl)
+            if metal_elems:
+                net = Net(
+                    name='{}'.format(pl.layer.number),
+                    lcar=self.lcar,
+                    level=self.level,
+                    algorithm=self.algorithm,
+                    layer=pl.layer,
+                    polygons=metal_elems,
+                    primitives=self.local_devices,
+                    bounding_boxes=self.boxes
+                )
+                nets += net.graph
+        return nets

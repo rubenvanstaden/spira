@@ -100,7 +100,7 @@ class Route90(__Manhattan__):
         return spira.SRef(D)
 
 
-class RouteManhattan90(Route90):
+class Route90(Route90):
 
     def create_elementals(self, elems):
 
@@ -139,7 +139,6 @@ class RouteManhattan90(Route90):
 
         # if (p1_angle == 90) or (p1_angle == 270):
         #     if (a2 == a1-90) or (a2 == a1+270):
-        #         print('1. YES!!!')
         #         ports += spira.Term(name='T1',
         #             width=self.port1.width,
         #             orientation=0
@@ -152,7 +151,6 @@ class RouteManhattan90(Route90):
         #             # orientation=self.port2.orientation
         #         )
         #     if (a2 == a1+90) or (a2 == a1-270):
-        #         print('2. YES!!!')
         #         ports += spira.Term(name='T1',
         #             width=self.port1.width,
         #             # orientation=180
@@ -167,7 +165,6 @@ class RouteManhattan90(Route90):
 
         # if (p1_angle == 0) or (p1_angle == 180):
         #     if angle == 90:
-        #         print('A')
         #         ports += spira.Term(name='T1',
         #             width=self.port1.width,
         #             orientation=0
@@ -180,7 +177,6 @@ class RouteManhattan90(Route90):
         #             # orientation=self.port2.orientation
         #         )
         #     else:
-        #         print('B')
         #         ports += spira.Term(name='T1',
         #             width=self.port1.width,
         #             orientation=0
@@ -194,7 +190,6 @@ class RouteManhattan90(Route90):
         #         )
 
         if angle == 90:
-            print('A')
             ports += spira.Term(name='T1',
                 width=self.port1.width,
                 orientation=0
@@ -205,7 +200,6 @@ class RouteManhattan90(Route90):
                 orientation=90
             )
         else:
-            print('B')
             ports += spira.Term(name='T1',
                 width=self.port1.width,
                 orientation=0

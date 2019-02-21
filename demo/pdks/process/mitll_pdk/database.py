@@ -211,6 +211,8 @@ RDD.VIAS = ProcessTree()
 class TCellI4(DynamicDataTree):
     def initialize(self):
         from demo.pdks.templates.contact import ViaTemplate
+        from demo.pdks.components.mitll.via import ViaC5R
+        self.DEFAULT = ViaC5R
         self.PCELL = ViaTemplate(
             name = 'I4',
             via_layer = RDD.I4.LAYER,
@@ -223,6 +225,8 @@ RDD.VIAS.I4 = TCellI4()
 class TCellI5(DynamicDataTree):
     def initialize(self):
         from demo.pdks.templates.contact import ViaTemplate
+        from demo.pdks.components.mitll.via import ViaI5
+        self.DEFAULT = ViaI5
         self.PCELL = ViaTemplate(
             name = 'I5',
             via_layer = RDD.I5.LAYER,
@@ -232,9 +236,25 @@ class TCellI5(DynamicDataTree):
 
 RDD.VIAS.I5 = TCellI5()
 
+class TCellI6(DynamicDataTree):
+    def initialize(self):
+        from demo.pdks.templates.contact import ViaTemplate
+        from demo.pdks.components.mitll.via import ViaI6
+        self.DEFAULT = ViaI6
+        self.PCELL = ViaTemplate(
+            name = 'I6',
+            via_layer = RDD.I6.LAYER,
+            layer1 = RDD.M6.LAYER,
+            layer2 = RDD.M7.LAYER
+        )
+
+RDD.VIAS.I6 = TCellI6()
+
 class TCellC5R(DynamicDataTree):
     def initialize(self):
         from demo.pdks.templates.contact import ViaTemplate
+        from demo.pdks.components.mitll.via import ViaC5R
+        self.DEFAULT = ViaC5R
         self.PCELL = ViaTemplate(
             name = 'C5R',
             via_layer = RDD.C5R.LAYER, 
@@ -247,6 +267,8 @@ RDD.VIAS.C5R = TCellC5R()
 class TCellJ5(DynamicDataTree):
     def initialize(self):
         from demo.pdks.templates.contact import ViaTemplate
+        from demo.pdks.components.mitll.via import ViaC5R
+        self.DEFAULT = ViaC5R
         self.PCELL = ViaTemplate(
             name = 'J5',
             via_layer = RDD.J5.LAYER, 
@@ -266,6 +288,27 @@ class TCellJunction(DynamicDataTree):
         self.PCELL = Junction
 
 RDD.DEVICES.JJ = TCellJunction()
+
+class TCellGJunction(DynamicDataTree):
+    def initialize(self):
+        from demo.pdks.components.mitll.junction import GJunction
+        self.PCELL = GJunction
+
+RDD.DEVICES.G_JJ = TCellGJunction()
+
+class TCellSJunction(DynamicDataTree):
+    def initialize(self):
+        from demo.pdks.components.mitll.junction import SJunction
+        self.PCELL = SJunction
+
+RDD.DEVICES.S_JJ = TCellSJunction()
+
+class TCellSGJunction(DynamicDataTree):
+    def initialize(self):
+        from demo.pdks.components.mitll.junction import SGJunction
+        self.PCELL = SGJunction
+
+RDD.DEVICES.SG_JJ = TCellSGJunction()
 
 # --------------------------------- Finished -------------------------------------
 

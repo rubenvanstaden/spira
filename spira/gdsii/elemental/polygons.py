@@ -90,7 +90,12 @@ class PolygonAbstract(__Polygon__):
     def commit_to_gdspy(self, cell):
         if self.__repr__() not in list(PolygonAbstract.__committed__.keys()):
             ply = deepcopy(self.shape.points)
-            P = gdspy.PolygonSet(ply, self.gdslayer.number, self.gdslayer.datatype)
+            P = gdspy.PolygonSet(
+                polygons=ply, 
+                layer=self.gdslayer.number, 
+                datatype=self.gdslayer.datatype,
+                verbose=False
+            )
             cell.add(P)
             PolygonAbstract.__committed__.update({self.__repr__():P})
         else:
@@ -110,6 +115,7 @@ class PolygonAbstract(__Polygon__):
 
     def rotate(self, angle=45, center=(0,0)):
         super().rotate(angle=(angle-self.direction)*np.pi/180, center=center)
+        # super().rotate(angle=angle*np.pi/180, center=center)
         self.shape.points = self.polygons
         return self
 

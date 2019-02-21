@@ -50,7 +50,7 @@ class DataFieldDescriptor(BaseField):
             self.fdef_name = None
 
     def __field_was_stored__(self, obj):
-        return self.__name__ in obj.__store__
+        return (self.__name__ in obj.__store__)
 
     def __get__(self, obj, type=None):
         """
@@ -70,7 +70,8 @@ class DataFieldDescriptor(BaseField):
                 if hasattr(self, 'default'):
                     value = self.default
                 else:
-                    value = self
+                    value = None
+                    # value = self
             else:
                 value = self.call_param_function(obj)
         else:

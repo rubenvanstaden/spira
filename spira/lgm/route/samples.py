@@ -1,6 +1,6 @@
 import spira
 from spira import param
-from spira.lgm.route.manhattan_base import RouteManhattan
+from spira.lgm.route.manhattan_base import Route
 
 
 class Test_Manhattan_180(spira.Cell):
@@ -9,25 +9,25 @@ class Test_Manhattan_180(spira.Cell):
     def test_q1_180(self):
         p1 = spira.Term(name='P1', midpoint=(0,0), orientation=0, width=2*1e6)
         p2 = spira.Term(name='P2', midpoint=(40*1e6,20*1e6), orientation=180, width=2*1e6)
-        rm = RouteManhattan(port1=p1, port2=p2, radius=8*1e6)
+        rm = Route(port1=p1, port2=p2, radius=8*1e6)
         return spira.SRef(rm, midpoint=(5*1e6,5*1e6))
 
     def test_q2_180(self):
         p1 = spira.Term(name='P1', midpoint=(0,0), orientation=0, width=2*1e6)
         p2 = spira.Term(name='P2', midpoint=(-40*1e6,20*1e6), orientation=180, width=2*1e6)
-        rm = RouteManhattan(port1=p1, port2=p2, radius=8*1e6)
+        rm = Route(port1=p1, port2=p2, radius=8*1e6)
         return spira.SRef(rm, midpoint=(-5*1e6,5*1e6))
 
     def test_q3_180(self):
         p1 = spira.Term(name='P1', midpoint=(0,0), orientation=180, width=2*1e6)
         p2 = spira.Term(name='P2', midpoint=(-40*1e6,-20*1e6), orientation=0, width=2*1e6)
-        rm = RouteManhattan(port1=p1, port2=p2, radius=8*1e6)
+        rm = Route(port1=p1, port2=p2, radius=8*1e6)
         return spira.SRef(rm, midpoint=(-5*1e6,-5*1e6))
 
     def test_q4_180(self):
         p1 = spira.Term(name='P1', midpoint=(0,0), orientation=180, width=2*1e6)
         p2 = spira.Term(name='P2', midpoint=(40*1e6,-20*1e6), orientation=0, width=2*1e6)
-        rm = RouteManhattan(port1=p1, port2=p2, radius=8*1e6)
+        rm = Route(port1=p1, port2=p2, radius=8*1e6)
         return spira.SRef(rm, midpoint=(5*1e6,-5*1e6))
 
     def create_elementals(self, elems):
@@ -46,21 +46,21 @@ class Test_Manhattan_90(spira.Cell):
     def test_q1_90(self):
         p1 = spira.Term(name='P1', midpoint=(0,0), orientation=0, width=2*1e6)
         p2 = spira.Term(name='P2', midpoint=(40*1e6,20*1e6), orientation=90, width=2*1e6)
-        rm = RouteManhattan(port1=p1, port2=p2, radius=8*1e6)
+        rm = Route(port1=p1, port2=p2, radius=8*1e6)
         # return spira.SRef(rm, midpoint=(200*1e6,0*1e6))
         return spira.SRef(rm, midpoint=(5*1e6,5*1e6))
 
     def test_q2_90(self):
         p1 = spira.Term(name='P1', midpoint=(0,0), orientation=0, width=2*1e6)
         p2 = spira.Term(name='P2', midpoint=(-40*1e6,20*1e6), orientation=-90, width=2*1e6)
-        rm = RouteManhattan(port1=p1, port2=p2, radius=8*1e6)
+        rm = Route(port1=p1, port2=p2, radius=8*1e6)
         # return spira.SRef(rm, midpoint=(200*1e6,200*1e6))
         return spira.SRef(rm, midpoint=(-5*1e6,5*1e6))
 
     def test_q3_90(self):
         p1 = spira.Term(name='P1', midpoint=(0,0), orientation=180, width=2*1e6)
         p2 = spira.Term(name='P2', midpoint=(-40*1e6,-20*1e6), orientation=-90, width=2*1e6)
-        rm = RouteManhattan(port1=p1, port2=p2, radius=8*1e6)
+        rm = Route(port1=p1, port2=p2, radius=8*1e6)
         # return spira.SRef(rm, midpoint=(200*1e6,400*1e6))
         return spira.SRef(rm, midpoint=(-5*1e6,-5*1e6))
 
@@ -68,7 +68,7 @@ class Test_Manhattan_90(spira.Cell):
         """ P1 has an orientation of 180. """
         p1 = spira.Term(name='P1', midpoint=(0,0), orientation=180, width=2*1e6)
         p2 = spira.Term(name='P2', midpoint=(40*1e6,-20*1e6), orientation=90, width=2*1e6)
-        rm = RouteManhattan(port1=p1, port2=p2, radius=8*1e6)
+        rm = Route(port1=p1, port2=p2, radius=8*1e6)
         # return spira.SRef(rm, midpoint=(200*1e6,800*1e6))
         return spira.SRef(rm, midpoint=(5*1e6,-5*1e6))
 
@@ -77,26 +77,26 @@ class Test_Manhattan_90(spira.Cell):
     def test_q1_90_2(self):
         p1 = spira.Term(name='P1', midpoint=(0,0), orientation=-90, width=2*1e6)
         p2 = spira.Term(name='P2', midpoint=(40*1e6,20*1e6), orientation=180, width=2*1e6)
-        rm = RouteManhattan(port1=p1, port2=p2, radius=8*1e6)
+        rm = Route(port1=p1, port2=p2, radius=8*1e6)
         return spira.SRef(rm, midpoint=(115*1e6,5*1e6))
 
     def test_q2_90_2(self):
         p1 = spira.Term(name='P1', midpoint=(0,0), orientation=90, width=2*1e6)
         p2 = spira.Term(name='P2', midpoint=(-40*1e6,20*1e6), orientation=180, width=2*1e6)
-        rm = RouteManhattan(port1=p1, port2=p2, radius=8*1e6)
+        rm = Route(port1=p1, port2=p2, radius=8*1e6)
         return spira.SRef(rm, midpoint=(105*1e6,5*1e6))
 
     def test_q3_90_2(self):
         p1 = spira.Term(name='P1', midpoint=(0,0), orientation=90, width=2*1e6)
         p2 = spira.Term(name='P2', midpoint=(-40*1e6,-20*1e6), orientation=0, width=2*1e6)
-        rm = RouteManhattan(port1=p1, port2=p2, radius=8*1e6)
+        rm = Route(port1=p1, port2=p2, radius=8*1e6)
         return spira.SRef(rm, midpoint=(105*1e6,-5*1e6))
 
     def test_q4_90_2(self):
         """ P1 has an orientation of 180. """
         p1 = spira.Term(name='P1', midpoint=(0,0), orientation=-90, width=2*1e6)
         p2 = spira.Term(name='P2', midpoint=(40*1e6,-20*1e6), orientation=0, width=2*1e6)
-        rm = RouteManhattan(port1=p1, port2=p2, radius=8*1e6)
+        rm = Route(port1=p1, port2=p2, radius=8*1e6)
         return spira.SRef(rm, midpoint=(115*1e6,-5*1e6))
 
     def create_elementals(self, elems):
@@ -122,25 +122,25 @@ class Test_Manhattan_Horizontal(spira.Cell):
     def test_p1p2_180_horizontal(self):
         p1 = spira.Term(name='P1', midpoint=(0,0), orientation=0, width=2*1e6)
         p2 = spira.Term(name='P2', midpoint=(40*1e6,0), orientation=0, width=2*1e6)
-        rm = RouteManhattan(port1=p1, port2=p2, radius=8*1e6)
+        rm = Route(port1=p1, port2=p2, radius=8*1e6)
         return spira.SRef(rm, midpoint=(5*1e6,5*1e6))
 
     def test_p2p1_180_horizontal(self):
         p1 = spira.Term(name='P1', midpoint=(0,0), orientation=0, width=2*1e6)
         p2 = spira.Term(name='P2', midpoint=(-40*1e6,0), orientation=0, width=2*1e6)
-        rm = RouteManhattan(port1=p1, port2=p2, radius=8*1e6)
+        rm = Route(port1=p1, port2=p2, radius=8*1e6)
         return spira.SRef(rm, midpoint=(-5*1e6,5*1e6))
 
     def test_p1p2_180_bot(self):
         p1 = spira.Term(name='P1', midpoint=(0,0), orientation=180, width=2*1e6)
         p2 = spira.Term(name='P2', midpoint=(40*1e6,0), orientation=180, width=2*1e6)
-        rm = RouteManhattan(port1=p1, port2=p2, radius=8*1e6)
+        rm = Route(port1=p1, port2=p2, radius=8*1e6)
         return spira.SRef(rm, midpoint=(5*1e6,-5*1e6))
 
     def test_p2p1_180_bot(self):
         p1 = spira.Term(name='P1', midpoint=(0,0), orientation=180, width=2*1e6)
         p2 = spira.Term(name='P2', midpoint=(-40*1e6,0), orientation=180, width=2*1e6)
-        rm = RouteManhattan(port1=p1, port2=p2, radius=8*1e6)
+        rm = Route(port1=p1, port2=p2, radius=8*1e6)
         return spira.SRef(rm, midpoint=(-5*1e6,-5*1e6))
 
     def create_elementals(self, elems):
@@ -159,25 +159,25 @@ class Test_Manhattan_Vertical(spira.Cell):
     def test_p1p2_180_vertical(self):
         p1 = spira.Term(name='P1', midpoint=(0,0), orientation=90, width=2*1e6)
         p2 = spira.Term(name='P2', midpoint=(0,-40*1e6), orientation=90, width=2*1e6)
-        rm = RouteManhattan(port1=p1, port2=p2, radius=8*1e6)
+        rm = Route(port1=p1, port2=p2, radius=8*1e6)
         return spira.SRef(rm, midpoint=(-5*1e6,-5*1e6))
 
     def test_p2p1_180_vertical(self):
         p1 = spira.Term(name='P1', midpoint=(0,0), orientation=90, width=2*1e6)
         p2 = spira.Term(name='P2', midpoint=(0,40*1e6), orientation=90, width=2*1e6)
-        rm = RouteManhattan(port1=p1, port2=p2, radius=8*1e6)
+        rm = Route(port1=p1, port2=p2, radius=8*1e6)
         return spira.SRef(rm, midpoint=(-5*1e6,5*1e6))
 
     def test_p1p2_180_vertical_bot(self):
         p1 = spira.Term(name='P1', midpoint=(0,0), orientation=-90, width=2*1e6)
         p2 = spira.Term(name='P2', midpoint=(0,-40*1e6), orientation=-90, width=2*1e6)
-        rm = RouteManhattan(port1=p1, port2=p2, radius=8*1e6)
+        rm = Route(port1=p1, port2=p2, radius=8*1e6)
         return spira.SRef(rm, midpoint=(5*1e6,-5*1e6))
 
     def test_p2p1_180_vertical_bot(self):
         p1 = spira.Term(name='P1', midpoint=(0,0), orientation=-90, width=2*1e6)
         p2 = spira.Term(name='P2', midpoint=(0,40*1e6), orientation=-90, width=2*1e6)
-        rm = RouteManhattan(port1=p1, port2=p2, radius=8*1e6)
+        rm = Route(port1=p1, port2=p2, radius=8*1e6)
         return spira.SRef(rm, midpoint=(5*1e6,5*1e6))
 
     def create_elementals(self, elems):
@@ -200,25 +200,25 @@ class Test_Manhattan_180_SimilarAngles(spira.Cell):
     def test_q1_parallel(self):
         p1 = spira.Term(name='P1', midpoint=(0,0), orientation=self.angle, width=2*1e6)
         p2 = spira.Term(name='P2', midpoint=(50*1e6,50*1e6), orientation=180, width=2*1e6)
-        rm = RouteManhattan(port1=p1, port2=p2, radius=8*1e6)
+        rm = Route(port1=p1, port2=p2, radius=8*1e6)
         return spira.SRef(rm, midpoint=(5*1e6, -5*1e6))
 
     def test_q2_parallel(self):
         p1 = spira.Term(name='P1', midpoint=(0,0), orientation=self.angle, width=2*1e6)
         p2 = spira.Term(name='P2', midpoint=(-50*1e6,50*1e6), orientation=180, width=2*1e6)
-        rm = RouteManhattan(port1=p1, port2=p2, radius=8*1e6)
+        rm = Route(port1=p1, port2=p2, radius=8*1e6)
         return spira.SRef(rm, midpoint=(-5*1e6, -5*1e6))
 
     def test_q3_parallel(self):
         p1 = spira.Term(name='P1', midpoint=(0,0), orientation=self.angle, width=2*1e6)
         p2 = spira.Term(name='P2', midpoint=(-50*1e6,-50*1e6), orientation=180, width=2*1e6)
-        rm = RouteManhattan(port1=p1, port2=p2, radius=8*1e6)
+        rm = Route(port1=p1, port2=p2, radius=8*1e6)
         return spira.SRef(rm, midpoint=(-5*1e6, 150*1e6))
 
     def test_q4_parallel(self):
         p1 = spira.Term(name='P1', midpoint=(0,0), orientation=self.angle, width=2*1e6)
         p2 = spira.Term(name='P2', midpoint=(50*1e6,-50*1e6), orientation=180, width=2*1e6)
-        rm = RouteManhattan(port1=p1, port2=p2, radius=8*1e6)
+        rm = Route(port1=p1, port2=p2, radius=8*1e6)
         return spira.SRef(rm, midpoint=(5*1e6, 150*1e6))
 
     def create_elementals(self, elems):
@@ -238,7 +238,7 @@ class TestManhattan(spira.Cell):
     def test_q1_180_90(self):
         p1 = spira.Term(name='P1', midpoint=(0,0), orientation=-90, width=2*1e6)
         p2 = spira.Term(name='P2', midpoint=(40*1e6,20*1e6), orientation=90, width=2*1e6)
-        rm = RouteManhattan(port1=p1, port2=p2, radius=8*1e6)
+        rm = Route(port1=p1, port2=p2, radius=8*1e6)
         return spira.SRef(rm, midpoint=(0,400*1e6))
 
     def create_elementals(self, elems):

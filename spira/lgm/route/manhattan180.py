@@ -364,7 +364,7 @@ class RouteParallel(__Manhattan__):
         return spira.SRef(D)
 
 
-class RouteManhattan180(Route180, RouteParallel):
+class Route180(Route180, RouteParallel):
     """ Route ports that has a 180 degree difference. """
 
     def create_elementals(self, elems):
@@ -373,7 +373,7 @@ class RouteManhattan180(Route180, RouteParallel):
         p2 = self.p2
 
         if self.port1.orientation == self.port2.orientation:
-            print('Angle: Equal')
+            # print('Angle: Equal')
             if (p1[1] == p2[1]) or (p1[0] == p2[0]):
                 elems += self.parallel
             if (p2[1] > p1[1]) and (p2[0] > p1[0]):
@@ -391,7 +391,7 @@ class RouteManhattan180(Route180, RouteParallel):
         elif np.round(np.abs(np.mod(self.port1.orientation - self.port2.orientation,360)),3) != 180:
             raise ValueError('[DEVICE] route() error: Ports do not face each other (orientations must be 180 apart)')    
         else:
-            print('Angle: 180 Difference')
+            # print('Angle: 180 Difference')
             if (p2[1] > p1[1]) and (p2[0] > p1[0]):
                 print('Q1')
                 elems += self.quadrant_one

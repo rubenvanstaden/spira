@@ -4,7 +4,7 @@ from copy import copy, deepcopy
 from spira import param, shapes
 from spira.rdd import get_rule_deck
 from demo.pdks.components.junction import Junction
-from spira.lgm.route.manhattan_base import RouteManhattan
+from spira.lgm.route.manhattan_base import Route
 from spira.lgm.route.basic import RouteShape, RouteBasic, Route
 from spira.lpe.containers import __CellContainer__
 from spira.lpe.circuits import Circuit
@@ -27,7 +27,7 @@ class TIntersection(Circuit):
 
     def create_routes(self, routes):
 
-        R1 = RouteManhattan(
+        R1 = Route(
             port1=self.term_ports['T1'],
             port2=self.term_ports['T2'],
             player=RDD.PLAYER.BAS
@@ -35,14 +35,14 @@ class TIntersection(Circuit):
         routes += spira.SRef(R1)
 
         for i in range(self.num):
-            R2 = RouteManhattan(
+            R2 = Route(
                 port1=self.term_ports['T{}'.format(i+3)],
                 port2=self.term_ports['D{}'.format(i+1)],
                 player=RDD.PLAYER.BAS
             )
             routes += spira.SRef(R2)
 
-        R3 = RouteManhattan(
+        R3 = Route(
             port1=self.term_ports['D0'],
             port2=self.term_ports['T0'],
             player=RDD.PLAYER.BAS
