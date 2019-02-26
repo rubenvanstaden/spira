@@ -44,15 +44,12 @@ class __Polygon__(gdspy.PolygonSet, ElementalInitializer):
         return self
 
     def __sub__(self, other):
-        pp = bool_operation(
+        points = bool_operation(
             subj=self.shape.points,
             clip=other.shape.points,
             method='difference'
         )
-        if len(pp) > 0:
-            return Polygons(shape=pp, gdslayer=self.gdslayer)
-        else:
-            return None
+        return points
 
     def __and__(self, other):
         pp = bool_operation(
@@ -61,7 +58,7 @@ class __Polygon__(gdspy.PolygonSet, ElementalInitializer):
             method='intersection'
         )
         if len(pp) > 0:
-            return Polygons(shape=pp, gdslayer=self.gdslayer)
+            return Polygons(shape=np.array(pp), gdslayer=self.gdslayer)
         else:
             return None
 
@@ -89,9 +86,8 @@ class PolygonAbstract(__Polygon__):
 
     def commit_to_gdspy(self, cell):
         if self.__repr__() not in list(PolygonAbstract.__committed__.keys()):
-            ply = deepcopy(self.shape.points)
             P = gdspy.PolygonSet(
-                polygons=ply, 
+                polygons=deepcopy(self.shape.points), 
                 layer=self.gdslayer.number, 
                 datatype=self.gdslayer.datatype,
                 verbose=False
@@ -111,12 +107,15 @@ class PolygonAbstract(__Polygon__):
     def reflect(self, p1=(0,0), p2=(1,0), angle=None):
         for n, points in enumerate(self.shape.points):
             self.shape.points[n] = self.__reflect__(points, p1, p2)
+        self.polygons = self.shape.points
         return self
 
     def rotate(self, angle=45, center=(0,0)):
+        angle = (-1) * angle
         super().rotate(angle=(angle-self.direction)*np.pi/180, center=center)
         # super().rotate(angle=angle*np.pi/180, center=center)
         self.shape.points = self.polygons
+        # self.polygons = self.shape.points
         return self
 
     def translate(self, dx, dy):

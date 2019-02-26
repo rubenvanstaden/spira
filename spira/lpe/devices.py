@@ -51,11 +51,6 @@ class Device(__PolygonOperator__):
 
         return elems
 
-    # def create_ports(self, ports):
-    #     for e in self.elementals.flat_copy():
-    #         print(e)
-    #     return ports
-
     def create_netlist(self):
         self.g = self.merge
 
@@ -68,39 +63,7 @@ class Device(__PolygonOperator__):
 
 
 # class DeviceLayout(__CellContainer__):
-
-#     metals = param.ElementalListField()
-#     contacts = param.ElementalListField()
-#     level = param.IntegerField(default=2)
-
-#     def generate_physical_polygons(self, pl):
-#         elems = spira.ElementList()
-#         R = self.cell.elementals.flat_copy()
-#         Rm = R.get_polygons(layer=pl.layer)
-#         for i, e in enumerate(Rm):
-#             if len(e.polygons[0]) == 4:
-#                 alias = 'box_{}_{}_{}'.format(pl.layer.number, self.cell.id, i)
-#                 poly = spira.Polygons(shape=e.polygons)
-#                 elems += ply.Box(name=alias, player=pl, center=poly.center, w=poly.dx, h=poly.dy, level=self.level)
-#             else:
-#                 alias = 'ply_{}_{}_{}'.format(pl.layer.number, self.cell.id, i)
-#                 elems += ply.Polygon(name=alias, player=pl, points=e.polygons, level=self.level)
-#         return elems
-
-#     def create_metals(self, elems):
-#         for player in RDD.PLAYER.get_physical_layers(purposes='METAL'):
-#             for e in self.generate_physical_polygons(player):
-#                 elems += e
-#         return elems
-
-#     def create_contacts(self, elems):
-#         for player in RDD.PLAYER.get_physical_layers(purposes=['VIA', 'JJ']):
-#             for e in self.generate_physical_polygons(player):
-#                 elems += e
-#         return elems
-
-
-class DeviceLayout(__CellContainer__):
+class DeviceLayout(__PolygonOperator__):
 
     metals = param.ElementalListField()
     contacts = param.ElementalListField()
@@ -130,12 +93,6 @@ class DeviceLayout(__CellContainer__):
         for player in RDD.PLAYER.get_physical_layers(purposes=['VIA', 'JJ']):
             for e in self.generate_physical_polygons(player):
                 elems += e
-
-        # for name, player in RDD.PLAYER.items:
-        #     print(player)
-        #     R = self.cell.elementals.flat_copy()
-        #     Rm = R.get_polygons(layer=player.layer)
-
         return elems
 
     def create_elementals(self, elems):
@@ -152,58 +109,55 @@ class DeviceLayout(__CellContainer__):
         return elems
 
     def determine_type(self):
-    # def what_type(self):
         self.__type__ = None
 
-        # for key in RDD.VIAS.keys:
-        #     # print(key)
-        #     default_via = RDD.VIAS[key].DEFAULT()
-        #     # print(default_via)
+        for key in RDD.VIAS.keys:
+            default_via = RDD.VIAS[key].DEFAULT()
 
-        #     is_possibly_match = True
-        #     if len(self.contacts) != len(default_via.contacts):
-        #         is_possibly_match = False
-        #     if len(self.metals) != len(default_via.metals):
-        #         is_possibly_match = False
-        #     print(is_possibly_match)
-        #     # print(default_via.ports)
+            is_possibly_match = True
+            if len(self.contacts) != len(default_via.contacts):
+                is_possibly_match = False
+            if len(self.metals) != len(default_via.metals):
+                is_possibly_match = False
+            # print(is_possibly_match)
+            # print(default_via.ports)
 
-        #     if is_possibly_match:
-        #         default_ports = spira.ElementList()
-        #         for e in default_via.elementals.flatten():
-        #             if isinstance(e, spira.Port):
-        #                 if e.name != 'P_metal':
-        #                     default_ports += e.gdslayer.node_id
-        #         print(default_ports)
-        #         print('--------------------------')
+            if is_possibly_match:
+                default_ports = spira.ElementList()
+                for e in default_via.elementals.flatten():
+                    if isinstance(e, spira.Port):
+                        if e.name != 'P_metal':
+                            default_ports += e.gdslayer.node_id
+                # print(default_ports)
+                # print('--------------------------')
 
-        #         self_ports = spira.ElementList()
-        #         for e in self.elementals.flatten():
-        #             if isinstance(e, spira.Port):
-        #                 if e.name != 'P_metal':
-        #                     self_ports += e.gdslayer.node_id
-        #         print(self_ports)
+                self_ports = spira.ElementList()
+                for e in self.elementals.flatten():
+                    if isinstance(e, spira.Port):
+                        if e.name != 'P_metal':
+                            self_ports += e.gdslayer.node_id
+                # print(self_ports)
 
-        #         # for p1 in defa
-        #         if set(default_ports) == set(self_ports):
-        #             print('YESSSSSSSSSSSSSSSSSSSSS')
-        #             print(RDD.VIAS[key].DEFAULT.__name_prefix__)
+                # for p1 in defa
+                if set(default_ports) == set(self_ports):
+                    # print('YESSSSSSSSSSSSSSSSSSSSS')
+                    # print(RDD.VIAS[key].DEFAULT.__name_prefix__)
                     # self.__type__ = RDD.VIAS[key].DEFAULT.__name_prefix__
-        #             self.__type__ = key
+                    self.__type__ = key
 
-        #         print('')
+                # print('')
 
 
 
         for key in RDD.DEVICES.keys:
-            print(key)
+            # print(key)
             default_via = RDD.DEVICES[key].PCELL()
             is_possibly_match = True
-            
-            # if len(self.contacts) != len(default_via.contacts):
-            #     is_possibly_match = False
-            # if len(self.metals) != len(default_via.metals):
-            #     is_possibly_match = False
+
+            if len(self.contacts) != len(default_via.contacts):
+                is_possibly_match = False
+            if len(self.merged_layers) != len(default_via.metals):
+                is_possibly_match = False
             # print(is_possibly_match)
 
             if is_possibly_match:
@@ -229,25 +183,23 @@ class DeviceLayout(__CellContainer__):
             if is_possibly_match:
                 default_ports = spira.ElementList()
                 for e in default_via.contacts:
-                    print(e.player)
+                    # print(e.player)
                     default_ports += e.player
 
-                print('--------------------------')
+                # print('--------------------------')
 
                 self_ports = spira.ElementList()
                 for e in self.contacts:
-                    print(e.player)
+                    # print(e.player)
                     self_ports += e.player
 
                 if set(default_ports) != set(self_ports):
                     is_possibly_match = False
 
             if is_possibly_match:
-                print('YESSSSSSSSSSSSSSSSSSSSS')
+                # print('YESSSSSSSSSSSSSSSSSSSSS')
                 self.__type__ = key
-            print('')
-
-
+            # print('')
 
 
 class Gate(__PolygonOperator__):
@@ -266,7 +218,6 @@ class Gate(__PolygonOperator__):
             Bm = B.get_polygons(layer=player.layer)
 
             for i, e in enumerate([*Rm, *Bm]):
-            # for i, e in enumerate([*Rm]):
                 alias = 'ply_{}_{}_{}'.format(player.layer.number, self.cell.id, i)
                 elems += ply.Polygon(name=alias, player=player, points=e.polygons, level=self.level)
 
@@ -300,13 +251,13 @@ class Gate(__PolygonOperator__):
         # Algorithm 1
         self.g = self.nodes_combine(algorithm='d2d')
         # Algorithm 2
-        # self.g = self.generate_branches()
-        # # Algorithm 3
-        # self.detect_dummy_nodes()
-        # # Algorithm 4
-        # self.g = self.generate_branches()
-        # # Algorithm 5
-        # self.g = self.nodes_combine(algorithm='d2d')
+        self.g = self.generate_branches()
+        # Algorithm 3
+        self.detect_dummy_nodes()
+        # Algorithm 4
+        self.g = self.generate_branches()
+        # Algorithm 5
+        self.g = self.nodes_combine(algorithm='d2d')
 
         self.plot_netlist(G=self.g, graphname=self.name, labeltext='id')
         return self.g

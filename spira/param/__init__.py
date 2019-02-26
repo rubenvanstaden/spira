@@ -2,7 +2,7 @@ from .field.typed_string import StringField
 from .field.typed_bool import BoolField
 from .field.typed_list import ListField
 from .field.layer_list import LayerListProperty
-from .field.typed_color import ColorField
+# from .field.typed_color import ColorField
 from .field.typed_point import PointField
 
 from spira.core.descriptor import DataField
@@ -24,6 +24,15 @@ def PolygonField(default='', shape=[]):
 def LabelField(position=[]):
     from spira.gdsii.elemental.label import Label
     F = Label(position)
+    return DataFieldDescriptor(default=F)
+
+
+def ColorField(default=None, red=0.0, green=0.0, blue=0.0, **kwargs):
+    from spira.visualization.color import Color
+    if default is None:
+        F = Color(red=0.0, green=0.0, blue=0.0, **kwargs)
+    else:
+        F = default
     return DataFieldDescriptor(default=F)
 
 
@@ -53,6 +62,11 @@ def LayerField(name='noname', number=0, datatype=0, **kwargs):
     F = Layer(name=name, number=number, datatype=datatype, **kwargs)
     return DataFieldDescriptor(default=F, **kwargs)
 
+
+def DictField(**kwargs):
+    from .variables import DICTIONARY
+    return DataFieldDescriptor(constraint=DICTIONARY, **kwargs)
+    
 
 def FloatField(**kwargs):
     from .variables import FLOAT

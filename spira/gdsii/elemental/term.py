@@ -4,6 +4,7 @@ import numpy as np
 
 from spira import param
 from copy import copy, deepcopy
+from spira.visualization import color
 from spira.gdsii.elemental.port import PortAbstract, __Port__
 from spira.core.initializer import ElementalInitializer
 from spira.gdsii.group import GroupElementals
@@ -25,9 +26,9 @@ class Term(PortAbstract):
 
     edgelayer = param.LayerField(name='Edge', number=63)
     arrowlayer = param.LayerField(name='Arrow', number=77)
+    color = param.ColorField(default=color.COLOR_GRAY)
 
     width = param.FloatField(default=2*1e6)
-    length = param.FloatField(default=0.1*1e6)
 
     layer1 = param.LayerField()
     layer2 = param.LayerField()
@@ -37,17 +38,33 @@ class Term(PortAbstract):
     port1 = param.DataField(fdef_name='create_port1')
     port2 = param.DataField(fdef_name='create_port2')
 
+    def get_length(self):
+        if not hasattr(self, '__length__'):
+            key = self.gdslayer.name
+            if key in RDD.keys:
+                if RDD.name == 'MiTLL':
+                    self.__length__ = RDD[key].MIN_SIZE * 1e6
+                elif RDD.name == 'AiST':
+                    self.__length__ = RDD[key].WIDTH * 1e6
+            else:
+                self.__length__ = RDD.GDSII.TERM_WIDTH
+        return self.__length__
+
+    def set_length(self, value):
+        self.__length__ = value
+
+    length = param.FunctionField(get_length, set_length, doc='Set the width of the terminal edge equal to a 3rd of the minimum metal width.')
+
     def __init__(self, port=None, elementals=None, polygon=None, **kwargs):
         ElementalInitializer.__init__(self, **kwargs)
-
         if elementals is not None:
             self.elementals = elementals
 
     def __repr__(self):
-        return ("[SPiRA: Term] (name {}, number {}, midpoint {}, " +
-            "width {}, orientation {}, length {})").format(self.name,
-            self.gdslayer.number, self.midpoint,
-            self.width, self.orientation, self.length
+        return ("[SPiRA: Term] (name {}, lock {}, number {}, midpoint {}, " +
+            "width {}, orientation {}, length {}, edgelayer {}, arrowlayer {})").format(
+                self.name, self.locked, self.gdslayer.number, self.midpoint, self.width, 
+                self.orientation, self.length, self.edgelayer, self.arrowlayer
         )
 
     def __str__(self):
@@ -61,21 +78,21 @@ class Term(PortAbstract):
         port = spira.Port(name='P2', midpoint=self.midpoint, gdslayer=self.layer2)
         return port
 
-    def encloses(self, polygon):
-        if pyclipper.PointInPolygon(self.endpoints[0], polygon) != 0:
+    def encloses(self, points):
+        if pyclipper.PointInPolygon(self.endpoints[0], points) != 0:
             return True
-        elif pyclipper.PointInPolygon(self.endpoints[1], polygon) != 0:
+        elif pyclipper.PointInPolygon(self.endpoints[1], points) != 0:
             return True
 
-    def encloses_midpoint(self, polygon):
-        return pyclipper.PointInPolygon(self.midpoint, polygon[0]) != 0
+    def encloses_midpoint(self, points):
+        return pyclipper.PointInPolygon(self.midpoint, points) != 0
 
     @property
     def endpoints(self):
-        dx = self.width/2*np.cos((self.orientation - 90)*np.pi/180)
-        dy = self.width/2*np.sin((self.orientation - 90)*np.pi/180)
-        # dx = self.length/2*np.cos((self.orientation - 90)*np.pi/180)
-        # dy = self.length/2*np.sin((self.orientation - 90)*np.pi/180)
+        # dx = self.width/2*np.cos((self.orientation - 90)*np.pi/180)
+        # dy = self.width/2*np.sin((self.orientation - 90)*np.pi/180)
+        dx = self.length/2*np.cos((self.orientation - 90)*np.pi/180)
+        dy = self.length/2*np.sin((self.orientation - 90)*np.pi/180)
         left_point = self.midpoint - np.array([dx,dy])
         right_point = self.midpoint + np.array([dx,dy])
         return np.array([left_point, right_point])
@@ -91,7 +108,9 @@ class Term(PortAbstract):
     @property
     def edge(self):
         from spira import shapes
-        rect_shape = shapes.RectangleShape(p1=[0, 0], p2=[self.length, self.width])
+        dx = self.length
+        dy = self.width - dx
+        rect_shape = shapes.RectangleShape(p1=[0, 0], p2=[dx, dy])
         ply = spira.Polygons(shape=rect_shape, gdslayer=self.edgelayer, direction=90)
         if self.reflection:
             ply.reflect()
@@ -128,10 +147,10 @@ class Term(PortAbstract):
             parent=self.parent,
             name=self.name,
             midpoint=deepcopy(self.midpoint),
-            orientation=self.orientation,
+            orientation=deepcopy(self.orientation),
             reflection=self.reflection,
-            width=self.width,
-            length=self.length,
+            width=deepcopy(self.width),
+            length=deepcopy(self.length),
             gdslayer=deepcopy(self.gdslayer),
             edgelayer=deepcopy(self.edgelayer),
             arrowlayer=deepcopy(self.arrowlayer),
@@ -173,11 +192,8 @@ class Dummy(Term):
 if __name__ == '__main__':
 
     cell = spira.Cell('Terminal Test')
-
     term = Term()
-
     cell += term
-
     cell.output()
 
 

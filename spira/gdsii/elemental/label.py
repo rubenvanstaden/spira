@@ -5,6 +5,7 @@ import numpy as np
 from copy import copy, deepcopy
 from spira.core.initializer import ElementalInitializer
 from spira import param
+from spira.visualization import color
 from spira.core.mixin.transform import TranformationMixin
 
 
@@ -48,7 +49,6 @@ class __Label__(gdspy.Label, ElementalInitializer):
 class LabelAbstract(__Label__):
 
     gdslayer = param.LayerField()
-    color = param.StringField(default='#g54eff')
     text = param.StringField(default='notext')
     node_id = param.StringField()
     str_anchor = param.StringField(default='o')
@@ -84,6 +84,7 @@ class LabelAbstract(__Label__):
         return self
 
     def rotate(self, angle=45, center=(0,0)):
+        angle = (-1) * angle
         self.position = self.__rotate__(self.position, angle=angle, center=[0, 0])
         self.rotation += angle
         self.rotation = np.mod(self.rotation, 360)
@@ -114,6 +115,8 @@ class Label(LabelAbstract):
     """
 
     """
+
+    color = param.ColorField(default=color.COLOR_BLUE)
 
     def __init__(self, position, **kwargs):
         super().__init__(position, **kwargs)

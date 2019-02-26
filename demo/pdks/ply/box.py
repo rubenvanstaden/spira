@@ -12,7 +12,7 @@ class Box(ProcessLayer):
     w = param.FloatField(default=1)
     h = param.FloatField(default=1)
     center = param.PointField()
-    color = param.ColorField(default='#C0C0C0')
+    # color = param.ColorField(default='#C0C0C0')
     points = param.DataField(fdef_name='create_points')
 
     __port_compass__ = ['North', 'East', 'South', 'West']
@@ -70,10 +70,7 @@ class Box(ProcessLayer):
             midpoint = [(xpts[i+1] + xpts[i])/2, (ypts[i+1] + ypts[i])/2]
             width = np.abs(np.sqrt((xpts[i+1] - xpts[i])**2 + (ypts[i+1]-ypts[i])**2))
 
-            # print(orientation)
-            # print(x)
-            # print(y)
-            # print('')
+            orientation = (-1) * orientation
 
             edges += spira.Term(
                 name=name,

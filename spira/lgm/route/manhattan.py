@@ -28,20 +28,21 @@ class __Manhattan__(spira.Cell):
     quadrant_four = param.DataField(fdef_name='create_quadrant_four')
 
     def get_radius(self):
-        if hasattr(self, '__radius__'):
-            return self.__radius__
-        else:
-            dx = abs(self.p2[0] - self.p1[0])
-            dy = abs(self.p2[1] - self.p1[1])
-            # if dx <= dy:
-            #     self.__radius__ = dx/2
-            # elif dy <= dx:
-            #     self.__radius__ = dy/2
-            if dx <= dy:
-                self.__radius__ = dx
-            elif dy <= dx:
-                self.__radius__ = dy
-            return self.__radius__
+        if self.port1 and self.port2:
+            if hasattr(self, '__radius__'):
+                return self.__radius__
+            else:
+                dx = abs(self.p2[0] - self.p1[0])
+                dy = abs(self.p2[1] - self.p1[1])
+                # if dx <= dy:
+                #     self.__radius__ = dx/2
+                # elif dy <= dx:
+                #     self.__radius__ = dy/2
+                if dx <= dy:
+                    self.__radius__ = dx
+                elif dy <= dx:
+                    self.__radius__ = dy
+                return self.__radius__
 
     def set_radius(self, value):
         self.__radius__ = value

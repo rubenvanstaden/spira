@@ -5,13 +5,42 @@ from spira.rdd import get_rule_deck
 from spira.rdd.technology import ProcessTree
 from demo.pdks import ply
 from spira.lpe.devices import Device
+from spira.visualization import color
+from copy import copy, deepcopy
 
 
 RDD = get_rule_deck()
 
 
 class Via(Device):
-    pass
+    color = param.ColorField(default=color.COLOR_LIGHT_GRAY)
+
+    def create_ports(self, ports):
+        """ Activate the edge ports to be used in
+        the Device for metal connections. """
+
+        for m in self.metals:
+            for p in m.ports:
+                if isinstance(p, spira.Term):
+                    edgelayer = deepcopy(p.gdslayer)
+                    edgelayer.datatype = 80
+                    arrowlayer = deepcopy(p.gdslayer)
+                    arrowlayer.datatype = 81
+                    term = spira.Term(
+                        name=p.name,
+                        gdslayer=deepcopy(m.player.layer),
+                        midpoint=deepcopy(p.midpoint),
+                        orientation=deepcopy(p.orientation)+90,
+                        reflection=p.reflection,
+                        edgelayer=edgelayer,
+                        arrowlayer=arrowlayer,
+                        width=p.width,
+                        # length=deepcopy(p.length)
+                    )
+
+                    ports += term
+
+        return ports
 
 
 class ViaC5R(Via):
@@ -36,12 +65,12 @@ class ViaC5R(Via):
         elems += ply.Box(player=self.cc, center=(0,0), w=RDD.C5R.MIN_SIZE*1e6, h=RDD.C5R.MIN_SIZE*1e6)
         return elems
 
-    def create_ports(self, ports):
-        ports += spira.Term(name='Input', midpoint=(-self.w/2, 0), orientation=90, width=self.w/2)
-        ports += spira.Term(name='Output', midpoint=(self.w/2, 0), orientation=-90, width=self.w/2)
-        ports += spira.Term(name='North', midpoint=(0, self.h/2), orientation=0, width=self.w/2)
-        ports += spira.Term(name='South', midpoint=(0, -self.h/2), orientation=180, width=self.w/2)
-        return ports
+    # def create_ports(self, ports):
+    #     ports += spira.Term(name='Input', midpoint=(-self.w/2, 0), orientation=90, width=self.w/2)
+    #     ports += spira.Term(name='Output', midpoint=(self.w/2, 0), orientation=-90, width=self.w/2)
+    #     ports += spira.Term(name='North', midpoint=(0, self.h/2), orientation=0, width=self.w/2)
+    #     ports += spira.Term(name='South', midpoint=(0, -self.h/2), orientation=180, width=self.w/2)
+    #     return ports
 
 
 class ViaI5(Via):
@@ -66,12 +95,12 @@ class ViaI5(Via):
         elems += ply.Box(player=self.cc, center=(0,0), w=RDD.I5.MIN_SIZE*self.um, h=RDD.I5.MIN_SIZE*self.um)
         return elems
 
-    def create_ports(self, ports):
-        ports += spira.Term(name='Input', midpoint=(-self.w/2, 0), orientation=90, width=self.w/2)
-        ports += spira.Term(name='Output', midpoint=(self.w/2, 0), orientation=-90, width=self.w/2)
-        ports += spira.Term(name='North', midpoint=(0, self.h/2), orientation=0, width=self.w/2)
-        ports += spira.Term(name='South', midpoint=(0, -self.h/2), orientation=180, width=self.w/2)
-        return ports
+    # def create_ports(self, ports):
+    #     ports += spira.Term(name='Input', midpoint=(-self.w/2, 0), orientation=90, width=self.w/2)
+    #     ports += spira.Term(name='Output', midpoint=(self.w/2, 0), orientation=-90, width=self.w/2)
+    #     ports += spira.Term(name='North', midpoint=(0, self.h/2), orientation=0, width=self.w/2)
+    #     ports += spira.Term(name='South', midpoint=(0, -self.h/2), orientation=180, width=self.w/2)
+    #     return ports
 
 
 class ViaI6(Via):
@@ -96,12 +125,12 @@ class ViaI6(Via):
         elems += ply.Box(player=self.cc, center=(0,0), w=RDD.I6.MIN_SIZE*self.um, h=RDD.I6.MIN_SIZE*self.um)
         return elems
 
-    def create_ports(self, ports):
-        ports += spira.Term(name='Input', midpoint=(-self.w/2, 0), orientation=90, width=self.w/2)
-        ports += spira.Term(name='Output', midpoint=(self.w/2, 0), orientation=-90, width=self.w/2)
-        ports += spira.Term(name='North', midpoint=(0, self.h/2), orientation=0, width=self.w/2)
-        ports += spira.Term(name='South', midpoint=(0, -self.h/2), orientation=180, width=self.w/2)
-        return ports
+    # def create_ports(self, ports):
+    #     ports += spira.Term(name='Input', midpoint=(-self.w/2, 0), orientation=90, width=self.w/2)
+    #     ports += spira.Term(name='Output', midpoint=(self.w/2, 0), orientation=-90, width=self.w/2)
+    #     ports += spira.Term(name='North', midpoint=(0, self.h/2), orientation=0, width=self.w/2)
+    #     ports += spira.Term(name='South', midpoint=(0, -self.h/2), orientation=180, width=self.w/2)
+    #     return ports
 
 
 if __name__ == '__main__':

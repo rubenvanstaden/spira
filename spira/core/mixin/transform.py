@@ -31,7 +31,7 @@ class TranformationMixin(object):
 
     def transform(self, transform):
         """ Transform port with the given transform class. """
-        if transform['reflection']:
+        if transform['reflection'] is True:
             self.reflect()
         if transform['rotation'] is not None:
             self.rotate(angle=transform['rotation'])

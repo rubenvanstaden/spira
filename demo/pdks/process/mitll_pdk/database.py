@@ -1,4 +1,5 @@
 from spira.rdd.all import *
+from spira.visualization import color
 from spira.rdd.layer import PurposeLayer
 from spira.rdd import RULE_DECK_DATABASE as RDD
 
@@ -11,6 +12,7 @@ RDD.desc = 'Process fabrication data for the MiTLL process from the USA.'
 
 RDD.GDSII = DataTree()
 RDD.GDSII.TEXT = 18
+RDD.GDSII.TERM_WIDTH = 0.2*1e6
 RDD.GDSII.UNIT = 1e-6
 RDD.GDSII.GRID = 1e-11
 RDD.GDSII.PRECISION = 1e-9
@@ -28,9 +30,11 @@ RDD.LAYER = ProcessTree()
 
 RDD.L0 = ProcessTree()
 RDD.L0.LAYER = Layer(name='L0', number=3)
-RDD.L0.MIN_SIZE = 2.0
+RDD.L0.MIN_SIZE = 2.0 
 RDD.L0.MAX_WIDTH = 20.0
-RDD.L0.COLOR = '#DEB887'
+# RDD.L0.COLOR = '#DEB887'
+# RDD.L0.COLOR = 
+RDD.L0.COLOR = color.COLOR_CORAL
 
 RDD.M0 = ProcessTree()
 RDD.M0.LAYER = Layer(name='M0', number=1)
@@ -48,49 +52,57 @@ RDD.M2 = ProcessTree()
 RDD.M2.LAYER = Layer(name='M2', number=20)
 RDD.M2.MIN_SIZE = 0.35
 RDD.M2.MAX_WIDTH = 20.0
-RDD.M2.COLOR = '#F0E68C'
+# RDD.M2.COLOR = '#F0E68C'
+RDD.M2.COLOR = color.COLOR_CORAL
 
 RDD.M3 = ProcessTree()
 RDD.M3.LAYER = Layer(name='M3', number=30)
 RDD.M3.MIN_SIZE = 0.35
 RDD.M3.MAX_WIDTH = 20.0
-RDD.M3.COLOR = '#FA8072'
+# RDD.M3.COLOR = '#FA8072'
+RDD.M3.COLOR = color.COLOR_CORAL
 
 RDD.M4 = ProcessTree()
 RDD.M4.LAYER = Layer(name='M4', number=40)
 RDD.M4.MIN_SIZE = 0.35
 RDD.M4.MAX_WIDTH = 20.0
-RDD.M4.COLOR = '#EF9631'
+# RDD.M4.COLOR = '#EF9631'
+RDD.M4.COLOR = color.COLOR_WHITE
 
 RDD.M5 = ProcessTree()
 RDD.M5.LAYER = Layer(name='M5', number=50)
 RDD.M5.MIN_SIZE = 0.7
 RDD.M5.MAX_WIDTH = 20.0
-RDD.M5.COLOR = '#FFC0CB'
+# RDD.M5.COLOR = '#FFC0CB'
+RDD.M5.COLOR = color.COLOR_SALMON
 
 RDD.M6 = ProcessTree()
 RDD.M6.LAYER = Layer(name='M6', number=60)
 RDD.M6.MIN_SIZE = 0.5
 RDD.M6.MAX_WIDTH = 20.0
-RDD.M6.COLOR = '#E9F26F'
+# RDD.M6.COLOR = '#E9F26F'
+RDD.M6.COLOR = color.COLOR_TURQUOISE
 
 RDD.M7 = ProcessTree()
 RDD.M7.LAYER = Layer(name='M7', number=70)
 RDD.M7.MIN_SIZE = 0.5
 RDD.M7.MAX_WIDTH = 20.0
-RDD.M7.COLOR = '#C497E2'
+# RDD.M7.COLOR = '#C497E2'
+RDD.M7.COLOR = color.COLOR_CORAL
 
 RDD.M8 = ProcessTree()
 RDD.M8.LAYER = Layer(name='M8', number=80)
 RDD.M8.MIN_SIZE = 10.0
-RDD.M8.COLOR = '#E4B1E2'
+# RDD.M8.COLOR = '#E4B1E2'
+RDD.M8.COLOR = color.COLOR_CORAL
 
 RDD.R5 = ProcessTree()
 RDD.R5.LAYER = Layer(name='R5', number=52)
 RDD.R5.MIN_SIZE = 0.5
 # FIXME: Validation is processlayer.py
 RDD.R5.MAX_WIDTH = 5.0
-RDD.R5.COLOR = '#D2B48C'
+# RDD.R5.COLOR = '#D2B48C'
+RDD.R5.COLOR = color.COLOR_LIGHT_GREEN
 
 # --------------------------------- Vias ----------------------------------------
 
@@ -105,14 +117,16 @@ RDD.I0.LAYER = Layer(name='I0', number=2)
 RDD.I0.MIN_SIZE = 0.6
 RDD.I0.MAX_SIZE = 1.2
 RDD.I0.M5_METAL = 1.0
-RDD.I0.COLOR = '#6A5ACD'
+RDD.I0.COLOR = color.COLOR_CORAL
+# RDD.I0.COLOR = '#6A5ACD'
 
 RDD.I1 = ProcessTree()
 RDD.I1.LAYER = Layer(name='I1', number=11)
 RDD.I1.MIN_SIZE = 0.6
 RDD.I1.MAX_SIZE = 1.2
 RDD.I1.M5_METAL = 1.0
-RDD.I1.COLOR = '#4682B4'
+# RDD.I1.COLOR = '#4682B4'
+RDD.I1.COLOR = color.COLOR_CORAL
 
 RDD.I2 = ProcessTree()
 RDD.I2.WIDTH = 0.5
@@ -120,60 +134,69 @@ RDD.I2.LAYER = Layer(name='I2', number=21)
 RDD.I2.MIN_SIZE = 0.6
 RDD.I2.MAX_SIZE = 1.2
 RDD.I2.M5_METAL = 1.0
-RDD.I2.COLOR = '#5F9EA0'
+# RDD.I2.COLOR = '#5F9EA0'
+RDD.I2.COLOR = color.COLOR_CORAL
 
 RDD.I3 = ProcessTree()
 RDD.I3.LAYER = Layer(name='I3', number=31)
 RDD.I3.MIN_SIZE = 0.6
 RDD.I3.MAX_SIZE = 1.2
 RDD.I3.M5_METAL = 1.0
-RDD.I3.COLOR = '#7AD831'
+# RDD.I3.COLOR = '#7AD831'
+RDD.I3.COLOR = color.COLOR_CORAL
 
 RDD.I4 = ProcessTree()
 RDD.I4.LAYER = Layer(name='I4', number=41)
 RDD.I4.MIN_SIZE = 0.8
 RDD.I4.MAX_SIZE = 1.2
 RDD.I4.M5_METAL = 1.0
-RDD.I4.COLOR = '#90EE90'
+# RDD.I4.COLOR = '#90EE90'
+RDD.I4.COLOR = color.COLOR_CORAL
 
 RDD.I5 = ProcessTree()
 RDD.I5.LAYER = Layer(name='I5', number=54)
 RDD.I5.MIN_SIZE = 0.7
 RDD.I5.MAX_SIZE = 1.2
 RDD.I5.M5_METAL = 1.0
-RDD.I5.COLOR = '#40E0D0'
+# RDD.I5.COLOR = '#40E0D0'
+RDD.I5.COLOR = color.COLOR_CORAL
 
 RDD.J5 = ProcessTree()
 RDD.J5.LAYER = Layer(name='J5', number=51)
 RDD.J5.MIN_SIZE = 0.7
 RDD.J5.MAX_SIZE = 3.0
 RDD.J5.M5_METAL = 1.0
-RDD.J5.COLOR = '#FFA500'
+# RDD.J5.COLOR = '#FFA500'
+RDD.J5.COLOR = color.COLOR_CORAL
 
 RDD.C5J = ProcessTree()
 RDD.C5J.LAYER = Layer(name='C5J', number=55)
 RDD.C5J.MIN_SIZE = 0.5
 RDD.C5J.M5_METAL = 1.0
-RDD.C5J.COLOR = '#F7EC80'
+# RDD.C5J.COLOR = '#F7EC80'
+RDD.C5J.COLOR = color.COLOR_CORAL
 
 RDD.C5R = ProcessTree()
 RDD.C5R.LAYER = Layer(name='C5R', number=53)
 # RDD.C5R.LAYER = Layer(name='C5R', number=56)
 RDD.C5R.MIN_SIZE = 0.7
 RDD.C5R.M5_METAL = 1.0
-RDD.C5R.COLOR = '#EFDC2E'
+# RDD.C5R.COLOR = '#EFDC2E'
+RDD.C5R.COLOR = color.COLOR_CORAL
 
 RDD.I6 = ProcessTree()
 RDD.I6.LAYER = Layer(name='I6', number=61)
 RDD.I6.MIN_SIZE = 0.7
 RDD.I6.M5_METAL = 1.0
-RDD.I6.COLOR = '#6B8E23'
+# RDD.I6.COLOR = '#6B8E23'
+RDD.I6.COLOR = color.COLOR_CORAL
 
 RDD.I7 = ProcessTree()
 RDD.I7.LAYER = Layer(name='I7', number=71)
 RDD.I7.MIN_SIZE = 5.0
 RDD.I7.M5_METAL = 1.0
-RDD.I7.COLOR = '#3CB371'
+# RDD.I7.COLOR = '#3CB371'
+RDD.I7.COLOR = color.COLOR_CORAL
 
 # ------------------------------- Physical Layers -------------------------------
 
@@ -257,8 +280,8 @@ class TCellC5R(DynamicDataTree):
         self.DEFAULT = ViaC5R
         self.PCELL = ViaTemplate(
             name = 'C5R',
-            via_layer = RDD.C5R.LAYER, 
-            layer1 = RDD.R5.LAYER, 
+            via_layer = RDD.C5R.LAYER,
+            layer1 = RDD.R5.LAYER,
             layer2 = RDD.M6.LAYER
         )
 
@@ -271,8 +294,8 @@ class TCellJ5(DynamicDataTree):
         self.DEFAULT = ViaC5R
         self.PCELL = ViaTemplate(
             name = 'J5',
-            via_layer = RDD.J5.LAYER, 
-            layer1 = RDD.M5.LAYER, 
+            via_layer = RDD.J5.LAYER,
+            layer1 = RDD.M5.LAYER,
             layer2 = RDD.M6.LAYER
         )
 

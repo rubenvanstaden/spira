@@ -10,6 +10,7 @@ from spira.core.mixin.property import CellMixin
 from spira.core.mixin.gdsii_output import OutputMixin
 from spira.core.mixin.transform import TranformationMixin
 from spira.rdd import get_rule_deck
+from spira.visualization import color
 from spira.gdsii.group import GroupElementals
 
 
@@ -39,7 +40,7 @@ class CellAbstract(__Cell__):
 
     ports = param.ElementalListField(fdef_name='create_ports')
     elementals = param.ElementalListField(fdef_name='create_elementals')
-    color = param.StringField(default='#FFA07A')
+    color = param.ColorField(default=color.COLOR_DARK_SLATE_GREY)
 
     def create_elementals(self, elems):
         return elems
@@ -79,13 +80,16 @@ class CellAbstract(__Cell__):
         from demo.pdks.ply.base import ProcessLayer
         d, o = super().move(midpoint=midpoint, destination=destination, axis=axis)
         for e in self.elementals:
-            if issubclass(type(e), (LabelAbstract, PolygonAbstract)):
-                # e.translate(dx, dy)
-                e.move(destination=d, midpoint=o)
-            if issubclass(type(e), ProcessLayer):
-                e.move(destination=d, midpoint=o)
-            if isinstance(e, SRef):
-                e.move(destination=d, midpoint=o)
+
+            e.move(destination=d, midpoint=o)
+
+            # if issubclass(type(e), (LabelAbstract, PolygonAbstract)):
+            #     # e.translate(dx, dy)
+            #     e.move(destination=d, midpoint=o)
+            # if issubclass(type(e), ProcessLayer):
+            #     e.move(destination=d, midpoint=o)
+            # if isinstance(e, SRef):
+            #     e.move(destination=d, midpoint=o)
 
         for p in self.ports:
             mc = np.array(p.midpoint) + np.array(d) - np.array(o)
@@ -109,6 +113,7 @@ class CellAbstract(__Cell__):
         from demo.pdks.ply.base import ProcessLayer
         if angle == 0:
             return self
+        angle = (-1) * angle
         for e in self.elementals:
             if issubclass(type(e), PolygonAbstract):
                 e.rotate(angle=angle, center=center)
@@ -159,6 +164,12 @@ class CellAbstract(__Cell__):
 class Cell(CellAbstract):
     """ A Cell encapsulates a set of elementals that
     describes the layout being generated. """
+    
+    routes = param.ElementalListField(fdef_name='create_routes')
+    
+    def create_routes(self, routes):
+        return routes
+
 
     def __init__(self, name=None, elementals=None, ports=None, nets=None, library=None, **kwargs):
         CellInitializer.__init__(self, **kwargs)
@@ -199,7 +210,13 @@ class Cell(CellAbstract):
     def __str__(self):
         return self.__repr__()
 
-
+    def _copy(self):
+        return Cell(
+            name=self.name+'awe',
+            elementals=deepcopy(self.elementals),
+            ports=deepcopy(self.ports),
+            color=self.color
+        )
 
 
 

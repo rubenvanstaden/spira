@@ -25,8 +25,9 @@ _current_library = None
 
 DEFAULT_LIBRARY = None
 
-SCALE_UP = 1.0e+6
-SCALE_DOWN = 1.0e-6
+SCALE_UP = 1e+6
+SCALE_DOWN = 1e-6
+OFFSET = 0.3
 
 # ----------------------------- Initialize Library -----------------------------
 

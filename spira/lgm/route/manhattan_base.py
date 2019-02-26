@@ -5,11 +5,14 @@ from spira.lgm.route.manhattan import __Manhattan__
 from spira.lgm.route.manhattan90 import Route90
 from spira.lgm.route.manhattan180 import Route180
 from spira.lgm.route.basic import RouteShape, RouteBasic, RoutePointShape
+from spira.visualization import color
 
 
 class Route(__Manhattan__):
 
     cell = param.CellField()
+
+    # color = param.ColorField(default=color.COLOR_DEEP_GREEN)
 
     path = param.NumpyArrayField()
     width = param.FloatField(default=1*1e8)

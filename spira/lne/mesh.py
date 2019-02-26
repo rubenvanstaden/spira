@@ -15,6 +15,7 @@ from spira import param
 from spira import log as LOG
 from spira.core.initializer import ElementalInitializer
 from copy import copy, deepcopy
+from spira.visualization import color
 
 
 # -------------------------------------------------------------------
@@ -241,9 +242,8 @@ class MeshLabeled(MeshAbstract):
 
                     device_node = None
                     for n in bnodes:
-                        # self.g.node[n]['surface'].color = '#FFA07A'
                         self.g.node[n]['device'] = B.S
-                        self.g.node[n]['device'].color = '#FFA07A'
+                        # self.g.node[n]['device'].ref.color = color.COLOR_AZURE
                         self.g.node[n]['device'].node_id = '{}_{}'.format(B.S.ref.name, B.S.midpoint)
 
                         # self.g.node[n]['surface'].color = '#ffffff'

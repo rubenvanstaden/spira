@@ -137,28 +137,22 @@ class DrawGraphAbstract(object):
                 label = G.node[n]['surface']
 
             if label:
-                # nodes['text'].append(G.node[n]['display'])
-
                 if labeltext == 'number':
                     nodes['text'].append(n)
                 else:
                     if isinstance(label, (spira.Port, spira.Term)):
-                        # nodes['text'].append(label.id)
                         nodes['text'].append(label.node_id)
                         # nodes['text'].append(n)
                     else:
-                        # nodes['text'].append(label.id)
                         nodes['text'].append(label.node_id)
                         # nodes['text'].append(n)
 
                 if isinstance(label, spira.SRef):
-                    nodes['color'].append(label.ref.color)
-                elif isinstance(label, (spira.Port, spira.Term)):
-                    nodes['color'].append(label.label.color)
-                elif isinstance(label, spira.Dummy):
-                    nodes['color'].append(label.color)
+                    nodes['color'].append(label.ref.color.hexcode)
+                elif isinstance(label, (spira.Port, spira.Term, spira.Dummy)):
+                    nodes['color'].append(label.color.hexcode)
                 else:
-                    nodes['color'].append(label.color)
+                    nodes['color'].append(label.color.hexcode)
 
         return nodes
 

@@ -1,6 +1,7 @@
 import spira 
 import networkx as nx
 from spira import param, shapes
+from spira.visualization import color
 from spira.gdsii.elemental.port import __Port__
 
 
@@ -9,6 +10,7 @@ class __NetlistSimplifier__(object):
     _ID = 0
 
     __stored_paths__ = []
+    __branch_nodes__ = None
 
     def __remove_nodes__(self):
         remove = list()
@@ -28,28 +30,60 @@ class __NetlistSimplifier__(object):
 
         self.g.remove_nodes_from(remove)
 
+    # def __validate_path__(self, path):
+    #     """ Test if path contains masternodes. """
+    #     valid = True
+    #     s, t = path[0], path[-1]
+    #     if self.__is_path_stored__(s, t):
+    #         valid = False
+    #     if s not in self.branch_nodes:
+    #         valid = False
+    #     if t not in self.branch_nodes:
+    #         valid = False
+    #     for n in path[1:-1]:
+    #         if 'device' in self.g.node[n]:
+    #             D = self.g.node[n]['device']
+    #             if issubclass(type(D), (__Port__, spira.SRef)):
+    #                 valid = False
+    #     return valid
+
     def __validate_path__(self, path):
+        from demo.pdks.components.mitll.via import Via
         """ Test if path contains masternodes. """
         valid = True
         s, t = path[0], path[-1]
         if self.__is_path_stored__(s, t):
             valid = False
-        if s not in self.branch_nodes:
+        # if s not in self.master_nodes:
+        if s not in self.__branch_nodes__:
             valid = False
-        if t not in self.branch_nodes:
+        # if t not in self.master_nodes:
+        if t not in self.__branch_nodes__:
             valid = False
         for n in path[1:-1]:
             if 'device' in self.g.node[n]:
                 D = self.g.node[n]['device']
-                if issubclass(type(D), (__Port__, spira.SRef)):
+                # if issubclass(type(D), spira.SRef):
+                #     if issubclass(type(D.ref), Via):
+                #         if len([i for i in self.g[n]]) > 2:
+                #             valid = False
+                #     else:
+                #         valid = False
+                if issubclass(type(D), __Port__):
+                    valid = False
+                if issubclass(type(D), spira.SRef):
                     valid = False
         return valid
 
     def __store_branch_paths__(self, s, t):
         if nx.has_path(self.g, s, t):
-            for p in nx.all_simple_paths(self.g, source=s, target=t):
-                if self.__validate_path__(p):
-                    self.__stored_paths__.append(p)
+            p = nx.shortest_path(self.g, source=s, target=t)
+            if self.__validate_path__(p):
+                self.__stored_paths__.append(p)
+
+            # for p in nx.all_simple_paths(self.g, source=s, target=t):
+            #     if self.__validate_path__(p):
+            #         self.__stored_paths__.append(p)
 
     def __is_path_stored__(self, s, t):
         for path in self.__stored_paths__:
@@ -70,11 +104,6 @@ class __NetlistSimplifier__(object):
 class NetlistSimplifier(__NetlistSimplifier__):
 
     @property
-    def master_nodes(self):
-        """ Excludes via devices with only two edges (series). """
-        pass
-
-    @property
     def branch_nodes(self):
         """ Nodes that defines different conducting branches. """
         branch_nodes = list()
@@ -87,12 +116,53 @@ class NetlistSimplifier(__NetlistSimplifier__):
                     branch_nodes.append(n)
         return branch_nodes
 
+    @property
+    def master_nodes(self):
+        """ Excludes via devices with only two edges (series). """
+        from demo.pdks.components.mitll.via import Via
+        branch_nodes = list()
+        for n in self.g.nodes():
+            if 'device' in self.g.node[n]:
+                D = self.g.node[n]['device']
+                if issubclass(type(D), spira.SRef):
+                    if issubclass(type(D.ref), Via):
+                        # print(D.ref)
+                        if len([i for i in self.g[n]]) > 2:
+                            # print('YES!')
+                            branch_nodes.append(n)
+                    else:
+                        branch_nodes.append(n)
+                if issubclass(type(D), __Port__):
+                    branch_nodes.append(n)
+        return branch_nodes
+
+    @property
+    def terminal_nodes(self):
+        """ Nodes that defines different conducting branches. """
+        branch_nodes = list()
+        for n in self.g.nodes():
+            if 'device' in self.g.node[n]:
+                D = self.g.node[n]['device']
+                if issubclass(type(D), spira.Term):
+                    branch_nodes.append(n)
+        return branch_nodes
+
     def detect_dummy_nodes(self):
 
         for sg in nx.connected_component_subgraphs(self.g, copy=True):
-            s = self.branch_nodes[0]
+            # s = self.branch_nodes[0]
+            s = self.__branch_nodes__[0]
+
+            # paths = []
+            # # for t in filter(lambda x: x not in [s], self.branch_nodes):
+            # for t in filter(lambda x: x not in [s], self.__branch_nodes__):
+            #     if nx.has_path(self.g, s, t):
+            #         for p in nx.all_simple_paths(self.g, source=s, target=t):
+            #             paths.append(p)
+
+            s = self.terminal_nodes[0]
             paths = []
-            for t in filter(lambda x: x not in [s], self.branch_nodes):
+            for t in filter(lambda x: x not in [s], self.terminal_nodes):
                 if nx.has_path(self.g, s, t):
                     for p in nx.all_simple_paths(self.g, source=s, target=t):
                         paths.append(p)
@@ -115,7 +185,8 @@ class NetlistSimplifier(__NetlistSimplifier__):
                     self.g.nodes[d]['device'] = spira.Dummy(
                         name='Dummy',
                         midpoint=N.position,
-                        color='#90EE90'
+                        # color='#90EE90'
+                        color=color.COLOR_DARKSEA_GREEN
                     )
 
     def generate_branches(self):
@@ -125,24 +196,28 @@ class NetlistSimplifier(__NetlistSimplifier__):
         self.__increment_caller_id__()
         text = self.__get_called_id__()
 
+        self.__branch_nodes__ = self.branch_nodes
+
         for sg in nx.connected_component_subgraphs(self.g, copy=True):
-            for s in self.branch_nodes:
-                targets = filter(lambda x: x not in [s], self.branch_nodes)
+            # for s in self.branch_nodes:
+            for s in self.__branch_nodes__:
+                # print(s)
+                # targets = filter(lambda x: x not in [s], self.branch_nodes)
+                # targets = filter(lambda x: x not in [s], self.master_nodes)
+                targets = filter(lambda x: x not in [s], self.__branch_nodes__)
                 for t in targets:
                     self.__store_branch_paths__(s, t)
+
             for i, path in enumerate(self.__stored_paths__):
-
                 source = self.g.node[path[-1]]['device'].__str__()
-
                 for n in path[1:-1]:
                     lbl = self.g.node[n]['surface']
                     self.g.node[n]['device'] = spira.Label(
-                    # self.g.node[n]['path'] = spira.Label(
                         position=lbl.position,
-                        # text='path',
                         text=text,
                         gdslayer=lbl.gdslayer,
-                        color='#FFFFFF',
+                        # color=color.COLOR_WHITE,
+                        color=lbl.color,
                         node_id='{}_{}'.format(i, source)
                     )
 

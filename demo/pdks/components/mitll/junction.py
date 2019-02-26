@@ -6,6 +6,7 @@ from copy import deepcopy
 from spira.rdd.technology import ProcessTree
 from demo.pdks import ply
 from spira.lpe.devices import Device
+from spira.visualization import color
 from demo.pdks.process.mitll_pdk.database import RDD
 
 
@@ -15,6 +16,7 @@ class Junction(Device):
     __name_prefix__ = 'Junction'
 
     um = param.FloatField(default=1e+6)
+    color = param.ColorField(default=color.COLOR_PLUM)
 
     jj_metal = param.DataField(fdef_name='get_junction_metal')
 
@@ -44,8 +46,6 @@ class Junction(Device):
                         if m.polygon & c.polygon:
                             for p in m.ports:
                                 terms += p
-                                # if p.name in ['West', 'East', 'North']:
-                                    # terms += p
         return terms
 
     def create_ports(self, ports):
@@ -54,35 +54,20 @@ class Junction(Device):
 
         for p in self.jj_metal:
             if isinstance(p, spira.Term):
-
                 edgelayer = deepcopy(p.gdslayer)
                 edgelayer.datatype = 80
-
-                # new_edge = deepcopy(p.edge)
-                # new_edge.gdslayer = edgelayer
-                # # new_edge.rotate(angle=p.orientation)
-
                 arrowlayer = deepcopy(p.gdslayer)
                 arrowlayer.datatype = 81
-
-                # new_arrow = deepcopy(p.arrow)
-                # new_arrow.gdslayer = arrowlayer
-                # # new_arrow.rotate(angle=p.orientation)
-
                 term = spira.Term(
                     name=p.name,
-                    midpoint=p.midpoint,
+                    gdslayer=deepcopy(p.gdslayer),
+                    midpoint=deepcopy(p.midpoint),
                     orientation=deepcopy(p.orientation)+90,
                     reflection=p.reflection,
                     edgelayer=edgelayer,
                     arrowlayer=arrowlayer,
-                    # edge=new_edge,
-                    # arrow=new_arrow,
-                    # is_edge=True
-                    # label=p.label,
-                    # width=p.width,
-                    width=1*1e6,
-                    length=p.length
+                    width=p.width,
+                    # length=deepcopy(p.length)
                 )
 
                 ports += term

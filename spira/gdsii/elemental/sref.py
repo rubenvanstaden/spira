@@ -16,39 +16,10 @@ class __SRef__(gdspy.CellReference, ElementalInitializer):
 
     __mixins__ = [TranformationMixin]
 
-    def __getitem__(self, val):
-        """
-        This allows you to access an alias from the
-        reference's parent, and receive a copy of the
-        reference which is correctly rotated and translated.
-        """
-        try:
-            alias_device = self.ref[val]
-        except:
-            raise ValueError('[PHIDL] Tried to access alias "%s" from parent '
-                'Device "%s", which does not exist' % (val, self.ref.name))
-
-        assert isinstance(alias_device, SRef)
-
-        new_reference = SRef(alias_device.ref,
-            midpoint=alias_device.midpoint,
-            rotation=alias_device.rotation,
-            magnification=alias_device.magnification,
-            reflection=alias_device.reflection
-        )
-
-        if self.reflection:
-            new_reference.reflect((1,0))
-        if self.rotation is not None:
-            new_reference.rotate(self.rotation)
-        if self.midpoint is not None:
-            new_reference.move(self.midpoint)
-
-        return new_reference
-
     def __deepcopy__(self, memo):
         return SRef(
             structure=deepcopy(self.ref),
+            _parent_ports=deepcopy(self._parent_ports),
             midpoint=deepcopy(self.midpoint),
             rotation=self.rotation,
             magnification=self.magnification,
@@ -95,15 +66,41 @@ class SRefAbstract(__SRef__):
         el.transform(transform)
         return el
 
+    # @property
+    # def ports(self):
+    #     """ This property allows you to access
+    #     my_device_reference.ports, and receive a
+    #     copy of the ports dict which is correctly
+    #     rotated and translated. """
+    #     for port in self._parent_ports:
+
+    #         key = (port.name, port.gdslayer.number)
+
+    #         tf = {
+    #             'midpoint': self.midpoint,
+    #             'rotation': self.rotation,
+    #             'magnification': self.magnification,
+    #             'reflection': self.reflection
+    #         }
+
+    #         new_port = deepcopy(port)
+    #         self._local_ports[key] = new_port.transform(tf)
+    #         if key in self.port_locks.keys():
+    #             self._local_ports[key].locked = self.port_locks[key]
+
+    #     return self._local_ports
+
     @property
     def ports(self):
-        """
-        This property allows you to access
+        """ This property allows you to access
         my_device_reference.ports, and receive a
         copy of the ports dict which is correctly
-        rotated and translated
-        """
+        rotated and translated. """
         for port in self._parent_ports:
+
+            key = (port.name, port.gdslayer.number)
+            # key = port.node_id
+            # print(key)
 
             tf = {
                 'midpoint': self.midpoint,
@@ -112,10 +109,11 @@ class SRefAbstract(__SRef__):
                 'reflection': self.reflection
             }
 
-            new_port = port._copy()
-            # new_port = copy(port)
-            # new_port = deepcopy(port)
-            self._local_ports[port.name] = new_port.transform(tf)
+            new_port = deepcopy(port)
+            self._local_ports[key] = new_port.transform(tf)
+            if key in self.port_locks.keys():
+                self._local_ports[key].locked = self.port_locks[key]
+
         return self._local_ports
 
     def move(self, midpoint=(0,0), destination=None, axis=None):
@@ -134,6 +132,7 @@ class SRefAbstract(__SRef__):
     def rotate(self, angle=45, center=(0,0)):
         if angle == 0:
             return self
+        angle = (-1) * angle
         if self.rotation is None:
             self.rotation = 0
         if issubclass(type(center), __Port__):
@@ -208,19 +207,18 @@ class SRef(SRefAbstract):
     >>> sref = spira.SRef(structure=cell)
     """
 
+    _parent_ports = param.ElementalListField()
+    _local_ports = param.DictField(default={})
+    port_locks = param.DictField(default={})
+
     def __init__(self, structure, **kwargs):
-
         ElementalInitializer.__init__(self, **kwargs)
-
         self.ref = structure
-        self._parent_ports = spira.ElementList()
-
         for p in structure.ports:
             self._parent_ports += p
         for t in structure.terms:
             self._parent_ports += t
-        # self._local_ports = {port.name:copy(port) for port in self._parent_ports}
-        self._local_ports = {port.name:deepcopy(port) for port in self._parent_ports}
+        self._local_ports = {port.node_id:deepcopy(port) for port in self._parent_ports}
 
     def __repr__(self):
         name = self.ref.name
@@ -236,12 +234,6 @@ class SRef(SRefAbstract):
 
     def __str__(self):
         return self.__repr__()
-
-    # def get_node_id(self):
-    #     if self.__id__:
-    #         return self.__id__
-    #     else:
-    #         return '{}_{}'.format(self.ref.name, self.midpoint)
 
 
 

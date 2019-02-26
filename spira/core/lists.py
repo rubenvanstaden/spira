@@ -4,12 +4,27 @@ from spira.param.field.typed_list import TypedList
 
 class ElementFilterMixin(object):
 
-    def get_polygons(self, layer=None):
+    def get_polygons(self, layer=None, cell_type=None):
         from spira.layers.layer import Layer
         from spira.rdd.layer import PurposeLayer
         elems = ElementList()
+        if layer is None:
+            raise ValueError('Layer not set.')
         for ply in self.polygons:
-            if layer is not None:
+            if cell_type is not None:
+                # print('A')
+                if isinstance(layer, Layer):
+                    if layer.is_equal_number(ply.gdslayer):
+                        # print(layer)
+                        if ply.gdslayer.datatype == cell_type:
+                            # print(ply)
+                            elems += ply
+                elif isinstance(layer, PurposeLayer):
+                    if ply.gdslayer.number == layer.datatype:
+                        if ply.gdslayer.datatype == cell_type:
+                            elems += ply
+            else:
+                # print('B')
                 if isinstance(layer, Layer):
                     if layer.is_equal_number(ply.gdslayer):
                         elems += ply

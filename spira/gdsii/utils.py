@@ -3,81 +3,72 @@ import spira
 import pyclipper
 import numpy as np
 
-from spira.settings import SCALE_DOWN, SCALE_UP
-
+from spira.settings import SCALE_DOWN, SCALE_UP, OFFSET
 
 
 st = pyclipper.scale_to_clipper
 sf = pyclipper.scale_from_clipper
 
 
-def get_purpose_layers(cell, players):
-    elems = spira.ElementList()
-    for ply in cell.elementals.polygons:
-        for phys in players:
-            if ply.gdslayer == phys.layer:
-                elems += ply
-    return elems
-
-
-def bool_operation(subj, clip=None, method=None, closed=True):
-    """ Angusj clipping library """
-
+def bool_operation(subj, clip=None, method=None, closed=True, scale=1):
     from spira.gdsii.elemental.polygons import PolygonAbstract
-
-    scale = 1
-
     pc = pyclipper.Pyclipper()
-
     if issubclass(type(subj), PolygonAbstract):
         subj = subj.polygons
     if issubclass(type(clip), PolygonAbstract):
         clip = clip.polygons
-
     if clip is not None:
         pc.AddPaths(st(clip, scale), pyclipper.PT_CLIP, True)
     pc.AddPaths(st(subj, scale), pyclipper.PT_SUBJECT, closed)
-
     subj = None
     if method == 'difference':
-        subj = pc.Execute(pyclipper.CT_DIFFERENCE,
-                          pyclipper.PFT_NONZERO,
-                          pyclipper.PFT_NONZERO)
+        subj = pc.Execute(
+            pyclipper.CT_DIFFERENCE,
+            pyclipper.PFT_NONZERO,
+            pyclipper.PFT_NONZERO
+        )
     elif method == 'union':
-        subj = pc.Execute(pyclipper.CT_UNION,
-                          pyclipper.PFT_NONZERO,
-                          pyclipper.PFT_NONZERO)
+        subj = pc.Execute(
+            pyclipper.CT_UNION,
+            pyclipper.PFT_NONZERO,
+            pyclipper.PFT_NONZERO
+        )
     elif method == 'intersection':
-        subj = pc.Execute(pyclipper.CT_INTERSECTION,
-                          pyclipper.PFT_NONZERO,
-                          pyclipper.PFT_NONZERO)
+        subj = pc.Execute(
+            pyclipper.CT_INTERSECTION,
+            pyclipper.PFT_NONZERO,
+            pyclipper.PFT_NONZERO
+        )
     elif method == 'exclusive':
-        subj = pc.Execute(pyclipper.CT_XOR,
-                          pyclipper.PFT_NONZERO,
-                          pyclipper.PFT_NONZERO)
+        subj = pc.Execute(
+            pyclipper.CT_XOR,
+            pyclipper.PFT_NONZERO,
+            pyclipper.PFT_NONZERO
+        )
     else:
         raise ValueError('Please specify a clipping method')
+    points = []
+    for pts in pyclipper.SimplifyPolygons(subj):
+        points.append(np.array(pts))
+    return np.array(points)
 
-    sp = pyclipper.SimplifyPolygons(subj)
-    # cp = pyclipper.CleanPolygons(sf(sp, scale))
-    return sp
 
-
-def offset_operation(layer, size):
-    """
-    Apply polygon offsetting using Angusj.
-    Either blow up polygons or blow it down.
-    """
-
+def offset_operation(points, offset_type=None, scale=OFFSET):
+    """ Apply polygon offsetting using Angusj.
+    Either blow up polygons or blow it down. """
     pco = pyclipper.PyclipperOffset()
-    pco.AddPath(layer, pyclipper.JT_ROUND, pyclipper.ET_CLOSEDPOLYGON)
-
-    if size == 'down':
-        return pco.Execute(-10000)[0]
-    elif size == 'up':
-        return pco.Execute(10.0)
+    pco.AddPath(points, pyclipper.JT_MITER, pyclipper.ET_CLOSEDPOLYGON)
+    pp = None
+    if offset_type == 'down':
+        pp = pco.Execute(-10000)[0]
+    elif offset_type == 'up':
+        pp = pco.Execute(scale * SCALE_UP)
     else:
-        raise ValueError('please select the Offset function to use')
+        raise ValueError('Please select the Offset function to use')
+    points = []
+    for pts in pp:
+        points.append(np.array(pts))
+    return np.array(points)
 
 
 def encloses(points, position):
@@ -95,18 +86,18 @@ def labeled_polygon_id(position, polygons):
     return None
 
 
-def _grids_per_unit():
-    return (utils.unit/utils.grid) * utils.um
+# def _grids_per_unit():
+#     return (utils.unit/utils.grid) * utils.um
 
 
-def _points_to_float(points):
-    layer = np.array(points).tolist()
+# def _points_to_float(points):
+#     layer = np.array(points).tolist()
 
-    polygons = []
-    for pl in layer:
-        poly = [[float(y) for y in x] for x in pl]
-        polygons.append(poly)
-    return polygons
+#     polygons = []
+#     for pl in layer:
+#         poly = [[float(y) for y in x] for x in pl]
+#         polygons.append(poly)
+#     return polygons
 
 
 def snap_points(points, grids_per_unit=None):

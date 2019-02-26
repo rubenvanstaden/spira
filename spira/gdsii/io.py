@@ -79,6 +79,7 @@ def wrap_references(cell, c2dmap):
             if e.x_reflection == True:
                 center = __reflect__(points=center)
             if e.rotation is not None:
+                # e.rotation = (-1) * e.rotation
                 center = __rotate__(points=center, angle=e.rotation)
 
             tf = {
