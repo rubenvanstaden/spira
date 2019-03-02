@@ -60,7 +60,7 @@ class PurposeLayer(__Layer__):
 
     @property
     def key(self):
-        return (self.datatype, self.symbol)
+        return (self.datatype, self.symbol, 'purpose_layer_key')
 
 
 from spira.core.descriptor import DataFieldDescriptor
@@ -90,7 +90,7 @@ class PhysicalLayer(__Layer__):
     #     return self.__repr__()
 
     def __hash__(self):
-        return hash(self.id)
+        return hash(self.node_id)
 
     def __eq__(self, other):
         if isinstance(other, PhysicalLayer):
@@ -132,7 +132,7 @@ class PhysicalLayer(__Layer__):
 
     @property
     def key(self):
-        return (self.layer.number, self.purpose.symbol)
+        return (self.layer.number, self.purpose.symbol, 'physical_layer_key')
 
 
 # from spira.core.descriptor import DataFieldDescriptor

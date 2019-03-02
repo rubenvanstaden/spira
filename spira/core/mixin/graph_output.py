@@ -40,7 +40,8 @@ class DrawGraphAbstract(object):
             marker=dict(
                 color=nodes['color'],
                 size=30,
-                line=dict(width=2)))
+                line=dict(width=2))
+            )
 
         edge_label_trace = go.Scatter(
             x=edges['x_labels'],
@@ -51,23 +52,31 @@ class DrawGraphAbstract(object):
             marker=dict(
                 color='#6666FF',
                 size=2,
-                line=dict(width=4)))
+                line=dict(width=4))
+            )
 
-        fig = go.Figure(data=[edge_trace, node_trace, edge_label_trace],
-                    layout=go.Layout(
-                    title='<br>' + graphname,
-                    titlefont=dict(size=24),
-                    showlegend=False,
-                    width=1200,
-                    height=1200,
-                    hovermode='closest',
-                    margin=dict(b=20,l=5,r=5,t=40),
-                    xaxis=go.layout.XAxis(showgrid=False,
-                        zeroline=False,
-                        showticklabels=False),
-                    yaxis=go.layout.YAxis(showgrid=False,
-                        zeroline=False,
-                        showticklabels=False)))
+        fig = go.Figure(
+            data=[edge_trace, node_trace, edge_label_trace],
+            layout=go.Layout(
+                title='<br>' + graphname,
+                titlefont=dict(size=24),
+                showlegend=False,
+                width=1900,
+                height=1900,
+                hovermode='closest',
+                margin=dict(b=20,l=5,r=5,t=20),
+                xaxis=go.layout.XAxis(
+                    showgrid=False,
+                    zeroline=False,
+                    showticklabels=False
+                ),
+                yaxis=go.layout.YAxis(
+                    showgrid=False,
+                    zeroline=False,
+                    showticklabels=False
+                )
+            )
+        )
 
         directory = os.getcwd() + '/debug/'
         file_name = directory + str(graphname) + '.html'
@@ -114,7 +123,7 @@ class DrawGraphAbstract(object):
 
     def _create_nodes(self, G, labeltext):
         import spira
-        from spira.lpe.mask import Native
+        from demo.pdks.ply.base import __ProcessLayer__
 
         nodes = {}
 
@@ -132,27 +141,32 @@ class DrawGraphAbstract(object):
             label = None
 
             if 'device' in G.node[n]:
+                # if 'route' in G.node[n]:
+                #     label = G.node[n]['route']
+                # if isinstance(G.node[n]['device'], spira.Dummy):
+                #     label = G.node[n]['device']
                 label = G.node[n]['device']
-            elif 'surface' in G.node[n]:
+            elif 'route' in G.node[n]:
+                label = G.node[n]['route']
+            # elif 'branch' in G.node[n]:
+            #     label = G.node[n]['branch']
+            else:
                 label = G.node[n]['surface']
 
             if label:
-                if labeltext == 'number':
-                    nodes['text'].append(n)
-                else:
-                    if isinstance(label, (spira.Port, spira.Term)):
-                        nodes['text'].append(label.node_id)
-                        # nodes['text'].append(n)
-                    else:
-                        nodes['text'].append(label.node_id)
-                        # nodes['text'].append(n)
+                text = '({}) {}'.format(n, label.node_id)
+                nodes['text'].append(text)
 
-                if isinstance(label, spira.SRef):
+                if isinstance(label, spira.Label):
+                    nodes['color'].append(label.color.hexcode)
+                elif isinstance(label, spira.SRef):
                     nodes['color'].append(label.ref.color.hexcode)
                 elif isinstance(label, (spira.Port, spira.Term, spira.Dummy)):
                     nodes['color'].append(label.color.hexcode)
+                elif issubclass(type(label), __ProcessLayer__):
+                    nodes['color'].append(label.player.data.COLOR.hexcode)
                 else:
-                    nodes['color'].append(label.color.hexcode)
+                    raise ValueError('Unsupported graph node type: {}'.format(type(label)))
 
         return nodes
 

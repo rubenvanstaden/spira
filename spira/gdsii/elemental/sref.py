@@ -20,9 +20,11 @@ class __SRef__(gdspy.CellReference, ElementalInitializer):
         return SRef(
             structure=deepcopy(self.ref),
             _parent_ports=deepcopy(self._parent_ports),
+            port_locks=self.port_locks,
             midpoint=deepcopy(self.midpoint),
             rotation=self.rotation,
             magnification=self.magnification,
+            node_id=deepcopy(self.node_id),
             reflection=self.reflection
         )
 
@@ -49,46 +51,87 @@ class SRefAbstract(__SRef__):
 
     def flat_copy(self, level=-1, commit_to_gdspy=False):
         """  """
-
         if level == 0:
             el = spira.ElementList()
             el += self
             return el
-
         transform = {
             'midpoint': self.midpoint,
             'rotation': self.rotation,
             'magnification': self.magnification,
             'reflection': self.reflection
         }
-
         el = self.ref.elementals.flat_copy(level-1)
         el.transform(transform)
         return el
 
+    @property
+    def polygons(self):
+        pass
+
     # @property
-    # def ports(self):
-    #     """ This property allows you to access
-    #     my_device_reference.ports, and receive a
-    #     copy of the ports dict which is correctly
-    #     rotated and translated. """
-    #     for port in self._parent_ports:
+    # def netlist(self):
+    #     g = deepcopy(self.ref.netlist)
+    #     for n in g.nodes():
+    #         if 'branch' in g.node[n]:
+    #             pc_ply = g.nodes[n]['route']
+    #             tf = {
+    #                 'midpoint': self.midpoint,
+    #                 'rotation': self.rotation,
+    #                 'magnification': self.magnification,
+    #                 'reflection': self.reflection
+    #             }
+    #             for p in pc_ply.edge_ports:
+    #                 new_p = deepcopy(p)
+    #                 p1 = new_p.transform(tf)
+    #                 for key, p2 in self.ports.items():
+    #                     if p1.key == p2.key:
+    #                         if p2.locked is False:
+    #                             g.node[n]['device'] = pc_ply
+    #                             eid = self.port_connects[key]
+    #                             if 'connect' in g.node[n]:
+    #                                 g.node[n]['connect'].append(eid)
+    #                             else:
+    #                                 g.node[n]['connect'] = [eid]
 
-    #         key = (port.name, port.gdslayer.number)
+    #     for n in g.nodes():
+    #         p = np.array(g.node[n]['pos'])
+    #         m = np.array(self.midpoint)
+    #         g.node[n]['pos'] = p + m
 
-    #         tf = {
-    #             'midpoint': self.midpoint,
-    #             'rotation': self.rotation,
-    #             'magnification': self.magnification,
-    #             'reflection': self.reflection
-    #         }
+    #     return g
 
-    #         new_port = deepcopy(port)
-    #         self._local_ports[key] = new_port.transform(tf)
-    #         if key in self.port_locks.keys():
-    #             self._local_ports[key].locked = self.port_locks[key]
+    @property
+    def netlist(self):
+        g = deepcopy(self.ref.netlist)
+        for n in g.nodes():
+            if 'device' not in g.node[n]:
+                pc_ply = g.nodes[n]['surface']
+                tf = {
+                    'midpoint': self.midpoint,
+                    'rotation': self.rotation,
+                    'magnification': self.magnification,
+                    'reflection': self.reflection
+                }
+                for p in pc_ply.edge_ports:
+                    new_p = deepcopy(p)
+                    p1 = new_p.transform(tf)
+                    for key, p2 in self.ports.items():
+                        if p1.key == p2.key:
+                            if p2.locked is False:
+                                g.node[n]['device'] = pc_ply
+                                eid = self.port_connects[key]
+                                if 'connect' in g.node[n]:
+                                    g.node[n]['connect'].append(eid)
+                                else:
+                                    g.node[n]['connect'] = [eid]
 
-    #     return self._local_ports
+        for n in g.nodes():
+            p = np.array(g.node[n]['pos'])
+            m = np.array(self.midpoint)
+            g.node[n]['pos'] = p + m
+
+        return g
 
     @property
     def ports(self):
@@ -98,10 +141,6 @@ class SRefAbstract(__SRef__):
         rotated and translated. """
         for port in self._parent_ports:
 
-            key = (port.name, port.gdslayer.number)
-            # key = port.node_id
-            # print(key)
-
             tf = {
                 'midpoint': self.midpoint,
                 'rotation': self.rotation,
@@ -109,10 +148,18 @@ class SRefAbstract(__SRef__):
                 'reflection': self.reflection
             }
 
+            key = list(port.key)
+            key[2] = self.midpoint[0]
+            key[3] = self.midpoint[1]
+            key = tuple(key)
+
             new_port = deepcopy(port)
             self._local_ports[key] = new_port.transform(tf)
+
             if key in self.port_locks.keys():
                 self._local_ports[key].locked = self.port_locks[key]
+            if key in self.port_connects.keys():
+                self._local_ports[key].connections += self.port_connects[key]
 
         return self._local_ports
 
@@ -132,7 +179,7 @@ class SRefAbstract(__SRef__):
     def rotate(self, angle=45, center=(0,0)):
         if angle == 0:
             return self
-        angle = (-1) * angle
+        # angle = (-1) * angle
         if self.rotation is None:
             self.rotation = 0
         if issubclass(type(center), __Port__):
@@ -209,7 +256,9 @@ class SRef(SRefAbstract):
 
     _parent_ports = param.ElementalListField()
     _local_ports = param.DictField(default={})
+
     port_locks = param.DictField(default={})
+    port_connects = param.DictField(default={})
 
     def __init__(self, structure, **kwargs):
         ElementalInitializer.__init__(self, **kwargs)
@@ -218,7 +267,7 @@ class SRef(SRefAbstract):
             self._parent_ports += p
         for t in structure.terms:
             self._parent_ports += t
-        self._local_ports = {port.node_id:deepcopy(port) for port in self._parent_ports}
+        # self._local_ports = {port.node_id:deepcopy(port) for port in self._parent_ports}
 
     def __repr__(self):
         name = self.ref.name

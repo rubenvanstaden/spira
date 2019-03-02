@@ -1,4 +1,5 @@
 import gdspy
+import pyclipper
 import numpy as np
 
 from spira import param
@@ -84,6 +85,16 @@ class PolygonAbstract(__Polygon__):
     gdslayer = param.LayerField()
     direction = param.IntegerField(default=0)
 
+    @property
+    def points(self):
+        return self.shape.points
+        
+    def encloses(self, point):
+        for points in self.points:
+            if pyclipper.PointInPolygon(point, points) == 0:
+                return False
+        return True
+    
     def commit_to_gdspy(self, cell):
         if self.__repr__() not in list(PolygonAbstract.__committed__.keys()):
             P = gdspy.PolygonSet(
@@ -111,7 +122,7 @@ class PolygonAbstract(__Polygon__):
         return self
 
     def rotate(self, angle=45, center=(0,0)):
-        angle = (-1) * angle
+        # angle = (-1) * angle
         super().rotate(angle=(angle-self.direction)*np.pi/180, center=center)
         # super().rotate(angle=angle*np.pi/180, center=center)
         self.shape.points = self.polygons

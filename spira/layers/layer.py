@@ -64,7 +64,7 @@ class Layer(__Layer__):
 
     @property
     def key(self):
-        return (self.number, self.datatype)
+        return (self.number, self.datatype, 'layer_key')
 
     def is_equal_number(self, other):
         if self.number == other.number:

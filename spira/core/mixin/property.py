@@ -58,20 +58,6 @@ class CellMixin(__Properties__):
         self.__gdspy_cell__ = cell.construct_gdspy_tree(glib)
 
     def __wrapper__(self, c, c2dmap):
-        # if hasattr(c, 'routes'):
-        #     for e in c.routes.flat_elems():
-        #         G = c2dmap[c]
-        #         if isinstance(e, spira.SRef):
-        #             G.add(
-        #                 gdspy.CellReference(
-        #                     ref_cell=c2dmap[e.ref],
-        #                     origin=e.midpoint,
-        #                     rotation=e.rotation,
-        #                     magnification=e.magnification,
-        #                     x_reflection=e.reflection
-        #                 )
-        #             )
-
         for e in c.elementals.flat_elems():
             G = c2dmap[c]
             if isinstance(e, spira.SRef):
@@ -102,7 +88,7 @@ class CellMixin(__Properties__):
     @property
     def bbox(self):
         # cell = self.__set_gdspy_cell_withut_ports__()
-
+        # print(cell)
         cell = self.__get_gdspy_cell__()
         bbox = cell.get_bounding_box()
         if bbox is None:

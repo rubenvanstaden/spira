@@ -1,97 +1,253 @@
 import spira
+import numpy as np
 from spira import param, shapes
 from demo.pdks import ply
-from spira.rdd import get_rule_deck
 from spira.lpe.containers import __CellContainer__
 from copy import copy, deepcopy
 
 from spira.gdsii.utils import scale_polygon_down as spd
 from spira.gdsii.utils import scale_polygon_up as spu
+from spira.lpe.pcells import  __NetlistCell__
+from demo.pdks.components.mitll.via import Via
 
 
-RDD = get_rule_deck()
+RDD = spira.get_rule_deck()
 
 
-class __Mask__(__CellContainer__):
+class Mask(__NetlistCell__):
+    """  """
 
-    alias = param.StringField()
-    player = param.PhysicalLayerField()
-    level = param.IntegerField(default=1)
+    def create_elementals(self, elems):
+        elems = super().create_elementals(elems)
 
-    metals = param.DataField(fdef_name='create_flatten_metals')
-    merged_layers = param.DataField(fdef_name='create_merged_layers')
+        Ds = spira.Cell(name='Structures')
+        for e in self.cell.structures:
+            Ds += e
 
-    # def create_boxes(self, boxes):
-    #     return boxes
+        Dr = spira.Cell(name='Routes')
+        for e in self.cell.routes:
+            Dr += e
 
-    def create_flatten_metals(self):
-        # E = self.cell.elementals.flat_copy()
-        R = self.cell.routes.flat_copy()
-        B = self.cell.boxes.flat_copy()
-        # Em = E.get_polygons(layer=self.player.layer)
-        Rm = R.get_polygons(layer=self.player.layer)
-        Bm = B.get_polygons(layer=self.player.layer)
-        metal_elems = spira.ElementList()
-        # for e in Em:
-        #     metal_elems += e
-        for e in Rm:
-            metal_elems += e
-        for e in Bm:
-            metal_elems += e
-        return metal_elems
+        elems += spira.SRef(Ds)
+        elems += spira.SRef(Dr)
 
-    def create_merged_layers(self):
-        points = []
-        elems = spira.ElementList()
-        for p in self.metals:
-            assert isinstance(p, spira.Polygons)
-            for pp in p.polygons:
-                points.append(pp)
-        if points:
-            shape = shapes.Shape(points=points)
-            shape.apply_merge
-            for pts in shape.points:
-                elems += spira.Polygons(shape=[pts])
         return elems
 
-    # def create_elementals(self, elems):
-    #     # TODO: Map the gdslayer to a physical layer in the RDD.
-    #     player = None
-    #     for k, v in RDD.PLAYER.items:
-    #         if v.layer == self.player.layer:
-    #             player = v
+    def create_nets(self, nets):
 
-    #     for i, poly in enumerate(self.merged_layers):
-    #     # for i, poly in enumerate(self.metals):
+        print('[*] Connecting Circuit and Device nets')
 
-    #     # R = self.cell.routes.flat_copy()
-    #     # Rm = R.get_polygons(layer=self.player.layer)
-    #     # for i, poly in enumerate(Rm):
+        g = deepcopy(self.cell.netlist)
 
-    #     # R = self.cell.elementals.flat_copy()
-    #     # Rm = R.get_polygons(layer=self.player.layer)
-    #     # for i, poly in enumerate(Rm):
-    #         assert isinstance(poly, spira.Polygons)
-    #         if player is not None:
-    #             ml = ply.Polygon(
-    #                 name='ply_{}_{}'.format(self.alias, i),
-    #                 player=player,
-    #                 points=poly.polygons,
-    #                 level=self.level
-    #             )
-    #             elems += ml
-    #     return elems
+        # s_nodes = {}
+        # n_nodes = {}
+        # for S in self.cell.structures:
 
+        #     print(S)
 
-class Metal(__Mask__):
-    pass
+        #     if not issubclass(type(S.ref), Via):
+        #         n_nodes[S.node_id] = []
+        #         for n in g.nodes():
+        #             if 'device' in g.node[n]:
+        #                 D = g.node[n]['device']
+        #                 if isinstance(D, spira.SRef):
+        #                     if D.node_id == S.node_id:
+        #                         nn = [i for i in g[n]]
+        #                         n_nodes[S.node_id].extend(nn)
 
+        #         gs = S.netlist
 
-class Native(__Mask__):
-    pass
+        #         c_nodes = {}
+        #         for n in n_nodes[S.node_id]:
+        #             # print('')
+        #             # print(n)
+        #             for m in gs.nodes:
+        #                 if 'branch' in g.node[n]:
+        #                     if 'connect' in gs.node[m]:
+        #                         for i, R in enumerate(gs.node[m]['connect']):
+        #                             print(i, R)
+        #                             if g.node[n]['branch'].route == R.node_id:
 
+        #                                 uid = '{}_{}_{}'.format(i, n, S.midpoint)
 
+        #                                 # print(uid)
 
+        #                                 if n in s_nodes.keys():
+        #                                     s_nodes[n].append(uid)
+        #                                 else:
+        #                                     s_nodes[n] = [uid]
 
+        #                                 if m in c_nodes.keys():
+        #                                     c_nodes[m].append(uid)
+        #                                 else:
+        #                                     c_nodes[m] = [uid]
+
+        #         for m, connections in c_nodes.items():
+        #             gs.node[m]['connect'] = []
+        #             for v in connections:
+        #                 s_copy = gs.node[m]['device'].modified_copy(node_id=v)
+        #                 gs.node[m]['device'] = s_copy
+        #                 gs.node[m]['connect'].append(s_copy)
+
+        #         nets += gs
+
+        # for n, structures in s_nodes.items():
+        #     g.node[n]['connected_structures'] = []
+        #     # print(g.node[n]['branch'])
+        #     for v in structures:
+        #         # s_copy = g.node[n]['branch'].modified_copy(node_id=v)
+        #         # g.node[n]['route'] = s_copy
+                
+        #         b = g.node[n]['branch']
+        #         # print(b)
+                
+        #         value = spira.Label(
+        #             position=b.position,
+        #             text=b.text,
+        #             route=b.route,
+        #             gdslayer=b.gdslayer,
+        #             color=b.color,
+        #             node_id=v
+        #         )
+
+        #         g.node[n]['branch'] = value
+
+        #         g.node[n]['connected_structures'].append(value)
+
+        #     print('')
+
+        nets += g
+
+        return nets
+
+    # def create_nets(self, nets):
+
+    #     print('[*] Connecting Circuit and Device nets')
+
+    #     g = deepcopy(self.cell.netlist)
+
+    #     s_nodes = {}
+    #     n_nodes = {}
+    #     for S in self.cell.structures:
+    #         if not issubclass(type(S.ref), Via):
+    #             n_nodes[S.node_id] = []
+    #             for n in g.nodes():
+    #                 if 'device' in g.node[n]:
+    #                     D = g.node[n]['device']
+    #                     if isinstance(D, spira.SRef):
+    #                         if D.node_id == S.node_id:
+    #                             nn = [i for i in g[n]]
+    #                             n_nodes[S.node_id].extend(nn)
+
+    #             gs = S.netlist
+
+    #             c_nodes = {}
+    #             for n in n_nodes[S.node_id]:
+    #                 for m in gs.nodes:
+    #                     if 'route' in g.node[n]:
+    #                         if 'connect' in gs.node[m]:
+    #                             for R in gs.node[m]['connect']:
+    #                                 if g.node[n]['route'].node_id == R.node_id:
+
+    #                                     uid = '{}_{}'.format(n, S.midpoint)
+
+    #                                     if n in s_nodes.keys():
+    #                                         s_nodes[n].append(uid)
+    #                                     else:
+    #                                         s_nodes[n] = [uid]
+
+    #                                     if m in c_nodes.keys():
+    #                                         c_nodes[m].append(uid)
+    #                                     else:
+    #                                         c_nodes[m] = [uid]
+
+    #             for m, connections in c_nodes.items():
+    #                 gs.node[m]['connect'] = []
+    #                 for v in connections:
+    #                     s_copy = gs.node[m]['device'].modified_copy(node_id=v)
+    #                     gs.node[m]['device'] = s_copy
+    #                     gs.node[m]['connect'].append(s_copy)
+
+    #             nets += gs
+
+    #     # for n, v in s_nodes.items():
+    #     #     s_copy = g.node[n]['route'].modified_copy(node_id=v)
+    #     #     g.node[n]['route'] = s_copy
+        
+    #     for n, structures in s_nodes.items():
+    #         g.node[n]['connected_structures'] = []
+    #         for v in structures:
+    #             s_copy = g.node[n]['route'].modified_copy(node_id=v)
+    #             g.node[n]['route'] = s_copy
+    #             g.node[n]['connected_structures'].append(s_copy)
+
+    #     nets += g
+
+    #     return nets
+
+    def create_netlist(self):
+
+        self.g = self.merge
+
+        # for r in self.g.nodes(data='connected_structures'):
+        #     if r[1] is not None:
+        #         if isinstance(r[1], list):
+        #             for c1 in r[1]:
+        #                 for d in self.g.nodes(data='connect'):
+        #                     if d[1] is not None:
+        #                         for c2 in d[1]:
+        #                             if c1.node_id == c2.node_id:
+        #                                 self.g.add_edge(r[0], d[0])
+
+        # remove_nodes = []
+        # for S in self.cell.structures:
+        #     if not issubclass(type(S.ref), Via):
+        #         for n in self.g.nodes():
+        #             if 'device' in self.g.node[n]:
+        #                 D = self.g.node[n]['device']
+        #                 if isinstance(D, spira.SRef):
+        #                     if D.node_id == S.node_id:
+        #                         remove_nodes.append(n)
+
+        # self.g.remove_nodes_from(remove_nodes)
+
+        self.plot_netlist(G=self.g, graphname=self.name, labeltext='id')
+
+    def create_ports(self, ports):
+
+        # for D in self.cell.structures:
+        #     for name, port in D.ports.items():
+        #         if port.locked is False:
+        #             # print(D)
+        #             edgelayer = deepcopy(port.gdslayer)
+        #             edgelayer.datatype = 100
+        #             m_term = spira.Term(
+        #                 name=port.name,
+        #                 gdslayer=deepcopy(port.gdslayer),
+        #                 midpoint=deepcopy(port.midpoint),
+        #                 orientation=deepcopy(port.orientation),
+        #                 reflection=port.reflection,
+        #                 edgelayer=edgelayer,
+        #                 width=port.width,
+        #             )
+        #             ports += m_term
+
+        # for R in self.cell.routes:
+        #     for name, port in R.ports.items():
+        #         if port.locked is False:
+        #             edgelayer = deepcopy(port.gdslayer)
+        #             edgelayer.datatype = 101
+        #             m_term = spira.Term(
+        #                 name=port.name,
+        #                 gdslayer=deepcopy(port.gdslayer),
+        #                 midpoint=deepcopy(port.midpoint),
+        #                 orientation=deepcopy(port.orientation),
+        #                 reflection=port.reflection,
+        #                 edgelayer=edgelayer,
+        #                 width=port.width,
+        #             )
+        #             ports += m_term
+
+        return ports
 
 

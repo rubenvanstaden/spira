@@ -12,19 +12,15 @@ class ElementFilterMixin(object):
             raise ValueError('Layer not set.')
         for ply in self.polygons:
             if cell_type is not None:
-                # print('A')
                 if isinstance(layer, Layer):
                     if layer.is_equal_number(ply.gdslayer):
-                        # print(layer)
                         if ply.gdslayer.datatype == cell_type:
-                            # print(ply)
                             elems += ply
                 elif isinstance(layer, PurposeLayer):
                     if ply.gdslayer.number == layer.datatype:
                         if ply.gdslayer.datatype == cell_type:
                             elems += ply
             else:
-                # print('B')
                 if isinstance(layer, Layer):
                     if layer.is_equal_number(ply.gdslayer):
                         elems += ply
@@ -40,17 +36,6 @@ class ElementFilterMixin(object):
         for e in self._list:
             if issubclass(type(e), PolygonAbstract):
                 elems += e
-        return elems
-
-    @property
-    def metals(self):
-        from spira.rdd import get_rule_deck
-        from spira.gdsii.elemental.polygons import PolygonAbstract
-        RDD = get_rule_deck()
-        elems = ElementList()
-        for p in self.polygons:
-            if p.gdslayer.number in RDD.METALS.layers:
-                elems += p
         return elems
 
     @property
@@ -90,20 +75,17 @@ class __ElementList__(TypedList, ElementFilterMixin):
     def __str__(self):
         return self.__repr__()
 
-    def __getitem__(self, i):
-        if isinstance(i, str):
-            for cell_ref in self.sref:
-                name = cell_ref.ref.name
-                rest = name.split('-', 1)[0]
-                if i == rest: return cell_ref
-        elif isinstance(i, tuple):
-            elems = ElementList()
-            for e in self.polygons:
-                if e.gdslayer.key == i:
-                    elems += e
-            return elems
+    def __getitem__(self, value):
+        r_val = None
+        if isinstance(value, str):
+            for e in self._list:
+                if e.node_id == value: 
+                    r_val = e
         else:
-            return self._list[i]
+            r_val = self._list[value]
+        if r_val is None:
+            raise ValueError('Elemental not found!')
+        return r_val
 
     def __delitem__(self, key):
         for i in range(0, len(self._list)):
@@ -127,9 +109,6 @@ class __ElementList__(TypedList, ElementFilterMixin):
 
 
 class ElementList(__ElementList__):
-    """
-
-    """
 
     def dependencies(self):
         import spira

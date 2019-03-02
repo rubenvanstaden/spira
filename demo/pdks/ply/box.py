@@ -12,7 +12,6 @@ class Box(ProcessLayer):
     w = param.FloatField(default=1)
     h = param.FloatField(default=1)
     center = param.PointField()
-    # color = param.ColorField(default='#C0C0C0')
     points = param.DataField(fdef_name='create_points')
 
     __port_compass__ = ['North', 'East', 'South', 'West']
@@ -63,7 +62,8 @@ class Box(ProcessLayer):
             clockwise += ((xpts[i+1] - xpts[i]) * (ypts[i+1] + ypts[i]))
 
         for i in range(0, n):
-            name = self.__port_compass__[i]
+            # name = self.__port_compass__[i]
+            name = 'e{}'.format(i)
             x = np.sign(clockwise) * (xpts[i+1] - xpts[i])
             y = np.sign(clockwise) * (ypts[i] - ypts[i+1])
             orientation = (np.arctan2(x, y) * 180/np.pi) + 180
@@ -74,12 +74,13 @@ class Box(ProcessLayer):
 
             edges += spira.Term(
                 name=name,
+                gdslayer=self.layer,
                 midpoint=midpoint,
+                orientation=orientation,
                 width=width,
-                gdslayer=self.player.layer,
                 edgelayer=spira.Layer(number=65),
                 arrowlayer=spira.Layer(number=78),
-                orientation=orientation,
+                local_connect=self.polygon.node_id,
                 is_edge=True
             )
 

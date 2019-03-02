@@ -35,6 +35,38 @@ class BoundingBox(__CellContainer__):
                         setter[pl.layer.number] = 'already_set'
         return elems
 
-    # def create_ports(self, ports):
-    #     """ Commit the unlocked ports of the Device to the Block. """
-    #     return ports
+    def create_ports(self, ports):
+        """ Commit the unlocked ports of the Device to the Block. """
+
+        for name, port in self.S.ports.items():
+            if port.locked is False:
+                edgelayer = deepcopy(port.gdslayer)
+                edgelayer.datatype = 75
+                m_term = spira.Term(
+                    name=port.name,
+                    gdslayer=deepcopy(port.gdslayer),
+                    midpoint=deepcopy(port.midpoint),
+                    orientation=deepcopy(port.orientation),
+                    reflection=port.reflection,
+                    edgelayer=edgelayer,
+                    width=port.width,
+                    connections=deepcopy(port.connections)
+                )
+                ports += m_term
+                
+        # for name, port in self.S.ports.items():
+        #     if port.locked is False:
+        #         edgelayer = deepcopy(port.gdslayer)
+        #         edgelayer.datatype = 75
+        #         m_term = spira.Term(
+        #             name=port.name,
+        #             gdslayer=deepcopy(port.gdslayer),
+        #             midpoint=deepcopy(port.midpoint),
+        #             orientation=deepcopy(port.orientation),
+        #             reflection=port.reflection,
+        #             edgelayer=edgelayer,
+        #             width=port.width,
+        #         )
+        #         ports += m_term
+
+        return ports

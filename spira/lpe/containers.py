@@ -29,7 +29,11 @@ class __CircuitContainer__(__NetContainer__):
 
     boxes = param.ElementalListField(fdef_name='create_boxes')
     routes = param.ElementalListField(fdef_name='create_routes')
+    structures = param.ElementalListField(fdef_name='create_structures')
     devices = param.ElementalListField(fdef_name='create_devices')
+    
+    def create_structures(self, structs):
+        return structs
 
     def create_routes(self, routes):
         return routes

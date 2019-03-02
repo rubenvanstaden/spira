@@ -49,7 +49,7 @@ class __Label__(gdspy.Label, ElementalInitializer):
 class LabelAbstract(__Label__):
 
     gdslayer = param.LayerField()
-    text = param.StringField(default='notext')
+    text = param.StringField(default='no_text')
     node_id = param.StringField()
     str_anchor = param.StringField(default='o')
     rotation = param.FloatField(default=0)
@@ -116,6 +116,7 @@ class Label(LabelAbstract):
 
     """
 
+    route = param.StringField(default='no_route')
     color = param.ColorField(default=color.COLOR_BLUE)
 
     def __init__(self, position, **kwargs):

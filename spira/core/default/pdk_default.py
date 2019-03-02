@@ -115,7 +115,7 @@ RDD.VIAS = ProcessTree()
 
 class TCellRC(DynamicDataTree):
     def initialize(self):
-        from demo.pdks.templates.contact import ViaTemplate
+        from spira.lpe.contact import ViaTemplate
         self.PCELL = ViaTemplate(
             name = 'RC',
             via_layer = RDD.RC.LAYER,
@@ -127,7 +127,7 @@ RDD.VIAS.RC = TCellRC()
 
 class TCellGC(DynamicDataTree):
     def initialize(self):
-        from demo.pdks.templates.contact import ViaTemplate
+        from spira.lpe.contact import ViaTemplate
         self.PCELL = ViaTemplate(
             name = 'GC',
             via_layer = RDD.GC.LAYER,
@@ -139,7 +139,7 @@ RDD.VIAS.GC = TCellGC()
 
 class TCellBC(DynamicDataTree):
     def initialize(self):
-        from demo.pdks.templates.contact import ViaTemplate
+        from spira.lpe.contact import ViaTemplate
         self.PCELL = ViaTemplate(
             name = 'BC',
             via_layer = RDD.BC.LAYER,
@@ -151,7 +151,7 @@ RDD.VIAS.BC = TCellBC()
 
 class TCellJC(DynamicDataTree):
     def initialize(self):
-        from demo.pdks.templates.contact import ViaTemplate
+        from spira.lpe.contact import ViaTemplate
         self.PCELL = ViaTemplate(
             name = 'JC',
             via_layer = RDD.JC.LAYER,
@@ -164,7 +164,7 @@ RDD.VIAS.JC = TCellJC()
 
 class TCellCC(DynamicDataTree):
     def initialize(self):
-        from demo.pdks.templates.contact import ViaTemplate
+        from spira.lpe.contact import ViaTemplate
         self.PCELL = ViaTemplate(
             name = 'CC',
             via_layer = RDD.CC.LAYER,

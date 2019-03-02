@@ -42,10 +42,11 @@ class __Mesh__(meshio.Mesh, ElementalInitializer):
 
     mesh_graph = param.DataField(fdef_name='create_mesh_graph')
 
-    def __init__(self, polygons, bounding_boxes=None, **kwargs):
+    def __init__(self, polygons, route_nodes=None, bounding_boxes=None, **kwargs):
 
         self.polygons = polygons
         self.bounding_boxes = bounding_boxes
+        self.route_nodes = route_nodes
 
         ElementalInitializer.__init__(self, **kwargs)
 
@@ -97,9 +98,6 @@ class MeshAbstract(__Mesh__):
 
     triangles = param.DataField(fdef_name='create_triangles')
     physical_triangles = param.DataField(fdef_name='create_physical_triangles')
-
-    def __init__(self, polygons, bounding_boxes=None, **kwargs):
-        super().__init__(polygons, bounding_boxes, **kwargs)
 
     def create_triangles(self):
         if 'triangle' not in self.cells:
@@ -188,45 +186,64 @@ class MeshLabeled(MeshAbstract):
     surface_nodes = param.DataField(fdef_name='create_surface_nodes')
     device_nodes = param.DataField(fdef_name='create_device_nodes')
     boundary_nodes = param.DataField(fdef_name='create_boundary_nodes')
+    routes = param.DataField(fdef_name='create_route_nodes')
 
-    def __init__(self, polygons, bounding_boxes=None, **kwargs):
-        super().__init__(polygons, bounding_boxes, **kwargs)
+    def __init__(self, polygons, route_nodes=None, bounding_boxes=None, **kwargs):
+        super().__init__(polygons, route_nodes, bounding_boxes, **kwargs)
 
         self.surface_nodes
         self.device_nodes
 
         if bounding_boxes is not None:
             self.boundary_nodes
+        if route_nodes is not None:
+            self.routes
 
     def create_surface_nodes(self):
         triangles = self.__layer_triangles_dict__()
         for key, nodes in triangles.items():
             for n in nodes:
-
-                pid = utils.labeled_polygon_id(
-                    self.g.node[n]['pos'], 
-                    self.polygons
-                )
-
-                if pid is not None:
-                    for pl in RDD.PLAYER.get_physical_layers(purposes='METAL'):
-                        if pl.layer == self.layer:
-                            label = spira.Label(
-                                position=self.g.node[n]['pos'],
-                                text=self.name,
-                                gdslayer=self.layer,
-                                color=pl.data.COLOR
-                            )
-                            label.node_id = '{}'.format(pid)
-                            display = '{}'.format(pl.layer.name)
-                            self.g.node[n]['surface'] = label
-                            self.g.node[n]['display'] = display
+                for pp in self.polygons:
+                    poly = pp.polygon
+                    if poly.encloses(self.g.node[n]['pos']):
+                        for pl in RDD.PLAYER.get_physical_layers(purposes='METAL'):
+                            if pl.layer == self.layer:
+                                pp.color=pl.data.COLOR
+                                self.g.node[n]['surface'] = pp
 
     def create_device_nodes(self):
-        for node, triangle in self.__triangle_nodes__().items():
+        for n, triangle in self.__triangle_nodes__().items():
             points = [utils.c2d(self.points[i]) for i in triangle]
-            for S in self.primitives:
-                self.add_device_label(node, S, points)
+            for D in self.primitives:
+                if isinstance(D, (spira.Port, spira.Term)):
+                    if not isinstance(D, spira.Dummy):
+                        if D.encloses(points):
+                            self.g.node[n]['device'] = D
+                else:
+                    for p in D.ports:
+                        if p.gdslayer.number == self.layer.number:
+                            if p.encloses(points):
+                                if 'device' in self.g.node[n]:
+                                    self.add_new_node(n, D, p.midpoint)
+                                else:
+                                    self.g.node[n]['device'] = D
+
+    def create_route_nodes(self):
+        for R in self.route_nodes:
+            for p in R.ref.metals:
+            # for p in R.ref.merged_layers:
+                ply = deepcopy(p)
+                for n in self.g.nodes():
+                    if ply.polygon.encloses(self.g.node[n]['pos']):
+                        # self.g.node[n]['surface'] = p
+                        self.g.node[n]['route'] = p
+                        # self.g.node[n]['route'] = spira.Label(
+                        #     position=R.midpoint,
+                        #     text='ROUTE',
+                        #     color=color.COLOR_AZURE,
+                        #     # node_id='ROUTE'
+                        #     node_id=p.__class__.__name__,
+                        # )
 
     def create_boundary_nodes(self):
         if self.level > 1:
@@ -234,27 +251,10 @@ class MeshLabeled(MeshAbstract):
                 for p in B.elementals.polygons:
                     ply = deepcopy(p)
                     ply.center = B.S.midpoint
-                    bnodes = []
                     for n in self.g.nodes():
-                        s = self.g.node[n]['surface']
-                        if s.encloses(ply.polygons[0]):
-                            bnodes.append(n)
-
-                    device_node = None
-                    for n in bnodes:
-                        self.g.node[n]['device'] = B.S
-                        # self.g.node[n]['device'].ref.color = color.COLOR_AZURE
-                        self.g.node[n]['device'].node_id = '{}_{}'.format(B.S.ref.name, B.S.midpoint)
-
-                        # self.g.node[n]['surface'].color = '#ffffff'
-                        # if 'device' in self.g.node[n]:
-                        #     self.g.node[n]['device'].color = '#ffffff'
-                    #     if 'device' in self.g.node[n]:
-                    #         if device_node is None:
-                    #             device_node = self.g.node[n]['device']
-                    # if device_node is not None:
-                    #     for n in bnodes:
-                    #         self.g.node[n]['device'] = device_node
+                        if ply.encloses(self.g.node[n]['pos']):
+                            self.g.node[n]['device'] = B.S
+                            self.g.node[n]['device'].node_id = '{}_{}'.format(B.S.ref.name, B.S.midpoint)
 
     def add_new_node(self, n, D, pos):
         l1 = spira.Layer(name='Label', number=104)
@@ -272,20 +272,6 @@ class MeshLabeled(MeshAbstract):
             display='{}'.format(l1.name)
         )
         self.g.add_edge(n, num+1)
-
-    def add_device_label(self, n, D, points):
-        if isinstance(D, (spira.Port, spira.Term)):
-            if not isinstance(D, spira.Dummy):
-                if D.encloses(points):
-                    self.g.node[n]['device'] = D
-        else:
-            for p in D.ports:
-                if p.gdslayer.number == self.layer.number:
-                    if p.encloses(points):
-                        if 'device' in self.g.node[n]:
-                            self.add_new_node(n, D, p.midpoint)
-                        else:
-                            self.g.node[n]['device'] = D
 
 
 class Mesh(MeshLabeled):

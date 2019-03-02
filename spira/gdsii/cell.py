@@ -170,7 +170,6 @@ class Cell(CellAbstract):
     def create_routes(self, routes):
         return routes
 
-
     def __init__(self, name=None, elementals=None, ports=None, nets=None, library=None, **kwargs):
         CellInitializer.__init__(self, **kwargs)
         gdspy.Cell.__init__(self, self.name, exclude_from_current=True)

@@ -117,16 +117,14 @@ RDD.I0.LAYER = Layer(name='I0', number=2)
 RDD.I0.MIN_SIZE = 0.6
 RDD.I0.MAX_SIZE = 1.2
 RDD.I0.M5_METAL = 1.0
-RDD.I0.COLOR = color.COLOR_CORAL
-# RDD.I0.COLOR = '#6A5ACD'
+RDD.I0.COLOR = color.COLOR_LIGHT_GRAY
 
 RDD.I1 = ProcessTree()
 RDD.I1.LAYER = Layer(name='I1', number=11)
 RDD.I1.MIN_SIZE = 0.6
 RDD.I1.MAX_SIZE = 1.2
 RDD.I1.M5_METAL = 1.0
-# RDD.I1.COLOR = '#4682B4'
-RDD.I1.COLOR = color.COLOR_CORAL
+RDD.I1.COLOR = color.COLOR_LIGHT_GRAY
 
 RDD.I2 = ProcessTree()
 RDD.I2.WIDTH = 0.5
@@ -134,69 +132,60 @@ RDD.I2.LAYER = Layer(name='I2', number=21)
 RDD.I2.MIN_SIZE = 0.6
 RDD.I2.MAX_SIZE = 1.2
 RDD.I2.M5_METAL = 1.0
-# RDD.I2.COLOR = '#5F9EA0'
-RDD.I2.COLOR = color.COLOR_CORAL
+RDD.I2.COLOR = color.COLOR_LIGHT_GRAY
 
 RDD.I3 = ProcessTree()
 RDD.I3.LAYER = Layer(name='I3', number=31)
 RDD.I3.MIN_SIZE = 0.6
 RDD.I3.MAX_SIZE = 1.2
 RDD.I3.M5_METAL = 1.0
-# RDD.I3.COLOR = '#7AD831'
-RDD.I3.COLOR = color.COLOR_CORAL
+RDD.I3.COLOR = color.COLOR_LIGHT_GRAY
 
 RDD.I4 = ProcessTree()
 RDD.I4.LAYER = Layer(name='I4', number=41)
 RDD.I4.MIN_SIZE = 0.8
 RDD.I4.MAX_SIZE = 1.2
 RDD.I4.M5_METAL = 1.0
-# RDD.I4.COLOR = '#90EE90'
-RDD.I4.COLOR = color.COLOR_CORAL
+RDD.I4.COLOR = color.COLOR_INDIAN_RED
 
 RDD.I5 = ProcessTree()
 RDD.I5.LAYER = Layer(name='I5', number=54)
 RDD.I5.MIN_SIZE = 0.7
 RDD.I5.MAX_SIZE = 1.2
 RDD.I5.M5_METAL = 1.0
-# RDD.I5.COLOR = '#40E0D0'
-RDD.I5.COLOR = color.COLOR_CORAL
+RDD.I5.COLOR = color.COLOR_LIGHT_GRAY
 
 RDD.J5 = ProcessTree()
 RDD.J5.LAYER = Layer(name='J5', number=51)
 RDD.J5.MIN_SIZE = 0.7
 RDD.J5.MAX_SIZE = 3.0
 RDD.J5.M5_METAL = 1.0
-# RDD.J5.COLOR = '#FFA500'
-RDD.J5.COLOR = color.COLOR_CORAL
+RDD.J5.COLOR = color.COLOR_LIGHT_GRAY
 
 RDD.C5J = ProcessTree()
 RDD.C5J.LAYER = Layer(name='C5J', number=55)
 RDD.C5J.MIN_SIZE = 0.5
 RDD.C5J.M5_METAL = 1.0
-# RDD.C5J.COLOR = '#F7EC80'
-RDD.C5J.COLOR = color.COLOR_CORAL
+RDD.C5J.COLOR = color.COLOR_LIGHT_GRAY
 
 RDD.C5R = ProcessTree()
 RDD.C5R.LAYER = Layer(name='C5R', number=53)
 # RDD.C5R.LAYER = Layer(name='C5R', number=56)
 RDD.C5R.MIN_SIZE = 0.7
 RDD.C5R.M5_METAL = 1.0
-# RDD.C5R.COLOR = '#EFDC2E'
-RDD.C5R.COLOR = color.COLOR_CORAL
+RDD.C5R.COLOR = color.COLOR_LIGHT_GRAY
 
 RDD.I6 = ProcessTree()
 RDD.I6.LAYER = Layer(name='I6', number=61)
 RDD.I6.MIN_SIZE = 0.7
 RDD.I6.M5_METAL = 1.0
-# RDD.I6.COLOR = '#6B8E23'
-RDD.I6.COLOR = color.COLOR_CORAL
+RDD.I6.COLOR = color.COLOR_STEEL_BLUE
 
 RDD.I7 = ProcessTree()
 RDD.I7.LAYER = Layer(name='I7', number=71)
 RDD.I7.MIN_SIZE = 5.0
 RDD.I7.M5_METAL = 1.0
-# RDD.I7.COLOR = '#3CB371'
-RDD.I7.COLOR = color.COLOR_CORAL
+RDD.I7.COLOR = color.COLOR_DARK_MAGENTA
 
 # ------------------------------- Physical Layers -------------------------------
 
@@ -233,7 +222,7 @@ RDD.VIAS = ProcessTree()
 
 class TCellI4(DynamicDataTree):
     def initialize(self):
-        from demo.pdks.templates.contact import ViaTemplate
+        from spira.lpe.contact import ViaTemplate
         from demo.pdks.components.mitll.via import ViaC5R
         self.DEFAULT = ViaC5R
         self.PCELL = ViaTemplate(
@@ -247,7 +236,7 @@ RDD.VIAS.I4 = TCellI4()
 
 class TCellI5(DynamicDataTree):
     def initialize(self):
-        from demo.pdks.templates.contact import ViaTemplate
+        from spira.lpe.contact import ViaTemplate
         from demo.pdks.components.mitll.via import ViaI5
         self.DEFAULT = ViaI5
         self.PCELL = ViaTemplate(
@@ -261,7 +250,7 @@ RDD.VIAS.I5 = TCellI5()
 
 class TCellI6(DynamicDataTree):
     def initialize(self):
-        from demo.pdks.templates.contact import ViaTemplate
+        from spira.lpe.contact import ViaTemplate
         from demo.pdks.components.mitll.via import ViaI6
         self.DEFAULT = ViaI6
         self.PCELL = ViaTemplate(
@@ -275,7 +264,7 @@ RDD.VIAS.I6 = TCellI6()
 
 class TCellC5R(DynamicDataTree):
     def initialize(self):
-        from demo.pdks.templates.contact import ViaTemplate
+        from spira.lpe.contact import ViaTemplate
         from demo.pdks.components.mitll.via import ViaC5R
         self.DEFAULT = ViaC5R
         self.PCELL = ViaTemplate(
@@ -289,7 +278,7 @@ RDD.VIAS.C5R = TCellC5R()
 
 class TCellJ5(DynamicDataTree):
     def initialize(self):
-        from demo.pdks.templates.contact import ViaTemplate
+        from spira.lpe.contact import ViaTemplate
         from demo.pdks.components.mitll.via import ViaC5R
         self.DEFAULT = ViaC5R
         self.PCELL = ViaTemplate(

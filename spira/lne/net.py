@@ -18,6 +18,7 @@ class Net(ElementalInitializer):
 
     polygons = param.ElementalListField()
     primitives = param.ElementalListField()
+    route_nodes = param.ElementalListField()
     bounding_boxes = param.ElementalListField()
 
     graph = param.DataField(fdef_name='create_netlist_graph')
@@ -42,6 +43,7 @@ class Net(ElementalInitializer):
             layer=self.layer,
             polygons=self.polygons,
             primitives=self.primitives,
+            route_nodes=self.route_nodes,
             bounding_boxes=self.bounding_boxes,
             data=geom.create_mesh
         )

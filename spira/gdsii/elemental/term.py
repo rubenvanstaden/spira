@@ -14,10 +14,9 @@ RDD = spira.get_rule_deck()
 
 
 class Term(PortAbstract):
-    """
-    Terminals are horizontal ports that connect SRef instances
-    in the horizontal plane. They typcially represents the
-    i/o ports of a components.
+    """ Terminals are horizontal ports that connect SRef 
+    instances in the horizontal plane. They typcially 
+    represents the i/o ports of a components.
 
     Examples
     --------
@@ -27,6 +26,11 @@ class Term(PortAbstract):
     edgelayer = param.LayerField(name='Edge', number=63)
     arrowlayer = param.LayerField(name='Arrow', number=77)
     color = param.ColorField(default=color.COLOR_GRAY)
+
+    connections = param.ElementalListField()
+
+    local_connect = param.StringField()
+    external_connect = param.StringField()
 
     width = param.FloatField(default=2*1e6)
 
@@ -133,13 +137,13 @@ class Term(PortAbstract):
     def commit_to_gdspy(self, cell):
         if self.__repr__() not in list(__Port__.__committed__.keys()):
             self.edge.commit_to_gdspy(cell=cell)
-            self.arrow.commit_to_gdspy(cell=cell)
+            # self.arrow.commit_to_gdspy(cell=cell)
             self.label.commit_to_gdspy(cell=cell)
             __Port__.__committed__.update({self.__repr__(): self})
         else:
             p = __Port__.__committed__[self.__repr__()]
             p.edge.commit_to_gdspy(cell=cell)
-            p.arrow.commit_to_gdspy(cell=cell)
+            # p.arrow.commit_to_gdspy(cell=cell)
             p.label.commit_to_gdspy(cell=cell)
 
     def _copy(self):
@@ -154,11 +158,13 @@ class Term(PortAbstract):
             gdslayer=deepcopy(self.gdslayer),
             edgelayer=deepcopy(self.edgelayer),
             arrowlayer=deepcopy(self.arrowlayer),
+            local_connect=self.local_connect,
+            external_connect=self.external_connect,
             color=self.color,
             is_edge=self.is_edge
         )
         return new_port
-
+        
 
 class Dummy(Term):
     """

@@ -80,11 +80,14 @@ class __PortConstructor__(__ProcessLayer__):
 
             edges += spira.Term(
                 name=name,
+                # name='{}_{}'.format(i, name),
+                gdslayer=self.layer,
                 midpoint=midpoint,
                 orientation=orientation,
                 width=width,
                 edgelayer=spira.Layer(number=65),
                 arrowlayer=spira.Layer(number=78),
+                local_connect=self.polygon.node_id,
                 is_edge=True
             )
 

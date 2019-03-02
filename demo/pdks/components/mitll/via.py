@@ -15,32 +15,32 @@ RDD = get_rule_deck()
 class Via(Device):
     color = param.ColorField(default=color.COLOR_LIGHT_GRAY)
 
-    def create_ports(self, ports):
-        """ Activate the edge ports to be used in
-        the Device for metal connections. """
+    # def create_ports(self, ports):
+    #     """ Activate the edge ports to be used in
+    #     the Device for metal connections. """
 
-        for m in self.metals:
-            for p in m.ports:
-                if isinstance(p, spira.Term):
-                    edgelayer = deepcopy(p.gdslayer)
-                    edgelayer.datatype = 80
-                    arrowlayer = deepcopy(p.gdslayer)
-                    arrowlayer.datatype = 81
-                    term = spira.Term(
-                        name=p.name,
-                        gdslayer=deepcopy(m.player.layer),
-                        midpoint=deepcopy(p.midpoint),
-                        orientation=deepcopy(p.orientation)+90,
-                        reflection=p.reflection,
-                        edgelayer=edgelayer,
-                        arrowlayer=arrowlayer,
-                        width=p.width,
-                        # length=deepcopy(p.length)
-                    )
+    #     for m in self.metals:
+    #         for p in m.ports:
+    #             if isinstance(p, spira.Term):
+    #                 edgelayer = deepcopy(p.gdslayer)
+    #                 edgelayer.datatype = 80
+    #                 arrowlayer = deepcopy(p.gdslayer)
+    #                 arrowlayer.datatype = 81
+    #                 term = spira.Term(
+    #                     name=p.name,
+    #                     gdslayer=deepcopy(m.player.layer),
+    #                     midpoint=deepcopy(p.midpoint),
+    #                     orientation=deepcopy(p.orientation)+90,
+    #                     reflection=p.reflection,
+    #                     edgelayer=edgelayer,
+    #                     arrowlayer=arrowlayer,
+    #                     local_connect=p.local_connect,
+    #                     width=p.width,
+    #                 )
 
-                    ports += term
+    #                 ports += term
 
-        return ports
+    #     return ports
 
 
 class ViaC5R(Via):

@@ -74,7 +74,7 @@ class GeometryAbstract(__Geometry__):
             dim=self.dimension,
             prune_vertices=False,
             remove_faces=False,
-            # geo_filename=geo_file
+            geo_filename=geo_file
         )
 
         mm = meshio.Mesh(*mesh_data)
@@ -90,7 +90,8 @@ class GeometryAbstract(__Geometry__):
         from spira.gdsii.utils import scale_polygon_up as spu
 
         elems = ElementList()
-        for ply in self.polygons:
+        for pp in self.polygons:
+            ply = pp.polygon
             for i, points in enumerate(ply.polygons):
                 c_points = numpy_to_list(points, self.height, unit=RDD.GDSII.GRID)
                 surface_label = '{}_{}_{}_{}'.format(
@@ -101,7 +102,6 @@ class GeometryAbstract(__Geometry__):
                 gp = self.geom.add_polygon(
                     c_points, 
                     lcar=0.1,
-                    # lcar=100,
                     make_surface=True,
                     holes=self.holes
                 )

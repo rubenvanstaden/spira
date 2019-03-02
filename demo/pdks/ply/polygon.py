@@ -1,12 +1,13 @@
 import spira
 import numpy as np
 from spira import param, shapes
+from spira.visualization import color
 from demo.pdks.ply.base import ProcessLayer
 
 
 class Polygon(ProcessLayer):
 
-    color = param.ColorField(default='#C0C0C0')
+    color = param.ColorField(default=color.COLOR_BLUE_VIOLET)
     points = param.ElementalListField()
 
     # def validate_parameters(self):

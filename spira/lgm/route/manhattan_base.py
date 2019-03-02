@@ -1,18 +1,19 @@
 import spira
 import numpy as np
 from spira import param, shapes
+from demo.pdks import ply
 from spira.lgm.route.manhattan import __Manhattan__
 from spira.lgm.route.manhattan90 import Route90
 from spira.lgm.route.manhattan180 import Route180
 from spira.lgm.route.basic import RouteShape, RouteBasic, RoutePointShape
 from spira.visualization import color
+from spira.lpe.pcells import Structure
 
 
-class Route(__Manhattan__):
+RDD = spira.get_rule_deck()
 
-    cell = param.CellField()
 
-    # color = param.ColorField(default=color.COLOR_DEEP_GREEN)
+class Route(Structure, __Manhattan__):
 
     path = param.NumpyArrayField()
     width = param.FloatField(default=1*1e8)
@@ -20,29 +21,11 @@ class Route(__Manhattan__):
     # FIXME!
     player = param.PhysicalLayerField()
     angle = param.DataField(fdef_name='create_angle')
-    route_shape = param.DataField(fdef_name='create_route_shape')
 
-    metals = param.DataField(fdef_name='create_flatten_metals')
-    merged_layers = param.DataField(fdef_name='create_merged_layers')
-
-    def create_flatten_metals(self):
-        flat_elems = self.cell.flat_copy()
-        # metal_elems = flat_elems.get_polygons(layer=self.player.layer)
-        return flat_elems
-
-    def create_merged_layers(self):
-        points = []
-        elems = spira.ElementList()
-        for p in self.metals:
-            assert isinstance(p, spira.Polygons)
-            for pp in p.polygons:
-                points.append(pp)
-        if points:
-            shape = shapes.Shape(points=points)
-            shape.apply_merge
-            for pts in shape.points:
-                elems += spira.Polygons(shape=[pts], gdslayer=self.gdslayer)
-        return elems
+    route_90 = param.DataField(fdef_name='create_route_90')
+    route_180 = param.DataField(fdef_name='create_route_180')
+    route_path = param.DataField(fdef_name='create_route_path')
+    route_straight = param.DataField(fdef_name='create_route_straight')
 
     # def validate_parameters(self):
     #     if self.port1.width < self.player.data.WIDTH:
@@ -59,6 +42,8 @@ class Route(__Manhattan__):
         return None
 
     def determine_type(self):
+        if self.cell is not None:
+            self.__type__ = 'layout'
         if self.angle:
             if (self.angle == 0) or (self.angle == 180):
                 if (self.p2[1] != self.p1[1]) or (self.p2[0] != self.p1[0]):
@@ -71,155 +56,91 @@ class Route(__Manhattan__):
             if self.path:
                 self.__type__ = 'path'
 
-    def create_route_shape(self):
-        if self.__type__ == 'straight':
-            route_shape = RouteShape(
-                port1=self.port1,
-                port2=self.port2,
-                path_type='straight',
-                width_type='straight'
-            )
-        elif self.__type__ == 'path':
-            route_shape = RoutePointShape(
-                path=self.path,
-                width=self.width
-            )
-        else:
-            raise ValueError('Routing type algorithm does not exist.')
-        return route_shape
+    def create_route_90(self):
+        R1 = Route90(
+            port1=self.port1,
+            port2=self.port2,
+            radius=self.radius,
+            length=self.length,
+            gdslayer=self.gdslayer
+        )
+        R = spira.Cell(name='M90')
+        for e in R1.flatten():
+            R += e
+        for e in R1.ports:
+            R += e
+        r = spira.SRef(R)
+        return r
+
+    def create_route_180(self):
+        R1 = Route180(
+            port1=self.port1,
+            port2=self.port2,
+            radius=self.radius,
+            length=self.length,
+            gdslayer=self.gdslayer
+        )
+        R = spira.Cell(name='M180')
+        for e in R1.flatten():
+            R += e
+        for e in R1.ports:
+            R += e
+        r = spira.SRef(R)
+        return r
+
+    def create_route_path(self):
+        route_shape = RoutePointShape(
+            path=self.path,
+            width=self.width
+        )
+        R = RouteBasic(
+            route=self.route_shape, 
+            connect_layer=self.player.layer
+        )
+        r = spira.SRef(R)
+        r.connect(port=r.ports['TERM1'], destination=self.port1)
+        return r
+
+    def create_route_straight(self):
+        route_shape = RouteShape(
+            port1=self.port1,
+            port2=self.port2,
+            path_type='straight',
+            width_type='straight'
+        )
+        R = RouteBasic(
+            route=route_shape, 
+            connect_layer=self.player.layer
+        )
+        r = spira.SRef(R1)
+        r.rotate(angle=self.port2.orientation-180, center=R.port1.midpoint)
+        r.move(midpoint=(0,0), destination=self.port1.midpoint)
+        return r
+
+    def create_metals(self, elems):
+        for e in self.cell.elementals:
+            if issubclass(type(e), spira.Polygons):
+                for player in RDD.PLAYER.get_physical_layers(purposes='METAL'):
+                    if player.layer.number == e.gdslayer.number:
+                        elems += ply.Polygon(points=e.shape.points, player=player)
+        return elems
 
     def create_elementals(self, elems):
 
-        if self.__type__ == 'straight':
-            R1 = RouteBasic(route=self.route_shape, connect_layer=self.player.layer)
-            r1 = spira.SRef(R1)
-            r1.rotate(angle=self.port2.orientation-180, center=R1.port1.midpoint)
-            r1.move(midpoint=(0,0), destination=self.port1.midpoint)
-
-        if self.__type__ == 'path':
-            R1 = RouteBasic(route=self.route_shape, connect_layer=self.player.layer)
-            r1 = spira.SRef(R1)
-            r1.connect(port=r1.ports['TERM1'], destination=self.port1)
-
-        if self.__type__ == '180':
-            R1 = Route180(
-                port1=self.port1,
-                port2=self.port2,
-                radius=self.radius,
-                length=self.length,
-                gdslayer=self.gdslayer
-            )
-            R = spira.Cell(name='M180')
-            for e in R1.flatten():
-                R += e
-            for e in R1.ports:
-                R += e
-            r1 = spira.SRef(R)
-
         if self.__type__ == '90':
-            R1 = Route90(
-                port1=self.port1,
-                port2=self.port2,
-                radius=self.radius,
-                length=self.length,
-                gdslayer=self.gdslayer
-            )
-            R = spira.Cell(name='M90')
-            for e in R1.flatten():
-                R += e
-            for e in R1.ports:
-                R += e
+            r1 = self.route_90
+        if self.__type__ == '180':
+            r1 = self.route_180
+        if self.__type__ == 'path':
+            r1 = self.route_path
+        if self.__type__ == 'straight':
+            r1 = self.route_straight
+        if self.__type__ == 'layout':
+            R = RouteBasic(elementals=self.merged_layers)
             r1 = spira.SRef(R)
 
         elems += r1
 
-        # # for e in r1.flatten():
-        # #     elems += e
-
-
-        # # ----------------------------------------
-
-
-        # for p in R1.ports:
-        #     self.ports += p
-
-        # # for e in R1.elementals:
-        # # for e in R1.flat_copy():
-        # for e in R1.flatten():
-        #     elems += e
-
-        # # self.cell = R1
-        # # for e in self.merged_layers:
-        # #     elems += e
-
         return elems
 
-
-
-    # def create_elementals(self, elems):
-
-    #     if (angle == 0) or (angle == 180):
-    #         if (self.p2[1] != self.p1[1]) or (self.p2[0] != self.p1[0]):
-    #             R1 = Route180(
-    #                 port1=self.port1,
-    #                 port2=self.port2,
-    #                 radius=self.radius,
-    #                 length=self.length,
-    #                 gdslayer=self.gdslayer
-    #             )
-
-    #     if angle == 180:
-    #         if (self.p2[1] == self.p1[1]) or (self.p2[0] == self.p1[0]):
-    #             R1 = Route(
-    #                 port1=self.port1,
-    #                 port2=self.port2,
-    #                 player=self.player
-    #             )
-
-    #     if (angle == 90) or (angle == 270):
-    #         R1 = Route90(
-    #             port1=self.port1,
-    #             port2=self.port2,
-    #             radius=self.radius,
-    #             length=self.length,
-    #             gdslayer=self.gdslayer
-    #         )
-
-    #     # if (self.p2[1] == self.p1[1]) or (self.p2[0] == self.p1[0]):
-    #     #     R1 = Route(
-    #     #         port1=self.port1,
-    #     #         port2=self.port2,
-    #     #         player=self.player
-    #     #     )
-    #     # else:
-    #     #     if (angle == 180) or (angle == 0):
-    #     #         R1 = Route180(
-    #     #             port1=self.port1,
-    #     #             port2=self.port2,
-    #     #             radius=self.radius,
-    #     #             length=self.length,
-    #     #             gdslayer=self.gdslayer
-    #     #         )
-    #     #     else:
-    #     #         R1 = Route90(
-    #     #             port1=self.port1,
-    #     #             port2=self.port2,
-    #     #             radius=self.radius,
-    #     #             length=self.length,
-    #     #             gdslayer=self.gdslayer
-    #     #         )
-
-    #     for p in R1.ports:
-    #         self.ports += p
-
-    #     # for e in R1.elementals:
-    #     # for e in R1.flat_copy():
-    #     for e in R1.flatten():
-    #         elems += e
-
-    #     # self.cell = R1
-    #     # for e in self.merged_layers:
-    #     #     elems += e
-
-    #     return elems
 

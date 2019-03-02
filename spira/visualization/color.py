@@ -63,6 +63,9 @@ COLOR_AZURE = Color(name='azure', red=240, green=255, blue=255)
 COLOR_PLUM = Color(name='plum', red=221, green=160, blue=221)
 COLOR_DARK_SLATE_GREY = Color(name='dark slate grey', red=47, green=79, blue=79)
 COLOR_DARKSEA_GREEN = Color(name='darksea green', red=143, green=188, blue=143)
+COLOR_INDIAN_RED = Color(name='indian red', red=205, green=92, blue=92)
+COLOR_STEEL_BLUE = Color(name='steel blue', red=70, green=130, blue=180)
+COLOR_DARK_MAGENTA = Color(name='dark magenta', red=139, green=0, blue=139)
 
 
 # COLOR_BLACK = Color(name = "black", red = 0, green = 0, blue = 0)

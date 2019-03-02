@@ -42,8 +42,11 @@ class PortAbstract(__Port__):
 
     def flat_copy(self, level=-1):
         c_port = self.modified_copy(
-            midpoint=self.midpoint,
-            orientation=self.orientation
+            midpoint=deepcopy(self.midpoint),
+            orientation=self.orientation,
+            reflection=self.reflection,
+            gdslayer=deepcopy(self.gdslayer),
+            locked=self.locked
         )
         return c_port
 
@@ -57,7 +60,7 @@ class PortAbstract(__Port__):
 
     def rotate(self, angle=45, center=(0,0)):
         """ Rotate port around the center with angle. """
-        angle = (-1) * angle
+        # angle = (-1) * angle
         self.midpoint = self.__rotate__(self.midpoint, angle=angle, center=center)
         self.orientation += angle
         self.orientation = np.mod(self.orientation, 360)
@@ -94,6 +97,10 @@ class PortAbstract(__Port__):
             color=color.COLOR_GHOSTWHITE
         )
         return lbl
+
+    @property
+    def key(self):
+        return (self.name, self.gdslayer.number, self.midpoint[0], self.midpoint[1])
 
 
 class Port(PortAbstract):

@@ -82,22 +82,9 @@ def labeled_polygon_id(position, polygons):
     for i, spira_polygon in enumerate(polygons):
         for j, points in enumerate(spira_polygon.polygons):
             if encloses(points, position):
-                return spira_polygon.id
+                # return spira_polygon.id
+                return spira_polygon.node_id
     return None
-
-
-# def _grids_per_unit():
-#     return (utils.unit/utils.grid) * utils.um
-
-
-# def _points_to_float(points):
-#     layer = np.array(points).tolist()
-
-#     polygons = []
-#     for pl in layer:
-#         poly = [[float(y) for y in x] for x in pl]
-#         polygons.append(poly)
-#     return polygons
 
 
 def snap_points(points, grids_per_unit=None):

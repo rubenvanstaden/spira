@@ -28,51 +28,50 @@ class Junction(Device):
         return elems
 
     def create_contacts(self, elems):
-        # FIXME
         elems += ply.Box(player=RDD.PLAYER.C5R, center=(0*self.um, 3.86*self.um), w=0.9*self.um, h=0.7*self.um)
         elems += ply.Box(player=RDD.PLAYER.C5R, center=(0*self.um, 3.86*self.um), w=0.9*self.um, h=0.7*self.um)
         elems += ply.Box(player=RDD.PLAYER.C5R, center=(0*self.um, 1.74*self.um), w=0.9*self.um, h=0.7*self.um)
         elems += ply.Box(player=RDD.PLAYER.I5, center=(0*self.um, 5.4*self.um), w=0.7*self.um, h=0.7*self.um)
-        # elems += ply.Circle(player=RDD.PLAYER.C5J, center=(0*self.um, 0*self.um), box_size=[1.0*self.um, 1.0*self.um])
         elems += ply.Circle(player=RDD.PLAYER.J5, center=(0*self.um, 0*self.um), box_size=[1.3*self.um, 1.3*self.um])
         return elems
 
-    def get_junction_metal(self):
-        terms = spira.ElementList()
-        for m in self.metals:
-            for c in self.contacts:
-                if m.player == RDD.PLAYER.M6:
-                    if c.player == RDD.PLAYER.J5:
-                        if m.polygon & c.polygon:
-                            for p in m.ports:
-                                terms += p
-        return terms
+    # def get_junction_metal(self):
+    #     terms = spira.ElementList()
+    #     for m in self.metals:
+    #         for c in self.contacts:
+    #             if m.player == RDD.PLAYER.M6:
+    #                 if c.player == RDD.PLAYER.J5:
+    #                     if m.polygon & c.polygon:
+    #                         for p in m.ports:
+    #                             terms += p
+    #     return terms
 
-    def create_ports(self, ports):
-        """ Activate the edge ports to be used in
-        the Device for metal connections. """
+    # def create_ports(self, ports):
+    #     """ Activate the edge ports to be used in
+    #     the Device for metal connections. """
 
-        for p in self.jj_metal:
-            if isinstance(p, spira.Term):
-                edgelayer = deepcopy(p.gdslayer)
-                edgelayer.datatype = 80
-                arrowlayer = deepcopy(p.gdslayer)
-                arrowlayer.datatype = 81
-                term = spira.Term(
-                    name=p.name,
-                    gdslayer=deepcopy(p.gdslayer),
-                    midpoint=deepcopy(p.midpoint),
-                    orientation=deepcopy(p.orientation)+90,
-                    reflection=p.reflection,
-                    edgelayer=edgelayer,
-                    arrowlayer=arrowlayer,
-                    width=p.width,
-                    # length=deepcopy(p.length)
-                )
+    #     for p in self.jj_metal:
+    #         if isinstance(p, spira.Term):
+    #             edgelayer = deepcopy(p.gdslayer)
+    #             edgelayer.datatype = 80
+    #             arrowlayer = deepcopy(p.gdslayer)
+    #             arrowlayer.datatype = 81
+    #             term = spira.Term(
+    #                 name=p.name,
+    #                 gdslayer=deepcopy(p.gdslayer),
+    #                 midpoint=deepcopy(p.midpoint),
+    #                 orientation=deepcopy(p.orientation)+90,
+    #                 reflection=p.reflection,
+    #                 edgelayer=edgelayer,
+    #                 arrowlayer=arrowlayer,
+    #                 local_connect=p.local_connect,
+    #                 width=p.width,
+    #                 # length=deepcopy(p.length)
+    #             )
 
-                ports += term
+    #             ports += term
 
-        return ports
+    #     return ports
 
 
 class GJunction(Junction):

@@ -11,6 +11,7 @@ from spira.gdsii.utils import scale_polygon_up as spu
 from copy import copy, deepcopy
 from spira import LOG
 
+from demo.pdks.process.mitll_pdk.database import RDD
 
 import numpy as np
 from numpy.linalg import norm
@@ -53,6 +54,56 @@ def debug_path(filename):
     return path
 
 
+def map_references(c, c2dmap):
+    for e in c.elementals.sref:
+        if e.ref in c2dmap.keys():
+            e.ref = c2dmap[e.ref]
+            e._parent_ports = e.ref.ports
+            e._local_ports = {(port.name, port.gdslayer.number, port.midpoint[0], port.midpoint[1]):deepcopy(port) for port in e.ref.ports}
+            e.port_locks = {(port.name, port.gdslayer.number, port.midpoint[0], port.midpoint[1]):port.locked for port in e.ref.ports}
+            # e._local_ports = {port.node_id:deepcopy(port) for port in e.ref.ports}
+            # e.port_locks = {port.node_id:port.locked for port in e.ref.ports}
+
+
+def device_detector(cell):
+    from spira.lpe.devices import Device
+    from spira.lpe.contact import DeviceTemplate
+    c2dmap = {}
+    for C in cell.dependencies():
+        cc = deepcopy(C)
+        L = DeviceTemplate(name=C.name, cell=cc, level=1)
+        if L.__type__ is not None:
+            for key in RDD.DEVICES.keys:
+                if L.__type__ == key:
+                    D = RDD.DEVICES[key].PCELL(metals=L.metals, contacts=L.contacts)
+                    c2dmap.update({C: D})
+            for key in RDD.VIAS.keys:
+                if L.__type__ == key:
+                    D = RDD.VIAS[key].DEFAULT(metals=L.metals, contacts=L.contacts)
+                    c2dmap.update({C: D})
+        else:
+            c2dmap.update({C: C})
+    for c in cell.dependencies():
+       map_references(c, c2dmap)
+    return c2dmap[cell]
+
+
+def circuit_detector(cell):
+    from spira.lpe.devices import Device
+    from spira.lpe.circuits import Circuit
+    c2dmap = {}
+    for C in cell.dependencies():
+        if not issubclass(type(C), Device):
+            if ('Metal' not in C.name) and ('Native' not in C.name):
+                D = Circuit(cell=C, level=2)
+                c2dmap.update({C: D})
+        else:
+            c2dmap.update({C: C})
+    for c in cell.dependencies():
+        map_references(c, c2dmap)
+    return c2dmap[cell]
+
+
 def wrap_labels(cell, c2dmap):
     for l in cell.get_labels():
         D = c2dmap[cell]
@@ -79,7 +130,6 @@ def wrap_references(cell, c2dmap):
             if e.x_reflection == True:
                 center = __reflect__(points=center)
             if e.rotation is not None:
-                # e.rotation = (-1) * e.rotation
                 center = __rotate__(points=center, angle=e.rotation)
 
             tf = {
