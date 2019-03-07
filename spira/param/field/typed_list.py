@@ -80,27 +80,27 @@ class TypedList(collections.abc.MutableSequence):
         del self[:]
 
 
-from spira.core.descriptor import DataFieldDescriptor
-class ListField(DataFieldDescriptor):
-    __type__ = TypedList
+# from spira.core.descriptor import DataFieldDescriptor
+# class ListField(DataFieldDescriptor):
+#     __type__ = TypedList
 
-    def __init__(self, default=[], **kwargs):
-        kwargs['default'] = self.__type__(default)
-        super().__init__(**kwargs)
+#     def __init__(self, default=[], **kwargs):
+#         kwargs['default'] = self.__type__(default)
+#         super().__init__(**kwargs)
 
-    def get_stored_value(self, obj):
-        value = obj.__store__[self.__name__]
-        return list(value)
+#     def get_stored_value(self, obj):
+#         value = obj.__store__[self.__name__]
+#         return list(value)
 
-    def __set__(self, obj, value):
-        if isinstance(value, self.__type__):
-            obj.__store__[self.__name__] = value
-        elif isinstance(value, list):
-            obj.__store__[self.__name__] = self.__type__(items=value)
-        else:
-            raise TypeError("Invalid type in setting value " + 
-                            "of {} (expected {}): {}"
-                            .format(self.__class_, type(value)))
+#     def __set__(self, obj, value):
+#         if isinstance(value, self.__type__):
+#             obj.__store__[self.__name__] = value
+#         elif isinstance(value, list):
+#             obj.__store__[self.__name__] = self.__type__(items=value)
+#         else:
+#             raise TypeError("Invalid type in setting value " + 
+#                             "of {} (expected {}): {}"
+#                             .format(self.__class_, type(value)))
 
 
 

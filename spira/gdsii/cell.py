@@ -63,8 +63,6 @@ class CellAbstract(__Cell__):
 
     def dependencies(self):
         deps = self.elementals.dependencies()
-        # if hasattr(self, 'routes'):
-        #     deps += self.routes.dependencies()
         deps += self
         return deps
 
@@ -75,6 +73,13 @@ class CellAbstract(__Cell__):
             if not isinstance(e, (SRef, ElementList)):
                 e.commit_to_gdspy(cell=cell)
         return cell
+        
+    def translate(self, dx, dy):
+        for e in self.elementals:
+            e.translate(dx=dx, dy=dy)
+        for p in self.ports:
+            p.translate(dx=dx, dy=dy)
+        return self
 
     def move(self, midpoint=(0,0), destination=None, axis=None):
         from demo.pdks.ply.base import ProcessLayer
@@ -113,7 +118,6 @@ class CellAbstract(__Cell__):
         from demo.pdks.ply.base import ProcessLayer
         if angle == 0:
             return self
-        angle = (-1) * angle
         for e in self.elementals:
             if issubclass(type(e), PolygonAbstract):
                 e.rotate(angle=angle, center=center)
@@ -221,6 +225,33 @@ class Cell(CellAbstract):
 
 
 
+
+
+class Connector(Cell):
+    """
+    Terminals are horizontal ports that connect SRef instances
+    in the horizontal plane. They typcially represents the
+    i/o ports of a components.
+
+    Examples
+    --------
+    >>> term = spira.Term()
+    """
+
+    midpoint = param.MidPointField()
+    orientation = param.IntegerField(default=0)
+    width = param.FloatField(default=2*1e6)
+
+    def __repr__(self):
+        return ("[SPiRA: Connector] (name {}, midpoint {}, " +
+            "width {}, orientation {})").format(self.name,
+            self.midpoint, self.width, self.orientation
+        )
+
+    def create_ports(self, ports):
+        ports += spira.Term(name='P1', midpoint=self.midpoint, width=self.width, orientation=self.orientation)
+        ports += spira.Term(name='P2', midpoint=self.midpoint, width=self.width, orientation=self.orientation-180)
+        return ports
 
 
 

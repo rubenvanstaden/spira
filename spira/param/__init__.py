@@ -1,6 +1,6 @@
 from .field.typed_string import StringField
 from .field.typed_bool import BoolField
-from .field.typed_list import ListField
+# from .field.typed_list import ListField
 from .field.layer_list import LayerListProperty
 # from .field.typed_color import ColorField
 from .field.typed_point import PointField
@@ -61,6 +61,11 @@ def LayerField(name='noname', number=0, datatype=0, **kwargs):
     from spira.layers.layer import Layer
     F = Layer(name=name, number=number, datatype=datatype, **kwargs)
     return DataFieldDescriptor(default=F, **kwargs)
+
+
+def ListField(**kwargs):
+    from .variables import LIST
+    return DataFieldDescriptor(constraint=LIST, **kwargs)
 
 
 def DictField(**kwargs):

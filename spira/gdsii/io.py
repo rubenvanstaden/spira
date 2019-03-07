@@ -11,7 +11,8 @@ from spira.gdsii.utils import scale_polygon_up as spu
 from copy import copy, deepcopy
 from spira import LOG
 
-from demo.pdks.process.mitll_pdk.database import RDD
+# from demo.pdks.process.mitll_pdk.database import RDD
+RDD = spira.get_rule_deck()
 
 import numpy as np
 from numpy.linalg import norm
@@ -75,11 +76,19 @@ def device_detector(cell):
         if L.__type__ is not None:
             for key in RDD.DEVICES.keys:
                 if L.__type__ == key:
-                    D = RDD.DEVICES[key].PCELL(metals=L.metals, contacts=L.contacts)
+                    D = RDD.DEVICES[key].PCELL(
+                        metals=L.metals, 
+                        contacts=L.contacts,
+                        ports=L.ports
+                    )
                     c2dmap.update({C: D})
             for key in RDD.VIAS.keys:
                 if L.__type__ == key:
-                    D = RDD.VIAS[key].DEFAULT(metals=L.metals, contacts=L.contacts)
+                    D = RDD.VIAS[key].DEFAULT(
+                        metals=L.metals, 
+                        contacts=L.contacts,
+                        ports=L.ports
+                    )
                     c2dmap.update({C: D})
         else:
             c2dmap.update({C: C})

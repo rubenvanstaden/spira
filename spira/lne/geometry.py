@@ -74,7 +74,7 @@ class GeometryAbstract(__Geometry__):
             dim=self.dimension,
             prune_vertices=False,
             remove_faces=False,
-            geo_filename=geo_file
+            # geo_filename=geo_file
         )
 
         mm = meshio.Mesh(*mesh_data)

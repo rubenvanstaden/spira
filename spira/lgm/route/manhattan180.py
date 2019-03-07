@@ -1,6 +1,7 @@
 import spira
 import numpy as np
-from spira import param
+from spira import param, shapes
+from demo.pdks import ply
 from spira.lgm.route.arc_bend import ArcRoute, Arc
 from spira.lgm.route.basic import RouteShape
 from spira.lgm.route.basic import RouteBasic
@@ -8,19 +9,15 @@ from spira.gdsii.utils import scale_coord_up as scu
 from spira.lgm.route.manhattan import __Manhattan__
 
 
-class Route180(__Manhattan__):
+class RouteBase180(__Manhattan__):
 
     def create_quadrant_one(self):
 
         self.b1.connect(port=self.b1.ports['P2'], destination=self.term_ports['T1'])
-        # h = self.p1[1] + (self.p2[1]-self.p1[1])/2 - self.radius
-        # h = (self.p2[0]-self.p1[0])/2 - self.radius
         h = (self.p2[1]-self.p1[1])/2 - self.radius
         self.b1.move(midpoint=self.b1.ports['P2'], destination=[0, h])
 
         self.b2.connect(port=self.b1.ports['P2'], destination=self.b2.ports['P1'])
-        # h = self.p1[1] + (self.p2[1]-self.p1[1])/2 + self.radius
-        # h = (self.p2[0]-self.p1[0])/2 + self.radius
         h = (self.p2[1]-self.p1[1])/2 + self.radius
         self.b2.move(midpoint=self.b2.ports['P1'], destination=[self.term_ports['T2'].midpoint[0], h])
 
@@ -42,12 +39,10 @@ class Route180(__Manhattan__):
     def create_quadrant_two(self):
 
         self.b1.connect(port=self.b1.ports['P1'], destination=self.term_ports['T1'])
-        # h = self.p1[1] + (self.p2[1]-self.p1[1])/2 - self.radius
         h = (self.p2[1]-self.p1[1])/2 - self.radius
         self.b1.move(midpoint=self.b1.ports['P1'], destination=[0, h])
 
         self.b2.connect(port=self.b2.ports['P1'], destination=self.b1.ports['P2'])
-        # h = self.p1[1] + (self.p2[1]-self.p1[1])/2 + self.radius
         h = (self.p2[1]-self.p1[1])/2 + self.radius
         self.b2.move(midpoint=self.b2.ports['P2'], destination=[self.term_ports['T2'].midpoint[0], h])
 
@@ -364,7 +359,7 @@ class RouteParallel(__Manhattan__):
         return spira.SRef(D)
 
 
-class Route180(Route180, RouteParallel):
+class Route180(RouteBase180, RouteParallel):
     """ Route ports that has a 180 degree difference. """
 
     def create_elementals(self, elems):
@@ -373,37 +368,46 @@ class Route180(Route180, RouteParallel):
         p2 = self.p2
 
         if self.port1.orientation == self.port2.orientation:
-            # print('Angle: Equal')
             if (p1[1] == p2[1]) or (p1[0] == p2[0]):
-                elems += self.parallel
+                R = self.parallel
             if (p2[1] > p1[1]) and (p2[0] > p1[0]):
                 print('Q1 Equal Angles')
-                elems += self.q1
+                R = self.q1
             if (p2[1] > p1[1]) and (p2[0] < p1[0]):
                 print('Q2 Equal Angles')
-                elems += self.q2
+                R = self.q2
             if (p2[1] < p1[1]) and (p2[0] < p1[0]):
                 print('Q3 Equal Angles')
-                elems += self.q3
+                R = self.q3
             if (p2[1] < p1[1]) and (p2[0] > p1[0]):
                 print('Q4 Equal Angles')
-                elems += self.q4
+                R = self.q4
         elif np.round(np.abs(np.mod(self.port1.orientation - self.port2.orientation,360)),3) != 180:
             raise ValueError('[DEVICE] route() error: Ports do not face each other (orientations must be 180 apart)')    
         else:
-            # print('Angle: 180 Difference')
             if (p2[1] > p1[1]) and (p2[0] > p1[0]):
                 print('Q1')
-                elems += self.quadrant_one
+                R = self.quadrant_one
             if (p2[1] > p1[1]) and (p2[0] < p1[0]):
                 print('Q2')
-                elems += self.quadrant_two
+                R = self.quadrant_two
             if (p2[1] < p1[1]) and (p2[0] < p1[0]):
                 print('Q3')
-                elems += self.quadrant_three
+                R = self.quadrant_three
             if (p2[1] < p1[1]) and (p2[0] > p1[0]):
                 print('Q4')
-                elems += self.quadrant_four
+                R = self.quadrant_four
+                
+        points = []
+        for e in R.ref.flatten():
+            if isinstance(e, spira.Polygons):
+                for p in e.points:
+                    points.append(p)
+        route_shape = shapes.Shape(points=points)
+        route_shape.apply_merge
+        poly = ply.Polygon(points=route_shape.points, player=self.player, enable_edges=False) 
+        elems += poly
+
         return elems
 
     def create_ports(self, ports):

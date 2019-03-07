@@ -11,6 +11,7 @@ class __ProcessLayer__(spira.Cell):
 
     layer = param.DataField(fdef_name='create_layer')
     polygon = param.DataField(fdef_name='create_polygon')
+    enable_edges = param.BoolField(default=True)
 
     def create_layer(self):
         return None
@@ -75,12 +76,8 @@ class __PortConstructor__(__ProcessLayer__):
             orientation = (np.arctan2(x, y) * 180/np.pi) - 90
             midpoint = [(xpts[i+1] + xpts[i])/2, (ypts[i+1] + ypts[i])/2]
             width = np.abs(np.sqrt((xpts[i+1] - xpts[i])**2 + (ypts[i+1]-ypts[i])**2))
-
-            orientation = (-1) * orientation
-
-            edges += spira.Term(
+            edges += spira.EdgeTerm(
                 name=name,
-                # name='{}_{}'.format(i, name),
                 gdslayer=self.layer,
                 midpoint=midpoint,
                 orientation=orientation,
@@ -135,7 +132,9 @@ class ProcessLayer(__PortConstructor__):
         elif self.player.purpose == RDD.PURPOSE.METAL:
             if self.level == 1:
                 ports += self.metal_port
-            for edge in self.edge_ports:
-                ports += edge
+            
+            if self.enable_edges:
+                for edge in self.edge_ports:
+                    ports += edge
 
         return ports

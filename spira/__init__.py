@@ -8,6 +8,7 @@ RDD = get_rule_deck()
 from spira.rdd import *
 
 from spira.gdsii.cell import Cell
+from spira.gdsii.cell import Connector
 from spira.gdsii.library import Library
 from spira.gdsii.lists.cell_list import CellList
 

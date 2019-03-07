@@ -1,7 +1,6 @@
 import spira
 import numpy as np
 from spira import param, shapes
-from spira.lpe import mask
 from demo.pdks import ply
 from spira.lpe.containers import __CellContainer__, __NetContainer__
 from spira.lne.net import Net
@@ -127,6 +126,9 @@ class __NetlistCell__(__NetContainer__):
 class Structure(__NetlistCell__):
     """ Decorates all elementas with purpose metal with
     LCells and add them as elementals to the new class. """
+    
+    um = param.FloatField(default=1e+6)
+    layout = param.BoolField(default=False)
 
     metals = param.ElementalListField()
     contacts = param.ElementalListField()
@@ -135,12 +137,16 @@ class Structure(__NetlistCell__):
     primitives = param.ElementalListField()
     merged_layers = param.ElementalListField()
     
-    edge_datatype = param.IntegerField(default=90)
+    edge_datatype = param.IntegerField(default=103)
     arrow_datatype = param.IntegerField(default=81)
 
     level = param.IntegerField(default=2)
     algorithm = param.IntegerField(default=6)
     lcar = param.IntegerField(default=0.1)
+
+    def __metal_name__(self, uid, pl):
+        name = 'metal_{}_{}_{}'.format(self.name, pl.layer.number, uid)
+        return name
 
     def create_metals(self, elems):
         return elems
@@ -169,8 +175,8 @@ class Structure(__NetlistCell__):
         for player, points in params.items():
             shape = shapes.Shape(points=points)
             shape.apply_merge
-            for unique_id, pts in enumerate(shape.points):
-                name='structure_box_{}_{}_{}'.format(player, unique_id, self.name)
+            for uid, pts in enumerate(shape.points):
+                name = self.__metal_name__(uid, player)
                 elems += ply.Polygon(name=name, player=player, points=[pts], level=self.level)
         return elems
 
@@ -178,60 +184,40 @@ class Structure(__NetlistCell__):
         """ Activate the edge ports to be used in
         the Device for metal connections. """
 
-        for m in self.merged_layers:
+        # for m in self.merged_layers:
+        for m in self.metals:
             for p in m.ports:
-                if isinstance(p, spira.Term):
-
+                if isinstance(p, (spira.Term, spira.EdgeTerm)):
                     edgelayer = deepcopy(p.gdslayer)
                     arrowlayer = deepcopy(p.gdslayer)
-
-                    # # FIXME!!!
-                    # edgelayer.number = 0
-                    # arrowlayer.number = 0
-
                     edgelayer.datatype = self.edge_datatype
                     arrowlayer.datatype = self.arrow_datatype
 
-                    # term = p.modified_copy(
-                    #     name=p.name,
-                    #     gdslayer=deepcopy(m.player.layer),
-                    #     edgelayer=edgelayer,
-                    #     arrowlayer=arrowlayer,
-                    # )
-
-                    term = spira.Term(
+                    term = p.modified_copy(
                         name=p.name,
-                        # name='{}_{}'.format(i, p.name),
                         gdslayer=deepcopy(m.player.layer),
-                        midpoint=deepcopy(p.midpoint),
-                        orientation=deepcopy(p.orientation),
-                        reflection=p.reflection,
                         edgelayer=edgelayer,
                         arrowlayer=arrowlayer,
-                        width=p.width,
-                        length=deepcopy(p.length)
                     )
-
-                    # term.connections += m
 
                     ports += term
         return ports
 
-    # def create_nets(self, nets):
-    #     for pl in RDD.PLAYER.get_physical_layers(purposes='METAL'):
-    #         polygons = self.get_metals(pl)
-    #         if len(polygons) > 0:
-    #             net = Net(
-    #                 name='{}'.format(pl.layer.number),
-    #                 lcar=self.lcar,
-    #                 level=self.level,
-    #                 algorithm=self.algorithm,
-    #                 layer=pl.layer,
-    #                 polygons=polygons,
-    #                 route_nodes=self.routes,
-    #                 primitives=self.primitives,
-    #                 bounding_boxes=self.contacts
-    #             )
-    #             nets += net.graph
-    #     return nets
+    def create_nets(self, nets):
+        for pl in RDD.PLAYER.get_physical_layers(purposes='METAL'):
+            polygons = self.get_metals(pl)
+            if len(polygons) > 0:
+                net = Net(
+                    name='{}'.format(pl.layer.number),
+                    lcar=self.lcar,
+                    level=self.level,
+                    algorithm=self.algorithm,
+                    layer=pl.layer,
+                    polygons=polygons,
+                    route_nodes=self.routes,
+                    primitives=self.primitives,
+                    bounding_boxes=self.contacts
+                )
+                nets += net.graph
+        return nets
 

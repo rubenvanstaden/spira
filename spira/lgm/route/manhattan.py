@@ -6,6 +6,9 @@ from spira.lgm.route.basic import RouteShape
 from spira.lgm.route.basic import RouteBasic
 
 
+RDD = spira.get_rule_deck()
+
+
 class __Manhattan__(spira.Cell):
 
     port1 = param.PortField(default=None)
@@ -13,6 +16,7 @@ class __Manhattan__(spira.Cell):
 
     length = param.FloatField(default=20*1e6)
     gdslayer = param.LayerField(number=13)
+    player = param.PhysicalLayerField(default=RDD.DEF.PDEFAULT)
     bend_type = param.StringField(default='rectangle')
     # bend_type = param.StringField(default='circular')
 
@@ -34,14 +38,14 @@ class __Manhattan__(spira.Cell):
             else:
                 dx = abs(self.p2[0] - self.p1[0])
                 dy = abs(self.p2[1] - self.p1[1])
-                # if dx <= dy:
-                #     self.__radius__ = dx/2
-                # elif dy <= dx:
-                #     self.__radius__ = dy/2
                 if dx <= dy:
-                    self.__radius__ = dx
+                    self.__radius__ = dx*0.2
                 elif dy <= dx:
-                    self.__radius__ = dy
+                    self.__radius__ = dy*0.2
+                # if dx <= dy:
+                #     self.__radius__ = dx
+                # elif dy <= dx:
+                #     self.__radius__ = dy
                 return self.__radius__
 
     def set_radius(self, value):
@@ -50,14 +54,17 @@ class __Manhattan__(spira.Cell):
     radius = param.FunctionField(get_radius, set_radius)
 
     def _generate_route(self, p1, p2):
-        route = RouteShape(
+        route_shape = RouteShape(
             port1=p1, port2=p2,
             path_type='straight',
             width_type='straight'
         )
-        R1 = RouteBasic(route=route, connect_layer=self.gdslayer)
+        route_shape.apply_merge
+        # R1 = RouteBasic(route=route, connect_layer=self.gdslayer)
+        R1 = RouteBasic(route=route_shape, connect_layer=self.player)
         r1 = spira.SRef(R1)
         r1.rotate(angle=p2.orientation-180, center=R1.port1.midpoint)
+        # r1.rotate(angle=p2.orientation, center=R1.port1.midpoint)
         r1.move(midpoint=(0,0), destination=p1.midpoint)
         return r1
 
@@ -95,8 +102,10 @@ class __Manhattan__(spira.Cell):
             B1 = Rect(shape=RectRoute(
                     width=self.port1.width,
                     gdslayer=self.gdslayer,
+                    # player=self.player,
                     size=(self.radius,self.radius)
-                )
+                ),
+                player=self.player
             )
         return spira.SRef(B1)
 
@@ -112,8 +121,10 @@ class __Manhattan__(spira.Cell):
             B2 = Rect(shape=RectRouteTwo(
                     width=self.port1.width,
                     gdslayer=self.gdslayer,
+                    # player=self.player,
                     size=(self.radius,self.radius)
-                )
+                ),
+                player=self.player
             )
         return spira.SRef(B2)
 

@@ -18,8 +18,8 @@ class __SRef__(gdspy.CellReference, ElementalInitializer):
 
     def __deepcopy__(self, memo):
         return SRef(
-            structure=deepcopy(self.ref),
-            _parent_ports=deepcopy(self._parent_ports),
+            # structure=deepcopy(self.ref),
+            structure=self.ref,
             port_locks=self.port_locks,
             midpoint=deepcopy(self.midpoint),
             rotation=self.rotation,
@@ -30,6 +30,29 @@ class __SRef__(gdspy.CellReference, ElementalInitializer):
 
     def __eq__(self, other):
         return self.__str__() == other.__str__()
+
+    def __move_net__(self, g):
+        for n in g.nodes():
+            p = np.array(g.node[n]['pos'])
+            m = np.array(self.midpoint)
+            g.node[n]['pos'] = p + m
+        return g
+
+    def __equal_ports__(self, p1, p2):
+        if p1.encloses_midpoint(p2.edge.points[0]):
+            if p1.gdslayer.number == p2.gdslayer.number:
+                return True
+        return False
+
+    @property
+    def tf(self):
+        tf = {
+            'midpoint': self.midpoint,
+            'rotation': self.rotation,
+            'magnification': self.magnification,
+            'reflection': self.reflection
+        }
+        return tf
 
 
 class SRefAbstract(__SRef__):
@@ -67,57 +90,29 @@ class SRefAbstract(__SRef__):
 
     @property
     def polygons(self):
-        pass
-
-    # @property
-    # def netlist(self):
-    #     g = deepcopy(self.ref.netlist)
-    #     for n in g.nodes():
-    #         if 'branch' in g.node[n]:
-    #             pc_ply = g.nodes[n]['route']
-    #             tf = {
-    #                 'midpoint': self.midpoint,
-    #                 'rotation': self.rotation,
-    #                 'magnification': self.magnification,
-    #                 'reflection': self.reflection
-    #             }
-    #             for p in pc_ply.edge_ports:
-    #                 new_p = deepcopy(p)
-    #                 p1 = new_p.transform(tf)
-    #                 for key, p2 in self.ports.items():
-    #                     if p1.key == p2.key:
-    #                         if p2.locked is False:
-    #                             g.node[n]['device'] = pc_ply
-    #                             eid = self.port_connects[key]
-    #                             if 'connect' in g.node[n]:
-    #                                 g.node[n]['connect'].append(eid)
-    #                             else:
-    #                                 g.node[n]['connect'] = [eid]
-
-    #     for n in g.nodes():
-    #         p = np.array(g.node[n]['pos'])
-    #         m = np.array(self.midpoint)
-    #         g.node[n]['pos'] = p + m
-
-    #     return g
+        # FIXME: Assums all elementals are ply.Polygon.
+        elems = spira.ElementList()
+        tf = {
+            'midpoint': self.midpoint,
+            'rotation': self.rotation,
+            'magnification': self.magnification,
+            'reflection': self.reflection
+        }
+        for p in self.ref.elementals:
+            new_p = deepcopy(p)
+            elems += new_p.transform(tf)
+        return elems
 
     @property
     def netlist(self):
-        g = deepcopy(self.ref.netlist)
+        g = self.ref.netlist
         for n in g.nodes():
             if 'device' not in g.node[n]:
                 pc_ply = g.nodes[n]['surface']
-                tf = {
-                    'midpoint': self.midpoint,
-                    'rotation': self.rotation,
-                    'magnification': self.magnification,
-                    'reflection': self.reflection
-                }
                 for p in pc_ply.edge_ports:
-                    new_p = deepcopy(p)
-                    p1 = new_p.transform(tf)
-                    for key, p2 in self.ports.items():
-                        if p1.key == p2.key:
+                    p1 = p.transform(self.tf)
+                    for key, p2 in self.instance_ports.items():
+                        if self.__equal_ports__(p1, p2):
                             if p2.locked is False:
                                 g.node[n]['device'] = pc_ply
                                 eid = self.port_connects[key]
@@ -125,13 +120,30 @@ class SRefAbstract(__SRef__):
                                     g.node[n]['connect'].append(eid)
                                 else:
                                     g.node[n]['connect'] = [eid]
+        return self.__move_net__(g)
+    
+    @property
+    def instance_ports(self):
+        """ This property allows you to access
+        my_device_reference.ports, and receive a
+        copy of the ports dict which is correctly
+        rotated and translated. """
+        for port in self._parent_ports:
 
-        for n in g.nodes():
-            p = np.array(g.node[n]['pos'])
-            m = np.array(self.midpoint)
-            g.node[n]['pos'] = p + m
+            key = list(port.key)
+            key[2] += self.midpoint[0]
+            key[3] += self.midpoint[1]
+            key = tuple(key)
 
-        return g
+            new_port = deepcopy(port)
+            self.iports[key] = new_port.transform(self.tf)
+
+            if key in self.port_locks.keys():
+                self.iports[key].locked = self.port_locks[key]
+            if key in self.port_connects.keys():
+                self.iports[key].connections.append(self.port_connects[key])
+
+        return self.iports
 
     @property
     def ports(self):
@@ -140,27 +152,8 @@ class SRefAbstract(__SRef__):
         copy of the ports dict which is correctly
         rotated and translated. """
         for port in self._parent_ports:
-
-            tf = {
-                'midpoint': self.midpoint,
-                'rotation': self.rotation,
-                'magnification': self.magnification,
-                'reflection': self.reflection
-            }
-
-            key = list(port.key)
-            key[2] = self.midpoint[0]
-            key[3] = self.midpoint[1]
-            key = tuple(key)
-
             new_port = deepcopy(port)
-            self._local_ports[key] = new_port.transform(tf)
-
-            if key in self.port_locks.keys():
-                self._local_ports[key].locked = self.port_locks[key]
-            if key in self.port_connects.keys():
-                self._local_ports[key].connections += self.port_connects[key]
-
+            self._local_ports[port.name] = new_port.transform(self.tf)
         return self._local_ports
 
     def move(self, midpoint=(0,0), destination=None, axis=None):
@@ -179,7 +172,6 @@ class SRefAbstract(__SRef__):
     def rotate(self, angle=45, center=(0,0)):
         if angle == 0:
             return self
-        # angle = (-1) * angle
         if self.rotation is None:
             self.rotation = 0
         if issubclass(type(center), __Port__):
@@ -254,20 +246,21 @@ class SRef(SRefAbstract):
     >>> sref = spira.SRef(structure=cell)
     """
 
-    _parent_ports = param.ElementalListField()
-    _local_ports = param.DictField(default={})
-
+    iports = param.DictField(default={})
     port_locks = param.DictField(default={})
     port_connects = param.DictField(default={})
 
     def __init__(self, structure, **kwargs):
         ElementalInitializer.__init__(self, **kwargs)
         self.ref = structure
+        self._parent_ports = []
         for p in structure.ports:
-            self._parent_ports += p
+            self._parent_ports.append(p)
         for t in structure.terms:
-            self._parent_ports += t
+            self._parent_ports.append(t)
+        self._local_ports = {}
         # self._local_ports = {port.node_id:deepcopy(port) for port in self._parent_ports}
+        # self._local_ports = {port.name:deepcopy(port) for port in self._parent_ports}
 
     def __repr__(self):
         name = self.ref.name

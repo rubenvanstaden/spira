@@ -32,10 +32,10 @@ class Junction(Device):
         elems += ply.Box(player=RDD.PLAYER.JJ, center=(1.95*self.um, 3.55*self.um), w=1.9*self.um, h=1.3*self.um)
         return elems
 
-    def create_ports(self, ports):
-        ports += spira.Term(name='Input', midpoint=(0.25*self.um, 3.5*self.um), orientation=90, width=2*self.um)
-        ports += spira.Term(name='Output', midpoint=(3.6*self.um, 3.5*self.um), orientation=-90)
-        return ports
+    # def create_ports(self, ports):
+    #     ports += spira.Term(name='Input', midpoint=(0.25*self.um, 3.5*self.um), orientation=90, width=2*self.um)
+    #     ports += spira.Term(name='Output', midpoint=(3.6*self.um, 3.5*self.um), orientation=-90)
+    #     return ports
 
 
 if __name__ == '__main__':

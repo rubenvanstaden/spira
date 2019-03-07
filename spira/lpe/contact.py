@@ -1,6 +1,7 @@
 import spira
 from spira import param
 from demo.pdks import ply
+# from copy import copy, deepcopy
 from spira.lpe.pcells import Structure
 
 
@@ -87,6 +88,50 @@ class DeviceTemplate(Structure):
             RDD.VIAS[key].PCELL.create_elementals(elems)
 
         return elems
+
+    # def create_ports(self, ports):
+    #     """ Activate the edge ports to be used in
+    #     the Device for metal connections. """
+
+    #     # for m in self.merged_layers:
+    #         # print(m)
+    #     for m in self.metals:
+    #         for p in m.ports:
+    #             # if isinstance(p, spira.Term):
+    #             if isinstance(p, spira.EdgeTerm):
+    #                 # print(p)
+
+    #                 edgelayer = deepcopy(p.gdslayer)
+    #                 arrowlayer = deepcopy(p.gdslayer)
+
+    #                 edgelayer.datatype = self.edge_datatype
+    #                 arrowlayer.datatype = self.arrow_datatype
+
+    #                 term = p.modified_copy(
+    #                     name=p.name,
+    #                     gdslayer=deepcopy(m.player.layer),
+    #                     edgelayer=edgelayer,
+    #                     arrowlayer=arrowlayer,
+    #                 )
+
+    #                 # # term = spira.Term(
+    #                 # term = spira.EdgeTerm(
+    #                 #     name=p.name,
+    #                 #     # name='{}_{}'.format(i, p.name),
+    #                 #     gdslayer=deepcopy(m.player.layer),
+    #                 #     midpoint=deepcopy(p.midpoint),
+    #                 #     orientation=deepcopy(p.orientation),
+    #                 #     reflection=p.reflection,
+    #                 #     edgelayer=edgelayer,
+    #                 #     arrowlayer=arrowlayer,
+    #                 #     width=p.width,
+    #                 #     length=deepcopy(p.length)
+    #                 # )
+
+    #                 # term.connections += m
+
+    #                 ports += term
+    #     return ports
 
     def determine_type(self):
         self.__type__ = None

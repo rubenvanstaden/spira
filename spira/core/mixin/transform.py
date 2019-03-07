@@ -31,6 +31,7 @@ class TranformationMixin(object):
 
     def transform(self, transform):
         """ Transform port with the given transform class. """
+        from spira.gdsii.cell import Cell
         if transform['reflection'] is True:
             self.reflect()
         if transform['rotation'] is not None:

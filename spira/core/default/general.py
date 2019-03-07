@@ -1,5 +1,5 @@
 from spira.rdd.layer import PurposeLayer
-from spira.rdd.technology import ProcessTree
+from spira.rdd.technology import ProcessTree, DynamicDataTree
 from spira.rdd import RULE_DECK_DATABASE as RDD
 
 # ---------------------------------- Purpose Layers ----------------------------------
@@ -31,6 +31,22 @@ RDD.PURPOSE.ERROR.ENCLOSURE = PurposeLayer(name='nTron layer', datatype=21, symb
 RDD.PURPOSE.ERROR.OVERLAP = PurposeLayer(name='nTron layer', datatype=21, symbol='OVR')
 RDD.PURPOSE.ERROR.DENSITY = PurposeLayer(name='nTron layer', datatype=21, symbol='OVR')
 
+# ---------------------------------- Physical Layer ----------------------------------
+
+class Default(DynamicDataTree):
+    def initialize(self):
+        from spira.rdd.layer import PhysicalLayer
+
+        # RC = ProcessTree()
+        # # RC.LAYER = Layer(name='RC', number=9)
+        # RC.WIDTH = 0.5
+        # RC.M5_METAL = 1.0
+        # RC.COLOR = '#B6EBE6'
+
+        # self.PDEFAULT = PhysicalTree()
+        self.PDEFAULT = PhysicalLayer(purpose=RDD.PURPOSE.GROUND)
+
+RDD.DEF = Default()
 
 
 

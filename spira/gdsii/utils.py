@@ -12,6 +12,10 @@ sf = pyclipper.scale_from_clipper
 
 def bool_operation(subj, clip=None, method=None, closed=True, scale=1):
     from spira.gdsii.elemental.polygons import PolygonAbstract
+
+    if clip is None and len(subj) <= 1:
+        return subj
+
     pc = pyclipper.Pyclipper()
     if issubclass(type(subj), PolygonAbstract):
         subj = subj.polygons

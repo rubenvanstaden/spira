@@ -31,8 +31,10 @@ class __Shape__(FieldInitializer):
         from spira.gdsii.utils import scale_polygon_down as spd
         # polygons = spd(self.points, value=1e-0)
         polygons = spd(self.points, value=1e-4)
-        # polygons = self.points
-        self.points = []
+        # polygons = spu(self.points, value=1e9)
+        # print(polygons)
+        # polygons = deepcopy(self.points)
+        points = []
         for poly in polygons:
             if pyclipper.Orientation(poly) is False:
                 reverse_poly = pyclipper.ReversePath(poly)
@@ -42,10 +44,12 @@ class __Shape__(FieldInitializer):
             # solution = pyclipper.CleanPolygons(solution)
             # solution = spd(solution, value=1e-4)
             for sol in solution:
-                self.points.append(sol)
-        self.points = bool_operation(subj=self.points, method='union')
-        # self.points = spu(self.points, value=1e0)
+                points.append(sol)
+        # print(points)
+        self.points = bool_operation(subj=points, method='union')
+        # self.points = spd(self.points, value=1e-9)
         self.points = spu(self.points, value=1e4)
+        # self.points = spu(self.points, value=1e0)
         # self.points = spd(self.points)
         return self
 

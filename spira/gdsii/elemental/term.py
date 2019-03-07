@@ -27,7 +27,8 @@ class Term(PortAbstract):
     arrowlayer = param.LayerField(name='Arrow', number=77)
     color = param.ColorField(default=color.COLOR_GRAY)
 
-    connections = param.ElementalListField()
+    # connections = param.ElementalListField()
+    connections = param.ListField(default=[])
 
     local_connect = param.StringField()
     external_connect = param.StringField()
@@ -93,8 +94,6 @@ class Term(PortAbstract):
 
     @property
     def endpoints(self):
-        # dx = self.width/2*np.cos((self.orientation - 90)*np.pi/180)
-        # dy = self.width/2*np.sin((self.orientation - 90)*np.pi/180)
         dx = self.length/2*np.cos((self.orientation - 90)*np.pi/180)
         dy = self.length/2*np.sin((self.orientation - 90)*np.pi/180)
         left_point = self.midpoint - np.array([dx,dy])
@@ -126,14 +125,14 @@ class Term(PortAbstract):
     def arrow(self):
         from spira import shapes
         arrow_shape = shapes.ArrowShape(a=self.length, b=self.length/2, c=self.length*2)
-        # arrow_shape.apply_merge
+        arrow_shape.apply_merge
         ply = spira.Polygons(shape=arrow_shape, gdslayer=self.arrowlayer)
         if self.reflection:
             ply.reflect()
         ply.rotate(angle=self.orientation)
         ply.move(midpoint=ply.center, destination=self.midpoint)
         return ply
-
+        
     def commit_to_gdspy(self, cell):
         if self.__repr__() not in list(__Port__.__committed__.keys()):
             self.edge.commit_to_gdspy(cell=cell)
@@ -166,6 +165,32 @@ class Term(PortAbstract):
         return new_port
         
 
+class EdgeTerm(Term):
+    """
+    Terminals are horizontal ports that connect SRef instances
+    in the horizontal plane. They typcially represents the
+    i/o ports of a components.
+
+    Examples
+    --------
+    >>> term = spira.Term()
+    """
+
+    def __repr__(self):
+        return ("[SPiRA: EdgeTerm] (name {}, number {}, midpoint {}, " +
+            "width {}, orientation {})").format(self.name,
+            self.gdslayer.number, self.midpoint,
+            self.width, self.orientation
+        )
+
+    def reflect(self):
+        """ Do not reflect EdgeTerms when reference is reflected. """
+        self.midpoint = [self.midpoint[0], -self.midpoint[1]]
+        self.orientation = 180 - self.orientation
+        self.orientation = np.mod(self.orientation, 360)
+        return self
+
+
 class Dummy(Term):
     """
     Terminals are horizontal ports that connect SRef instances
@@ -183,16 +208,6 @@ class Dummy(Term):
             self.gdslayer.number, self.midpoint,
             self.width, self.orientation
         )
-
-    # def _copy(self):
-    #     new_port = Dummy(parent=self.parent,
-    #         name=self.name,
-    #         midpoint=self.midpoint,
-    #         width=self.width,
-    #         length=self.length,
-    #         gdslayer=deepcopy(self.gdslayer),
-    #         orientation=self.orientation)
-    #     return new_port
 
 
 if __name__ == '__main__':

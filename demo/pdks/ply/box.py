@@ -66,13 +66,15 @@ class Box(ProcessLayer):
             name = 'e{}'.format(i)
             x = np.sign(clockwise) * (xpts[i+1] - xpts[i])
             y = np.sign(clockwise) * (ypts[i] - ypts[i+1])
-            orientation = (np.arctan2(x, y) * 180/np.pi) + 180
+            # orientation = (np.arctan2(x, y) * 180/np.pi) + 90
+            orientation = (np.arctan2(x, y) * 180/np.pi) - 90
             midpoint = [(xpts[i+1] + xpts[i])/2, (ypts[i+1] + ypts[i])/2]
             width = np.abs(np.sqrt((xpts[i+1] - xpts[i])**2 + (ypts[i+1]-ypts[i])**2))
 
-            orientation = (-1) * orientation
+            # orientation = (-1) * orientation
 
-            edges += spira.Term(
+            # edges += spira.Term(
+            edges += spira.EdgeTerm(
                 name=name,
                 gdslayer=self.layer,
                 midpoint=midpoint,
@@ -88,6 +90,7 @@ class Box(ProcessLayer):
 
     def create_polygon(self):
         shape = shapes.BoxShape(width=self.w, height=self.h)
+        shape.apply_merge
         ply = spira.Polygons(shape=shape, gdslayer=self.player.layer)
         ply.center = self.center
         return ply

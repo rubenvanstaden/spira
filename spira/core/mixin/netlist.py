@@ -28,39 +28,13 @@ class __NetlistSimplifier__(object):
                     if self.g.node[n]['branch'].text == text:
                         locked_nodes.append(n)
             elif 'device' in self.g.node[n]:
-                locked_nodes.append(n)
+                D = self.g.node[n]['device']
+                if not isinstance(D, spira.EdgeTerm):
+                    locked_nodes.append(n)
         for n in self.g.nodes():
             if n not in locked_nodes:
                 remove_nodes.append(n)
         self.g.remove_nodes_from(remove_nodes)
-
-    # def __remove_nodes__(self):
-    #     remove = list()
-    #     text = self.__get_called_id__()
-    #     for n in self.g.nodes():
-    #         if 'device' not in self.g.node[n]:
-    #             remove.append(n)
-    #         elif isinstance(self.g.node[n]['device'], spira.Label):
-    #             if self.g.node[n]['device'].text != text:
-    #                 remove.append(n)
-    #     self.g.remove_nodes_from(remove)
-
-    # def __validate_path__(self, path):
-    #     """ Test if path contains masternodes. """
-    #     valid = True
-    #     s, t = path[0], path[-1]
-    #     if self.__is_path_stored__(s, t):
-    #         valid = False
-    #     if s not in self.branch_nodes:
-    #         valid = False
-    #     if t not in self.branch_nodes:
-    #         valid = False
-    #     for n in path[1:-1]:
-    #         if 'device' in self.g.node[n]:
-    #             D = self.g.node[n]['device']
-    #             if issubclass(type(D), (__Port__, spira.SRef)):
-    #                 valid = False
-    #     return valid
 
     def __validate_path__(self, path):
         from demo.pdks.components.mitll.via import Via
@@ -77,7 +51,8 @@ class __NetlistSimplifier__(object):
             if 'device' in self.g.node[n]:
                 D = self.g.node[n]['device']
                 if issubclass(type(D), __Port__):
-                    valid = False
+                    if not isinstance(D, spira.EdgeTerm):
+                        valid = False
                 if issubclass(type(D), spira.SRef):
                     valid = False
         return valid
@@ -113,12 +88,14 @@ class __NetlistSimplifier__(object):
         if issubclass(type(Ds), spira.SRef):
             source = 'source: {}'.format(Ds.ref.name)
         elif issubclass(type(Ds), __Port__):
-            source = 'source: {}'.format(Ds.name)
+            if not isinstance(Ds, spira.EdgeTerm):
+                source = 'source: {}'.format(Ds.name)
 
         if issubclass(type(Dt), spira.SRef):
             target = 'target: {}'.format(Dt.ref.name)
         elif issubclass(type(Dt), __Port__):
-            target = 'target: {}'.format(Dt.name)
+            if not isinstance(Dt, spira.EdgeTerm):
+                target = 'target: {}'.format(Dt.name)
 
         return "\n".join([ntype, number, source, target])
 
@@ -135,7 +112,8 @@ class NetlistSimplifier(__NetlistSimplifier__):
                 if isinstance(D, spira.Dummy):
                     branch_nodes.append(n)
                 if issubclass(type(D), (__Port__, spira.SRef)):
-                    branch_nodes.append(n)
+                    if not isinstance(D, spira.EdgeTerm):
+                        branch_nodes.append(n)
         return branch_nodes
 
     @property
@@ -164,7 +142,8 @@ class NetlistSimplifier(__NetlistSimplifier__):
             if 'device' in self.g.node[n]:
                 D = self.g.node[n]['device']
                 if issubclass(type(D), spira.Term):
-                    branch_nodes.append(n)
+                    if not isinstance(D, spira.EdgeTerm):
+                        branch_nodes.append(n)
         return branch_nodes
 
     def detect_dummy_nodes(self):
@@ -174,12 +153,12 @@ class NetlistSimplifier(__NetlistSimplifier__):
 
             paths = []
             for t in filter(lambda x: x not in [s], self.__branch_nodes__):
-                if nx.has_path(self.g, s, t):
-                    p = nx.shortest_path(self.g, source=s, target=t)
-                    paths.append(p)
                 # if nx.has_path(self.g, s, t):
-                #     for p in nx.all_simple_paths(self.g, source=s, target=t):
-                        # paths.append(p)
+                #     p = nx.shortest_path(self.g, source=s, target=t)
+                #     paths.append(p)
+                if nx.has_path(self.g, s, t):
+                    for p in nx.all_simple_paths(self.g, source=s, target=t):
+                        paths.append(p)
 
             new_paths = []
             for p1 in paths:
@@ -203,15 +182,6 @@ class NetlistSimplifier(__NetlistSimplifier__):
                     )
                     del self.g.node[n]['branch']
 
-            # for d in dummies:
-            #     N = self.g.nodes[d]['device']
-            #     if isinstance(N, spira.Label):
-            #         self.g.nodes[d]['device'] = spira.Dummy(
-            #             name='Dummy',
-            #             midpoint=N.position,
-            #             color=color.COLOR_DARKSEA_GREEN
-            #         )
-
     def generate_branches(self):
         """  """
 
@@ -226,21 +196,6 @@ class NetlistSimplifier(__NetlistSimplifier__):
                 targets = filter(lambda x: x not in [s], self.__branch_nodes__)
                 for t in targets:
                     self.__store_branch_paths__(s, t)
-
-            # for i, path in enumerate(self.__stored_paths__):
-            #     source = self.g.node[path[-1]]['device'].__str__()
-            #     for n in path[1:-1]:
-            #         lbl = self.g.node[n]['surface']
-            #         self.g.node[n]['device'] = spira.Label(
-            #             # position=lbl.position,
-            #             position=lbl.center,
-            #             text=text,
-            #             # gdslayer=lbl.gdslayer,
-            #             gdslayer=lbl.player.layer,
-            #             # color=color.COLOR_WHITE,
-            #             color=lbl.color,
-            #             node_id='{}_{}'.format(i, source)
-            #         )
 
             for i, path in enumerate(self.__stored_paths__):
                 text = self.__get_called_id__()

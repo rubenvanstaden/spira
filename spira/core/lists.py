@@ -61,7 +61,8 @@ class ElementFilterMixin(object):
         from spira.gdsii.cell import Cell
         elems = ElementList()
         for e in self._list:
-            if isinstance(e, Cell):
+            if issubclass(type(e), Cell):
+            # if isinstance(e, Cell):
                 elems += e
         return elems
 
@@ -78,9 +79,17 @@ class __ElementList__(TypedList, ElementFilterMixin):
     def __getitem__(self, value):
         r_val = None
         if isinstance(value, str):
-            for e in self._list:
-                if e.node_id == value: 
+            for e in self.cells:
+                # print(e.name)
+                name = e.name.split('_')[0]
+                if name == value:
                     r_val = e
+            # for p in self.polygons:
+            #     if e.name == value:
+            #         r_val = e
+            # for e in self._list:
+            #     if e.node_id == value:
+            #         r_val = e
         else:
             r_val = self._list[value]
         if r_val is None:

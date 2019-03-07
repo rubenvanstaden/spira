@@ -60,10 +60,9 @@ class PortAbstract(__Port__):
 
     def rotate(self, angle=45, center=(0,0)):
         """ Rotate port around the center with angle. """
-        # angle = (-1) * angle
-        self.midpoint = self.__rotate__(self.midpoint, angle=angle, center=center)
         self.orientation += angle
         self.orientation = np.mod(self.orientation, 360)
+        self.midpoint = self.__rotate__(self.midpoint, angle=angle, center=center)
         return self
 
     def translate(self, dx, dy):

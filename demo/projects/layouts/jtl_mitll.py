@@ -23,10 +23,15 @@ if __name__ == '__main__':
     # name = 'LSmitll_ptlrx_new'
     # name = 'LSmitll_DCSFQ_original'
     # name = 'LSmitll_SPLITT_new'
+    # name = 'LSmitll_SFQDC'
+    name = 'LSmitll_MERGET_new'
     # name = 'LSmitll_DFFT_new'
-    # name = 'LSmitll_MERGET_new'
-    name = 'LSmitll_SFQDC'
+    # FIXME
     # name = 'LSmitll_NOT_new'
+    # FIXME
+    # name = 'FabJTL'
+    # FIXME
+    # name = 'FabJTL_T_v0.3'
 
     # Level 3 circuits
     # ----------------
@@ -41,7 +46,7 @@ if __name__ == '__main__':
     mask = Mask(name=input_cell.name, cell=ms_cell)
 
     mask.netlist
-    mask.output()
+    # mask.output()
 
     # input_cell.output()
     # cv_cell.output()

@@ -62,7 +62,7 @@ class DrawGraphAbstract(object):
                 titlefont=dict(size=24),
                 showlegend=False,
                 width=1900,
-                height=1900,
+                height=900,
                 hovermode='closest',
                 margin=dict(b=20,l=5,r=5,t=20),
                 xaxis=go.layout.XAxis(
@@ -141,15 +141,9 @@ class DrawGraphAbstract(object):
             label = None
 
             if 'device' in G.node[n]:
-                # if 'route' in G.node[n]:
-                #     label = G.node[n]['route']
-                # if isinstance(G.node[n]['device'], spira.Dummy):
-                #     label = G.node[n]['device']
                 label = G.node[n]['device']
-            elif 'route' in G.node[n]:
-                label = G.node[n]['route']
-            # elif 'branch' in G.node[n]:
-            #     label = G.node[n]['branch']
+            elif 'branch' in G.node[n]:
+                label = G.node[n]['branch']
             else:
                 label = G.node[n]['surface']
 

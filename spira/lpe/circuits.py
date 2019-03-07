@@ -16,6 +16,7 @@ from spira.core.mixin.netlist import NetlistSimplifier
 from spira.lpe.pcells import __NetlistCell__
 from spira.lpe.boxes import BoundingBox
 from halo import Halo
+from spira.gdsii.utils import bool_operation
 
 
 RDD = spira.get_rule_deck()
@@ -38,42 +39,28 @@ class RouteToStructureConnector(__CircuitContainer__, Structure):
     def unlock_ports(self):
         for R in self.routes:
             for D in self.structures:
-                self._activate_route_edges(R, D)
-                self._activate_device_edges(R, D)
+                # self.__unlock_route_edges__(R, D)
+                self.__unlock_device_edges__(R, D)
 
-    def _activate_route_edges(self, R, D):
-        for S in D.ref.metals:
-            M = deepcopy(S)
+    def __unlock_route_edges__(self, R, D):
+        for M in D.ref.metals:
             M_ply = M.polygon
-            tf = {
-                'midpoint': D.midpoint,
-                'rotation': D.rotation,
-                'magnification': D.magnification,
-                'reflection': D.reflection
-            }
-            M_ply.transform(tf)
-            for key, port in R.ports.items():
+            M_ply.transform(D.tf)
+            for key, port in R.instance_ports.items():
                 for mp in M_ply.shape.points:
                     if port.encloses(mp):
                         R.port_locks[port.key] = False
 
-    def _activate_device_edges(self, R, D):
-        for S in R.ref.metals:
-        # for S in R.ref.merged_layers:
-            R_ply = S.polygon
-            for key, port in D.ports.items():
-                if isinstance(port, spira.Term):
-                    # print(port)
-                    # print(key)
-                    # print('')
-                    if port.gdslayer.number == R_ply.gdslayer.number:
+    def __unlock_device_edges__(self, R, D):
+        for pp in R.ref.metals:
+            R_ply = pp.elementals[0]
+            for key, port in D.instance_ports.items():
+                if isinstance(port, (spira.Term, spira.EdgeTerm)):
+                    if port.gdslayer.number == pp.player.layer.number:
                         if R_ply & port.edge:
+                            route_key = (pp.node_id, pp.player.layer.number)
+                            D.port_connects[key] = route_key
                             D.port_locks[key] = False
-                            D.port_connects[key] = S
-                            # print(port.connections)
-                            # print(S)
-                            # print(key)
-                            # print('')
 
 
 class Circuit(RouteToStructureConnector):
@@ -81,26 +68,44 @@ class Circuit(RouteToStructureConnector):
 
     __mixins__ = [NetlistSimplifier]
 
-    lcar = param.IntegerField(default=0.1)
-    # lcar = param.IntegerField(default=100)
     algorithm = param.IntegerField(default=6)
-    level = param.IntegerField(default=1)
+    level = param.IntegerField(default=2)
+    lcar = param.IntegerField(default=0.1)
 
     def create_elementals(self, elems):
+        # for e in self.structures:
+        #     elems += e
+        # for e in self.routes:
+        #     elems += e
         for e in self.merged_layers:
             elems += e
         return elems
 
+    def create_primitives(self, elems):
+        elems = deepcopy(self.ports)
+        for p in self.terminals:
+            elems += p
+        return elems
+
     def create_structures(self, structs):
-        for S in self.cell.elementals:
-            if isinstance(S, spira.SRef):
-                structs += S
+        if self.cell is not None:
+            for S in self.cell.elementals:
+                if isinstance(S, spira.SRef):
+                    structs += S
+        else:
+            for e in self.elementals.sref:
+                if issubclass(type(e), (Device, Circuit)):
+                    structs += e
         return structs
 
     def create_routes(self, routes):
         if self.cell is not None:
             r = Route(cell=self.cell)
             routes += spira.SRef(r)
+        else:
+            for e in self.elementals.sref:
+                if issubclass(type(e), Route):
+                    routes += e
         return routes
 
     def create_metals(self, elems):
@@ -110,17 +115,14 @@ class Circuit(RouteToStructureConnector):
             Rm = R.get_polygons(layer=player.layer)
             Bm = B.get_polygons(layer=player.layer)
             for i, e in enumerate([*Rm, *Bm]):
-                alias = 'ply_{}_{}_{}'.format(player.layer.number, self.cell.node_id, i)
+                # alias = 'ply_{}_{}_{}'.format(player.layer.number, self.cell.node_id, i)
+                alias = 'ply_{}_{}_{}'.format(player.layer.number, self.__class__.__name__, i)
+                # alias = 'ply_{}_{}_{}'.format(player.layer.number, 'webfwejfbjk', i)
                 elems += ply.Polygon(name=alias, player=player, points=e.polygons, level=self.level)
         return elems
 
-    def create_primitives(self, elems):
-        elems = deepcopy(self.ports)
-        for p in self.terminals:
-            elems += p
-        return elems
-
     def create_ports(self, ports):
+    # def create_connector_ports(self, ports):
 
         print('\n[*] Calculate Layout ports')
 
@@ -129,14 +131,14 @@ class Circuit(RouteToStructureConnector):
         self.unlock_ports()
 
         for D in self.structures:
-            for name, port in D.ports.items():
+            for name, port in D.instance_ports.items():
                 if port.locked is False:
                     edgelayer = deepcopy(port.gdslayer)
                     edgelayer.datatype = 100
                     ports += port.modified_copy(edgelayer=edgelayer)
-
+    
         for R in self.routes:
-            for name, port in R.ports.items():
+            for name, port in R.instance_ports.items():
                 if port.locked is False:
                     edgelayer = deepcopy(port.gdslayer)
                     edgelayer.datatype = 101
@@ -223,24 +225,5 @@ class Circuit(RouteToStructureConnector):
         self.plot_netlist(G=self.g, graphname=self.name, labeltext='id')
 
         return self.g
-
-
-    def create_nets(self, nets):
-        for pl in RDD.PLAYER.get_physical_layers(purposes='METAL'):
-            polygons = self.get_metals(pl)
-            if len(polygons) > 0:
-                net = Net(
-                    name='{}_{}'.format(self.name, pl.layer.number),
-                    lcar=self.lcar,
-                    level=self.level,
-                    algorithm=self.algorithm,
-                    layer=pl.layer,
-                    polygons=polygons,
-                    route_nodes=self.routes,
-                    primitives=self.primitives,
-                    bounding_boxes=self.contacts
-                )
-                nets += net.graph
-        return nets
 
 

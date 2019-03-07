@@ -1,6 +1,10 @@
 import spira
 from spira import param
 from spira.lgm.route.path import __Path__
+from demo.pdks import ply
+
+
+RDD = spira.get_rule_deck()
 
 
 class Route(__Path__):
@@ -27,11 +31,16 @@ class Route(__Path__):
 class RouteToCell(spira.Cell):
 
     shape = param.ShapeField()
+    player = param.PhysicalLayerField(default=RDD.DEF.PDEFAULT)
 
     def create_elementals(self, elems):
-        elems += spira.Polygons(
-            shape=self.shape,
-            gdslayer=self.shape.gdslayer
+        # elems += spira.Polygons(
+        #     shape=self.shape,
+        #     gdslayer=self.shape.gdslayer
+        # )
+        elems += ply.Polygon(
+            points=self.shape.points,
+            player=self.player
         )
         return elems
 

@@ -3,6 +3,7 @@ import gdspy
 import numpy as np
 from spira import param
 from spira import shapes
+from demo.pdks import ply
 from numpy.linalg import norm
 from spira.rdd import get_rule_deck
 from numpy import sqrt, pi, cos, sin, log, exp, sinh, mod
@@ -34,6 +35,7 @@ class RouteShape(shapes.Shape):
         point_b = np.array(self.port2.midpoint)
         if self.width2 is None:
             self.width2 = self.port2.width
+
         if round(abs(mod(self.port1.orientation - self.port2.orientation, 360)), 3) != 180:
             raise ValueError('Ports do not face eachother.')
         orientation = self.port1.orientation - 90
@@ -112,7 +114,7 @@ class RoutePointShape(shapes.Shape):
 class RouteBasic(spira.Cell):
 
     route = param.ShapeField()
-    connect_layer = param.LayerField(doc='GDSII layer to which the route connects.')
+    connect_layer = param.PhysicalLayerField(default=RDD.DEF.PDEFAULT)
 
     m1 = param.DataField(fdef_name='create_midpoint1')
     m2 = param.DataField(fdef_name='create_midpoint2')
@@ -129,7 +131,7 @@ class RouteBasic(spira.Cell):
 
     def create_layer(self):
         ll = spira.Layer(
-            number=self.connect_layer.number,
+            number=self.connect_layer.layer.number,
             datatype=RDD.PURPOSE.TERM.datatype
         )
         return ll
@@ -138,6 +140,8 @@ class RouteBasic(spira.Cell):
         midpoint = (0,0)
         if isinstance(self.route, RoutePointShape):
             midpoint = self.route.path[0]
+        # elif isinstance(self.route, RouteShape):
+        #     midpoint = [self.route.x_dist, self.route.y_dist]
         return midpoint
 
     def create_midpoint2(self):
@@ -149,7 +153,8 @@ class RouteBasic(spira.Cell):
         return midpoint
 
     def create_width1(self):
-        width = (0,0)
+        # width = (0,0)
+        width = 0
         if isinstance(self.route, RoutePointShape):
             width = self.route.width
         elif isinstance(self.route, RouteShape):
@@ -157,7 +162,8 @@ class RouteBasic(spira.Cell):
         return width
 
     def create_width2(self):
-        width = (0,0)
+        # width = (0,0)
+        width = 0
         if isinstance(self.route, RoutePointShape):
             width = self.route.width
         elif isinstance(self.route, RouteShape):
@@ -186,11 +192,9 @@ class RouteBasic(spira.Cell):
         term = spira.Term(name='TERM1',
             # midpoint=(0,0),
             midpoint=self.m1,
-            # width=self.route.width1,
-            # width=self.w1,
-            width=self.w1[0],
+            width=self.w1,
+            # width=self.w1[0],
             length=0.2*1e6,
-            # orientation=180,
             orientation=self.o1,
             gdslayer=self.llayer
         )
@@ -199,13 +203,10 @@ class RouteBasic(spira.Cell):
 
     def create_port2(self):
         term = spira.Term(name='TERM2',
-            # midpoint=[self.route.x_dist, self.route.y_dist],
             midpoint=self.m2,
-            # width=self.route.width2,
-            # width=self.w2,
-            width=self.w2[0],
+            width=self.w2,
+            # width=self.w2[0],
             length=0.2*1e6,
-            # orientation=0,
             orientation=self.o2,
             gdslayer=self.llayer
         )
@@ -213,9 +214,11 @@ class RouteBasic(spira.Cell):
         return term
 
     def create_elementals(self, elems):
-        ply = spira.Polygons(shape=self.route, gdslayer=self.connect_layer)
-        ply.rotate(angle=-90)
-        elems += ply
+        # ply = spira.Polygons(shape=self.route, gdslayer=self.connect_layer)
+        # ply = spira.Polygons(shape=self.route, gdslayer=self.connect_layer)
+        poly = ply.Polygon(points=self.route.points, player=self.connect_layer, enable_edges=False)
+        poly.rotate(angle=-90)
+        elems += poly
         return elems
 
     def create_ports(self, ports):

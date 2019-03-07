@@ -58,6 +58,7 @@ class __Polygon__(gdspy.PolygonSet, ElementalInitializer):
             clip=self.shape.points,
             method='intersection'
         )
+        # print(pp)
         if len(pp) > 0:
             return Polygons(shape=np.array(pp), gdslayer=self.gdslayer)
         else:
@@ -82,6 +83,7 @@ class __Polygon__(gdspy.PolygonSet, ElementalInitializer):
 
 class PolygonAbstract(__Polygon__):
 
+    name = param.StringField()
     gdslayer = param.LayerField()
     direction = param.IntegerField(default=0)
 
@@ -122,11 +124,8 @@ class PolygonAbstract(__Polygon__):
         return self
 
     def rotate(self, angle=45, center=(0,0)):
-        # angle = (-1) * angle
         super().rotate(angle=(angle-self.direction)*np.pi/180, center=center)
-        # super().rotate(angle=angle*np.pi/180, center=center)
         self.shape.points = self.polygons
-        # self.polygons = self.shape.points
         return self
 
     def translate(self, dx, dy):

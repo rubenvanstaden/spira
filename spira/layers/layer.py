@@ -1,6 +1,7 @@
 from spira import param
 from spira.rdd.layer import PurposeLayer
 from spira.core.initializer import ElementalInitializer
+from copy import deepcopy
 
 
 class __Layer__(ElementalInitializer):
@@ -58,8 +59,8 @@ class Layer(__Layer__):
     def __deepcopy__(self, memo):
         return Layer(
             name=self.name,
-            number=self.number,
-            datatype=self.datatype
+            number=deepcopy(self.number),
+            datatype=deepcopy(self.datatype)
         )
 
     @property

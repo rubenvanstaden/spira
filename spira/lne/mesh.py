@@ -216,7 +216,7 @@ class MeshLabeled(MeshAbstract):
             points = [utils.c2d(self.points[i]) for i in triangle]
             for D in self.primitives:
                 if isinstance(D, (spira.Port, spira.Term)):
-                    if not isinstance(D, spira.Dummy):
+                    if not isinstance(D, (spira.Dummy, spira.EdgeTerm)):
                         if D.encloses(points):
                             self.g.node[n]['device'] = D
                 else:
@@ -229,19 +229,20 @@ class MeshLabeled(MeshAbstract):
                                     self.g.node[n]['device'] = D
 
     def create_route_nodes(self):
+        """  """
+        from demo.pdks import ply
         for R in self.route_nodes:
-            for p in R.ref.metals:
-            # for p in R.ref.merged_layers:
-                ply = deepcopy(p)
+            for pp in R.ref.metals:
+                R_ply = pp.elementals[0]
                 for n in self.g.nodes():
-                    if ply.polygon.encloses(self.g.node[n]['pos']):
-                        # self.g.node[n]['surface'] = p
-                        self.g.node[n]['route'] = p
+                    if R_ply.encloses(self.g.node[n]['pos']):
+                        self.g.node[n]['route'] = pp
+                        # self.g.node[n]['route'] = tf_polygon
+                        # self.g.node[n]['route'] = p
                         # self.g.node[n]['route'] = spira.Label(
                         #     position=R.midpoint,
                         #     text='ROUTE',
                         #     color=color.COLOR_AZURE,
-                        #     # node_id='ROUTE'
                         #     node_id=p.__class__.__name__,
                         # )
 
