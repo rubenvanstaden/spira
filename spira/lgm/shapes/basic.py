@@ -25,8 +25,8 @@ class RectangleShape(Shape):
 
 class BoxShape(Shape):
 
-    width = param.FloatField(default=1)
-    height = param.FloatField(default=1)
+    width = param.FloatField(default=1*1e6)
+    height = param.FloatField(default=1*1e6)
 
     def create_points(self, points):
         cx = self.center[0]
@@ -43,7 +43,7 @@ class BoxShape(Shape):
 
 class CircleShape(Shape):
 
-    box_size = param.PointField(default=(1.0, 1.0))
+    box_size = param.PointField(default=(2.0*1e6, 2.0*1e6))
     start_angle = param.FloatField(default=0.0)
     end_angle = param.FloatField(default=360.0)
     angle_step = param.FloatField(default=3)
@@ -105,9 +105,9 @@ class ConvexPolygon(Shape):
 
 class BasicTriangle(Shape):
 
-    a = param.FloatField(default=2)
-    b = param.FloatField(default=0.5)
-    c = param.FloatField(default=1)
+    a = param.FloatField(default=2*1e6)
+    b = param.FloatField(default=0.5*1e6)
+    c = param.FloatField(default=1*1e6)
 
     def create_points(self, points):
         p1 = [0, 0]
@@ -138,38 +138,5 @@ class ArrowShape(TriangleShape):
         box.move(pos=(0, -height/2))
         points.extend(box.points)
         return points
-
-
-if __name__ == '__main__':
-    circle_shape = CircleShape()
-    hexagon_shape = ConvexPolygon()
-    arrow_shape = ArrowShape()
-    arrow_shape.apply_merge
-    rect_shape = RectangleShape()
-    box_shape = BoxShape()
-    basic_tri_shape = BasicTriangle()
-    tri_shape = TriangleShape()
-    tri_shape.apply_merge
-
-    cell = spira.Cell(name='Basic Shapes')
-
-    circle = spira.Polygons(shape=circle_shape, gdslayer=spira.Layer(number=13))
-    circle.center = (0,0)
-    hexagon = spira.Polygons(shape=hexagon_shape, gdslayer=spira.Layer(number=14))
-    hexagon.center = (5,0)
-    arrow = spira.Polygons(shape=arrow_shape, gdslayer=spira.Layer(number=15))
-    arrow.center = (10,0)
-    rect = spira.Polygons(shape=rect_shape, gdslayer=spira.Layer(number=16))
-    rect.center = (15,0)
-    box = spira.Polygons(shape=box_shape, gdslayer=spira.Layer(number=17))
-    box.center = (20,0)
-    basic = spira.Polygons(shape=basic_tri_shape, gdslayer=spira.Layer(number=18))
-    basic.center = (25,0)
-    tri = spira.Polygons(shape=tri_shape, gdslayer=spira.Layer(number=19))
-    tri.center = (30,0)
-
-    cell += [circle, hexagon, arrow, rect, box, basic, tri]
-
-    cell.output()
 
 

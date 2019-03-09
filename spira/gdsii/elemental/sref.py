@@ -226,6 +226,12 @@ class SRefAbstract(__SRef__):
         self.move(midpoint=p, destination=destination)
         return self
 
+    def align(p1, p2, distance):
+        pass
+        # # TODO:Get port direction and distance
+        # self.connect(port=p1, destination=p2)
+        # self.move(midpoint=p2, destination=d)
+
     def stretch(self, port, center=[0,0], vector=[1,1]):
         """  """
         from spira.lgm.shape.stretch import Stretch

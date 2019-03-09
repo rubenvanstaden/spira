@@ -1,6 +1,7 @@
 import spira
 from spira import param
-from spira.lgm.route.manhattan_base import Route
+from spira.lgm.route.routing import Route
+from spira.lgm.route.route_shaper import *
 
 
 class Test_Manhattan_180(spira.Cell):
@@ -101,7 +102,7 @@ class Test_Manhattan_90(spira.Cell):
 
     def create_elementals(self, elems):
 
-        # # Angle negative
+        # Angle negative
         elems += self.test_q1_90()
         elems += self.test_q2_90()
         elems += self.test_q3_90()
@@ -145,10 +146,10 @@ class Test_Manhattan_Horizontal(spira.Cell):
 
     def create_elementals(self, elems):
 
-        elems += self.test_p1p2_180_horizontal()
+        # elems += self.test_p1p2_180_horizontal()
         elems += self.test_p2p1_180_horizontal()
-        elems += self.test_p1p2_180_bot()
-        elems += self.test_p2p1_180_bot()
+        # elems += self.test_p1p2_180_bot()
+        # elems += self.test_p2p1_180_bot()
 
         return elems
 
@@ -232,7 +233,6 @@ class Test_Manhattan_180_SimilarAngles(spira.Cell):
 
 
 class TestManhattan(spira.Cell):
-    """  """
 
     # FIXME!
     def test_q1_180_90(self):
@@ -245,16 +245,42 @@ class TestManhattan(spira.Cell):
 
         elems += spira.SRef(Test_Manhattan_90(), midpoint=(0,0))
         elems += spira.SRef(Test_Manhattan_180(), midpoint=(250*1e6, 0))
-        elems += spira.SRef(Test_Manhattan_Horizontal(), midpoint=(0,-250*1e6))
-        elems += spira.SRef(Test_Manhattan_Vertical(), midpoint=(250*1e6, -250*1e6))
-        elems += spira.SRef(Test_Manhattan_180_SimilarAngles(), midpoint=(500*1e6, -250*1e6))
+        # elems += spira.SRef(Test_Manhattan_Horizontal(), midpoint=(0,-250*1e6))
+        # elems += spira.SRef(Test_Manhattan_Vertical(), midpoint=(250*1e6, -250*1e6))
+        # elems += spira.SRef(Test_Manhattan_180_SimilarAngles(), midpoint=(500*1e6, -250*1e6))
 
-        # elems += self.test_q1_180_90()
+        return elems
+
+
+class TestGeneral(spira.Cell):
+
+    D = spira.Cell(name='RouteSimplerTests')
+
+    def create_elementals(self, elems):
+        points = [(0,0), (0,-5*1e6), (10*1e6,-5*1e6), (10*1e6,0), (15*1e6,0)]
+
+        p1 = spira.Term(name='P1', midpoint=(0,0), orientation=-90, width=2*1e6)
+        p2 = spira.Term(name='P2', midpoint=(30*1e6,0), orientation=90, width=2*1e6)
+
+        r1 = RouteSimple(port1=p1, port2=p2, path_type='straight', width_type='straight')
+        r2 = RoutePointShape(path=points, width=1*1e6)
+        r3 = RouteArcShape(start_angle=0, theta=90, angle_resolution=5)
+        r4 = RouteSquareShape()
+
+        elems += spira.SRef(structure=RouteGeneral(route_shape=r1), midpoint=(0*1e6, 0*1e6))
+        elems += spira.SRef(structure=RouteGeneral(route_shape=r2), midpoint=(10*1e6, 0*1e6))
+        elems += spira.SRef(structure=RouteGeneral(route_shape=r3), midpoint=(20*1e6, 0*1e6))
+        elems += spira.SRef(structure=RouteGeneral(route_shape=r4), midpoint=(30*1e6, 0*1e6))
 
         return elems
 
 
 if __name__ == '__main__':
-    test_cell = TestManhattan()
-    test_cell.output()
+
+    cell = spira.Cell(name='Route Tests')
+
+    cell += spira.SRef(structure=TestManhattan())
+    cell += spira.SRef(structure=TestGeneral(), midpoint=(0, -100*1e6))
+
+    cell.output(cell='Route Tests_1')
 

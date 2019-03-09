@@ -2,12 +2,10 @@ import spira
 from spira import param, shapes, io
 from spira.lpe.circuits import Circuit
 from demo.pdks.process.mitll_pdk.database import RDD
-from spira.lgm.route.manhattan_base import Route
 
 from demo.pdks.components.mitll.junction import Junction
 from demo.pdks.components.mitll.via import ViaC5R, ViaI5
 from demo.pdks.components.mitll.resistor import Resistor
-from spira.lpe.mask import Mask
 
 
 class __Ports__(Circuit):
@@ -135,22 +133,22 @@ class __Routes__(__Circuits__):
     route_jjsg285_jjsg141 = param.DataField(fdef_name='create_route_jjsg285_jjsg141')
 
     def create_route_p1_jjsg126(self):
-        R1 = Route(port1=self.p1, port2=self.jjsg126.ports['e1'], player=RDD.PLAYER.M6)
+        R1 = spira.Route(port1=self.p1, port2=self.jjsg126.ports['e1'], player=RDD.PLAYER.M6)
         r1 = spira.SRef(R1)
         return r1
 
     def create_route_p2_jjsg125(self):
-        R1 = Route(port1=self.p2, port2=self.jjsg125.ports['e1'], player=RDD.PLAYER.M6)
+        R1 = spira.Route(port1=self.p2, port2=self.jjsg125.ports['e1'], player=RDD.PLAYER.M6)
         r1 = spira.SRef(R1)
         return r1
 
     def create_route_p3_jjsg285(self):
-        R1 = Route(port1=self.p3, port2=self.jjsg285.ports['e3'], player=RDD.PLAYER.M6)
+        R1 = spira.Route(port1=self.p3, port2=self.jjsg285.ports['e3'], player=RDD.PLAYER.M6)
         r1 = spira.SRef(R1)
         return r1
         
     def create_route_res0_jjsg285(self):
-        R1 = Route(port1=self.res_0.ports['vl_Input'], port2=self.jjsg285.ports['e1'], player=RDD.PLAYER.M6)
+        R1 = spira.Route(port1=self.res_0.ports['vl_Input'], port2=self.jjsg285.ports['e1'], player=RDD.PLAYER.M6)
         r1 = spira.SRef(R1)
         return r1
 
@@ -171,7 +169,7 @@ class __Routes__(__Circuits__):
             self.jjsg285.ports['e2']
         ]
 
-        R1 = Route(port_list=ports, player=RDD.PLAYER.M6)
+        R1 = spira.Route(port_list=ports, player=RDD.PLAYER.M6)
         r1 = spira.SRef(R1)
 
         return [r1]
@@ -196,7 +194,7 @@ class __Routes__(__Circuits__):
             self.jjsg141.ports['e2']
         ]
 
-        R1 = Route(port_list=ports, player=RDD.PLAYER.M6)
+        R1 = spira.Route(port_list=ports, player=RDD.PLAYER.M6)
         r1 = spira.SRef(R1)
 
         # # cm1 = (23.75*self.um, -9.7*self.um)
@@ -272,6 +270,7 @@ class Not(__Routes__):
 
 
 if __name__ == '__main__':
+    from spira.lpe.mask import Mask
 
     name = 'NOT PCell'
     spira.LOG.header('Running example: {}'.format(name))

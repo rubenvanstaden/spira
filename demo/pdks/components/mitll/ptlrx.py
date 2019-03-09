@@ -2,11 +2,9 @@ import spira
 from spira import param, shapes, io
 from spira.lpe.circuits import Circuit
 from demo.pdks.process.mitll_pdk.database import RDD
-from spira.lgm.route.manhattan_base import Route
 
 from demo.pdks.components.mitll.junction import Junction
 from demo.pdks.components.mitll.via import ViaC5R, ViaI5
-from spira.lpe.mask import Mask
 
 
 class __Ports__(Circuit):
@@ -80,7 +78,7 @@ class __Routes__(__Devices__):
     connect_via3_to_p3 = param.DataField(fdef_name='create_connect_via3_to_p3')
 
     def create_connect_j3_to_p2(self):
-        R1 = Route(
+        R1 = spira.Route(
             # port1=self.jj3.ports['East'],
             port1=self.jj3.ports['e1'],
             port2=self.p2,
@@ -89,7 +87,7 @@ class __Routes__(__Devices__):
         return r1
 
     def create_connect_via1_to_via2(self):
-        R1 = Route(
+        R1 = spira.Route(
             port1=self.via_c5r_1.ports['North'],
             port2=self.via_c5r_2.ports['South'],
             # port1=self.via_c5r_1.ports['e2'],
@@ -100,12 +98,12 @@ class __Routes__(__Devices__):
 
     def create_connect_via3_to_p3(self):
         # R1 = Route(port1=self.via_i5.ports['Output'], port2=self.p3, gdslayer=RDD.M5.LAYER)
-        R1 = Route(port1=self.via_i5.ports['Output'], port2=self.p3, player=RDD.PLAYER.M5, radius=0.5*self.um)
+        R1 = spira.Route(port1=self.via_i5.ports['Output'], port2=self.p3, player=RDD.PLAYER.M5, radius=0.5*self.um)
         r1 = spira.SRef(R1)
         return r1
 
     def create_connect_j2_to_p1(self):
-        R1 = Route(port1=self.jj2.ports['e2'], port2=self.p1, player=RDD.PLAYER.M6, radius=0.5*self.um)
+        R1 = spira.Route(port1=self.jj2.ports['e2'], port2=self.p1, player=RDD.PLAYER.M6, radius=0.5*self.um)
         # R1 = Route(port1=self.jj2.ports['South'], port2=self.p1, player=RDD.PLAYER.M6, radius=0.5*self.um)
         r1 = spira.SRef(R1)
         return r1
@@ -122,7 +120,7 @@ class __Routes__(__Devices__):
         dx = t2[0]-t1[0]
         dy = t2[1]-t1[1]
 
-        R1 = Route(
+        R1 = spira.Route(
             # port1=s1.ports['West'],
             # port2=s2.ports['West'],
             port1=s1.ports['e3'],
@@ -155,7 +153,7 @@ class __Routes__(__Devices__):
         d6 = 3.2 * self.um
         d7 = t2[1] - (t1[1] + d1 + d3 - d5)
 
-        R1 = Route(
+        R1 = spira.Route(
             # port1=s1.ports['East'],
             port2=s2.ports['Input'],
             port1=s1.ports['e1'],
@@ -189,10 +187,10 @@ class __Routes__(__Devices__):
         p1 = spira.Term(name='D1', midpoint=(-9*self.um, -3.2*self.um), width=1*1e6, orientation=0)
         p2 = spira.Term(name='D2', midpoint=(-9*self.um, -3.2*self.um), width=1*1e6, orientation=180)
 
-        R1 = Route(port1=t1, port2=p1, player=RDD.PLAYER.M6, radius=0.5*self.um)
+        R1 = spira.Route(port1=t1, port2=p1, player=RDD.PLAYER.M6, radius=0.5*self.um)
         r1 = spira.SRef(R1)
 
-        R2 = Route(port1=p2, port2=t2, player=RDD.PLAYER.M6, radius=0.5*self.um)
+        R2 = spira.Route(port1=p2, port2=t2, player=RDD.PLAYER.M6, radius=0.5*self.um)
         r2 = spira.SRef(R2)
 
         return [r1, r2]
@@ -210,8 +208,8 @@ class Ptlrx(__Routes__):
         return elems
 
     def create_routes(self, routes):
-        # routes += self.connect_j1_to_j2
-        # routes += self.connect_j1_to_via1
+        routes += self.connect_j1_to_j2
+        routes += self.connect_j1_to_via1
         # routes += self.connect_via1_to_via2
         # routes += self.connect_j3_to_p2
         # routes += self.connect_j2_to_p1
@@ -220,7 +218,6 @@ class Ptlrx(__Routes__):
         return routes
 
     def create_ports(self, ports):
-        # ports = super().create_ports(ports)
         ports += self.p1
         ports += self.p2
         ports += self.p3
@@ -228,6 +225,7 @@ class Ptlrx(__Routes__):
 
 
 if __name__ == '__main__':
+    from spira.lpe.mask import Mask
 
     name = 'PtlRX PCell'
     spira.LOG.header('Running example: {}'.format(name))

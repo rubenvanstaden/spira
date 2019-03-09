@@ -1,10 +1,10 @@
 import spira
 import numpy as np
 from spira import param
-from spira import shapes
+from spira.lgm.shapes.shape import Shape
 
 
-class YtronShape(shapes.Shape):
+class YtronShape(Shape):
     """ Shape for generating a yTron device. """
 
     rho = param.FloatField(default=0.2*1e6)
@@ -78,18 +78,10 @@ class YtronShape(shapes.Shape):
         return points
 
 
-class NtronShape(shapes.Shape):
+class NtronShape(Shape):
     """ Shape for generating a nTron device. """
 
     def create_points(self, points):
-
-
         return points
 
 
-if __name__ == "__main__":
-
-    ytron = YtronShape()
-    cell = spira.Cell(name='yTron')
-    cell += spira.Polygons(shape=ytron)
-    cell.output()

@@ -50,13 +50,12 @@ class LabelAbstract(__Label__):
 
     gdslayer = param.LayerField()
     text = param.StringField(default='no_text')
-    node_id = param.StringField()
+    # node_id = param.StringField()
     str_anchor = param.StringField(default='o')
     rotation = param.FloatField(default=0)
     magnification = param.FloatField(default=1)
     reflection = param.BoolField(default=False)
     texttype = param.IntegerField(default=0)
-    gdspy_commit = param.BoolField()
 
     def __init__(self, position, **kwargs):
         super().__init__(position, **kwargs)
@@ -84,7 +83,6 @@ class LabelAbstract(__Label__):
         return self
 
     def rotate(self, angle=45, center=(0,0)):
-        angle = (-1) * angle
         self.position = self.__rotate__(self.position, angle=angle, center=[0, 0])
         self.rotation += angle
         self.rotation = np.mod(self.rotation, 360)

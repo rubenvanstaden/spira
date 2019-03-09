@@ -37,15 +37,11 @@ class Mask(__NetlistCell__):
 
         print('[*] Connecting Circuit and Device nets')
 
-        # g = deepcopy(self.cell.netlist)
         g = self.cell.netlist
 
         reference_nodes = {}
         neighbour_nodes = {}
         for S in self.cell.structures:
-
-            print(S)
-
             if not issubclass(type(S.ref), Via):
                 neighbour_nodes[S.node_id] = []
                 for n in g.nodes():
@@ -64,7 +60,6 @@ class Mask(__NetlistCell__):
                         for m in gs.nodes:
                             if 'connect' in gs.node[m]:
                                 for i, R in enumerate(gs.node[m]['connect']):
-                                    print(i, R[0])
                                     if g.node[n]['branch'].route == R[0]:
                                         uid = '{}_{}_{}'.format(i, n, S.midpoint)
                                         if n in reference_nodes.keys():

@@ -51,9 +51,9 @@ def PortField(default=None):
     return DataFieldDescriptor(default=F)
 
 
-def ShapeField(points=[]):
+def ShapeField(points=[], doc=''):
     from spira.lgm.shapes.shape import Shape
-    F = Shape(points)
+    F = Shape(points, doc=doc)
     return DataFieldDescriptor(default=F)
 
 

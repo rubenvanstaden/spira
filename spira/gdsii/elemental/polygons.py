@@ -58,7 +58,6 @@ class __Polygon__(gdspy.PolygonSet, ElementalInitializer):
             clip=self.shape.points,
             method='intersection'
         )
-        # print(pp)
         if len(pp) > 0:
             return Polygons(shape=np.array(pp), gdslayer=self.gdslayer)
         else:
@@ -100,7 +99,7 @@ class PolygonAbstract(__Polygon__):
     def commit_to_gdspy(self, cell):
         if self.__repr__() not in list(PolygonAbstract.__committed__.keys()):
             P = gdspy.PolygonSet(
-                polygons=deepcopy(self.shape.points), 
+                polygons=deepcopy(self.shape.points),
                 layer=self.gdslayer.number, 
                 datatype=self.gdslayer.datatype,
                 verbose=False

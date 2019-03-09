@@ -24,8 +24,8 @@ if __name__ == '__main__':
     # name = 'LSmitll_DCSFQ_original'
     # name = 'LSmitll_SPLITT_new'
     # name = 'LSmitll_SFQDC'
-    name = 'LSmitll_MERGET_new'
-    # name = 'LSmitll_DFFT_new'
+    # name = 'LSmitll_MERGET_new'
+    name = 'LSmitll_DFFT_new'
     # FIXME
     # name = 'LSmitll_NOT_new'
     # FIXME

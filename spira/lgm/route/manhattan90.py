@@ -2,10 +2,7 @@ import spira
 import numpy as np
 from spira import param, shapes
 from demo.pdks import ply
-from spira.lgm.route.basic import RouteShape
-from spira.lgm.route.basic import RouteBasic
-from spira.lgm.route.arc_bend import ArcRoute, Arc
-from spira.gdsii.utils import scale_coord_up as scu
+from spira.lgm.route.route_shaper import RouteSimple, RouteGeneral
 from spira.lgm.route.manhattan import __Manhattan__
 
 
@@ -20,8 +17,8 @@ class Route90(__Manhattan__):
         h = (p2[1]-p1[1]) - self.radius
         self.b1.move(midpoint=self.b1.ports['P2'], destination=[0, h])
 
-        r1 = self._generate_route(self.b1.ports['P2'], self.term_ports['T1'])
-        r2 = self._generate_route(self.b1.ports['P1'], self.term_ports['T2'])
+        r1 = self.route_straight(self.b1.ports['P2'], self.term_ports['T1'])
+        r2 = self.route_straight(self.b1.ports['P1'], self.term_ports['T2'])
 
         D = spira.Cell(name='Route_Q1_90')
         D += [self.b1, r1, r2]
@@ -42,8 +39,8 @@ class Route90(__Manhattan__):
         h = (p2[1]-p1[1]) - self.radius
         self.b1.move(midpoint=self.b1.ports['P1'].midpoint, destination=[self.term_ports['T1'].midpoint[0], h])
 
-        r1 = self._generate_route(self.b1.ports['P1'], self.term_ports['T1'])
-        r2 = self._generate_route(self.b1.ports['P2'], self.term_ports['T2'])
+        r1 = self.route_straight(self.b1.ports['P1'], self.term_ports['T1'])
+        r2 = self.route_straight(self.b1.ports['P2'], self.term_ports['T2'])
 
         D = spira.Cell(name='Route_Q2_90')
         D += [self.b1, r1, r2]
@@ -64,8 +61,8 @@ class Route90(__Manhattan__):
         h = p2[1] + self.radius
         self.b2.move(midpoint=self.b2.ports['P1'], destination=[0, h])
 
-        r1 = self._generate_route(self.b2.ports['P1'], self.term_ports['T1'])
-        r2 = self._generate_route(self.b2.ports['P2'], self.term_ports['T2'])
+        r1 = self.route_straight(self.b2.ports['P1'], self.term_ports['T1'])
+        r2 = self.route_straight(self.b2.ports['P2'], self.term_ports['T2'])
 
         D = spira.Cell(name='Route_Q4_90')
         D += [self.b1, r1, r2]
@@ -86,8 +83,8 @@ class Route90(__Manhattan__):
         h = p2[1] + self.radius
         self.b2.move(midpoint=self.b2.ports['P2'], destination=[0, h])
 
-        r1 = self._generate_route(self.b2.ports['P2'], self.term_ports['T1'])
-        r2 = self._generate_route(self.b2.ports['P1'], self.term_ports['T2'])
+        r1 = self.route_straight(self.b2.ports['P2'], self.term_ports['T1'])
+        r2 = self.route_straight(self.b2.ports['P1'], self.term_ports['T2'])
 
         D = spira.Cell(name='Route_Q4_90')
         D += [self.b2, r1, r2]
@@ -132,6 +129,8 @@ class Route90(Route90):
         route_shape.apply_merge
         poly = ply.Polygon(points=route_shape.points, player=self.player, enable_edges=False) 
         elems += poly
+
+        elems += R
 
         return elems
         

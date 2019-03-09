@@ -1,9 +1,7 @@
 import spira
 from spira import param, shapes, io
 from spira.lpe.circuits import Circuit
-from spira.lpe.mask import Mask
 from demo.pdks.process.mitll_pdk.database import RDD
-from spira.lgm.route.manhattan_base import Route
 
 from demo.pdks.components.mitll.junction import Junction
 from demo.pdks.components.mitll.via import ViaC5R, ViaI5
@@ -49,7 +47,7 @@ class __Routes__(__Ports__):
     jj2_p2 = param.DataField(fdef_name='create_jj2_p2')
 
     def create_p1_jj1(self):
-        R1 = Route(
+        R1 = spira.Route(
             port1=self.p1,
             # port2=self.jj1.ports['West'],
             port2=self.jj1.ports['e3'],
@@ -58,7 +56,7 @@ class __Routes__(__Ports__):
         return r1
 
     def create_jj1_jj2(self):
-        R1 = Route(
+        R1 = spira.Route(
             # port1=self.jj1.ports['East'],
             # port2=self.jj2.ports['West'],
             port1=self.jj1.ports['e1'],
@@ -68,7 +66,7 @@ class __Routes__(__Ports__):
         return r1
         
     def create_jj2_p2(self):
-        R1 = Route(
+        R1 = spira.Route(
             # port1=self.jj2.ports['East'],
             port1=self.jj2.ports['e1'],
             port2=self.p2,
@@ -81,6 +79,9 @@ class Jtl(__Routes__):
     """ Parameterized Cell for JTL circuit. """
 
     def create_structures(self, elems):
+        # c = spira.Cell(name='awe')
+        # c += spira.Polygons(shape=[[[0,0], [1*1e6,0], [1*1e6,1*1e6], [0,1*1e6]]])
+        # elems += spira.SRef(c)
         elems += self.jj1
         elems += self.jj2
         return elems
@@ -92,13 +93,13 @@ class Jtl(__Routes__):
         return elems
 
     def create_ports(self, ports):
-        ports = super().create_ports(ports)
         ports += self.p1
         ports += self.p2
         return ports
 
 
 if __name__ == '__main__':
+    from spira.lpe.mask import Mask
 
     name = 'JTL PCell'
     spira.LOG.header('Running example: {}'.format(name))
@@ -110,6 +111,7 @@ if __name__ == '__main__':
     mask = Mask(name=input_cell.name, cell=input_cell)
     mask.netlist
     mask.output()
+    # input_cell.writer()
 
     spira.LOG.end_print('JTL example finished')
 

@@ -10,6 +10,8 @@ from numpy.linalg import norm
 
 class __Shape__(FieldInitializer):
 
+    doc = param.StringField()
+
     center = param.PointField()
     gdslayer = param.LayerField()
     clockwise = param.BoolField(default=False)
@@ -31,9 +33,6 @@ class __Shape__(FieldInitializer):
         from spira.gdsii.utils import scale_polygon_down as spd
         # polygons = spd(self.points, value=1e-0)
         polygons = spd(self.points, value=1e-4)
-        # polygons = spu(self.points, value=1e9)
-        # print(polygons)
-        # polygons = deepcopy(self.points)
         points = []
         for poly in polygons:
             if pyclipper.Orientation(poly) is False:
@@ -41,16 +40,11 @@ class __Shape__(FieldInitializer):
                 solution = pyclipper.SimplifyPolygon(reverse_poly)
             else:
                 solution = pyclipper.SimplifyPolygon(poly)
-            # solution = pyclipper.CleanPolygons(solution)
-            # solution = spd(solution, value=1e-4)
             for sol in solution:
                 points.append(sol)
-        # print(points)
         self.points = bool_operation(subj=points, method='union')
-        # self.points = spd(self.points, value=1e-9)
         self.points = spu(self.points, value=1e4)
         # self.points = spu(self.points, value=1e0)
-        # self.points = spd(self.points)
         return self
 
     def create_simplified_points(self):

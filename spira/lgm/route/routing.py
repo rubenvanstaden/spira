@@ -5,7 +5,7 @@ from demo.pdks import ply
 from spira.lgm.route.manhattan import __Manhattan__
 from spira.lgm.route.manhattan90 import Route90
 from spira.lgm.route.manhattan180 import Route180
-from spira.lgm.route.basic import RouteShape, RouteBasic, RoutePointShape
+from spira.lgm.route.route_shaper import RouteSimple, RouteGeneral, RoutePointShape
 from spira.visualization import color
 from spira.lpe.pcells import Structure
 
@@ -69,13 +69,11 @@ class Route(Structure, __Manhattan__):
             player=self.player,
             gdslayer=self.gdslayer
         )
-        R = spira.Cell(name='M90')
-        # for e in R1.flatten():
-        #     R += e
-        for e in R1.elementals:
-            R += e
-        for e in R1.ports:
-            R += e
+        R = spira.Cell(
+            name='M90',
+            elementals=R1.elementals,
+            ports=R1.ports
+        )
         r = spira.SRef(R)
         return r
 
@@ -88,12 +86,11 @@ class Route(Structure, __Manhattan__):
             player=self.player,
             gdslayer=self.gdslayer
         )
-        R = spira.Cell(name='M180')
-        for e in R1.elementals:
-        # for e in R1.flatten():
-            R += e
-        for e in R1.ports:
-            R += e
+        R = spira.Cell(
+            name='M180',
+            elementals=R1.elementals,
+            ports=R1.ports
+        )
         r = spira.SRef(R)
         return r
 
@@ -102,31 +99,29 @@ class Route(Structure, __Manhattan__):
             path=self.path,
             width=self.width
         )
-        # route_shape.apply_merge
-        R = RouteBasic(
-            route=route_shape, 
+        route_shape.apply_merge
+        R = RouteGeneral(
+            route_shape=route_shape, 
             connect_layer=self.player
         )
         r = spira.SRef(R)
-        r.connect(port=r.ports['TERM1'], destination=self.port1)
-        # print(r.ref.elementals)
+        r.connect(port=r.ports['P1'], destination=self.port1)
         return r
 
     def create_route_straight(self):
-        route_shape = RouteShape(
+        route_shape = RouteSimple(
             port1=self.port1,
             port2=self.port2,
             path_type='straight',
             width_type='straight'
         )
-        # route_shape.apply_merge
-        R = RouteBasic(
-            route=route_shape,
+        route_shape.apply_merge
+        R = RouteGeneral(
+            route_shape=route_shape,
             connect_layer=self.player
         )
         r = spira.SRef(R)
-        r.rotate(angle=self.port2.orientation-180, center=R.port1.midpoint)
-        r.move(midpoint=(0,0), destination=self.port1.midpoint)
+        r.connect(port=r.ports['P1'], destination=self.port1)
         return r
 
     def create_route_auto(self):
@@ -141,7 +136,12 @@ class Route(Structure, __Manhattan__):
             print(self.port_list[x])
             print(self.port_list[x+1])
             print('')
-            route_cell = Route(port1=self.port_list[x], port2=self.port_list[x+1], player=self.player, radius=0.3*1e6)
+            route_cell = Route(
+                port1=self.port_list[x], 
+                port2=self.port_list[x+1], 
+                player=self.player, 
+                radius=0.3*1e6
+            )
             R += spira.SRef(route_cell)
 
         D = spira.Cell(name='Device Router')
@@ -153,8 +153,7 @@ class Route(Structure, __Manhattan__):
         route_shape = shapes.Shape(points=points)
         route_shape.apply_merge
         D += ply.Polygon(points=route_shape.points, player=self.player, enable_edges=False) 
-        r = spira.SRef(D)
-        return r
+        return spira.SRef(D)
 
     def create_metals(self, elems):
         if self.cell is not None:
@@ -203,7 +202,7 @@ class Route(Structure, __Manhattan__):
         if self.__type__ == 'auto':
             r1 = self.route_auto
         if self.__type__ == 'layout':
-            R = RouteBasic(elementals=self.merged_layers)
+            R = RouteGeneral(elementals=self.merged_layers, ports=[])
             r1 = spira.SRef(R)
 
         elems += r1

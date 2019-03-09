@@ -1,7 +1,6 @@
 import spira
 from spira import param, shapes, io
 from spira.lpe.circuits import Circuit
-from spira.lgm.route.manhattan_base import Route
 
 from demo.pdks.components.mitll.junction import Junction
 from demo.pdks.components.mitll.via import ViaC5R, ViaI5
@@ -19,14 +18,14 @@ class Resistor(Circuit):
     def create_via_left(self):
         via = ViaC5R()
         return spira.SRef(via)
-        
+
     def create_via_right(self):
         via = ViaC5R()
         return spira.SRef(via, midpoint=(self.length, 0))
 
     def create_elementals(self, elems):
 
-        res = Route(
+        res = spira.Route(
             port1=self.via_left.ports['Output'],
             port2=self.via_right.ports['Input'],
             player=RDD.PLAYER.R5

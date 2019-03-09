@@ -10,8 +10,8 @@ from copy import copy, deepcopy
 from spira.lpe.devices import Device
 from spira.lpe.pcells import Structure
 
-from spira.lgm.route.manhattan_base import Route
-from spira.lgm.route.basic import RouteShape, RouteBasic
+from spira.lgm.route.routing import Route
+from spira.lgm.route.route_shaper import RouteSimple, RouteGeneral
 from spira.core.mixin.netlist import NetlistSimplifier
 from spira.lpe.pcells import __NetlistCell__
 from spira.lpe.boxes import BoundingBox
@@ -30,8 +30,9 @@ class RouteToStructureConnector(__CircuitContainer__, Structure):
         print('[*] Connecting routes with devices')
         self.unlock_ports()
         for D in self.structures:
-            B = BoundingBox(S=D)
-            boxes += B
+            if isinstance(D, spira.SRef):
+                B = BoundingBox(S=D)
+                boxes += B
         end = time.time()
         print('Block calculation time {}:'.format(end - start))
         return boxes
@@ -136,7 +137,7 @@ class Circuit(RouteToStructureConnector):
                     edgelayer = deepcopy(port.gdslayer)
                     edgelayer.datatype = 100
                     ports += port.modified_copy(edgelayer=edgelayer)
-    
+
         for R in self.routes:
             for name, port in R.instance_ports.items():
                 if port.locked is False:

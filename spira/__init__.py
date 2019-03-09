@@ -17,6 +17,7 @@ from spira.gdsii import *
 from spira.lne import *
 from spira.lgm import *
 from spira.lgm import shapes
+from spira.lgm.route.routing import Route
 
 from spira.core.lists import ElementList
 

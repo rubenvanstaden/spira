@@ -1,9 +1,10 @@
 import spira
 import numpy as np
 from spira import param
-from spira.lgm.route.arc_bend import ArcRoute, Arc, Rect, RectRoute, RectRouteTwo
-from spira.lgm.route.basic import RouteShape
-from spira.lgm.route.basic import RouteBasic
+from spira.lgm.route.route_shaper import RouteSimple
+from spira.lgm.route.route_shaper import RouteGeneral
+from spira.lgm.route.route_shaper import RouteArcShape
+from spira.lgm.route.route_shaper import RouteSquareShape
 
 
 RDD = spira.get_rule_deck()
@@ -53,18 +54,18 @@ class __Manhattan__(spira.Cell):
     
     radius = param.FunctionField(get_radius, set_radius)
 
-    def _generate_route(self, p1, p2):
-        route_shape = RouteShape(
+    def route_straight(self, p1, p2):
+        route_shape = RouteSimple(
             port1=p1, port2=p2,
             path_type='straight',
             width_type='straight'
         )
         route_shape.apply_merge
-        # R1 = RouteBasic(route=route, connect_layer=self.gdslayer)
-        R1 = RouteBasic(route=route_shape, connect_layer=self.player)
+        R1 = RouteGeneral(route_shape=route_shape, connect_layer=self.player)
         r1 = spira.SRef(R1)
-        r1.rotate(angle=p2.orientation-180, center=R1.port1.midpoint)
-        # r1.rotate(angle=p2.orientation, center=R1.port1.midpoint)
+        # r1.rotate(angle=p2.orientation-180, center=R1.port_input.midpoint)
+        r1.rotate(angle=p2.orientation+90, center=R1.port_input.midpoint)
+        # r1.rotate(angle=p2.orientation, center=R1.port_input.midpoint)
         r1.move(midpoint=(0,0), destination=p1.midpoint)
         return r1
 
@@ -89,44 +90,76 @@ class __Manhattan__(spira.Cell):
         if angle == 270:
             p2 = [-self.port2.midpoint[1], self.port2.midpoint[0]]
         return p2
-
+        
     def create_arc_bend_1(self):
         if self.bend_type == 'circular':
-            B1 = Arc(shape=ArcRoute(
+            rs = RouteArcShape(
                 radius=self.radius,
                 width=self.port1.width,
                 gdslayer=self.gdslayer,
-                start_angle=0, theta=90)
+                start_angle=0, theta=90
             )
         if self.bend_type == 'rectangle':
-            B1 = Rect(shape=RectRoute(
-                    width=self.port1.width,
-                    gdslayer=self.gdslayer,
-                    # player=self.player,
-                    size=(self.radius,self.radius)
-                ),
-                player=self.player
+            rs = RouteSquareShape(
+                width=self.port1.width,
+                size=(self.radius, self.radius)
             )
+        B1 = RouteGeneral(route_shape=rs, connect_layer=self.player)
         return spira.SRef(B1)
 
     def create_arc_bend_2(self):
         if self.bend_type == 'circular':
-            B2 = Arc(shape=ArcRoute(
+            rs = RouteArcShape(
                 radius=self.radius,
                 width=self.port1.width,
                 gdslayer=self.gdslayer,
-                start_angle=0, theta=-90)
+                start_angle=0, theta=-90
             )
         if self.bend_type == 'rectangle':
-            B2 = Rect(shape=RectRouteTwo(
-                    width=self.port1.width,
-                    gdslayer=self.gdslayer,
-                    # player=self.player,
-                    size=(self.radius,self.radius)
-                ),
-                player=self.player
+            rs = RouteSquareShape(
+                width=self.port1.width,
+                size=(self.radius, self.radius)
             )
-        return spira.SRef(B2)
+        B1 = RouteGeneral(route_shape=rs, connect_layer=self.player)
+        return spira.SRef(B1)
+
+    # def create_arc_bend_1(self):
+    #     if self.bend_type == 'circular':
+    #         B1 = Arc(shape=ArcRoute(
+    #             radius=self.radius,
+    #             width=self.port1.width,
+    #             gdslayer=self.gdslayer,
+    #             start_angle=0, theta=90)
+    #         )
+    #     if self.bend_type == 'rectangle':
+    #         B1 = Rect(shape=RectRoute(
+    #                 width=self.port1.width,
+    #                 gdslayer=self.gdslayer,
+    #                 # player=self.player,
+    #                 size=(self.radius,self.radius)
+    #             ),
+    #             player=self.player
+    #         )
+    #     return spira.SRef(B1)
+
+    # def create_arc_bend_2(self):
+    #     if self.bend_type == 'circular':
+    #         B2 = Arc(shape=ArcRoute(
+    #             radius=self.radius,
+    #             width=self.port1.width,
+    #             gdslayer=self.gdslayer,
+    #             start_angle=0, theta=-90)
+    #         )
+    #     if self.bend_type == 'rectangle':
+    #         B2 = Rect(shape=RectRouteTwo(
+    #                 width=self.port1.width,
+    #                 gdslayer=self.gdslayer,
+    #                 # player=self.player,
+    #                 size=(self.radius,self.radius)
+    #             ),
+    #             player=self.player
+    #         )
+    #     return spira.SRef(B2)
 
 
 

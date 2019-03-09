@@ -96,7 +96,6 @@ class ProcessLayer(__PortConstructor__):
     layer1 = param.LayerField()
     layer2 = param.LayerField()
     player = param.PhysicalLayerField()
-
     level = param.IntegerField(default=10)
     error = param.IntegerField(default=0)
 
@@ -132,7 +131,7 @@ class ProcessLayer(__PortConstructor__):
         elif self.player.purpose == RDD.PURPOSE.METAL:
             if self.level == 1:
                 ports += self.metal_port
-            
+
             if self.enable_edges:
                 for edge in self.edge_ports:
                     ports += edge
