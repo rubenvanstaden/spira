@@ -4,8 +4,8 @@ import numpy as np
 
 # ------------------------------ SPiRA Information -----------------------------
 
-__version__ = '0.0.2'
-__release__ = 'Auron'
+__version__ = '0.0.3'
+__release__ = 'Auron [Beta]'
 
 LIB_NAME = 'SPiRA'
 LIB_DESCRIPTION = 'SPiRA: The Virtuoso'
