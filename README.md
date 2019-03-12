@@ -8,7 +8,7 @@ following, though some parts are still under active development:
 * **RDD**: The newly proposed Python-based PDK schema, called Rule Deck Database. This schema allows connecting directly to Python object trees data manipulation.
 * **PCells**: Layout generators can be created using basic Python. The framework focusses on reducing native Python boiler-plate code to improve design efficiency.
 * **LVS** : A graph network can be extracted using a mesh-to-graph methodology. 
-* **DRC** (experimental): Rule checking are done by placing parameter rescritions, and connecting to a Template Cell created defined in the RDD. 
+<!-- * **DRC** (experimental): Rule checking are done by placing parameter rescritions, and connecting to a Template Cell created defined in the RDD.  -->
 
 ## Depenencies
 
