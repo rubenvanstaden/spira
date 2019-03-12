@@ -48,25 +48,26 @@ Examples of using the PCell implementation is given in [examples](https://github
 
 
 ## Future Changes
-* Add auto scaling to PCell values.
+* Fix issue with writing to a GDSII file.
+* Add support for GDSII Box elemental.
+* Implement caching parameters.
+* Add auto scaling to PCell values (once caching is implemented).
 * Update LVS to solve multi-level circuits.
-* Implement DRC.
-* Fix issues with gds writting and other operations, such as Box objects.
-* Add polygon stretching methods.
-* Add elemental-to-port alignment.
+* Implement Design Rule Checking.
+* Add sref-to-port alignment.
+* Implement polygon stretching.
 
 
 ## History of changes
 
 ### Version 0.0.3 (March 12, 2019)
-* Added point routing by receiving a list of specific points.
-* Device cell detection using (Junction, Via, etc).
-* Basic LVS implementation working.
 * Added Dummy ports for crossing nodes in netlist.
-* Added EdgePort for terminals on the edges of polygons.
-* Added example shape for yTron.
-* Added path routing.
-* Auto routed with ports implemented>
+* Automatically generate terminal edges for metal polygons.
+* Added shape for yTron.
+* Added path routing between two terminals.
+* Define a route using a list of terminals.
+* Device cell detection (Junction, Via, etc).
+* Basic LVS implementation.
 
 ### Version 0.0.2 (Jan 11, 2019)
 * Implemented Manhattan routing between terminals.
