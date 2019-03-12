@@ -58,7 +58,7 @@ Examples of using the PCell implementation is given in [examples](https://github
 
 ## History of changes
 
-### Version 0.0.3 (March 08, 2019)
+### Version 0.0.3 (March 12, 2019)
 * Added point routing by receiving a list of specific points.
 * Device cell detection using (Junction, Via, etc).
 * Basic LVS implementation working.
