@@ -3,20 +3,20 @@ import time
 import numpy as np
 from spira import param, shapes
 from spira.lpe import mask
-from demo.pdks import ply
+from spira import pc
 from spira.lpe.containers import __CellContainer__, __NetContainer__, __CircuitContainer__
 from spira.lne.net import Net
 from copy import copy, deepcopy
 from spira.lpe.devices import Device
-from spira.lpe.pcells import Structure
+from spira.lpe.structure import Structure
 
 from spira.lgm.route.routing import Route
 from spira.lgm.route.route_shaper import RouteSimple, RouteGeneral
 from spira.core.mixin.netlist import NetlistSimplifier
-from spira.lpe.pcells import __NetlistCell__
+from spira.lpe.structure import __NetlistCell__
 from spira.lpe.boxes import BoundingBox
 from halo import Halo
-from spira.gdsii.utils import bool_operation
+from spira.utils import boolean
 
 
 RDD = spira.get_rule_deck()
@@ -54,14 +54,15 @@ class RouteToStructureConnector(__CircuitContainer__, Structure):
 
     def __unlock_device_edges__(self, R, D):
         for pp in R.ref.metals:
-            R_ply = pp.elementals[0]
-            for key, port in D.instance_ports.items():
-                if isinstance(port, (spira.Term, spira.EdgeTerm)):
-                    if port.gdslayer.number == pp.player.layer.number:
-                        if R_ply & port.edge:
-                            route_key = (pp.node_id, pp.player.layer.number)
-                            D.port_connects[key] = route_key
-                            D.port_locks[key] = False
+            if isinstance(pp, pc.ProcessLayer):
+                R_ply = pp.polygon
+                for key, port in D.instance_ports.items():
+                    if isinstance(port, (spira.Term, spira.EdgeTerm)):
+                        if port.gdslayer.number == pp.player.layer.number:
+                            if R_ply & port.edge:
+                                route_key = (pp.node_id, pp.player.layer.number)
+                                D.port_connects[key] = route_key
+                                D.port_locks[key] = False
 
 
 class Circuit(RouteToStructureConnector):
@@ -71,7 +72,7 @@ class Circuit(RouteToStructureConnector):
 
     algorithm = param.IntegerField(default=6)
     level = param.IntegerField(default=2)
-    lcar = param.IntegerField(default=0.1)
+    lcar = param.IntegerField(default=10)
 
     def create_elementals(self, elems):
         # for e in self.structures:
@@ -119,7 +120,7 @@ class Circuit(RouteToStructureConnector):
                 # alias = 'ply_{}_{}_{}'.format(player.layer.number, self.cell.node_id, i)
                 alias = 'ply_{}_{}_{}'.format(player.layer.number, self.__class__.__name__, i)
                 # alias = 'ply_{}_{}_{}'.format(player.layer.number, 'webfwejfbjk', i)
-                elems += ply.Polygon(name=alias, player=player, points=e.polygons, level=self.level)
+                elems += pc.Polygon(name=alias, player=player, points=e.polygons, level=self.level)
         return elems
 
     def create_ports(self, ports):
@@ -198,14 +199,15 @@ class Circuit(RouteToStructureConnector):
                                 datatype=RDD.GDSII.TEXT
                             )
                     if p1 and p2 :
-                        if label.encloses(ply=port.polygons[0]):
-                            ports += spira.Term(
-                                name=label.text,
-                                layer1=p1, layer2=p2,
-                                width=port.dx,
-                                # length=port.dy,
-                                midpoint=label.position
-                            )
+                        for pts in port.polygons:
+                            # if label.encloses(ply=port.polygons[0]):
+                            if label.encloses(ply=pts):
+                                ports += spira.Term(
+                                    name=label.text,
+                                    layer1=p1, layer2=p2,
+                                    width=port.dx,
+                                    midpoint=label.position
+                                )
 
         return ports
 

@@ -1,8 +1,9 @@
 import spira
 import pyclipper
+import gdspy
 import numpy as np
 from spira import param
-from spira.gdsii.utils import *
+from spira.utils import *
 from copy import copy, deepcopy
 from spira.core.initializer import FieldInitializer
 from numpy.linalg import norm
@@ -11,12 +12,9 @@ from numpy.linalg import norm
 class __Shape__(FieldInitializer):
 
     doc = param.StringField()
-
     center = param.PointField()
-    gdslayer = param.LayerField()
     clockwise = param.BoolField(default=False)
     points = param.PointArrayField(fdef_name='create_points')
-
     apply_merge = param.DataField(fdef_name='create_merged_points')
     simplify = param.DataField(fdef_name='create_simplified_points')
     edges = param.DataField(fdef_name='create_edge_lines')
@@ -27,14 +25,37 @@ class __Shape__(FieldInitializer):
     def create_points(self, points):
         return points
 
+    # def create_merged_points(self):
+    #     """  """
+    #     from spira.utils import scale_polygon_up as spu
+    #     from spira.utils import scale_polygon_down as spd
+    #     polygons = spd(self.points, value=1e-0)
+    #     points = []
+    #     for poly in polygons:
+    #         if pyclipper.Orientation(poly) is False:
+    #             reverse_poly = pyclipper.ReversePath(poly)
+    #             solution = pyclipper.SimplifyPolygon(reverse_poly)
+    #         else:
+    #             solution = pyclipper.SimplifyPolygon(poly)
+    #         for sol in solution:
+    #             points.append(sol)
+    #     self.points = boolean(subj=points, method='or')
+    #     self.points = spu(self.points, value=1e0)
+    #     return self
+
     def create_merged_points(self):
         """  """
-        from spira.gdsii.utils import scale_polygon_up as spu
-        from spira.gdsii.utils import scale_polygon_down as spd
+        from spira.utils import scale_polygon_up as spu
+        from spira.utils import scale_polygon_down as spd
         # polygons = spd(self.points, value=1e-0)
-        polygons = spd(self.points, value=1e-4)
+        # polygons = spd(self.points, value=1e-4)
+        # accuracy = 1e-5
+        # sc = 1/accuracy
+        sc = 2**30
+        polygons = pyclipper.scale_to_clipper(self.points, sc)
         points = []
         for poly in polygons:
+            # print(poly)
             if pyclipper.Orientation(poly) is False:
                 reverse_poly = pyclipper.ReversePath(poly)
                 solution = pyclipper.SimplifyPolygon(reverse_poly)
@@ -42,9 +63,18 @@ class __Shape__(FieldInitializer):
                 solution = pyclipper.SimplifyPolygon(poly)
             for sol in solution:
                 points.append(sol)
-        self.points = bool_operation(subj=points, method='union')
-        self.points = spu(self.points, value=1e4)
+        value = boolean(subj=points, method='or')
         # self.points = spu(self.points, value=1e0)
+        # print(self.points)
+        
+        PTS = []
+        mc = pyclipper.scale_from_clipper(value, sc)
+        for pts in pyclipper.SimplifyPolygons(mc):
+            PTS.append(np.array(pts))
+        self.points = np.array(pyclipper.CleanPolygons(PTS))
+        # print(self.points)
+
+        # self.points = spu(self.points, value=1e4)
         return self
 
     def create_simplified_points(self):
@@ -115,14 +145,14 @@ class __Shape__(FieldInitializer):
         """ number of points in the shape """
         return self.__len__()
 
-    @property
-    def reverse(self):
-        pass
-
     def move(self, pos):
         p = np.array([pos[0], pos[1]])
         self.points += p
         return self
+
+    @property
+    def reverse(self):
+        pass
 
     def transform(self):
         pass
@@ -148,12 +178,6 @@ class Shape(__Shape__):
         super().__init__(**kwargs)
         if points is not None:
             self.points = points
-
-    # def __repr__(self):
-    #     return 'Shape'
-
-    # def __str__(self):
-    #     return self.__repr__()
 
     # def __deepcopy__(self, memo):
     #     # self.points = np.array(self.points)

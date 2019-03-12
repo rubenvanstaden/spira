@@ -3,15 +3,14 @@ import spira
 import gdspy
 import pathlib
 import numpy as np
-from spira.gdsii.utils import c3d
-from spira.gdsii.utils import scale_coord_down as scd
-from spira.gdsii.utils import scale_coord_up as scu
-from spira.gdsii.utils import scale_polygon_down as spd
-from spira.gdsii.utils import scale_polygon_up as spu
+from spira.utils import c3d
+from spira.utils import scale_coord_down as scd
+from spira.utils import scale_coord_up as scu
+from spira.utils import scale_polygon_down as spd
+from spira.utils import scale_polygon_up as spu
 from copy import copy, deepcopy
 from spira import LOG
 
-# from demo.pdks.process.mitll_pdk.database import RDD
 RDD = spira.get_rule_deck()
 
 import numpy as np

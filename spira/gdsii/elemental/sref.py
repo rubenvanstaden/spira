@@ -105,11 +105,13 @@ class SRefAbstract(__SRef__):
 
     @property
     def netlist(self):
+        # g = deepcopy(self.ref.netlist)
         g = self.ref.netlist
         for n in g.nodes():
             if 'device' not in g.node[n]:
                 pc_ply = g.nodes[n]['surface']
-                for p in pc_ply.edge_ports:
+                for ep in pc_ply.edge_ports:
+                    p = deepcopy(ep)
                     p1 = p.transform(self.tf)
                     for key, p2 in self.instance_ports.items():
                         if self.__equal_ports__(p1, p2):

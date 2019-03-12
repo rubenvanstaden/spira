@@ -3,9 +3,9 @@ import spira
 import numpy as np
 from copy import deepcopy
 from spira.core.lists import ElementList
-from spira.gdsii.utils import scale_polygon_down as spd
-from spira.gdsii.utils import scale_polygon_up as spu
-from spira.gdsii.utils import scale_coord_down as scd
+from spira.utils import scale_polygon_down as spd
+from spira.utils import scale_polygon_up as spu
+from spira.utils import scale_coord_down as scd
 
 
 class __Properties__(object):

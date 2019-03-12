@@ -17,9 +17,14 @@ from spira.gdsii import *
 from spira.lne import *
 from spira.lgm import *
 from spira.lgm import shapes
+from spira import process as pc
 from spira.lgm.route.routing import Route
+from spira.lpe.devices import Device
+from spira.lpe.circuits import Circuit
+from spira.lpe.mask import Mask
 
 from spira.core.lists import ElementList
+
 
 def initialize():
     from spira import log as LOG

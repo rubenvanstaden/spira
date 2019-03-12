@@ -3,10 +3,11 @@ from spira import param, shapes
 from spira.lne.net import Net
 import numpy as np
 from copy import copy, deepcopy
-from spira.lpe.pcells import Structure
+from spira.lpe.structure import Structure
 from spira.gdsii.elemental.port import __Port__
 from spira.core.mixin.netlist import NetlistSimplifier
 from spira.lpe.containers import __CellContainer__
+from spira.visualization import color
 
 
 RDD = spira.get_rule_deck()
@@ -17,7 +18,7 @@ class Device(Structure):
     describes the layout being generated. """
 
     level = param.IntegerField(default=1)
-    lcar = param.IntegerField(default=0.00001)
+    lcar = param.IntegerField(default=1)
 
     def __init__(self, name=None, metals=None, contacts=None, **kwargs):
         super().__init__(name=None, **kwargs)
@@ -57,5 +58,6 @@ class Device(Structure):
         return self.g
 
 
-
+class Via(Device):
+    color = param.ColorField(default=color.COLOR_LIGHT_GRAY)
 

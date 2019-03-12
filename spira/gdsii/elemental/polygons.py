@@ -5,7 +5,7 @@ import numpy as np
 from spira import param
 from copy import copy, deepcopy
 
-from spira.gdsii.utils import *
+from spira.utils import *
 from spira.core.initializer import ElementalInitializer
 from spira.core.mixin.transform import TranformationMixin
 from spira.core.mixin.property import PolygonMixin
@@ -45,18 +45,18 @@ class __Polygon__(gdspy.PolygonSet, ElementalInitializer):
         return self
 
     def __sub__(self, other):
-        points = bool_operation(
+        points = boolean(
             subj=self.shape.points,
             clip=other.shape.points,
-            method='difference'
+            method='not'
         )
         return points
 
     def __and__(self, other):
-        pp = bool_operation(
+        pp = boolean(
             subj=other.shape.points,
             clip=self.shape.points,
-            method='intersection'
+            method='and'
         )
         if len(pp) > 0:
             return Polygons(shape=np.array(pp), gdslayer=self.gdslayer)
@@ -64,10 +64,10 @@ class __Polygon__(gdspy.PolygonSet, ElementalInitializer):
             return None
 
     def __or__(self, other):
-        pp = bool_operation(
+        pp = boolean(
             subj=other.shape.points,
             clip=self.shape.points,
-            method='union'
+            method='or'
         )
         if len(pp) > 0:
             return Polygons(shape=pp, gdslayer=self.gdslayer)
@@ -85,17 +85,15 @@ class PolygonAbstract(__Polygon__):
     name = param.StringField()
     gdslayer = param.LayerField()
     direction = param.IntegerField(default=0)
+    # layer = param.IntegerField()
+    # datatype = param.IntegerField()
 
-    @property
-    def points(self):
-        return self.shape.points
-        
     def encloses(self, point):
         for points in self.points:
             if pyclipper.PointInPolygon(point, points) == 0:
                 return False
         return True
-    
+
     def commit_to_gdspy(self, cell):
         if self.__repr__() not in list(PolygonAbstract.__committed__.keys()):
             P = gdspy.PolygonSet(

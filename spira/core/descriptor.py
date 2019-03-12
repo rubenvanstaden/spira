@@ -71,7 +71,6 @@ class DataFieldDescriptor(BaseField):
                     value = self.default
                 else:
                     value = None
-                    # value = self
             else:
                 value = self.call_param_function(obj)
         else:

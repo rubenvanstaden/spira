@@ -10,11 +10,14 @@ st = pyclipper.scale_to_clipper
 sf = pyclipper.scale_from_clipper
 
 
-def bool_operation(subj, clip=None, method=None, closed=True, scale=1):
+# def boolean(subj, clip=None, method=None, closed=True, scale=0.00001):
+def boolean(subj, clip=None, method=None, closed=True, scale=1):
     from spira.gdsii.elemental.polygons import PolygonAbstract
 
     if clip is None and len(subj) <= 1:
         return subj
+
+    sc = 1/scale
 
     pc = pyclipper.Pyclipper()
     if issubclass(type(subj), PolygonAbstract):
@@ -22,42 +25,34 @@ def bool_operation(subj, clip=None, method=None, closed=True, scale=1):
     if issubclass(type(clip), PolygonAbstract):
         clip = clip.polygons
     if clip is not None:
-        pc.AddPaths(st(clip, scale), pyclipper.PT_CLIP, True)
-    pc.AddPaths(st(subj, scale), pyclipper.PT_SUBJECT, closed)
-    subj = None
-    if method == 'difference':
-        subj = pc.Execute(
-            pyclipper.CT_DIFFERENCE,
-            pyclipper.PFT_NONZERO,
-            pyclipper.PFT_NONZERO
-        )
-    elif method == 'union':
-        subj = pc.Execute(
-            pyclipper.CT_UNION,
-            pyclipper.PFT_NONZERO,
-            pyclipper.PFT_NONZERO
-        )
-    elif method == 'intersection':
-        subj = pc.Execute(
-            pyclipper.CT_INTERSECTION,
-            pyclipper.PFT_NONZERO,
-            pyclipper.PFT_NONZERO
-        )
-    elif method == 'exclusive':
-        subj = pc.Execute(
-            pyclipper.CT_XOR,
-            pyclipper.PFT_NONZERO,
-            pyclipper.PFT_NONZERO
-        )
+        # pc.AddPaths(st(clip, sc), pyclipper.PT_CLIP, True)
+        pc.AddPaths(clip, pyclipper.PT_CLIP, True)
+    # pc.AddPaths(st(subj, sc), pyclipper.PT_SUBJECT, closed)
+    pc.AddPaths(subj, pyclipper.PT_SUBJECT, closed)
+
+    if method == 'not':
+        value = pc.Execute(pyclipper.CT_DIFFERENCE, pyclipper.PFT_NONZERO, pyclipper.PFT_NONZERO)
+    elif method == 'or':
+        value = pc.Execute(pyclipper.CT_UNION, pyclipper.PFT_NONZERO, pyclipper.PFT_NONZERO)
+    elif method == 'and':
+        value = pc.Execute(pyclipper.CT_INTERSECTION, pyclipper.PFT_NONZERO, pyclipper.PFT_NONZERO)
+    elif method == 'xor':
+        value = pc.Execute(pyclipper.CT_XOR, pyclipper.PFT_NONZERO, pyclipper.PFT_NONZERO)
     else:
         raise ValueError('Please specify a clipping method')
-    points = []
-    for pts in pyclipper.SimplifyPolygons(subj):
-        points.append(np.array(pts))
-    return np.array(points)
+
+    return value
+
+    # PTS = []
+    # mc = sf(value, sc)
+    # for pts in pyclipper.SimplifyPolygons(mc):
+    #     PTS.append(np.array(pts))
+    # points = pyclipper.CleanPolygons(PTS)
+
+    # return np.array(points)
 
 
-def offset_operation(points, offset_type=None, scale=OFFSET):
+def offset(points, offset_type=None, scale=OFFSET):
     """ Apply polygon offsetting using Angusj.
     Either blow up polygons or blow it down. """
     pco = pyclipper.PyclipperOffset()
@@ -161,11 +156,16 @@ def scale_polygon_down(polygons, value=None):
 
 
 def numpy_to_list(points, start_height, unit=None):
-    if unit is None:
-        raise ValueError('Unit value not implemented!')
-    # unit = 1
+    # return np.array([[np.int32(p[0]*unit), np.int32(p[1]*unit), start_height] for p in points])
     return [[float(p[0]*unit), float(p[1]*unit), start_height] for p in points]
-    # return np.array([[p[0]*unit, p[1]*unit, start_height] for p in points], dtype=np.int64)
+
+    # pts = []
+    # for p in points:
+    #     p1 = round(float(p[0]*unit), 6)
+    #     p2 = round(float(p[1]*unit), 6)
+    #     pts.append([p1, p2, start_height])
+    # return pts
+
 
 
 

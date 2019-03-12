@@ -24,6 +24,10 @@ setup(
         'pyqt5',
         'lxml',
 
+        # Developer packages
+        'sphinxcontrib-napoleon',
+        'halo',
+
         # Basic packages
         'termcolor',
         'colorama',
@@ -31,7 +35,6 @@ setup(
         'scipy',
         'pytest',
         'numpy',
-        'sphinxcontrib-napoleon',
 
         # Core packages
         'gdspy',

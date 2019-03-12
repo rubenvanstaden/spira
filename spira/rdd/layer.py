@@ -131,6 +131,18 @@ class PhysicalLayer(__Layer__):
     #     return self
 
     @property
+    def name(self):
+        return self.layer.name
+
+    @property
+    def number(self):
+        return self.layer.number
+
+    @property
+    def datatype(self):
+        return self.layer.datatype
+
+    @property
     def key(self):
         return (self.layer.number, self.purpose.symbol, 'physical_layer_key')
 

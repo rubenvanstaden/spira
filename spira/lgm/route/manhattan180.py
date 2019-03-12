@@ -1,11 +1,10 @@
 import spira
 import numpy as np
 from spira import param, shapes
-from demo.pdks import ply
-# from spira.lgm.route.arc_bend import ArcRoute, Arc
+from spira import pc# from spira.lgm.route.arc_bend import ArcRoute, Arc
 from spira.lgm.route.route_shaper import RouteSimple
 from spira.lgm.route.route_shaper import RouteGeneral
-from spira.gdsii.utils import scale_coord_up as scu
+from spira.utils import scale_coord_up as scu
 from spira.lgm.route.manhattan import __Manhattan__
 
 
@@ -365,17 +364,17 @@ class Route180(RouteBase180, RouteParallel):
                 print('Q4')
                 R = self.quadrant_four
 
-        elems += R
+        # elems += R
                 
-        # points = []
-        # for e in R.ref.flatten():
-        #     if isinstance(e, spira.Polygons):
-        #         for p in e.points:
-        #             points.append(p)
-        # route_shape = shapes.Shape(points=points)
-        # route_shape.apply_merge
-        # poly = ply.Polygon(points=route_shape.points, player=self.player, enable_edges=False) 
-        # elems += poly
+        points = []
+        for e in R.ref.flatten():
+            if isinstance(e, spira.Polygons):
+                for p in e.points:
+                    points.append(p)
+        route_shape = shapes.Shape(points=points)
+        route_shape.apply_merge
+        poly = pc.Polygon(points=route_shape.points, player=self.player, enable_edges=False) 
+        elems += poly
 
         return elems
 

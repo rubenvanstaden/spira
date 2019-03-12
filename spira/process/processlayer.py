@@ -9,15 +9,19 @@ RDD = get_rule_deck()
 
 class __ProcessLayer__(spira.Cell):
 
+    doc = param.StringField()
     layer = param.DataField(fdef_name='create_layer')
+    points = param.DataField(fdef_name='create_points')
     polygon = param.DataField(fdef_name='create_polygon')
-    enable_edges = param.BoolField(default=True)
 
     def create_layer(self):
         return None
 
     def create_polygon(self):
-        return None
+        return self.elementals[0]
+
+    def create_points(self):
+        return self.polygon.shape.points
 
     def commit_to_gdspy(self, cell):
         self.polygon.commit_to_gdspy(cell=cell)
@@ -46,20 +50,28 @@ class __PortConstructor__(__ProcessLayer__):
 
     def create_contact_ports(self):
         p1 = spira.Port(
-            name='P1',
+            name='P_contact_1',
             midpoint=self.polygon.center,
             gdslayer = self.layer1
         )
         p2 = spira.Port(
-            name='P2',
+            name='P_contact_2',
             midpoint=self.polygon.center,
             gdslayer = self.layer2
         )
         return [p1, p2]
 
     def create_edge_ports(self, edges):
-        xpts = list(self.points[0][:, 0])
-        ypts = list(self.points[0][:, 1])
+        # print(self.points)
+
+        PTS = []
+        for pts in self.points:
+            PTS.append(np.array(pts))
+        xpts = list(PTS[0][:, 0])
+        ypts = list(PTS[0][:, 1])
+
+        # xpts = list(self.points[0][:, 0])
+        # ypts = list(self.points[0][:, 1])
 
         n = len(xpts)
         xpts.append(xpts[0])
@@ -98,10 +110,17 @@ class ProcessLayer(__PortConstructor__):
     player = param.PhysicalLayerField()
     level = param.IntegerField(default=10)
     error = param.IntegerField(default=0)
+    enable_edges = param.BoolField(default=True)
+    
+    def __repr__(self):
+        return ("[SPiRA: ProcessLayer(\'{}\')] {} center, {} ports)").format(
+            self.player.layer.number,
+            self.center,
+            self.ports.__len__()
+        )
 
-    def create_elementals(self, elems):
-        elems += self.polygon
-        return elems
+    def __str__(self):
+        return self.__repr__()
 
     def create_layer(self):
         if self.error != 0:
@@ -125,15 +144,14 @@ class ProcessLayer(__PortConstructor__):
         return layer
 
     def create_ports(self, ports):
-
-        if self.player.purpose in (RDD.PURPOSE.PRIM.VIA, RDD.PURPOSE.PRIM.JUNCTION):
+        if self.player.purpose == RDD.PURPOSE.PRIM.JUNCTION:
+            ports += self.contact_ports
+        elif self.player.purpose == RDD.PURPOSE.PRIM.VIA:
             ports += self.contact_ports
         elif self.player.purpose == RDD.PURPOSE.METAL:
             if self.level == 1:
                 ports += self.metal_port
-
             if self.enable_edges:
                 for edge in self.edge_ports:
                     ports += edge
-
         return ports

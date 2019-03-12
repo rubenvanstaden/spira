@@ -1,14 +1,14 @@
 import spira
 import numpy as np
 from spira import param, shapes
-from demo.pdks import ply
+from spira import pc
 from spira.lpe.containers import __CellContainer__
 from copy import copy, deepcopy
 
-from spira.gdsii.utils import scale_polygon_down as spd
-from spira.gdsii.utils import scale_polygon_up as spu
-from spira.lpe.pcells import  __NetlistCell__
-from demo.pdks.components.mitll.via import Via
+from spira.utils import scale_polygon_down as spd
+from spira.utils import scale_polygon_up as spu
+from spira.lpe.structure import  __NetlistCell__
+from spira.lpe.devices import Via
 
 
 RDD = spira.get_rule_deck()
@@ -43,6 +43,10 @@ class Mask(__NetlistCell__):
         neighbour_nodes = {}
         for S in self.cell.structures:
             if not issubclass(type(S.ref), Via):
+
+                print(type(S.ref))
+                print(S)
+
                 neighbour_nodes[S.node_id] = []
                 for n in g.nodes():
                     if 'device' in g.node[n]:
@@ -70,7 +74,7 @@ class Mask(__NetlistCell__):
                                             struct_nodes[m].append(uid)
                                         else:
                                             struct_nodes[m] = [uid]
-    
+
                 for m, connections in struct_nodes.items():
                     gs.node[m]['connect'] = []
                     for v in connections:
@@ -110,8 +114,13 @@ class Mask(__NetlistCell__):
                         for d in self.g.nodes(data='connect'):
                             if d[1] is not None:
                                 for c2 in d[1]:
-                                    if c1.node_id == c2.node_id:
-                                        self.g.add_edge(r[0], d[0])
+                                    # print(c1.node_id)
+                                    # print(c2)
+                                    # print('')
+                                    if not isinstance(c1, tuple):
+                                        if not isinstance(c2, tuple):
+                                            if c1.node_id == c2.node_id:
+                                                self.g.add_edge(r[0], d[0])
 
         remove_nodes = []
         for S in self.cell.structures:

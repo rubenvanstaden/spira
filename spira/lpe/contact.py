@@ -1,8 +1,7 @@
 import spira
 from spira import param
-from demo.pdks import ply
-# from copy import copy, deepcopy
-from spira.lpe.pcells import Structure
+from spira import pc
+from spira.lpe.structure import Structure
 
 
 RDD = spira.get_rule_deck()
@@ -60,10 +59,10 @@ class DeviceTemplate(Structure):
             if len(e.polygons[0]) == 4:
                 alias = 'devices_box_{}_{}_{}'.format(pl.layer.number, self.cell.node_id, i)
                 poly = spira.Polygons(shape=e.polygons)
-                elems += ply.Box(name=alias, player=pl, center=poly.center, w=poly.dx, h=poly.dy, level=self.level)
+                elems += pc.Box(name=alias, player=pl, center=poly.center, w=poly.dx, h=poly.dy, level=self.level)
             else:
                 alias = 'ply_{}_{}_{}'.format(pl.layer.number, self.cell.node_id, i)
-                elems += ply.Polygon(name=alias, player=pl, points=e.polygons, level=self.level)
+                elems += pc.Polygon(name=alias, player=pl, points=e.polygons, level=self.level)
         return elems
 
     def create_metals(self, elems):

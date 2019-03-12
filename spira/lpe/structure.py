@@ -1,7 +1,7 @@
 import spira
 import numpy as np
 from spira import param, shapes
-from demo.pdks import ply
+from spira import pc
 from spira.lpe.containers import __CellContainer__, __NetContainer__
 from spira.lne.net import Net
 from copy import copy, deepcopy
@@ -142,7 +142,7 @@ class Structure(__NetlistCell__):
 
     level = param.IntegerField(default=2)
     algorithm = param.IntegerField(default=6)
-    lcar = param.IntegerField(default=0.1)
+    lcar = param.IntegerField(default=0)
 
     def __metal_name__(self, uid, pl):
         name = 'metal_{}_{}_{}'.format(self.name, pl.layer.number, uid)
@@ -167,25 +167,26 @@ class Structure(__NetlistCell__):
     def create_merged_layers(self, elems):
         params = {}
         for M in self.metals:
-            if M.player not in params.keys():
-                params[M.player] = list(M.polygon.polygons)
-            else:
-                for pp in M.polygon.polygons:
-                    params[M.player].append(pp)
+            if isinstance(M, pc.ProcessLayer):
+                if M.player not in params.keys():
+                    params[M.player] = list(M.polygon.polygons)
+                else:
+                    for pp in M.polygon.polygons:
+                        params[M.player].append(pp)
         for player, points in params.items():
             shape = shapes.Shape(points=points)
             shape.apply_merge
             for uid, pts in enumerate(shape.points):
                 name = self.__metal_name__(uid, player)
-                elems += ply.Polygon(name=name, player=player, points=[pts], level=self.level)
+                elems += pc.Polygon(name=name, player=player, points=[pts], level=self.level)
         return elems
 
     def create_ports(self, ports):
         """ Activate the edge ports to be used in
         the Device for metal connections. """
 
-        # for m in self.merged_layers:
-        for m in self.metals:
+        for m in self.merged_layers:
+        # for m in self.metals:
             for p in m.ports:
                 if isinstance(p, (spira.Term, spira.EdgeTerm)):
                     edgelayer = deepcopy(p.gdslayer)
@@ -193,11 +194,13 @@ class Structure(__NetlistCell__):
                     edgelayer.datatype = self.edge_datatype
                     arrowlayer.datatype = self.arrow_datatype
 
+                    name = '{}_{}'.format(m.player.name, p.name)
                     term = p.modified_copy(
-                        name=p.name,
+                        name=name,
                         gdslayer=deepcopy(m.player.layer),
                         edgelayer=edgelayer,
                         arrowlayer=arrowlayer,
+                        width=1*1e6
                     )
 
                     ports += term

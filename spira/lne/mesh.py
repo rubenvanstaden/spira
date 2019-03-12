@@ -9,7 +9,7 @@ import networkx as nx
 from spira import settings
 
 from spira.gdsii.elemental.label import Label
-from spira.gdsii import utils
+from spira import utils
 from spira import param
 
 from spira import log as LOG
@@ -230,7 +230,7 @@ class MeshLabeled(MeshAbstract):
 
     def create_route_nodes(self):
         """  """
-        from demo.pdks import ply
+        from spira import pc
         for R in self.route_nodes:
             for pp in R.ref.metals:
                 R_ply = pp.elementals[0]
@@ -249,9 +249,7 @@ class MeshLabeled(MeshAbstract):
     def create_boundary_nodes(self):
         if self.level > 1:
             for B in self.bounding_boxes:
-                for p in B.elementals.polygons:
-                    ply = deepcopy(p)
-                    ply.center = B.S.midpoint
+                for ply in B.elementals.polygons:
                     for n in self.g.nodes():
                         if ply.encloses(self.g.node[n]['pos']):
                             self.g.node[n]['device'] = B.S

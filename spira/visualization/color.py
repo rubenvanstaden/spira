@@ -66,6 +66,7 @@ COLOR_DARKSEA_GREEN = Color(name='darksea green', red=143, green=188, blue=143)
 COLOR_INDIAN_RED = Color(name='indian red', red=205, green=92, blue=92)
 COLOR_STEEL_BLUE = Color(name='steel blue', red=70, green=130, blue=180)
 COLOR_DARK_MAGENTA = Color(name='dark magenta', red=139, green=0, blue=139)
+COLOR_ROYAL_BLUE = Color(name='royal blue', red=65, green=105, blue=225)
 
 
 # COLOR_BLACK = Color(name = "black", red = 0, green = 0, blue = 0)

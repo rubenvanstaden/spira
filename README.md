@@ -47,6 +47,15 @@ Examples of using the PCell implementation is given in [examples](https://github
 <!-- Examples of using the PCell implementation is given in [examples](https://spira.readthedocs.io/en/latest/pcell_examples.html). -->
 
 
+## Future Changes
+* Add auto scaling to PCell values.
+* Update LVS to solve multi-level circuits.
+* Implement DRC.
+* Fix issues with gds writting and other operations, such as Box objects.
+* Add polygon stretching methods.
+* Add elemental-to-port alignment.
+
+
 ## History of changes
 
 ### Version 0.0.3 (March 08, 2019)

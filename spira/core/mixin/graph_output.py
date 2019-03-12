@@ -5,7 +5,7 @@ import spira
 from spira import log as LOG
 
 from spira.gdsii.io import *
-from spira.gdsii.utils import scale_coord_down as scd
+from spira.utils import scale_coord_down as scd
 
 from spira.param.field.typed_graph import EdgeCapacitor
 from spira.param.field.typed_graph import EdgeInductor
@@ -123,7 +123,7 @@ class DrawGraphAbstract(object):
 
     def _create_nodes(self, G, labeltext):
         import spira
-        from demo.pdks.ply.base import __ProcessLayer__
+        from spira.process.processlayer import __ProcessLayer__
 
         nodes = {}
 

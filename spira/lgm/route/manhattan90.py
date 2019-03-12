@@ -1,7 +1,6 @@
 import spira
 import numpy as np
-from spira import param, shapes
-from demo.pdks import ply
+from spira import param, shapes, pc
 from spira.lgm.route.route_shaper import RouteSimple, RouteGeneral
 from spira.lgm.route.manhattan import __Manhattan__
 
@@ -127,10 +126,10 @@ class Route90(Route90):
                     points.append(p)
         route_shape = shapes.Shape(points=points)
         route_shape.apply_merge
-        poly = ply.Polygon(points=route_shape.points, player=self.player, enable_edges=False) 
+        poly = pc.Polygon(points=route_shape.points, player=self.player, enable_edges=False)
         elems += poly
 
-        elems += R
+        # elems += R
 
         return elems
         

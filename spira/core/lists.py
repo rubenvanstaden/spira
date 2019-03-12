@@ -122,7 +122,8 @@ class ElementList(__ElementList__):
     def dependencies(self):
         import spira
         from spira.gdsii.lists.cell_list import CellList
-        from demo.pdks.ply.base import ProcessLayer
+        from spira import pc
+        from spira.process.processlayer import ProcessLayer
         cells = CellList()
         for e in self._list:
             if not issubclass(type(e), ProcessLayer):

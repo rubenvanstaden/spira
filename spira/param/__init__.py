@@ -179,12 +179,12 @@ class PointArrayField(DataFieldDescriptor):
         # return value 
 
     def __operations__(self, points):
-        # from spira.gdsii.utils import scale_polygon_up as spu
+        # from spira.utils import scale_polygon_up as spu
         # return spu(points) 
         return points
 
     def __set__(self, obj, points):
-        # from spira.gdsii.utils import scale_polygon_up as spu
+        # from spira.utils import scale_polygon_up as spu
         # pp = spu(self.__operations__(points))
         # obj.__store__[self.__name__] = pp
         obj.__store__[self.__name__] = points

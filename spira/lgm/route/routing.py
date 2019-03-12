@@ -1,13 +1,13 @@
 import spira
 import numpy as np
 from spira import param, shapes
-from demo.pdks import ply
+from spira import pc
 from spira.lgm.route.manhattan import __Manhattan__
 from spira.lgm.route.manhattan90 import Route90
 from spira.lgm.route.manhattan180 import Route180
 from spira.lgm.route.route_shaper import RouteSimple, RouteGeneral, RoutePointShape
 from spira.visualization import color
-from spira.lpe.pcells import Structure
+from spira.lpe.structure import Structure
 
 
 RDD = spira.get_rule_deck()
@@ -27,13 +27,6 @@ class Route(Structure, __Manhattan__):
     route_path = param.DataField(fdef_name='create_route_path')
     route_straight = param.DataField(fdef_name='create_route_straight')
     route_auto = param.DataField(fdef_name='create_route_auto')
-
-    # def validate_parameters(self):
-    #     if self.port1.width < self.player.data.WIDTH:
-    #         return False
-    #     if self.port2.width < self.player.data.WIDTH:
-    #         return False
-    #     return True
 
     def create_angle(self):
         if self.port1 and self.port2:
@@ -56,7 +49,6 @@ class Route(Structure, __Manhattan__):
                     self.__type__ = 'straight'
             if self.path:
                 self.__type__ = 'path'
-        # elif len(self.port_list) > 0:
         if self.port_list is not None:
             self.__type__ = 'auto'
 
@@ -105,7 +97,7 @@ class Route(Structure, __Manhattan__):
             connect_layer=self.player
         )
         r = spira.SRef(R)
-        r.connect(port=r.ports['P1'], destination=self.port1)
+        # r.connect(port=r.ports['P1'], destination=self.port1)
         return r
 
     def create_route_straight(self):
@@ -124,26 +116,46 @@ class Route(Structure, __Manhattan__):
         r.connect(port=r.ports['P1'], destination=self.port1)
         return r
 
-    def create_route_auto(self):
-        print('AUTO!')
-        R = spira.Cell(name='Auto Router')
-        # for x in range(int(np.floor(len(self.port_list)/2))+1):
-        print(len(self.port_list))
-        # for x in range(int(np.floor(len(self.port_list)/2))):
-        for x in range(0, len(self.port_list), 2):
-        # for x in self.port_list[::2]:
-            print(x)
-            print(self.port_list[x])
-            print(self.port_list[x+1])
-            print('')
-            route_cell = Route(
-                port1=self.port_list[x], 
-                port2=self.port_list[x+1], 
-                player=self.player, 
-                radius=0.3*1e6
-            )
-            R += spira.SRef(route_cell)
+    # def create_route_auto(self):
+    #     R = spira.Cell(name='Auto Router')
+    #     for x in range(0, len(self.port_list), 2):
+    #         route_cell = Route(
+    #             port1=self.port_list[x],
+    #             port2=self.port_list[x+1],
+    #             player=self.player,
+    #             radius=0.1*1e6
+    #         )
+    #         R += spira.SRef(route_cell)
+    #     D = spira.Cell(name='Device Router')
+    #     points = []
+    #     for e in R.flatten():
+    #         if isinstance(e, spira.Polygons):
+    #             for p in e.points:
+    #                 points.append(p)
+    #     route_shape = shapes.Shape(points=points)
+    #     route_shape.apply_merge
+    #     D += pc.Polygon(points=route_shape.points, player=self.player, enable_edges=False) 
+    #     return spira.SRef(D)
 
+    def create_route_auto(self):
+        R = spira.Cell(name='Auto Router')
+
+        term_list = []
+        for x in range(0, len(self.port_list)):
+            p = self.port_list[x]
+            if isinstance(p, spira.Term):
+                term_list.append(p)
+            elif isinstance(p, spira.Connector):
+                for c in p.ports:
+                    term_list.append(c)
+
+        for x in range(0, len(term_list), 2):
+            route_cell = Route(
+                port1=term_list[x],
+                port2=term_list[x+1],
+                player=self.player, 
+                radius=0.1*1e6)
+            R += spira.SRef(route_cell)
         D = spira.Cell(name='Device Router')
         points = []
         for e in R.flatten():
@@ -152,7 +164,7 @@ class Route(Structure, __Manhattan__):
                     points.append(p)
         route_shape = shapes.Shape(points=points)
         route_shape.apply_merge
-        D += ply.Polygon(points=route_shape.points, player=self.player, enable_edges=False) 
+        D += pc.Polygon(points=route_shape.points, player=self.player, enable_edges=False) 
         return spira.SRef(D)
 
     def create_metals(self, elems):
@@ -161,7 +173,7 @@ class Route(Structure, __Manhattan__):
                 if issubclass(type(e), spira.Polygons):
                     for player in RDD.PLAYER.get_physical_layers(purposes='METAL'):
                         if player.layer.number == e.gdslayer.number:
-                            elems += ply.Polygon(points=e.shape.points, player=player)
+                            elems += pc.Polygon(points=e.shape.points, player=player)
         elif self.__type__ == '90':
             r1 = self.route_90
             # for e in r1.ref.elementals:

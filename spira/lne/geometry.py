@@ -4,7 +4,7 @@ import pygmsh
 import meshio
 
 from spira.core.lists import ElementList
-from spira.gdsii.utils import numpy_to_list
+from spira.utils import numpy_to_list
 from spira import param
 from spira.lne.mesh import Mesh
 from spira.core.initializer import ElementalInitializer
@@ -27,12 +27,17 @@ class __Geometry__(ElementalInitializer):
     def __init__(self, lcar, **kwargs):
         ElementalInitializer.__init__(self, **kwargs)
 
+        if lcar == 0:
+            raise ValueError('Characteristic Length cannot be zero.')
+
         self.geom = pygmsh.opencascade.Geometry(
             characteristic_length_min=lcar,
             characteristic_length_max=lcar
         )
 
         self.geom.add_raw_code('Mesh.Algorithm = {};'.format(self.algorithm))
+        # self.geom.add_raw_code('Mesh.ScalingFactor = {};'.format(RDD.GDSII.GRID))
+        self.geom.add_raw_code('Mesh.ScalingFactor = {};'.format(1e-6))
         self.geom.add_raw_code('Coherence Mesh;')
 
         self.mesh = None
@@ -52,7 +57,7 @@ class GeometryAbstract(__Geometry__):
     dimension = param.IntegerField(default=2)
     polygons = param.ElementalListField()
 
-    def __init__(self, lcar=0.01, **kwargs):
+    def __init__(self, lcar=1e6, **kwargs):
         super().__init__(lcar=lcar, **kwargs)
 
     def create_meshio(self):
@@ -68,40 +73,50 @@ class GeometryAbstract(__Geometry__):
         if not os.path.exists(directory):
             os.makedirs(directory)
 
+        mesh_data = None
+
         mesh_data = pygmsh.generate_mesh(
             self.geom,
-            verbose=False,
+            # verbose=False,
+            verbose=True,
             dim=self.dimension,
             prune_vertices=False,
             remove_faces=False,
-            # geo_filename=geo_file
+            geo_filename=geo_file
         )
 
         mm = meshio.Mesh(*mesh_data)
+        print('done meshing')
 
         # FIXME: WARNING:root:Binary Gmsh needs c_int (typically numpy.int32) integers (got int64). Converting.
         # meshio.write(mesh_file, mm)
-        meshio.write(vtk_file, mm)
+        # meshio.write(vtk_file, mm)
 
         return mesh_data
 
     def create_pygmsh_elementals(self):
-        from spira.gdsii.utils import scale_polygon_down as spd
-        from spira.gdsii.utils import scale_polygon_up as spu
+        from spira.utils import scale_polygon_down as spd
+        from spira.utils import scale_polygon_up as spu
 
         elems = ElementList()
         for pp in self.polygons:
             ply = pp.polygon
+            print('')
+            print(ply)
             for i, points in enumerate(ply.polygons):
-                c_points = numpy_to_list(points, self.height, unit=RDD.GDSII.GRID)
+                # print(points)
+                # c_points = numpy_to_list(points, self.height, unit=RDD.GDSII.GRID)
+                c_points = numpy_to_list(points, self.height, unit=1e-6)
+                # c_points = numpy_to_list(points, self.height, unit=1)
+                print(c_points)
                 surface_label = '{}_{}_{}_{}'.format(
                     ply.gdslayer.number,
                     ply.gdslayer.datatype,
                     GeometryAbstract._ID, i
                 )
                 gp = self.geom.add_polygon(
-                    c_points, 
-                    lcar=0.1,
+                    c_points,
+                    lcar=1e6,
                     make_surface=True,
                     holes=self.holes
                 )

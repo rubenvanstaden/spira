@@ -12,6 +12,7 @@ from spira.core.mixin.transform import TranformationMixin
 from spira.rdd import get_rule_deck
 from spira.visualization import color
 from spira.gdsii.group import GroupElementals
+from spira.gdsii.elemental.term import Term
 
 
 RDD = get_rule_deck()
@@ -82,12 +83,10 @@ class CellAbstract(__Cell__):
         return self
 
     def move(self, midpoint=(0,0), destination=None, axis=None):
-        from demo.pdks.ply.base import ProcessLayer
+        from spira import pc
         d, o = super().move(midpoint=midpoint, destination=destination, axis=axis)
         for e in self.elementals:
-
             e.move(destination=d, midpoint=o)
-
             # if issubclass(type(e), (LabelAbstract, PolygonAbstract)):
             #     # e.translate(dx, dy)
             #     e.move(destination=d, midpoint=o)
@@ -95,11 +94,9 @@ class CellAbstract(__Cell__):
             #     e.move(destination=d, midpoint=o)
             # if isinstance(e, SRef):
             #     e.move(destination=d, midpoint=o)
-
         for p in self.ports:
             mc = np.array(p.midpoint) + np.array(d) - np.array(o)
             p.move(midpoint=p.midpoint, destination=mc)
-
         return self
 
     def reflect(self, p1=(0,0), p2=(1,0)):
@@ -115,7 +112,7 @@ class CellAbstract(__Cell__):
 
     def rotate(self, angle=45, center=(0,0)):
         """ Rotates the cell with angle around a center. """
-        from demo.pdks.ply.base import ProcessLayer
+        from spira import pc
         if angle == 0:
             return self
         for e in self.elementals:
@@ -135,9 +132,7 @@ class CellAbstract(__Cell__):
 
     def get_ports(self, level=None):
         """ Returns copies of all the ports of the Device. """
-        port_list = [p._copy() for p in self.ports]
-        # port_list = [copy(p) for p in self.ports]
-        # port_list = [deepcopy(p) for p in self.ports]
+        port_list = [deepcopy(p) for p in self.ports]
         if level is None or level > 0:
             for r in self.elementals.sref:
                 if level is None:
@@ -156,9 +151,7 @@ class CellAbstract(__Cell__):
 
                 ref_ports_transformed = []
                 for rp in ref_ports:
-                    new_port = rp._copy()
-                    # new_port = copy(rp)
-                    # new_port = deepcopy(rp)
+                    new_port = deepcopy(rp)
                     new_port = new_port.transform(tf)
                     ref_ports_transformed.append(new_port)
                 port_list += ref_ports_transformed
@@ -213,19 +206,6 @@ class Cell(CellAbstract):
     def __str__(self):
         return self.__repr__()
 
-    def _copy(self):
-        return Cell(
-            name=self.name+'awe',
-            elementals=deepcopy(self.elementals),
-            ports=deepcopy(self.ports),
-            color=self.color
-        )
-
-
-
-
-
-
 
 class Connector(Cell):
     """
@@ -249,8 +229,8 @@ class Connector(Cell):
         )
 
     def create_ports(self, ports):
-        ports += spira.Term(name='P1', midpoint=self.midpoint, width=self.width, orientation=self.orientation)
-        ports += spira.Term(name='P2', midpoint=self.midpoint, width=self.width, orientation=self.orientation-180)
+        ports += Term(name='P1', midpoint=self.midpoint, width=self.width, orientation=self.orientation)
+        ports += Term(name='P2', midpoint=self.midpoint, width=self.width, orientation=self.orientation-180)
         return ports
 
 

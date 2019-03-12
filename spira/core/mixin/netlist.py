@@ -37,7 +37,7 @@ class __NetlistSimplifier__(object):
         self.g.remove_nodes_from(remove_nodes)
 
     def __validate_path__(self, path):
-        from demo.pdks.components.mitll.via import Via
+        from spira.lpe.devices import Via
         """ Test if path contains masternodes. """
         valid = True
         s, t = path[0], path[-1]
@@ -119,7 +119,7 @@ class NetlistSimplifier(__NetlistSimplifier__):
     @property
     def master_nodes(self):
         """ Excludes via devices with only two edges (series). """
-        from demo.pdks.components.mitll.via import Via
+        from spira.lpe.devices import Via
         branch_nodes = list()
         for n in self.g.nodes():
             if 'device' in self.g.node[n]:

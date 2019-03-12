@@ -2,7 +2,7 @@ import spira
 import gdspy
 import numpy as np
 from spira import param, shapes
-from demo.pdks import ply
+from spira import pc
 from numpy.linalg import norm
 from numpy import sqrt, pi, cos, sin, log, exp, sinh, mod
 
@@ -12,7 +12,7 @@ RDD = spira.get_rule_deck()
 
 class __RouteSimple__(shapes.Shape):
     """ Interface class for shaping route patterns. """
-    
+
     m1 = param.DataField(fdef_name='create_midpoint1')
     m2 = param.DataField(fdef_name='create_midpoint2')
 
@@ -310,7 +310,7 @@ class RouteGeneral(spira.Cell):
         return term
 
     def create_elementals(self, elems):
-        poly = ply.Polygon(
+        poly = pc.Polygon(
             points=self.route_shape.points, 
             player=self.connect_layer, 
             enable_edges=False
