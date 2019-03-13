@@ -322,3 +322,15 @@ class RouteGeneral(spira.Cell):
         ports += [self.port_input, self.port_output]
         return ports
 
+
+if __name__ == '__main__':
+    p1 = spira.Term(midpoint=(0,0), orientation=-90)
+    p2 = spira.Term(midpoint=(30*1e6,20*1e6), orientation=90)
+    rs = RouteSimple(port1=p1, port2=p2, path_type='straight')
+    pp = spira.Polygons(shape=rs)
+    pp.rotate(angle=180)
+    cell = spira.Cell()
+    cell += pp
+    cell += [p1, p2]
+    cell.output()
+    

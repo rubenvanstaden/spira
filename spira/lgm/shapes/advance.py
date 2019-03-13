@@ -81,7 +81,12 @@ class YtronShape(Shape):
 class NtronShape(Shape):
     """ Shape for generating a nTron device. """
 
+
+
     def create_points(self, points):
+
+
+
         return points
 
 

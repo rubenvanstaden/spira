@@ -54,6 +54,9 @@ Examples of using the PCell implementation is given in [examples](https://github
 
 
 ## Future Changes
+* Update BoxShape to include rounded corners.
+* Fix auto-docs implementation.
+* Fix type-checking implementation.
 * Fix issue with writing to a GDSII file.
 * Add support for GDSII Box elemental.
 * Implement caching parameters.
@@ -65,6 +68,9 @@ Examples of using the PCell implementation is given in [examples](https://github
 
 
 ## History of changes
+
+### Version 0.1.0 (XXX, 2019)
+* Added automatic docstring generation.
 
 ### Version 0.0.3 (March 12, 2019)
 * Added Dummy ports for crossing nodes in netlist.
