@@ -1,4 +1,5 @@
 import spira
+import gdspy
 import numpy as np
 from spira import param
 from spira.rdd import get_rule_deck
@@ -23,10 +24,11 @@ class __ProcessLayer__(spira.Cell):
     def create_points(self):
         return self.polygon.shape.points
 
-    def commit_to_gdspy(self, cell):
-        self.polygon.commit_to_gdspy(cell=cell)
+    def commit_to_gdspy(self, cell=None):
+        P = self.polygon.commit_to_gdspy(cell=cell)
         for p in self.ports:
             p.commit_to_gdspy(cell=cell)
+        return P
 
     def flat_copy(self, level=-1, commit_to_gdspy=False):
         elems = spira.ElementList()
@@ -61,8 +63,10 @@ class __PortConstructor__(__ProcessLayer__):
         )
         return [p1, p2]
 
+    def sliced_points(self, position, axis):
+        return points
+
     def create_edge_ports(self, edges):
-        # print(self.points)
 
         PTS = []
         for pts in self.points:
@@ -111,7 +115,7 @@ class ProcessLayer(__PortConstructor__):
     level = param.IntegerField(default=10)
     error = param.IntegerField(default=0)
     enable_edges = param.BoolField(default=True)
-    
+
     def __repr__(self):
         return ("[SPiRA: ProcessLayer(\'{}\')] {} center, {} ports)").format(
             self.player.layer.number,

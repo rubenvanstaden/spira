@@ -88,50 +88,6 @@ class DeviceTemplate(Structure):
 
         return elems
 
-    # def create_ports(self, ports):
-    #     """ Activate the edge ports to be used in
-    #     the Device for metal connections. """
-
-    #     # for m in self.merged_layers:
-    #         # print(m)
-    #     for m in self.metals:
-    #         for p in m.ports:
-    #             # if isinstance(p, spira.Term):
-    #             if isinstance(p, spira.EdgeTerm):
-    #                 # print(p)
-
-    #                 edgelayer = deepcopy(p.gdslayer)
-    #                 arrowlayer = deepcopy(p.gdslayer)
-
-    #                 edgelayer.datatype = self.edge_datatype
-    #                 arrowlayer.datatype = self.arrow_datatype
-
-    #                 term = p.modified_copy(
-    #                     name=p.name,
-    #                     gdslayer=deepcopy(m.player.layer),
-    #                     edgelayer=edgelayer,
-    #                     arrowlayer=arrowlayer,
-    #                 )
-
-    #                 # # term = spira.Term(
-    #                 # term = spira.EdgeTerm(
-    #                 #     name=p.name,
-    #                 #     # name='{}_{}'.format(i, p.name),
-    #                 #     gdslayer=deepcopy(m.player.layer),
-    #                 #     midpoint=deepcopy(p.midpoint),
-    #                 #     orientation=deepcopy(p.orientation),
-    #                 #     reflection=p.reflection,
-    #                 #     edgelayer=edgelayer,
-    #                 #     arrowlayer=arrowlayer,
-    #                 #     width=p.width,
-    #                 #     length=deepcopy(p.length)
-    #                 # )
-
-    #                 # term.connections += m
-
-    #                 ports += term
-    #     return ports
-
     def determine_type(self):
         self.__type__ = None
 
@@ -143,8 +99,6 @@ class DeviceTemplate(Structure):
                 is_possibly_match = False
             if len(self.metals) != len(default_via.metals):
                 is_possibly_match = False
-            # print(is_possibly_match)
-            # print(default_via.ports)
 
             if is_possibly_match:
                 default_ports = spira.ElementList()
@@ -152,37 +106,23 @@ class DeviceTemplate(Structure):
                     if isinstance(e, spira.Port):
                         if e.name != 'P_metal':
                             default_ports += e.gdslayer.node_id
-                # print(default_ports)
-                # print('--------------------------')
 
                 self_ports = spira.ElementList()
                 for e in self.elementals.flatten():
                     if isinstance(e, spira.Port):
                         if e.name != 'P_metal':
                             self_ports += e.gdslayer.node_id
-                # print(self_ports)
-
-                # for p1 in defa
                 if set(default_ports) == set(self_ports):
-                    # print('YESSSSSSSSSSSSSSSSSSSSS')
-                    # print(RDD.VIAS[key].DEFAULT.__name_prefix__)
-                    # self.__type__ = RDD.VIAS[key].DEFAULT.__name_prefix__
                     self.__type__ = key
 
-                # print('')
-
-
-
         for key in RDD.DEVICES.keys:
-            # print(key)
             default_via = RDD.DEVICES[key].PCELL()
             is_possibly_match = True
 
             if len(self.contacts) != len(default_via.contacts):
                 is_possibly_match = False
-            if len(self.merged_layers) != len(default_via.metals):
+            if len(self.merged_layers) != len(default_via.merged_layers):
                 is_possibly_match = False
-            # print(is_possibly_match)
 
             if is_possibly_match:
                 default_ports = spira.ElementList()
@@ -190,37 +130,25 @@ class DeviceTemplate(Structure):
                     if isinstance(e, spira.Port):
                         if e.name != 'P_metal':
                             default_ports += e.gdslayer.node_id
-                # print(default_ports)
-                # print('--------------------------')
 
                 self_ports = spira.ElementList()
                 for e in self.elementals.flatten():
                     if isinstance(e, spira.Port):
                         if e.name != 'P_metal':
                             self_ports += e.gdslayer.node_id
-                # print(self_ports)
-
-                # # for p1 in defa
-                # if set(default_ports) != set(self_ports):
-                #     is_possibly_match = False
 
             if is_possibly_match:
                 default_ports = spira.ElementList()
                 for e in default_via.contacts:
-                    # print(e.player)
                     default_ports += e.player
-
-                # print('--------------------------')
 
                 self_ports = spira.ElementList()
                 for e in self.contacts:
-                    # print(e.player)
                     self_ports += e.player
 
                 if set(default_ports) != set(self_ports):
                     is_possibly_match = False
 
             if is_possibly_match:
-                # print('YESSSSSSSSSSSSSSSSSSSSS')
                 self.__type__ = key
-            # print('')
+

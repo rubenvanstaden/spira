@@ -1,109 +1,85 @@
-from .field.typed_string import StringField
-from .field.typed_bool import BoolField
-# from .field.typed_list import ListField
 from .field.layer_list import LayerListProperty
-# from .field.typed_color import ColorField
 from .field.typed_point import PointField
 
 from spira.core.descriptor import DataField
 from spira.core.descriptor import DataFieldDescriptor
 from spira.core.descriptor import FunctionField
+from spira.param.restrictions import RestrictType
+from spira.param.variables import *
 
 import numpy as np
 
 
-def PolygonField(default='', shape=[]):
-    from spira.gdsii.elemental.polygons import Polygons
-    if default is None:
-        F = None
-    else:
-        F = Polygons(shape)
-    return DataFieldDescriptor(default=F)
-
-
-def LabelField(position=[]):
-    from spira.gdsii.elemental.label import Label
-    F = Label(position)
-    return DataFieldDescriptor(default=F)
-
-
-def ColorField(default=None, red=0.0, green=0.0, blue=0.0, **kwargs):
-    from spira.visualization.color import Color
-    if default is None:
-        F = Color(red=0.0, green=0.0, blue=0.0, **kwargs)
-    else:
-        F = default
-    return DataFieldDescriptor(default=F)
-
-
-def GroupElementalField(default=None):
-    from spira.gdsii.group import GroupElementals
-    F = GroupElementals(elementals=default)
-    return DataFieldDescriptor(default=F)
-
-
-def PortField(default=None):
-    from spira.gdsii.elemental.port import Port
-    if default is None:
-        F = None
-    else:
-        F = Port()
-    return DataFieldDescriptor(default=F)
-
-
-def ShapeField(points=[], doc=''):
-    from spira.lgm.shapes.shape import Shape
-    F = Shape(points, doc=doc)
-    return DataFieldDescriptor(default=F)
-
-
 def LayerField(name='noname', number=0, datatype=0, **kwargs):
-    from spira.layers.layer import Layer
-    F = Layer(name=name, number=number, datatype=datatype, **kwargs)
-    return DataFieldDescriptor(default=F, **kwargs)
+    from spira.layer import Layer
+    if 'default' not in kwargs:
+        kwargs['default'] = Layer(name=name, number=number, datatype=datatype, **kwargs)
+    R = RestrictType(Layer)
+    return DataFieldDescriptor(restrictions=R, **kwargs)
 
 
-def ListField(**kwargs):
-    from .variables import LIST
-    return DataFieldDescriptor(constraint=LIST, **kwargs)
+def ColorField(red=0, green=0, blue=0, **kwargs):
+    from spira.visualization.color import Color
+    if 'default' not in kwargs:
+        kwargs['default'] = Color(red=0, green=0, blue=0, **kwargs)
+    R = RestrictType(Color)
+    return DataFieldDescriptor(restrictions=R, **kwargs)
 
 
-def DictField(**kwargs):
-    from .variables import DICTIONARY
-    return DataFieldDescriptor(constraint=DICTIONARY, **kwargs)
-    
-
-def FloatField(**kwargs):
-    from .variables import FLOAT
-    return DataFieldDescriptor(constraint=FLOAT, **kwargs)
+def LabelField(position=[[], []], **kwargs):
+    from spira.gdsii.elemental.label import Label
+    if 'default' not in kwargs:
+        kwargs['default'] = Label(position=position)
+    R = RestrictType(Label)
+    return DataFieldDescriptor(restrictions=R, **kwargs)
 
 
-def NumpyArrayField(**kwargs):
-    from .variables import NUMPY_ARRAY
-    return DataFieldDescriptor(constraint=NUMPY_ARRAY, **kwargs)
+def PortField(midpoint=[0, 0], **kwargs):
+    from spira.gdsii.elemental.port import Port
+    if 'default' not in kwargs:
+        kwargs['default'] = Port(midpoint=midpoint)
+    R = RestrictType(Port)
+    return DataFieldDescriptor(restrictions=R, **kwargs)
 
 
-def IntegerField(**kwargs):
-    from .variables import INTEGER
-    return DataFieldDescriptor(constraint=INTEGER, **kwargs)
+def TermField(midpoint=[0, 0], **kwargs):
+    from spira.gdsii.elemental.term import Term
+    if 'default' not in kwargs:
+        kwargs['default'] = Term(midpoint=midpoint)
+    R = RestrictType(Term)
+    return DataFieldDescriptor(restrictions=R, **kwargs)
 
 
-def CellField(default=None, name=None, elementals=None, ports=None, library=None):
+def ShapeField(points=[], doc='', **kwargs):
+    from spira.lgm.shapes.shape import Shape
+    if 'default' not in kwargs:
+        kwargs['default'] = Shape(points, doc=doc)
+    R = RestrictType(Shape)
+    return DataFieldDescriptor(restrictions=R, **kwargs)
+
+
+def CellField(name=None, elementals=None, ports=None, library=None, **kwargs):
     from spira.gdsii.cell import Cell
-    if default is None:
-        F = None
-    else:
-        F = Cell(name=default, elementals=elementals, library=library)
-    return DataFieldDescriptor(default=F)
+    if 'default' not in kwargs:
+        kwargs['default'] = Cell(name=name, elementals=elementals, library=library)
+    R = RestrictType(Cell)
+    return DataFieldDescriptor(restrictions=R, **kwargs)
 
 
-def PhysicalLayerField(default=None, layer=None, purpose=None):
+def PhysicalLayerField(layer=None, purpose=None, **kwargs):
     from spira.rdd.layer import PhysicalLayer
-    if default is None:
-        F = PhysicalLayer(layer=layer, purpose=purpose)
-    else:
-        F = default
-    return DataFieldDescriptor(default=F)
+    if 'default' not in kwargs:
+        kwargs['default'] = PhysicalLayer(layer=layer, purpose=purpose)
+    R = RestrictType(PhysicalLayer)
+    return DataFieldDescriptor(restrictions=R, **kwargs)
+
+
+def PolygonField(shape=[[], []], **kwargs):
+    from spira.gdsii.elemental.polygons import Polygons
+    if 'default' not in kwargs:
+        kwargs['default'] = Polygons(shape=shape)
+    R = RestrictType(Polygons)
+    return DataFieldDescriptor(restrictions=R, **kwargs)
 
 
 class ElementalListField(DataFieldDescriptor):
@@ -112,6 +88,7 @@ class ElementalListField(DataFieldDescriptor):
 
     def __init__(self, default=[], **kwargs):
         kwargs['default'] = self.__type__(default)
+        kwargs['restrictions'] = RestrictType([self.__type__])
         super().__init__(**kwargs)
 
     def __repr__(self):

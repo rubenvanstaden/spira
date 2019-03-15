@@ -54,23 +54,25 @@ Examples of using the PCell implementation is given in [examples](https://github
 
 
 ## Future Changes
-* Update BoxShape to include rounded corners.
+* Add basic DRC tests in RDD.
 * Fix auto-docs implementation.
-* Fix type-checking implementation.
+* Add Display class to RDD.
+* Update BoxShape to include rounded corners.
+* Implement polygon stretching.
+* Implement polygon slicing.
 * Fix issue with writing to a GDSII file.
-* Add support for GDSII Box elemental.
+* Update LVS to solve multi-level circuits.
+* Add sref-to-port alignment.
 * Implement caching parameters.
 * Add auto scaling to PCell values (once caching is implemented).
-* Update LVS to solve multi-level circuits.
-* Implement Design Rule Checking.
-* Add sref-to-port alignment.
-* Implement polygon stretching.
 
 
 ## History of changes
 
 ### Version 0.1.0 (XXX, 2019)
+* Implement locked parameters.
 * Added automatic docstring generation.
+* Fix type-checking implementation. Updated parameter restrictions.
 
 ### Version 0.0.3 (March 12, 2019)
 * Added Dummy ports for crossing nodes in netlist.

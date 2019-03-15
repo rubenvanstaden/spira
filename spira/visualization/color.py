@@ -9,12 +9,12 @@ from spira.core.initializer import FieldInitializer
 class Color(FieldInitializer):
     """ Defines a color in terms of a name and RGB values. """
 
-    name = param.StringField()
-    red = param.FloatField(default=0.0)
-    green = param.FloatField(default=0.0)
-    blue = param.FloatField(default=0.0)
+    name = param.StringField(default='black')
+    red = param.IntegerField(default=0)
+    green = param.IntegerField(default=0)
+    blue = param.IntegerField(default=0)
 
-    def __init__(self, red=0.0, green=0.0, blue=0.0, **kwargs):
+    def __init__(self, red=0, green=0, blue=0, **kwargs):
         super().__init__(red=red, green=green, blue=blue, **kwargs)
 
     def rgb_tuple(self):
@@ -39,8 +39,11 @@ class Color(FieldInitializer):
     def __neq__(self, other):
         return other.red != self.red or other.green != self.green or other.blue != self.blue
 
+    def __repr__(self):
+        return ("[SPiRA: Color] (name '{}', hex {})").format(self.name, self.hexcode)
+
     def __str__(self):
-        return self.name
+        return self.__repr__()
 
 
 COLOR_BLACK = Color(name='black', red=0, green=0, blue=0)
@@ -69,28 +72,6 @@ COLOR_DARK_MAGENTA = Color(name='dark magenta', red=139, green=0, blue=139)
 COLOR_ROYAL_BLUE = Color(name='royal blue', red=65, green=105, blue=225)
 
 
-# COLOR_BLACK = Color(name = "black", red = 0, green = 0, blue = 0)
-# COLOR_WHITE = Color(name = "white", red = 1, green = 1, blue = 1)
-# COLOR_GHOSTWHITE = Color(name = "ghost white", red = 0.97, green = 0.97, blue = 1)
-# COLOR_RED = Color(name = "red", red = 1, green = 0, blue = 0)
-# COLOR_GREEN = Color(name = "green", red = 0, green = 1, blue = 0)
-# COLOR_BLUE = Color(name = "blue", red = 0, green = 0, blue = 1)
-# COLOR_CYAN = Color(name = "cyan", red = 0, green = 1, blue = 1)
-# COLOR_YELLOW = Color(name = "yellow", red = 1, green = 1, blue = 0)
-# COLOR_MAGENTA = Color(name = "magenta", red = 1, green = 0, blue = 1)
-# COLOR_DARK_GREEN = Color(name = "dark green", red = 0.5, green = 0.31, blue = 0)
-# COLOR_DEEP_GREEN = Color(name = "deep green", red = 0, green = 0.5, blue = 0.5)
-# COLOR_ORANGE = Color(name = "ORANGE", red = 1, green = 0.62, blue = 0.62)
-# COLOR_PURPLE = Color(name = "PURPLE", red = 0.75, green = 0.5, blue = 1)
-# COLOR_CHAMPAGNE = Color(name = "CHAMPAGNE", red = 0.98, green = 0.84, blue = 0.65)
-# COLOR_BLUE_VIOLET = Color(name = "BLUE-VIOLET", red = 0.44, green = 0.0, blue = 1.0)
-# COLOR_BLUE_CRAYOLA = Color(name = "BLUE (CRAYOLA)", red = 0.12, green = 0.46, blue = 1.0)
-# COLOR_SCARLET = Color(name = "SCARLET", red = 1.0, green = 0.14, blue = 0.0)
-# COLOR_SANGRIA = Color(name = "SANGRIA", red=0.57, green = 0.0, blue = 0.04)
-# COLOR_SILVER = Color(name = "SILVER", red=0.75, green = 0.75, blue = 0.75)
-# COLOR_TITANIUM_YELLOW = Color(name = "TITANIUM_YELLOW", red=0.93, green = 0.90, blue = 0.0)
-# COLOR_GRAY = Color(name="GRAY", red=0.55, green=0.52, blue = 0.55)
-# COLOR_COPPER = Color(name="COPPER", red=0.72, green = 0.45, blue = 0.20)
 
 
 

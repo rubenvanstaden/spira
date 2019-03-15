@@ -21,10 +21,9 @@ RDD = get_rule_deck()
 class __Cell__(gdspy.Cell, CellInitializer):
 
     __name_generator__ = RDD.ADMIN.NAME_GENERATOR
-    # __mixins__ = [OutputMixin, CellMixin, TranformationMixin, GroupElementals]
     __mixins__ = [OutputMixin, CellMixin, TranformationMixin]
 
-    name = param.DataField(fdef_name='create_name')
+    name = param.DataField(fdef_name='create_name', doc='Name of the cell instance.')
 
     def __add__(self, other):
         from spira.gdsii.elemental.port import __Port__
@@ -39,9 +38,9 @@ class __Cell__(gdspy.Cell, CellInitializer):
 
 class CellAbstract(__Cell__):
 
-    ports = param.ElementalListField(fdef_name='create_ports')
-    elementals = param.ElementalListField(fdef_name='create_elementals')
-    color = param.ColorField(default=color.COLOR_DARK_SLATE_GREY)
+    ports = param.ElementalListField(fdef_name='create_ports', doc='List of ports to be added to the cell instance.')
+    elementals = param.ElementalListField(fdef_name='create_elementals', doc='List of elementals to be added to the cell instance.')
+    color = param.ColorField(default=color.COLOR_DARK_SLATE_GREY, doc='Color that a default cell will represent in a netlist.')
 
     def create_elementals(self, elems):
         return elems

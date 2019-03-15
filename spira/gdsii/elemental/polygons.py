@@ -85,8 +85,14 @@ class PolygonAbstract(__Polygon__):
     name = param.StringField()
     gdslayer = param.LayerField()
     direction = param.IntegerField(default=0)
-    # layer = param.IntegerField()
-    # datatype = param.IntegerField()
+
+    @property
+    def layer(self):
+        return self.gdslayer.layer
+
+    @property
+    def datatype(self):
+        return self.gdslayer.datatype
 
     def encloses(self, point):
         for points in self.points:
@@ -94,7 +100,20 @@ class PolygonAbstract(__Polygon__):
                 return False
         return True
 
-    def commit_to_gdspy(self, cell):
+    # def commit_to_gdspy(self, cell):
+    #     if self.__repr__() not in list(PolygonAbstract.__committed__.keys()):
+    #         P = gdspy.PolygonSet(
+    #             polygons=deepcopy(self.shape.points),
+    #             layer=self.gdslayer.number, 
+    #             datatype=self.gdslayer.datatype,
+    #             verbose=False
+    #         )
+    #         cell.add(P)
+    #         PolygonAbstract.__committed__.update({self.__repr__():P})
+    #     else:
+    #         cell.add(PolygonAbstract.__committed__[self.__repr__()])
+
+    def commit_to_gdspy(self, cell=None):
         if self.__repr__() not in list(PolygonAbstract.__committed__.keys()):
             P = gdspy.PolygonSet(
                 polygons=deepcopy(self.shape.points),
@@ -102,10 +121,12 @@ class PolygonAbstract(__Polygon__):
                 datatype=self.gdslayer.datatype,
                 verbose=False
             )
-            cell.add(P)
             PolygonAbstract.__committed__.update({self.__repr__():P})
         else:
-            cell.add(PolygonAbstract.__committed__[self.__repr__()])
+            P = PolygonAbstract.__committed__[self.__repr__()]
+        if cell is not None:
+            cell.add(P)
+        return P
 
     def flat_copy(self, level=-1, commit_to_gdspy=False):
         elems = []
@@ -134,6 +155,32 @@ class PolygonAbstract(__Polygon__):
         d, o = super().move(midpoint=midpoint, destination=destination, axis=axis)
         dx, dy = np.array(d) - o
         self.translate(dx, dy)
+        return self
+
+    def fillet(self, radius, angle_resolution=128, precision=0.001*1e6):
+        super().fillet(radius=radius, points_per_2pi=angle_resolution, precision=precision)
+        self.shape.points = self.polygons
+        return self
+
+    def merge(self):
+        sc = 2**30
+        polygons = pyclipper.scale_to_clipper(self.points, sc)
+        points = []
+        for poly in polygons:
+            if pyclipper.Orientation(poly) is False:
+                reverse_poly = pyclipper.ReversePath(poly)
+                solution = pyclipper.SimplifyPolygon(reverse_poly)
+            else:
+                solution = pyclipper.SimplifyPolygon(poly)
+            for sol in solution:
+                points.append(sol)
+        value = boolean(subj=points, method='or')
+        PTS = []
+        mc = pyclipper.scale_from_clipper(value, sc)
+        for pts in pyclipper.SimplifyPolygons(mc):
+            PTS.append(np.array(pts))
+        self.shape.points = np.array(pyclipper.CleanPolygons(PTS))
+        self.polygons = self.shape.points
         return self
 
     def fast_boolean(self, other, operation):

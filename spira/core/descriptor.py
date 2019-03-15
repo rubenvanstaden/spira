@@ -1,3 +1,4 @@
+from spira.param.restrictions import RestrictNothing
 
 
 class BaseField(object):
@@ -34,23 +35,29 @@ class BaseField(object):
 
 
 class DataFieldDescriptor(BaseField):
-    __keywords__ = ['default', 'fdef_name']
+    __keywords__ = ['default', 'fdef_name', 'restrictions', 'locked']
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
         self.locked = False
 
-        if 'constraint' in kwargs:
-            self.constraint = kwargs['constraint']
+        if 'restriction' in kwargs:
+            self.restriction = kwargs['restriction']
         else:
-            self.constraint = None
+            self.restriction = RestrictNothing()
 
         if 'fdef_name' not in kwargs:
             self.fdef_name = None
 
     def __field_was_stored__(self, obj):
         return (self.__name__ in obj.__store__)
+
+    def __check_restriction__(self, obj, value):
+        if self.restriction(value, obj):
+            return True
+        else:
+            raise ValueError("Invalid parameter assignment '{}' of cell '{}' with value '{}', which is not compatible with '{}'.".format(self.name, obj.__class__.__name__, str(value), str(self.restriction)))
 
     def __get__(self, obj, type=None):
         """
@@ -75,6 +82,7 @@ class DataFieldDescriptor(BaseField):
                 value = self.call_param_function(obj)
         else:
             value = self.get_stored_value(obj)
+        self.__check_restriction__(obj, value)
         return value
 
     def __set__(self, obj, value):
@@ -100,6 +108,9 @@ class DataFieldDescriptor(BaseField):
         >>> obj.__class__.__name__
         Via
         """
+        if self.locked:
+            raise ValueError("Cannot assign to locked parameter '{}' of '{}'".format(self.name, type(obj).__name__))
+        self.__check_restriction__(obj, value)
         obj.__store__[self.__name__] = value
 
     def bind_property(self, cls, name):

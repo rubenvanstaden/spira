@@ -5,7 +5,7 @@ from spira.param.field.typed_list import TypedList
 class ElementFilterMixin(object):
 
     def get_polygons(self, layer=None, cell_type=None):
-        from spira.layers.layer import Layer
+        from spira.layer import Layer
         from spira.rdd.layer import PurposeLayer
         elems = ElementList()
         if layer is None:

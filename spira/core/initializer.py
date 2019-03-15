@@ -291,21 +291,6 @@ class FieldInitializer(__Field__):
             class_string = '{} ({})'.format(class_string, c)
         return class_string
 
-    # @property
-    # def id(self):
-    #     return self.__str__()
-
-    # @property
-    # def node_id(self):
-    #     if self.__id__:
-    #         return self.__id__
-    #     else:
-    #         return self.__str__()
-
-    # @node_id.setter
-    # def node_id(self, value):
-    #     self.__id__ = value
-
     def __store_fields__(self, kwargs):
         props = self.__fields__()
         for key, value in kwargs.items():
@@ -390,7 +375,6 @@ class CellInitializer(FieldInitializer, metaclass=MetaCell):
 
     def get_node_id(self):
         if self.__id__:
-        # if hasattr(self, '__id__'):
             return self.__id__
         else:
             return self.__str__()
@@ -398,23 +382,7 @@ class CellInitializer(FieldInitializer, metaclass=MetaCell):
     def set_node_id(self, value):
         self.__id__ = value
 
-    node_id = param.FunctionField(get_node_id, set_node_id)
-
-    # def __str__(self):
-    #     return self.__repr__()
-
-    # @property
-    # def id(self):
-    #     return self.__str__()
-
-    # @property
-    # def node_id(self):
-    #     _id = '{}_{}'.format(self.__str__(), self.name)
-    #     return _id
-
-    # @node_id.setter
-    # def node_id(self, string):
-    #     self.name = string
+    node_id = param.FunctionField(get_node_id, set_node_id, doc='Unique elemental ID.')
 
 
 class ElementalInitializer(FieldInitializer, metaclass=MetaElemental):

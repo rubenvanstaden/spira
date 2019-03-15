@@ -77,16 +77,14 @@ class GeometryAbstract(__Geometry__):
 
         mesh_data = pygmsh.generate_mesh(
             self.geom,
-            # verbose=False,
-            verbose=True,
+            verbose=False,
             dim=self.dimension,
             prune_vertices=False,
             remove_faces=False,
-            geo_filename=geo_file
+            # geo_filename=geo_file
         )
 
         mm = meshio.Mesh(*mesh_data)
-        print('done meshing')
 
         # FIXME: WARNING:root:Binary Gmsh needs c_int (typically numpy.int32) integers (got int64). Converting.
         # meshio.write(mesh_file, mm)
@@ -101,14 +99,8 @@ class GeometryAbstract(__Geometry__):
         elems = ElementList()
         for pp in self.polygons:
             ply = pp.polygon
-            print('')
-            print(ply)
             for i, points in enumerate(ply.polygons):
-                # print(points)
-                # c_points = numpy_to_list(points, self.height, unit=RDD.GDSII.GRID)
                 c_points = numpy_to_list(points, self.height, unit=1e-6)
-                # c_points = numpy_to_list(points, self.height, unit=1)
-                print(c_points)
                 surface_label = '{}_{}_{}_{}'.format(
                     ply.gdslayer.number,
                     ply.gdslayer.datatype,

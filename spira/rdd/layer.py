@@ -8,6 +8,12 @@ class __Layer__(ElementalInitializer):
 
 
 class PurposeLayer(__Layer__):
+    """
+
+    Examples
+    --------
+    >>> pp_layer = PurposeLayer()
+    """
 
     doc = param.StringField()
     name = param.StringField()
@@ -17,9 +23,12 @@ class PurposeLayer(__Layer__):
     def __init__(self, **kwargs):
         ElementalInitializer.__init__(self, **kwargs)
 
-    # def __repr__(self):
-    #     string = '[SPiRA: PurposeLayer] (\'{}\', datatype {}, symbol \'{}\')'
-    #     return string.format(self.name, self.datatype, self.symbol)
+    def __repr__(self):
+        string = '[SPiRA: PurposeLayer] (\'{}\', datatype {}, symbol \'{}\')'
+        return string.format(self.name, self.datatype, self.symbol)
+
+    def __str__(self):
+        return self.__repr__()
 
     def __eq__(self, other):
         if isinstance(other, PurposeLayer):
@@ -72,6 +81,9 @@ def PurposeLayerField(name='', datatype=0, symbol=''):
 class PhysicalLayer(__Layer__):
     """
 
+    Examples
+    --------
+    >>> ps_layer = PhysicalLayer()
     """
 
     doc = param.StringField()
@@ -82,12 +94,12 @@ class PhysicalLayer(__Layer__):
     def __init__(self, **kwargs):
         ElementalInitializer.__init__(self, **kwargs)
 
-    # def __repr__(self):
-    #     string = '[SPiRA: PhysicalLayer] (layer \'{}\', symbol \'{}\')'
-    #     return string.format(self.layer.name, self.purpose.symbol)
+    def __repr__(self):
+        string = '[SPiRA: PhysicalLayer] (layer \'{}\', symbol \'{}\')'
+        return string.format(self.layer.name, self.purpose.symbol)
 
-    # def __str__(self):
-    #     return self.__repr__()
+    def __str__(self):
+        return self.__repr__()
 
     def __hash__(self):
         return hash(self.node_id)
@@ -95,8 +107,8 @@ class PhysicalLayer(__Layer__):
     def __eq__(self, other):
         if isinstance(other, PhysicalLayer):
             return other.key == self.key
-        # elif isinstance(other, Layer):
-        #     return other.number == self.layer.number
+        elif isinstance(other, Layer):
+            return other.number == self.layer.number
         elif isinstance(other, int):
             return other == self.layer.number
         else:
@@ -105,30 +117,30 @@ class PhysicalLayer(__Layer__):
     def __neq__(self, other):
         if isinstance(other, PhysicalLayer):
             return other.key != self.key
-        # elif isinstance(other, Layer):
-        #     return other.number != self.layer.number
+        elif isinstance(other, Layer):
+            return other.number != self.layer.number
         elif isinstance(other, int):
             return other != self.layer.number
         else:
             raise ValueError('Not Implemented!')
     
-    # def __add__(self, other):
-    #     if isinstance(other, PhysicalLayer):
-    #         d = self.datatype + other.datatype
-    #     elif isinstance(other, int):
-    #         d = self.datatype + other
-    #     else:
-    #         raise ValueError('Not Implemented')
-    #     return PurposeLayer(datatype=d)
+    def __add__(self, other):
+        if isinstance(other, PhysicalLayer):
+            d = self.datatype + other.datatype
+        elif isinstance(other, int):
+            d = self.datatype + other
+        else:
+            raise ValueError('Not Implemented')
+        return PurposeLayer(datatype=d)
 
-    # def __iadd__(self, other):
-    #     if isinstance(other, PhysicalLayer):
-    #         self.datatype += other.datatype
-    #     elif isinstance(other, int):
-    #         self.datatype += other
-    #     else:
-    #         raise ValueError('Not Implemented')
-    #     return self
+    def __iadd__(self, other):
+        if isinstance(other, PhysicalLayer):
+            self.datatype += other.datatype
+        elif isinstance(other, int):
+            self.datatype += other
+        else:
+            raise ValueError('Not Implemented')
+        return self
 
     @property
     def name(self):
@@ -146,11 +158,6 @@ class PhysicalLayer(__Layer__):
     def key(self):
         return (self.layer.number, self.purpose.symbol, 'physical_layer_key')
 
-
-# from spira.core.descriptor import DataFieldDescriptor
-# def PhysicalLayerField(layer, purpose):
-#     F = PhysicalLayer(layer=layer, purpose=purpose)
-#     return DataFieldDescriptor(default=F)
 
 
 

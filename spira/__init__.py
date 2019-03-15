@@ -12,7 +12,8 @@ from spira.gdsii.cell import Connector
 from spira.gdsii.library import Library
 from spira.gdsii.lists.cell_list import CellList
 
-from spira.layers import *
+# from spira.layers import *
+from spira.layer import Layer
 from spira.gdsii import *
 from spira.lne import *
 from spira.lgm import *

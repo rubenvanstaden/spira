@@ -6,10 +6,6 @@ from spira import param
 from spira.settings import DEG2RAD
 from spira.lgm.shapes.shape import Shape
 
-from spira.gdsii.elemental.polygons import PolygonAbstract
-from spira.gdsii.elemental.polygons import Polygons
-from spira.core.initializer import FieldInitializer
-
 
 class RectangleShape(Shape):
 

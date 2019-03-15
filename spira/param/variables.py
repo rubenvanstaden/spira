@@ -1,47 +1,71 @@
 import numpy as np
+from spira.param.restrictions import RestrictType
+from spira.core.descriptor import DataFieldDescriptor
 
 
-class __Constraint__(object):
-
-    def __init__(self, **kwargs):
-        pass
-
-
-class ConstaintType(__Constraint__):
-    """ restrict the type or types the argument can have. Pass a type or tuple of types """
-    def __init__(self, allowed_types):
-        self.allowed_types = ()
-        self .__types_set = False
-        self.__add_type__(allowed_types)
-        if not self.__types_set:
-            raise ValueError("allowed_typed of Type Restriction should be set on initialization")
-
-    def __add_type__(self, type_type):
-        if isinstance(type_type, type):
-            self.allowed_types += (type_type,)
-            self .__types_set = True
-        elif isinstance(type_type, (tuple, list)):
-            for T in type_type:
-                self.__add_type__(T)
-        else:
-            raise TypeError("Restrict type should have a 'type' or 'tuple' of types as argument")
-
-    def validate(self, value, obj=None):
-        return isinstance(value, self.allowed_types)
-
-    # def __repr__(self):
-    #     return "Type Restriction:" + ",".join([T.__name__ for T in self.allowed_types])
+FLOAT = RestrictType(float)
+INTEGER = RestrictType(int)
+STRING = RestrictType(str)
+BOOL = RestrictType(bool)
+DICTIONARY = RestrictType(dict)
+LIST = RestrictType(list)
+TUPLE = RestrictType(tuple)
+NUMPY_ARRAY = RestrictType(np.ndarray)
 
 
-FLOAT = ConstaintType(float)
-INTEGER = ConstaintType(int)
-STRING = ConstaintType(str)
-BOOL = ConstaintType(bool)
-DICTIONARY = ConstaintType(dict)
-LIST = ConstaintType(list)
-NUMPY_ARRAY = ConstaintType(np.ndarray)
+def IntegerField(restriction=None, **kwargs):
+    from .variables import INTEGER
+    if 'default' not in kwargs:
+        kwargs['default'] = 0
+    return DataFieldDescriptor(restriction=INTEGER, **kwargs)
 
 
+def FloatField(**kwargs):
+    from .variables import FLOAT
+    if 'default' not in kwargs:
+        kwargs['default'] = 0.0
+    return DataFieldDescriptor(restriction=FLOAT, **kwargs)
 
+
+def StringField(**kwargs):
+    from .variables import STRING
+    if 'default' not in kwargs:
+        kwargs['default'] = ''
+    return DataFieldDescriptor(restriction=STRING, **kwargs)
+
+
+def BoolField(**kwargs):
+    from .variables import BOOL
+    if 'default' not in kwargs:
+        kwargs['default'] = False
+    return DataFieldDescriptor(restriction=BOOL, **kwargs)
+
+
+def ListField(**kwargs):
+    from .variables import LIST
+    if 'default' not in kwargs:
+        kwargs['default'] = []
+    return DataFieldDescriptor(restriction=LIST, **kwargs)
+
+
+def TupleField(**kwargs):
+    from .variables import TUPLE
+    if 'default' not in kwargs:
+        kwargs['default'] = []
+    return DataFieldDescriptor(restriction=TUPLE, **kwargs)
+
+
+def DictField(**kwargs):
+    from .variables import DICTIONARY
+    if 'default' not in kwargs:
+        kwargs['default'] = {}
+    return DataFieldDescriptor(restriction=DICTIONARY, **kwargs)
+
+
+def NumpyArrayField(**kwargs):
+    from .variables import NUMPY_ARRAY
+    if 'default' not in kwargs:
+        kwargs['default'] = np.array([])
+    return DataFieldDescriptor(restriction=NUMPY_ARRAY, **kwargs)
 
 

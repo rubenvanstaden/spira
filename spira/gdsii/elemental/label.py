@@ -50,17 +50,16 @@ class LabelAbstract(__Label__):
 
     gdslayer = param.LayerField()
     text = param.StringField(default='no_text')
-    # node_id = param.StringField()
     str_anchor = param.StringField(default='o')
-    rotation = param.FloatField(default=0)
-    magnification = param.FloatField(default=1)
+    rotation = param.IntegerField(default=0)
     reflection = param.BoolField(default=False)
+    magnification = param.FloatField(default=1.0)
     texttype = param.IntegerField(default=0)
 
     def __init__(self, position, **kwargs):
         super().__init__(position, **kwargs)
 
-    def commit_to_gdspy(self, cell):
+    def commit_to_gdspy(self, cell=None):
         if self.__repr__() not in list(LabelAbstract.__committed__.keys()):
             L = gdspy.Label(self.text,
                 deepcopy(self.position),
@@ -71,10 +70,12 @@ class LabelAbstract(__Label__):
                 layer=self.gdslayer.number,
                 texttype=self.texttype
             )
-            cell.add(L)
             LabelAbstract.__committed__.update({self.__repr__():L})
         else:
-            cell.add(LabelAbstract.__committed__[self.__repr__()])
+            L = LabelAbstract.__committed__[self.__repr__()]
+        if cell is not None:
+            cell.add(L)
+        return L
 
     def reflect(self, p1=(0,1), p2=(0,0), angle=None):
         self.position = [self.position[0], -self.position[1]]

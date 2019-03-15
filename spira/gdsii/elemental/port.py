@@ -127,7 +127,7 @@ class Port(PortAbstract):
             self.radius, self.orientation
         )
 
-    def commit_to_gdspy(self, cell):
+    def commit_to_gdspy(self, cell=None):
         if self.__repr__() not in list(__Port__.__committed__.keys()):
             self.surface.commit_to_gdspy(cell=cell)
             self.label.commit_to_gdspy(cell=cell)
@@ -144,7 +144,8 @@ class Port(PortAbstract):
             center=self.midpoint,
             box_size=[self.radius, self.radius]
         )
-        ply = spira.Polygons(shape=shape, gdslayer=self.gdslayer)
+        layer = self.gdslayer.modified_copy(datatype=4)
+        ply = spira.Polygons(shape=shape, gdslayer=layer)
         ply.move(midpoint=ply.center, destination=self.midpoint)
         return ply
 

@@ -195,7 +195,7 @@ class TechAdminTree(DynamicDataTree):
         self.NAME_GENERATOR = NameGenerator(
             prefix_attribute='__name_prefix__',
             counter_zero=0,
-            process_name='AiST_CELL'
+            process_name=''
         )
         
 RDD.ADMIN = TechAdminTree()

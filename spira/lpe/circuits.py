@@ -75,12 +75,12 @@ class Circuit(RouteToStructureConnector):
     lcar = param.IntegerField(default=10)
 
     def create_elementals(self, elems):
-        # for e in self.structures:
-        #     elems += e
-        # for e in self.routes:
-        #     elems += e
-        for e in self.merged_layers:
+        for e in self.structures:
             elems += e
+        for e in self.routes:
+            elems += e
+        # for e in self.merged_layers:
+        #     elems += e
         return elems
 
     def create_primitives(self, elems):

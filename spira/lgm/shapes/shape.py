@@ -11,7 +11,6 @@ from numpy.linalg import norm
 
 class __Shape__(FieldInitializer):
 
-    doc = param.StringField()
     center = param.PointField()
     clockwise = param.BoolField(default=False)
     points = param.PointArrayField(fdef_name='create_points')
@@ -173,6 +172,8 @@ class Shape(__Shape__):
     --------
     >>> shape = shapes.Shape(points=[])
     """
+    
+    doc = param.StringField()
 
     def __init__(self, points=None, **kwargs):
         super().__init__(**kwargs)

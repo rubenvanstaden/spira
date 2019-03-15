@@ -1,5 +1,6 @@
-import math
 import spira
+import gdspy
+import math
 import pyclipper
 import numpy as np
 
@@ -165,6 +166,17 @@ def numpy_to_list(points, start_height, unit=None):
     #     p2 = round(float(p[1]*unit), 6)
     #     pts.append([p1, p2, start_height])
     # return pts
+
+
+def cut(ply, position, axis):
+    from spira import process as pc
+    plys = spira.ElementList()
+    gp = ply.commit_to_gdspy()
+    pl = gdspy.slice(objects=[gp], position=position, axis=axis)
+    for p in pl:
+        if len(p.polygons) > 0:
+            plys += spira.Polygons(shape=p.polygons)
+    return plys
 
 
 
