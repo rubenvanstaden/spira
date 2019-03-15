@@ -66,6 +66,14 @@ def CellField(name=None, elementals=None, ports=None, library=None, **kwargs):
     return DataFieldDescriptor(restrictions=R, **kwargs)
 
 
+def PurposeLayerField(name='', datatype=0, symbol='', **kwargs):
+    from spira.rdd.layer import PurposeLayer
+    if 'default' not in kwargs:
+        kwargs['default'] = PurposeLayer(name=name, datatype=datatype, symbol='')
+    R = RestrictType(PurposeLayer)
+    return DataFieldDescriptor(restrictions=R, **kwargs)
+
+
 def PhysicalLayerField(layer=None, purpose=None, **kwargs):
     from spira.rdd.layer import PhysicalLayer
     if 'default' not in kwargs:

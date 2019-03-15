@@ -72,12 +72,6 @@ class PurposeLayer(__Layer__):
         return (self.datatype, self.symbol, 'purpose_layer_key')
 
 
-from spira.core.descriptor import DataFieldDescriptor
-def PurposeLayerField(name='', datatype=0, symbol=''):
-    F = PurposeLayer(name=name, datatype=datatype, symbol='')
-    return DataFieldDescriptor(default=F)
-
-
 class PhysicalLayer(__Layer__):
     """
 
