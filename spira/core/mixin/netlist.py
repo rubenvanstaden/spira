@@ -206,7 +206,7 @@ class NetlistSimplifier(__NetlistSimplifier__):
                         position=lbl.center,
                         text=text,
                         route=self.g.node[n]['route'].node_id,
-                        gdslayer=lbl.player.layer,
+                        gds_layer=lbl.ps_layer.layer,
                         color=lbl.color,
                         node_id=node_id
                     )

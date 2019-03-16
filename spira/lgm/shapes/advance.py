@@ -12,7 +12,7 @@ class YtronShape(Shape):
     source_length = param.FloatField(default=5*1e6)
     arm_widths = param.PointField(default=(2*1e6, 2*1e6))
     theta = param.FloatField(default=2.5)
-    theta_resolution = param.FloatField(default=10)
+    theta_resolution = param.FloatField(default=10.0)
 
     xc = param.DataField(fdef_name='create_xc')
     yc = param.DataField(fdef_name='create_yc')

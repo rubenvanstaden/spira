@@ -24,12 +24,11 @@ RDD.PURPOSE.PRIM.NTRON = PurposeLayer(name='nTron layer', datatype=21, symbol='N
 # ---------------------------------- Error Layers ------------------------------------
 
 RDD.PURPOSE.ERROR = ProcessTree()
-RDD.PURPOSE.ERROR.SPACING = PurposeLayer(name='nTron layer', datatype=21, symbol='SP')
-RDD.PURPOSE.ERROR.MIN_WIDTH = PurposeLayer(name='nTron layer', datatype=21, symbol='MAXW')
-RDD.PURPOSE.ERROR.MAX_WIDTH = PurposeLayer(name='nTron layer', datatype=21, symbol='MINW')
-RDD.PURPOSE.ERROR.ENCLOSURE = PurposeLayer(name='nTron layer', datatype=21, symbol='ENC')
-RDD.PURPOSE.ERROR.OVERLAP = PurposeLayer(name='nTron layer', datatype=21, symbol='OVR')
-RDD.PURPOSE.ERROR.DENSITY = PurposeLayer(name='nTron layer', datatype=21, symbol='OVR')
+RDD.PURPOSE.ERROR.WIDTH = PurposeLayer(name='Minimum or maximum layer width rule broken', datatype=100, symbol='WID')
+RDD.PURPOSE.ERROR.SPACING = PurposeLayer(name='Spacing rule broken', datatype=101, symbol='SP')
+RDD.PURPOSE.ERROR.ENCLOSURE = PurposeLayer(name='Enclosure rule', datatype=102, symbol='ENC')
+RDD.PURPOSE.ERROR.OVERLAP = PurposeLayer(name='Overlap rule', datatype=103, symbol='OVR')
+RDD.PURPOSE.ERROR.DENSITY = PurposeLayer(name='Density rule', datatype=104, symbol='OVR')
 
 # ---------------------------------- Physical Layer ----------------------------------
 

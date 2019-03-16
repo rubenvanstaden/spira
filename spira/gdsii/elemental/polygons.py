@@ -26,14 +26,14 @@ class __Polygon__(gdspy.PolygonSet, ElementalInitializer):
     def __deepcopy__(self, memo):
         ply = self.modified_copy(
             shape=deepcopy(self.shape),
-            gdslayer=deepcopy(self.gdslayer),
+            gds_layer=deepcopy(self.gds_layer),
         )
         return ply
 
     def __add__(self, other):
         polygons = []
         assert isinstance(other, Polygons)
-        if self.gdslayer == other.gdslayer:
+        if self.gds_layer == other.gds_layer:
             for points in self.shape.points:
                 polygons.append(np.array(points))
             for points in other.polygons:
@@ -59,7 +59,7 @@ class __Polygon__(gdspy.PolygonSet, ElementalInitializer):
             method='and'
         )
         if len(pp) > 0:
-            return Polygons(shape=np.array(pp), gdslayer=self.gdslayer)
+            return Polygons(shape=np.array(pp), gds_layer=self.gds_layer)
         else:
             return None
 
@@ -70,12 +70,12 @@ class __Polygon__(gdspy.PolygonSet, ElementalInitializer):
             method='or'
         )
         if len(pp) > 0:
-            return Polygons(shape=pp, gdslayer=self.gdslayer)
+            return Polygons(shape=pp, gds_layer=self.gds_layer)
         else:
             return None
 
     def is_equal_layers(self, other):
-        if self.gdslayer.number == other.gdslayer.number:
+        if self.gds_layer.number == other.gds_layer.number:
             return True
         return False
 
@@ -83,16 +83,16 @@ class __Polygon__(gdspy.PolygonSet, ElementalInitializer):
 class PolygonAbstract(__Polygon__):
 
     name = param.StringField()
-    gdslayer = param.LayerField()
+    gds_layer = param.LayerField()
     direction = param.IntegerField(default=0)
 
     @property
     def layer(self):
-        return self.gdslayer.layer
+        return self.gds_layer.layer
 
     @property
     def datatype(self):
-        return self.gdslayer.datatype
+        return self.gds_layer.datatype
 
     def encloses(self, point):
         for points in self.points:
@@ -104,8 +104,8 @@ class PolygonAbstract(__Polygon__):
     #     if self.__repr__() not in list(PolygonAbstract.__committed__.keys()):
     #         P = gdspy.PolygonSet(
     #             polygons=deepcopy(self.shape.points),
-    #             layer=self.gdslayer.number, 
-    #             datatype=self.gdslayer.datatype,
+    #             layer=self.gds_layer.number, 
+    #             datatype=self.gds_layer.datatype,
     #             verbose=False
     #         )
     #         cell.add(P)
@@ -117,8 +117,8 @@ class PolygonAbstract(__Polygon__):
         if self.__repr__() not in list(PolygonAbstract.__committed__.keys()):
             P = gdspy.PolygonSet(
                 polygons=deepcopy(self.shape.points),
-                layer=self.gdslayer.number, 
-                datatype=self.gdslayer.datatype,
+                layer=self.gds_layer.number, 
+                datatype=self.gds_layer.datatype,
                 verbose=False
             )
             PolygonAbstract.__committed__.update({self.__repr__():P})
@@ -189,7 +189,7 @@ class PolygonAbstract(__Polygon__):
             other.shape.points,
             operation=operation
         )
-        return Polygons(shape=mm.points, gdslayer=self.gdslayer)
+        return Polygons(shape=mm.points, gds_layer=self.gds_layer)
 
 
 class Polygons(PolygonAbstract):
@@ -200,7 +200,7 @@ class Polygons(PolygonAbstract):
     --------
     >>> layer = spira.Layer(number=99)
     >>> rect_shape = spira.RectangleShape(p1=[0,0], p2=[1,1])
-    >>> ply = spira.Polygons(shape=rect_shape, gdslayer=layer)
+    >>> ply = spira.Polygons(shape=rect_shape, gds_layer=layer)
     """
 
     def __init__(self, shape, **kwargs):
@@ -217,8 +217,8 @@ class Polygons(PolygonAbstract):
         ElementalInitializer.__init__(self, **kwargs)
         gdspy.PolygonSet.__init__(
             self, self.shape.points,
-            layer=self.gdslayer.number,
-            datatype=self.gdslayer.datatype,
+            layer=self.gds_layer.number,
+            datatype=self.gds_layer.datatype,
             verbose=False
         )
 
@@ -228,7 +228,7 @@ class Polygons(PolygonAbstract):
         return ("[SPiRA: Polygon] ({} center, {} area " +
                 "{} vertices, layer {}, datatype {})").format(
                 self.center, self.ply_area, sum([len(p) for p in self.shape.points]),
-                self.gdslayer.number, self.gdslayer.datatype)
+                self.gds_layer.number, self.gds_layer.datatype)
 
     def __str__(self):
         return self.__repr__()

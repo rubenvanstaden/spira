@@ -76,26 +76,26 @@ def test_elem_polygon():
     # Create polygon using class parameters.
     ply1 = spira.Polygons(p1)
     assert issubclass(type(ply1.shape), shapes.Shape)
-    assert ply1.gdslayer.number == 0
-    assert ply1.gdslayer.datatype == 0
+    assert ply1.gds_layer.number == 0
+    assert ply1.gds_layer.datatype == 0
 
     # Create polygon using new layer number.
     ply2 = spira.Polygons(
         shape=p2,
-        gdslayer=spira.Layer(number=77)
+        gds_layer=spira.Layer(number=77)
     )
     assert issubclass(type(ply2.shape), shapes.Shape)
-    assert ply2.gdslayer.number == 77
-    assert ply2.gdslayer.datatype == 0
+    assert ply2.gds_layer.number == 77
+    assert ply2.gds_layer.datatype == 0
 
     # Create polygon using new shape, number and datatype.
     ply3 = spira.Polygons(
         shape=shapes.Shape(points=p3),
-        gdslayer=spira.Layer(number=51, datatype=1)
+        gds_layer=spira.Layer(number=51, datatype=1)
     )
     assert issubclass(type(ply3.shape), shapes.Shape)
-    assert ply3.gdslayer.number == 51
-    assert ply3.gdslayer.datatype == 1
+    assert ply3.gds_layer.number == 51
+    assert ply3.gds_layer.datatype == 1
 
 # -------------------------------------------- spira.Label ------------------------------------------
 
@@ -132,7 +132,7 @@ def test_elem_cell():
         def create_elementals(self, elems):
             elems += spira.Polygons(
                 shape=[[[0,0], [3,0], [3,1], [0,1]]],
-                gdslayer=spira.Layer(number=77)
+                gds_layer=spira.Layer(number=77)
             )
             return elems
     c2 = CellB()
@@ -147,7 +147,7 @@ def test_elem_sref():
         def create_elementals(self, elems):
             elems += spira.Polygons(
                 shape=[[[0,0], [3,0], [3,1], [0,1]]],
-                gdslayer=spira.Layer(number=77)
+                gds_layer=spira.Layer(number=77)
             )
             return elems
     c2 = CellB()

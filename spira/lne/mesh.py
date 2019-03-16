@@ -221,7 +221,7 @@ class MeshLabeled(MeshAbstract):
                             self.g.node[n]['device'] = D
                 else:
                     for p in D.ports:
-                        if p.gdslayer.number == self.layer.number:
+                        if p.gds_layer.number == self.layer.number:
                             if p.encloses(points):
                                 if 'device' in self.g.node[n]:
                                     self.add_new_node(n, D, p.midpoint)
@@ -260,7 +260,7 @@ class MeshLabeled(MeshAbstract):
         label = spira.Label(
             position=pos,
             text='new',
-            gdslayer = l1
+            gds_layer = l1
         )
         label.node_id = '{}_{}'.format(n, n)
         num = self.g.number_of_nodes()

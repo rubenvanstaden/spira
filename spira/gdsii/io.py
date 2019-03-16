@@ -59,8 +59,8 @@ def map_references(c, c2dmap):
         if e.ref in c2dmap.keys():
             e.ref = c2dmap[e.ref]
             e._parent_ports = e.ref.ports
-            e._local_ports = {(port.name, port.gdslayer.number, port.midpoint[0], port.midpoint[1]):deepcopy(port) for port in e.ref.ports}
-            e.port_locks = {(port.name, port.gdslayer.number, port.midpoint[0], port.midpoint[1]):port.locked for port in e.ref.ports}
+            e._local_ports = {(port.name, port.gds_layer.number, port.midpoint[0], port.midpoint[1]):deepcopy(port) for port in e.ref.ports}
+            e.port_locks = {(port.name, port.gds_layer.number, port.midpoint[0], port.midpoint[1]):port.locked for port in e.ref.ports}
             # e._local_ports = {port.node_id:deepcopy(port) for port in e.ref.ports}
             # e.port_locks = {port.node_id:port.locked for port in e.ref.ports}
 
@@ -119,8 +119,7 @@ def wrap_labels(cell, c2dmap):
             D += spira.Label(
                 position=scu(l.position),
                 text=l.text,
-                gdslayer=spira.Layer(number=l.layer),
-                str_anchor=l.anchor
+                gds_layer=spira.Layer(number=int(l.layer))
             )
 
 
@@ -151,7 +150,7 @@ def wrap_references(cell, c2dmap):
             c2dmap[cell] += S
 
 
-def import_gds(filename, cellname=None, flatten=False, duplayer={}):
+def import_gds(filename, cellname=None, flatten=False, dups_layer={}):
     """  """
 
     LOG.header('Imported GDS file -> \'{}\''.format(filename))
@@ -183,11 +182,11 @@ def import_gds(filename, cellname=None, flatten=False, duplayer={}):
         for e in cell.elements:
             if isinstance(e, gdspy.PolygonSet):
                 for points in e.polygons:
-                    layer = spira.Layer(number=e.layers[0], datatype=e.datatypes[0])
-                    D += spira.Polygons(shape=spu([points]), gdslayer=layer)
+                    layer = spira.Layer(number=int(e.layers[0]), datatype=int(e.datatypes[0]))
+                    D += spira.Polygons(shape=spu([points]), gds_layer=layer)
             elif isinstance(e, gdspy.Polygon):
-                layer = spira.Layer(number=e.layers, datatype=e.datatype)
-                D += spira.Polygons(shape=spu([e.points]), gdslayer=layer)
+                layer = spira.Layer(number=int(e.layers), datatype=int(e.datatype))
+                D += spira.Polygons(shape=spu([e.points]), gds_layer=layer)
         c2dmap.update({cell:D})
         cell_list += cell
 

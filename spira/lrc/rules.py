@@ -10,9 +10,9 @@ RDD = get_rule_deck()
 
 
 class __DesignRule__(ElementalInitializer):
-    violate = param.BoolField()
     doc = param.StringField()
     name = param.StringField()
+    violate = param.BoolField()
 
 
 class __SingleLayerDesignRule__(__DesignRule__):
@@ -29,7 +29,6 @@ class __DoubleLayerDesignRule__(__DesignRule__):
 class Width(__SingleLayerDesignRule__):
     minimum = param.FloatField()
     maximum = param.FloatField()
-    error = param.IntegerField(default=RDD.PURPOSE.ERROR.MIN_WIDTH.datatype)
 
     def __repr__(self):
         return 'Rule width: min={} max={}'.format(self.minimum, self.maximum)
@@ -43,7 +42,6 @@ class Width(__SingleLayerDesignRule__):
 
 class Surround(__DoubleLayerDesignRule__):
     minimum = param.FloatField()
-    error = param.IntegerField(default=RDD.PURPOSE.ERROR.SPACING.datatype)
 
     def __repr__(self):
         return 'Rule surround: min={}'.format(self.minimum)
@@ -113,7 +111,6 @@ class Surround(__DoubleLayerDesignRule__):
 
 class Density(__DoubleLayerDesignRule__):
     minimum = param.IntegerField()
-    error = param.IntegerField(default=RDD.PURPOSE.ERROR.DENSITY.datatype)
 
     # TODO: Detect holes in die polygon
 
@@ -160,19 +157,14 @@ class Density(__DoubleLayerDesignRule__):
         return fails
 
 
-def WidthField(min=0, max=0, **kwargs):
-    """ Field definition for minimum and maximum widths. """
-    F = Width(min=min, max=max, **kwargs)
-    return DataFieldDescriptor(default=F)
+class Rule(ElementalInitializer):
+    """  """
 
+    design_rule = param.DesignRuleField()
+    error_layer = param.PurposeLayerField()
 
-def SurroundField(min=0, **kwargs):
-    """ Field definition for minimum and maximum widths. """
-    F = Surround(min=min, **kwargs)
-    return DataFieldDescriptor(default=F, **kwargs)
+    def __repr__(self):
+        return '[SPiRA: Rule] '
 
-
-def DensityField(min=0, max=0, **kwargs):
-    """ Field definition for minimum and maximum widths. """
-    F = Density(min=min, **kwargs)
-    return DataFieldDescriptor(default=F)
+    def __str__(self):
+        return self.__repr__()

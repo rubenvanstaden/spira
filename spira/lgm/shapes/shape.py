@@ -185,12 +185,12 @@ class Shape(__Shape__):
     #     # shape = self.modified_copy(
     #     #     points = deepcopy(self.points),
     #     #     # points = np.copy(self.points),
-    #     #     gdslayer = self.gdslayer
+    #     #     gds_layer = self.gds_layer
     #     # )
     #     shape = self.modified_copy(
     #         points = deepcopy(self.points),
-    #         # gdslayer = deepcopy(self.gdslayer)
-    #         # gdslayer = self.gdslayer
+    #         # gds_layer = deepcopy(self.gds_layer)
+    #         # gds_layer = self.gds_layer
     #     )
     #     return shape
 

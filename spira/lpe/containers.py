@@ -6,7 +6,7 @@ from copy import deepcopy
 
 class __CellContainer__(Cell):
 
-    cell = param.CellField()
+    cell = param.CellField(allow_none=True)
 
     def create_elementals(self, elems):
         elems += SRef(structure=self.cell)

@@ -47,19 +47,19 @@ class __PortConstructor__(__ProcessLayer__):
         return spira.Port(
             name='P_metal',
             midpoint=self.polygon.center,
-            gdslayer = self.player.layer
+            gds_layer = self.ps_layer.layer
         )
 
     def create_contact_ports(self):
         p1 = spira.Port(
             name='P_contact_1',
             midpoint=self.polygon.center,
-            gdslayer = self.layer1
+            gds_layer = self.layer1
         )
         p2 = spira.Port(
             name='P_contact_2',
             midpoint=self.polygon.center,
-            gdslayer = self.layer2
+            gds_layer = self.layer2
         )
         return [p1, p2]
 
@@ -94,7 +94,7 @@ class __PortConstructor__(__ProcessLayer__):
             width = np.abs(np.sqrt((xpts[i+1] - xpts[i])**2 + (ypts[i+1]-ypts[i])**2))
             edges += spira.EdgeTerm(
                 name=name,
-                gdslayer=self.layer,
+                gds_layer=self.layer,
                 midpoint=midpoint,
                 orientation=orientation,
                 width=width,
@@ -111,14 +111,14 @@ class ProcessLayer(__PortConstructor__):
 
     layer1 = param.LayerField()
     layer2 = param.LayerField()
-    player = param.PhysicalLayerField()
+    ps_layer = param.PhysicalLayerField()
     level = param.IntegerField(default=10)
     error = param.IntegerField(default=0)
     enable_edges = param.BoolField(default=True)
 
     def __repr__(self):
         return ("[SPiRA: ProcessLayer(\'{}\')] {} center, {} ports)").format(
-            self.player.layer.number,
+            self.ps_layer.layer.number,
             self.center,
             self.ports.__len__()
         )
@@ -130,29 +130,29 @@ class ProcessLayer(__PortConstructor__):
         if self.error != 0:
             layer = spira.Layer(
                 name=self.name,
-                number=self.player.layer.number,
+                number=self.ps_layer.layer.number,
                 datatype=self.error
             )
         elif self.level != 0:
             layer = spira.Layer(
                 name=self.name,
-                number=self.player.layer.number,
+                number=self.ps_layer.layer.number,
                 datatype=self.level
             )
         else:
             layer = spira.Layer(
                 name=self.name,
-                number=self.player.layer.number,
-                datatype=self.player.layer.datatype
+                number=self.ps_layer.layer.number,
+                datatype=self.ps_layer.layer.datatype
             )
         return layer
 
     def create_ports(self, ports):
-        if self.player.purpose == RDD.PURPOSE.PRIM.JUNCTION:
+        if self.ps_layer.purpose == RDD.PURPOSE.PRIM.JUNCTION:
             ports += self.contact_ports
-        elif self.player.purpose == RDD.PURPOSE.PRIM.VIA:
+        elif self.ps_layer.purpose == RDD.PURPOSE.PRIM.VIA:
             ports += self.contact_ports
-        elif self.player.purpose == RDD.PURPOSE.METAL:
+        elif self.ps_layer.purpose == RDD.PURPOSE.METAL:
             if self.level == 1:
                 ports += self.metal_port
             if self.enable_edges:

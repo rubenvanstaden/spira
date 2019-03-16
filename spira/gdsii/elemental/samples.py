@@ -13,18 +13,18 @@ class TestPolygons(spira.Cell):
     def create_elementals(self, elems):
 
         points = [[(0, 0), (2*1e6, 2*1e6), (2*1e6, 6*1e6), (-6*1e6, 6*1e6), (-6*1e6, -6*1e6), (-4*1e6, -4*1e6), (-4*1e6, 4*1e6), (0, 4*1e6)]]
-        pp = pc.Polygon(points=points, player=RDD.PLAYER.COU)
+        pp = pc.Polygon(points=points, ps_layer=RDD.PLAYER.COU)
 
         plys = spira.ElementList()
         pl = utils.cut(ply=pp, position=[-3*1e6, 3*1e6], axis=0)
         
         # p = pl[1]
-        # ply = pc.Polygon(points=p.points, player=RDD.PLAYER.COU)
+        # ply = pc.Polygon(points=p.points, ps_layer=RDD.PLAYER.COU)
         # plys += ply
         # elems += p
 
         for p in pl:
-            ply = pc.Polygon(points=p.points, player=RDD.PLAYER.COU)
+            ply = pc.Polygon(points=p.points, ps_layer=RDD.PLAYER.COU)
             plys += ply
             elems += p
 

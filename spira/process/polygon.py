@@ -11,7 +11,7 @@ class Polygon(ProcessLayer):
     points = param.ElementalListField()
 
     def create_elementals(self, elems):
-        elems += spira.Polygons(shape=self.points, gdslayer=self.player.layer)
+        elems += spira.Polygons(shape=self.points, gds_layer=self.ps_layer.layer)
         return elems
 
 

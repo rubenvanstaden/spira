@@ -168,17 +168,17 @@ class Structure(__NetlistCell__):
         params = {}
         for M in self.metals:
             if isinstance(M, pc.ProcessLayer):
-                if M.player not in params.keys():
-                    params[M.player] = list(M.polygon.polygons)
+                if M.ps_layer not in params.keys():
+                    params[M.ps_layer] = list(M.polygon.polygons)
                 else:
                     for pp in M.polygon.polygons:
-                        params[M.player].append(pp)
-        for player, points in params.items():
+                        params[M.ps_layer].append(pp)
+        for ps_layer, points in params.items():
             shape = shapes.Shape(points=points)
             shape.apply_merge
             for uid, pts in enumerate(shape.points):
-                name = self.__metal_name__(uid, player)
-                elems += pc.Polygon(name=name, player=player, points=[pts], level=self.level)
+                name = self.__metal_name__(uid, ps_layer)
+                elems += pc.Polygon(name=name, ps_layer=ps_layer, points=[pts], level=self.level)
         return elems
 
     def create_ports(self, ports):
@@ -189,15 +189,15 @@ class Structure(__NetlistCell__):
         # for m in self.metals:
             for p in m.ports:
                 if isinstance(p, (spira.Term, spira.EdgeTerm)):
-                    edgelayer = deepcopy(p.gdslayer)
-                    arrowlayer = deepcopy(p.gdslayer)
+                    edgelayer = deepcopy(p.gds_layer)
+                    arrowlayer = deepcopy(p.gds_layer)
                     edgelayer.datatype = self.edge_datatype
                     arrowlayer.datatype = self.arrow_datatype
 
-                    name = '{}_{}'.format(m.player.name, p.name)
+                    name = '{}_{}'.format(m.ps_layer.name, p.name)
                     term = p.modified_copy(
                         name=name,
-                        gdslayer=deepcopy(m.player.layer),
+                        gds_layer=deepcopy(m.ps_layer.layer),
                         edgelayer=edgelayer,
                         arrowlayer=arrowlayer,
                         width=1*1e6

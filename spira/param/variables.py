@@ -1,16 +1,32 @@
 import numpy as np
-from spira.param.restrictions import RestrictType
+from spira.param.restrictions import RestrictType, RestrictRange
 from spira.core.descriptor import DataFieldDescriptor
 
 
+NUMBER = RestrictType((int, float))
 FLOAT = RestrictType(float)
 INTEGER = RestrictType(int)
+COMPLEX = RestrictType((int, float, complex))
 STRING = RestrictType(str)
 BOOL = RestrictType(bool)
 DICTIONARY = RestrictType(dict)
 LIST = RestrictType(list)
 TUPLE = RestrictType(tuple)
 NUMPY_ARRAY = RestrictType(np.ndarray)
+
+
+def NumberField(restriction=None, **kwargs):
+    if 'default' not in kwargs:
+        kwargs['default'] = 0
+    R = NUMBER & restriction
+    return DataFieldDescriptor(restriction=R, **kwargs)
+    
+
+def ComplexField(restriction=None, **kwargs):
+    from .variables import COMPLEX
+    if 'default' not in kwargs:
+        kwargs['default'] = 0
+    return DataFieldDescriptor(restriction=COMPLEX, **kwargs)
 
 
 def IntegerField(restriction=None, **kwargs):

@@ -28,12 +28,12 @@ class PortAbstract(__Port__):
 
     name = param.StringField()
     midpoint = param.MidPointField()
-    orientation = param.IntegerField(default=0)
+    orientation = param.NumberField(default=0.0)
     reflection = param.BoolField(default=False)
 
     parent = param.DataField()
     locked = param.BoolField(default=True)
-    gdslayer = param.LayerField(name='PortLayer', number=64)
+    gds_layer = param.LayerField(name='PortLayer', number=64)
 
     __mixins__ = [GroupElementals]
 
@@ -45,7 +45,7 @@ class PortAbstract(__Port__):
             midpoint=deepcopy(self.midpoint),
             orientation=self.orientation,
             reflection=self.reflection,
-            gdslayer=deepcopy(self.gdslayer),
+            gds_layer=deepcopy(self.gds_layer),
             locked=self.locked
         )
         return c_port
@@ -91,7 +91,7 @@ class PortAbstract(__Port__):
         lbl = spira.Label(
             position=self.midpoint,
             text=self.name,
-            gdslayer=self.gdslayer,
+            gds_layer=self.gds_layer,
             texttype=64,
             color=color.COLOR_GHOSTWHITE
         )
@@ -99,7 +99,7 @@ class PortAbstract(__Port__):
 
     @property
     def key(self):
-        return (self.name, self.gdslayer.number, self.midpoint[0], self.midpoint[1])
+        return (self.name, self.gds_layer.number, self.midpoint[0], self.midpoint[1])
 
 
 class Port(PortAbstract):
@@ -123,7 +123,7 @@ class Port(PortAbstract):
     def __repr__(self):
         return ("[SPiRA: Port] (name {}, number {}, midpoint {}, " +
             "radius {}, orientation {})").format(self.name,
-            self.gdslayer.number, self.midpoint,
+            self.gds_layer.number, self.midpoint,
             self.radius, self.orientation
         )
 
@@ -144,8 +144,8 @@ class Port(PortAbstract):
             center=self.midpoint,
             box_size=[self.radius, self.radius]
         )
-        layer = self.gdslayer.modified_copy(datatype=4)
-        ply = spira.Polygons(shape=shape, gdslayer=layer)
+        layer = self.gds_layer.modified_copy(datatype=4)
+        ply = spira.Polygons(shape=shape, gds_layer=layer)
         ply.move(midpoint=ply.center, destination=self.midpoint)
         return ply
 
@@ -154,7 +154,7 @@ class Port(PortAbstract):
             parent=self.parent,
             name=self.name,
             midpoint=deepcopy(self.midpoint),
-            gdslayer=deepcopy(self.gdslayer),
+            gds_layer=deepcopy(self.gds_layer),
             orientation=self.orientation,
             color=self.color
         )

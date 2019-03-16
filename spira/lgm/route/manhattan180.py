@@ -373,7 +373,7 @@ class Route180(RouteBase180, RouteParallel):
                     points.append(p)
         route_shape = shapes.Shape(points=points)
         route_shape.apply_merge
-        poly = pc.Polygon(points=route_shape.points, player=self.player, enable_edges=False) 
+        poly = pc.Polygon(points=route_shape.points, ps_layer=self.ps_layer, enable_edges=False) 
         elems += poly
 
         return elems

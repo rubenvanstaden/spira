@@ -42,7 +42,7 @@ class CircleShape(Shape):
     box_size = param.PointField(default=(2.0*1e6, 2.0*1e6))
     start_angle = param.FloatField(default=0.0)
     end_angle = param.FloatField(default=360.0)
-    angle_step = param.FloatField(default=3)
+    angle_step = param.IntegerField(default=3)
 
     def create_points(self, points):
         sa = self.start_angle * DEG2RAD

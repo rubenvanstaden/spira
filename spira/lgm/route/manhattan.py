@@ -16,8 +16,8 @@ class __Manhattan__(spira.Cell):
     port2 = param.PortField(default=None)
 
     length = param.FloatField(default=20*1e6)
-    gdslayer = param.LayerField(number=13)
-    player = param.PhysicalLayerField(default=RDD.DEF.PDEFAULT)
+    gds_layer = param.LayerField(number=13)
+    ps_layer = param.PhysicalLayerField(default=RDD.DEF.PDEFAULT)
     bend_type = param.StringField(default='rectangle')
     # bend_type = param.StringField(default='circular')
 
@@ -61,7 +61,7 @@ class __Manhattan__(spira.Cell):
             width_type='straight'
         )
         route_shape.apply_merge
-        R1 = RouteGeneral(route_shape=route_shape, connect_layer=self.player)
+        R1 = RouteGeneral(route_shape=route_shape, connect_layer=self.ps_layer)
         r1 = spira.SRef(R1)
         # r1.rotate(angle=p2.orientation-180, center=R1.port_input.midpoint)
         r1.rotate(angle=p2.orientation+90, center=R1.port_input.midpoint)
@@ -96,7 +96,7 @@ class __Manhattan__(spira.Cell):
             rs = RouteArcShape(
                 radius=self.radius,
                 width=self.port1.width,
-                gdslayer=self.gdslayer,
+                gds_layer=self.gds_layer,
                 start_angle=0, theta=90
             )
         if self.bend_type == 'rectangle':
@@ -104,7 +104,7 @@ class __Manhattan__(spira.Cell):
                 width=self.port1.width,
                 size=(self.radius, self.radius)
             )
-        B1 = RouteGeneral(route_shape=rs, connect_layer=self.player)
+        B1 = RouteGeneral(route_shape=rs, connect_layer=self.ps_layer)
         return spira.SRef(B1)
 
     def create_arc_bend_2(self):
@@ -112,7 +112,7 @@ class __Manhattan__(spira.Cell):
             rs = RouteArcShape(
                 radius=self.radius,
                 width=self.port1.width,
-                gdslayer=self.gdslayer,
+                gds_layer=self.gds_layer,
                 start_angle=0, theta=-90
             )
         if self.bend_type == 'rectangle':
@@ -120,7 +120,7 @@ class __Manhattan__(spira.Cell):
                 width=self.port1.width,
                 size=(self.radius, self.radius)
             )
-        B1 = RouteGeneral(route_shape=rs, connect_layer=self.player)
+        B1 = RouteGeneral(route_shape=rs, connect_layer=self.ps_layer)
         return spira.SRef(B1)
 
     # def create_arc_bend_1(self):
@@ -128,17 +128,17 @@ class __Manhattan__(spira.Cell):
     #         B1 = Arc(shape=ArcRoute(
     #             radius=self.radius,
     #             width=self.port1.width,
-    #             gdslayer=self.gdslayer,
+    #             gds_layer=self.gds_layer,
     #             start_angle=0, theta=90)
     #         )
     #     if self.bend_type == 'rectangle':
     #         B1 = Rect(shape=RectRoute(
     #                 width=self.port1.width,
-    #                 gdslayer=self.gdslayer,
-    #                 # player=self.player,
+    #                 gds_layer=self.gds_layer,
+    #                 # ps_layer=self.ps_layer,
     #                 size=(self.radius,self.radius)
     #             ),
-    #             player=self.player
+    #             ps_layer=self.ps_layer
     #         )
     #     return spira.SRef(B1)
 
@@ -147,17 +147,17 @@ class __Manhattan__(spira.Cell):
     #         B2 = Arc(shape=ArcRoute(
     #             radius=self.radius,
     #             width=self.port1.width,
-    #             gdslayer=self.gdslayer,
+    #             gds_layer=self.gds_layer,
     #             start_angle=0, theta=-90)
     #         )
     #     if self.bend_type == 'rectangle':
     #         B2 = Rect(shape=RectRouteTwo(
     #                 width=self.port1.width,
-    #                 gdslayer=self.gdslayer,
-    #                 # player=self.player,
+    #                 gds_layer=self.gds_layer,
+    #                 # ps_layer=self.ps_layer,
     #                 size=(self.radius,self.radius)
     #             ),
-    #             player=self.player
+    #             ps_layer=self.ps_layer
     #         )
     #     return spira.SRef(B2)
 

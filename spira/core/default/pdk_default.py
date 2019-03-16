@@ -200,6 +200,21 @@ class TechAdminTree(DynamicDataTree):
         
 RDD.ADMIN = TechAdminTree()
 
+# ------------------------------- Define Design Rules ----------------------------
+
+class DesignRuleTree(DynamicDataTree):
+    """ A technology tree with a name generator. """
+    def initialize(self):
+        from spira.lrc.rules import Width, Rule
+
+        width_rule_set = [
+            Rule(design_rule=Width(layer1=RDD.M6.LAYER, minimum=RDD.M6.WIDTH), error_layer=RDD.PURPOSE.ERROR.WIDTH),
+            Rule(design_rule=Width(layer1=RDD.M5.LAYER, minimum=RDD.M5.WIDTH), error_layer=RDD.PURPOSE.ERROR.WIDTH),
+        ]
+
+        self.WIDTH = width_rule_set
+
+RDD.RULES = DesignRuleTree()
 
 
 

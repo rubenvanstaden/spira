@@ -42,6 +42,11 @@ class DataFieldDescriptor(BaseField):
 
         self.locked = False
 
+        if 'allow_none' in kwargs:
+            self.allow_none = kwargs['allow_none']
+        else:
+            self.allow_none = False
+
         if 'restriction' in kwargs:
             self.restriction = kwargs['restriction']
         else:
@@ -82,7 +87,13 @@ class DataFieldDescriptor(BaseField):
                 value = self.call_param_function(obj)
         else:
             value = self.get_stored_value(obj)
-        self.__check_restriction__(obj, value)
+        if not self.restriction(value, obj):
+            if value is None:
+                if not self.allow_none:
+                    raise ValueError("Cannot set parameter {} of {} to None.".format(self.name, obj.__class__.__name__))
+            else:
+                raise ValueError("Invalid parameter assignment '{}' of cell '{}' with value '{}', which is not compatible with '{}'.".format(self.name, obj.__class__.__name__, str(value), str(self.restriction)))
+        # self.__check_restriction__(obj, value)
         return value
 
     def __set__(self, obj, value):

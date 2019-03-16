@@ -5,6 +5,14 @@ class __ParameterRestriction__(object):
     def __init__(self, **kwargs):
         pass
 
+    def __and__(self, other):
+        if isinstance(other, __ParameterRestriction__):
+            return __ParameterRestrictionAnd__(self, other)
+        elif other is None:
+            return self
+        else:
+            raise TypeError("Cannot AND __PropertyRestriction__ with %s" % type(other))
+
     def __call__(self, value, obj=None):
         return self.validate(value, obj)
 
@@ -14,6 +22,18 @@ class __ParameterRestriction__(object):
 
     def __repr__(self):
         return "General Restriction" 
+
+
+class __ParameterRestrictionAnd__(__ParameterRestriction__):
+    def __init__(self, restriction1, restriction2):
+        self.restriction1 = restriction1
+        self.restriction2 = restriction2
+
+    def validate(self, value, obj=None):
+        return self.restriction1(value, obj) and self.restriction2(value, obj)
+
+    def __repr__(self):
+        return "(%s and %s)" % (self.restriction1, self.restriction2)
 
 
 class RestrictNothing(__ParameterRestriction__):
@@ -45,9 +65,58 @@ class RestrictType(__ParameterRestriction__):
         return isinstance(value, self.allowed_types)
 
     def __repr__(self):
-        return 'Type Restriction: ' + ','.join([t.__name__ for t in self.allowed_types])
+        return ' Type Restriction: ' + ', '.join([t.__name__ for t in self.allowed_types])
 
     def __str__(self):
         return self.__repr__()
+
+
+class RestrictRange(__ParameterRestriction__):
+    """ Restrict the parameter to be in a given range. """
+    def __init__(self, lower=None, upper=None, lower_inc=True, upper_inc=False):
+        self.lower = lower
+        self.upper = upper
+        self.lower_inc = lower_inc
+        self.upper_inc = upper_inc
+        if lower is None and upper is None:
+            raise ValueError("Range Restriction should have an upper or lower limit")
+        if not upper is None and not lower is None:
+            if lower > upper:
+                raise ValueError("lower limit should be smaller than upper limit in Range Restriction")
+
+    def validate(self, value, obj=None):
+        if self.lower is None:
+            if self.upper_inc:
+                return value < self.upper
+            else:
+                return value <= self.upper
+        elif self.upper is None:
+            if self.lower_inc:
+                return value >= self.lower
+            else:
+                return value > self.lower
+        else:
+            if self.lower_inc:
+                T1 = value >= self.lower
+            else:
+                T1 = value > self.lower
+            if self.upper_inc:
+                T2 = value <= self.upper
+            else:
+                T2 = value < self.upper
+            return T1 and T2
+
+    def __repr__(self):
+        if self.lower_inc:
+            west_b = "["
+        else:
+            west_b = ")"
+
+        if self.upper_inc:
+            right_b = "]"
+        else:
+            right_b = ")"
+        S = "Range Restriction: {}{}, {}{} ".format(west_b, str(self.lower), str(self.upper), right_b)
+        return S
 
 

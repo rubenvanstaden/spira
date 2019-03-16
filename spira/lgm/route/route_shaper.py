@@ -104,7 +104,7 @@ class RouteArcShape(__RouteSimple__):
 
 class RouteSquareShape(__RouteSimple__):
 
-    gdslayer = param.LayerField(name='ArcLayer', number=91)
+    gds_layer = param.LayerField(name='ArcLayer', number=91)
     radius = param.FloatField(default=5*1e6)
     width = param.FloatField(default=1*1e6)
     size = param.MidPointField(default=(3*1e6,3*1e6))
@@ -146,8 +146,8 @@ class RouteSimple(__RouteSimple__):
 
     path_type = param.StringField(default='sine')
     width_type = param.StringField(default='straight')
-    width_input = param.FloatField(default=None)
-    width_output = param.FloatField(default=None)
+    width_input = param.FloatField(allow_none=True, default=None)
+    width_output = param.FloatField(allow_none=True, default=None)
 
     x_dist = param.FloatField()
     y_dist = param.FloatField()
@@ -282,9 +282,9 @@ class RouteGeneral(spira.Cell):
     port_input = param.DataField(fdef_name='create_port_input')
     port_output = param.DataField(fdef_name='create_port_output')
 
-    gdslayer = param.DataField(fdef_name='create_gdslayer')
+    gds_layer = param.DataField(fdef_name='create_gds_layer')
 
-    def create_gdslayer(self):
+    def create_gds_layer(self):
         ll = spira.Layer(
             number=self.connect_layer.layer.number,
             datatype=RDD.PURPOSE.TERM.datatype
@@ -296,7 +296,7 @@ class RouteGeneral(spira.Cell):
             midpoint=self.route_shape.m1,
             width=self.route_shape.w1,
             orientation=self.route_shape.o1,
-            gdslayer=self.gdslayer
+            gds_layer=self.gds_layer
         )
         return term
 
@@ -305,14 +305,14 @@ class RouteGeneral(spira.Cell):
             midpoint=self.route_shape.m2,
             width=self.route_shape.w2,
             orientation=self.route_shape.o2,
-            gdslayer=self.gdslayer
+            gds_layer=self.gds_layer
         )
         return term
 
     def create_elementals(self, elems):
         poly = pc.Polygon(
             points=self.route_shape.points, 
-            player=self.connect_layer, 
+            ps_layer=self.connect_layer, 
             enable_edges=False
         )
         elems += poly

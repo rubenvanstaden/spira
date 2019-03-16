@@ -1,13 +1,13 @@
+import numpy as np
+
 from .field.layer_list import LayerListProperty
 from .field.typed_point import PointField
+from .restrictions import RestrictType
+from .variables import *
 
 from spira.core.descriptor import DataField
-from spira.core.descriptor import DataFieldDescriptor
 from spira.core.descriptor import FunctionField
-from spira.param.restrictions import RestrictType
-from spira.param.variables import *
-
-import numpy as np
+from spira.core.descriptor import DataFieldDescriptor
 
 
 def LayerField(name='noname', number=0, datatype=0, **kwargs):
@@ -88,6 +88,12 @@ def PolygonField(shape=[[], []], **kwargs):
         kwargs['default'] = Polygons(shape=shape)
     R = RestrictType(Polygons)
     return DataFieldDescriptor(restrictions=R, **kwargs)
+    
+
+def DesignRuleField(shape=[[], []], **kwargs):
+    from spira.lrc.rules import __DesignRule__
+    R = RestrictType(__DesignRule__)
+    return DataFieldDescriptor(restrictions=R, **kwargs)
 
 
 class ElementalListField(DataFieldDescriptor):
@@ -164,14 +170,9 @@ class PointArrayField(DataFieldDescriptor):
         # return value 
 
     def __operations__(self, points):
-        # from spira.utils import scale_polygon_up as spu
-        # return spu(points) 
         return points
 
     def __set__(self, obj, points):
-        # from spira.utils import scale_polygon_up as spu
-        # pp = spu(self.__operations__(points))
-        # obj.__store__[self.__name__] = pp
         obj.__store__[self.__name__] = points
     
     # def __process__(self, points):

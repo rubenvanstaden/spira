@@ -40,7 +40,7 @@ class __SRef__(gdspy.CellReference, ElementalInitializer):
 
     def __equal_ports__(self, p1, p2):
         if p1.encloses_midpoint(p2.edge.points[0]):
-            if p1.gdslayer.number == p2.gdslayer.number:
+            if p1.gds_layer.number == p2.gds_layer.number:
                 return True
         return False
 
@@ -58,9 +58,10 @@ class __SRef__(gdspy.CellReference, ElementalInitializer):
 class SRefAbstract(__SRef__):
 
     midpoint = param.MidPointField()
-    rotation = param.FloatField(default=None)
+    # rotation = param.IntegerField(default=None, allow_none=True)
+    rotation = param.FloatField(allow_none=True)
     reflection = param.BoolField(default=False)
-    magnification = param.FloatField(default=1)
+    magnification = param.FloatField(default=1.0)
 
     def dependencies(self):
         from spira.gdsii.lists.cell_list import CellList
@@ -228,7 +229,7 @@ class SRefAbstract(__SRef__):
         self.move(midpoint=p, destination=destination)
         return self
 
-    def align(p1, p2, distance):
+    def align(self, p1, p2, distance):
         pass
         # # TODO:Get port direction and distance
         # self.connect(port=p1, destination=p2)

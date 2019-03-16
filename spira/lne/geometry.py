@@ -17,8 +17,9 @@ class __Geometry__(ElementalInitializer):
 
     _ID = 0
 
-    height = param.FloatField(default=0)
-    holes = param.IntegerField(default=None)
+    height = param.FloatField(default=0.0)
+    # holes = param.IntegerField(default=None)
+    holes = param.IntegerField(default=0)
     algorithm = param.IntegerField(default=6)
 
     create_mesh = param.DataField(fdef_name='create_meshio')
@@ -96,21 +97,26 @@ class GeometryAbstract(__Geometry__):
         from spira.utils import scale_polygon_down as spd
         from spira.utils import scale_polygon_up as spu
 
+        if self.holes == 0:
+            holes = None
+        else:
+            holes = self.holes
+
         elems = ElementList()
         for pp in self.polygons:
             ply = pp.polygon
             for i, points in enumerate(ply.polygons):
                 c_points = numpy_to_list(points, self.height, unit=1e-6)
                 surface_label = '{}_{}_{}_{}'.format(
-                    ply.gdslayer.number,
-                    ply.gdslayer.datatype,
+                    ply.gds_layer.number,
+                    ply.gds_layer.datatype,
                     GeometryAbstract._ID, i
                 )
                 gp = self.geom.add_polygon(
                     c_points,
                     lcar=1e6,
                     make_surface=True,
-                    holes=self.holes
+                    holes=holes
                 )
                 self.geom.add_physical_surface(gp.surface, label=surface_label)
                 elems += [gp.surface, gp.line_loop]

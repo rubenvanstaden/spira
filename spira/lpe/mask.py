@@ -92,7 +92,7 @@ class Mask(__NetlistCell__):
                     position=b.position,
                     text=b.text,
                     route=b.route,
-                    gdslayer=b.gdslayer,
+                    gds_layer=b.gds_layer,
                     color=b.color,
                     node_id=v
                 )
@@ -144,11 +144,11 @@ class Mask(__NetlistCell__):
     #     #     for name, port in D.ports.items():
     #     #         if port.locked is False:
     #     #             # print(D)
-    #     #             edgelayer = deepcopy(port.gdslayer)
+    #     #             edgelayer = deepcopy(port.gds_layer)
     #     #             edgelayer.datatype = 100
     #     #             m_term = spira.Term(
     #     #                 name=port.name,
-    #     #                 gdslayer=deepcopy(port.gdslayer),
+    #     #                 gds_layer=deepcopy(port.gds_layer),
     #     #                 midpoint=deepcopy(port.midpoint),
     #     #                 orientation=deepcopy(port.orientation),
     #     #                 reflection=port.reflection,
@@ -160,11 +160,11 @@ class Mask(__NetlistCell__):
     #     # for R in self.cell.routes:
     #     #     for name, port in R.ports.items():
     #     #         if port.locked is False:
-    #     #             edgelayer = deepcopy(port.gdslayer)
+    #     #             edgelayer = deepcopy(port.gds_layer)
     #     #             edgelayer.datatype = 101
     #     #             m_term = spira.Term(
     #     #                 name=port.name,
-    #     #                 gdslayer=deepcopy(port.gdslayer),
+    #     #                 gds_layer=deepcopy(port.gds_layer),
     #     #                 midpoint=deepcopy(port.midpoint),
     #     #                 orientation=deepcopy(port.orientation),
     #     #                 reflection=port.reflection,

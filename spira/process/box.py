@@ -7,14 +7,14 @@ from spira.process.processlayer import ProcessLayer
 
 class Box(ProcessLayer):
 
-    w = param.FloatField(default=1)
-    h = param.FloatField(default=1)
+    w = param.FloatField(default=1.0)
+    h = param.FloatField(default=1.0)
     center = param.PointField()
 
     def create_elementals(self, elems):
         shape = BoxShape(width=self.w, height=self.h)
         shape.apply_merge
-        ply = spira.Polygons(shape=shape, gdslayer=self.player.layer)
+        ply = spira.Polygons(shape=shape, gds_layer=self.ps_layer.layer)
         ply.center = self.center
         elems += ply
         return elems

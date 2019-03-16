@@ -17,10 +17,10 @@ class Route(Structure, __Manhattan__):
 
     path = param.NumpyArrayField()
     width = param.FloatField(default=1*1e8)
-    port_list = param.ListField()
+    port_list = param.ListField(allow_none=True)
 
     # FIXME!
-    angle = param.DataField(fdef_name='create_angle')
+    angle = param.DataField(fdef_name='create_angle', allow_none=True)
 
     route_90 = param.DataField(fdef_name='create_route_90')
     route_180 = param.DataField(fdef_name='create_route_180')
@@ -49,7 +49,11 @@ class Route(Structure, __Manhattan__):
                     self.__type__ = 'straight'
             if self.path:
                 self.__type__ = 'path'
-        if self.port_list is not None:
+
+        print(self.angle)
+        print(self.port_list)
+        # if self.port_list is not None:
+        if len(self.port_list) > 0:
             self.__type__ = 'auto'
 
     def create_route_90(self):
@@ -58,8 +62,8 @@ class Route(Structure, __Manhattan__):
             port2=self.port2,
             radius=self.radius,
             length=self.length,
-            player=self.player,
-            gdslayer=self.gdslayer
+            ps_layer=self.ps_layer,
+            gds_layer=self.gds_layer
         )
         R = spira.Cell(
             name='M90',
@@ -75,8 +79,8 @@ class Route(Structure, __Manhattan__):
             port2=self.port2,
             radius=self.radius,
             length=self.length,
-            player=self.player,
-            gdslayer=self.gdslayer
+            ps_layer=self.ps_layer,
+            gds_layer=self.gds_layer
         )
         R = spira.Cell(
             name='M180',
@@ -94,7 +98,7 @@ class Route(Structure, __Manhattan__):
         route_shape.apply_merge
         R = RouteGeneral(
             route_shape=route_shape, 
-            connect_layer=self.player
+            connect_layer=self.ps_layer
         )
         r = spira.SRef(R)
         # r.connect(port=r.ports['P1'], destination=self.port1)
@@ -110,7 +114,7 @@ class Route(Structure, __Manhattan__):
         route_shape.apply_merge
         R = RouteGeneral(
             route_shape=route_shape,
-            connect_layer=self.player
+            connect_layer=self.ps_layer
         )
         r = spira.SRef(R)
         r.connect(port=r.ports['P1'], destination=self.port1)
@@ -122,7 +126,7 @@ class Route(Structure, __Manhattan__):
     #         route_cell = Route(
     #             port1=self.port_list[x],
     #             port2=self.port_list[x+1],
-    #             player=self.player,
+    #             ps_layer=self.ps_layer,
     #             radius=0.1*1e6
     #         )
     #         R += spira.SRef(route_cell)
@@ -134,7 +138,7 @@ class Route(Structure, __Manhattan__):
     #                 points.append(p)
     #     route_shape = shapes.Shape(points=points)
     #     route_shape.apply_merge
-    #     D += pc.Polygon(points=route_shape.points, player=self.player, enable_edges=False) 
+    #     D += pc.Polygon(points=route_shape.points, ps_layer=self.ps_layer, enable_edges=False) 
     #     return spira.SRef(D)
 
     def create_route_auto(self):
@@ -153,7 +157,7 @@ class Route(Structure, __Manhattan__):
             route_cell = Route(
                 port1=term_list[x],
                 port2=term_list[x+1],
-                player=self.player, 
+                ps_layer=self.ps_layer, 
                 radius=0.1*1e6)
             R += spira.SRef(route_cell)
         D = spira.Cell(name='Device Router')
@@ -164,16 +168,16 @@ class Route(Structure, __Manhattan__):
                     points.append(p)
         route_shape = shapes.Shape(points=points)
         route_shape.apply_merge
-        D += pc.Polygon(points=route_shape.points, player=self.player, enable_edges=False) 
+        D += pc.Polygon(points=route_shape.points, ps_layer=self.ps_layer, enable_edges=False) 
         return spira.SRef(D)
 
     def create_metals(self, elems):
         if self.cell is not None:
             for e in self.cell.elementals:
                 if issubclass(type(e), spira.Polygons):
-                    for player in RDD.PLAYER.get_physical_layers(purposes='METAL'):
-                        if player.layer.number == e.gdslayer.number:
-                            elems += pc.Polygon(points=e.shape.points, player=player)
+                    for ps_layer in RDD.PLAYER.get_physical_layers(purposes='METAL'):
+                        if ps_layer.layer.number == e.gds_layer.number:
+                            elems += pc.Polygon(points=e.shape.points, ps_layer=ps_layer)
         elif self.__type__ == '90':
             r1 = self.route_90
             # for e in r1.ref.elementals:

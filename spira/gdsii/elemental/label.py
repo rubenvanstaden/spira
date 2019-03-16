@@ -31,7 +31,7 @@ class __Label__(gdspy.Label, ElementalInitializer):
             rotation=self.rotation,
             magnification=self.magnification,
             x_reflection=self.reflection,
-            layer=self.gdslayer.number,
+            layer=self.gds_layer.number,
             texttype=self.texttype
         )
 
@@ -41,16 +41,15 @@ class __Label__(gdspy.Label, ElementalInitializer):
     def __deepcopy__(self, memo):
         c_label = self.modified_copy(
             position=deepcopy(self.position),
-            gdslayer=deepcopy(self.gdslayer)
+            gds_layer=deepcopy(self.gds_layer)
         )
         return c_label
 
 
 class LabelAbstract(__Label__):
 
-    gdslayer = param.LayerField()
+    gds_layer = param.LayerField()
     text = param.StringField(default='no_text')
-    str_anchor = param.StringField(default='o')
     rotation = param.IntegerField(default=0)
     reflection = param.BoolField(default=False)
     magnification = param.FloatField(default=1.0)
@@ -67,7 +66,7 @@ class LabelAbstract(__Label__):
                 rotation=self.rotation,
                 magnification=self.magnification,
                 x_reflection=self.reflection,
-                layer=self.gdslayer.number,
+                layer=self.gds_layer.number,
                 texttype=self.texttype
             )
             LabelAbstract.__committed__.update({self.__repr__():L})

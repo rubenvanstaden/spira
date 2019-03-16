@@ -13,19 +13,19 @@ class ElementFilterMixin(object):
         for ply in self.polygons:
             if cell_type is not None:
                 if isinstance(layer, Layer):
-                    if layer.is_equal_number(ply.gdslayer):
-                        if ply.gdslayer.datatype == cell_type:
+                    if layer.is_equal_number(ply.gds_layer):
+                        if ply.gds_layer.datatype == cell_type:
                             elems += ply
                 elif isinstance(layer, PurposeLayer):
-                    if ply.gdslayer.number == layer.datatype:
-                        if ply.gdslayer.datatype == cell_type:
+                    if ply.gds_layer.number == layer.datatype:
+                        if ply.gds_layer.datatype == cell_type:
                             elems += ply
             else:
                 if isinstance(layer, Layer):
-                    if layer.is_equal_number(ply.gdslayer):
+                    if layer.is_equal_number(ply.gds_layer):
                         elems += ply
                 elif isinstance(layer, PurposeLayer):
-                    if ply.gdslayer.number == layer.datatype:
+                    if ply.gds_layer.number == layer.datatype:
                         elems += ply
         return elems
 

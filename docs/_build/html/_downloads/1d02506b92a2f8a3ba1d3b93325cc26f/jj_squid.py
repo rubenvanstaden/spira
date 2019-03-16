@@ -26,7 +26,7 @@ class JunctionSquid(spira.Cell):
 
         points = [p1, p2, p3, p4]
 
-        return spira.Path(points, width=1, gdslayer=RDD.M5, distance=3)
+        return spira.Path(points, width=1, gds_layer=RDD.M5, distance=3)
 
     def create_bot_routing(self):
         p1 = [self.midpoint, -self.h/2]
@@ -36,7 +36,7 @@ class JunctionSquid(spira.Cell):
 
         points = [p1, p2, p3, p4]
 
-        return spira.Path(points, width=1, gdslayer=RDD.M6, distance=3)
+        return spira.Path(points, width=1, gds_layer=RDD.M6, distance=3)
 
     def create_elementals(self, elems):
 

@@ -48,6 +48,14 @@ class __Properties__(object):
     def center(self, destination):
         self.move(destination=destination, midpoint=self.center)
 
+    @property
+    def xpos(self):
+        return self.center[0]
+
+    @property
+    def ypos(self):
+        return self.center[1]
+
 
 class PolygonMixin(__Properties__):
 
@@ -63,7 +71,16 @@ class PolygonMixin(__Properties__):
     @property
     def bbox(self):
         self.polygons = np.array(self.points)
+        # print(self.polygons)
         return self.get_bounding_box()
+        
+    # @property
+    # def bbox(self):
+    #     self.polygons = np.array(self.points)
+    #     bbox = self.get_bounding_box()
+    #     if bbox is None:
+    #         bbox = ((0,0),(0,0))
+    #     return bbox
 
 
 class CellMixin(__Properties__):

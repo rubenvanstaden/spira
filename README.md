@@ -54,6 +54,7 @@ Examples of using the PCell implementation is given in [examples](https://github
 
 
 ## Future Changes
+* Create PortList class for special port filtering functionality.
 * Add basic DRC tests in RDD.
 * Fix auto-docs implementation.
 * Add Display class to RDD.
@@ -70,6 +71,9 @@ Examples of using the PCell implementation is given in [examples](https://github
 ## History of changes
 
 ### Version 0.1.0 (XXX, 2019)
+* Updated parameter field to accept an extra restriction argument.
+* Added NumberField which supports 'int' and 'float' parameters.
+* Added ComplexField which supports 'int', 'float' and 'complex' parameters.
 * Implement locked parameters.
 * Added automatic docstring generation.
 * Fix type-checking implementation. Updated parameter restrictions.

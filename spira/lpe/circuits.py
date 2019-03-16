@@ -58,9 +58,9 @@ class RouteToStructureConnector(__CircuitContainer__, Structure):
                 R_ply = pp.polygon
                 for key, port in D.instance_ports.items():
                     if isinstance(port, (spira.Term, spira.EdgeTerm)):
-                        if port.gdslayer.number == pp.player.layer.number:
+                        if port.gds_layer.number == pp.ps_layer.layer.number:
                             if R_ply & port.edge:
-                                route_key = (pp.node_id, pp.player.layer.number)
+                                route_key = (pp.node_id, pp.ps_layer.layer.number)
                                 D.port_connects[key] = route_key
                                 D.port_locks[key] = False
 
@@ -113,14 +113,14 @@ class Circuit(RouteToStructureConnector):
     def create_metals(self, elems):
         R = self.routes.flat_copy()
         B = self.contacts.flat_copy()
-        for player in RDD.PLAYER.get_physical_layers(purposes='METAL'):
-            Rm = R.get_polygons(layer=player.layer)
-            Bm = B.get_polygons(layer=player.layer)
+        for ps_layer in RDD.PLAYER.get_physical_layers(purposes='METAL'):
+            Rm = R.get_polygons(layer=ps_layer.layer)
+            Bm = B.get_polygons(layer=ps_layer.layer)
             for i, e in enumerate([*Rm, *Bm]):
-                # alias = 'ply_{}_{}_{}'.format(player.layer.number, self.cell.node_id, i)
-                alias = 'ply_{}_{}_{}'.format(player.layer.number, self.__class__.__name__, i)
-                # alias = 'ply_{}_{}_{}'.format(player.layer.number, 'webfwejfbjk', i)
-                elems += pc.Polygon(name=alias, player=player, points=e.polygons, level=self.level)
+                # alias = 'ply_{}_{}_{}'.format(ps_layer.layer.number, self.cell.node_id, i)
+                alias = 'ply_{}_{}_{}'.format(ps_layer.layer.number, self.__class__.__name__, i)
+                # alias = 'ply_{}_{}_{}'.format(ps_layer.layer.number, 'webfwejfbjk', i)
+                elems += pc.Polygon(name=alias, ps_layer=ps_layer, points=e.polygons, level=self.level)
         return elems
 
     def create_ports(self, ports):
@@ -135,14 +135,14 @@ class Circuit(RouteToStructureConnector):
         for D in self.structures:
             for name, port in D.instance_ports.items():
                 if port.locked is False:
-                    edgelayer = deepcopy(port.gdslayer)
+                    edgelayer = deepcopy(port.gds_layer)
                     edgelayer.datatype = 100
                     ports += port.modified_copy(edgelayer=edgelayer)
 
         for R in self.routes:
             for name, port in R.instance_ports.items():
                 if port.locked is False:
-                    edgelayer = deepcopy(port.gdslayer)
+                    edgelayer = deepcopy(port.gds_layer)
                     edgelayer.datatype = 101
                     ports += port.modified_copy(edgelayer=edgelayer)
 
@@ -155,9 +155,9 @@ class Circuit(RouteToStructureConnector):
         #     for m in self.get_metals(pl):
         #         for p in m.ports:
         #             for t in self.terminals:
-        #                 edgelayer = deepcopy(p.gdslayer)
+        #                 edgelayer = deepcopy(p.gds_layer)
         #                 edgelayer.datatype = 82
-        #                 arrowlayer = deepcopy(p.gdslayer)
+        #                 arrowlayer = deepcopy(p.gds_layer)
         #                 arrowlayer.datatype = 83
         #                 if p.encloses_midpoint(points=t.edge.polygons):
         #                     ports += spira.Term(

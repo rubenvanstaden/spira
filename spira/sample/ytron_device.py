@@ -10,8 +10,8 @@ class YtronPCell(spira.Device):
         return shapes.YtronShape(rho=1*self.um)
 
     def create_elementals(self, elems):
-        # ply = spira.Polygons(shape=self.sy, gdslayer=RDD.M6.LAYER)
-        ply = spira.Polygons(shape=self.sy, gdslayer=spira.Layer(number=9, datatype=10))
+        # ply = spira.Polygons(shape=self.sy, gds_layer=RDD.M6.LAYER)
+        ply = spira.Polygons(shape=self.sy, gds_layer=spira.Layer(number=9, datatype=10))
         elems += ply
         return elems
 

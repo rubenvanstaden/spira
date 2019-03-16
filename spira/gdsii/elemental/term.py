@@ -45,7 +45,7 @@ class Term(PortAbstract):
 
     def get_length(self):
         if not hasattr(self, '__length__'):
-            key = self.gdslayer.name
+            key = self.gds_layer.name
             if key in RDD.keys:
                 if RDD.name == 'MiTLL':
                     self.__length__ = RDD[key].MIN_SIZE * 1e6
@@ -68,7 +68,7 @@ class Term(PortAbstract):
     def __repr__(self):
         return ("[SPiRA: Term] (name {}, lock {}, number {}, midpoint {}, " +
             "width {}, orientation {}, length {}, edgelayer {}, arrowlayer {})").format(
-                self.name, self.locked, self.gdslayer.number, self.midpoint, self.width, 
+                self.name, self.locked, self.gds_layer.number, self.midpoint, self.width, 
                 self.orientation, self.length, self.edgelayer, self.arrowlayer
         )
 
@@ -76,11 +76,11 @@ class Term(PortAbstract):
         return self.__repr__()
 
     def create_port1(self):
-        port = spira.Port(name='P1', midpoint=self.midpoint, gdslayer=self.layer1)
+        port = spira.Port(name='P1', midpoint=self.midpoint, gds_layer=self.layer1)
         return port
 
     def create_port2(self):
-        port = spira.Port(name='P2', midpoint=self.midpoint, gdslayer=self.layer2)
+        port = spira.Port(name='P2', midpoint=self.midpoint, gds_layer=self.layer2)
         return port
 
     def encloses(self, points):
@@ -114,7 +114,7 @@ class Term(PortAbstract):
         dx = self.length
         dy = self.width - dx
         rect_shape = shapes.RectangleShape(p1=[0, 0], p2=[dx, dy])
-        ply = spira.Polygons(shape=rect_shape, gdslayer=self.edgelayer, direction=90)
+        ply = spira.Polygons(shape=rect_shape, gds_layer=self.edgelayer, direction=90)
         if self.reflection:
             ply.reflect()
         ply.rotate(angle=self.orientation)
@@ -126,7 +126,7 @@ class Term(PortAbstract):
         from spira import shapes
         arrow_shape = shapes.ArrowShape(a=self.length, b=self.length/2, c=self.length*2)
         arrow_shape.apply_merge
-        ply = spira.Polygons(shape=arrow_shape, gdslayer=self.arrowlayer)
+        ply = spira.Polygons(shape=arrow_shape, gds_layer=self.arrowlayer)
         if self.reflection:
             ply.reflect()
         ply.rotate(angle=self.orientation)
@@ -154,7 +154,7 @@ class Term(PortAbstract):
             reflection=self.reflection,
             width=deepcopy(self.width),
             length=deepcopy(self.length),
-            gdslayer=deepcopy(self.gdslayer),
+            gds_layer=deepcopy(self.gds_layer),
             edgelayer=deepcopy(self.edgelayer),
             arrowlayer=deepcopy(self.arrowlayer),
             local_connect=self.local_connect,
@@ -179,7 +179,7 @@ class EdgeTerm(Term):
     def __repr__(self):
         return ("[SPiRA: EdgeTerm] (name {}, number {}, midpoint {}, " +
             "width {}, orientation {})").format(self.name,
-            self.gdslayer.number, self.midpoint,
+            self.gds_layer.number, self.midpoint,
             self.width, self.orientation
         )
 
@@ -205,7 +205,7 @@ class Dummy(Term):
     def __repr__(self):
         return ("[SPiRA: Dummy] (name {}, number {}, midpoint {}, " +
             "width {}, orientation {})").format(self.name,
-            self.gdslayer.number, self.midpoint,
+            self.gds_layer.number, self.midpoint,
             self.width, self.orientation
         )
 

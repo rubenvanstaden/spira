@@ -158,7 +158,7 @@ class DrawGraphAbstract(object):
                 elif isinstance(label, (spira.Port, spira.Term, spira.Dummy)):
                     nodes['color'].append(label.color.hexcode)
                 elif issubclass(type(label), __ProcessLayer__):
-                    nodes['color'].append(label.player.data.COLOR.hexcode)
+                    nodes['color'].append(label.ps_layer.data.COLOR.hexcode)
                 else:
                     raise ValueError('Unsupported graph node type: {}'.format(type(label)))
 

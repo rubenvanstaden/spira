@@ -218,7 +218,7 @@ class Connector(Cell):
     """
 
     midpoint = param.MidPointField()
-    orientation = param.IntegerField(default=0)
+    orientation = param.FloatField(default=0.0)
     width = param.FloatField(default=2*1e6)
 
     def __repr__(self):

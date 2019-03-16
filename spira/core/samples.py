@@ -44,7 +44,7 @@ class TestFields(spira.Cell):
     port = param.PortField(doc='Port docstring.')
     shape = param.ShapeField(doc='Shape docstring.')
     cell = param.CellField(doc='Cell docstring.')
-    player = param.PhysicalLayerField(doc='Player docstring.')
+    ps_layer = param.PhysicalLayerField(doc='Player docstring.')
     polygon = param.PolygonField(doc='Polygon docstring.')
     print(layer.__doc__)
 
@@ -63,7 +63,7 @@ if __name__ == '__main__':
     print(TestFields.port.__doc__)
     print(TestFields.shape.__doc__)
     print(TestFields.cell.__doc__)
-    print(TestFields.player.__doc__)
+    print(TestFields.ps_layer.__doc__)
     print(TestFields.polygon.__doc__)
 
     # print(cell.layer.__doc__)
@@ -72,7 +72,7 @@ if __name__ == '__main__':
     # print(cell.port.__doc__)
     # print(cell.shape.__doc__)
     # print(cell.cell.__doc__)
-    # print(cell.player.__doc__)
+    # print(cell.ps_layer.__doc__)
     # print(cell.polygon.__doc__)
 
     # print('Layer: {}'.format(cell.layer))
@@ -81,7 +81,7 @@ if __name__ == '__main__':
     # print('Port: {}'.format(cell.port))
     # print('Cell: {}'.format(cell.cell))
     # print('Shape: {}'.format(cell.shape))
-    # print('PLayer: {}'.format(cell.player))
+    # print('PLayer: {}'.format(cell.ps_layer))
     # print('Polygon: {}'.format(cell.polygon))
 
     # --------------------------------------------

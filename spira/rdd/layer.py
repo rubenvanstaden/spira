@@ -82,7 +82,7 @@ class PhysicalLayer(__Layer__):
 
     doc = param.StringField()
     layer = param.LayerField()
-    purpose = PurposeLayerField()
+    purpose = param.PurposeLayerField()
     data = param.DataField(default=ProcessTree())
 
     def __init__(self, **kwargs):

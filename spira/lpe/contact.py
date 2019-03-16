@@ -18,14 +18,14 @@ class ViaTemplate(spira.Cell):
         M2 = spira.ElementList()
 
         for e in elems:
-            if e.player.purpose == RDD.PURPOSE.METAL:
-                if e.player.layer == self.layer1:
+            if e.ps_layer.purpose == RDD.PURPOSE.METAL:
+                if e.ps_layer.layer == self.layer1:
                     M1 += e
-                elif e.player.layer == self.layer2:
+                elif e.ps_layer.layer == self.layer2:
                     M2 += e
 
-            if e.player.purpose in [RDD.PURPOSE.PRIM.VIA, RDD.PURPOSE.PRIM.JUNCTION]:
-                if e.player.layer == self.via_layer:
+            if e.ps_layer.purpose in [RDD.PURPOSE.PRIM.VIA, RDD.PURPOSE.PRIM.JUNCTION]:
+                if e.ps_layer.layer == self.via_layer:
                     for M in M1:
                         if e.polygon | M.polygon:
                             prev_port = e.ports[0]
@@ -33,7 +33,7 @@ class ViaTemplate(spira.Cell):
                                 name=e.name,
                                 midpoint=prev_port.midpoint,
                                 orientation=prev_port.orientation,
-                                gdslayer=M.player.layer
+                                gds_layer=M.ps_layer.layer
                             )
 
                     for M in M2:
@@ -43,7 +43,7 @@ class ViaTemplate(spira.Cell):
                                 name=e.name,
                                 midpoint=prev_port.midpoint,
                                 orientation=prev_port.orientation,
-                                gdslayer=M.player.layer
+                                gds_layer=M.ps_layer.layer
                             )
                                 
         return elems
@@ -59,21 +59,21 @@ class DeviceTemplate(Structure):
             if len(e.polygons[0]) == 4:
                 alias = 'devices_box_{}_{}_{}'.format(pl.layer.number, self.cell.node_id, i)
                 poly = spira.Polygons(shape=e.polygons)
-                elems += pc.Box(name=alias, player=pl, center=poly.center, w=poly.dx, h=poly.dy, level=self.level)
+                elems += pc.Box(name=alias, ps_layer=pl, center=poly.center, w=poly.dx, h=poly.dy, level=self.level)
             else:
                 alias = 'ply_{}_{}_{}'.format(pl.layer.number, self.cell.node_id, i)
-                elems += pc.Polygon(name=alias, player=pl, points=e.polygons, level=self.level)
+                elems += pc.Polygon(name=alias, ps_layer=pl, points=e.polygons, level=self.level)
         return elems
 
     def create_metals(self, elems):
-        for player in RDD.PLAYER.get_physical_layers(purposes='METAL'):
-            for e in self.generate_physical_polygons(player):
+        for ps_layer in RDD.PLAYER.get_physical_layers(purposes='METAL'):
+            for e in self.generate_physical_polygons(ps_layer):
                 elems += e
         return elems
 
     def create_contacts(self, elems):
-        for player in RDD.PLAYER.get_physical_layers(purposes=['VIA', 'JJ']):
-            for e in self.generate_physical_polygons(player):
+        for ps_layer in RDD.PLAYER.get_physical_layers(purposes=['VIA', 'JJ']):
+            for e in self.generate_physical_polygons(ps_layer):
                 elems += e
         return elems
 
@@ -105,13 +105,13 @@ class DeviceTemplate(Structure):
                 for e in default_via.elementals.flatten():
                     if isinstance(e, spira.Port):
                         if e.name != 'P_metal':
-                            default_ports += e.gdslayer.node_id
+                            default_ports += e.gds_layer.node_id
 
                 self_ports = spira.ElementList()
                 for e in self.elementals.flatten():
                     if isinstance(e, spira.Port):
                         if e.name != 'P_metal':
-                            self_ports += e.gdslayer.node_id
+                            self_ports += e.gds_layer.node_id
                 if set(default_ports) == set(self_ports):
                     self.__type__ = key
 
@@ -129,22 +129,22 @@ class DeviceTemplate(Structure):
                 for e in default_via.elementals.flatten():
                     if isinstance(e, spira.Port):
                         if e.name != 'P_metal':
-                            default_ports += e.gdslayer.node_id
+                            default_ports += e.gds_layer.node_id
 
                 self_ports = spira.ElementList()
                 for e in self.elementals.flatten():
                     if isinstance(e, spira.Port):
                         if e.name != 'P_metal':
-                            self_ports += e.gdslayer.node_id
+                            self_ports += e.gds_layer.node_id
 
             if is_possibly_match:
                 default_ports = spira.ElementList()
                 for e in default_via.contacts:
-                    default_ports += e.player
+                    default_ports += e.ps_layer
 
                 self_ports = spira.ElementList()
                 for e in self.contacts:
-                    self_ports += e.player
+                    self_ports += e.ps_layer
 
                 if set(default_ports) != set(self_ports):
                     is_possibly_match = False
