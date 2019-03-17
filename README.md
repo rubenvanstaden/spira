@@ -54,6 +54,7 @@ Examples of using the PCell implementation is given in [examples](https://github
 
 
 ## Future Changes
+* Upgrade Midpoint class to Coord.
 * Create PortList class for special port filtering functionality.
 * Add basic DRC tests in RDD.
 * Fix auto-docs implementation.

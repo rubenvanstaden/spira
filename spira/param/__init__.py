@@ -10,6 +10,14 @@ from spira.core.descriptor import FunctionField
 from spira.core.descriptor import DataFieldDescriptor
 
 
+def CoordField(**kwargs):
+    from spira.lgm.coord import Coord
+    if 'default' not in kwargs:
+        kwargs['default'] = Coord(0,0)
+    R = RestrictType(Coord)
+    return DataFieldDescriptor(restrictions=R, **kwargs)
+
+
 def LayerField(name='noname', number=0, datatype=0, **kwargs):
     from spira.layer import Layer
     if 'default' not in kwargs:

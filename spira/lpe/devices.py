@@ -61,3 +61,27 @@ class Device(Structure):
 class Via(Device):
     color = param.ColorField(default=color.COLOR_LIGHT_GRAY)
 
+
+class DeviceDRC(__CellContainer__):
+
+    def create_elementals(self, elems):
+
+        for R in RDD.RULES.WIDTH:
+            print(R.design_rule)
+            for e in self.cell.elementals:
+                if e.ps_layer == R.design_rule.layer1:
+                    print(e.ports)
+                    if not R.design_rule.apply(e1=e):
+                        # e.error = R.error_layer.datatype
+                        e.ps_layer.layer.datatype = 100
+
+                    # print(e.points)
+
+                    for p in e.edge_ports:
+                        self.ports += p
+
+                    elems += e
+            print('')
+
+        return elems
+

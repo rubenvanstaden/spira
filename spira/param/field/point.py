@@ -14,7 +14,7 @@ class __Point__(FieldInitializer):
     def __getitem__(self, index):
         if index == 0: return self.x
         if index == 1: return self.y
-        raise IndexError("Coord2 type only supports index 0 and 1")
+        raise IndexError("Coord type only supports index 0 and 1")
 
     def __setitem__(self, index, value):
 
@@ -23,7 +23,7 @@ class __Point__(FieldInitializer):
         elif index == 1:
             self.y = value
         else:
-            raise IndexError("Coord2 type only supports index 0 and 1")
+            raise IndexError("Coord type only supports index 0 and 1")
         return
 
     def __iter__(self):

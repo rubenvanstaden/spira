@@ -112,7 +112,8 @@ class Term(PortAbstract):
     def edge(self):
         from spira import shapes
         dx = self.length
-        dy = self.width - dx
+        # dy = self.width - dx
+        dy = self.width
         rect_shape = shapes.RectangleShape(p1=[0, 0], p2=[dx, dy])
         ply = spira.Polygons(shape=rect_shape, gds_layer=self.edgelayer, direction=90)
         if self.reflection:

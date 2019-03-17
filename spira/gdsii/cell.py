@@ -161,6 +161,8 @@ class Cell(CellAbstract):
     """ A Cell encapsulates a set of elementals that
     describes the layout being generated. """
     
+    um = param.FloatField(default=1e6)
+    
     routes = param.ElementalListField(fdef_name='create_routes')
     
     def create_routes(self, routes):

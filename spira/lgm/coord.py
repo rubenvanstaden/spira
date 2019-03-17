@@ -1,0 +1,111 @@
+import math
+import numpy as np
+
+
+class Coord(object):
+    """
+
+    """
+
+    def __init__(self, *args):
+        if len(args) == 2:
+            self.x, self.y = args
+        elif len(args) == 1:
+            self.x, self.y = args[0][0], args[0][1]
+
+    def __getitem__(self, index):
+        if index == 0: 
+            return self.x
+        if index == 1: 
+            return self.y
+        raise IndexError("Coord type only supports index 0 and 1")
+
+    def __setitem__(self, index, value):
+        if index == 0: 
+            self.x = value
+        elif index == 1: 
+            self.y = value
+        else:
+            raise IndexError("Coord type only supports index 0 and 1")
+        return
+
+    def __iter__(self):
+        for index in range(2):
+            yield self[index]
+
+    def move(self, position):
+        """ Move the coordinate by a displacement vector. """
+        self.x += position[0]
+        self.y += position[1]
+        return self
+
+    def move_copy(self, position):
+        """ Return a moved copy of the coordinate """
+        return Coord(self.x + position[0], self.y + position[1])
+
+    def __str__(self):
+        return "(" + str(self.x) + "," + str(self.y) + ")"
+
+    def __eq__(self, other):
+        return (other != None) and (abs(self[0] - other[0]) < 10e-10) and (abs(self[1] - other[1]) < 10e-10)
+
+    def __ne__(self, other):
+        return (other == None) or (abs(self[0] - other[0]) > 10e-10) or (abs(self[1] - other[1]) > 10e-10)
+
+    def distance(self, other):    
+        """ The distance to another coordinate """
+        return math.sqrt((other[0] - self.x)**2 + (other[1] - self.y)**2)
+
+    def angle_deg(self, other=(0.0, 0.0)):
+        """ the angle with respect to another coordinate, in degrees """
+        return 180.0 / math.pi * self.angle_rad(other)
+
+    def angle_rad(self, other=(0.0, 0.0)):
+        """ the angle with respect to another coordinate, in radians """
+        return math.atan2(self.y - other[1], self.x - other[0])
+
+    def __iadd__(self, other):
+        self.x += other[0]
+        self.y += other[1]
+        return self
+
+    def __add__(self, other):
+        return Coord(self.x + other[0], self.y + other[1])
+
+    def __isub__(self, other):
+        self.x -= other[0]
+        self.y -= other[1]
+        return self
+
+    def __sub__(self, other):
+        return Coord(self.x - other[0], self.y - other[1])
+
+    def __neg__(self):
+        return Coord(-self.x, -self.y)    
+
+    def __imul__(self, other):
+        self.x *= other
+        self.y *= other
+        return self
+
+    def __mul__(self, other):
+        return Coord(self.x * other, self.y * other)
+
+    def __rmul__(self, other):
+        return Coord(self.x * other, self.y * other)
+
+    def __repr__(self):
+        return 'Coord({}, {})'.format(self.x, self.y)
+
+    def dot(self, other):
+        return np.conj(self.x) * other[0] + np.conj(self.y) * other[1]        
+
+    def __abs__(self):
+        return math.sqrt(abs(self.x) ** 2 + abs(self.y) ** 2)
+
+    def id_string(self):
+        return "%d_%d" % (self.x * 1000, self.y * 1000)
+
+    def convert_to_array(self):
+        return [self.x, self.y]
+    

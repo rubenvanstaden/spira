@@ -3,6 +3,7 @@ import gdspy
 import pyclipper
 import numpy as np
 from copy import copy, deepcopy
+from numpy.linalg import norm
 
 from spira import param
 from spira.visualization import color
@@ -75,6 +76,9 @@ class PortAbstract(__Port__):
         dx, dy = np.array(d) - o
         self.translate(dx, dy)
         return self
+
+    def distance(self, other):
+        return norm(np.array(self.midpoint) - np.array(other.midpoint))
 
     def connect(self, S, P):
         """ Connects the port to a specific polygon in a cell reference. """
