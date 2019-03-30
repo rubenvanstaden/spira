@@ -72,6 +72,7 @@ Examples of using the PCell implementation is given in [examples](https://github
 ## History of changes
 
 ### Version 0.1.0 (XXX, 2019)
+* Updated the datatype parameter of ports that represents primitive connects.
 * Updated parameter field to accept an extra restriction argument.
 * Added NumberField which supports 'int' and 'float' parameters.
 * Added ComplexField which supports 'int', 'float' and 'complex' parameters.

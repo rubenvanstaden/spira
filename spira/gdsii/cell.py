@@ -53,6 +53,10 @@ class CellAbstract(__Cell__):
             self.__name__ = self.__name_generator__(self)
         return self.__name__
 
+    @property
+    def alias(self):
+        return self.name.split('__')[0]
+
     def flatten(self):
         self.elementals = self.elementals.flatten()
         return self.elementals
@@ -73,7 +77,7 @@ class CellAbstract(__Cell__):
             if not isinstance(e, (SRef, ElementList)):
                 e.commit_to_gdspy(cell=cell)
         return cell
-        
+
     def translate(self, dx, dy):
         for e in self.elementals:
             e.translate(dx=dx, dy=dy)
@@ -164,6 +168,8 @@ class Cell(CellAbstract):
     um = param.FloatField(default=1e6)
     
     routes = param.ElementalListField(fdef_name='create_routes')
+
+    _next_uid = 0
     
     def create_routes(self, routes):
         return routes
@@ -173,6 +179,8 @@ class Cell(CellAbstract):
         gdspy.Cell.__init__(self, self.name, exclude_from_current=True)
 
         self.g = nx.Graph()
+        self.uid = Cell._next_uid
+        Cell._next_uid += 1
  
         if name is not None:
             s = '{}_{}'.format(name, self.__class__._ID)
@@ -220,7 +228,7 @@ class Connector(Cell):
     """
 
     midpoint = param.MidPointField()
-    orientation = param.FloatField(default=0.0)
+    orientation = param.NumberField(default=0.0)
     width = param.FloatField(default=2*1e6)
 
     def __repr__(self):

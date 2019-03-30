@@ -11,7 +11,7 @@ class Net(ElementalInitializer):
 
     name = param.StringField()
     layer = param.LayerField()
-    lcar = param.IntegerField(default=0)
+    lcar = param.FloatField(default=0)
     level = param.IntegerField(default=1)
     dimension = param.IntegerField(default=2)
     algorithm = param.IntegerField(default=6)

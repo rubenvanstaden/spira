@@ -27,23 +27,35 @@ class ViaTemplate(spira.Cell):
             if e.ps_layer.purpose in [RDD.PURPOSE.PRIM.VIA, RDD.PURPOSE.PRIM.JUNCTION]:
                 if e.ps_layer.layer == self.via_layer:
                     for M in M1:
-                        if e.polygon | M.polygon:
+                        ll = spira.Layer(
+                            number=M.ps_layer.layer.number,
+                            datatype=e.ps_layer.purpose.datatype
+                        )
+                        # if e.polygon | M.polygon:
+                        if e.polygon & M.polygon:
                             prev_port = e.ports[0]
                             e.ports[0] = spira.Port(
                                 name=e.name,
                                 midpoint=prev_port.midpoint,
                                 orientation=prev_port.orientation,
-                                gds_layer=M.ps_layer.layer
+                                # gds_layer=M.ps_layer.layer
+                                gds_layer=ll
                             )
 
                     for M in M2:
-                        if e.polygon | M.polygon:
+                        ll = spira.Layer(
+                            number=M.ps_layer.layer.number,
+                            datatype=e.ps_layer.purpose.datatype
+                        )
+                        # if e.polygon | M.polygon:
+                        if e.polygon & M.polygon:
                             prev_port = e.ports[1]
                             e.ports[1] = spira.Port(
                                 name=e.name,
                                 midpoint=prev_port.midpoint,
                                 orientation=prev_port.orientation,
-                                gds_layer=M.ps_layer.layer
+                                # gds_layer=M.ps_layer.layer
+                                gds_layer=ll
                             )
                                 
         return elems
@@ -66,7 +78,8 @@ class DeviceTemplate(Structure):
         return elems
 
     def create_metals(self, elems):
-        for ps_layer in RDD.PLAYER.get_physical_layers(purposes='METAL'):
+        # for ps_layer in RDD.PLAYER.get_physical_layers(purposes='METAL'):
+        for ps_layer in RDD.PLAYER.get_physical_layers(purposes=['METAL', 'GND']):
             for e in self.generate_physical_polygons(ps_layer):
                 elems += e
         return elems
@@ -94,10 +107,16 @@ class DeviceTemplate(Structure):
         for key in RDD.VIAS.keys:
             default_via = RDD.VIAS[key].DEFAULT()
 
+            # print(key)
+            # print(self.contacts)
+            # print('-------------------')
+            # print(default_via.contacts)
+
             is_possibly_match = True
             if len(self.contacts) != len(default_via.contacts):
                 is_possibly_match = False
-            if len(self.metals) != len(default_via.metals):
+            # if len(self.metals) != len(default_via.metals):
+            if len(self.merged_layers) != len(default_via.merged_layers):
                 is_possibly_match = False
 
             if is_possibly_match:
@@ -111,18 +130,35 @@ class DeviceTemplate(Structure):
                 for e in self.elementals.flatten():
                     if isinstance(e, spira.Port):
                         if e.name != 'P_metal':
+                            # print(e)
                             self_ports += e.gds_layer.node_id
                 if set(default_ports) == set(self_ports):
                     self.__type__ = key
+            # print('')
 
         for key in RDD.DEVICES.keys:
             default_via = RDD.DEVICES[key].PCELL()
             is_possibly_match = True
 
+            # print(key)
+            # print(self.contacts)
+            # print('--------------')
+            # print(default_via.contacts)
+
             if len(self.contacts) != len(default_via.contacts):
                 is_possibly_match = False
             if len(self.merged_layers) != len(default_via.merged_layers):
                 is_possibly_match = False
+
+            # FIXME: Only works for AiST process.
+            # if is_possibly_match:
+            #     for m1 in self.merged_layers:
+            #         same_shape = False
+            #         for m2 in default_via.merged_layers:
+            #             if m1.polygon.count == m2.polygon.count:
+            #                 same_shape = True
+            #         if same_shape is False:
+            #             is_possibly_match = False
 
             if is_possibly_match:
                 default_ports = spira.ElementList()

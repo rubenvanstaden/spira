@@ -7,12 +7,12 @@ from spira.lgm.shapes.shape import Shape
 class YtronShape(Shape):
     """ Shape for generating a yTron device. """
 
-    rho = param.FloatField(default=0.2*1e6)
+    rho = param.NumberField(default=0.2*1e6)
     arm_lengths = param.PointField(default=(5*1e6, 3*1e6))
-    source_length = param.FloatField(default=5*1e6)
+    source_length = param.NumberField(default=5*1e6)
     arm_widths = param.PointField(default=(2*1e6, 2*1e6))
-    theta = param.FloatField(default=2.5)
-    theta_resolution = param.FloatField(default=10.0)
+    theta = param.NumberField(default=2.5)
+    theta_resolution = param.NumberField(default=10.0)
 
     xc = param.DataField(fdef_name='create_xc')
     yc = param.DataField(fdef_name='create_yc')
@@ -21,7 +21,7 @@ class YtronShape(Shape):
     arm_x_right = param.DataField(fdef_name='create_arm_x_right')
     arm_y_right = param.DataField(fdef_name='create_arm_y_right')
     rad_theta = param.DataField(fdef_name='create_rad_theta')
-
+    
     def create_rad_theta(self):
         return self.theta * np.pi/180
 

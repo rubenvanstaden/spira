@@ -128,7 +128,6 @@ class RouteParallel(__Manhattan__):
     q4 = param.DataField(fdef_name='create_q4_180')
 
     def create_parallel_route(self):
-        print('ebfwjekfwefjkj')
 
         p1, p2 = self.p1, self.p2
         b1, b2 = self.b2, self.b1

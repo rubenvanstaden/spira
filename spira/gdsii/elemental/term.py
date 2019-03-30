@@ -33,7 +33,7 @@ class Term(PortAbstract):
     local_connect = param.StringField()
     external_connect = param.StringField()
 
-    width = param.FloatField(default=2*1e6)
+    width = param.NumberField(default=2*1e6)
 
     layer1 = param.LayerField()
     layer2 = param.LayerField()
@@ -112,8 +112,8 @@ class Term(PortAbstract):
     def edge(self):
         from spira import shapes
         dx = self.length
-        # dy = self.width - dx
-        dy = self.width
+        dy = self.width - dx
+        # dy = self.width
         rect_shape = shapes.RectangleShape(p1=[0, 0], p2=[dx, dy])
         ply = spira.Polygons(shape=rect_shape, gds_layer=self.edgelayer, direction=90)
         if self.reflection:
@@ -133,7 +133,7 @@ class Term(PortAbstract):
         ply.rotate(angle=self.orientation)
         ply.move(midpoint=ply.center, destination=self.midpoint)
         return ply
-        
+
     def commit_to_gdspy(self, cell):
         if self.__repr__() not in list(__Port__.__committed__.keys()):
             self.edge.commit_to_gdspy(cell=cell)
@@ -164,7 +164,7 @@ class Term(PortAbstract):
             is_edge=self.is_edge
         )
         return new_port
-        
+
 
 class EdgeTerm(Term):
     """
@@ -178,9 +178,9 @@ class EdgeTerm(Term):
     """
 
     def __repr__(self):
-        return ("[SPiRA: EdgeTerm] (name {}, number {}, midpoint {}, " +
+        return ("[SPiRA: EdgeTerm] (name {}, number {}, datatype {}, midpoint {}, " +
             "width {}, orientation {})").format(self.name,
-            self.gds_layer.number, self.midpoint,
+            self.gds_layer.number, self.gds_layer.datatype, self.midpoint,
             self.width, self.orientation
         )
 

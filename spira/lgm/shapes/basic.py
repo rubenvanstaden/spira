@@ -21,8 +21,8 @@ class RectangleShape(Shape):
 
 class BoxShape(Shape):
 
-    width = param.FloatField(default=1*1e6)
-    height = param.FloatField(default=1*1e6)
+    width = param.NumberField(default=1*1e6)
+    height = param.NumberField(default=1*1e6)
 
     def create_points(self, points):
         cx = self.center[0]

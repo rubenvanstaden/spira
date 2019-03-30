@@ -50,7 +50,7 @@ class LabelAbstract(__Label__):
 
     gds_layer = param.LayerField()
     text = param.StringField(default='no_text')
-    rotation = param.IntegerField(default=0)
+    rotation = param.NumberField(default=0)
     reflection = param.BoolField(default=False)
     magnification = param.FloatField(default=1.0)
     texttype = param.IntegerField(default=0)

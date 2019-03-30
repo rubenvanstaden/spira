@@ -13,6 +13,7 @@ from spira.param.field.typed_graph import EdgeInductor
 import matplotlib.pyplot as plt
 import plotly.graph_objs as go
 import plotly.offline as offline
+from spira.visualization import color
 
 from spira import settings
 
@@ -124,6 +125,7 @@ class DrawGraphAbstract(object):
     def _create_nodes(self, G, labeltext):
         import spira
         from spira.process.processlayer import __ProcessLayer__
+        from spira.gdsii.elemental.polygons import __Polygon__
 
         nodes = {}
 
@@ -159,8 +161,13 @@ class DrawGraphAbstract(object):
                     nodes['color'].append(label.color.hexcode)
                 elif issubclass(type(label), __ProcessLayer__):
                     nodes['color'].append(label.ps_layer.data.COLOR.hexcode)
+                elif issubclass(type(label), __Polygon__):
+                    nodes['color'].append(label.color.hexcode)
                 else:
                     raise ValueError('Unsupported graph node type: {}'.format(type(label)))
+
+                if 'connect' in G.node[n]:
+                    nodes['color'] = [color.COLOR_WHITE]
 
         return nodes
 

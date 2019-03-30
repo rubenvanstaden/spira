@@ -15,6 +15,21 @@ class Layer(__Layer__):
     number = param.IntegerField(default=0)
     datatype = param.IntegerField(default=0)
 
+    # def get_datatype(self):
+    #     if not hasattr(self, '__datatype__'):
+    #         self.__datatype__ = 0
+    #     return self.__datatype__
+
+    # def set_datatype(self, value):
+    #     if isinstance(value, PurposeLayer):
+    #         self.__datatype__ = int(value.datatype)
+    #     elif isinstance(value, (int, float)):
+    #         self.__datatype__ = int(value)
+    #     else:
+    #         raise ValueError("Cannot set 'dataype' parameter of type {}".format(type(value)))
+
+    # datatype = param.FunctionField(get_datatype, set_datatype, doc='Set the datatype of the layer.')
+
     def __init__(self, **kwargs):
         ElementalInitializer.__init__(self, **kwargs)
 

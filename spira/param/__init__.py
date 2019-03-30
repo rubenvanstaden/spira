@@ -16,6 +16,14 @@ def CoordField(**kwargs):
         kwargs['default'] = Coord(0,0)
     R = RestrictType(Coord)
     return DataFieldDescriptor(restrictions=R, **kwargs)
+    
+
+def TransformationField(name='noname', number=0, datatype=0, **kwargs):
+    from spira.gdsii.tranformation import Tranform
+    # if 'default' not in kwargs:
+    #     kwargs['default'] = Layer(name=name, number=number, datatype=datatype, **kwargs)
+    R = RestrictType(Tranform)
+    return DataFieldDescriptor(restrictions=R, **kwargs)
 
 
 def LayerField(name='noname', number=0, datatype=0, **kwargs):

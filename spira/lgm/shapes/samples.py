@@ -49,10 +49,10 @@ if __name__ == '__main__':
 
     # ----------------------------- Advanced Shapes ----------------------------------
     
-    ytron_shape = YtronShape()
-    ytron = spira.Polygons(shape=ytron_shape, gds_layer=spira.Layer(number=20))
-    ytron.center = (35*1e6,0)
-    cell += ytron
+    # ytron_shape = YtronShape()
+    # ytron = spira.Polygons(shape=ytron_shape, gds_layer=spira.Layer(number=20))
+    # ytron.center = (35*1e6,0)
+    # cell += ytron
 
     cell.output()
 

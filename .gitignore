@@ -1,6 +1,8 @@
 build/
 dist/
 env/
+mit/
+aist/
 .vscode/
 debug/
 .eggs/

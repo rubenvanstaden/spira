@@ -12,6 +12,9 @@ from spira.core.mixin.transform import TranformationMixin
 from spira.gdsii.group import GroupElementals
 
 
+RDD = spira.get_rule_deck()
+
+
 class __Port__(ElementalInitializer):
 
     __mixins__ = [TranformationMixin]
@@ -35,6 +38,7 @@ class PortAbstract(__Port__):
     parent = param.DataField()
     locked = param.BoolField(default=True)
     gds_layer = param.LayerField(name='PortLayer', number=64)
+    text_type = param.NumberField(default=RDD.GDSII.TEXT)
 
     __mixins__ = [GroupElementals]
 
@@ -96,7 +100,8 @@ class PortAbstract(__Port__):
             position=self.midpoint,
             text=self.name,
             gds_layer=self.gds_layer,
-            texttype=64,
+            # texttype=64,
+            texttype=self.text_type,
             color=color.COLOR_GHOSTWHITE
         )
         return lbl
@@ -125,9 +130,9 @@ class Port(PortAbstract):
             self.elementals = elementals
 
     def __repr__(self):
-        return ("[SPiRA: Port] (name {}, number {}, midpoint {}, " +
+        return ("[SPiRA: Port] (name {}, number {}, datatype {}, midpoint {}, " +
             "radius {}, orientation {})").format(self.name,
-            self.gds_layer.number, self.midpoint,
+            self.gds_layer.number, self.gds_layer.datatype, self.midpoint,
             self.radius, self.orientation
         )
 
@@ -148,7 +153,7 @@ class Port(PortAbstract):
             center=self.midpoint,
             box_size=[self.radius, self.radius]
         )
-        layer = self.gds_layer.modified_copy(datatype=4)
+        layer = deepcopy(self.gds_layer)
         ply = spira.Polygons(shape=shape, gds_layer=layer)
         ply.move(midpoint=ply.center, destination=self.midpoint)
         return ply

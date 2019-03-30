@@ -24,10 +24,10 @@ class __RouteSimple__(shapes.Shape):
 
     def create_midpoint1(self):
         pass
-        
+
     def create_midpoint2(self):
         pass
-    
+
     def create_width1(self):
         pass
 
@@ -42,27 +42,27 @@ class __RouteSimple__(shapes.Shape):
 
 
 class RouteArcShape(__RouteSimple__):
-    
-    radius = param.FloatField(default=5*1e6)
-    width = param.FloatField(default=1*1e6)
-    theta = param.FloatField(default=45)
-    start_angle = param.FloatField(default=0)
-    angle_resolution = param.FloatField(default=15)
+
+    radius = param.NumberField(default=5*1e6)
+    width = param.NumberField(default=1*1e6)
+    theta = param.NumberField(default=45)
+    start_angle = param.NumberField(default=0)
+    angle_resolution = param.NumberField(default=15)
     angle1 = param.DataField(fdef_name='create_angle1')
     angle2 = param.DataField(fdef_name='create_angle2')
-    
+
     def create_midpoint1(self):
         x = np.cos(self.angle1)
         y = np.sin(self.angle1)
         midpoint = [self.radius*x, self.radius*y]
         return midpoint
-        
+
     def create_midpoint2(self):
         x = np.cos(self.angle2)
         y = np.sin(self.angle2)
         midpoint = [self.radius*x, self.radius*y]
         return midpoint
-    
+
     def create_width1(self):
         return self.width
 
@@ -110,12 +110,10 @@ class RouteSquareShape(__RouteSimple__):
     size = param.MidPointField(default=(3*1e6,3*1e6))
 
     def create_midpoint1(self):
-        # return [0, self.size[1]]
         return [-self.size[0], 0]
-        
+
     def create_midpoint2(self):
         return [0, self.size[1]]
-        # return [-self.size[0], 0]
     
     def create_width1(self):
         return self.width
@@ -146,18 +144,18 @@ class RouteSimple(__RouteSimple__):
 
     path_type = param.StringField(default='sine')
     width_type = param.StringField(default='straight')
-    width_input = param.FloatField(allow_none=True, default=None)
-    width_output = param.FloatField(allow_none=True, default=None)
+    width_input = param.NumberField(allow_none=True, default=None)
+    width_output = param.NumberField(allow_none=True, default=None)
 
     x_dist = param.FloatField()
     y_dist = param.FloatField()
-    
+
     def create_midpoint1(self):
         return (0,0)
-        
+
     def create_midpoint2(self):
         return [self.x_dist, self.y_dist]
-    
+
     def create_width1(self):
         return self.width_input
 

@@ -5,7 +5,7 @@ from spira.lgm.route.route_shaper import RouteSimple, RouteGeneral
 from spira.lgm.route.manhattan import __Manhattan__
 
 
-class Route90(__Manhattan__):
+class Route90Base(__Manhattan__):
     """ Route ports that has a 180 degree difference. """
 
     def create_quadrant_one(self):
@@ -97,7 +97,7 @@ class Route90(__Manhattan__):
         return spira.SRef(D)
 
 
-class Route90(Route90):
+class Route90(Route90Base):
 
     def create_elementals(self, elems):
 

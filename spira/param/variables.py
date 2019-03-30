@@ -3,7 +3,7 @@ from spira.param.restrictions import RestrictType, RestrictRange
 from spira.core.descriptor import DataFieldDescriptor
 
 
-NUMBER = RestrictType((int, float))
+NUMBER = RestrictType((int, float, np.int32, np.int64, np.float))
 FLOAT = RestrictType(float)
 INTEGER = RestrictType(int)
 COMPLEX = RestrictType((int, float, complex))

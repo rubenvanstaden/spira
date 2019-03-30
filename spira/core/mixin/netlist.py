@@ -178,7 +178,8 @@ class NetlistSimplifier(__NetlistSimplifier__):
                     self.g.node[n]['device'] = spira.Dummy(
                         name='Dummy',
                         midpoint=N.position,
-                        color=color.COLOR_DARKSEA_GREEN
+                        color=color.COLOR_DARKSEA_GREEN,
+                        node_id=self.g.node[n]['pos']
                     )
                     del self.g.node[n]['branch']
 
@@ -207,6 +208,7 @@ class NetlistSimplifier(__NetlistSimplifier__):
                         text=text,
                         route=self.g.node[n]['route'].node_id,
                         gds_layer=lbl.ps_layer.layer,
+                        # gds_layer=lbl.gds_layer,
                         color=lbl.color,
                         node_id=node_id
                     )

@@ -71,16 +71,7 @@ class PolygonMixin(__Properties__):
     @property
     def bbox(self):
         self.polygons = np.array(self.points)
-        # print(self.polygons)
         return self.get_bounding_box()
-        
-    # @property
-    # def bbox(self):
-    #     self.polygons = np.array(self.points)
-    #     bbox = self.get_bounding_box()
-    #     if bbox is None:
-    #         bbox = ((0,0),(0,0))
-    #     return bbox
 
 
 class CellMixin(__Properties__):

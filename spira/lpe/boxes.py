@@ -22,7 +22,7 @@ class BoundingBox(__CellContainer__):
             setter[layer] = 'not_set'
         for p in polygons:
             for pl in RDD.PLAYER.get_physical_layers(purposes=['METAL', 'GND']):
-                if pl.layer == p.gds_layer:
+                if pl.layer.is_equal_number(p.gds_layer):
                     if setter[pl.layer.number] == 'not_set':
                         l1 = spira.Layer(name='BoundingBox', number=pl.layer.number, datatype=9)
                         ply = spira.Polygons(shape=self.S.ref.pbox, gds_layer=l1)

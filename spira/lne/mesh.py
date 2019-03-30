@@ -231,21 +231,27 @@ class MeshLabeled(MeshAbstract):
     def create_route_nodes(self):
         """  """
         from spira import pc
-        for R in self.route_nodes:
-            for pp in R.ref.metals:
-                R_ply = pp.elementals[0]
+
+        def r_func(R):
+            if issubclass(type(R), pc.ProcessLayer):
+                R_ply = R.elementals[0]
                 for n in self.g.nodes():
                     if R_ply.encloses(self.g.node[n]['pos']):
-                        self.g.node[n]['route'] = pp
-                        # self.g.node[n]['route'] = tf_polygon
-                        # self.g.node[n]['route'] = p
-                        # self.g.node[n]['route'] = spira.Label(
-                        #     position=R.midpoint,
-                        #     text='ROUTE',
-                        #     color=color.COLOR_AZURE,
-                        #     node_id=p.__class__.__name__,
-                        # )
+                        self.g.node[n]['route'] = R
+            else:
+                for pp in R.ref.metals:
+                    R_ply = pp.elementals[0]
+                    for n in self.g.nodes():
+                        if R_ply.encloses(self.g.node[n]['pos']):
+                            self.g.node[n]['route'] = pp
 
+        for R in self.route_nodes:
+            if isinstance(R, spira.ElementList):
+                for r in R:
+                    r_func(r)
+            else:
+                r_func(R)
+    
     def create_boundary_nodes(self):
         if self.level > 1:
             for B in self.bounding_boxes:

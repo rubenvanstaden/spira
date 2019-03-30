@@ -4,6 +4,7 @@ import numpy as np
 
 from spira import param
 from copy import copy, deepcopy
+from spira.visualization import color
 
 from spira.utils import *
 from spira.core.initializer import ElementalInitializer
@@ -22,6 +23,12 @@ class __Polygon__(gdspy.PolygonSet, ElementalInitializer):
 
     def __hash__(self):
         return hash(self.id)
+
+    def __copy__(self):
+        return self.modified_copy(
+            shape=deepcopy(self.shape),
+            gds_layer=deepcopy(self.gds_layer)
+        )
 
     def __deepcopy__(self, memo):
         ply = self.modified_copy(
@@ -85,6 +92,11 @@ class PolygonAbstract(__Polygon__):
     name = param.StringField()
     gds_layer = param.LayerField()
     direction = param.IntegerField(default=0)
+
+    @property
+    def count(self):
+        # FIXME: For multiple polygons
+        return np.size(self.shape.points[0], 0)
 
     @property
     def layer(self):
@@ -202,6 +214,8 @@ class Polygons(PolygonAbstract):
     >>> rect_shape = spira.RectangleShape(p1=[0,0], p2=[1,1])
     >>> ply = spira.Polygons(shape=rect_shape, gds_layer=layer)
     """
+
+    color = param.ColorField(default=color.COLOR_BLUE_VIOLET)
 
     def __init__(self, shape, **kwargs):
         from spira.lgm.shapes.shape import __Shape__

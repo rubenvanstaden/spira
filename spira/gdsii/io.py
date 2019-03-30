@@ -76,7 +76,7 @@ def device_detector(cell):
             for key in RDD.DEVICES.keys:
                 if L.__type__ == key:
                     D = RDD.DEVICES[key].PCELL(
-                        metals=L.metals, 
+                        metals=L.metals,
                         contacts=L.contacts,
                         ports=L.ports
                     )
@@ -84,7 +84,7 @@ def device_detector(cell):
             for key in RDD.VIAS.keys:
                 if L.__type__ == key:
                     D = RDD.VIAS[key].DEFAULT(
-                        metals=L.metals, 
+                        metals=L.metals,
                         contacts=L.contacts,
                         ports=L.ports
                     )
@@ -92,18 +92,22 @@ def device_detector(cell):
         else:
             c2dmap.update({C: C})
     for c in cell.dependencies():
-       map_references(c, c2dmap)
+        map_references(c, c2dmap)
     return c2dmap[cell]
 
 
 def circuit_detector(cell):
     from spira.lpe.devices import Device
     from spira.lpe.circuits import Circuit
+
+    print('Detecting circuits')
+    
     c2dmap = {}
     for C in cell.dependencies():
         if not issubclass(type(C), Device):
             if ('Metal' not in C.name) and ('Native' not in C.name):
                 D = Circuit(cell=C, level=2)
+                print(D)
                 c2dmap.update({C: D})
         else:
             c2dmap.update({C: C})

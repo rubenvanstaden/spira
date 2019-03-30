@@ -50,8 +50,8 @@ class Route(Structure, __Manhattan__):
             if self.path:
                 self.__type__ = 'path'
 
-        print(self.angle)
-        print(self.port_list)
+        # print(self.angle)
+        # print(self.port_list)
         # if self.port_list is not None:
         if len(self.port_list) > 0:
             self.__type__ = 'auto'
@@ -108,6 +108,8 @@ class Route(Structure, __Manhattan__):
         route_shape = RouteSimple(
             port1=self.port1,
             port2=self.port2,
+            # path_type='sine',
+            # width_type='sine'
             path_type='straight',
             width_type='straight'
         )
@@ -180,27 +182,22 @@ class Route(Structure, __Manhattan__):
                             elems += pc.Polygon(points=e.shape.points, ps_layer=ps_layer)
         elif self.__type__ == '90':
             r1 = self.route_90
-            # for e in r1.ref.elementals:
             for e in r1.polygons:
                 elems += e
         elif self.__type__ == '180':
             r1 = self.route_180
-            # for e in r1.ref.elementals:
             for e in r1.polygons:
                 elems += e
         elif self.__type__ == 'path':
             r1 = self.route_path
-            # for e in r1.ref.elementals:
             for e in r1.polygons:
                 elems += e
         elif self.__type__ == 'straight':
             r1 = self.route_straight
-            # for e in r1.ref.elementals:
             for e in r1.polygons:
                 elems += e
         elif self.__type__ == 'auto':
             r1 = self.route_auto
-            # for e in r1.ref.elementals:
             for e in r1.polygons:
                 elems += e
         return elems

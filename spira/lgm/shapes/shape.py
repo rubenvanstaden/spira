@@ -14,6 +14,7 @@ class __Shape__(FieldInitializer):
     center = param.PointField()
     clockwise = param.BoolField(default=False)
     points = param.PointArrayField(fdef_name='create_points')
+    # points = param.DataField(fdef_name='create_points')
     apply_merge = param.DataField(fdef_name='create_merged_points')
     simplify = param.DataField(fdef_name='create_simplified_points')
     edges = param.DataField(fdef_name='create_edge_lines')
@@ -180,19 +181,11 @@ class Shape(__Shape__):
         if points is not None:
             self.points = points
 
-    # def __deepcopy__(self, memo):
-    #     # self.points = np.array(self.points)
-    #     # shape = self.modified_copy(
-    #     #     points = deepcopy(self.points),
-    #     #     # points = np.copy(self.points),
-    #     #     gds_layer = self.gds_layer
-    #     # )
-    #     shape = self.modified_copy(
-    #         points = deepcopy(self.points),
-    #         # gds_layer = deepcopy(self.gds_layer)
-    #         # gds_layer = self.gds_layer
-    #     )
-    #     return shape
+    def __deepcopy__(self, memo):
+        shape = self.modified_copy(
+            points = deepcopy(self.points)
+        )
+        return shape
 
     def __contains__(self, point):
         """ Checks if point is on the shape. """

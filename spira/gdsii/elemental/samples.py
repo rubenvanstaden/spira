@@ -38,7 +38,6 @@ class TestPolygons(spira.Cell):
                 for e1 in p1.edge_ports:
                     for e2 in p2.edge_ports:
                         if e1.edge & e2.edge:
-                            print('mewfbwefkj')
                             elems += e1.edge
 
         return elems

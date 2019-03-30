@@ -59,7 +59,9 @@ class DataFieldDescriptor(BaseField):
         return (self.__name__ in obj.__store__)
 
     def __check_restriction__(self, obj, value):
-        if self.restriction(value, obj):
+        if (self.allow_none is True) and (value is None):
+            return True
+        elif self.restriction(value, obj):
             return True
         else:
             raise ValueError("Invalid parameter assignment '{}' of cell '{}' with value '{}', which is not compatible with '{}'.".format(self.name, obj.__class__.__name__, str(value), str(self.restriction)))

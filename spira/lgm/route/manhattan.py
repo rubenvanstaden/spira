@@ -96,7 +96,8 @@ class __Manhattan__(spira.Cell):
             rs = RouteArcShape(
                 radius=self.radius,
                 width=self.port1.width,
-                gds_layer=self.gds_layer,
+                # gds_layer=self.gds_layer,
+                # gds_layer=self.ps_layer.layer,
                 start_angle=0, theta=90
             )
         if self.bend_type == 'rectangle':
@@ -112,7 +113,8 @@ class __Manhattan__(spira.Cell):
             rs = RouteArcShape(
                 radius=self.radius,
                 width=self.port1.width,
-                gds_layer=self.gds_layer,
+                # gds_layer=self.gds_layer,
+                # gds_layer=self.ps_layer.layer,
                 start_angle=0, theta=-90
             )
         if self.bend_type == 'rectangle':
