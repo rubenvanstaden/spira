@@ -114,6 +114,7 @@ class SRefAbstract(__SRef__):
             magnification=self.magnification,
             reflection=self.reflection
         )
+        print(self.ref)
         for R in self.ref.routes:
             if isinstance(R, spira.ElementList):
                 for r in R:

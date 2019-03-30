@@ -27,6 +27,9 @@ class __Cell__(gdspy.Cell, CellInitializer):
 
     def __add__(self, other):
         from spira.gdsii.elemental.port import __Port__
+        # from spira.gdsii.elemental.sref import SRef
+        # if not isinstance(other, SRef):
+        #     raise ValueError('Only SRef objects can be added to cells.')
         if other is None:
             return self
         if issubclass(type(other), __Port__):
@@ -53,9 +56,9 @@ class CellAbstract(__Cell__):
             self.__name__ = self.__name_generator__(self)
         return self.__name__
 
-    @property
-    def alias(self):
-        return self.name.split('__')[0]
+    # @property
+    # def alias(self):
+    #     return self.name.split('__')[0]
 
     def flatten(self):
         self.elementals = self.elementals.flatten()
@@ -164,15 +167,25 @@ class CellAbstract(__Cell__):
 class Cell(CellAbstract):
     """ A Cell encapsulates a set of elementals that
     describes the layout being generated. """
-    
+
     um = param.FloatField(default=1e6)
-    
+
     routes = param.ElementalListField(fdef_name='create_routes')
 
     _next_uid = 0
-    
+
     def create_routes(self, routes):
         return routes
+
+    def get_alias(self):
+        if not hasattr(self, '__alias__'):
+            self.__alias__ = self.name.split('__')[0]
+        return self.__alias__
+
+    def set_alias(self, value):
+        self.__alias__ = value
+
+    alias = param.FunctionField(get_alias, set_alias, doc='Functions to generate an alias for cell name.')
 
     def __init__(self, name=None, elementals=None, ports=None, nets=None, library=None, **kwargs):
         CellInitializer.__init__(self, **kwargs)
@@ -181,7 +194,7 @@ class Cell(CellAbstract):
         self.g = nx.Graph()
         self.uid = Cell._next_uid
         Cell._next_uid += 1
- 
+
         if name is not None:
             s = '{}_{}'.format(name, self.__class__._ID)
             self.__dict__['__name__'] = s
