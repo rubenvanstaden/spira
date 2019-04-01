@@ -53,14 +53,14 @@ class Device(__CircuitContainer__, Structure):
         return elems
 
     def create_elementals(self, elems):
-        # for e in self.merged_layers:
-            # elems += e
-        for e in self.metals:
-            if isinstance(e, spira.ElementList):
-                for elem in e:
-                    elems += elem
-            else:
-                elems += e
+        for e in self.merged_layers:
+            elems += e
+        # for e in self.metals:
+        #     if isinstance(e, spira.ElementList):
+        #         for elem in e:
+        #             elems += elem
+        #     else:
+        #         elems += e
         for e in self.contacts:
             elems += e
 
@@ -76,7 +76,7 @@ class Device(__CircuitContainer__, Structure):
 
     def create_netlist(self):
 
-        print('Generating device netlist')
+        # print('Generating device netlist')
 
         # graphs = []
         # for net in self.nets:

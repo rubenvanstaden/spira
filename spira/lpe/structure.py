@@ -307,6 +307,7 @@ class Structure(__NetlistCell__):
                     arrowlayer = deepcopy(p.gds_layer)
                     edgelayer.datatype = self.edge_datatype
                     arrowlayer.datatype = self.arrow_datatype
+                    # ports += p
                     term = p.modified_copy(
                         name=p.name,
                         gds_layer=deepcopy(m.ps_layer.layer),
@@ -314,7 +315,6 @@ class Structure(__NetlistCell__):
                         arrowlayer=arrowlayer,
                         width=p.width
                     )
-                    # print(term)
                     ports += term
         return ports
 

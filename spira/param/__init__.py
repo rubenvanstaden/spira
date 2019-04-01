@@ -188,40 +188,33 @@ class PointArrayField(DataFieldDescriptor):
     def __operations__(self, points):
         return points
 
+    # def __process__(self, points):
+    def __operations__(self, points):
+        from spira.lgm.shapes.shape import Shape
+        if isinstance(points, Shape):
+            return array(points.points)
+        elif isinstance(points, (list, np.ndarray)):
+            if len(points):
+                element = points[0]
+                if isinstance(element, (np.ndarray, list)):
+                    points_as_array = np.array(points, copy=False)
+                else:
+                    points_as_array = np.array([(c[0], c[1]) for c in points])
+                return points_as_array
+            else:
+                return np.ndarray((0, 2))
+        # elif isinstance(points, Coord2):
+        #     return array([[points.x, points.y]])
+        # elif isinstance(points, tuple):
+        #     return array([[points[0], points[1]]])
+        else:
+            raise TypeError("Invalid type of points in setting value of PointsDefinitionProperty: " + str(type(points))) 
+
     def __set__(self, obj, points):
         obj.__store__[self.__name__] = points
+        
+    # def __deepcopy__(self, memo):
+    #     from copy import deepcopy
+    #     return deepcopy(obj)
     
-    # def __process__(self, points):
-    #     if isinstance(points, Shape):
-    #         return array(points.points)
-    #     elif isinstance(points, (list, ndarray)):
-    #         if len(points):
-    #             element = points[0]
-    #             if isinstance(element, (ndarray, list)):
-    #                 points_as_array = array(points, copy=False)
-    #             else:
-    #                 points_as_array = array([(c[0], c[1]) for c in points])
-    #             return points_as_array
-    #         else:
-    #             return ndarray((0, 2))
-    #     elif isinstance(points, Coord2):
-    #             return array([[points.x, points.y]])
-    #     elif isinstance(points, tuple):
-    #             return array([[points[0], points[1]]])
-    #     else:
-    #             raise TypeError("Invalid type of points in setting value of PointsDefinitionProperty: " + str(type(points)))
-    
-    # def __set__(self, obj, points):
-    #     points = self.__process__(points)
-    #     self.__externally_set_property_value_on_object__(obj, points)
-            
-
-
-
-
-
-
-
-
-
 

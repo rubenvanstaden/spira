@@ -15,7 +15,7 @@ class __Manhattan__(spira.Cell):
     port1 = param.PortField(default=None)
     port2 = param.PortField(default=None)
 
-    length = param.FloatField(default=20*1e6)
+    length = param.NumberField(default=20*1e6)
     gds_layer = param.LayerField(number=13)
     ps_layer = param.PhysicalLayerField(default=RDD.DEF.PDEFAULT)
     bend_type = param.StringField(default='rectangle')

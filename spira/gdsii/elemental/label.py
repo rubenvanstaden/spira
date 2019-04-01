@@ -52,7 +52,7 @@ class LabelAbstract(__Label__):
     text = param.StringField(default='no_text')
     rotation = param.NumberField(default=0)
     reflection = param.BoolField(default=False)
-    magnification = param.FloatField(default=1.0)
+    magnification = param.NumberField(default=1.0)
     texttype = param.IntegerField(default=0)
 
     def __init__(self, position, **kwargs):

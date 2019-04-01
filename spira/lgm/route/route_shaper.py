@@ -105,8 +105,8 @@ class RouteArcShape(__RouteSimple__):
 class RouteSquareShape(__RouteSimple__):
 
     gds_layer = param.LayerField(name='ArcLayer', number=91)
-    radius = param.FloatField(default=5*1e6)
-    width = param.FloatField(default=1*1e6)
+    radius = param.NumberField(default=5*1e6)
+    width = param.NumberField(default=1*1e6)
     size = param.MidPointField(default=(3*1e6,3*1e6))
 
     def create_midpoint1(self):

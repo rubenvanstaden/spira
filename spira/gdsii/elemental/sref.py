@@ -61,7 +61,7 @@ class SRefAbstract(__SRef__):
     rotation = param.NumberField(allow_none=True, default=None)
     reflection = param.BoolField(default=False)
     magnification = param.FloatField(default=1.0)
-    
+
     def dependencies(self):
         from spira.gdsii.lists.cell_list import CellList
         d = CellList()
@@ -105,7 +105,8 @@ class SRefAbstract(__SRef__):
 
     @property
     def get_routes(self):
-        print('\n:: Get Routes')
+        from spira import pc
+        # print('\n:: Get Routes')
         elems = spira.ElementList()
         from spira.gdsii.tranformation import Tranform
         pc_tf = Tranform(
@@ -114,36 +115,53 @@ class SRefAbstract(__SRef__):
             magnification=self.magnification,
             reflection=self.reflection
         )
-        print(self.ref)
         for R in self.ref.routes:
+            # print(R)
             if isinstance(R, spira.ElementList):
                 for r in R:
                     Rt = r.modified_copy(pc_transformation=pc_tf)
                     elems += Rt
-            else:
+            elif issubclass(type(R), pc.ProcessLayer):
                 Rt = R.modified_copy(pc_transformation=pc_tf)
                 elems += Rt
+            elif isinstance(R, SRef):
+                if issubclass(type(R.ref), spira.Route):
+                    Rt = R.ref.modified_copy(route_transformation=pc_tf)
+                    elems += SRef(Rt)
+                else:
+                    raise ValueError('SREF: Get Route not supported')
+            else:
+                raise ValueError('Get Route not supported')
+        # print('-------------------------------------------\n')
         return elems
 
     def unlock_overlapping_ports(self, D, initial=False):
+
+        # print('\n--------------------')
+        # print('CELLLLLLL: {}'.format(self))
+        # for k, v in self.instance_ports.items():
+        #     print(k, v)
+        # print('-----------------------\n')
+
         if initial is True:
             for R in D.routes:
-                self.__unlock_device_edges__(R=R)
+                self.__unlock_device_edges__(D=D, R=R)
             for S in D.structures:
                 if id(S) != id(self):
                     self.unlock_overlapping_ports(D=S, initial=False)
         else:
             if isinstance(D, SRef):
                 for R in D.get_routes:
-                    if D.ref.name != self.ref.name:
-                        self.__unlock_device_edges__(R=R)
-                # for S in D.ref.structures:
-                #     if id(S) != id(self):
-                #         self.unlock_overlapping_ports(D=S, initial=False)
+                    if id(D) != id(self):
+                        print(D)
+                        self.__unlock_device_edges__(D=D, R=R)
+                for S in D.ref.structures:
+                    if id(S) != id(self):
+                        self.unlock_overlapping_ports(D=S, initial=False)
 
-    def __unlock_device_edges__(self, R):
+    def __unlock_device_edges__(self, D, R):
 
-        def r_func(self, R):
+        def r_func(self, D, R):
             from spira import pc
             if issubclass(type(R), pc.ProcessLayer):
                 pp = R
@@ -153,7 +171,10 @@ class SRefAbstract(__SRef__):
                         if port.gds_layer.number == pp.ps_layer.layer.number:
                             if port.edge.ply_area != 0:
                                 if R_ply & port.edge:
-                                    route_key = (pp.node_id, pp.ps_layer.layer.number)
+                                    print(R_ply)
+                                    print(port.edge)
+                                    print('')
+                                    route_key = (D.ref.name, pp.node_id, pp.ps_layer.layer.number)
                                     self.port_connects[key] = route_key
                                     self.port_locks[key] = False
             else:
@@ -164,16 +185,16 @@ class SRefAbstract(__SRef__):
                             if port.gds_layer.number == pp.ps_layer.layer.number:
                                 if port.edge.ply_area != 0:
                                     if R_ply & port.edge:
-                                        route_key = (pp.node_id, pp.ps_layer.layer.number)
+                                        # route_key = (pp.node_id, pp.ps_layer.layer.number)
+                                        route_key = (D.name, pp.node_id, pp.ps_layer.layer.number)
                                         self.port_connects[key] = route_key
                                         self.port_locks[key] = False
 
         if isinstance(R, spira.ElementList):
-            pass
-            # for r in R:
-            #     r_func(self, r)
+            for r in R:
+                r_func(self, D, r)
         else:
-            r_func(self, R)
+            r_func(self, D, R)
 
     @property
     def netlist(self):
@@ -189,10 +210,18 @@ class SRefAbstract(__SRef__):
                             if p2.locked is False:
                                 g.node[n]['device'] = pc_ply
                                 eid = self.port_connects[key]
+                                # print('\n=======================')
+                                # print(self)
+                                # print(eid)
                                 if 'connect' in g.node[n]:
                                     g.node[n]['connect'].append(eid)
                                 else:
                                     g.node[n]['connect'] = [eid]
+                                g.name = self.ref.name
+                                # print(g)
+                                # print(g.name)
+                                # print(g.node[n]['connect'])
+                                # print('=======================')
         return self.__move_net__(g)
 
     @property
@@ -202,8 +231,6 @@ class SRefAbstract(__SRef__):
         copy of the ports dict which is correctly
         rotated and translated. """
         for port in self._parent_ports:
-
-            print(port.key)
 
             key = list(port.key)
             key[2] += self.midpoint[0]
@@ -327,17 +354,12 @@ class SRef(SRefAbstract):
     >>> sref = spira.SRef(structure=cell)
     """
 
-    _next_uid = 0
-
-    iports = param.DictField(default={})
+    # iports = param.DictField(default={})
     port_locks = param.DictField(default={})
     port_connects = param.DictField(default={})
 
     def __init__(self, structure, **kwargs):
         ElementalInitializer.__init__(self, **kwargs)
-        
-        self.uid = SRef._next_uid
-        SRef._next_uid += 1
 
         self.ref = structure
         self._parent_ports = []
@@ -346,6 +368,7 @@ class SRef(SRefAbstract):
         for t in structure.terms:
             self._parent_ports.append(t)
         self._local_ports = {}
+        self.iports = {}
 
     def __repr__(self):
         name = self.ref.name

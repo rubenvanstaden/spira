@@ -2,8 +2,6 @@ import spira
 import time
 import numpy as np
 from spira import param, shapes, pc
-from spira.lpe import mask
-from spira import pc
 from spira.lpe.containers import __CellContainer__, __NetContainer__, __CircuitContainer__
 from spira.lne.net import Net
 from copy import copy, deepcopy
@@ -34,14 +32,14 @@ class RouteToStructureConnector(__CircuitContainer__, Structure):
 
     def create_contacts(self, boxes):
         start = time.time()
-        print('[*] Connecting routes with devices')
+        # print('[*] Connecting routes with devices')
         self.unlock_ports()
         for D in self.structures:
             if isinstance(D, spira.SRef):
                 B = BoundingBox(S=D)
                 boxes += B
         end = time.time()
-        print('Block calculation time {}:'.format(end - start))
+        # print('Block calculation time {}:'.format(end - start))
         return boxes
 
     def unlock_ports(self):
@@ -240,7 +238,7 @@ class Circuit(RouteToStructureConnector):
 
     def create_nets(self, nets):
 
-        print('Generating circuit netlist')
+        # print('Generating circuit netlist')
 
         graphs = []
         for m in self.merged_layers:
@@ -249,9 +247,9 @@ class Circuit(RouteToStructureConnector):
             MNet = MetalNet()
             MNet.g = utils.nodes_combine(m.graph, algorithm='d2d')
             gm = MNet.generate_branches()
-            # gm = MNet.detect_dummy_nodes()
-            # gm = MNet.generate_branches()
-            # gm = utils.nodes_combine(gm, algorithm='b2b')
+            gm = MNet.detect_dummy_nodes()
+            gm = MNet.generate_branches()
+            gm = utils.nodes_combine(gm, algorithm='b2b')
             graphs.append(gm)
             # graphs.append(MNet.g)
 
@@ -268,7 +266,7 @@ class Circuit(RouteToStructureConnector):
         reference_nodes = {}
         neighbour_nodes = {}
         for S in self.structures:
-            
+
             neighbour_nodes[S.node_id] = []
             for n in g.nodes():
                 if 'device' in g.node[n]:
@@ -284,6 +282,7 @@ class Circuit(RouteToStructureConnector):
 
             for n in neighbour_nodes[S.node_id]:
                 if 'branch' in g.node[n]:
+                    # Loop over all the subject device nodes.
                     for m in gs.nodes:
                         if 'connect' in gs.node[m]:
                             for i, R in enumerate(gs.node[m]['connect']):
@@ -297,6 +296,63 @@ class Circuit(RouteToStructureConnector):
                                         struct_nodes[m].append(uid)
                                     else:
                                         struct_nodes[m] = [uid]
+                elif 'device' in g.node[n]:
+                    print('DEVICE detected!!!')
+                    print('subj: {}'.format(S))
+                    print('obj: {}'.format(g.node[n]['device']))
+
+                    D = g.node[n]['device']
+                    obj_graph = D.netlist
+                    
+                    for no in obj_graph.nodes:
+                        obj_id = obj_graph.node[no]['surface'].node_id
+                        for m in gs.nodes:
+                            if 'connect' in gs.node[m]:
+                                for i, R in enumerate(gs.node[m]['connect']):
+                                    subj_connect_id = R[1]
+                                    print('YESSSSSSSSS')
+                                    print(R)
+                                    print(subj_connect_id)
+                                    print(obj_id)
+                                    print('')
+                                    if subj_connect_id == obj_id:
+                                        print('bwekjfwejfbewjkbwebfk')
+                                        uid = '{}_{}_{}'.format(i, n, m, nn, S.midpoint)
+                                        if n in reference_nodes.keys():
+                                            reference_nodes[n].append(uid)
+                                        else:
+                                            reference_nodes[n] = [uid]
+                                        if m in struct_nodes.keys():
+                                            struct_nodes[m].append(uid)
+                                        else:
+                                            struct_nodes[m] = [uid]
+
+                    # for node in list(gd.nodes(data='branch')):
+                    #     if node[1] is not None:
+                    #         nn = node[0]
+                    #         for m in gs.nodes:
+                    #             if 'connect' in gs.node[m]:
+                    #                 for i, R in enumerate(gs.node[m]['connect']):
+                    #                     # if gd.node[i]['branch'].route == R[0]:
+                    #                     subj_route = R[1]
+                    #                     obj_route = node[1].route
+                    #                     print('YESSSSSSSSS')
+                    #                     print(node[nn])
+                    #                     print(R)
+                    #                     print(subj_route)
+                    #                     print(obj_route)
+                    #                     print('')
+                    #                     if subj_route == obj_route:
+                    #                         print('bwekjfwejfbewjkbwebfk')
+                    #                         uid = '{}_{}_{}'.format(i, n, m, nn, S.midpoint)
+                    #                         if n in reference_nodes.keys():
+                    #                             reference_nodes[n].append(uid)
+                    #                         else:
+                    #                             reference_nodes[n] = [uid]
+                    #                         if m in struct_nodes.keys():
+                    #                             struct_nodes[m].append(uid)
+                    #                         else:
+                    #                             struct_nodes[m] = [uid]
 
             for m, connections in struct_nodes.items():
                 gs.node[m]['connect'] = []
@@ -328,7 +384,7 @@ class Circuit(RouteToStructureConnector):
 
     def create_netlist(self):
 
-        print('Generating mask netlist')
+        # print('Generating mask netlist')
 
         self.g = nx.disjoint_union_all(self.nets)
 

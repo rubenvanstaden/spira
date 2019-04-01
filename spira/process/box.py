@@ -12,12 +12,13 @@ class Box(ProcessLayer):
     h = param.NumberField(default=1.0)
     center = param.PointField()
     
-    # def __deepcopy__(self, memo):
-    #     return Box(
-    #         # elementals=deepcopy(self.elementals),
-    #         polygon=deepcopy(self.polygon),
-    #         node_id=deepcopy(self.node_id),
-    #     )
+    def __deepcopy__(self, memo):
+        return Box(
+            # elementals=deepcopy(self.elementals),
+            # polygon=deepcopy(self.polygon),
+            ps_layer=self.ps_layer,
+            node_id=deepcopy(self.node_id),
+        )
 
     def create_elementals(self, elems):
         shape = BoxShape(width=self.w, height=self.h)

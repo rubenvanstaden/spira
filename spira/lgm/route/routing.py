@@ -16,7 +16,7 @@ RDD = spira.get_rule_deck()
 class Route(Structure, __Manhattan__):
 
     path = param.NumpyArrayField()
-    width = param.FloatField(default=1*1e8)
+    width = param.NumberField(default=1*1e8)
     port_list = param.ListField(allow_none=True)
 
     # FIXME!
@@ -27,6 +27,8 @@ class Route(Structure, __Manhattan__):
     route_path = param.DataField(fdef_name='create_route_path')
     route_straight = param.DataField(fdef_name='create_route_straight')
     route_auto = param.DataField(fdef_name='create_route_auto')
+    
+    route_transformation = param.TransformationField(allow_none=True, default=None)
 
     def create_angle(self):
         if self.port1 and self.port2:
@@ -119,6 +121,8 @@ class Route(Structure, __Manhattan__):
             connect_layer=self.ps_layer
         )
         r = spira.SRef(R)
+        if self.route_transformation is not None:
+            r.transform(transform=self.route_transformation.apply())
         r.connect(port=r.ports['P1'], destination=self.port1)
         return r
 

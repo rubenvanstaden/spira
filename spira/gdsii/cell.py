@@ -168,7 +168,7 @@ class Cell(CellAbstract):
     """ A Cell encapsulates a set of elementals that
     describes the layout being generated. """
 
-    um = param.FloatField(default=1e6)
+    um = param.NumberField(default=1e6)
 
     routes = param.ElementalListField(fdef_name='create_routes')
 
@@ -242,7 +242,7 @@ class Connector(Cell):
 
     midpoint = param.MidPointField()
     orientation = param.NumberField(default=0.0)
-    width = param.FloatField(default=2*1e6)
+    width = param.NumberField(default=2*1e6)
 
     def __repr__(self):
         return ("[SPiRA: Connector] (name {}, midpoint {}, " +
