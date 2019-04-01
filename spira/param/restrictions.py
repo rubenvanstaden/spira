@@ -62,6 +62,8 @@ class RestrictType(__ParameterRestriction__):
             raise TypeError("Restrict type should have a 'type' or 'tuple' of types as argument")
 
     def validate(self, value, obj=None):
+        if hasattr(value, '__call__'):
+           value = value()
         return isinstance(value, self.allowed_types)
 
     def __repr__(self):

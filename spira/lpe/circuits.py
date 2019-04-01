@@ -115,14 +115,16 @@ class Circuit(RouteToStructureConnector):
 
     def create_elementals(self, elems):
 
-        for e in self.routes:
-            elems += e
+        # for e in self.routes:
+        #     elems += e
+
         for e in self.structures:
             elems += e
 
+        for e in self.route_layers:
+            elems += e
+
         # for e in self.merged_layers:
-        #     elems += e
-        # for e in self.route_layers:
         #     elems += e
 
         return elems

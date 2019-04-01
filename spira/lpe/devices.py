@@ -38,8 +38,8 @@ class Device(__CircuitContainer__, Structure):
         for N in self.contacts:
             elems += N
         # FIXME: Works for ytron, fails for junction.
-        # for P in self.ports:
-        #     elems += P
+        for P in self.ports:
+            elems += P
         return elems
 
     def create_contacts(self, elems):
