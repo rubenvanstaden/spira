@@ -5,16 +5,21 @@ import numpy as np
 import spira
 from copy import copy, deepcopy
 
-from spira import param
+from spira.core import param
 from spira.gdsii.elemental.port import __Port__
 from spira.gdsii.elemental.port import Port
 from spira.core.initializer import ElementalInitializer
-from spira.core.mixin.transform import TranformationMixin
+from spira.core.mixin.transform import TransformationMixin
+from spira.core.tranformation import GenericTransform
+from spira.core.transformable import Transformable
 
 
-class __SRef__(gdspy.CellReference, ElementalInitializer):
+class __SRef__(Transformable, ElementalInitializer):
 
-    __mixins__ = [TranformationMixin]
+    __mixins__ = [TransformationMixin]
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
 
     def __deepcopy__(self, memo):
         return SRef(
@@ -43,24 +48,56 @@ class __SRef__(gdspy.CellReference, ElementalInitializer):
             if p1.gds_layer.number == p2.gds_layer.number:
                 return True
         return False
+        
+    def transform(self, transformation=None):
+        if transformation is not None:
+            T = transformation
+            if T.reflection is True:
+                self.reflect()
+            if T.rotation is not None:
+                self.rotate(angle=T.rotation)
+            if len(T.midpoint) != 0:
+                self.translate(dx=T.midpoint[0], dy=T.midpoint[1])
+            # T = transformation
+            # self.midpoint=T.midpoint
+            # self.rotation=T.rotation
+            # self.reflection=T.reflection
+            # self.magnification=T.magnification
+        return self
 
-    @property
-    def tf(self):
-        tf = {
-            'midpoint': self.midpoint,
-            'rotation': self.rotation,
-            'magnification': self.magnification,
-            'reflection': self.reflection
-        }
-        return tf
+    def expand_transform(self):
+        S = spira.Cell(
+            # name=self.ref.name + self.transformation.id_string(),
+            name=self.ref.name + self.get_transformation.id_string(),
+            elementals=deepcopy(self.ref.elementals)
+        )
+        # S = S.transform(self.get_transformation)
+        S.expand_transform()
+        self.ref = S
+        # S.transform(self.transformation)
+        self.transformation = None
+        self.midpoint = [0,0]
+        self.rotation = None
+        self.reflection = False
+        self.magnification = 1.0
+        return self
 
 
-class SRefAbstract(__SRef__):
+class SRefAbstract(gdspy.CellReference, __SRef__):
 
     midpoint = param.MidPointField()
     rotation = param.NumberField(allow_none=True, default=None)
     reflection = param.BoolField(default=False)
     magnification = param.FloatField(default=1.0)
+
+    @property
+    def get_transformation(self):
+        return GenericTransform(
+            midpoint=self.midpoint,
+            rotation=self.rotation,
+            reflection=self.reflection,
+            magnification=self.magnification
+        )
 
     def dependencies(self):
         from spira.gdsii.lists.cell_list import CellList
@@ -72,35 +109,30 @@ class SRefAbstract(__SRef__):
     def flatten(self):
         return self.ref.flatten()
 
-    def flat_copy(self, level=-1, commit_to_gdspy=False):
+    def flat_copy(self, level=-1):
         """  """
         if level == 0:
             el = spira.ElementList()
             el += self
             return el
-        transform = {
-            'midpoint': self.midpoint,
-            'rotation': self.rotation,
-            'magnification': self.magnification,
-            'reflection': self.reflection
-        }
         el = self.ref.elementals.flat_copy(level-1)
-        el.transform(transform)
+        el.transform(self.get_transformation)
         return el
 
     @property
     def polygons(self):
         # FIXME: Assums all elementals are ply.Polygon.
         elems = spira.ElementList()
-        tf = {
-            'midpoint': self.midpoint,
-            'rotation': self.rotation,
-            'magnification': self.magnification,
-            'reflection': self.reflection
-        }
+        # tf = {
+        #     'midpoint': self.midpoint,
+        #     'rotation': self.rotation,
+        #     'magnification': self.magnification,
+        #     'reflection': self.reflection
+        # }
         for p in self.ref.elementals:
-            new_p = deepcopy(p)
-            elems += new_p.transform(tf)
+            elems += p.transform_copy(self.get_transformation)
+            # new_p = deepcopy(p)
+            # elems += new_p.transform(tf)
         return elems
 
     @property
@@ -108,15 +140,14 @@ class SRefAbstract(__SRef__):
         from spira import pc
         # print('\n:: Get Routes')
         elems = spira.ElementList()
-        from spira.gdsii.tranformation import Tranform
-        pc_tf = Tranform(
+        from spira.core.tranformation import Transform
+        pc_tf = Transform(
             midpoint=self.midpoint,
             rotation=self.rotation,
             magnification=self.magnification,
             reflection=self.reflection
         )
         for R in self.ref.routes:
-            # print(R)
             if isinstance(R, spira.ElementList):
                 for r in R:
                     Rt = r.modified_copy(pc_transformation=pc_tf)
@@ -254,8 +285,10 @@ class SRefAbstract(__SRef__):
         copy of the ports dict which is correctly
         rotated and translated. """
         for port in self._parent_ports:
-            new_port = deepcopy(port)
-            self._local_ports[port.name] = new_port.transform(self.tf)
+            self._local_ports[port.name] = port.transform_copy(self.get_transformation)
+            # self._local_ports[port.name] = port.transform_copy(self.transformation)
+            # new_port = deepcopy(port)
+            # self._local_ports[port.name] = new_port.transform(self.tf)
         return self._local_ports
 
     def move(self, midpoint=(0,0), destination=None, axis=None):
@@ -312,7 +345,7 @@ class SRefAbstract(__SRef__):
 
         return self
 
-    def connect(self, port, destination, overlap=0):
+    def connect(self, port, destination):
         """  """
         if port in self.ports.keys():
             p = self.ports[port]
@@ -333,12 +366,59 @@ class SRefAbstract(__SRef__):
         # # TODO:Get port direction and distance
         # self.connect(port=p1, destination=p2)
         # self.move(midpoint=p2, destination=d)
-
-    def stretch(self, port, center=[0,0], vector=[1,1]):
+        
+    def stretch(self, port, destination):
         """  """
-        from spira.lgm.shape.stretch import Stretch
-        self.stretching[port] = Stretch(center=center, vector=vector)
-        return self
+        from spira.lgm.coord import Coord
+        if port in self.ports.keys():
+            p = self.ports[port]
+        elif issubclass(type(port), __Port__):
+            p = port
+        else:
+            raise ValueError("[SPiRA] connect() did not receive a Port or " +
+                "valid port name - received ({}), ports available " +
+                "are ({})").format(port, self.ports.keys()
+            )
+
+        if issubclass(type(destination), __Port__):
+            d = destination
+        elif isinstance(destination, (tuple, list, set)):
+            d = Coord(destination)
+
+        # dx = d.x - p.x
+        # dy = d.y - p.y
+
+        # print(dx)
+
+        # if dx != 0:
+        #     sx = (d.x - p.x)/p.x
+        # else:
+        #     sx = 1
+        # if dy != 0:
+        #     sy = (d.y - p.y)/p.y
+        # else:
+        #     sy = 1
+
+        sx = d.x/p.x
+        sy = d.y/p.y
+
+        print(sx, sy)
+
+        ply = self.polygons[0]
+        ply.stretch(sx=sx, sy=sy)
+        print(ply)
+
+        cell = spira.Cell()
+        cell += ply
+        S = SRef(cell)
+        return S
+
+
+    # def stretch(self, port, center=[0,0], vector=[1,1]):
+    #     """  """
+    #     from spira.lgm.shape.stretch import Stretch
+    #     self.stretching[port] = Stretch(center=center, vector=vector)
+    #     return self
 
 
 class SRef(SRefAbstract):
@@ -359,7 +439,8 @@ class SRef(SRefAbstract):
     port_connects = param.DictField(default={})
 
     def __init__(self, structure, **kwargs):
-        ElementalInitializer.__init__(self, **kwargs)
+        # ElementalInitializer.__init__(self, **kwargs)
+        __SRef__.__init__(self, **kwargs)
 
         self.ref = structure
         self._parent_ports = []

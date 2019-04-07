@@ -1,6 +1,6 @@
 import spira
 import pytest
-from spira import param
+from spira.core import param
 from spira import shapes
 from spira.lgm.route.manhattan180 import Route180
 from spira.lgm.route.manhattan90 import Route90

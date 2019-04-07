@@ -3,9 +3,9 @@ import spira
 import pygmsh
 import meshio
 
-from spira.core.lists import ElementList
+from spira.core.elem_list import ElementList
 from spira.utils import numpy_to_list
-from spira import param
+from spira.core import param
 from spira.lne.mesh import Mesh
 from spira.core.initializer import ElementalInitializer
 

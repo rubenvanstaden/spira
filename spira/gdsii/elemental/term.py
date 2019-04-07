@@ -2,7 +2,7 @@ import spira
 import pyclipper
 import numpy as np
 
-from spira import param
+from spira.core import param
 from copy import copy, deepcopy
 from spira.visualization import color
 from spira.gdsii.elemental.port import PortAbstract, __Port__
@@ -137,13 +137,13 @@ class Term(PortAbstract):
     def commit_to_gdspy(self, cell):
         if self.__repr__() not in list(__Port__.__committed__.keys()):
             self.edge.commit_to_gdspy(cell=cell)
-            # self.arrow.commit_to_gdspy(cell=cell)
+            self.arrow.commit_to_gdspy(cell=cell)
             self.label.commit_to_gdspy(cell=cell)
             __Port__.__committed__.update({self.__repr__(): self})
         else:
             p = __Port__.__committed__[self.__repr__()]
             p.edge.commit_to_gdspy(cell=cell)
-            # p.arrow.commit_to_gdspy(cell=cell)
+            p.arrow.commit_to_gdspy(cell=cell)
             p.label.commit_to_gdspy(cell=cell)
 
     def _copy(self):

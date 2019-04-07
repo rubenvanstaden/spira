@@ -1,6 +1,7 @@
 import spira 
 import networkx as nx
-from spira import param, shapes
+from spira.core import param
+from spira import shapes
 from spira.visualization import color
 from spira.gdsii.elemental.port import __Port__
 

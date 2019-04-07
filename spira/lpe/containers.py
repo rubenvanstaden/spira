@@ -1,6 +1,6 @@
 from spira.gdsii.cell import Cell
 from spira.gdsii.elemental.sref import SRef
-from spira import param
+from spira.core import param
 from copy import deepcopy
 
 

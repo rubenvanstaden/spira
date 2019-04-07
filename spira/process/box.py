@@ -1,7 +1,7 @@
 import spira
 import numpy as np
 from copy import deepcopy
-from spira import param
+from spira.core import param
 from spira.lgm.shapes.basic import BoxShape
 from spira.process.processlayer import ProcessLayer
 
@@ -11,7 +11,7 @@ class Box(ProcessLayer):
     w = param.NumberField(default=1.0)
     h = param.NumberField(default=1.0)
     center = param.PointField()
-    
+
     def __deepcopy__(self, memo):
         return Box(
             # elementals=deepcopy(self.elementals),

@@ -1,5 +1,5 @@
 import spira
-from spira import param
+from spira.core import param
 from spira import pc
 from spira.lpe.structure import Structure
 

@@ -1,5 +1,5 @@
 import spira
-from spira import param
+from spira.core import param
 from spira.lgm.route.routing import Route
 from spira.lgm.route.route_shaper import *
 

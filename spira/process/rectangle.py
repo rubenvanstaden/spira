@@ -1,7 +1,8 @@
 import spira
 import numpy as np
 from copy import deepcopy
-from spira import param, shapes
+from spira.core import param
+from spira import shapes
 from spira.process.processlayer import ProcessLayer
 
 

@@ -1,7 +1,8 @@
 import spira
 import time
 import numpy as np
-from spira import param, shapes, pc
+from spira.core import param
+from spira import shapes, pc
 from spira.lpe.containers import __CellContainer__, __NetContainer__, __CircuitContainer__
 from spira.lne.net import Net
 from copy import copy, deepcopy

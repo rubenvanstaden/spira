@@ -2,9 +2,9 @@ import os
 import gdspy
 import spira
 
-from spira import param
+from spira.core import param
 from spira.gdsii.io import import_gds
-from spira.core.lists import ElementList
+from spira.core.elem_list import ElementList
 from spira.gdsii.lists.cell_list import CellList
 from spira.core.initializer import FieldInitializer
 from spira.core.mixin.gdsii_output import OutputMixin

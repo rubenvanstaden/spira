@@ -371,7 +371,7 @@ class MetaCell(MetaInitializer):
             return retrieved_cell
 
 
-from spira import param
+from spira.core import param
 class CellInitializer(FieldInitializer, metaclass=MetaCell):
 
     def get_node_id(self):

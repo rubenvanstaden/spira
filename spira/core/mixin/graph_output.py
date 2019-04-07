@@ -7,8 +7,8 @@ from spira import log as LOG
 from spira.gdsii.io import *
 from spira.utils import scale_coord_down as scd
 
-from spira.param.field.typed_graph import EdgeCapacitor
-from spira.param.field.typed_graph import EdgeInductor
+from spira.core.param.field.typed_graph import EdgeCapacitor
+from spira.core.param.field.typed_graph import EdgeInductor
 
 import matplotlib.pyplot as plt
 import plotly.graph_objs as go

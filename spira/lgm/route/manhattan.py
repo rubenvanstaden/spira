@@ -1,6 +1,6 @@
 import spira
 import numpy as np
-from spira import param
+from spira.core import param
 from spira.lgm.route.route_shaper import RouteSimple
 from spira.lgm.route.route_shaper import RouteGeneral
 from spira.lgm.route.route_shaper import RouteArcShape

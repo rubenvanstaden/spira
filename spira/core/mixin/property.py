@@ -2,7 +2,7 @@ import gdspy
 import spira
 import numpy as np
 from copy import deepcopy
-from spira.core.lists import ElementList
+from spira.core.elem_list import ElementList
 from spira.utils import scale_polygon_down as spd
 from spira.utils import scale_polygon_up as spu
 from spira.utils import scale_coord_down as scd

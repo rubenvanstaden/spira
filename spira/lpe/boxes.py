@@ -1,5 +1,5 @@
 import spira
-from spira import param
+from spira.core import param
 from copy import deepcopy
 from spira.lpe.containers import __CellContainer__
 

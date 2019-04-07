@@ -4,14 +4,14 @@ import pyclipper
 import numpy as np
 from copy import copy, deepcopy
 from spira.core.initializer import ElementalInitializer
-from spira import param
+from spira.core import param
 from spira.visualization import color
-from spira.core.mixin.transform import TranformationMixin
+from spira.core.mixin.transform import TransformationMixin
 
 
 class __Label__(gdspy.Label, ElementalInitializer):
 
-    __mixins__ = [TranformationMixin]
+    __mixins__ = [TransformationMixin]
 
     __committed__ = {}
 

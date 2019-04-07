@@ -1,7 +1,8 @@
 import spira
 import gdspy
 import numpy as np
-from spira import param, shapes
+from spira.core import param
+from spira import shapes
 from spira import pc
 from numpy.linalg import norm
 from numpy import sqrt, pi, cos, sin, log, exp, sinh, mod

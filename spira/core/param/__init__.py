@@ -19,10 +19,10 @@ def CoordField(**kwargs):
     
 
 def TransformationField(name='noname', number=0, datatype=0, **kwargs):
-    from spira.gdsii.tranformation import Tranform
+    from spira.core.tranformation import Transform
     # if 'default' not in kwargs:
     #     kwargs['default'] = Layer(name=name, number=number, datatype=datatype, **kwargs)
-    R = RestrictType(Tranform)
+    R = RestrictType(Transform)
     return DataFieldDescriptor(restrictions=R, **kwargs)
 
 
@@ -113,7 +113,7 @@ def DesignRuleField(shape=[[], []], **kwargs):
 
 
 class ElementalListField(DataFieldDescriptor):
-    from spira.core.lists import ElementList
+    from spira.core.elem_list import ElementList
     __type__ = ElementList
 
     def __init__(self, default=[], **kwargs):
@@ -218,3 +218,25 @@ class PointArrayField(DataFieldDescriptor):
     #     return deepcopy(obj)
     
 
+class PortListField(DataFieldDescriptor):
+    from spira.core.port_list import PortList
+    __type__ = PortList
+
+    def __init__(self, default=[], **kwargs):
+        kwargs['default'] = self.__type__(default)
+        kwargs['restrictions'] = RestrictType([self.__type__])
+        super().__init__(**kwargs)
+
+    def __repr__(self):
+        return ''
+
+    def __str__(self):
+        return ''
+
+    def call_param_function(self, obj):
+        f = self.get_param_function(obj)
+        value = f(self.__type__())
+        if value is None:
+            value = self.__type__()
+        obj.__store__[self.__name__] = value
+        return value

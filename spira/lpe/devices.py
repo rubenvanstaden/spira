@@ -1,12 +1,12 @@
 import spira 
-from spira import param, shapes, pc
+from spira.core import param
+from spira import shapes, pc
 from spira.lne.net import Net
 import numpy as np
 import networkx as nx
 from copy import copy, deepcopy
 from spira.lpe.structure import Structure
 from spira.gdsii.elemental.port import __Port__
-# from spira.core.mixin.netlist import NetlistSimplifier
 from spira.lpe.containers import __CellContainer__, __CircuitContainer__
 from spira.visualization import color
 

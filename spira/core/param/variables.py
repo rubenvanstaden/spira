@@ -1,5 +1,5 @@
 import numpy as np
-from spira.param.restrictions import RestrictType, RestrictRange
+from spira.core.param.restrictions import RestrictType, RestrictRange
 from spira.core.descriptor import DataFieldDescriptor
 
 

@@ -12,7 +12,6 @@ from spira.gdsii.cell import Connector
 from spira.gdsii.library import Library
 from spira.gdsii.lists.cell_list import CellList
 
-# from spira.layers import *
 from spira.layer import Layer
 from spira.gdsii import *
 from spira.lne import *
@@ -23,7 +22,8 @@ from spira.lgm.route.routing import Route
 from spira.lpe.devices import Device
 from spira.lpe.circuits import Circuit
 
-from spira.core.lists import ElementList
+from spira.core.elem_list import ElementList
+from spira.core.port_list import PortList
 
 
 def initialize():

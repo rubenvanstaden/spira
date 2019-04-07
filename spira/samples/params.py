@@ -1,6 +1,6 @@
 import spira
 import numpy as np
-from spira import param
+from spira.core import param
 
 
 class TestDefault(spira.Cell):

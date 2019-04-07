@@ -1,17 +1,28 @@
 import spira
-from spira import param
 import numpy as np
+from copy import deepcopy
 from numpy.linalg import norm
 from spira.core.initializer import ElementalInitializer
+from spira.core import param
 
 
-# From http://math.stackexchange.com/questions/11515/point-reflection-across-a-line
-class Tranform(ElementalInitializer):
+class __Transformable__(object):
 
-    midpoint = param.MidPointField()
-    rotation = param.NumberField(allow_none=True, default=None)
-    reflection = param.BoolField(default=False)
-    magnification = param.FloatField(default=1.0)
+    def transform(self, transformation):
+        return self
+
+    def transform_copy(self, transformation):
+        T = deepcopy(self)
+        T.transform(transformation)
+        return T
+
+    def reverse_transform(self, transformation):
+        return self.transform(-transformation)
+
+    def reverse_transform_copy(self, transformation):
+        T = deepcopy(self)
+        T.reverse_transform(transformation)
+        return T
 
     def __reflect__(self, points, p1=(0,0), p2=(1,0)):
         points = np.array(points); p1 = np.array(p1); p2 = np.array(p2)
@@ -36,27 +47,6 @@ class Tranform(ElementalInitializer):
             pts = (points - c0) * ca + (points - c0)[::-1] * sa + c0
             pts = np.round(pts, 6)
         return pts
-        
-    def apply(self):
-        """ Transform port with the given transform class. """
-        tf = {
-            'midpoint': self.midpoint,
-            'rotation': self.rotation,
-            'magnification': self.magnification,
-            'reflection': self.reflection
-        }
-        return tf
-
-    def transform(self, transform):
-        """ Transform port with the given transform class. """
-        from spira.gdsii.cell import Cell
-        if transform['reflection'] is True:
-            self.reflect()
-        if transform['rotation'] is not None:
-            self.rotate(angle=transform['rotation'])
-        if len(transform['midpoint']) != 0:
-            self.translate(dx=transform['midpoint'][0], dy=transform['midpoint'][1])
-        return self
 
     def move(self, midpoint=(0,0), destination=None, axis=None):
         """ Moves elements of the Device from the midpoint point 
@@ -96,3 +86,22 @@ class Tranform(ElementalInitializer):
             d = (o[0], d[1])
 
         return d, o
+
+
+class Transformable(__Transformable__):
+    """ Object that can be transformed. """
+
+    transformation = param.TransformationField(allow_none=True, default=None)
+    
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
+    # def __init__(self, transformation=None, **kwargs):
+    #     if (not 'transformation' in kwargs) or (transformation != None):
+    #         kwargs['transformation'] = transformation
+    #     super().__init__(self, **kwargs)
+
+
+
+
+

@@ -1,4 +1,4 @@
-from spira.param.restrictions import RestrictNothing
+from spira.core.param.restrictions import RestrictNothing
 
 
 class BaseField(object):

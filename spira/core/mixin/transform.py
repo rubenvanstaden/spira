@@ -1,9 +1,12 @@
 import numpy as np
 from numpy.linalg import norm
+from spira.core import param
 
 
 # From http://math.stackexchange.com/questions/11515/point-reflection-across-a-line
-class TranformationMixin(object):
+class TransformationMixin(object):
+
+    # transformation = param.TransformationField(allow_none=True, default=None)
 
     def __reflect__(self, points, p1=(0,0), p2=(1,0)):
         points = np.array(points); p1 = np.array(p1); p2 = np.array(p2)
@@ -28,17 +31,6 @@ class TranformationMixin(object):
             pts = (points - c0) * ca + (points - c0)[::-1] * sa + c0
             pts = np.round(pts, 6)
         return pts
-
-    def transform(self, transform):
-        """ Transform port with the given transform class. """
-        from spira.gdsii.cell import Cell
-        if transform['reflection'] is True:
-            self.reflect()
-        if transform['rotation'] is not None:
-            self.rotate(angle=transform['rotation'])
-        if len(transform['midpoint']) != 0:
-            self.translate(dx=transform['midpoint'][0], dy=transform['midpoint'][1])
-        return self
 
     def move(self, midpoint=(0,0), destination=None, axis=None):
         """ Moves elements of the Device from the midpoint point 
@@ -78,3 +70,15 @@ class TranformationMixin(object):
             d = (o[0], d[1])
 
         return d, o
+
+    def transform(self, T):
+        """ Transform port with the given transform class. """
+        from spira.gdsii.cell import Cell
+        if T['reflection'] is True:
+            self.reflect()
+        if T['rotation'] is not None:
+            self.rotate(angle=T['rotation'])
+        if len(T['midpoint']) != 0:
+            self.translate(dx=T['midpoint'][0], dy=T['midpoint'][1])
+        return self
+

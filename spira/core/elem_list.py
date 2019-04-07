@@ -1,5 +1,5 @@
 import collections
-from spira.param.field.typed_list import TypedList
+from spira.core.param.field.typed_list import TypedList
 
 
 class ElementFilterMixin(object):
@@ -82,18 +82,6 @@ class __ElementList__(TypedList, ElementFilterMixin):
             for e in self.cells:
                 if e.alias == value:
                     r_val = e
-        # if isinstance(value, str):
-        #     for e in self.cells:
-        #         # print(e.name)
-        #         name = e.name.split('_')[0]
-        #         if name == value:
-        #             r_val = e
-        #     # for p in self.polygons:
-        #     #     if e.name == value:
-        #     #         r_val = e
-        #     # for e in self._list:
-        #     #     if e.node_id == value:
-        #     #         r_val = e
         else:
             r_val = self._list[value]
         if r_val is None:
@@ -119,6 +107,10 @@ class __ElementList__(TypedList, ElementFilterMixin):
                 if item.name == name:
                     return True
         return False
+        
+    def __reversed__(self):
+        for e in self._list[::-1]:
+            yield e 
 
 
 class ElementList(__ElementList__):
@@ -141,15 +133,15 @@ class ElementList(__ElementList__):
         for e in self._list:
             cells.add(e.dependencies())
         return cells
-
-    def stretch(self, stretch_class):
-        for c in self:
-            c.stretch(stretch_class)
+        
+    def expand_transform(self):
+        for c in self._list:
+            c.expand_transform()
         return self
 
-    def transform(self, transform):
-        for c in self:
-            c.transform(transform)
+    def transform(self, transformation):
+        for c in self._list:
+            c.transform(transformation)
         return self
 
     def flat_elems(self):
@@ -166,10 +158,24 @@ class ElementList(__ElementList__):
         el = ElementList()
         for e in self._list:
             el += e.flat_copy(level)
-        if level == -1:
-            return el.flatten()
-        else:
-            return el
+        return el
+        
+    def commit_to_gdspy(self, cell):
+        for e in self._list:
+            if isinstance(e, ElementList):
+                e.commit_to_gdspy(cell=cell)
+            else:
+                e.commit_to_gdspy(cell=cell)
+        return self
+
+    # def flat_copy(self, level=-1):
+    #     el = ElementList()
+    #     for e in self._list:
+    #         el += e.flat_copy(level)
+    #     if level == -1:
+    #         return el.flatten()
+    #     else:
+    #         return el
 
     def flatten(self):
         from spira.gdsii.cell import Cell
@@ -187,6 +193,27 @@ class ElementList(__ElementList__):
             return flat_list
         else:
             return [self._list]
+
+    # def flatten(self):
+    #     from spira.gdsii.cell import Cell
+    #     from spira.gdsii.elemental.polygons import PolygonAbstract
+    #     from spira.gdsii.elemental.sref import SRef
+    #     from spira.gdsii.elemental.port import __Port__
+    #     from spira.core.port_list import PortList
+    #     if isinstance(self, collections.Iterable):
+    #         flat_list = ElementList()
+    #         for i in self._list:
+    #             if issubclass(type(i), Cell):
+    #                 i = i.flat_copy()
+    #             elif isinstance(i, SRef):
+    #                 i = i.flat_copy()
+    #             # if not issubclass(type(i), __Port__):
+    #             if not isinstance(i, PortList):
+    #                 for a in i.flatten():
+    #                     flat_list += a
+    #         return flat_list
+    #     else:
+    #         return [self._list]
 
     def isstored(self, pp):
         for e in self._list:

@@ -3,13 +3,12 @@ import gdspy
 import numpy as np
 import networkx as nx
 from copy import deepcopy
-from spira import param
-from spira.rdd import get_rule_deck
+from spira.core import param
 from spira.lne.mesh import Mesh
 from spira.lne.geometry import Geometry
 
 
-RDD = get_rule_deck()
+RDD = spira.get_rule_deck()
 
 
 class __ProcessLayer__(spira.Cell):
@@ -29,12 +28,11 @@ class __ProcessLayer__(spira.Cell):
 
     @property
     def tf_polygon(self):
-    # def create_tf_polygon(self):
-        ply = deepcopy(self.elementals[0])
-        if self.pc_transformation is not None:
-            # print('!!!!!!!!!!!!!!!!!!!!')
-            ply.transform(transform=self.pc_transformation.apply())
-        return ply
+        pass
+    #     ply = deepcopy(self.elementals[0])
+    #     if self.pc_transformation is not None:
+    #         ply.transform(transform=self.pc_transformation.apply())
+    #     return ply
 
     def create_points(self):
         return self.polygon.shape.points
@@ -44,12 +42,20 @@ class __ProcessLayer__(spira.Cell):
         for p in self.ports:
             p.commit_to_gdspy(cell=cell)
         return P
+        
+    # def flat_copy(self, level=-1):
+    #     elems = spira.ElementList()
+    #     ports = spira.ElementList()
+    #     elems += self.polygon.flat_copy()
+    #     ports += self.ports.flat_copy()
+    #     C = self.modified_copy(elementals=elems, ports=ports)
+    #     return C
 
-    def flat_copy(self, level=-1, commit_to_gdspy=False):
-        elems = spira.ElementList()
-        elems += self.polygon.flat_copy()
-        elems += self.ports.flat_copy()
-        return elems
+    # def flat_copy(self, level=-1, commit_to_gdspy=False):
+    #     elems = spira.ElementList()
+    #     elems += self.polygon.flat_copy()
+    #     elems += self.ports.flat_copy()
+    #     return elems
 
 
 class __PortConstructor__(__ProcessLayer__):
@@ -101,9 +107,6 @@ class __PortConstructor__(__ProcessLayer__):
         xpts = list(PTS[0][:, 0])
         ypts = list(PTS[0][:, 1])
 
-        # xpts = list(self.points[0][:, 0])
-        # ypts = list(self.points[0][:, 1])
-
         n = len(xpts)
         xpts.append(xpts[0])
         ypts.append(ypts[0]) 
@@ -112,10 +115,7 @@ class __PortConstructor__(__ProcessLayer__):
         for i in range(0, n):
             clockwise += ((xpts[i+1] - xpts[i]) * (ypts[i+1] + ypts[i]))
 
-        # print(self._ID)
-
         for i in range(0, n):
-            # name = '{}_e{}_{}'.format(self.ps_layer.layer.name, i, self._ID)
             name = '{}_e{}'.format(self.ps_layer.layer.name, i)
             x = np.sign(clockwise) * (xpts[i+1] - xpts[i])
             y = np.sign(clockwise) * (ypts[i] - ypts[i+1])
@@ -132,33 +132,10 @@ class __PortConstructor__(__ProcessLayer__):
                 edgelayer=spira.Layer(number=65),
                 arrowlayer=spira.Layer(number=78),
                 local_connect=self.polygon.node_id,
-                is_edge=True
+                is_edge=True,
+                # pid=self.node_id
             )
             
-            # el = spira.Layer(
-            #     number=self.layer.number,
-            #     datatype=RDD.PURPOSE.EDGE.datatype
-            #     # datatype=RDD.PURPOSE.EDGE
-            # )
-            
-            # al = spira.Layer(
-            #     number=self.layer.number,
-            #     # datatype=RDD.PURPOSE.ARROW
-            #     datatype=RDD.PURPOSE.ARROW.datatype
-            # )
-
-            # edges += spira.EdgeTerm(
-            #     name=name,
-            #     gds_layer=self.layer,
-            #     midpoint=midpoint,
-            #     orientation=orientation,
-            #     width=width,
-            #     edgelayer=el,
-            #     arrowlayer=al,
-            #     local_connect=self.polygon.node_id,
-            #     is_edge=True
-            # )
-
         return edges
 
 
@@ -180,17 +157,6 @@ class ProcessLayer(__PortConstructor__):
     bounding_boxes = param.ElementalListField()
     graph = param.DataField(fdef_name='create_netlist_graph')
     # -----------
-
-    pc_transformation = param.TransformationField(allow_none=True, default=None)
-
-    # def __deepcopy__(self, memo):
-    #     return ProcessLayer(
-    #         elementals=deepcopy(self.elementals),
-    #         # polygon=deepcopy(self.polygon),
-    #         layer=self.layer,
-    #         ps_layer=self.ps_layer,
-    #         node_id=deepcopy(self.node_id),
-    #     )
 
     def __repr__(self):
         return ("[SPiRA: ProcessLayer(\'{}\')] {} center, {} ports)").format(

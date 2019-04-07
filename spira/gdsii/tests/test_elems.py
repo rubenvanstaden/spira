@@ -1,7 +1,7 @@
 import spira
 import pytest
 import numpy as np
-from spira import param
+from spira.core import param
 from spira import shapes
 from spira.rdd.layer import PurposeLayer
 

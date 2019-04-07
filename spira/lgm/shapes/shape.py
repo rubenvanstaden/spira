@@ -2,7 +2,7 @@ import spira
 import pyclipper
 import gdspy
 import numpy as np
-from spira import param
+from spira.core import param
 from spira.utils import *
 from copy import copy, deepcopy
 from spira.core.initializer import FieldInitializer
@@ -144,6 +144,11 @@ class __Shape__(FieldInitializer):
     def count(self):
         """ number of points in the shape """
         return self.__len__()
+
+    def center_of_mass(self):
+        c = np.mean(self.points[0], 0)
+        return [c[0], c[1]]
+        # return Coord2(COM[0], COM[1]) 
 
     def move(self, pos):
         p = np.array([pos[0], pos[1]])

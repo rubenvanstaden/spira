@@ -10,7 +10,7 @@ from spira import settings
 
 from spira.gdsii.elemental.label import Label
 from spira import utils
-from spira import param
+from spira.core import param
 
 from spira import log as LOG
 from spira.core.initializer import ElementalInitializer

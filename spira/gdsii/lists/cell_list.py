@@ -1,5 +1,5 @@
 from spira.gdsii.cell import __Cell__
-from spira.param.field.typed_list import TypedList
+from spira.core.param.field.typed_list import TypedList
 class CellList(TypedList):
 
     def __getitem__(self, key):

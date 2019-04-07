@@ -1,5 +1,5 @@
 import spira
-from spira import param
+from spira.core import param
 from spira.lrc.rules import __DoubleLayerDesignRule__
 from spira.core.initializer import ElementalInitializer
 

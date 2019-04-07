@@ -2,34 +2,36 @@ import gdspy
 import numpy as np
 import networkx as nx
 from copy import copy, deepcopy
-from spira import param
-from spira.core.lists import ElementList
+from spira.core import param
+from spira.core.elem_list import ElementList
 from spira.gdsii import *
 from spira.core.initializer import CellInitializer
 from spira.core.mixin.property import CellMixin
 from spira.core.mixin.gdsii_output import OutputMixin
-from spira.core.mixin.transform import TranformationMixin
+from spira.core.mixin.transform import TransformationMixin
 from spira.rdd import get_rule_deck
 from spira.visualization import color
 from spira.gdsii.group import GroupElementals
 from spira.gdsii.elemental.term import Term
+from spira.core.transformable import Transformable
 
 
 RDD = get_rule_deck()
 
 
-class __Cell__(gdspy.Cell, CellInitializer):
+class __Cell__(Transformable, CellInitializer):
 
     __name_generator__ = RDD.ADMIN.NAME_GENERATOR
-    __mixins__ = [OutputMixin, CellMixin, TranformationMixin]
+    # __mixins__ = [OutputMixin, CellMixin, TransformationMixin]
+    __mixins__ = [OutputMixin, CellMixin]
 
-    name = param.DataField(fdef_name='create_name', doc='Name of the cell instance.')
+    # name = param.DataField(fdef_name='create_name', doc='Name of the cell instance.')
+    
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
 
     def __add__(self, other):
         from spira.gdsii.elemental.port import __Port__
-        # from spira.gdsii.elemental.sref import SRef
-        # if not isinstance(other, SRef):
-        #     raise ValueError('Only SRef objects can be added to cells.')
         if other is None:
             return self
         if issubclass(type(other), __Port__):
@@ -39,12 +41,12 @@ class __Cell__(gdspy.Cell, CellInitializer):
         return self
 
 
-class CellAbstract(__Cell__):
+class CellAbstract(gdspy.Cell, __Cell__):
 
-    ports = param.ElementalListField(fdef_name='create_ports', doc='List of ports to be added to the cell instance.')
+    # ports = param.ElementalListField(fdef_name='create_ports', doc='List of ports to be added to the cell instance.')
+    ports = param.PortListField(fdef_name='create_ports', doc='List of ports to be added to the cell instance.')
     elementals = param.ElementalListField(fdef_name='create_elementals', doc='List of elementals to be added to the cell instance.')
-    color = param.ColorField(default=color.COLOR_DARK_SLATE_GREY, doc='Color that a default cell will represent in a netlist.')
-
+    
     def create_elementals(self, elems):
         return elems
 
@@ -56,13 +58,19 @@ class CellAbstract(__Cell__):
             self.__name__ = self.__name_generator__(self)
         return self.__name__
 
-    # @property
-    # def alias(self):
-    #     return self.name.split('__')[0]
-
     def flatten(self):
         self.elementals = self.elementals.flatten()
         return self.elementals
+
+    # def flat_copy(self, level=-1):
+    #     elems = self.elementals.flat_copy(level)
+    #     ports = self.ports.flat_copy(level)
+    #     C = self.modified_copy(elementals=elems, ports=ports)
+    #     return C
+
+    def transform(self, transformation):
+        self.elementals.transform(transformation)
+        return self
 
     def flat_copy(self, level=-1):
         self.elementals = self.elementals.flat_copy(level)
@@ -73,13 +81,34 @@ class CellAbstract(__Cell__):
         deps += self
         return deps
 
+    def expand_transform(self):
+        self.elementals.expand_transform()
+        # if self.transformation is not None:
+        #     self.elementals.transform(self.transformation)
+        #     self.transformation = None  
+        return self
+
     def commit_to_gdspy(self):
         from spira.gdsii.elemental.sref import SRef
         cell = gdspy.Cell(self.name, exclude_from_current=True)
         for e in self.elementals:
-            if not isinstance(e, (SRef, ElementList)):
+            if isinstance(e, SRef):
+                e.ref.commit_to_gdspy()
+            else:
                 e.commit_to_gdspy(cell=cell)
+                    
+            # if not isinstance(e, (SRef, ElementList)):
+            #     e.commit_to_gdspy(cell=cell)
         return cell
+
+    # def commit_to_gdspy(self):
+    #     from spira.gdsii.elemental.sref import SRef
+    #     cell = gdspy.Cell(self.name, exclude_from_current=True)
+    #     for e in self.elementals:
+    #         print(e)
+    #         if not isinstance(e, (SRef, ElementList)):
+    #             e.commit_to_gdspy(cell=cell)
+    #     return cell
 
     def translate(self, dx, dy):
         for e in self.elementals:
@@ -93,13 +122,6 @@ class CellAbstract(__Cell__):
         d, o = super().move(midpoint=midpoint, destination=destination, axis=axis)
         for e in self.elementals:
             e.move(destination=d, midpoint=o)
-            # if issubclass(type(e), (LabelAbstract, PolygonAbstract)):
-            #     # e.translate(dx, dy)
-            #     e.move(destination=d, midpoint=o)
-            # if issubclass(type(e), ProcessLayer):
-            #     e.move(destination=d, midpoint=o)
-            # if isinstance(e, SRef):
-            #     e.move(destination=d, midpoint=o)
         for p in self.ports:
             mc = np.array(p.midpoint) + np.array(d) - np.array(o)
             p.move(midpoint=p.midpoint, destination=mc)
@@ -148,18 +170,19 @@ class CellAbstract(__Cell__):
 
                 ref_ports = r.ref.get_ports(level=new_level)
 
-                tf = {
-                    'midpoint': r.midpoint,
-                    'rotation': r.rotation,
-                    'magnification': r.magnification,
-                    'reflection': r.reflection
-                }
+                # tf = {
+                #     'midpoint': r.midpoint,
+                #     'rotation': r.rotation,
+                #     'magnification': r.magnification,
+                #     'reflection': r.reflection
+                # }
 
                 ref_ports_transformed = []
                 for rp in ref_ports:
-                    new_port = deepcopy(rp)
-                    new_port = new_port.transform(tf)
-                    ref_ports_transformed.append(new_port)
+                    # new_port = deepcopy(rp)
+                    # new_port = new_port.transform(tf)
+                    pt = rp.transform_copy(r.get_transformation)
+                    ref_ports_transformed.append(pt)
                 port_list += ref_ports_transformed
         return port_list
 
@@ -170,7 +193,9 @@ class Cell(CellAbstract):
 
     um = param.NumberField(default=1e6)
 
+    name = param.DataField(fdef_name='create_name', doc='Name of the cell instance.')
     routes = param.ElementalListField(fdef_name='create_routes')
+    color = param.ColorField(default=color.COLOR_DARK_SLATE_GREY, doc='Color that a default cell will represent in a netlist.')
 
     _next_uid = 0
 
@@ -188,7 +213,9 @@ class Cell(CellAbstract):
     alias = param.FunctionField(get_alias, set_alias, doc='Functions to generate an alias for cell name.')
 
     def __init__(self, name=None, elementals=None, ports=None, nets=None, library=None, **kwargs):
-        CellInitializer.__init__(self, **kwargs)
+
+        # CellInitializer.__init__(self, **kwargs)
+        __Cell__.__init__(self, **kwargs)
         gdspy.Cell.__init__(self, self.name, exclude_from_current=True)
 
         self.g = nx.Graph()
@@ -198,7 +225,7 @@ class Cell(CellAbstract):
         if name is not None:
             s = '{}_{}'.format(name, self.__class__._ID)
             self.__dict__['__name__'] = s
-            __Cell__.name.__set__(self, s)
+            Cell.name.__set__(self, s)
             self.__class__._ID += 1
 
         if library is not None:

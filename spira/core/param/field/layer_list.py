@@ -1,4 +1,4 @@
-from spira.param.field.typed_list import TypedList
+from spira.core.param.field.typed_list import TypedList
 
 
 class LayerList(TypedList):

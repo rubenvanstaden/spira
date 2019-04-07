@@ -5,27 +5,33 @@ import numpy as np
 from copy import copy, deepcopy
 from numpy.linalg import norm
 
-from spira import param
+from spira.core import param
 from spira.visualization import color
 from spira.core.initializer import ElementalInitializer
-from spira.core.mixin.transform import TranformationMixin
+from spira.core.mixin.transform import TransformationMixin
 from spira.gdsii.group import GroupElementals
+from spira.gdsii.elemental.base import __Element__
 
 
 RDD = spira.get_rule_deck()
 
 
-class __Port__(ElementalInitializer):
-
-    __mixins__ = [TranformationMixin]
-
+class __Port__(__Element__):
     __committed__ = {}
 
-    def __add__(self, other):
-        if other is None:
-            return self
-        p1 = np.array(self.midpoint) + np.array(other)
-        return p1
+
+
+
+# class __Port__(__Element__):
+#     __mixins__ = [TransformationMixin]
+
+    # __committed__ = {}
+
+#     def __add__(self, other):
+#         if other is None:
+#             return self
+#         p1 = np.array(self.midpoint) + np.array(other)
+#         return p1
 
 
 class PortAbstract(__Port__):
@@ -39,21 +45,35 @@ class PortAbstract(__Port__):
     locked = param.BoolField(default=True)
     gds_layer = param.LayerField(name='PortLayer', number=64)
     text_type = param.NumberField(default=RDD.GDSII.TEXT)
+    pid = param.StringField()
 
     __mixins__ = [GroupElementals]
 
+    @property
+    def x(self):
+        return self.midpoint[0]
+
+    @property
+    def y(self):
+        return self.midpoint[1]
+
     def encloses(self, polygon):
         return pyclipper.PointInPolygon(self.midpoint, polygon) != 0
-
+        
     def flat_copy(self, level=-1):
-        c_port = self.modified_copy(
-            midpoint=deepcopy(self.midpoint),
-            orientation=self.orientation,
-            reflection=self.reflection,
-            gds_layer=deepcopy(self.gds_layer),
-            locked=self.locked
-        )
-        return c_port
+        E = self.modified_copy(transformation=self.transformation)
+        E.transform_copy(self.transformation)
+        return E
+
+    # def flat_copy(self, level=-1):
+    #     c_port = self.modified_copy(
+    #         midpoint=deepcopy(self.midpoint),
+    #         orientation=self.orientation,
+    #         reflection=self.reflection,
+    #         gds_layer=deepcopy(self.gds_layer),
+    #         locked=self.locked
+    #     )
+    #     return c_port
 
     def reflect(self):
         """ Reflect around the x-axis. """
@@ -109,6 +129,37 @@ class PortAbstract(__Port__):
     @property
     def key(self):
         return (self.name, self.gds_layer.number, self.midpoint[0], self.midpoint[1])
+
+    def transform(self, transformation=None):
+        if transformation is None:
+            t = self.transformation
+        else:
+            t = transformation
+
+        if t is not None:
+            if hasattr(t, '__subtransform__'):
+                for T in t.__subtransforms__:
+                    if T.reflection is True:
+                        self.reflect()
+                    if T.rotation is not None:
+                        self.rotate(angle=T.rotation)
+                    if len(T.midpoint) != 0:
+                        self.translate(dx=T.midpoint[0], dy=T.midpoint[1])
+            else:
+                T = t
+                if T.reflection is True:
+                    self.reflect()
+                if T.rotation is not None:
+                    self.rotate(angle=T.rotation)
+                if len(T.midpoint) != 0:
+                    self.translate(dx=T.midpoint[0], dy=T.midpoint[1])
+
+        return self
+
+    def transform_copy(self, transformation):
+        T = deepcopy(self)
+        T.transform(transformation)
+        return T
 
 
 class Port(PortAbstract):

@@ -1,7 +1,8 @@
 import spira
 import gdspy
 import numpy as np
-from spira import param, shapes, pc
+from spira.core import param
+from spira import shapes, pc
 from spira import utils
 
 

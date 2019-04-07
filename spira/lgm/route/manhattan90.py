@@ -1,6 +1,7 @@
 import spira
 import numpy as np
-from spira import param, shapes, pc
+from spira.core import param
+from spira import shapes, pc
 from spira.lgm.route.route_shaper import RouteSimple, RouteGeneral
 from spira.lgm.route.manhattan import __Manhattan__
 

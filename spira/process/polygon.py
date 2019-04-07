@@ -1,7 +1,8 @@
 import spira
 import numpy as np
 from copy import deepcopy
-from spira import param, shapes
+from spira.core import param
+from spira import shapes
 from spira.visualization import color
 from spira.process.processlayer import ProcessLayer
 
@@ -22,9 +23,10 @@ class Polygon(ProcessLayer):
 
     def create_elementals(self, elems):
         ply = spira.Polygons(shape=self.points, gds_layer=self.layer)
-        # if self.pc_transformation is not None:
-        #     # print('!!!!!!!!!!!!!!!!!!!!')
-        #     ply.transform(transform=self.pc_transformation.apply())
+        if self.transformation is not None:
+            print(ply)
+            ply.transform_copy(self.transformation)
+            print(ply)
         elems += ply
         return elems
 

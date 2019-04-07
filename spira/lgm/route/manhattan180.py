@@ -1,7 +1,7 @@
 import spira
 import numpy as np
-from spira import param, shapes
-from spira import pc# from spira.lgm.route.arc_bend import ArcRoute, Arc
+from spira.core import param
+from spira import shapes, pc
 from spira.lgm.route.route_shaper import RouteSimple
 from spira.lgm.route.route_shaper import RouteGeneral
 from spira.utils import scale_coord_up as scu

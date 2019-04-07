@@ -2,19 +2,18 @@ import gdspy
 import pyclipper
 import numpy as np
 
-from spira import param
+from spira.core import param
 from copy import copy, deepcopy
 from spira.visualization import color
-
+from spira.gdsii.elemental.base import __Element__
 from spira.utils import *
-from spira.core.initializer import ElementalInitializer
-from spira.core.mixin.transform import TranformationMixin
 from spira.core.mixin.property import PolygonMixin
 
 
-class __Polygon__(gdspy.PolygonSet, ElementalInitializer):
+class __Polygon__(gdspy.PolygonSet, __Element__):
 
-    __mixins__ = [TranformationMixin, PolygonMixin]
+    # __mixins__ = [TransformationMixin, PolygonMixin]
+    __mixins__ = [PolygonMixin]
 
     __committed__ = {}
 
@@ -112,20 +111,9 @@ class PolygonAbstract(__Polygon__):
                 return False
         return True
 
-    # def commit_to_gdspy(self, cell):
-    #     if self.__repr__() not in list(PolygonAbstract.__committed__.keys()):
-    #         P = gdspy.PolygonSet(
-    #             polygons=deepcopy(self.shape.points),
-    #             layer=self.gds_layer.number, 
-    #             datatype=self.gds_layer.datatype,
-    #             verbose=False
-    #         )
-    #         cell.add(P)
-    #         PolygonAbstract.__committed__.update({self.__repr__():P})
-    #     else:
-    #         cell.add(PolygonAbstract.__committed__[self.__repr__()])
-
     def commit_to_gdspy(self, cell=None):
+        if self.transformation is not None:
+            self.transform(self.transformation)
         if self.__repr__() not in list(PolygonAbstract.__committed__.keys()):
             P = gdspy.PolygonSet(
                 polygons=deepcopy(self.shape.points),
@@ -139,13 +127,21 @@ class PolygonAbstract(__Polygon__):
         if cell is not None:
             cell.add(P)
         return P
+        
+    def flat_copy(self, level=-1):
+        E = self.modified_copy(
+            shape=deepcopy(self.shape),
+            transformation=self.transformation
+        )
+        E.transform_copy(self.transformation)
+        return E
 
-    def flat_copy(self, level=-1, commit_to_gdspy=False):
-        elems = []
-        for points in self.shape.points:
-            c_poly = self.modified_copy(shape=deepcopy([points]))
-            elems.append(c_poly)
-        return elems
+    # def flat_copy(self, level=-1, commit_to_gdspy=False):
+    #     elems = []
+    #     for points in self.shape.points:
+    #         c_poly = self.modified_copy(shape=deepcopy([points]))
+    #         elems.append(c_poly)
+    #     return elems
 
     def reflect(self, p1=(0,0), p2=(1,0), angle=None):
         for n, points in enumerate(self.shape.points):
@@ -171,6 +167,11 @@ class PolygonAbstract(__Polygon__):
 
     def fillet(self, radius, angle_resolution=128, precision=0.001*1e6):
         super().fillet(radius=radius, points_per_2pi=angle_resolution, precision=precision)
+        self.shape.points = self.polygons
+        return self
+
+    def stretch(self, sx, sy=None, center=(0,0)):
+        super().scale(scalex=sx, scaley=sy, center=center)
         self.shape.points = self.polygons
         return self
 
@@ -228,7 +229,8 @@ class Polygons(PolygonAbstract):
         else:
             raise ValueError('Shape type not supported!')
 
-        ElementalInitializer.__init__(self, **kwargs)
+        # ElementalInitializer.__init__(self, **kwargs)
+        __Element__.__init__(self, **kwargs)
         gdspy.PolygonSet.__init__(
             self, self.shape.points,
             layer=self.gds_layer.number,
@@ -247,7 +249,45 @@ class Polygons(PolygonAbstract):
     def __str__(self):
         return self.__repr__()
 
+    def transform(self, transformation=None):
+        if transformation is None:
+            t = self.transformation
+        else:
+            t = transformation
+        
+        if t is not None:
+            if hasattr(t, '__subtransform__'):
+                for T in t.__subtransforms__:
+                    if T.reflection is True:
+                        self.reflect()
+                    if T.rotation is not None:
+                        self.rotate(angle=T.rotation)
+                    if len(T.midpoint) != 0:
+                        self.translate(dx=T.midpoint[0], dy=T.midpoint[1])
+            else:
+                T = t
+                if T.reflection is True:
+                    self.reflect()
+                if T.rotation is not None:
+                    self.rotate(angle=T.rotation)
+                if len(T.midpoint) != 0:
+                    self.translate(dx=T.midpoint[0], dy=T.midpoint[1])
 
+        return self
+
+    def transform_copy(self, transformation):
+        T = deepcopy(self)
+        T.transform(transformation)
+        return T
+
+    def expand_transform(self):
+        self.transform(self.transformation)
+        return self
+        # T = self.transform_copy(self.transformation)
+        # return T
+        # self.transformation = IdentityTransform()
+        # return self
+        
 
 
 
