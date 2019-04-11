@@ -13,7 +13,7 @@ parts, each of which is implemented as a segregated module:
 
 * **Layout Generator Kernel** (LGK): Layout generator framework that can bind to a PDK. This involves operations on the GDSII file format elements, such as polygons, label, cell references, etc.
 
-* **Layout Geometry Modular** (LGM): Algorithms for layout polygon operations and physical geometry construction for 2D and 3D (experimental) modeling.
+* **Layout Geometry Modular** (geometry): Algorithms for layout polygon operations and physical geometry construction for 2D and 3D (experimental) modeling.
 
 * **Layout Primitive Extractor** (LPE): Detecting layout primitives, such as vias, ports, ntrons and junctions.
 
@@ -31,7 +31,7 @@ coherent fashion. The `demo` folder is an example workspace. A workspace consist
 parts:
 
 * PDKs: Folder containing all the fabrication specific data.
-* Projects: Folder containing the Python source file createed using SPiRA.
+* Projects: Folder containing the Python source file createed using spira.
 
 **PDKs**
 
