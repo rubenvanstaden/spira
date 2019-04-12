@@ -1,7 +1,7 @@
 import spira
 from spira import param
 from spira import Rectangle
-from spira.rdd import get_rule_deck
+from spira.yevon.rdd import get_rule_deck
 
 
 RDD = get_rule_deck()

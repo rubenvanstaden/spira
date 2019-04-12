@@ -1,6 +1,6 @@
 import spira
 from spira import param
-from spira.rdd import get_rule_deck
+from spira.yevon.rdd import get_rule_deck
 from examples.junction import Junction
 
 

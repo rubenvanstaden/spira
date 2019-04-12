@@ -26,8 +26,8 @@ The following examples will illustrate each of the mentioned categories. First t
 .. code-block:: python
     :linenos:
 
-    from spira.rdd import get_rule_deck
-    from spira.rdd.technology import ProcessTree
+    from spira.yevon.rdd import get_rule_deck
+    from spira.yevon.rdd.technology import ProcessTree
 
     print('Initializing Rule Deck Library...')
 
@@ -96,7 +96,7 @@ by simply importing the specific process RDD file.
     :linenos:
 
     >>> import spira
-    >>> from spira.rdd.settings import get_rule_deck
+    >>> from spira.yevon.rdd.settings import get_rule_deck
     >>> RDD = get_rule_deck()
     >>> RDD.name
     'MiTLL'
