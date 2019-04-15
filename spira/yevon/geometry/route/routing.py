@@ -1,4 +1,4 @@
-import spira
+import spira.all as spira
 import numpy as np
 # from spira import shapes
 # from spira import pc
@@ -8,9 +8,12 @@ from spira.yevon.geometry.route.manhattan180 import Route180
 from spira.yevon.geometry.route.route_shaper import RouteSimple, RouteGeneral, RoutePointShape
 from spira.yevon.visualization import color
 from spira.netex.structure import Structure
+from spira.yevon.rdd import get_rule_deck
+from spira.core.param.variables import *
+from spira.core.descriptor import DataField
 
 
-RDD = spira.get_rule_deck()
+RDD = get_rule_deck()
 
 
 class Route(Structure, __Manhattan__):

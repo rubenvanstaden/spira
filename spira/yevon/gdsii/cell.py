@@ -2,7 +2,9 @@ import gdspy
 import numpy as np
 import networkx as nx
 from copy import copy, deepcopy
+from spira.yevon import utils
 
+from spira.core.param.restrictions import RestrictType
 from spira.core.initializer import FieldInitializer
 from spira.core.descriptor import DataFieldDescriptor, FunctionField, DataField
 from spira.core.elem_list import ElementList, ElementalListField
@@ -39,7 +41,6 @@ class __Cell__(FieldInitializer, metaclass=MetaCell):
     def set_node_id(self, value):
         self.__id__ = value
 
-    # node_id = param.FunctionField(get_node_id, set_node_id, doc='Unique elemental ID.')
     node_id = FunctionField(get_node_id, set_node_id, doc='Unique elemental ID.')
     
     def __add__(self, other):
@@ -74,19 +75,8 @@ class CellAbstract(gdspy.Cell, __Cell__):
         return deps
 
     # def flat_copy(self, level=-1):
-    #     elems = self.elementals.flat_copy(level)
-    #     ports = self.ports.flat_copy(level)
-    #     C = self.modified_copy(elementals=elems, ports=ports)
-    #     return C
-
-    # def flat_copy(self, level=-1):
     #     self.elementals = self.elementals.flat_copy(level)
     #     return self.elementals
-
-    # def expand_transform(self):
-    #     self.elementals.expand_transform()
-    #     # self.transformation = None
-    #     return self
 
     def commit_to_gdspy(self):
         from spira.yevon.gdsii.sref import SRef
@@ -98,11 +88,11 @@ class CellAbstract(gdspy.Cell, __Cell__):
                 e.commit_to_gdspy(cell=cell)
         return cell
 
-    def translate(self, dx, dy):
+    def __translate__(self, dx, dy):
         for e in self.elementals:
-            e.translate(dx=dx, dy=dy)
+            e.__translate__(dx=dx, dy=dy)
         for p in self.ports:
-            p.translate(dx=dx, dy=dy)
+            p.__translate__(dx=dx, dy=dy)
         return self
 
     def move(self, midpoint=(0,0), destination=None, axis=None):
@@ -115,33 +105,35 @@ class CellAbstract(gdspy.Cell, __Cell__):
             p.move(midpoint=p.midpoint, destination=mc)
         return self
 
-    def reflect(self, p1=(0,0), p2=(1,0)):
+    def __reflect__(self, p1=(0,0), p2=(1,0)):
         """ Reflects the cell around the line [p1, p2]. """
         for e in self.elementals:
             if not issubclass(type(e), LabelAbstract):
-                e.reflect(p1, p2)
+                e.__reflect__(p1, p2)
         for p in self.ports:
-            p.midpoint = self.__reflect__(p.midpoint, p1, p2)
+            # p.midpoint = self.__reflect__(p.midpoint, p1, p2)
+            p.midpoint = utils.reflect_algorithm(p.midpoint, p1, p2)
             phi = np.arctan2(p2[1]-p1[1], p2[0]-p1[0])*180 / np.pi
             p.orientation = 2*phi - p.orientation
         return self
 
-    def rotate(self, angle=45, center=(0,0)):
+    def __rotate__(self, angle=45, center=(0,0)):
         """ Rotates the cell with angle around a center. """
         from spira import pc
         if angle == 0:
             return self
         for e in self.elementals:
             if issubclass(type(e), PolygonAbstract):
-                e.rotate(angle=angle, center=center)
+                e.__rotate__(angle=angle, center=center)
             elif isinstance(e, SRef):
-                e.rotate(angle=angle, center=center)
+                e.__rotate__(angle=angle, center=center)
             elif issubclass(type(e), ProcessLayer):
-                e.rotate(angle=angle, center=center)
+                e.__rotate__(angle=angle, center=center)
         ports = self.ports
         self.ports = PortList()
         for p in ports:
-            p.midpoint = self.__rotate__(p.midpoint, angle, center)
+            # p.midpoint = self.__rotate__(p.midpoint, angle, center)
+            p.midpoint = utils.rotate_algorithm(p.midpoint, angle, center)
             p.orientation = np.mod(p.orientation + angle, 360)
             self.ports += p
         return self
@@ -195,12 +187,10 @@ class Cell(CellAbstract):
     def set_alias(self, value):
         self.__alias__ = value
 
-    # alias = param.FunctionField(get_alias, set_alias, doc='Functions to generate an alias for cell name.')
     alias = FunctionField(get_alias, set_alias, doc='Functions to generate an alias for cell name.')
 
     def __init__(self, name=None, elementals=None, ports=None, nets=None, library=None, **kwargs):
 
-        # CellInitializer.__init__(self, **kwargs)
         __Cell__.__init__(self, **kwargs)
         gdspy.Cell.__init__(self, self.name, exclude_from_current=True)
 
@@ -251,10 +241,7 @@ class Connector(Cell):
     >>> term = spira.Term()
     """
 
-    # midpoint = param.MidPointField()
     midpoint = CoordField()
-    # orientation = param.NumberField(default=0.0)
-    # width = param.NumberField(default=2*1e6)
     orientation = NumberField(default=0.0)
     width = NumberField(default=2*1e6)
 

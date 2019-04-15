@@ -1,4 +1,4 @@
-import spira
+import spira.all as spira
 from spira.core import param
 # from spira import shapes
 from spira.yevon.geometry import shapes

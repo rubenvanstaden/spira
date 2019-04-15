@@ -1,4 +1,4 @@
-import spira
+import spira.all as spira
 import gdspy
 import numpy as np
 import networkx as nx

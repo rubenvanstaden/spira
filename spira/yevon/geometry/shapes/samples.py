@@ -1,4 +1,4 @@
-import spira
+import spira.all as spira
 from spira.yevon.geometry.shapes.basic import *
 from spira.yevon.geometry.shapes.advance import *
 

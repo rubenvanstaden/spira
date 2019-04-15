@@ -1,4 +1,4 @@
-import spira
+import spira.all as spira
 from spira.core import param
 from spira.yevon.geometry.route.routing import Route
 from spira.yevon.geometry.route.route_shaper import *

@@ -1,6 +1,6 @@
 import os
 import gdspy
-import spira
+import spira.all as spira
 
 from spira import settings
 from spira import log as LOG

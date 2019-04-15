@@ -1,4 +1,4 @@
-import spira
+import spira.all as spira
 import numpy as np
 from spira.core import param
 # from spira import shapes, pc
@@ -8,11 +8,17 @@ from spira.netex.containers import __CellContainer__, __NetContainer__
 from spira.netex.net import Net
 from copy import copy, deepcopy
 import networkx as nx
-from spira import utils
+from spira.yevon import utils
 from spira.netex.netlist import NetlistSimplifier
+from spira.yevon.rdd import get_rule_deck
+
+from spira.core.param.variables import *
+from spira.core.elem_list import ElementalListField
+from spira.core.descriptor import DataField
+from spira.yevon.layer import LayerField
 
 
-RDD = spira.get_rule_deck()
+RDD = get_rule_deck()
 
 
 class MetalNet(NetlistSimplifier):
@@ -168,23 +174,23 @@ class Structure(__NetlistCell__):
     """ Decorates all elementas with purpose metal with
     LCells and add them as elementals to the new class. """
     
-    um = param.FloatField(default=1e+6)
-    layout = param.BoolField(default=False)
+    um = FloatField(default=1e+6)
+    layout = BoolField(default=False)
 
-    metals = param.ElementalListField()
-    contacts = param.ElementalListField()
+    metals = ElementalListField()
+    contacts = ElementalListField()
 
-    terminals = param.ElementalListField()
-    primitives = param.ElementalListField()
-    merged_layers = param.ElementalListField()
-    route_layers = param.ElementalListField()
+    terminals = ElementalListField()
+    primitives = ElementalListField()
+    merged_layers = ElementalListField()
+    route_layers = ElementalListField()
     
-    edge_datatype = param.IntegerField(default=103)
-    arrow_datatype = param.IntegerField(default=81)
+    edge_datatype = IntegerField(default=103)
+    arrow_datatype = IntegerField(default=81)
 
-    level = param.IntegerField(default=2)
-    algorithm = param.IntegerField(default=6)
-    lcar = param.FloatField(default=0.0)
+    level = IntegerField(default=2)
+    algorithm = IntegerField(default=6)
+    lcar = FloatField(default=0.0)
 
     def __metal_name__(self, uid, pl):
         name = 'metal_{}_{}_{}'.format(self.name, pl.layer.number, uid)

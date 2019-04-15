@@ -1,26 +1,27 @@
-import spira
+import spira.all as spira
 from spira.core.transforms.generic import GenericTransform
 from spira.core.transformable import Transformable
 
 
 class Reflection(GenericTransform):
 
-    def __init__(self, reflection=0, **kwargs):
-        kwargs['translation'] = SUPPRESSED
-        kwargs['v_mirror'] = True
-        
+    def __init__(self, reflection=False, **kwargs):
         super().__init__(reflection=reflection, **kwargs)
+
+    reflection = getattr(GenericTransform, 'reflection')
+
+    def apply_to_object(self, item):
+        if self.reflection is True:
+            item = item.__reflection__(p1=(0,0), p2=(1,0))
+        else:
+            item = self
+        # item = item.__translate__(self)
+        return item
         
-    def set_mirror_plane_y(self, value):
-        self.__mirror_plane_y__ = value
-        self.translation = Coord2(0.0, 2.0 * value)
-
-    reflection = SetFunctionProperty("__reflection__", set_mirror_plane_y, restriction=RESTRICT_NUMBER, default=0)
-
 
 class __ReflectionMixin__(object):
 
-    def reflect(self, reflection=False):
+    def _reflect(self, reflection=False):
         return self.transform(Reflection(reflection))
 
 

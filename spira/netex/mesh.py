@@ -1,5 +1,5 @@
 import os
-import spira
+import spira.all as spira
 import pygmsh
 import meshio
 import inspect

@@ -1,4 +1,4 @@
-import spira
+import spira.all as spira
 
 
 RDD = spira.get_rule_deck()

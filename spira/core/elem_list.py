@@ -103,7 +103,7 @@ class __ElementList__(TypedList, ElementFilterMixin):
         return L
 
     def __contains__(self, name):
-        import spira
+        import spira.all as spira
         for item in self._list:
             if isinstance(item, spira.Cell):
                 if item.name == name:
@@ -118,9 +118,10 @@ class __ElementList__(TypedList, ElementFilterMixin):
 class ElementList(__ElementList__):
 
     def dependencies(self):
-        import spira
+        import spira.all as spira
         from spira.yevon.gdsii.cell_list import CellList
-        from spira import pc
+        # from spira import pc
+        from spira.yevon import process as pc
         from spira.yevon.process.processlayer import ProcessLayer
         cells = CellList()
         for e in self._list:
@@ -129,7 +130,7 @@ class ElementList(__ElementList__):
         return cells
 
     def add(self, item):
-        import spira
+        import spira.all as spira
         from spira.yevon.gdsii.cell_list import CellList
         cells = CellList()
         for e in self._list:
@@ -242,5 +243,5 @@ class ElementalListField(DataFieldDescriptor):
         if value is None:
             value = self.__type__()
         obj.__store__[self.__name__] = value
-        return valu
+        return value
 

@@ -1,4 +1,4 @@
-import spira
+import spira.all as spira
 from spira.core.transformable import Transformable
 from spira.core.transforms.generic import GenericTransform
 
@@ -10,7 +10,7 @@ class Translation(GenericTransform):
 
     translation = getattr(GenericTransform, 'translation')
 
-    def apply(self, item):
+    def apply_to_object(self, item):
         return item.__translate__(dx=self.translation[0], dy=self.translation[1])
 
 
@@ -22,13 +22,12 @@ class __TranslationMixin__(object):
         return self.transform_copy(Translation(position))
 
     def _translate(self, translation=(0,0)):
-        print('_translate')
         return self.transform(Translation(translation))
 
     def translate_copy(self, position):
         return self.transform_copy(Translation(position))
 
-print('MIXIN')
+
 Transformable.mixin(__TranslationMixin__)
 
 

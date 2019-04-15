@@ -1,5 +1,5 @@
 import gdspy
-import spira
+import spira.all as spira
 import math
 import numpy as np
 from spira.core import param

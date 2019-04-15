@@ -3,6 +3,7 @@ import pyclipper
 import numpy as np
 
 from spira.core import param
+from spira.yevon import utils
 from copy import copy, deepcopy
 from spira.yevon.visualization import color
 from spira.yevon.gdsii.base import __Elemental__
@@ -139,24 +140,24 @@ class PolygonAbstract(__Polygon__):
         E.transform_copy(self.transformation)
         return E
 
-    def reflect(self, p1=(0,0), p2=(1,0), angle=None):
-        for n, points in enumerate(self.shape.points):
-            self.shape.points[n] = self.__reflect__(points, p1, p2)
-        self.polygons = self.shape.points
-        return self
-
-    def rotate(self, angle=45, center=(0,0)):
+    def __rotate__(self, angle=45, center=(0,0)):
         super().rotate(angle=(angle-self.direction)*np.pi/180, center=center)
         self.shape.points = self.polygons
         return self
 
-    def translate(self, dx, dy):
+    def __reflect__(self, p1=(0,0), p2=(1,0), angle=None):
+        for n, points in enumerate(self.shape.points):
+            self.shape.points[n] = utils.reflect_algorithm(points, p1, p2)
+        self.polygons = self.shape.points
+        return self
+
+    def __translate__(self, dx, dy):
         super().translate(dx=dx, dy=dy)
         self.shape.points = self.polygons
         return self
 
     def move(self, midpoint=(0,0), destination=None, axis=None):
-        d, o = super().move(midpoint=midpoint, destination=destination, axis=axis)
+        d, o = utils.move_algorithm(midpoint=midpoint, destination=destination, axis=axis)
         dx, dy = np.array(d) - o
         self.translate(dx, dy)
         return self
@@ -169,6 +170,10 @@ class PolygonAbstract(__Polygon__):
     def stretch(self, sx, sy=None, center=(0,0)):
         super().scale(scalex=sx, scaley=sy, center=center)
         self.shape.points = self.polygons
+        return self
+
+    def transform(self, transformation):
+        transformation.apply_to_object(self)
         return self
 
     def merge(self):
@@ -243,31 +248,31 @@ class Polygon(PolygonAbstract):
 
     def __str__(self):
         return self.__repr__()
-        
-    def apply_transformations(self, transformation=None):
-        if transformation is None:
-            t = self.transformation
-        else:
-            t = transformation
 
-        if t is not None:
-            if hasattr(t, '__subtransforms__'):
-                for T in t.__subtransforms__:
-                    if T.reflection is True:
-                        self.__reflect__()
-                    if T.rotation is not None:
-                        self.__rotate__(angle=T.rotation)
-                    if len(T.midpoint) != 0:
-                        self.translate(dx=T.midpoint[0], dy=T.midpoint[1])
-            else:
-                T = t
-                if T.reflection is True:
-                    self.reflect()
-                if T.rotation is not None:
-                    self.rotate(angle=T.rotation)
-                if len(T.midpoint) != 0:
-                    self.translate(dx=T.midpoint[0], dy=T.midpoint[1])
-        return self
+    # def apply_transformations(self, transformation=None):
+    #     if transformation is None:
+    #         t = self.transformation
+    #     else:
+    #         t = transformation
+
+    #     if t is not None:
+    #         if hasattr(t, '__subtransforms__'):
+    #             for T in t.__subtransforms__:
+    #                 if T.reflection is True:
+    #                     self.__reflect__()
+    #                 if T.rotation is not None:
+    #                     self.__rotate__(angle=T.rotation)
+    #                 if len(T.midpoint) != 0:
+    #                     self.translate(dx=T.midpoint[0], dy=T.midpoint[1])
+    #         else:
+    #             T = t
+    #             if T.reflection is True:
+    #                 self.reflect()
+    #             if T.rotation is not None:
+    #                 self.rotate(angle=T.rotation)
+    #             if len(T.midpoint) != 0:
+    #                 self.translate(dx=T.midpoint[0], dy=T.midpoint[1])
+    #     return self
         
 
     # def transform(self, transformation=None):
@@ -304,11 +309,7 @@ class Polygon(PolygonAbstract):
         self.transform(self.transformation)
         # self.transformation = None
         return self
-        # T = self.transform_copy(self.transformation)
-        # return T
-        # self.transformation = IdentityTransform()
-        # return self
-        
+
 
 Polygon.mixin(PolygonProperties)
 

@@ -1,4 +1,4 @@
-import spira
+import spira.all as spira
 from spira.core import param
 from spira.core.transformable import Transformable
 from spira.core.initializer import FieldInitializer
@@ -7,7 +7,6 @@ from spira.core.descriptor import FunctionField
 from spira.core.elem_list import ElementalListField
 
 
-print('ELEMENTAL')
 class __Elemental__(Transformable, FieldInitializer, metaclass=MetaElemental):
     """ Base class for all transformable elementals. """
 

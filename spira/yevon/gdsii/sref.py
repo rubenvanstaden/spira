@@ -2,12 +2,15 @@ import gdspy
 import numpy
 import inspect
 import numpy as np
-import spira
+import spira.all as spira
 from copy import copy, deepcopy
 
 from spira.yevon.geometry.ports.port import PortAbstract, __Port__
 from spira.core import param
 from spira.yevon.gdsii.base import __Elemental__
+from spira.yevon.geometry.coord import CoordField
+from spira.yevon import utils
+from spira.core.transforms import *
 
 from spira.core.param.variables import *
 
@@ -16,12 +19,9 @@ class __SRef__(__Elemental__):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        # Transformable.__init__(self, **kwargs)
-        # __Elemental__.__init__(self, **kwargs)
 
     def __deepcopy__(self, memo):
         return SRef(
-            # structure=deepcopy(self.ref),
             structure=self.ref,
             transformation=deepcopy(self.transformation),
             port_locks=self.port_locks,
@@ -48,17 +48,6 @@ class __SRef__(__Elemental__):
                 return True
         return False
 
-    def transform(self, transformation=None):
-        if transformation is not None:
-            T = transformation
-            if T.reflection is True:
-                self.reflect()
-            if T.rotation is not None:
-                self.rotate(angle=T.rotation)
-            if len(T.midpoint) != 0:
-                self.translate(dx=T.midpoint[0], dy=T.midpoint[1])
-        return self
-
     def expand_transform(self):
         S = spira.Cell(
             name=self.ref.name + self.get_transformation.id_string(),
@@ -81,19 +70,7 @@ class __SRef__(__Elemental__):
 
 class SRefAbstract(gdspy.CellReference, __SRef__):
 
-    # midpoint = param.MidPointField()
-    # rotation = param.NumberField(allow_none=True, default=None)
-    # reflection = param.BoolField(default=False)
-    # magnification = param.FloatField(default=1.0)
-
-    # @property
-    # def get_transformation(self):
-    #     return GenericTransform(
-    #         midpoint=self.midpoint,
-    #         rotation=self.rotation,
-    #         reflection=self.reflection,
-    #         magnification=self.magnification
-    #     )
+    midpoint = CoordField(default=(0,0))
 
     def dependencies(self):
         from spira.yevon.gdsii.cell_list import CellList
@@ -116,164 +93,13 @@ class SRefAbstract(gdspy.CellReference, __SRef__):
         return el
 
     @property
-    def polygons(self):
-        # FIXME: Assums all elementals are ply.Polygon.
-        elems = spira.ElementList()
-        for p in self.ref.elementals:
-            elems += p.transform_copy(self.get_transformation)
-        return elems
-
-    @property
-    def get_routes(self):
-        from spira import pc
-        # print('\n:: Get Routes')
-        elems = spira.ElementList()
-        from spira.core.transformation import Transform
-        pc_tf = Transform(
-            midpoint=self.midpoint,
-            rotation=self.rotation,
-            magnification=self.magnification,
-            reflection=self.reflection
-        )
-        for R in self.ref.routes:
-            if isinstance(R, spira.ElementList):
-                for r in R:
-                    Rt = r.modified_copy(pc_transformation=pc_tf)
-                    elems += Rt
-            elif issubclass(type(R), pc.ProcessLayer):
-                Rt = R.modified_copy(pc_transformation=pc_tf)
-                elems += Rt
-            elif isinstance(R, SRef):
-                if issubclass(type(R.ref), spira.Route):
-                    Rt = R.ref.modified_copy(route_transformation=pc_tf)
-                    elems += SRef(Rt)
-                else:
-                    raise ValueError('SREF: Get Route not supported')
-            else:
-                raise ValueError('Get Route not supported')
-        # print('-------------------------------------------\n')
-        return elems
-
-    def unlock_overlapping_ports(self, D, initial=False):
-
-        # print('\n--------------------')
-        # print('CELLLLLLL: {}'.format(self))
-        # for k, v in self.instance_ports.items():
-        #     print(k, v)
-        # print('-----------------------\n')
-
-        if initial is True:
-            for R in D.routes:
-                self.__unlock_device_edges__(D=D, R=R)
-            for S in D.structures:
-                if id(S) != id(self):
-                    self.unlock_overlapping_ports(D=S, initial=False)
-        else:
-            if isinstance(D, SRef):
-                for R in D.get_routes:
-                    if id(D) != id(self):
-                        # print(D)
-                        self.__unlock_device_edges__(D=D, R=R)
-                for S in D.ref.structures:
-                    if id(S) != id(self):
-                        self.unlock_overlapping_ports(D=S, initial=False)
-
-    def __unlock_device_edges__(self, D, R):
-
-        def r_func(self, D, R):
-            from spira import pc
-            if issubclass(type(R), pc.ProcessLayer):
-                pp = R
-                R_ply = pp.tf_polygon
-                for key, port in self.instance_ports.items():
-                    if isinstance(port, (spira.Term, spira.EdgeTerm)):
-                        if port.gds_layer.number == pp.ps_layer.layer.number:
-                            if port.edge.ply_area != 0:
-                                if R_ply & port.edge:
-                                    # print(R_ply)
-                                    # print(port.edge)
-                                    # print('')
-                                    route_key = (D.ref.name, pp.node_id, pp.ps_layer.layer.number)
-                                    self.port_connects[key] = route_key
-                                    self.port_locks[key] = False
-            else:
-                for pp in R.ref.metals:
-                    R_ply = pp.tf_polygon
-                    for key, port in self.instance_ports.items():
-                        if isinstance(port, (spira.Term, spira.EdgeTerm)):
-                            if port.gds_layer.number == pp.ps_layer.layer.number:
-                                if port.edge.ply_area != 0:
-                                    if R_ply & port.edge:
-                                        # route_key = (pp.node_id, pp.ps_layer.layer.number)
-                                        route_key = (D.name, pp.node_id, pp.ps_layer.layer.number)
-                                        self.port_connects[key] = route_key
-                                        self.port_locks[key] = False
-
-        if isinstance(R, spira.ElementList):
-            for r in R:
-                r_func(self, D, r)
-        else:
-            r_func(self, D, R)
-
-    @property
-    def netlist(self):
-        g = self.ref.netlist
-        for n in g.nodes():
-            if 'device' not in g.node[n]:
-                pc_ply = g.nodes[n]['surface']
-                for ep in pc_ply.edge_ports:
-                    p = deepcopy(ep)
-                    p1 = p.transform(self.tf)
-                    for key, p2 in self.instance_ports.items():
-                        if self.__equal_ports__(p1, p2):
-                            if p2.locked is False:
-                                g.node[n]['device'] = pc_ply
-                                eid = self.port_connects[key]
-                                # print('\n=======================')
-                                # print(self)
-                                # print(eid)
-                                if 'connect' in g.node[n]:
-                                    g.node[n]['connect'].append(eid)
-                                else:
-                                    g.node[n]['connect'] = [eid]
-                                g.name = self.ref.name
-                                # print(g)
-                                # print(g.name)
-                                # print(g.node[n]['connect'])
-                                # print('=======================')
-        return self.__move_net__(g)
-
-    @property
-    def instance_ports(self):
-        """ This property allows you to access
-        my_device_reference.ports, and receive a
-        copy of the ports dict which is correctly
-        rotated and translated. """
-        for port in self._parent_ports:
-
-            key = list(port.key)
-            key[2] += self.midpoint[0]
-            key[3] += self.midpoint[1]
-            key = tuple(key)
-
-            new_port = deepcopy(port)
-            self.iports[key] = new_port.transform(self.tf)
-
-            if key in self.port_locks.keys():
-                self.iports[key].locked = self.port_locks[key]
-            if key in self.port_connects.keys():
-                self.iports[key].connections.append(self.port_connects[key])
-
-        return self.iports
-
-    @property
     def ports(self):
         for port in self._parent_ports:
             self._local_ports[port.name] = port.transform_copy(self.get_transformation)
         return self._local_ports
 
     def move(self, midpoint=(0,0), destination=None, axis=None):
-        d, o = super().move(midpoint=midpoint, destination=destination, axis=axis)
+        d, o = utils.move_algorithm(midpoint=midpoint, destination=destination, axis=axis)
         dxdy = np.array(d) - np.array(o)
         self.midpoint = np.array(self.midpoint) + dxdy
         return self
@@ -285,24 +111,24 @@ class SRefAbstract(gdspy.CellReference, __SRef__):
         self.midpoint = self.origin
         return self
 
-    def rotate(self, angle=45, center=(0,0)):
+    def __rotate__(self, angle=45, center=(0,0)):
         if angle == 0:
             return self
-        if self.rotation is None:
-            self.rotation = 0
         if issubclass(type(center), __Port__):
             center = center.midpoint
-        self.rotation += angle
-        self.midpoint = self.__rotate__(self.midpoint, angle, center)
+        self.midpoint = utils.rotate_algorithm(self.midpoint, angle, center)
         return self
 
-    def reflect(self, p1=(0,0), p2=(1,0)):
+    def __reflect__(self, p1=(0,0), p2=(1,0)):
+
+        r = Rotation(rotation=self.rotation)
+        print(r)
+
         if issubclass(type(p1), __Port__):
             p1 = p1.midpoint
         if issubclass(type(p2), __Port__):
             p2 = p2.midpoint
-        if self.rotation is None:
-            self.rotation = 0
+
         p1 = np.array(p1)
         p2 = np.array(p2)
 
@@ -311,18 +137,26 @@ class SRefAbstract(gdspy.CellReference, __SRef__):
 
         # Rotate so reflection axis aligns with x-axis
         angle = np.arctan2((p2[1]-p1[1]), (p2[0]-p1[0]))*180 / np.pi
-        self.midpoint = self.__rotate__(self.midpoint, angle=-angle, center=[0,0])
-        self.rotation -= angle
+        self.midpoint = utils.rotate_algorithm(self.midpoint, angle=-angle, center=[0,0])
+        # self.rotation -= angle
+        # r -= angle
+        r.rotation -= angle
+        print(r)
 
         # Reflect across x-axis
-        self.reflection = not self.reflection
+        # self.reflection = not self.reflection
         self.midpoint = [self.midpoint[0], -self.midpoint[1]]
-        self.rotation = -self.rotation
+        # self.rotation = -self.rotation
+        r = -r
 
         # Un-rotate and un-translate
-        self.midpoint = self.__rotate__(self.midpoint, angle=angle, center=[0,0])
-        self.rotation += angle
+        self.midpoint = utils.rotate_algorithm(self.midpoint, angle=angle, center=[0,0])
+        # self.rotation += angle
+        r.rotation += angle
         self.midpoint = self.midpoint + p1
+        print(r)
+
+        self.transform(r)
 
         return self
 
@@ -344,62 +178,6 @@ class SRefAbstract(gdspy.CellReference, __SRef__):
 
     def align(self, p1, p2, distance):
         pass
-        # # TODO:Get port direction and distance
-        # self.connect(port=p1, destination=p2)
-        # self.move(midpoint=p2, destination=d)
-
-    # def stretch(self, port, destination):
-    #     """  """
-    #     from spira.yevon.geometry.coord import Coord
-    #     if port in self.ports.keys():
-    #         p = self.ports[port]
-    #     elif issubclass(type(port), __Port__):
-    #         p = port
-    #     else:
-    #         raise ValueError("[SPiRA] connect() did not receive a Port or " +
-    #             "valid port name - received ({}), ports available " +
-    #             "are ({})").format(port, self.ports.keys()
-    #         )
-
-    #     if issubclass(type(destination), __Port__):
-    #         d = destination
-    #     elif isinstance(destination, (tuple, list, set)):
-    #         d = Coord(destination)
-
-    #     # dx = d.x - p.x
-    #     # dy = d.y - p.y
-
-    #     # print(dx)
-
-    #     # if dx != 0:
-    #     #     sx = (d.x - p.x)/p.x
-    #     # else:
-    #     #     sx = 1
-    #     # if dy != 0:
-    #     #     sy = (d.y - p.y)/p.y
-    #     # else:
-    #     #     sy = 1
-
-    #     sx = d.x/p.x
-    #     sy = d.y/p.y
-
-    #     print(sx, sy)
-
-    #     ply = self.polygons[0]
-    #     ply.stretch(sx=sx, sy=sy)
-    #     print(ply)
-
-    #     cell = spira.Cell()
-    #     cell += ply
-    #     S = SRef(cell)
-    #     return S
-
-
-    # def stretch(self, port, center=[0,0], vector=[1,1]):
-    #     """  """
-    #     from spira.yevon.geometry.shape.stretch import Stretch
-    #     self.stretching[port] = Stretch(center=center, vector=vector)
-    #     return self
 
 
 class SRef(SRefAbstract):
@@ -415,7 +193,6 @@ class SRef(SRefAbstract):
     >>> sref = spira.SRef(structure=cell)
     """
 
-    # iports = param.DictField(default={})
     port_locks = DictField(default={})
     port_connects = DictField(default={})
 
@@ -445,6 +222,35 @@ class SRef(SRefAbstract):
 
     def __str__(self):
         return self.__repr__()
+
+    @property
+    def translation(self):
+        if self.transformation is not None:
+            return self.transformation.translation
+        else:
+            return 0.0
+
+    @property
+    def rotation(self):
+        if self.transformation is not None:
+            return self.transformation.rotation
+        else:
+            return 0.0
+
+    @property
+    def reflection(self):
+        if self.transformation is not None:
+            return self.transformation.reflection
+        else:
+            return False
+
+    @property
+    def magnification(self):
+        if self.transformation is not None:
+            return self.transformation.magnification
+        else:
+            return 1.0
+
 
 
 

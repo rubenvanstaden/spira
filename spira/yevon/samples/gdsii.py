@@ -1,4 +1,4 @@
-# import spira
+# import spira.all as spira
 # from spira import shapes
 
 

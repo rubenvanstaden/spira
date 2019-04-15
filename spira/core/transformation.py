@@ -1,7 +1,7 @@
-import spira
 import numpy as np
 from numpy.linalg import norm
-# from spira.core import param
+import spira.all as spira
+
 from spira.core.initializer import FieldInitializer
 from spira.core.param.restrictions import RestrictType
 from spira.core.descriptor import DataFieldDescriptor
@@ -10,10 +10,11 @@ from spira.core.descriptor import DataFieldDescriptor
 class Transform(FieldInitializer):
     """ Abstract base class for generic transform. """
 
-    # elements = param.ElementalListField()
+    def apply_to_object(self, item):
+        pass
 
     def __call__(self, item):
-        if isinstance(item, NoneType):
+        if isinstance(item, None):
             return self
         if isinstance(item, Transform):
             return item + self
@@ -104,6 +105,12 @@ class CompoundTransform(Transform):
         else:
             raise TypeError("Cannot add object of type " + str(type(other)) + " to transform")
         
+    def apply_to_object(self, item):
+        """ Apply transformation to elementals."""
+        for c in self.__subtransforms__:
+            item = c.apply_to_object(item)
+        return item
+
     def is_identity(self):
         for c in self.__subtransforms__:
             if not c.is_identity(): 
@@ -181,103 +188,6 @@ class ReversibleCompoundTransform(CompoundTransform, ReversibleTransform):
 
 def TransformationField(name='noname', number=0, datatype=0, **kwargs):
     from spira.core.transformation import Transform
-    # if 'default' not in kwargs:
-    #     kwargs['default'] = Layer(name=name, number=number, datatype=datatype, **kwargs)
     R = RestrictType(Transform)
     return DataFieldDescriptor(restrictions=R, **kwargs)
-
-
-
-
-
-# class Transform(ElementalInitializer):
-
-#     def __init__(self, transforms=[], **kwargs):
-#         if isinstance(transforms, list):
-#             self.__subtransforms__ = transforms
-#         else:
-#             self.__subtransforms__ = [transforms]
-#         super().__init__(**kwargs)
-
-#     def __add__(self, other):
-#         T = Transform(self)
-#         T.add(other)
-#         return T
-
-#     def __iadd__(self, other):
-#         self.add(other)
-#         return self
-
-#     def add(self, other):
-#         if other is None:
-#             return
-#         if isinstance(other, Transform):
-#             for c in other.__subtransforms__:
-#                 self.add(other)
-#         else:
-#             raise TypeError('Cannot add object of type ' + str(type(other)) + ' to transform')
-        
-#     def is_identity(self):
-#         """ returns True if the transformation does nothing """
-#         for c in self.__subtransforms__:
-#             if not c.is_identity(): return False
-#         return True
-
-#     def is_identity(self):
-#         """ Returns True if the transformation does nothing """
-#         for c in self.__subtransforms__:
-#             if not c.is_identity():
-#                 return False
-#         return True
-
-#     def id_string(self):
-#         """ gives a hash of the transform (for naming purposes) """
-#         return str(hash("R" + str(int(self.rotation * 10000)) +
-#                         "T" + str(int(self.translation[0] * 1000)) + "_" + str(int(self.translation[1] * 1000)) +
-#                         "M" + str(int(self.magnification * 1000)) +
-#                         "V" + str(self.v_mirror) +
-#                         "AM" + str(self.absolute_magnification) +
-#                         "AR" + str(self.absolute_rotation)
-#                         ))
-
-#     def __str__(self):
-#         """ gives a string representing the transform """
-#         return "R=%s-T=%s-M=%s-V=%s-AM=%s-AR=%s" % (str(int(self.rotation * 10000)), 
-#                                         str(int(self.translation[0] * 1000)) + "_" + str(int(self.translation[1] * 1000)),
-#                                         str(int(self.magnification * 1000)),
-#                                         str(self.v_mirror),
-#                                         str(self.absolute_magnification),
-#                                         str(self.absolute_rotation))
-
-
-# class GenericTransform(ReversibleTransform):
-
-#     midpoint = param.MidPointField()
-#     rotation = param.NumberField(allow_none=True, default=None)
-#     reflection = param.BoolField(default=False)
-#     magnification = param.FloatField(default=1.0)
-
-#     def id_string(self):
-#         """ Gives a hash of the transform (for naming purposes) """
-#         return self.__str__()
-#         # return str(hash("R" + str(int(self.rotation * 10000)) +
-#         #                 "T" + str(int(self.translation[0] * 1000)) + "_" + str(int(self.translation[1] * 1000)) +
-#         #                 "M" + str(int(self.magnification * 1000)) +
-#         #                 "V" + str(self.v_mirror) +
-#         #                 "AM" + str(self.absolute_magnification) +
-#         #                 "AR" + str(self.absolute_rotation)
-#         #                 ))
-
-#     def __str__(self):
-#         """ Gives a string representing the transform. """
-#         return "_M=%s-R=%s-RF=%s-MN=%s" % (
-#             # str(''.join(str(e) for e in self.midpoint)),
-#             str(self.midpoint),
-#             str(self.rotation),
-#             str(self.reflection),
-#             str(self.magnification)
-#         )
-
-
-
 

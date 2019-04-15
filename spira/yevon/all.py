@@ -1,6 +1,8 @@
-import spira.yevon.properties
+# import spira.yevon.properties
 
 from spira.core.all import *
+
+import spira.yevon.properties
 
 from spira.yevon.geometry.coord import *
 from spira.yevon.geometry.shapes import *
@@ -9,4 +11,5 @@ from spira.yevon.geometry.route import *
 
 from spira.yevon.layer import *
 from spira.yevon.gdsii import *
+
 

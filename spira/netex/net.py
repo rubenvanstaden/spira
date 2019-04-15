@@ -1,27 +1,31 @@
-import spira
+import spira.all as spira
 from spira.core import param
 from spira.netex.mesh import Mesh
 from spira.netex.geometry import Geometry
 from spira.core.initializer import FieldInitializer
+from spira.core.param.variables import *
+from spira.core.elem_list import ElementalListField
+from spira.core.descriptor import DataField
+from spira.yevon.layer import LayerField
 
 
 class Net(FieldInitializer):
-    """ Generates a graph from a list of polygon 
+    """ Generates a graph from a list of polygon
     elementals with a given mesh size. """
 
-    name = param.StringField()
-    layer = param.LayerField()
-    lcar = param.FloatField(default=0)
-    level = param.IntegerField(default=1)
-    dimension = param.IntegerField(default=2)
-    algorithm = param.IntegerField(default=6)
+    name = StringField()
+    layer = LayerField()
+    lcar = FloatField(default=0)
+    level = IntegerField(default=1)
+    dimension = IntegerField(default=2)
+    algorithm = IntegerField(default=6)
 
-    polygons = param.ElementalListField()
-    primitives = param.ElementalListField()
-    route_nodes = param.ElementalListField()
-    bounding_boxes = param.ElementalListField()
+    polygons = ElementalListField()
+    primitives = ElementalListField()
+    route_nodes = ElementalListField()
+    bounding_boxes = ElementalListField()
 
-    graph = param.DataField(fdef_name='create_netlist_graph')
+    graph = DataField(fdef_name='create_netlist_graph')
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)

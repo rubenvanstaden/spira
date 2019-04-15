@@ -1,4 +1,4 @@
-import spira
+import spira.all as spira
 from spira import param
 from spira.yevon.rdd import get_rule_deck
 from examples.junction import Junction

@@ -1,5 +1,7 @@
-import spira
-from spira import shapes
+# import spira.all as spira
+import spira.all as spira
+# from spira.all import *
+from spira.yevon.geometry import shapes
 
 
 class A(spira.Cell):
@@ -15,8 +17,8 @@ class A(spira.Cell):
 class B(spira.Cell):
 
     def create_elementals(self, elems):
-        
-        shape = shapes.BoxShape(width=8*1e6, height=8*1e6)
+
+        shape = shapes.BoxShape(width=8*1e6, height=30*1e6)
         ply = spira.Polygon(shape=shape, gds_layer=spira.Layer(number=2))
         elems += ply
 
@@ -33,7 +35,7 @@ class C(spira.Cell):
 
         return elems
 
-        
+
 class D(spira.Cell):
 
     def create_elementals(self, elems):
@@ -53,12 +55,23 @@ d = D()
 # b += spira.SRef(d)
 
 # a += spira.SRef(b, midpoint=(5*1e6, 10*1e6))
-S = spira.SRef(b)
-S._translate((10*1e6, 0))
+
+tf = spira.GenericTransform(translation=(-10*1e6, 0), rotation=90, reflection=True)
+print(tf)
+
+S = spira.SRef(b, transformation=tf)
+# S._rotate(45)
+S = S.transformation.apply_to_object(S)
+# S._translate((10*1e6, 0))
 a += S
 # a += spira.SRef(c)
 
+print('\n--- Transformation ---')
 print(a.transformation)
+print(S.transformation)
+print(type(S.transformation))
+print(S.rotation)
+print(S.translation)
 
 a.output()
 

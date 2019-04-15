@@ -95,7 +95,7 @@ by simply importing the specific process RDD file.
 .. code-block:: python
     :linenos:
 
-    >>> import spira
+    >>> import spira.all as spira
     >>> from spira.yevon.rdd.settings import get_rule_deck
     >>> RDD = get_rule_deck()
     >>> RDD.name

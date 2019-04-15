@@ -1,9 +1,10 @@
-import spira
+import spira.all as spira
 import gdspy
 import pyclipper
 import numpy as np
 from copy import copy, deepcopy
 from numpy.linalg import norm
+from spira.yevon import utils
 
 from spira.core import param
 from spira.yevon.visualization import color
@@ -61,8 +62,8 @@ class PortAbstract(__Port__):
 
     def encloses(self, polygon):
         return pyclipper.PointInPolygon(self.midpoint, polygon) != 0
-       
-    def reflect(self):
+
+    def __reflect__(self):
         """ Reflect around the x-axis. """
         self.midpoint = [self.midpoint[0], -self.midpoint[1]]
         self.orientation = -self.orientation
@@ -70,14 +71,15 @@ class PortAbstract(__Port__):
         self.reflection = True
         return self
 
-    def rotate(self, angle=45, center=(0,0)):
+    def __rotate__(self, angle=45, center=(0,0)):
         """ Rotate port around the center with angle. """
         self.orientation += angle
         self.orientation = np.mod(self.orientation, 360)
-        self.midpoint = self.__rotate__(self.midpoint, angle=angle, center=center)
+        # self.midpoint = self.__rotate__(self.midpoint, angle=angle, center=center)
+        self.midpoint = utils.rotate_algorithm(self.midpoint, angle=angle, center=center)
         return self
 
-    def translate(self, dx, dy):
+    def __translate__(self, dx, dy):
         """ Translate port by dx and dy. """
         self.midpoint = self.midpoint + np.array([dx, dy])
         return self
@@ -85,7 +87,7 @@ class PortAbstract(__Port__):
     def move(self, midpoint=(0,0), destination=None, axis=None):
         d, o = super().move(midpoint=midpoint, destination=destination, axis=axis)
         dx, dy = np.array(d) - o
-        self.translate(dx, dy)
+        self.__translate__(dx, dy)
         return self
 
     def distance(self, other):
@@ -116,36 +118,36 @@ class PortAbstract(__Port__):
     def key(self):
         return (self.name, self.gds_layer.number, self.midpoint[0], self.midpoint[1])
 
-    def transform(self, transformation=None):
-        if transformation is None:
-            t = self.transformation
-        else:
-            t = transformation
+    # def transform(self, transformation=None):
+    #     if transformation is None:
+    #         t = self.transformation
+    #     else:
+    #         t = transformation
 
-        if t is not None:
-            if hasattr(t, '__subtransform__'):
-                for T in t.__subtransforms__:
-                    if T.reflection is True:
-                        self.reflect()
-                    if T.rotation is not None:
-                        self.rotate(angle=T.rotation)
-                    if len(T.midpoint) != 0:
-                        self.translate(dx=T.midpoint[0], dy=T.midpoint[1])
-            else:
-                T = t
-                if T.reflection is True:
-                    self.reflect()
-                if T.rotation is not None:
-                    self.rotate(angle=T.rotation)
-                if len(T.midpoint) != 0:
-                    self.translate(dx=T.midpoint[0], dy=T.midpoint[1])
+    #     if t is not None:
+    #         if hasattr(t, '__subtransform__'):
+    #             for T in t.__subtransforms__:
+    #                 if T.reflection is True:
+    #                     self.reflect()
+    #                 if T.rotation is not None:
+    #                     self.rotate(angle=T.rotation)
+    #                 if len(T.midpoint) != 0:
+    #                     self.translate(dx=T.midpoint[0], dy=T.midpoint[1])
+    #         else:
+    #             T = t
+    #             if T.reflection is True:
+    #                 self.reflect()
+    #             if T.rotation is not None:
+    #                 self.rotate(angle=T.rotation)
+    #             if len(T.midpoint) != 0:
+    #                 self.translate(dx=T.midpoint[0], dy=T.midpoint[1])
 
-        return self
+    #     return self
 
-    def transform_copy(self, transformation):
-        T = deepcopy(self)
-        T.transform(transformation)
-        return T
+    # def transform_copy(self, transformation):
+    #     T = deepcopy(self)
+    #     T.transform(transformation)
+    #     return T
 
 
 class Port(PortAbstract):

@@ -1,7 +1,7 @@
-import spira 
+import spira.all as spira
 import networkx as nx
 from spira.core import param
-from spira import shapes
+from spira.yevon.geometry import shapes
 from spira.yevon.visualization import color
 from spira.yevon.geometry.ports.port import __Port__
 

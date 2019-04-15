@@ -1,4 +1,4 @@
-import spira
+import spira.all as spira
 import gdspy
 import pyclipper
 import numpy as np

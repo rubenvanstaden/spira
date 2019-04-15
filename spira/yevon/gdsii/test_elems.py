@@ -1,4 +1,4 @@
-import spira
+import spira.all as spira
 import pytest
 import numpy as np
 from spira.core import param

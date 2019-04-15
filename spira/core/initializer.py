@@ -319,9 +319,7 @@ class FieldInitializer(__Field__):
                 self.__doc__ = value
             else:
                 if key not in props:
-                    raise ValueError("Keyword argument \'{}\' " +
-                        "does not match any properties " +
-                        "of {}.".format(key, type(self)))
+                    raise ValueError("Keyword argument \'{}\' does not match any properties of {}.".format(key, type(self)))
                 setattr(self, key, value)
 
     def __validation_check__(self):

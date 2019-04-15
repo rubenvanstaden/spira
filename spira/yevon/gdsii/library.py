@@ -1,6 +1,6 @@
 import os
 import gdspy
-import spira
+import spira.all as spira
 
 # from spira.core import param
 from spira.core.param.variables import *

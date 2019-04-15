@@ -1,5 +1,5 @@
 import gdspy
-import spira
+import spira.all as spira
 import numpy as np
 from spira.yevon.gdsii.base import __Group__
 from spira.yevon.properties.geometry import __GeometryProperties__
@@ -38,6 +38,7 @@ class CellProperties(__Group__, __GeometryProperties__):
         for e in c.elementals.flat_elems():
             G = c2dmap[c]
             if isinstance(e, spira.SRef):
+                print(e.rotation)
                 G.add(
                     gdspy.CellReference(
                         ref_cell=c2dmap[e.ref],

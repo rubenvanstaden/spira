@@ -1,7 +1,9 @@
-from spira.yevon.gdsii.cell import Cell
+from spira.yevon.gdsii.cell import Cell, CellField
 from spira.yevon.gdsii.sref import SRef
 from spira.core import param
 from copy import deepcopy
+from spira.core.descriptor import DataField
+from spira.core.elem_list import ElementalListField
 
 
 class __CellContainer__(Cell):

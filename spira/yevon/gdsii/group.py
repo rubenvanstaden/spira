@@ -1,4 +1,4 @@
-import spira
+import spira.all as spira
 from spira.core import param
 from spira.yevon.gdsii.base import __Group__, __Elemental__
 

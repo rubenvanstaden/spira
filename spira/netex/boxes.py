@@ -1,4 +1,4 @@
-import spira
+import spira.all as spira
 from spira.core import param
 from copy import deepcopy
 from spira.netex.containers import __CellContainer__

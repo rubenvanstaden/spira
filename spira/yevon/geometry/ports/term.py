@@ -1,4 +1,4 @@
-import spira
+import spira.all as spira
 import pyclipper
 import numpy as np
 
@@ -189,7 +189,7 @@ class EdgeTerm(Term):
             self.width, self.orientation
         )
 
-    def reflect(self):
+    def __reflect__(self):
         """ Do not reflect EdgeTerms when reference is reflected. """
         self.midpoint = [self.midpoint[0], -self.midpoint[1]]
         self.orientation = 180 - self.orientation

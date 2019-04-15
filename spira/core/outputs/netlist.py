@@ -1,6 +1,6 @@
 import os
 import gdspy
-import spira
+import spira.all as spira
 import matplotlib.pyplot as plt
 import plotly.graph_objs as go
 import plotly.offline as offline
@@ -119,7 +119,7 @@ class PlotlyGraph(object):
         return edges
 
     def _create_nodes(self, G, labeltext):
-        import spira
+        import spira.all as spira
         from spira.yevon.process.processlayer import __ProcessLayer__
         from spira.yevon.gdsii.polygon import __Polygon__
 

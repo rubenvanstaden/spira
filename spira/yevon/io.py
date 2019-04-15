@@ -1,5 +1,5 @@
 import os
-import spira
+import spira.all as spira
 import gdspy
 import pathlib
 import numpy as np

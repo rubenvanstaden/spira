@@ -1,4 +1,4 @@
-import spira
+import spira.all as spira
 import numpy as np
 from copy import deepcopy
 from spira.yevon.geometry.shapes.basic import BoxShape
