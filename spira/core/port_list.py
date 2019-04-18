@@ -9,7 +9,6 @@ from spira.core.param.restrictions import RestrictType
 # class PortList(TypedList, Transformable):
 class PortList(TypedList):
 
-    # port_angle_decision = param.FloatField(default = 90.0)
     port_angle_decision = FloatField(default = 90.0)
 
     def __repr__(self):

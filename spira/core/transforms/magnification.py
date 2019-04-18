@@ -41,6 +41,5 @@ class __Magnification__(object):
         return self.transform_copy(Magnification(magnification, center))
 
 
-print('Magnification MIXIN')
 Transformable.mixin(__Magnification__)
 

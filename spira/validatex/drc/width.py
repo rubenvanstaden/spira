@@ -33,7 +33,6 @@ class Width(__SingleLayerDesignRule__):
                 pct = 100*(1 - (clip_area-overlap_area)/clip_area)
                 if pct < 50:
                     return False
-                print(pct)
         return True
 
 

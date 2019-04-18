@@ -37,18 +37,17 @@ class Transformable(__Transformable__):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-    # def __init__(self, transformation=None, **kwargs):
-    #     if (not 'transformation' in kwargs) or (transformation != None):
-    #         kwargs['transformation'] = transformation
-    #     super().__init__(self, **kwargs)
-
     def transform(self, transformation=None):
-        if isinstance(transformation, self.__transform_type__):
-            # self.transformation = self.transformation + transformation
+
+        # print(type(self))
+        # print(self)
+
+        # if isinstance(transformation, self.__transform_type__):
+        if issubclass(type(transformation), self.__transform_type__):
             if self.transformation is None:
                 self.transformation = transformation
             else:
-                self.transformation += transformation
+                self.transformation = self.transformation + transformation
         elif transformation is None:
             return
         else:

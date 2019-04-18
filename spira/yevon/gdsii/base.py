@@ -19,16 +19,10 @@ class __Elemental__(Transformable, FieldInitializer, metaclass=MetaElemental):
     def set_node_id(self, value):
         self.__id__ = value
 
-    # node_id = param.FunctionField(get_node_id, set_node_id)
     node_id = FunctionField(get_node_id, set_node_id)
-
-    # def __init__(self, transformation=None, **kwargs):
-    #     super().__init__(self, transformation=transformation, **kwargs)
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        # Transformable.__init__(self, **kwargs)
-        # FieldInitializer.__init__(self, **kwargs)
 
     def flatten(self):
         return [self]
@@ -62,7 +56,6 @@ class __Elemental__(Transformable, FieldInitializer, metaclass=MetaElemental):
 
 class __Group__(FieldInitializer):
 
-    # elementals = param.ElementalListField(fdef_name='create_elementals', doc='List of elementals to be added to the cell instance.')
     elementals = ElementalListField(fdef_name='create_elementals', doc='List of elementals to be added to the cell instance.')
 
     def create_elementals(self, elems):

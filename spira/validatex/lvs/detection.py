@@ -46,7 +46,6 @@ def circuit_detector(cell):
         if not issubclass(type(C), Device):
             if ('Metal' not in C.name) and ('Native' not in C.name):
                 D = Circuit(cell=C, level=2)
-                print(D)
                 c2dmap.update({C: D})
         else:
             c2dmap.update({C: C})

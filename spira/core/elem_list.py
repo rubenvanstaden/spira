@@ -79,11 +79,15 @@ class __ElementList__(TypedList, ElementFilterMixin):
         return self.__repr__()
 
     def __getitem__(self, value):
+        from spira.yevon.gdsii.cell import Cell
+        from spira.yevon.gdsii.polygon import Polygon
         r_val = None
         if isinstance(value, str):
-            for e in self.cells:
-                if e.alias == value:
-                    r_val = e
+            # for e in self.cells:
+            for e in self._list:
+                if issubclass(type(e), (Cell, Polygon)):
+                    if e.alias == value:
+                        r_val = e
         else:
             r_val = self._list[value]
         if r_val is None:
@@ -120,7 +124,6 @@ class ElementList(__ElementList__):
     def dependencies(self):
         import spira.all as spira
         from spira.yevon.gdsii.cell_list import CellList
-        # from spira import pc
         from spira.yevon import process as pc
         from spira.yevon.process.processlayer import ProcessLayer
         cells = CellList()
@@ -163,12 +166,12 @@ class ElementList(__ElementList__):
             el += e.flat_copy(level)
         return el
 
-    def commit_to_gdspy(self, cell):
+    def commit_to_gdspy(self, cell, transformation=None):
         for e in self._list:
             if isinstance(e, ElementList):
-                e.commit_to_gdspy(cell=cell)
+                e.commit_to_gdspy(cell=cell, transformation=transformation)
             else:
-                e.commit_to_gdspy(cell=cell)
+                e.commit_to_gdspy(cell=cell, transformation=transformation)
         return self
 
     # def flat_copy(self, level=-1):

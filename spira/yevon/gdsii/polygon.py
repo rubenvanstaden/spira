@@ -7,11 +7,12 @@ from spira.yevon import utils
 from copy import copy, deepcopy
 from spira.yevon.visualization import color
 from spira.yevon.gdsii.base import __Elemental__
-from spira.yevon.utils import *
+from spira.yevon import utils
 from spira.yevon.properties.polygon import PolygonProperties
 from spira.yevon.layer import LayerField
 from spira.core.param.variables import *
 from spira.yevon.visualization.color import ColorField
+from spira.core.descriptor import DataFieldDescriptor, FunctionField, DataField
 
 
 __all__ = ['Polygon']
@@ -115,9 +116,11 @@ class PolygonAbstract(__Polygon__):
                 return False
         return True
 
-    def commit_to_gdspy(self, cell=None):
-        if self.transformation is not None:
-            self.transform(self.transformation)
+    def commit_to_gdspy(self, cell=None, transformation=None):
+        # if self.transformation is not None:
+        #     self.transform(self.transformation)
+        # if transformation is not None:
+        #     self.transform(transformation)
         if self.__repr__() not in list(PolygonAbstract.__committed__.keys()):
             P = gdspy.PolygonSet(
                 polygons=deepcopy(self.shape.points),
@@ -140,15 +143,15 @@ class PolygonAbstract(__Polygon__):
         E.transform_copy(self.transformation)
         return E
 
-    def __rotate__(self, angle=45, center=(0,0)):
-        super().rotate(angle=(angle-self.direction)*np.pi/180, center=center)
-        self.shape.points = self.polygons
-        return self
-
     def __reflect__(self, p1=(0,0), p2=(1,0), angle=None):
         for n, points in enumerate(self.shape.points):
             self.shape.points[n] = utils.reflect_algorithm(points, p1, p2)
         self.polygons = self.shape.points
+        return self
+
+    def __rotate__(self, angle=45, center=(0,0)):
+        super().rotate(angle=(angle-self.direction)*np.pi/180, center=center)
+        self.shape.points = self.polygons
         return self
 
     def __translate__(self, dx, dy):
@@ -219,6 +222,16 @@ class Polygon(PolygonAbstract):
 
     color = ColorField(default=color.COLOR_BLUE_VIOLET)
 
+    def get_alias(self):
+        if not hasattr(self, '__alias__'):
+            self.__alias__ = self.gds_layer.name
+        return self.__alias__
+
+    def set_alias(self, value):
+        self.__alias__ = value
+
+    alias = FunctionField(get_alias, set_alias, doc='Functions to generate an alias for cell name.')
+
     def __init__(self, shape, **kwargs):
         from spira.yevon.geometry.shapes.shape import __Shape__
         from spira.yevon.geometry.shapes.shape import Shape
@@ -248,62 +261,6 @@ class Polygon(PolygonAbstract):
 
     def __str__(self):
         return self.__repr__()
-
-    # def apply_transformations(self, transformation=None):
-    #     if transformation is None:
-    #         t = self.transformation
-    #     else:
-    #         t = transformation
-
-    #     if t is not None:
-    #         if hasattr(t, '__subtransforms__'):
-    #             for T in t.__subtransforms__:
-    #                 if T.reflection is True:
-    #                     self.__reflect__()
-    #                 if T.rotation is not None:
-    #                     self.__rotate__(angle=T.rotation)
-    #                 if len(T.midpoint) != 0:
-    #                     self.translate(dx=T.midpoint[0], dy=T.midpoint[1])
-    #         else:
-    #             T = t
-    #             if T.reflection is True:
-    #                 self.reflect()
-    #             if T.rotation is not None:
-    #                 self.rotate(angle=T.rotation)
-    #             if len(T.midpoint) != 0:
-    #                 self.translate(dx=T.midpoint[0], dy=T.midpoint[1])
-    #     return self
-        
-
-    # def transform(self, transformation=None):
-    #     if transformation is None:
-    #         t = self.transformation
-    #     else:
-    #         t = transformation
-
-    #     if t is not None:
-    #         if hasattr(t, '__subtransforms__'):
-    #             for T in t.__subtransforms__:
-    #                 if T.reflection is True:
-    #                     self.reflect()
-    #                 if T.rotation is not None:
-    #                     self.rotate(angle=T.rotation)
-    #                 if len(T.midpoint) != 0:
-    #                     self.translate(dx=T.midpoint[0], dy=T.midpoint[1])
-    #         else:
-    #             T = t
-    #             if T.reflection is True:
-    #                 self.reflect()
-    #             if T.rotation is not None:
-    #                 self.rotate(angle=T.rotation)
-    #             if len(T.midpoint) != 0:
-    #                 self.translate(dx=T.midpoint[0], dy=T.midpoint[1])
-    #     return self
-
-    # def transform_copy(self, transformation):
-    #     T = deepcopy(self)
-    #     T.transform(transformation)
-    #     return T
 
     def expand_transform(self):
         self.transform(self.transformation)

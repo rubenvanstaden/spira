@@ -38,8 +38,7 @@ class PortAbstract(__Port__):
 
     name = StringField()
     midpoint = CoordField()
-    orientation = NumberField(default=0.0)
-    reflection = BoolField(default=False)
+    orientation = NumberField(default=0)
 
     parent = DataField()
     locked = BoolField(default=True)
@@ -63,19 +62,22 @@ class PortAbstract(__Port__):
     def encloses(self, polygon):
         return pyclipper.PointInPolygon(self.midpoint, polygon) != 0
 
+    def transform(self, transformation):
+        transformation.apply_to_object(self)
+        return self
+
     def __reflect__(self):
         """ Reflect around the x-axis. """
         self.midpoint = [self.midpoint[0], -self.midpoint[1]]
         self.orientation = -self.orientation
         self.orientation = np.mod(self.orientation, 360)
-        self.reflection = True
+        # self.reflection = True
         return self
 
     def __rotate__(self, angle=45, center=(0,0)):
         """ Rotate port around the center with angle. """
         self.orientation += angle
         self.orientation = np.mod(self.orientation, 360)
-        # self.midpoint = self.__rotate__(self.midpoint, angle=angle, center=center)
         self.midpoint = utils.rotate_algorithm(self.midpoint, angle=angle, center=center)
         return self
 
@@ -117,37 +119,6 @@ class PortAbstract(__Port__):
     @property
     def key(self):
         return (self.name, self.gds_layer.number, self.midpoint[0], self.midpoint[1])
-
-    # def transform(self, transformation=None):
-    #     if transformation is None:
-    #         t = self.transformation
-    #     else:
-    #         t = transformation
-
-    #     if t is not None:
-    #         if hasattr(t, '__subtransform__'):
-    #             for T in t.__subtransforms__:
-    #                 if T.reflection is True:
-    #                     self.reflect()
-    #                 if T.rotation is not None:
-    #                     self.rotate(angle=T.rotation)
-    #                 if len(T.midpoint) != 0:
-    #                     self.translate(dx=T.midpoint[0], dy=T.midpoint[1])
-    #         else:
-    #             T = t
-    #             if T.reflection is True:
-    #                 self.reflect()
-    #             if T.rotation is not None:
-    #                 self.rotate(angle=T.rotation)
-    #             if len(T.midpoint) != 0:
-    #                 self.translate(dx=T.midpoint[0], dy=T.midpoint[1])
-
-    #     return self
-
-    # def transform_copy(self, transformation):
-    #     T = deepcopy(self)
-    #     T.transform(transformation)
-    #     return T
 
 
 class Port(PortAbstract):
@@ -196,17 +167,6 @@ class Port(PortAbstract):
         ply = spira.Polygon(shape=shape, gds_layer=layer)
         ply.move(midpoint=ply.center, destination=self.midpoint)
         return ply
-
-    def _copy(self):
-        new_port = Port(
-            parent=self.parent,
-            name=self.name,
-            midpoint=deepcopy(self.midpoint),
-            gds_layer=deepcopy(self.gds_layer),
-            orientation=self.orientation,
-            color=self.color
-        )
-        return new_port
 
 
 def PortField(midpoint=[0, 0], **kwargs):

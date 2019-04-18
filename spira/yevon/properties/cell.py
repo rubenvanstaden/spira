@@ -38,10 +38,18 @@ class CellProperties(__Group__, __GeometryProperties__):
         for e in c.elementals.flat_elems():
             G = c2dmap[c]
             if isinstance(e, spira.SRef):
-                print(e.rotation)
+                if e.transformation is not None:
+                    e = e.transformation.apply_to_object(e)
+                # print(e.translation)
+                # if e.translation != 0:
+                #     midpoint = np.array(e.midpoint) + np.array(e.translation)
+                # else:
+                #     midpoint = e.midpoint
+                # print(midpoint)
                 G.add(
                     gdspy.CellReference(
                         ref_cell=c2dmap[e.ref],
+                        # origin=midpoint,
                         origin=e.midpoint,
                         rotation=e.rotation,
                         magnification=e.magnification,
@@ -71,22 +79,4 @@ class CellProperties(__Group__, __GeometryProperties__):
             bbox = ((0,0),(0,0))
         return np.array(bbox)
 
-    @property
-    def terms(self):
-        from spira.yevon.geometry.ports.term import Term
-        from spira.core.elem_list import ElementList
-        terms = ElementList()
-        for p in self.ports:
-            if isinstance(p, Term):
-                terms += p
-        return terms
-
-    @property
-    def term_ports(self):
-        from spira.yevon.geometry.ports.term import Term
-        terms = {}
-        for p in self.ports:
-            if isinstance(p, Term):
-                terms[p.name] = p
-        return terms
 

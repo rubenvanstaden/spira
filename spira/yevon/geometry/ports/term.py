@@ -32,7 +32,6 @@ class Term(PortAbstract):
     arrowlayer = LayerField(name='Arrow', number=77)
     color = ColorField(default=color.COLOR_GRAY)
 
-    # connections = param.ElementalListField()
     connections = ListField(default=[])
 
     local_connect = StringField()
@@ -40,13 +39,11 @@ class Term(PortAbstract):
 
     width = NumberField(default=2*1e6)
 
-    layer1 = LayerField()
-    layer2 = LayerField()
+    # layer1 = LayerField()
+    # layer2 = LayerField()
 
-    is_edge = BoolField(default=False)
-
-    port1 = DataField(fdef_name='create_port1')
-    port2 = DataField(fdef_name='create_port2')
+    # port1 = DataField(fdef_name='create_port1')
+    # port2 = DataField(fdef_name='create_port2')
 
     def get_length(self):
         if not hasattr(self, '__length__'):
@@ -71,22 +68,25 @@ class Term(PortAbstract):
             self.elementals = elementals
 
     def __repr__(self):
-        return ("[SPiRA: Term] (name {}, lock {}, number {}, midpoint {}, " +
-            "width {}, orientation {}, length {}, edgelayer {}, arrowlayer {})").format(
-                self.name, self.locked, self.gds_layer.number, self.midpoint, self.width, 
-                self.orientation, self.length, self.edgelayer, self.arrowlayer
-        )
+        return ("[SPiRA: Term] (name {}, midpoint {})").format(self.name, self.midpoint)
 
     def __str__(self):
         return self.__repr__()
 
-    def create_port1(self):
-        port = spira.Port(name='P1', midpoint=self.midpoint, gds_layer=self.layer1)
-        return port
+    # def __repr__(self):
+    #     return ("[SPiRA: Term] (name {}, lock {}, number {}, midpoint {}, " +
+    #         "width {}, orientation {}, length {}, edgelayer {}, arrowlayer {})").format(
+    #             self.name, self.locked, self.gds_layer.number, self.midpoint, self.width,
+    #             self.orientation, self.length, self.edgelayer, self.arrowlayer
+    #     )
 
-    def create_port2(self):
-        port = spira.Port(name='P2', midpoint=self.midpoint, gds_layer=self.layer2)
-        return port
+    # def create_port1(self):
+    #     port = spira.Port(name='P1', midpoint=self.midpoint, gds_layer=self.layer1)
+    #     return port
+
+    # def create_port2(self):
+    #     port = spira.Port(name='P2', midpoint=self.midpoint, gds_layer=self.layer2)
+    #     return port
 
     def encloses(self, points):
         if pyclipper.PointInPolygon(self.endpoints[0], points) != 0:
@@ -115,28 +115,30 @@ class Term(PortAbstract):
 
     @property
     def edge(self):
-        from spira import shapes
+        from spira.yevon.geometry import shapes
         dx = self.length
         dy = self.width - dx
-        # dy = self.width
         rect_shape = shapes.RectangleShape(p1=[0, 0], p2=[dx, dy])
-        ply = spira.Polygon(shape=rect_shape, gds_layer=self.edgelayer, direction=90)
-        if self.reflection:
-            ply.reflect()
-        ply.rotate(angle=self.orientation)
-        ply.move(midpoint=ply.center, destination=self.midpoint)
+        tf = spira.Translation(self.midpoint) + spira.Rotation(self.orientation)
+        ply = spira.Polygon(shape=rect_shape, gds_layer=self.edgelayer, direction=90, transformation=tf)
+        # ply.center = (110*1e6,0)
+        # if self.reflection:
+        #     ply.reflect()
+        # ply.rotate(angle=self.orientation)
+        # ply.move(midpoint=ply.center, destination=self.midpoint)
         return ply
 
     @property
     def arrow(self):
-        from spira import shapes
+        from spira.yevon.geometry import shapes
         arrow_shape = shapes.ArrowShape(a=self.length, b=self.length/2, c=self.length*2)
         arrow_shape.apply_merge
-        ply = spira.Polygon(shape=arrow_shape, gds_layer=self.arrowlayer)
-        if self.reflection:
-            ply.reflect()
-        ply.rotate(angle=self.orientation)
-        ply.move(midpoint=ply.center, destination=self.midpoint)
+        tf = spira.Translation(self.midpoint) + spira.Rotation(self.orientation)
+        ply = spira.Polygon(shape=arrow_shape, gds_layer=self.arrowlayer, transformation=tf)
+        # if self.reflection:
+        #     ply.reflect()
+        # ply.rotate(angle=self.orientation)
+        # ply.move(midpoint=ply.center, destination=self.midpoint)
         return ply
 
     def commit_to_gdspy(self, cell):
@@ -150,25 +152,6 @@ class Term(PortAbstract):
             p.edge.commit_to_gdspy(cell=cell)
             p.arrow.commit_to_gdspy(cell=cell)
             p.label.commit_to_gdspy(cell=cell)
-
-    def _copy(self):
-        new_port = Term(
-            parent=self.parent,
-            name=self.name,
-            midpoint=deepcopy(self.midpoint),
-            orientation=deepcopy(self.orientation),
-            reflection=self.reflection,
-            width=deepcopy(self.width),
-            length=deepcopy(self.length),
-            gds_layer=deepcopy(self.gds_layer),
-            edgelayer=deepcopy(self.edgelayer),
-            arrowlayer=deepcopy(self.arrowlayer),
-            local_connect=self.local_connect,
-            external_connect=self.external_connect,
-            color=self.color,
-            is_edge=self.is_edge
-        )
-        return new_port
 
 
 class EdgeTerm(Term):

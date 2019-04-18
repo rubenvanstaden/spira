@@ -12,12 +12,12 @@ class Reflection(GenericTransform):
 
     def apply_to_object(self, item):
         if self.reflection is True:
-            item = item.__reflection__(p1=(0,0), p2=(1,0))
+            item = item.__reflect__(p1=(0,0), p2=(1,0))
         else:
             item = self
         # item = item.__translate__(self)
         return item
-        
+
 
 class __ReflectionMixin__(object):
 

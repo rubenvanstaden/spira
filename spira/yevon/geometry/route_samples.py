@@ -1,5 +1,5 @@
 import spira.all as spira
-from spira.core import param
+# from spira.core import param
 from spira.yevon.geometry.route.routing import Route
 from spira.yevon.geometry.route.route_shaper import *
 
@@ -196,7 +196,7 @@ class Test_Manhattan_180_SimilarAngles(spira.Cell):
 
     # FIXME!
     # angle = param.IntegerField(default=0)
-    angle = param.IntegerField(default=180)
+    angle = IntegerField(default=180)
 
     def test_q1_parallel(self):
         p1 = spira.Term(name='P1', midpoint=(0,0), orientation=self.angle, width=2*1e6)

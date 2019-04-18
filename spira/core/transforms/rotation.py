@@ -16,7 +16,7 @@ class Rotation(GenericTransform):
         return Rotation(rotation=-self.rotation, center=self.center)
 
     def apply_to_object(self, item):
-        item = item.__rotate__(rotation=self.rotation, center=self.center)
+        item = item.__rotate__(angle=self.rotation, center=self.center)
         return item
 
 

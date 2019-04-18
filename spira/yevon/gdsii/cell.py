@@ -42,7 +42,7 @@ class __Cell__(FieldInitializer, metaclass=MetaCell):
         self.__id__ = value
 
     node_id = FunctionField(get_node_id, set_node_id, doc='Unique elemental ID.')
-    
+
     def __add__(self, other):
         from spira.yevon.geometry.ports.port import __Port__
         if other is None:
@@ -65,10 +65,6 @@ class CellAbstract(gdspy.Cell, __Cell__):
         self.elementals = self.elementals.flatten()
         return self.elementals
 
-    def transform(self, transformation=None):
-        self.elementals.transform(transformation)
-        return self
-
     def dependencies(self):
         deps = self.elementals.dependencies()
         deps += self
@@ -78,22 +74,15 @@ class CellAbstract(gdspy.Cell, __Cell__):
     #     self.elementals = self.elementals.flat_copy(level)
     #     return self.elementals
 
-    def commit_to_gdspy(self):
+    def commit_to_gdspy(self, transformation=None):
         from spira.yevon.gdsii.sref import SRef
         cell = gdspy.Cell(self.name, exclude_from_current=True)
         for e in self.elementals:
             if isinstance(e, SRef):
-                e.ref.commit_to_gdspy()
+                e.ref.commit_to_gdspy(e.transformation)
             else:
-                e.commit_to_gdspy(cell=cell)
+                e.commit_to_gdspy(cell=cell, transformation=transformation)
         return cell
-
-    def __translate__(self, dx, dy):
-        for e in self.elementals:
-            e.__translate__(dx=dx, dy=dy)
-        for p in self.ports:
-            p.__translate__(dx=dx, dy=dy)
-        return self
 
     def move(self, midpoint=(0,0), destination=None, axis=None):
         from spira import pc
@@ -105,20 +94,24 @@ class CellAbstract(gdspy.Cell, __Cell__):
             p.move(midpoint=p.midpoint, destination=mc)
         return self
 
+    def __translate__(self, dx, dy):
+        for e in self.elementals:
+            e.__translate__(dx=dx, dy=dy)
+        for p in self.ports:
+            p.__translate__(dx=dx, dy=dy)
+        return self
+
     def __reflect__(self, p1=(0,0), p2=(1,0)):
-        """ Reflects the cell around the line [p1, p2]. """
         for e in self.elementals:
             if not issubclass(type(e), LabelAbstract):
                 e.__reflect__(p1, p2)
         for p in self.ports:
-            # p.midpoint = self.__reflect__(p.midpoint, p1, p2)
             p.midpoint = utils.reflect_algorithm(p.midpoint, p1, p2)
             phi = np.arctan2(p2[1]-p1[1], p2[0]-p1[0])*180 / np.pi
             p.orientation = 2*phi - p.orientation
         return self
 
     def __rotate__(self, angle=45, center=(0,0)):
-        """ Rotates the cell with angle around a center. """
         from spira import pc
         if angle == 0:
             return self
@@ -132,7 +125,6 @@ class CellAbstract(gdspy.Cell, __Cell__):
         ports = self.ports
         self.ports = PortList()
         for p in ports:
-            # p.midpoint = self.__rotate__(p.midpoint, angle, center)
             p.midpoint = utils.rotate_algorithm(p.midpoint, angle, center)
             p.orientation = np.mod(p.orientation + angle, 360)
             self.ports += p
@@ -153,7 +145,7 @@ class CellAbstract(gdspy.Cell, __Cell__):
 
                 ref_ports_transformed = []
                 for rp in ref_ports:
-                    pt = rp.transform_copy(r.get_transformation)
+                    pt = rp.transform_copy(r.transformation)
                     ref_ports_transformed.append(pt)
                 port_list += ref_ports_transformed
 
@@ -164,11 +156,6 @@ class Cell(CellAbstract):
     """ A Cell encapsulates a set of elementals that
     describes the layout being generated. """
 
-    # um = param.NumberField(default=1e6)
-    # name = param.DataField(fdef_name='create_name', doc='Name of the cell instance.')
-    # routes = param.ElementalListField(fdef_name='create_routes')
-    # color = param.ColorField(default=color.COLOR_DARK_SLATE_GREY, doc='Color that a default cell will represent in a netlist.')
-    
     um = NumberField(default=1e6)
     name = DataField(fdef_name='create_name', doc='Name of the cell instance.')
     routes = ElementalListField(fdef_name='create_routes')
@@ -228,6 +215,45 @@ class Cell(CellAbstract):
 
     def __str__(self):
         return self.__repr__()
+        
+    def transform(self, transformation=None):
+        self.elementals.transform(transformation)
+        return self
+
+    def expand_transform(self):
+        for S in self.elementals.sref:
+            S.expand_transform()
+            S.ref.expand_transform()
+        return self
+
+    @property
+    def alias_cells(self):
+        childs = {}
+        for c in self.dependencies():
+            childs[c.alias] = c
+        return childs
+
+    @property
+    def alias_elems(self):
+        elems = {}
+        for e in self.elementals.polygons:
+            elems[e.alias] = e
+        return elems
+
+    def __getitem__(self, key):
+        from spira.yevon.gdsii.sref import SRef
+        from spira.yevon.gdsii.polygon import Polygon
+        keys = key.split(':')
+
+        item = None
+        if keys[0] in self.alias_cells:
+            item = self.alias_cells[keys[0]]
+        elif keys[0] in self.alias_elems:
+            item = self.alias_elems[keys[0]]
+        else:
+            raise ValueError('Alias {} key not found!'.format(keys[0]))
+            
+        return item
 
 
 class Connector(Cell):

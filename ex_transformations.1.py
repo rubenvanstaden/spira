@@ -2,6 +2,7 @@
 import spira.all as spira
 # from spira.all import *
 from spira.yevon.geometry import shapes
+from spira.yevon.geometry.coord import Coord
 
 
 class A(spira.Cell):
@@ -52,19 +53,19 @@ b = B()
 c = C()
 d = D()
 
-# b += spira.SRef(d)
+# tf = spira.GenericTransform(translation=Coord(-10*1e6, 0), rotation=45)
+# tf = spira.GenericTransform(translation=Coord(-10*1e6, 0), rotation=45, reflection=True)
+# tf = spira.Rotation(30) + spira.Translation((30*1e6, 0)) + spira.Reflection(reflection=True)
+# tf = spira.Rotation(30) + spira.Translation((30*1e6, 0))
 
-# a += spira.SRef(b, midpoint=(5*1e6, 10*1e6))
-
-tf = spira.GenericTransform(translation=(-10*1e6, 0), rotation=90, reflection=True)
 print(tf)
+print(type(tf))
 
 S = spira.SRef(b, transformation=tf)
 # S._rotate(45)
-S = S.transformation.apply_to_object(S)
 # S._translate((10*1e6, 0))
+S = S.transformation.apply_to_object(S)
 a += S
-# a += spira.SRef(c)
 
 print('\n--- Transformation ---')
 print(a.transformation)

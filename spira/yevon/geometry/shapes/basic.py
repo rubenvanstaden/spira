@@ -81,11 +81,11 @@ class CircleShape(Shape):
         return points
 
 
-class ConvexPolygon(Shape):
+class ConvexShape(Shape):
 
     radius = FloatField(default=1.0*1e6)
     num_sides = IntegerField(default=6)
-    
+
     def create_points(self, pts):
         if self.radius == 0.0:
             pts.append(self.center)

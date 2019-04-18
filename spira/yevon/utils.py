@@ -4,6 +4,7 @@ import math
 import pyclipper
 import numpy as np
 import networkx as nx
+from numpy.linalg import norm
 
 from spira.settings import SCALE_DOWN, SCALE_UP, OFFSET
 
@@ -24,6 +25,7 @@ def reflect_algorithm(points, p1=(0,0), p2=(1,0)):
 
 
 def rotate_algorithm(points, angle=45, center=(0,0)):
+    points = list(points)
     angle = angle*np.pi/180
     ca = np.cos(angle)
     sa = np.sin(angle)
@@ -38,7 +40,7 @@ def rotate_algorithm(points, angle=45, center=(0,0)):
     return pts
 
 
-def move_algorithm(self, midpoint=(0,0), destination=None, axis=None):
+def move_algorithm(midpoint=(0,0), destination=None, axis=None):
     """ Moves elements of the Device from the midpoint point
     to the destination. Both midpoint and destination can be
     1x2 array-like, Port, or a key corresponding to one of
