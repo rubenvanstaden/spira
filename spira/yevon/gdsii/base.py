@@ -27,7 +27,7 @@ class __Elemental__(Transformable, FieldInitializer, metaclass=MetaElemental):
     def flatten(self):
         return [self]
 
-    def commit_to_gdspy(self, cell, gdspy_commit=None):
+    def commit_to_gdspy(self, cell, transformation=None):
         return None
 
     def dependencies(self):
@@ -65,6 +65,12 @@ class __Group__(FieldInitializer):
     # def dependencies(self):
     #     return self.elementals.dependencies()
 
+    def commit_to_gdspy(self, cell, transformation=None):
+        for e in self.elementals:
+            print(e)
+            e.commit_to_gdspy(cell=cell, transformation=transformation)
+        return cell
+
     def append(self, element):
         el = self.elementals
         el.append(element)
@@ -81,8 +87,11 @@ class __Group__(FieldInitializer):
 
     def __iadd__(self, element):
         """ Add elemental and reduce the class to a simple compound elementals. """
-        if isinstance(element, list):
+        # if isinstance(element, list):
+        if isinstance(element, (list, spira.ElementList)):
             self.extend(element)
+        # elif isinstance(element, spira.ElementList):
+
         elif isinstance(element, __Elemental__):
             self.append(element)
         elif element is None:

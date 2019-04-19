@@ -9,7 +9,7 @@ from spira.yevon.geometry.route.route_shaper import RouteArcShape
 from spira.yevon.geometry.route.route_shaper import RouteSquareShape
 from spira.yevon.rdd import get_rule_deck
 
-from spira.yevon.geometry.ports.port import PortField
+from spira.yevon.geometry.ports.base import PortField
 from spira.core.param.variables import *
 from spira.yevon.layer import LayerField
 from spira.yevon.rdd.layer import PhysicalLayerField

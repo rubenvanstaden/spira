@@ -40,16 +40,9 @@ class CellProperties(__Group__, __GeometryProperties__):
             if isinstance(e, spira.SRef):
                 if e.transformation is not None:
                     e = e.transformation.apply_to_object(e)
-                # print(e.translation)
-                # if e.translation != 0:
-                #     midpoint = np.array(e.midpoint) + np.array(e.translation)
-                # else:
-                #     midpoint = e.midpoint
-                # print(midpoint)
                 G.add(
                     gdspy.CellReference(
                         ref_cell=c2dmap[e.ref],
-                        # origin=midpoint,
                         origin=e.midpoint,
                         rotation=e.rotation,
                         magnification=e.magnification,
@@ -61,7 +54,7 @@ class CellProperties(__Group__, __GeometryProperties__):
         d = self.dependencies()
         c2dmap = {}
         for c in d:
-            G = c.commit_to_gdspy()
+            G = c.commit_to_gdspy(cell=c)
             c2dmap.update({c:G})
         for c in d:
             self.__wrapper__(c, c2dmap)

@@ -122,3 +122,19 @@ class RestrictRange(__ParameterRestriction__):
         return S
 
 
+class RestrictContains(__ParameterRestriction__):
+    """ Restrict the argument to an object with contains at least one of a set of allowed values """
+
+    def __init__(self, allowed_values):
+        self.allowed_values = allowed_values
+
+    def validate(self, value, obj=None):
+        for v in self.allowed_values:
+            if v in value:
+                return True
+        return False
+
+    def __repr__(self):
+        return  "Contains Restriction: {}".format(str(self.allowed_values))
+
+

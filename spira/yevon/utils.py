@@ -47,7 +47,7 @@ def move_algorithm(midpoint=(0,0), destination=None, axis=None):
     the Ports in this device """
     # pass
 
-    from spira.yevon.geometry.ports.port import __Port__
+    from spira.yevon.geometry.ports.base import __Port__
 
     if destination is None:
         destination = midpoint
@@ -79,7 +79,6 @@ def move_algorithm(midpoint=(0,0), destination=None, axis=None):
         d = (o[0], d[1])
 
     return d, o
-
 
 
 def nodes_combine(g, algorithm):
@@ -170,7 +169,6 @@ def nodes_combine(g, algorithm):
     return g1
     
 
-# def boolean(subj, clip=None, method=None, closed=True, scale=0.00001):
 def boolean(subj, clip=None, method=None, closed=True, scale=1):
     from spira.yevon.gdsii.polygon import PolygonAbstract
 

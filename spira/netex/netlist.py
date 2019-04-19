@@ -3,7 +3,7 @@ import networkx as nx
 from spira.core import param
 from spira.yevon.geometry import shapes
 from spira.yevon.visualization import color
-from spira.yevon.geometry.ports.port import __Port__
+from spira.yevon.geometry.ports.base import __Port__
 
 
 class __NetlistSimplifier__(object):

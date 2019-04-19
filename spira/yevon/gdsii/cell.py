@@ -70,16 +70,16 @@ class CellAbstract(gdspy.Cell, __Cell__):
         deps += self
         return deps
 
-    # def flat_copy(self, level=-1):
-    #     self.elementals = self.elementals.flat_copy(level)
-    #     return self.elementals
+    def flat_copy(self, level=-1):
+        self.elementals = self.elementals.flat_copy(level)
+        return self.elementals
 
-    def commit_to_gdspy(self, transformation=None):
+    def commit_to_gdspy(self, cell, transformation=None):
         from spira.yevon.gdsii.sref import SRef
         cell = gdspy.Cell(self.name, exclude_from_current=True)
         for e in self.elementals:
             if isinstance(e, SRef):
-                e.ref.commit_to_gdspy(e.transformation)
+                e.ref.commit_to_gdspy(cell=e.ref, transformation=e.transformation)
             else:
                 e.commit_to_gdspy(cell=cell, transformation=transformation)
         return cell
@@ -112,7 +112,8 @@ class CellAbstract(gdspy.Cell, __Cell__):
         return self
 
     def __rotate__(self, angle=45, center=(0,0)):
-        from spira import pc
+        from spira.yevon import process as pc
+        from spira.yevon.gdsii.polygon import PolygonAbstract
         if angle == 0:
             return self
         for e in self.elementals:
@@ -133,6 +134,7 @@ class CellAbstract(gdspy.Cell, __Cell__):
     def get_ports(self, level=None):
         """ Returns copies of all the ports of the Device. """
         port_list = [deepcopy(p) for p in self.ports]
+        print(port_list)
         if level is None or level > 0:
             for r in self.elementals.sref:
 
@@ -215,9 +217,10 @@ class Cell(CellAbstract):
 
     def __str__(self):
         return self.__repr__()
-        
+
     def transform(self, transformation=None):
         self.elementals.transform(transformation)
+        self.ports.transform(transformation)
         return self
 
     def expand_transform(self):
@@ -252,7 +255,7 @@ class Cell(CellAbstract):
             item = self.alias_elems[keys[0]]
         else:
             raise ValueError('Alias {} key not found!'.format(keys[0]))
-            
+
         return item
 
 

@@ -5,7 +5,7 @@ import numpy as np
 import spira.all as spira
 from copy import copy, deepcopy
 
-from spira.yevon.geometry.ports.port import PortAbstract, __Port__
+from spira.yevon.geometry.ports.base import __Port__
 from spira.core import param
 from spira.yevon.gdsii.base import __Elemental__
 from spira.yevon.geometry.coord import CoordField, Coord

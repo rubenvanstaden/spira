@@ -1,4 +1,5 @@
 import numpy as np
+import networkx as nx
 from spira.core.param.restrictions import RestrictType, RestrictRange
 from spira.core.descriptor import DataFieldDescriptor
 
@@ -13,6 +14,7 @@ DICTIONARY = RestrictType(dict)
 LIST = RestrictType(list)
 TUPLE = RestrictType(tuple)
 NUMPY_ARRAY = RestrictType(np.ndarray)
+GRAPH = RestrictType(nx.Graph)
 
 
 def NumberField(restriction=None, **kwargs):
@@ -36,52 +38,60 @@ def IntegerField(restriction=None, **kwargs):
     return DataFieldDescriptor(restriction=INTEGER, **kwargs)
 
 
-def FloatField(**kwargs):
+def FloatField(restriction=None, **kwargs):
     from .variables import FLOAT
     if 'default' not in kwargs:
         kwargs['default'] = 0.0
     return DataFieldDescriptor(restriction=FLOAT, **kwargs)
 
 
-def StringField(**kwargs):
+def StringField(restriction=None, **kwargs):
     from .variables import STRING
     if 'default' not in kwargs:
         kwargs['default'] = ''
-    return DataFieldDescriptor(restriction=STRING, **kwargs)
+    R = STRING & restriction
+    return DataFieldDescriptor(restriction=R, **kwargs)
 
 
-def BoolField(**kwargs):
+def BoolField(restriction=None, **kwargs):
     from .variables import BOOL
     if 'default' not in kwargs:
         kwargs['default'] = False
     return DataFieldDescriptor(restriction=BOOL, **kwargs)
 
 
-def ListField(**kwargs):
+def ListField(restriction=None, **kwargs):
     from .variables import LIST
     if 'default' not in kwargs:
         kwargs['default'] = []
     return DataFieldDescriptor(restriction=LIST, **kwargs)
 
 
-def TupleField(**kwargs):
+def TupleField(restriction=None, **kwargs):
     from .variables import TUPLE
     if 'default' not in kwargs:
         kwargs['default'] = []
     return DataFieldDescriptor(restriction=TUPLE, **kwargs)
 
 
-def DictField(**kwargs):
+def DictField(restriction=None, **kwargs):
     from .variables import DICTIONARY
     if 'default' not in kwargs:
         kwargs['default'] = {}
     return DataFieldDescriptor(restriction=DICTIONARY, **kwargs)
 
 
-def NumpyArrayField(**kwargs):
+def NumpyArrayField(restriction=None, **kwargs):
     from .variables import NUMPY_ARRAY
     if 'default' not in kwargs:
         kwargs['default'] = np.array([])
     return DataFieldDescriptor(restriction=NUMPY_ARRAY, **kwargs)
 
+
+def GraphField(restriction=None, **kwargs):
+    from .variables import GRAPH
+    if 'default' not in kwargs:
+        kwargs['default'] = nx.Graph()
+    R = GRAPH
+    return DataFieldDescriptor(restriction=R, **kwargs)
 

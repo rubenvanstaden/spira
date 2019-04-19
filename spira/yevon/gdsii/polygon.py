@@ -56,7 +56,7 @@ class __Polygon__(gdspy.PolygonSet, __Elemental__):
         return self
 
     def __sub__(self, other):
-        points = boolean(
+        points = utils.boolean(
             subj=self.shape.points,
             clip=other.shape.points,
             method='not'
@@ -64,7 +64,7 @@ class __Polygon__(gdspy.PolygonSet, __Elemental__):
         return points
 
     def __and__(self, other):
-        pp = boolean(
+        pp = utils.boolean(
             subj=other.shape.points,
             clip=self.shape.points,
             method='and'
@@ -75,7 +75,7 @@ class __Polygon__(gdspy.PolygonSet, __Elemental__):
             return None
 
     def __or__(self, other):
-        pp = boolean(
+        pp = utils.boolean(
             subj=other.shape.points,
             clip=self.shape.points,
             method='or'
@@ -269,9 +269,4 @@ class Polygon(PolygonAbstract):
 
 
 Polygon.mixin(PolygonProperties)
-
-
-
-
-
 

@@ -133,7 +133,7 @@ class Term(PortAbstract):
         from spira.yevon.geometry import shapes
         arrow_shape = shapes.ArrowShape(a=self.length, b=self.length/2, c=self.length*2)
         arrow_shape.apply_merge
-        tf = spira.Translation(self.midpoint) + spira.Rotation(self.orientation)
+        tf = spira.Translation(self.midpoint) + spira.Rotation(self.orientation + 90)
         ply = spira.Polygon(shape=arrow_shape, gds_layer=self.arrowlayer, transformation=tf)
         # if self.reflection:
         #     ply.reflect()
@@ -141,17 +141,18 @@ class Term(PortAbstract):
         # ply.move(midpoint=ply.center, destination=self.midpoint)
         return ply
 
-    def commit_to_gdspy(self, cell):
-        if self.__repr__() not in list(__Port__.__committed__.keys()):
-            self.edge.commit_to_gdspy(cell=cell)
-            self.arrow.commit_to_gdspy(cell=cell)
-            self.label.commit_to_gdspy(cell=cell)
-            __Port__.__committed__.update({self.__repr__(): self})
-        else:
-            p = __Port__.__committed__[self.__repr__()]
-            p.edge.commit_to_gdspy(cell=cell)
-            p.arrow.commit_to_gdspy(cell=cell)
-            p.label.commit_to_gdspy(cell=cell)
+    # def commit_to_gdspy(self, cell):
+    #     # tf = spira.Translation(self.midpoint) + spira.Rotation(self.orientation)
+    #     if self.__repr__() not in list(__Port__.__committed__.keys()):
+    #         self.edge.commit_to_gdspy(cell=cell)
+    #         self.arrow.commit_to_gdspy(cell=cell)
+    #         self.label.commit_to_gdspy(cell=cell)
+    #         __Port__.__committed__.update({self.__repr__(): self})
+    #     else:
+    #         p = __Port__.__committed__[self.__repr__()]
+    #         p.edge.commit_to_gdspy(cell=cell)
+    #         p.arrow.commit_to_gdspy(cell=cell)
+    #         p.label.commit_to_gdspy(cell=cell)
 
 
 class EdgeTerm(Term):

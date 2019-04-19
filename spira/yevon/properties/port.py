@@ -1,4 +1,3 @@
-from spira.core import param
 from spira.yevon.properties.base import __Properties__
 from spira.core.port_list import PortListField
 

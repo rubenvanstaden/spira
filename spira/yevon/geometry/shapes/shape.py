@@ -12,7 +12,7 @@ from spira.core.param.variables import *
 from spira.core.descriptor import DataFieldDescriptor, DataField
 
 
-# __all__ = ['Shape', 'ShapeField']
+# __all__ = ['Shape', 'ShapeField', 'PointArrayField']
 
 
 class PointArrayField(DataFieldDescriptor):
@@ -119,7 +119,6 @@ class __Shape__(FieldInitializer):
         polygons = pyclipper.scale_to_clipper(self.points, sc)
         points = []
         for poly in polygons:
-            # print(poly)
             if pyclipper.Orientation(poly) is False:
                 reverse_poly = pyclipper.ReversePath(poly)
                 solution = pyclipper.SimplifyPolygon(reverse_poly)

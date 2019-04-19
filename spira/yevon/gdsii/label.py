@@ -41,7 +41,7 @@ class LabelAbstract(__Label__):
     def __init__(self, position, **kwargs):
         super().__init__(position, **kwargs)
 
-    def commit_to_gdspy(self, cell=None):
+    def commit_to_gdspy(self, cell=None, transformation=None):
         if self.__repr__() not in list(LabelAbstract.__committed__.keys()):
             L = gdspy.Label(self.text,
                 deepcopy(self.position),
