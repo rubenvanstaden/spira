@@ -1,26 +1,27 @@
-import spira.all as spira 
-from spira.core import param
-from spira import shapes, pc
-from spira.netex.net import Net
 import numpy as np
 import networkx as nx
+# import spira.all as spira 
+from spira.core.param.variables import *
+from spira.yevon.visualization.color import ColorField
+
 from copy import copy, deepcopy
-from spira.netex.structure import Structure
-# from spira.yevon.gdsii.port import __Port__
-from spira.yevon.geometry.ports.port import __Port__
-from spira.netex.containers import __CellContainer__, __CircuitContainer__
+from spira.netex.net import Net
+from spira.yevon.geometry import shapes
 from spira.yevon.visualization import color
+from spira.netex.structure import Structure
+from spira.netex.containers import __CellContainer__, __CircuitContainer__
+from spira.yevon.rdd import get_rule_deck
 
 
-RDD = spira.get_rule_deck()
+RDD = get_rule_deck()
 
 
 class Device(__CircuitContainer__, Structure):
     """ A Cell encapsulates a set of elementals that
     describes the layout being generated. """
 
-    level = param.IntegerField(default=1)
-    lcar = param.FloatField(default=1.0)
+    level = IntegerField(default=1)
+    lcar = FloatField(default=1.0)
 
     def __init__(self, name=None, metals=None, contacts=None, **kwargs):
         super().__init__(name=None, **kwargs)
@@ -98,7 +99,7 @@ class Device(__CircuitContainer__, Structure):
 
 
 class Via(Device):
-    color = param.ColorField(default=color.COLOR_LIGHT_GRAY)
+    color = ColorField(default=color.COLOR_LIGHT_GRAY)
 
 
 class DeviceDRC(__CellContainer__):

@@ -13,8 +13,8 @@ ply.move(midpoint=(1*1e6, 1*1e6), destination=(0*1e6, 0*1e6))
 ply2 = spira.Polygon(shape=deepcopy(shape), gds_layer=spira.Layer(number=88))
 ply2.move(midpoint=(1*1e6, 1*1e6), destination=(10*1e6, 0*1e6))
 
-port = spira.Term(name='P1', midpoint=(1*1e6, 0*1e6), orientation=-90, pid=ply.node_id)
-port1 = spira.Term(name='P2', midpoint=(10*1e6, 0*1e6), orientation=90, pid=ply2.node_id)
+port = spira.Terminal(name='P1', midpoint=(1*1e6, 0*1e6), orientation=-90, pid=ply.node_id)
+port1 = spira.Terminal(name='P2', midpoint=(10*1e6, 0*1e6), orientation=90, pid=ply2.node_id)
 
 c0 = spira.Cell(name='ply')
 c0 += ply

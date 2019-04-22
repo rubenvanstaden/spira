@@ -283,11 +283,9 @@ class __Field__(metaclass=MetaInitializer):
 
 
 class FieldInitializer(__Field__):
-    """
-    Set the keyword arguments of the class and
+    """ Set the keyword arguments of the class and
     bind geometric property operations to the
-    object for API usage.
-    """
+    object for API usage. """
 
     __id__ = ''
 

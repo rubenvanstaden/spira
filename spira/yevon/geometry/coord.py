@@ -110,7 +110,7 @@ class Coord(object):
 
     def convert_to_array(self):
         return [self.x, self.y]
-    
+
 
 def CoordField(**kwargs):
     from spira.yevon.geometry.coord import Coord
@@ -120,4 +120,3 @@ def CoordField(**kwargs):
     return DataFieldDescriptor(restrictions=R, **kwargs)
 
 
-    

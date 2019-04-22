@@ -27,8 +27,8 @@ class __Manhattan__(Cell):
     length = NumberField(default=20*1e6)
     gds_layer = LayerField(number=13)
     ps_layer = PhysicalLayerField(default=RDD.DEF.PDEFAULT)
-    bend_type = StringField(default='rectangle')
-    # bend_type = param.StringField(default='circular')
+    # bend_type = StringField(default='rectangle')
+    bend_type = StringField(default='circular')
 
     b1 = DataField(fdef_name='create_arc_bend_1')
     b2 = DataField(fdef_name='create_arc_bend_2')
@@ -72,9 +72,8 @@ class __Manhattan__(Cell):
         route_shape.apply_merge
         R1 = RouteGeneral(route_shape=route_shape, connect_layer=self.ps_layer)
         r1 = spira.SRef(R1)
-        # r1.rotate(angle=p2.orientation-180, center=R1.port_input.midpoint)
-        r1.rotate(angle=p2.orientation+90, center=R1.port_input.midpoint)
-        # r1.rotate(angle=p2.orientation, center=R1.port_input.midpoint)
+        # r1.rotate(angle=p2.orientation+90, center=R1.port_input.midpoint)
+        # r1._rotate(rotation=p2.orientation+90, center=R1.port_input.midpoint)
         r1.move(midpoint=(0,0), destination=p1.midpoint)
         return r1
 
@@ -99,7 +98,7 @@ class __Manhattan__(Cell):
         if angle == 270:
             p2 = [-self.port2.midpoint[1], self.port2.midpoint[0]]
         return p2
-        
+
     def create_arc_bend_1(self):
         if self.bend_type == 'circular':
             rs = RouteArcShape(

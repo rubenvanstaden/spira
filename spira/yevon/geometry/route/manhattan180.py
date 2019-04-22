@@ -16,60 +16,63 @@ class RouteBase180(__Manhattan__):
 
     def create_quadrant_one(self):
 
-        self.b1.connect(port=self.b1.ports['P2'], destination=self.term_ports['T1'])
+        self.b1.connect(port=self.b1.ports['P2'], destination=self.ports['T1'])
         h = (self.p2[1]-self.p1[1])/2 - self.radius
         self.b1.move(midpoint=self.b1.ports['P2'], destination=[0, h])
 
         # self.b2.connect(port=self.b1.ports['P2'], destination=self.b2.ports['P1'])
         self.b2.connect(port=self.b2.ports['P1'], destination=self.b1.ports['P1'])
         h = (self.p2[1]-self.p1[1])/2 + self.radius
-        # self.b2.move(midpoint=self.b2.ports['P1'], destination=[self.term_ports['T2'].midpoint[0], h])
-        self.b2.move(midpoint=self.b2.ports['P2'], destination=[self.term_ports['T2'].midpoint[0], h])
+        # self.b2.move(midpoint=self.b2.ports['P1'], destination=[self.ports['T2'].midpoint[0], h])
+        self.b2.move(midpoint=self.b2.ports['P2'], destination=[self.ports['T2'].midpoint[0], h])
 
-        r1 = self.route_straight(self.b1.ports['P2'], self.term_ports['T1'])
-        r2 = self.route_straight(self.b2.ports['P2'], self.term_ports['T2'])
-        r3 = self.route_straight(self.b2.ports['P1'], self.b1.ports['P1'])
+        r1 = self.route_straight(self.b1.ports['P2'], self.ports['T1'])
+        # r2 = self.route_straight(self.b2.ports['P2'], self.ports['T2'])
+        # r3 = self.route_straight(self.b2.ports['P1'], self.b1.ports['P1'])
 
         D = spira.Cell(name='Q1')
-        D += [self.b1, self.b2, r1, r2, r3]
+        D += [self.b1, self.b2]
 
-        D += self.term_ports['T1']
-        D += self.term_ports['T2']
+        # D += [self.b1, self.b2, r1, r2, r3]
 
-        D.rotate(angle=self.port1.orientation, center=self.p1)
-        D.move(midpoint=self.term_ports['T1'], destination=self.port1)
+        # D += self.ports['T1']
+        # D += self.ports['T2']
+
+        # # D.rotate(angle=self.port1.orientation, center=self.p1)
+        # D._rotate(rotation=self.port1.orientation, center=self.p1)
+        # D.move(midpoint=self.ports['T1'], destination=self.port1)
 
         return spira.SRef(D)
 
     def create_quadrant_two(self):
 
-        self.b1.connect(port=self.b1.ports['P1'], destination=self.term_ports['T1'])
+        self.b1.connect(port=self.b1.ports['P1'], destination=self.ports['T1'])
         h = (self.p2[1]-self.p1[1])/2 - self.radius
         self.b1.move(midpoint=self.b1.ports['P1'], destination=[0, h])
 
         # self.b2.connect(port=self.b2.ports['P1'], destination=self.b1.ports['P2'])
         self.b2.connect(port=self.b2.ports['P2'], destination=self.b1.ports['P2'])
         h = (self.p2[1]-self.p1[1])/2 + self.radius
-        self.b2.move(midpoint=self.b2.ports['P1'], destination=[self.term_ports['T2'].midpoint[0], h])
+        self.b2.move(midpoint=self.b2.ports['P1'], destination=[self.ports['T2'].midpoint[0], h])
 
-        r1 = self.route_straight(self.b2.ports['P1'], self.term_ports['T2'])
-        r2 = self.route_straight(self.b1.ports['P1'], self.term_ports['T1'])
+        r1 = self.route_straight(self.b2.ports['P1'], self.ports['T2'])
+        r2 = self.route_straight(self.b1.ports['P1'], self.ports['T1'])
         r3 = self.route_straight(self.b2.ports['P2'], self.b1.ports['P2'])
 
         D = spira.Cell(name='Q2')
         D += [self.b1, self.b2, r1, r2, r3]
 
-        D += self.term_ports['T1']
-        D += self.term_ports['T2']
+        D += self.ports['T1']
+        D += self.ports['T2']
 
         D.rotate(angle=self.port1.orientation, center=self.p1)
-        D.move(midpoint=self.term_ports['T1'], destination=self.port1)
+        D.move(midpoint=self.ports['T1'], destination=self.port1)
 
         return spira.SRef(D)
 
     def create_quadrant_three(self):
 
-        self.b1.connect(port=self.b1.ports['P2'], destination=self.term_ports['T1'])
+        self.b1.connect(port=self.b1.ports['P2'], destination=self.ports['T1'])
         # h = self.p2[1] + (self.p1[1]-self.p2[1])/2 + self.radius
         h = (self.p1[1]-self.p2[1])/2 + self.radius
         self.b1.move(midpoint=self.b1.ports['P2'], destination=[0, h])
@@ -77,26 +80,26 @@ class RouteBase180(__Manhattan__):
         self.b2.connect(port=self.b2.ports['P2'], destination=self.b1.ports['P1'])
         # h = self.p2[1] + (self.p1[1]-self.p2[1])/2 - self.radius
         h = (self.p1[1]-self.p2[1])/2 - self.radius
-        self.b2.move(midpoint=self.b2.ports['P1'], destination=[self.term_ports['T2'].midpoint[0], h])
+        self.b2.move(midpoint=self.b2.ports['P1'], destination=[self.ports['T2'].midpoint[0], h])
 
-        r1 = self.route_straight(self.b2.ports['P1'], self.term_ports['T2'])
-        r2 = self.route_straight(self.b1.ports['P2'], self.term_ports['T1'])
+        r1 = self.route_straight(self.b2.ports['P1'], self.ports['T2'])
+        r2 = self.route_straight(self.b1.ports['P2'], self.ports['T1'])
         r3 = self.route_straight(self.b2.ports['P2'], self.b1.ports['P1'])
 
         D = spira.Cell(name='Q3')
         D += [self.b1, self.b2, r1, r2, r3]
 
-        D += self.term_ports['T1']
-        D += self.term_ports['T2']
+        D += self.ports['T1']
+        D += self.ports['T2']
 
         D.rotate(angle=self.port1.orientation, center=self.p1)
-        D.move(midpoint=self.term_ports['T1'], destination=self.port1)
+        D.move(midpoint=self.ports['T1'], destination=self.port1)
 
         return spira.SRef(D)
 
     def create_quadrant_four(self):
 
-        self.b1.connect(port=self.b1.ports['P1'], destination=self.term_ports['T1'])
+        self.b1.connect(port=self.b1.ports['P1'], destination=self.ports['T1'])
         # h = self.p2[1] + (self.p1[1]-self.p2[1])/2 + self.radius
         h = (self.p1[1]-self.p2[1])/2 + self.radius
         self.b1.move(midpoint=self.b1.ports['P1'], destination=[0, h])
@@ -104,20 +107,20 @@ class RouteBase180(__Manhattan__):
         self.b2.connect(port=self.b2.ports['P1'], destination=self.b1.ports['P2'])
         # h = self.p2[1] + (self.p1[1]-self.p2[1])/2 - self.radius
         h = (self.p1[1]-self.p2[1])/2 - self.radius
-        self.b2.move(midpoint=self.b2.ports['P2'], destination=[self.term_ports['T2'].midpoint[0], h])
+        self.b2.move(midpoint=self.b2.ports['P2'], destination=[self.ports['T2'].midpoint[0], h])
 
-        r1 = self.route_straight(self.b1.ports['P1'], self.term_ports['T1'])
-        r2 = self.route_straight(self.b2.ports['P2'], self.term_ports['T2'])
+        r1 = self.route_straight(self.b1.ports['P1'], self.ports['T1'])
+        r2 = self.route_straight(self.b2.ports['P2'], self.ports['T2'])
         r3 = self.route_straight(self.b2.ports['P1'], self.b1.ports['P2'])
 
         D = spira.Cell(name='Q4')
         D += [self.b1, self.b2, r1, r2, r3]
 
-        D += self.term_ports['T1']
-        D += self.term_ports['T2']
+        D += self.ports['T1']
+        D += self.ports['T2']
 
         D.rotate(angle=self.port1.orientation, center=self.p1)
-        D.move(midpoint=self.term_ports['T1'], destination=self.port1)
+        D.move(midpoint=self.ports['T1'], destination=self.port1)
 
         return spira.SRef(D)
 
@@ -143,29 +146,29 @@ class RouteParallel(__Manhattan__):
             b1, b2 = self.b1, self.b2
         h = p2[1] + self.length
         d1 = [0, h]
-        d2 = [self.term_ports['T2'].midpoint[0], h]
+        d2 = [self.ports['T2'].midpoint[0], h]
 
-        b1.connect(port=b1.ports['P2'], destination=self.term_ports['T1'])
+        b1.connect(port=b1.ports['P2'], destination=self.ports['T1'])
         b1.move(midpoint=b1.ports['P2'], destination=d1)
 
         b2.connect(port=b2.ports['P2'], destination=b1.ports['P1'])
         b2.move(midpoint=b2.ports['P1'], destination=d2)
 
-        r1 = self.route_straight(b1.ports['P2'], self.term_ports['T1'])
-        r2 = self.route_straight(b2.ports['P1'], self.term_ports['T2'])
+        r1 = self.route_straight(b1.ports['P2'], self.ports['T1'])
+        r2 = self.route_straight(b2.ports['P1'], self.ports['T2'])
         r3 = self.route_straight(b1.ports['P1'], b2.ports['P2'])
 
         D = spira.Cell(name='Parallel')
         D += [self.b1, self.b2, r1, r2, r3]
 
-        t1 = self.term_ports['T1']
-        t2 = self.term_ports['T2']
+        t1 = self.ports['T1']
+        t2 = self.ports['T2']
 
         t1.rotate(angle=self.port1.orientation)
         t2.rotate(angle=self.port1.orientation)
 
         D.rotate(angle=self.port1.orientation, center=self.p1)
-        D.move(midpoint=self.term_ports['T1'], destination=self.port1)
+        D.move(midpoint=self.ports['T1'], destination=self.port1)
 
         return spira.SRef(D)
 
@@ -183,21 +186,21 @@ class RouteParallel(__Manhattan__):
                 b1, b2 = self.b1, self.b2
             h = dy + self.length
             d1 = [0, h]
-            d2 = [self.term_ports['T2'].midpoint[0], h] 
+            d2 = [self.ports['T2'].midpoint[0], h] 
         elif self.port1.orientation == 90:
             dx = max(p1[0], p2[0])
             if p2[1] > p1[1]:
                 b1, b2 = self.b1, self.b2
             h = dx - self.length
             d1 = [h, 0]
-            d2 = [h, self.term_ports['T2'].midpoint[1]]
+            d2 = [h, self.ports['T2'].midpoint[1]]
         elif self.port1.orientation == -90:
             dx = min(p1[0], p2[0])
             if p1[1] > p2[1]:
                 b1, b2 = self.b1, self.b2
             h = dx + self.length
             d1 = [h, 0]
-            d2 = [h, self.term_ports['T2'].midpoint[1]]
+            d2 = [h, self.ports['T2'].midpoint[1]]
         elif self.port1.orientation == 180:
             dy = min(p1[1], p2[1])
             if p1[0] > p2[0]:
@@ -206,16 +209,16 @@ class RouteParallel(__Manhattan__):
                 b1, b2 = self.b2, self.b1
             h = dy - self.length
             d1 = [0, h]
-            d2 = [self.term_ports['T2'].midpoint[0], h] 
+            d2 = [self.ports['T2'].midpoint[0], h] 
 
-        b1.connect(port=b1.ports['P2'], destination=self.term_ports['T1'])
+        b1.connect(port=b1.ports['P2'], destination=self.ports['T1'])
         b1.move(midpoint=b1.ports['P2'], destination=d1)
 
         b2.connect(port=b2.ports['P1'], destination=b1.ports['P1'])
         b2.move(midpoint=b2.ports['P2'], destination=d2)
 
-        r1 = self.route_straight(b1.ports['P2'], self.term_ports['T1'])
-        r2 = self.route_straight(b2.ports['P2'], self.term_ports['T2'])
+        r1 = self.route_straight(b1.ports['P2'], self.ports['T1'])
+        r2 = self.route_straight(b2.ports['P2'], self.ports['T2'])
         r3 = self.route_straight(b1.ports['P1'], b2.ports['P1'])
 
         return [self.b1, self.b2, r1, r2, r3]
@@ -225,25 +228,25 @@ class RouteParallel(__Manhattan__):
         b1 = self.b1
         b2 = self.b2
 
-        b1.connect(port=b1.ports['P2'], destination=self.term_ports['T1'])
+        b1.connect(port=b1.ports['P2'], destination=self.ports['T1'])
         h = self.p2[1] + self.radius + self.length
         b1.move(midpoint=b1.ports['P2'], destination=[0, h])
 
         b2.connect(port=b2.ports['P1'], destination=b1.ports['P1'])
-        b2.move(midpoint=b2.ports['P2'], destination=[self.term_ports['T2'].midpoint[0], h])
+        b2.move(midpoint=b2.ports['P2'], destination=[self.ports['T2'].midpoint[0], h])
 
-        r1 = self.route_straight(b1.ports['P2'], self.term_ports['T1'])
-        r2 = self.route_straight(b2.ports['P2'], self.term_ports['T2'])
+        r1 = self.route_straight(b1.ports['P2'], self.ports['T1'])
+        r2 = self.route_straight(b2.ports['P2'], self.ports['T2'])
         r3 = self.route_straight(b1.ports['P1'], b2.ports['P1'])
 
         D = spira.Cell(name='SameQ1')
         D += [self.b1, self.b2, r1, r2, r3]
 
-        D += self.term_ports['T1']
-        D += self.term_ports['T2']
+        D += self.ports['T1']
+        D += self.ports['T2']
 
         D.rotate(angle=self.port1.orientation, center=self.p1)
-        D.move(midpoint=self.term_ports['T1'], destination=self.port1)
+        D.move(midpoint=self.ports['T1'], destination=self.port1)
 
         return spira.SRef(D)
 
@@ -252,25 +255,25 @@ class RouteParallel(__Manhattan__):
         b1 = self.b1
         b2 = self.b2
 
-        b1.connect(port=b1.ports['P1'], destination=self.term_ports['T2'])
+        b1.connect(port=b1.ports['P1'], destination=self.ports['T2'])
         h = self.p2[1] + self.radius + self.length
         b1.move(midpoint=b1.ports['P1'], destination=[0, h])
 
         b2.connect(port=b2.ports['P2'], destination=b1.ports['P2'])
-        b2.move(midpoint=b2.ports['P1'], destination=[self.term_ports['T2'].midpoint[0], h])
+        b2.move(midpoint=b2.ports['P1'], destination=[self.ports['T2'].midpoint[0], h])
 
-        r1 = self.route_straight(b1.ports['P1'], self.term_ports['T1'])
-        r2 = self.route_straight(b2.ports['P1'], self.term_ports['T2'])
+        r1 = self.route_straight(b1.ports['P1'], self.ports['T1'])
+        r2 = self.route_straight(b2.ports['P1'], self.ports['T2'])
         r3 = self.route_straight(b1.ports['P2'], b2.ports['P2'])
 
         D = spira.Cell(name='SameQ2')
         D += [self.b1, self.b2, r1, r2, r3]
 
-        D += self.term_ports['T1']
-        D += self.term_ports['T2']
+        D += self.ports['T1']
+        D += self.ports['T2']
 
         D.rotate(angle=self.port1.orientation, center=self.p1)
-        D.move(midpoint=self.term_ports['T1'], destination=self.port1)
+        D.move(midpoint=self.ports['T1'], destination=self.port1)
 
         return spira.SRef(D)
 
@@ -279,25 +282,25 @@ class RouteParallel(__Manhattan__):
         b1 = self.b1
         b2 = self.b2
 
-        b1.connect(port=b1.ports['P1'], destination=self.term_ports['T2'])
+        b1.connect(port=b1.ports['P1'], destination=self.ports['T2'])
         h = self.p1[1] + self.radius + self.length
         b1.move(midpoint=b1.ports['P1'], destination=[0, h])
 
         b2.connect(port=b2.ports['P2'], destination=b1.ports['P2'])
-        b2.move(midpoint=b2.ports['P1'], destination=[self.term_ports['T2'].midpoint[0], h])
+        b2.move(midpoint=b2.ports['P1'], destination=[self.ports['T2'].midpoint[0], h])
 
-        r1 = self.route_straight(b1.ports['P1'], self.term_ports['T1'])
-        r2 = self.route_straight(b2.ports['P1'], self.term_ports['T2'])
+        r1 = self.route_straight(b1.ports['P1'], self.ports['T1'])
+        r2 = self.route_straight(b2.ports['P1'], self.ports['T2'])
         r3 = self.route_straight(b1.ports['P2'], b2.ports['P2'])
 
         D = spira.Cell(name='SameQ3')
         D += [self.b1, self.b2, r1, r2, r3]
 
-        D += self.term_ports['T1']
-        D += self.term_ports['T2']
+        D += self.ports['T1']
+        D += self.ports['T2']
 
         D.rotate(angle=self.port1.orientation, center=self.p1)
-        D.move(midpoint=self.term_ports['T1'], destination=self.port1)
+        D.move(midpoint=self.ports['T1'], destination=self.port1)
 
         return spira.SRef(D)
 
@@ -306,25 +309,25 @@ class RouteParallel(__Manhattan__):
         b1 = self.b1
         b2 = self.b2
 
-        b2.connect(port=b2.ports['P1'], destination=self.term_ports['T1'])
+        b2.connect(port=b2.ports['P1'], destination=self.ports['T1'])
         h = self.p1[1] + self.radius + self.length
         b2.move(midpoint=b2.ports['P1'], destination=[0, h])
 
         b1.connect(port=b1.ports['P2'], destination=b2.ports['P2'])
-        b1.move(midpoint=b1.ports['P1'], destination=[self.term_ports['T2'].midpoint[0], h])
+        b1.move(midpoint=b1.ports['P1'], destination=[self.ports['T2'].midpoint[0], h])
 
-        r1 = self.route_straight(b2.ports['P1'], self.term_ports['T1'])
-        r2 = self.route_straight(b1.ports['P1'], self.term_ports['T2'])
+        r1 = self.route_straight(b2.ports['P1'], self.ports['T1'])
+        r2 = self.route_straight(b1.ports['P1'], self.ports['T2'])
         r3 = self.route_straight(b1.ports['P2'], b2.ports['P2'])
 
         D = spira.Cell(name='SameQ4')
         D += [self.b1, self.b2, r1, r2, r3]
 
-        D += self.term_ports['T1']
-        D += self.term_ports['T2']
+        D += self.ports['T1']
+        D += self.ports['T2']
 
         D.rotate(angle=self.port1.orientation, center=self.p1)
-        D.move(midpoint=self.term_ports['T1'], destination=self.port1)
+        D.move(midpoint=self.ports['T1'], destination=self.port1)
 
         return spira.SRef(D)
 
@@ -367,17 +370,17 @@ class Route180(RouteBase180, RouteParallel):
                 print('Q4')
                 R = self.quadrant_four
 
-        # elems += R
+        elems += R
                 
-        points = []
-        for e in R.ref.flatten():
-            if isinstance(e, spira.Polygon):
-                for p in e.points:
-                    points.append(p)
-        route_shape = shapes.Shape(points=points)
-        route_shape.apply_merge
-        poly = pc.Polygon(points=route_shape.points, ps_layer=self.ps_layer, enable_edges=False) 
-        elems += poly
+        # points = []
+        # for e in R.ref.flatten():
+        #     if isinstance(e, spira.Polygon):
+        #         for p in e.points:
+        #             points.append(p)
+        # route_shape = shapes.Shape(points=points)
+        # route_shape.apply_merge
+        # poly = pc.Polygon(points=route_shape.points, ps_layer=self.ps_layer, enable_edges=False) 
+        # elems += poly
 
         return elems
 
@@ -385,11 +388,11 @@ class Route180(RouteBase180, RouteParallel):
 
         angle_diff = self.port1.orientation - self.port2.orientation
         if self.port1.orientation == self.port2.orientation:
-            ports += spira.Term(name='T1',
+            ports += spira.Terminal(name='T1',
                 width=self.port1.width,
                 orientation=0
             )
-            ports += spira.Term(name='T2',
+            ports += spira.Terminal(name='T2',
                 midpoint=list(np.subtract(self.p2, self.p1)),
                 width=self.port2.width,
                 orientation=0
@@ -398,11 +401,11 @@ class Route180(RouteBase180, RouteParallel):
             raise ValueError("2. [DEVICE] route() error: Ports do not " +
                 "face each other (orientations must be 180 apart)")
         else:
-            ports += spira.Term(name='T1',
+            ports += spira.Terminal(name='T1',
                 width=self.port1.width,
                 orientation=0
             )
-            ports += spira.Term(name='T2',
+            ports += spira.Terminal(name='T2',
                 midpoint=list(np.subtract(self.p2, self.p1)),
                 width=self.port2.width,
                 orientation=180

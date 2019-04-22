@@ -42,9 +42,5 @@ class TestPolygons(spira.Cell):
 if __name__ == '__main__':
 
     tp = TestPolygons()
-
-    print(tp)
-    print(type(tp))
-
     tp.output()
 

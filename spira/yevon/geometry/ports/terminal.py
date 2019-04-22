@@ -1,7 +1,7 @@
-import spira.all as spira
 import gdspy
 import pyclipper
 import numpy as np
+import spira.all as spira
 from copy import copy, deepcopy
 from numpy.linalg import norm
 from spira.yevon import utils
@@ -22,11 +22,11 @@ from spira.yevon.gdsii.group import Group
 RDD = get_rule_deck()
 
 
-class Terminal(Group, __HorizontalPort__):
+class Terminal(__HorizontalPort__):
     """  """
 
     width = NumberField(default=2*1e6)
-    
+
     edgelayer = LayerField(name='Edge', number=63)
     arrowlayer = LayerField(name='Arrow', number=77)
 
@@ -48,23 +48,46 @@ class Terminal(Group, __HorizontalPort__):
     def set_length(self, value):
         self.__length__ = value
 
-    length = FunctionField(get_length, set_length, doc='Set the width of the terminal edge equal to a 3rd of the minimum metal width.')
+    length = FunctionField(get_length, set_length, doc='Set the width of the terminal edge.')
 
-    def __init__(self, port=None, elementals=None, polygon=None, **kwargs):
+    def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
     def __repr__(self):
-        return ("[SPiRA: Terminal] (name {}, midpoint {})").format(self.name, self.midpoint)
+        return ("[SPiRA: Terminal] (name {}, midpoint {} orientation {})").format(self.name, self.midpoint, self.orientation)
 
     def __str__(self):
         return self.__repr__()
+        
+    def transform(self, transformation):
+        if transformation is not None:
+            transformation.apply_to_object(self)
+        return self
+        
+    def transform_copy(self, transformation):
+        T = deepcopy(self)
+        T.transform(transformation)
+        return T
+
+    def commit_to_gdspy(self, cell=None, transformation=None):
+        if self.__repr__() not in list(Terminal.__committed__.keys()):
+            self.edge.commit_to_gdspy(cell=cell, transformation=transformation)
+            self.arrow.commit_to_gdspy(cell=cell, transformation=transformation)
+            self.label.commit_to_gdspy(cell=cell, transformation=transformation)
+            Terminal.__committed__.update({self.__repr__(): self})
+        else:
+            p = Terminal.__committed__[self.__repr__()]
+            p.edge.commit_to_gdspy(cell=cell)
+            p.arrow.commit_to_gdspy(cell=cell)
+            p.label.commit_to_gdspy(cell=cell)
 
     def create_edge(self):
         from spira.yevon.geometry import shapes
         dx = self.length
         dy = self.width - dx
         rect_shape = shapes.RectangleShape(p1=[0, 0], p2=[dx, dy])
-        tf = spira.Translation(self.midpoint) + spira.Rotation(self.orientation)
+        tf = spira.Translation(self.midpoint) + spira.Rotation(self.orientation - 90)
+        # tf = spira.Translation(self.midpoint) + spira.Rotation(self.orientation)
         # ply = spira.Polygon(shape=rect_shape, gds_layer=self.edgelayer, direction=90, transformation=tf)
         ply = spira.Polygon(shape=rect_shape, gds_layer=self.edgelayer)
         ply.center = (0,0)
@@ -75,7 +98,8 @@ class Terminal(Group, __HorizontalPort__):
         from spira.yevon.geometry import shapes
         arrow_shape = shapes.ArrowShape(a=self.length, b=self.length/2, c=self.length*2)
         arrow_shape.apply_merge
-        tf = spira.Translation(self.midpoint) + spira.Rotation(self.orientation + 90)
+        tf = spira.Translation(self.midpoint) + spira.Rotation(self.orientation)
+        # tf = spira.Translation(self.midpoint) + spira.Rotation(self.orientation - 90)
         # ply = spira.Polygon(shape=arrow_shape, gds_layer=self.arrowlayer, transformation=tf)
         ply = spira.Polygon(shape=arrow_shape, gds_layer=self.arrowlayer)
         ply.center = (0,0)
@@ -107,10 +131,36 @@ class Terminal(Group, __HorizontalPort__):
         self.orientation = np.arctan2(dx,dy)*180/np.pi
         self.width = np.sqrt(dx**2 + dy**2)
 
-    def create_elementals(self, elems):
-        elems += self.edge
-        elems += self.arrow
-        elems += self.label
-        return elems
+    # def create_elementals(self, elems):
+    #     # elems += self.edge
+    #     # elems += self.arrow
+    #     # elems += self.label
+    #     return elems
+
+
+class EdgeTerminal(Terminal):
+    """
+    Terminals are horizontal ports that connect SRef instances
+    in the horizontal plane. They typcially represents the
+    i/o ports of a components.
+
+    Examples
+    --------
+    >>> term = spira.Terminal()
+    """
+
+    def __repr__(self):
+        return ("[SPiRA: EdgeTerm] (name {}, number {}, datatype {}, midpoint {}, " +
+            "width {}, orientation {})").format(self.name,
+            self.gds_layer.number, self.gds_layer.datatype, self.midpoint,
+            self.width, self.orientation
+        )
+
+    def __reflect__(self):
+        """ Do not reflect EdgeTerms when reference is reflected. """
+        self.midpoint = [self.midpoint[0], -self.midpoint[1]]
+        self.orientation = 180 - self.orientation
+        self.orientation = np.mod(self.orientation, 360)
+        return self
 
 

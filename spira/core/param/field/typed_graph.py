@@ -129,14 +129,16 @@ class PathList(typed_list):
             name = item
         if isinstance(name, str):
             for i in self:
-                if i.name == name: return True
+                if i.name == name: 
+                    return True
             return False
         else:
-            return list.__contains__(self,item)
+            return list.__contains__(self, item)
 
     def __fast_contains__(self, name):
         for i in self:
-            if i.name == name: return True
+            if i.name == name: 
+                return True
         return False
 
     def index(self, item):

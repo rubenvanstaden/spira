@@ -2,16 +2,18 @@ import spira.all as spira
 from spira.core import param
 from copy import deepcopy
 from spira.netex.containers import __CellContainer__
+from spira.core.descriptor import DataField
+from spira.yevon.rdd import get_rule_deck
 
 
-RDD = spira.get_rule_deck()
+RDD = get_rule_deck()
 
 
 class BoundingBox(__CellContainer__):
     """ Add a GROUND bbox to Device for primitive and DRC
     detection, since GROUND is only in Mask Cell. """
 
-    S = param.DataField()
+    S = DataField()
 
     def create_elementals(self, elems):
         setter = {}
@@ -37,7 +39,7 @@ class BoundingBox(__CellContainer__):
         #     if port.locked is False:
         #         edgelayer = deepcopy(port.gds_layer)
         #         edgelayer.datatype = 75
-        #         m_term = spira.Term(
+        #         m_term = spira.Terminal(
         #             name=port.name,
         #             gds_layer=deepcopy(port.gds_layer),
         #             midpoint=deepcopy(port.midpoint),
@@ -53,7 +55,7 @@ class BoundingBox(__CellContainer__):
         # #     if port.locked is False:
         # #         edgelayer = deepcopy(port.gds_layer)
         # #         edgelayer.datatype = 75
-        # #         m_term = spira.Term(
+        # #         m_term = spira.Terminal(
         # #             name=port.name,
         # #             gds_layer=deepcopy(port.gds_layer),
         # #             midpoint=deepcopy(port.midpoint),

@@ -153,7 +153,8 @@ class PlotlyGraph(object):
                     nodes['color'].append(label.color.hexcode)
                 elif isinstance(label, spira.SRef):
                     nodes['color'].append(label.ref.color.hexcode)
-                elif isinstance(label, (spira.Port, spira.Term, spira.Dummy)):
+                # elif isinstance(label, (spira.Port, spira.Terminal, spira.Dummy)):
+                elif isinstance(label, (spira.Port, spira.Terminal)):
                     nodes['color'].append(label.color.hexcode)
                 elif issubclass(type(label), __ProcessLayer__):
                     nodes['color'].append(label.ps_layer.data.COLOR.hexcode)

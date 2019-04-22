@@ -15,11 +15,11 @@ class Translation(GenericTransform):
 
 
 class __TranslationMixin__(object):
-    def move(self, position):
-        return self.transform(Translation(position))
+    # def move(self, position):
+    #     return self.transform(Translation(position))
 
-    def move_copy(self, position):
-        return self.transform_copy(Translation(position))
+    # def move_copy(self, position):
+    #     return self.transform_copy(Translation(position))
 
     def _translate(self, translation=(0,0)):
         return self.transform(Translation(translation))

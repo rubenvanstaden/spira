@@ -160,8 +160,8 @@ class PolygonAbstract(__Polygon__):
         return self
 
     def move(self, midpoint=(0,0), destination=None, axis=None):
-        d, o = utils.move_algorithm(midpoint=midpoint, destination=destination, axis=axis)
-        dx, dy = np.array(d) - o
+        d, o = utils.move_algorithm(obj=self, midpoint=midpoint, destination=destination, axis=axis)
+        dx, dy = np.array(d) - np.array(o)
         self.translate(dx, dy)
         return self
 
@@ -176,7 +176,8 @@ class PolygonAbstract(__Polygon__):
         return self
 
     def transform(self, transformation):
-        transformation.apply_to_object(self)
+        if transformation is not None:
+            transformation.apply_to_object(self)
         return self
 
     def merge(self):

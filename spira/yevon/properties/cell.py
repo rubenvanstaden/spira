@@ -3,6 +3,7 @@ import spira.all as spira
 import numpy as np
 from spira.yevon.gdsii.base import __Group__
 from spira.yevon.properties.geometry import __GeometryProperties__
+from spira.yevon.geometry.coord import Coord
 
 
 class CellProperties(__Group__, __GeometryProperties__):
@@ -10,12 +11,12 @@ class CellProperties(__Group__, __GeometryProperties__):
     __gdspy_cell__ = None
     __gdspy_cell__witout_posts__ = None
 
-    def flat_copy(self, level=-1):
-        C = spira.Cell(
-            name='{}_{}'.format(self.name, 'flat'),
-            elementals=self.elementals.flat_copy(level=level)
-        )
-        return C
+    # def flat_copy(self, level=-1):
+    #     C = spira.Cell(
+    #         name='{}_{}'.format(self.name, 'flat'),
+    #         elementals=self.elementals.flat_copy(level=level)
+    #     )
+    #     return C
 
     def __get_gdspy_cell__(self):
         # TODO: Test gdspy cell here.
@@ -40,6 +41,9 @@ class CellProperties(__Group__, __GeometryProperties__):
             if isinstance(e, spira.SRef):
                 if e.transformation is not None:
                     e = e.transformation.apply_to_object(e)
+                if isinstance(e.midpoint, Coord):
+                    # e.midpoint = np.array([e.midpoint[0], e.midpoint[1]])
+                    e.midpoint = e.midpoint.convert_to_array()
                 G.add(
                     gdspy.CellReference(
                         ref_cell=c2dmap[e.ref],
@@ -60,8 +64,8 @@ class CellProperties(__Group__, __GeometryProperties__):
             self.__wrapper__(c, c2dmap)
             if c.name not in glib.cell_dict.keys():
                 glib.add(c2dmap[c])
-        for p in self.get_ports():
-            p.commit_to_gdspy(cell=c2dmap[self])
+        # for p in self.get_ports():
+        #     p.commit_to_gdspy(cell=c2dmap[self])
         return c2dmap[self]
 
     @property

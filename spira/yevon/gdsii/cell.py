@@ -17,6 +17,7 @@ from spira.core.port_list import PortList
 from spira.yevon.gdsii import *
 from spira.yevon.rdd import get_rule_deck
 from spira.core.mixin import MixinBowl
+from spira.yevon.gdsii.sref import SRef
 
 
 RDD = get_rule_deck()
@@ -71,22 +72,45 @@ class CellAbstract(gdspy.Cell, __Cell__):
         return deps
 
     def flat_copy(self, level=-1):
-        self.elementals = self.elementals.flat_copy(level)
-        return self.elementals
+        name = '{}_{}'.format(self.name, 'flat'),
+        C = Cell(name, self.elementals.flat_copy(level=level))
+        return C
+
+    def flat_polygons(self, subj):
+        from spira.yevon.process.processlayer import ProcessLayer
+        from spira.yevon.gdsii.sref import SRef
+        for e1 in self.elementals:
+            if isinstance(e1, ProcessLayer):
+                subj += e1
+            elif isinstance(e1, SRef):
+                e1.ref.flat_polygons(subj=subj)
+        return subj
 
     def commit_to_gdspy(self, cell, transformation=None):
-        from spira.yevon.gdsii.sref import SRef
         cell = gdspy.Cell(self.name, exclude_from_current=True)
         for e in self.elementals:
-            if isinstance(e, SRef):
-                e.ref.commit_to_gdspy(cell=e.ref, transformation=e.transformation)
-            else:
-                e.commit_to_gdspy(cell=cell, transformation=transformation)
+            e.commit_to_gdspy(cell=cell, transformation=transformation)
+        for p in self.ports:
+            p.commit_to_gdspy(cell=cell, transformation=transformation)
         return cell
 
+    # def commit_to_gdspy(self, cell, transformation=None):
+    #     from spira.yevon.gdsii.sref import SRef
+    #     cell = gdspy.Cell(self.name, exclude_from_current=True)
+    #     for e in self.elementals:
+    #         if isinstance(e, SRef):
+    #             e.ref.commit_to_gdspy(cell=e.ref, transformation=e.transformation)
+    #         else:
+    #             e.commit_to_gdspy(cell=cell, transformation=transformation)
+    #     # for p in self.ports:
+    #     #     print(p)
+    #     #     p.commit_to_gdspy(cell=cell, transformation=transformation)
+    #     return cell
+
     def move(self, midpoint=(0,0), destination=None, axis=None):
-        from spira import pc
-        d, o = super().move(midpoint=midpoint, destination=destination, axis=axis)
+        from spira.yevon import process as pc
+        # d, o = super().move(midpoint=midpoint, destination=destination, axis=axis)
+        d, o = utils.move_algorithm(obj=self, midpoint=midpoint, destination=destination, axis=axis)
         for e in self.elementals:
             e.move(destination=d, midpoint=o)
         for p in self.ports:
@@ -131,27 +155,26 @@ class CellAbstract(gdspy.Cell, __Cell__):
             self.ports += p
         return self
 
-    def get_ports(self, level=None):
-        """ Returns copies of all the ports of the Device. """
-        port_list = [deepcopy(p) for p in self.ports]
-        print(port_list)
-        if level is None or level > 0:
-            for r in self.elementals.sref:
+    # def get_ports(self, level=None):
+    #     """ Returns copies of all the ports of the Device. """
+    #     port_list = [deepcopy(p) for p in self.ports]
+    #     if level is None or level > 0:
+    #         for r in self.elementals.sref:
 
-                if level is None:
-                    new_level = None
-                else:
-                    new_level = level - 1
+    #             if level is None:
+    #                 new_level = None
+    #             else:
+    #                 new_level = level - 1
 
-                ref_ports = r.ref.get_ports(level=new_level)
+    #             ref_ports = r.ref.get_ports(level=new_level)
 
-                ref_ports_transformed = []
-                for rp in ref_ports:
-                    pt = rp.transform_copy(r.transformation)
-                    ref_ports_transformed.append(pt)
-                port_list += ref_ports_transformed
+    #             ref_ports_transformed = []
+    #             for rp in ref_ports:
+    #                 pt = rp.transform_copy(r.transformation)
+    #                 ref_ports_transformed.append(pt)
+    #             port_list += ref_ports_transformed
 
-        return port_list
+    #     return port_list
 
 
 class Cell(CellAbstract):
@@ -227,6 +250,12 @@ class Cell(CellAbstract):
         for S in self.elementals.sref:
             S.expand_transform()
             S.ref.expand_transform()
+        # for e in self.elementals:
+        #     if isinstance(e, SRef):
+        #         e.expand_transform()
+        #         e.ref.expand_transform()
+        #     else:
+        #         e.expand_transform()
         return self
 
     @property
@@ -267,7 +296,7 @@ class Connector(Cell):
 
     Examples
     --------
-    >>> term = spira.Term()
+    >>> term = spira.Terminal()
     """
 
     midpoint = CoordField()
@@ -281,8 +310,8 @@ class Connector(Cell):
         )
 
     def create_ports(self, ports):
-        ports += Term(name='P1', midpoint=self.midpoint, width=self.width, orientation=self.orientation)
-        ports += Term(name='P2', midpoint=self.midpoint, width=self.width, orientation=self.orientation-180)
+        ports += Terminal(name='P1', midpoint=self.midpoint, width=self.width, orientation=self.orientation)
+        ports += Terminal(name='P2', midpoint=self.midpoint, width=self.width, orientation=self.orientation-180)
         return ports
 
 

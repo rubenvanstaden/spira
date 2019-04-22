@@ -36,7 +36,12 @@ class __GeometryProperties__(__Properties__):
 
     @property
     def center(self):
-        return np.sum(self.bbox, 0)/2
+        if self.bbox is None:
+            c = ''
+        else:
+            c = np.sum(self.bbox, 0)/2
+        return c
+        # return np.sum(self.bbox, 0)/2
     
     @center.setter
     def center(self, destination):

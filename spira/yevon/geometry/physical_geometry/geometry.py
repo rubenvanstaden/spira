@@ -1,6 +1,7 @@
 # from spira.core.initializer import FieldInitializer
 import os
 import pygmsh
+import networkx as nx
 from spira.yevon.gdsii.base import __Group__
 from spira.core.param.variables import *
 from spira.core.descriptor import DataField
@@ -21,8 +22,8 @@ class Geometry(__Group__):
     physical_surfaces = DataField(fdef_name='create_physical_surfaces')
     mesh_data = DataField(fdef_name='create_mesh_data')
 
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
+    def __init__(self, elementals=None, **kwargs):
+        super().__init__(elementals=elementals, **kwargs)
 
         self.geom = pygmsh.opencascade.Geometry(
             characteristic_length_min=self.lcar,
@@ -40,7 +41,7 @@ class Geometry(__Group__):
             holes = self.holes
 
         ps = []
-        for ply in self.elementals.polygons:
+        for ply in self.elementals:
             for i, points in enumerate(ply.points):
                 c_points = numpy_to_list(points, self.height, unit=1e-6)
                 surface_label = '{}_{}_{}_{}'.format(
@@ -86,3 +87,5 @@ class Geometry(__Group__):
         # meshio.write(vtk_file, mm)
 
         return mesh_data
+
+

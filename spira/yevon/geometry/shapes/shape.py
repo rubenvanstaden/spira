@@ -25,7 +25,8 @@ class PointArrayField(DataFieldDescriptor):
         if value is None:
             value = self.__operations__([])
         else:
-            value = self.__operations__(value)
+            # value = self.__operations__(value)
+            value = self.__operations__([c.convert_to_array() if isinstance(c, Coord) else c for c in value]) 
         obj.__store__[self.__name__] = value
         return value 
         # if (value is None):
@@ -69,13 +70,6 @@ class PointArrayField(DataFieldDescriptor):
 
 class __Shape__(FieldInitializer):
 
-    # center = param.CoordField()
-    # clockwise = param.BoolField(default=False)
-    # points = param.PointArrayField(fdef_name='create_points')
-    # apply_merge = param.DataField(fdef_name='create_merged_points')
-    # simplify = param.DataField(fdef_name='create_simplified_points')
-    # edges = param.DataField(fdef_name='create_edge_lines')
-    
     center = CoordField()
     clockwise = BoolField(default=False)
     points = PointArrayField(fdef_name='create_points')
@@ -111,10 +105,6 @@ class __Shape__(FieldInitializer):
         """  """
         from spira.yevon.utils import scale_polygon_up as spu
         from spira.yevon.utils import scale_polygon_down as spd
-        # polygons = spd(self.points, value=1e-0)
-        # polygons = spd(self.points, value=1e-4)
-        # accuracy = 1e-5
-        # sc = 1/accuracy
         sc = 2**30
         polygons = pyclipper.scale_to_clipper(self.points, sc)
         points = []
@@ -127,17 +117,12 @@ class __Shape__(FieldInitializer):
             for sol in solution:
                 points.append(sol)
         value = boolean(subj=points, method='or')
-        # self.points = spu(self.points, value=1e0)
-        # print(self.points)
-        
         PTS = []
         mc = pyclipper.scale_from_clipper(value, sc)
         for pts in pyclipper.SimplifyPolygons(mc):
             PTS.append(np.array(pts))
-        self.points = np.array(pyclipper.CleanPolygons(PTS))
-        # print(self.points)
-
-        # self.points = spu(self.points, value=1e4)
+        cln_pts = pyclipper.CleanPolygons(PTS)
+        self.points = np.array([np.array(p) for p in cln_pts])
         return self
 
     def create_simplified_points(self):
@@ -218,18 +203,18 @@ class __Shape__(FieldInitializer):
         self.points += p
         return self
 
-    @property
-    def reverse(self):
-        pass
+    # @property
+    # def reverse(self):
+    #     pass
 
-    def transform(self):
-        pass
+    # def transform(self):
+    #     pass
 
-    def encloses(self):
-        pass
+    # def encloses(self):
+    #     pass
 
-    def index(self, item):
-        pass
+    # def index(self, item):
+    #     pass
 
 
 class Shape(__Shape__):

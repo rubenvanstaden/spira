@@ -1,12 +1,10 @@
-import spira.all as spira
 import time
 import numpy as np
-from spira.core import param
-from spira import shapes, pc
+from spira.yevon.geometry import shapes
+from spira.yevon import process as pc
 from spira.netex.containers import __CellContainer__, __NetContainer__, __CircuitContainer__
 from spira.netex.net import Net
 from copy import copy, deepcopy
-from spira.netex.devices import Device
 from spira.netex.structure import Structure
 
 from spira.yevon.geometry.route.routing import Route
@@ -17,11 +15,14 @@ from spira.netex.boxes import BoundingBox
 from halo import Halo
 
 import networkx as nx
-from spira import utils
+from spira.yevon import utils
 from spira.yevon.utils import boolean
+from spira.yevon.rdd import get_rule_deck
+
+from spira.core.param.variables import *
 
 
-RDD = spira.get_rule_deck()
+RDD = get_rule_deck()
 
 
 class MetalNet(NetlistSimplifier):
@@ -33,14 +34,12 @@ class RouteToStructureConnector(__CircuitContainer__, Structure):
 
     def create_contacts(self, boxes):
         start = time.time()
-        # print('[*] Connecting routes with devices')
         self.unlock_ports()
         for D in self.structures:
             if isinstance(D, spira.SRef):
                 B = BoundingBox(S=D)
                 boxes += B
         end = time.time()
-        # print('Block calculation time {}:'.format(end - start))
         return boxes
 
     def unlock_ports(self):
@@ -110,9 +109,9 @@ class Circuit(RouteToStructureConnector):
 
     __mixins__ = [NetlistSimplifier]
 
-    algorithm = param.IntegerField(default=6)
-    level = param.IntegerField(default=2)
-    lcar = param.FloatField(default=10.0)
+    algorithm = IntegerField(default=6)
+    level = IntegerField(default=2)
+    lcar = FloatField(default=10.0)
 
     def create_elementals(self, elems):
 
@@ -230,7 +229,7 @@ class Circuit(RouteToStructureConnector):
                         for pts in port.polygons:
                             # if label.encloses(ply=port.polygons[0]):
                             if label.encloses(ply=pts):
-                                ports += spira.Term(
+                                ports += spira.Terminal(
                                     name=label.text,
                                     layer1=p1, layer2=p2,
                                     width=port.dx,

@@ -10,24 +10,24 @@ class PortProperties(__Properties__):
     def create_ports(self, ports):
         return ports
 
-    @property
-    def terms(self):
-        from spira.yevon.geometry.ports.term import Term
-        from spira.core.elem_list import ElementList
-        terms = ElementList()
-        for p in self.ports:
-            if isinstance(p, Term):
-                terms += p
-        return terms
+    # @property
+    # def terms(self):
+    #     from spira.yevon.geometry.ports.term import Term
+    #     from spira.core.elem_list import ElementList
+    #     terms = ElementList()
+    #     for p in self.ports:
+    #         if isinstance(p, Term):
+    #             terms += p
+    #     return terms
 
-    @property
-    def term_ports(self):
-        from spira.yevon.geometry.ports.term import Term
-        terms = {}
-        for p in self.ports:
-            if isinstance(p, Term):
-                terms[p.name] = p
-        return terms
+    # @property
+    # def term_ports(self):
+    #     from spira.yevon.geometry.ports.term import Term
+    #     terms = {}
+    #     for p in self.ports:
+    #         if isinstance(p, Term):
+    #             terms[p.name] = p
+    #     return terms
 
 
  

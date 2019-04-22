@@ -1,10 +1,8 @@
-# import spira.all as spira
 import gdspy
 import numpy as np
-# from spira.core import param
-# from spira import shapes
-# from spira import pc
+import spira.all as spira
 from spira.yevon.geometry import shapes
+from spira.yevon import process as pc
 from spira.yevon.gdsii.cell import Cell
 from numpy.linalg import norm
 from numpy import sqrt, pi, cos, sin, log, exp, sinh, mod
@@ -13,7 +11,7 @@ from spira.core.param.variables import *
 from spira.yevon.geometry.shapes import ShapeField
 from spira.yevon.rdd.layer import PhysicalLayerField
 from spira.yevon.layer import LayerField
-from spira.yevon.geometry.coord import CoordField
+from spira.yevon.geometry.coord import CoordField, Coord
 from spira.core.descriptor import DataField, FunctionField
 from spira.yevon.rdd import get_rule_deck
 
@@ -81,10 +79,12 @@ class RouteArcShape(__RouteSimple__):
         return self.width
 
     def create_orientation1(self):
-        return self.start_angle - 0 + 180*(self.theta<0)
+        # return self.start_angle + 180*(self.theta<0)
+        return self.start_angle + 180*(self.theta<0) - 180
 
     def create_orientation2(self):
-        return self.start_angle + self.theta + 180 - 180*(self.theta<0)
+        # return self.start_angle + self.theta + 180 - 180*(self.theta<0)
+        return self.start_angle + self.theta - 180*(self.theta<0)
 
     def create_angle1(self):
         angle1 = (self.start_angle + 0) * np.pi/180
@@ -175,26 +175,27 @@ class RouteSimple(__RouteSimple__):
 
     def create_orientation1(self):
         return -90
-        # return 180
 
     def create_orientation2(self):
         return 90
-        # return 0
 
     def create_points(self, points):
 
-        point_a = np.array(self.port1.midpoint)
+        # point_a = np.array(self.port1.midpoint)
+        point_a = self.port1.midpoint
         if self.width_input is None:
             self.width_input = self.port1.width
-        point_b = np.array(self.port2.midpoint)
+        # point_b = np.array(self.port2.midpoint)
+        point_b = self.port2.midpoint
         if self.width_output is None:
             self.width_output = self.port2.width
 
         if round(abs(mod(self.port1.orientation - self.port2.orientation, 360)), 3) != 180:
             raise ValueError('Ports do not face eachother.')
-        orientation = self.port1.orientation - 90
+        orientation = self.port1.orientation + 90
 
-        separation = point_b - point_a
+        separation = Coord(point_b) - Coord(point_a)
+        separation = np.array([separation[0], separation[1]])
         distance = norm(separation)
         rotation = np.arctan2(separation[1], separation[0]) * 180/pi
         angle = rotation - orientation
@@ -244,7 +245,7 @@ class RoutePointShape(__RouteSimple__):
 
     def set_path(self, value):
         self.__path__ = np.asarray(value)
-    
+
     path = FunctionField(get_path, set_path)
 
     def create_midpoint1(self):
@@ -301,7 +302,7 @@ class RouteGeneral(Cell):
         return ll
 
     def create_port_input(self):
-        term = spira.Term(name='P1',
+        term = spira.Terminal(name='P1',
             midpoint=self.route_shape.m1,
             width=self.route_shape.w1,
             orientation=self.route_shape.o1,
@@ -310,7 +311,7 @@ class RouteGeneral(Cell):
         return term
 
     def create_port_output(self):
-        term = spira.Term(name='P2',
+        term = spira.Terminal(name='P2',
             midpoint=self.route_shape.m2,
             width=self.route_shape.w2,
             orientation=self.route_shape.o2,
@@ -320,26 +321,31 @@ class RouteGeneral(Cell):
 
     def create_elementals(self, elems):
         poly = pc.Polygon(
-            points=self.route_shape.points, 
-            ps_layer=self.connect_layer, 
+            points=self.route_shape.points,
+            ps_layer=self.connect_layer,
             enable_edges=False
         )
         elems += poly
         return elems
 
     def create_ports(self, ports):
-        ports += [self.port_input, self.port_output]
+        ports += self.port_input
+        ports += self.port_output
         return ports
 
 
-if __name__ == '__main__':
-    p1 = spira.Term(midpoint=(0,0), orientation=-90)
-    p2 = spira.Term(midpoint=(30*1e6,20*1e6), orientation=90)
-    rs = RouteSimple(port1=p1, port2=p2, path_type='straight')
-    pp = spira.Polygon(shape=rs)
-    pp.rotate(angle=180)
-    cell = spira.Cell()
-    cell += pp
-    cell += [p1, p2]
-    cell.output()
+# if __name__ == '__main__':
+#     p1 = spira.Terminal(midpoint=(0,0), orientation=-90)
+#     p2 = spira.Terminal(midpoint=(30*1e6,20*1e6), orientation=90)
+#     print(p1)
+#     print(p2)
+#     rs = RouteSimple(port1=p1, port2=p2, path_type='sine')
+#     # rs = RouteArcShape(port1=p1, port2=p2)
+#     # rs = RouteGeneral(port1=p1, port2=p2)
+#     pp = spira.Polygon(shape=rs)
+#     pp.rotate(angle=180)
+#     cell = spira.Cell()
+#     cell += pp
+#     cell += [p1, p2]
+#     cell.output()
     

@@ -65,8 +65,6 @@ class GenericTransform(ReversibleTransform):
             T.reflection = (not self.reflection and other.reflection)
             # T.rotation = Rf * (self.rotation + other.rotation)
             T.rotation = self.rotation + other.rotation
-            print(type(self.translation))
-            print(type(other.translation))
             T.translation = Coord(self.translation) + other.translation
         else:
             raise ValueError('Not implemented!')
@@ -94,6 +92,7 @@ class GenericTransform(ReversibleTransform):
     def apply_to_object(self, item):
         if self.reflection is True:
             item = item.__reflect__()
+        # item = item.__rotate__(angle=self.rotation, center=self.center)
         item = item.__rotate__(angle=self.rotation)
         item = item.__translate__(dx=self.translation[0], dy=self.translation[1])
         return item

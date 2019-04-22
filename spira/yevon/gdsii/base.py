@@ -62,14 +62,11 @@ class __Group__(FieldInitializer):
         result = spira.ElementList()
         return result
 
-    # def dependencies(self):
-    #     return self.elementals.dependencies()
-
-    def commit_to_gdspy(self, cell, transformation=None):
-        for e in self.elementals:
-            print(e)
-            e.commit_to_gdspy(cell=cell, transformation=transformation)
-        return cell
+    # FIXME: For some reason this interferes with the spira.Cell commit.
+    # def commit_to_gdspy(self, cell, transformation=None):
+    #     for e in self.elementals:
+    #         e.commit_to_gdspy(cell=cell, transformation=transformation)
+    #     return cell
 
     def append(self, element):
         el = self.elementals
@@ -86,16 +83,17 @@ class __Group__(FieldInitializer):
         self.elementals = el  
 
     def __iadd__(self, element):
+        from spira.yevon import process as pc
+        from spira.yevon.geometry.ports.base import __Port__
         """ Add elemental and reduce the class to a simple compound elementals. """
-        # if isinstance(element, list):
         if isinstance(element, (list, spira.ElementList)):
             self.extend(element)
-        # elif isinstance(element, spira.ElementList):
-
-        elif isinstance(element, __Elemental__):
+        elif isinstance(element, (__Elemental__, pc.ProcessLayer)):
             self.append(element)
         elif element is None:
             return self
+        elif issubclass(type(element), __Port__):
+            self.ports += other
         else:
             raise TypeError("Invalid type " + str(type(element)) + " in __Group__.__iadd__().")
         return self

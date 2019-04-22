@@ -32,79 +32,17 @@ class __ProcessLayer__(Cell):
     def create_layer(self):
         return None
 
-    def create_polygon(self):
-        ply = self.elementals[0]
-        # if self.transformation is not None:
-        #     # print(type(self.transformation))
-        #     if hasattr(self.transformation, '__subtransforms__'):
-        #         for T in self.transformation.__subtransforms__:
-        #             ply = ply.transform_copy(T)
-        #     else:
-        #         # print(self.transformation)
-        #         ply = ply.transform_copy(self.transformation)
-        return ply
-
     def create_points(self):
-        return self.polygon.shape.points
+        return self.elementals[0].shape.points
 
-    def commit_to_gdspy(self, cell=None):
-        P = self.polygon.commit_to_gdspy(cell=cell)
+    def create_polygon(self):
+        return self.elementals[0]
+
+    def commit_to_gdspy(self, cell=None, transformation=None):
+        P = self.elementals[0].commit_to_gdspy(cell=cell, transformation=transformation)
         for p in self.ports:
-            p.commit_to_gdspy(cell=cell)
+            p.commit_to_gdspy(cell=cell, transformation=transformation)
         return P
-
-    # def transform(self, transformation=None):
-    #     if transformation is None:
-    #         t = self.transformation
-    #     else:
-    #         t = transformation
-
-    #     if t is not None:
-    #         if hasattr(t, '__subtransform__'):
-    #             for T in t.__subtransforms__:
-    #                 if T.reflection is True:
-    #                     self.reflect()
-    #                 if T.rotation is not None:
-    #                     self.rotate(angle=T.rotation)
-    #                 if len(T.midpoint) != 0:
-    #                     self.translate(dx=T.midpoint[0], dy=T.midpoint[1])
-    #         else:
-    #             T = t
-    #             if T.reflection is True:
-    #                 self.reflect()
-    #             if T.rotation is not None:
-    #                 self.rotate(angle=T.rotation)
-    #             if len(T.midpoint) != 0:
-    #                 self.translate(dx=T.midpoint[0], dy=T.midpoint[1])
-
-    #     self.transformation = transformation
-
-    #     # print('\n\n\nwfenwekjfnwejknfjwkefnwkefj')
-    #     # print(self.elementals)
-    #     self.points = self.elementals[0].points
-        
-    #     # from spira.yevon.geometry.shapes.basic import BoxShape
-    #     # elems = spira.ElementList()
-    #     # ply = spira.Polygon(shape=self.points, gds_layer=self.layer)
-    #     # elems += ply.transform_copy(self.transformation)
-    #     # # ply.center = self.center
-    #     # self.elementals = elems
-
-    #     return self
-        
-    # def flat_copy(self, level=-1):
-    #     elems = spira.ElementList()
-    #     ports = spira.ElementList()
-    #     elems += self.polygon.flat_copy()
-    #     ports += self.ports.flat_copy()
-    #     C = self.modified_copy(elementals=elems, ports=ports)
-    #     return C
-
-    # def flat_copy(self, level=-1, commit_to_gdspy=False):
-    #     elems = spira.ElementList()
-    #     elems += self.polygon.flat_copy()
-    #     elems += self.ports.flat_copy()
-    #     return elems
 
 
 class __PortConstructor__(__ProcessLayer__):
@@ -133,7 +71,8 @@ class __PortConstructor__(__ProcessLayer__):
         )
         p1 = spira.Port(
             name='P_contact_1',
-            midpoint=self.polygon.center,
+            # midpoint=self.polygon.center,
+            midpoint=self.elementals[0].center,
             gds_layer=l1
         )
         l2 = spira.Layer(
@@ -143,7 +82,8 @@ class __PortConstructor__(__ProcessLayer__):
         )
         p2 = spira.Port(
             name='P_contact_2',
-            midpoint=self.polygon.center,
+            # midpoint=self.polygon.center,
+            midpoint=self.elementals[0].center,
             gds_layer=l2
         )
         return [p1, p2]
@@ -168,19 +108,21 @@ class __PortConstructor__(__ProcessLayer__):
             name = '{}_e{}'.format(self.ps_layer.layer.name, i)
             x = np.sign(clockwise) * (xpts[i+1] - xpts[i])
             y = np.sign(clockwise) * (ypts[i] - ypts[i+1])
-            orientation = (np.arctan2(x, y) * 180/np.pi) - 90
+            # orientation = (np.arctan2(x, y) * 180/np.pi) - 90
+            orientation = (np.arctan2(x, y) * 180/np.pi)
             midpoint = [(xpts[i+1] + xpts[i])/2, (ypts[i+1] + ypts[i])/2]
             width = np.abs(np.sqrt((xpts[i+1] - xpts[i])**2 + (ypts[i+1]-ypts[i])**2))
-            edges += spira.EdgeTerm(
+            edges += spira.EdgeTerminal(
                 name=name,
                 gds_layer=self.layer,
                 midpoint=midpoint,
                 orientation=orientation,
                 width=width,
-                edgelayer=spira.Layer(number=65),
+                length=0.5*1e6,
+                edgelayer=spira.Layer(number=70),
                 arrowlayer=spira.Layer(number=78),
-                local_connect=self.polygon.node_id,
-                is_edge=True,
+                # local_connect=self.polygon.node_id,
+                # is_edge=True,
                 # pid=self.node_id
             )
 
@@ -195,16 +137,6 @@ class ProcessLayer(__PortConstructor__):
     level = IntegerField(default=0)
     error = IntegerField(default=0)
     enable_edges = BoolField(default=True)
-
-    # --- Net ---
-    lcar = FloatField(default=0.0)
-    dimension = IntegerField(default=2)
-    algorithm = IntegerField(default=6)
-    primitives = ElementalListField()
-    route_nodes = ElementalListField()
-    bounding_boxes = ElementalListField()
-    graph = DataField(fdef_name='create_netlist_graph')
-    # -----------
 
     def __repr__(self):
         return ("[SPiRA: ProcessLayer(\'{}\')] {} center, {} ports)").format(
@@ -253,32 +185,9 @@ class ProcessLayer(__PortConstructor__):
                 for edge in self.edge_ports:
                     ports += edge
         return ports
+        
+    # def expand_transform(self):
+    #     self.transform(self.transformation)
+    #     # self.transformation = None
+    #     return self
 
-    def create_netlist_graph(self):
-
-        geom = Geometry(
-            name=self.name,
-            layer=self.ps_layer.layer,
-            lcar=self.lcar,
-            # polygons=[self.polygon],
-            polygons=[self],
-            algorithm=self.algorithm,
-            dimension=self.dimension
-        )
-
-        mesh = Mesh(
-            name='{}'.format(self.layer),
-            level=self.level,
-            layer=self.ps_layer.layer,
-            # polygons=[self.polygon],
-            polygons=[self],
-            primitives=self.primitives,
-            route_nodes=self.route_nodes,
-            bounding_boxes=self.bounding_boxes,
-            data=geom.create_mesh
-        )
-
-        # print(list(nx.connected_components(mesh.g)))
-        # self.plotly_netlist(G=mesh.g, graphname=self.name, labeltext='id')
-
-        return mesh.g

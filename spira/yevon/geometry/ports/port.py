@@ -1,4 +1,4 @@
-# import spira.all as spira
+import spira.all as spira
 from copy import copy, deepcopy
 from numpy.linalg import norm
 from spira.yevon import utils
@@ -20,7 +20,7 @@ class Port(Group, __VerticalPort__):
     radius = FloatField(default=0.25*1e6)
     surface = DataField(fdef_name='create_surface')
 
-    def __init__(self, port=None, elementals=None, polygon=None, **kwargs):
+    def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
     def __repr__(self):
@@ -41,7 +41,7 @@ class Port(Group, __VerticalPort__):
     #         p.label.commit_to_gdspy(cell=cell)
 
     def create_surface(self):
-        from spira import shapes
+        from spira.yevon.geometry import shapes
         shape = shapes.CircleShape(
             center=self.midpoint,
             box_size=[self.radius, self.radius]

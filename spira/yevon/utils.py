@@ -5,6 +5,7 @@ import pyclipper
 import numpy as np
 import networkx as nx
 from numpy.linalg import norm
+from spira.yevon.geometry.coord import Coord
 
 from spira.settings import SCALE_DOWN, SCALE_UP, OFFSET
 
@@ -40,12 +41,11 @@ def rotate_algorithm(points, angle=45, center=(0,0)):
     return pts
 
 
-def move_algorithm(midpoint=(0,0), destination=None, axis=None):
+def move_algorithm(obj, midpoint=(0,0), destination=None, axis=None):
     """ Moves elements of the Device from the midpoint point
     to the destination. Both midpoint and destination can be
     1x2 array-like, Port, or a key corresponding to one of
     the Ports in this device """
-    # pass
 
     from spira.yevon.geometry.ports.base import __Port__
 
@@ -55,20 +55,24 @@ def move_algorithm(midpoint=(0,0), destination=None, axis=None):
 
     if issubclass(type(midpoint), __Port__):
         o = midpoint.midpoint
+    elif isinstance(midpoint, Coord):
+        o = midpoint
     elif np.array(midpoint).size == 2:
         o = midpoint
-    elif midpoint in self.ports:
-        o = self.ports[midpoint].midpoint
+    elif midpoint in obj.ports:
+        o = obj.ports[midpoint].midpoint
     else:
         raise ValueError("[PHIDL] [DeviceReference.move()] ``midpoint`` " +
                             "not array-like, a port, or port name")
 
     if issubclass(type(destination), __Port__):
         d = destination.midpoint
+    elif isinstance(destination, Coord):
+        d = destination
     elif np.array(destination).size == 2:
         d = destination
-    elif destination in self.ports:
-        d = self.ports[destination].midpoint
+    elif destination in obj.ports:
+        d = obj.ports[destination].midpoint
     else:
         raise ValueError("[PHIDL] [DeviceReference.move()] ``destination`` " +
                             "not array-like, a port, or port name")
@@ -77,6 +81,9 @@ def move_algorithm(midpoint=(0,0), destination=None, axis=None):
         d = (d[0], o[1])
     if axis == 'y':
         d = (o[0], d[1])
+
+    d = Coord(d[0], d[1])
+    o = Coord(o[0], o[1])
 
     return d, o
 

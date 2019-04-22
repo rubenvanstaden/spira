@@ -9,6 +9,7 @@ from spira.yevon.gdsii.base import __Elemental__
 from spira.yevon.layer import LayerField
 from spira.core.param.variables import *
 from spira.yevon.visualization.color import ColorField
+from spira.yevon.geometry.coord import Coord, CoordField
 
 
 __all__ = ['Label']
@@ -105,6 +106,8 @@ class Label(LabelAbstract):
         # TODO: Convert to Point object.
         if isinstance(position, (list, tuple, set, np.ndarray)):
             self.position = list(position)
+        elif isinstance(position, Coord):
+            self.position = list([position[0], position[1]])
         else:
             raise ValueError('Position type not supported!')
 

@@ -12,7 +12,7 @@ class Box(ProcessLayer):
 
     w = NumberField(default=1.0)
     h = NumberField(default=1.0)
-    center = CoordField()
+    center = CoordField(default=(0,0))
 
     # def __deepcopy__(self, memo):
     #     return Box(

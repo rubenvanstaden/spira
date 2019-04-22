@@ -56,11 +56,23 @@ class __Port__(__Elemental__):
         return pyclipper.PointInPolygon(self.midpoint, polygon) != 0
 
     def transform(self, transformation):
-        transformation.apply_to_object(self)
+        if transformation is not None:
+            transformation.apply_to_object(self)
         return self
+        
+    def transform_copy(self, transformation):
+        T = deepcopy(self)
+        T.transform(transformation)
+        return T
+
+    # def transform_copy(self, transformation):
+    #     return self.__class__(
+    #         midpoint=
+    #     )
 
     def __reflect__(self):
         """ Reflect around the x-axis. """
+        print('\n--- Reflecting Port ---')
         self.midpoint = [self.midpoint[0], -self.midpoint[1]]
         self.orientation = -self.orientation
         self.orientation = np.mod(self.orientation, 360)
@@ -80,7 +92,9 @@ class __Port__(__Elemental__):
         return self
 
     def move(self, midpoint=(0,0), destination=None, axis=None):
-        d, o = super().move(midpoint=midpoint, destination=destination, axis=axis)
+        # d, o = super().move(midpoint=midpoint, destination=destination, axis=axis)
+        # d, o = utils.move_algorithm(midpoint=midpoint, destination=destination, axis=axis)
+        d, o = utils.move_algorithm(obj=self, midpoint=midpoint, destination=destination, axis=axis)
         dx, dy = np.array(d) - o
         self.__translate__(dx, dy)
         return self

@@ -30,9 +30,9 @@ class __CircuitContainer__(__NetContainer__):
     """ Circuit topology description: routes, devcies and boudning boxes. """
 
     boxes = ElementalListField(fdef_name='create_boxes')
+    devices = ElementalListField(fdef_name='create_devices')
     routes = ElementalListField(fdef_name='create_routes')
     structures = ElementalListField(fdef_name='create_structures')
-    devices = ElementalListField(fdef_name='create_devices')
 
     def create_structures(self, structs):
         return structs

@@ -22,6 +22,10 @@ class PortList(TypedList):
     def __getitem__(self, key):
         if isinstance(key, int):
             return self._list[key]
+        elif isinstance(key, str):
+            for p in self._list:
+                if p.name == key:
+                    return p
         else:
             return self.get_from_label(key)
 
@@ -36,16 +40,16 @@ class PortList(TypedList):
             el += e.flat_copy(level)
         return el
 
-    def move(self, position):
-        for c in self._list:
-            c.move(position)
-        return self
+    # def move(self, position):
+    #     for c in self._list:
+    #         c.move(position)
+    #     return self
 
-    def move_copy(self, position):
-        T = self.__class__()
-        for c in self._list:
-            T.append(c.move_copy(position))
-        return T
+    # def move_copy(self, position):
+    #     T = self.__class__()
+    #     for c in self._list:
+    #         T.append(c.move_copy(position))
+    #     return T
 
     def transform_copy(self, transformation):
         T = self.__class__()
@@ -113,6 +117,12 @@ class PortList(TypedList):
             if isinstance(p, Term):
                 pl.append(p)
         return pl
+
+    def get_names(self):
+        names = []
+        for p in self._list:
+            names.append(p.name)
+        return names
 
     def get_ports_within_angles(self, start_angle, end_angle):
         pl = self.__class__()

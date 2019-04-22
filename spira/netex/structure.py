@@ -173,7 +173,7 @@ class __NetlistCell__(__NetContainer__):
 class Structure(__NetlistCell__):
     """ Decorates all elementas with purpose metal with
     LCells and add them as elementals to the new class. """
-    
+
     um = FloatField(default=1e+6)
     layout = BoolField(default=False)
 
@@ -269,11 +269,11 @@ class Structure(__NetlistCell__):
                         ps_layer=ps_layer,
                         points=[pts],
                         level=self.level,
-                        lcar=self.lcar,
-                        algorithm=self.algorithm,
-                        route_nodes=self.routes,
-                        primitives=self.primitives,
-                        bounding_boxes=self.contacts
+                        # lcar=self.lcar,
+                        # algorithm=self.algorithm,
+                        # route_nodes=self.routes,
+                        # primitives=self.primitives,
+                        # bounding_boxes=self.contacts
                     )
         else:
             for M in self.metals:
@@ -293,12 +293,12 @@ class Structure(__NetlistCell__):
                         ps_layer=ps_layer,
                         points=[pts],
                         level=self.level,
-                        lcar=(self.lcar-0.01*i),
+                        # lcar=(self.lcar-0.01*i),
                         # lcar=self.lcar,
-                        algorithm=self.algorithm,
-                        route_nodes=self.routes,
-                        primitives=self.primitives,
-                        bounding_boxes=self.contacts
+                        # algorithm=self.algorithm,
+                        # route_nodes=self.routes,
+                        # primitives=self.primitives,
+                        # bounding_boxes=self.contacts
                     )
 
         return elems

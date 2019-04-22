@@ -1,23 +1,42 @@
+import networkx as nx
+import numpy as np
 from spira.yevon.geometry.physical_geometry.geometry import Geometry
 from spira.core.descriptor import DataField
+from spira.yevon.rdd import get_rule_deck
+
+
+RDD = get_rule_deck()
 
 
 class __Net__(Geometry):
+    """ Constructs a graph from the physical geometry generated 
+    from the list of elementals. """
 
+    mesh_graph = DataField(fdef_name='create_mesh_graph')
     triangles = DataField(fdef_name='create_triangles')
     physical_triangles = DataField(fdef_name='create_physical_triangles')
+    
+    def __init__(self, elementals=None, **kwargs):
+        super().__init__(elementals=elementals, **kwargs)
+        
+        self.g = nx.Graph() 
+
+        self.mesh_graph
 
     def create_triangles(self):
         if 'triangle' not in self.mesh_data.cells:
             raise ValueError('Triangle not found in cells')
-        return self.cells['triangle']
+        return self.mesh_data.cells['triangle']
 
     def create_physical_triangles(self):
-        if 'triangle' not in self.mesh_data.cell_data[0]:
+        # if 'triangle' not in self.mesh_data.cell_data[0]:
+        if 'triangle' not in self.mesh_data.cell_data:
             raise ValueError('Triangle not in meshio cell_data')
-        if 'gmsh:physical' not in self.mesh_data.cell_data[0]['triangle']:
+        # if 'gmsh:physical' not in self.mesh_data.cell_data[0]['triangle']:
+        if 'gmsh:physical' not in self.mesh_data.cell_data['triangle']:
             raise ValueError('Physical not found in meshio triangle')
-        return self.mesh_data.cell_data[0]['triangle']['gmsh:physical'].tolist()
+        # return self.mesh_data.cell_data[0]['triangle']['gmsh:physical'].tolist()
+        return self.mesh_data.cell_data['triangle']['gmsh:physical'].tolist()
 
     def create_mesh_graph(self):
         """ Create a graph from the meshed geometry. """
@@ -59,7 +78,7 @@ class __Net__(Geometry):
         self.g.add_edge(n, num+1)
 
     def add_positions(self, n, tri):
-        pp = self.points
+        pp = self.mesh_data.points
         n1, n2, n3 = pp[tri[0]], pp[tri[1]], pp[tri[2]]
         sum_x = (n1[0] + n2[0] + n3[0]) / (3.0*RDD.GDSII.GRID)
         sum_y = (n1[1] + n2[1] + n3[1]) / (3.0*RDD.GDSII.GRID)
@@ -76,9 +95,6 @@ class __Net__(Geometry):
         key -> 5_0_1 (layer_datatype_polyid)
         value -> [1 2] (1=surface_id 2=triangle)
         """
-
-        print(self.mesh_data)
-        print(self.mesh_data.field_data)
 
         triangles = {}
         # for name, value in self.mesh_data.field_data[0].items():

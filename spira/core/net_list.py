@@ -34,16 +34,16 @@ class NetList(TypedList):
             el += e.flat_copy(level)
         return el
 
-    def move(self, position):
-        for c in self._list:
-            c.move(position)
-        return self
+    # def move(self, position):
+    #     for c in self._list:
+    #         c.move(position)
+    #     return self
 
-    def move_copy(self, position):
-        T = self.__class__()
-        for c in self._list:
-            T.append(c.move_copy(position))
-        return T
+    # def move_copy(self, position):
+    #     T = self.__class__()
+    #     for c in self._list:
+    #         T.append(c.move_copy(position))
+    #     return T
 
     def transform_copy(self, transformation):
         T = self.__class__()

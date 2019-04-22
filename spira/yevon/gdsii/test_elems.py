@@ -187,7 +187,7 @@ def test_elem_terminal():
         width = param.FloatField(default=10)
         height = param.FloatField(default=1)
         def create_ports(self, ports):
-            ports += spira.Term(
+            ports += spira.Terminal(
                 name='P1',
                 midpoint=(10,0), 
                 width=self.height, 

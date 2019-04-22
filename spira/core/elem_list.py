@@ -160,11 +160,11 @@ class ElementList(__ElementList__):
                     yield elem
         return _flatten(self._list)
 
-    def flat_copy(self, level=-1):
-        el = ElementList()
-        for e in self._list:
-            el += e.flat_copy(level)
-        return el
+    # def flat_copy(self, level=-1):
+    #     el = ElementList()
+    #     for e in self._list:
+    #         el += e.flat_copy(level)
+    #     return el
 
     def commit_to_gdspy(self, cell, transformation=None):
         for e in self._list:
@@ -174,14 +174,14 @@ class ElementList(__ElementList__):
                 e.commit_to_gdspy(cell=cell, transformation=transformation)
         return self
 
-    # def flat_copy(self, level=-1):
-    #     el = ElementList()
-    #     for e in self._list:
-    #         el += e.flat_copy(level)
-    #     if level == -1:
-    #         return el.flatten()
-    #     else:
-    #         return el
+    def flat_copy(self, level=-1):
+        el = ElementList()
+        for e in self._list:
+            el += e.flat_copy(level)
+        if level == -1:
+            return el.flatten()
+        else:
+            return el
 
     def flatten(self):
         from spira.yevon.gdsii.cell import Cell

@@ -14,13 +14,13 @@ class Rectangle(ProcessLayer):
     p1 = CoordField(default=(0,0))
     p2 = CoordField(default=(2,2))
     
-    def __deepcopy__(self, memo):
-        return Rectangle(
-            # elementals=deepcopy(self.elementals),
-            # polygon=deepcopy(self.polygon),
-            ps_layer=self.ps_layer,
-            node_id=deepcopy(self.node_id),
-        )
+    # def __deepcopy__(self, memo):
+    #     return Rectangle(
+    #         # elementals=deepcopy(self.elementals),
+    #         # polygon=deepcopy(self.polygon),
+    #         ps_layer=self.ps_layer,
+    #         node_id=deepcopy(self.node_id),
+    #     )
 
     def create_elementals(self, elems):
         shape = shapes.RectangleShape(p1=self.p1, p2=self.p2)
