@@ -22,12 +22,12 @@ class Transform(FieldInitializer):
             raise ValueError('Call not implemented!')
 
     def __add__(self, other):
-        if other is None: 
+        if other is None:
             return CompoundTransform([self])
         return CompoundTransform([self, other])
 
     def __sub__(self, other):
-        if other is None: 
+        if other is None:
             return CompoundTransform([self])
         if isinstance(other, ReversibleTransform):
             return CompoundTransform([self, -other])
@@ -60,7 +60,7 @@ class ReversibleTransform(Transform):
             return CompoundTransform([self, other])
 
     def __sub__(self, other):
-        if other is None: 
+        if other is None:
             return ReversibleCompoundTransform([self])
         if isinstance(other, ReversibleTransform):
             return ReversibleCompoundTransform([self, -other])

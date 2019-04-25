@@ -94,22 +94,8 @@ class CellAbstract(gdspy.Cell, __Cell__):
             p.commit_to_gdspy(cell=cell, transformation=transformation)
         return cell
 
-    # def commit_to_gdspy(self, cell, transformation=None):
-    #     from spira.yevon.gdsii.sref import SRef
-    #     cell = gdspy.Cell(self.name, exclude_from_current=True)
-    #     for e in self.elementals:
-    #         if isinstance(e, SRef):
-    #             e.ref.commit_to_gdspy(cell=e.ref, transformation=e.transformation)
-    #         else:
-    #             e.commit_to_gdspy(cell=cell, transformation=transformation)
-    #     # for p in self.ports:
-    #     #     print(p)
-    #     #     p.commit_to_gdspy(cell=cell, transformation=transformation)
-    #     return cell
-
     def move(self, midpoint=(0,0), destination=None, axis=None):
         from spira.yevon import process as pc
-        # d, o = super().move(midpoint=midpoint, destination=destination, axis=axis)
         d, o = utils.move_algorithm(obj=self, midpoint=midpoint, destination=destination, axis=axis)
         for e in self.elementals:
             e.move(destination=d, midpoint=o)

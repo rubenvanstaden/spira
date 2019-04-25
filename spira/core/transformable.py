@@ -38,11 +38,6 @@ class Transformable(__Transformable__):
         super().__init__(**kwargs)
 
     def transform(self, transformation=None):
-
-        # print(type(self))
-        # print(self)
-
-        # if isinstance(transformation, self.__transform_type__):
         if issubclass(type(transformation), self.__transform_type__):
             if self.transformation is None:
                 self.transformation = transformation

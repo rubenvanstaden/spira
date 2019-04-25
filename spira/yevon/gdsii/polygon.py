@@ -160,9 +160,14 @@ class PolygonAbstract(__Polygon__):
         return self
 
     def move(self, midpoint=(0,0), destination=None, axis=None):
+        import spira.all as spira
         d, o = utils.move_algorithm(obj=self, midpoint=midpoint, destination=destination, axis=axis)
-        dx, dy = np.array(d) - np.array(o)
-        self.translate(dx, dy)
+        dxdy = np.array(d) - np.array(o)
+        if self.transformation is None:
+            self.transformation = spira.Translation(translation=dxdy)
+        else:
+            self.transformation += spira.Translation(translation=dxdy)
+        # self.translate(dx, dy)
         return self
 
     def fillet(self, radius, angle_resolution=128, precision=0.001*1e6):

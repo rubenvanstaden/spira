@@ -45,7 +45,11 @@ class __GeometryProperties__(__Properties__):
     
     @center.setter
     def center(self, destination):
+        print('mwejfbkjfbjkfb')
+        print(self.center)
+        print(destination)
         self.move(destination=destination, midpoint=self.center)
+        self.transformation.apply_to_object(self)
 
     @property
     def xpos(self):

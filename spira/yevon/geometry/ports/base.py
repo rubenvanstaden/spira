@@ -65,11 +65,6 @@ class __Port__(__Elemental__):
         T.transform(transformation)
         return T
 
-    # def transform_copy(self, transformation):
-    #     return self.__class__(
-    #         midpoint=
-    #     )
-
     def __reflect__(self):
         """ Reflect around the x-axis. """
         print('\n--- Reflecting Port ---')
@@ -92,8 +87,6 @@ class __Port__(__Elemental__):
         return self
 
     def move(self, midpoint=(0,0), destination=None, axis=None):
-        # d, o = super().move(midpoint=midpoint, destination=destination, axis=axis)
-        # d, o = utils.move_algorithm(midpoint=midpoint, destination=destination, axis=axis)
         d, o = utils.move_algorithm(obj=self, midpoint=midpoint, destination=destination, axis=axis)
         dx, dy = np.array(d) - o
         self.__translate__(dx, dy)

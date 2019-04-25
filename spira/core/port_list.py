@@ -20,14 +20,25 @@ class PortList(TypedList):
         return self.__repr__()
 
     def __getitem__(self, key):
+        from spira.yevon.geometry.ports.base import __Port__
         if isinstance(key, int):
             return self._list[key]
         elif isinstance(key, str):
             for p in self._list:
                 if p.name == key:
                     return p
+        elif issubclass(type(key), __Port__):
+            for p in self._list:
+                if p == key:
+                    return p
         else:
             return self.get_from_label(key)
+
+    def __contains__(self, item):
+        for p in self._list:
+            if p.name == item.name:
+                return True
+        return False
 
     def __delitem__(self, key):
         for i in range(0, len(self._list)):

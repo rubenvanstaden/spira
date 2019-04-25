@@ -17,6 +17,7 @@ from spira.yevon.geometry.coord import CoordField
 from spira.core.descriptor import DataField, FunctionField
 from spira.yevon.geometry.ports.base import __HorizontalPort__
 from spira.yevon.gdsii.group import Group
+from spira.yevon.geometry.coord import Coord
 
 
 RDD = get_rule_deck()
@@ -58,7 +59,18 @@ class Terminal(__HorizontalPort__):
 
     def __str__(self):
         return self.__repr__()
-        
+
+    def __eq__(self, other):
+        return (self.name == other.name)
+        # print(self.midpoint)
+        # print(other.midpoint)
+        # if not isinstance(self.midpoint, Coord):
+        #     self.midpoint = Coord(self.midpoint[0], self.midpoint[1])
+        # return (self.midpoint == other.midpoint and (self.orientation == other.orientation))
+
+    def __ne__(self, other):
+        return (self.midpoint != other.midpoint or (self.orientation != other.orientation)) 
+
     def transform(self, transformation):
         if transformation is not None:
             transformation.apply_to_object(self)
@@ -87,11 +99,11 @@ class Terminal(__HorizontalPort__):
         dy = self.width - dx
         rect_shape = shapes.RectangleShape(p1=[0, 0], p2=[dx, dy])
         tf = spira.Translation(self.midpoint) + spira.Rotation(self.orientation - 90)
-        # tf = spira.Translation(self.midpoint) + spira.Rotation(self.orientation)
-        # ply = spira.Polygon(shape=rect_shape, gds_layer=self.edgelayer, direction=90, transformation=tf)
         ply = spira.Polygon(shape=rect_shape, gds_layer=self.edgelayer)
         ply.center = (0,0)
         ply.transform(tf)
+        # ply.__rotate__(angle=self.orientation-90)
+        # ply.__translate__(dx=self.midpoint[0], dy=self.midpoint[1])
         return ply
 
     def create_arrow(self):

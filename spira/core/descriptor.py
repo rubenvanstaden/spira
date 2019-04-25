@@ -189,6 +189,115 @@ class FunctionField(BaseField):
             raise ValueError('Cannot assign parameter.')
 
 
+class SetFunctionField(BaseField):
+    """property which calls a set method to set the variables,
+    but it is stored in a known attribute, so a get method
+    need not be specified. A restriction can be specified."""
+
+    def __init__(self, internal_member_name, fset, **kwargs):
+        self.fset = fset
+        self.__name__ = internal_member_name
+        self.name = internal_member_name
+        self.locked = False
+        self.allow_none = False
+        if 'restriction' in kwargs:
+            self.restriction = kwargs['restriction']
+        else:
+            self.restriction = RestrictNothing()
+        super().__init__(**kwargs)
+
+    def __get_default__(self):
+        import inspect
+        if inspect.isroutine(self.default):
+            return self.default()
+        else:
+            return self.default
+
+    def __get__(self, obj, type=None):
+        if obj is None:
+            return self
+        if (self.__name__ in obj.__dict__):
+            return obj.__dict__[self.__name__]
+        else:
+            if hasattr(self, 'default'):
+                d = self.__get_default__()
+                return d
+                # if self.preprocess is None:
+                #     return d
+                # else:
+                #     return self.preprocess(d, obj)
+            elif self.allow_none:
+                return None
+            else:
+                raise ValueError("Attribute '%s' of '%s' is not set, and no default value is specified" (self.name, obj))
+
+    def __set__(self, obj, value):
+        if self.restriction(value, obj):
+            return self.fset(obj, value)
+        else:
+            raise ValueError("%s does not match restriction %s in property %s" % (value, self.restriction, self.__name__))
+
+    def bind_property(self, cls, name):
+        self.name = name
+        if self.__name__ is None:
+            self.__name__ = '__prop_{}__'.format(name)
+
+
+import sys
+
+def is_call_internal(obj, level=1):
+    """ checks if a call to a function is done from within the object
+        or from outside """
+    f = sys._getframe(1 + level).f_locals
+    if not "self" in f:
+        return False
+    return (f["self"] is obj)
+
+
+class ConvertField(BaseField):
+
+    def __init__(self, parent_class, parent_property_name, convert_method):
+        self.convert_method = convert_method
+        self.parent_class = parent_class
+        self.parent_property_name = parent_property_name
+        self.locked = True
+        BaseField.__init__(self)
+
+    def __get__(self, obj, type=None):
+        if obj is None:
+            return self
+        print(self.parent_property.__get__(obj, type))
+        return self.parent_property.__get__(obj, type)
+
+    def __set__(self, obj, value):
+        print('convert setting: {}'.format(value))
+        self.convert_method(obj)
+        # if not is_call_internal(obj):
+        #     self.convert_method(obj)
+        value = self.parent_property.__set__(obj, value)
+        return value
+
+    def bind_property(self, cls, name):
+        import inspect
+        self.name = name
+        if None == self.parent_property_name:
+            self.parent_property_name = name
+        # if None == self.parent_class:
+        #     mro = inspect.getmro(cls)
+        #     found = False
+        #     for C in mro[1:]:
+        #         if name in C.__store__:
+        #             if isinstance(C.__store__[name][0], DefinitionProperty):
+        #                 continue
+        #             self.parent_class = C
+        #             found = True
+        #             break
+        #     if not found:
+        #         raise IpcorePropertyDescriptorException("DefinitionProperty '%s' of '%s' should have a matching property in a parent class." % (name, cls))
+        self.parent_property = object.__getattribute__(self.parent_class, self.parent_property_name)
+        print(self.parent_property)
+
+
 class DataField(DataFieldDescriptor):
     pass
 
