@@ -266,14 +266,11 @@ class ConvertField(BaseField):
     def __get__(self, obj, type=None):
         if obj is None:
             return self
-        print(self.parent_property.__get__(obj, type))
         return self.parent_property.__get__(obj, type)
 
     def __set__(self, obj, value):
-        print('convert setting: {}'.format(value))
-        self.convert_method(obj)
-        # if not is_call_internal(obj):
-        #     self.convert_method(obj)
+        if not is_call_internal(obj):
+            self.convert_method(obj)
         value = self.parent_property.__set__(obj, value)
         return value
 
@@ -295,7 +292,6 @@ class ConvertField(BaseField):
         #     if not found:
         #         raise IpcorePropertyDescriptorException("DefinitionProperty '%s' of '%s' should have a matching property in a parent class." % (name, cls))
         self.parent_property = object.__getattribute__(self.parent_class, self.parent_property_name)
-        print(self.parent_property)
 
 
 class DataField(DataFieldDescriptor):

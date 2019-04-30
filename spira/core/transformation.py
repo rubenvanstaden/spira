@@ -13,13 +13,28 @@ class Transform(FieldInitializer):
     def apply_to_object(self, item):
         pass
 
+    def apply_to_copy(self, item):
+        """ Applies the transform to a copy of the transformable item. """
+        if isinstance(item, list):
+            raise ValueError('Not implemented yet!')
+            # from .shape import Shape
+            # L = Shape(item).transform_copy(self)
+            # return L
+        else:
+            return item.transform_copy(self)
+
     def __call__(self, item):
-        if isinstance(item, None):
+        # print('--- Calling transform ---')
+        # print(self)
+        # print(item)
+        # print('')
+        if item is None:
             return self
         if isinstance(item, Transform):
             return item + self
         else:
-            raise ValueError('Call not implemented!')
+            return self.apply_to_copy(item)
+            # raise ValueError('Call not implemented!')
 
     def __add__(self, other):
         if other is None:

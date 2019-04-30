@@ -69,11 +69,11 @@ class __Manhattan__(Cell):
             path_type='straight',
             width_type='straight'
         )
-        route_shape.apply_merge
+        # route_shape.apply_merge
         R1 = RouteGeneral(route_shape=route_shape, connect_layer=self.ps_layer)
         r1 = spira.SRef(R1)
         # r1.rotate(angle=p2.orientation+90, center=R1.port_input.midpoint)
-        # r1._rotate(rotation=p2.orientation+90, center=R1.port_input.midpoint)
+        r1._rotate(rotation=p2.orientation-90, center=R1.port_input.midpoint)
         r1.move(midpoint=(0,0), destination=p1.midpoint)
         return r1
 

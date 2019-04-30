@@ -10,28 +10,55 @@ from spira.yevon.utils import scale_coord_up as scu
 from spira.yevon.geometry.route.manhattan import __Manhattan__
 
 from spira.core.descriptor import DataField
+from copy import deepcopy
 
 
 class RouteBase180(__Manhattan__):
 
     def create_quadrant_one(self):
 
-        self.b1.connect(port=self.b1.ports['P2'], destination=self.ports['T1'])
+        t1 = deepcopy(self.ports['T1'])
+        t2 = deepcopy(self.ports['T2'])
+        
+        # bp1 = deepcopy(self.b1.ports['P2'])
+
+        # print('********************')
+        # print(self.b1.ports['P2'])
+        # self.b1.connect(port=bp1, destination=t1)
+        self.b1.connect(port=self.b1.ports['P2'], destination=t1)
+        # # self.b1.transformation.apply_to_object(self.b1)
+        # print(self.p1)
+        # print(self.p2)
+        # print(self.radius)
         h = (self.p2[1]-self.p1[1])/2 - self.radius
+        # h = (self.p2[1]-self.p1[1]) - self.radius
+        # print(h)
+        # print(self.b1.ports['P2'])
         self.b1.move(midpoint=self.b1.ports['P2'], destination=[0, h])
 
-        # self.b2.connect(port=self.b1.ports['P2'], destination=self.b2.ports['P1'])
-        self.b2.connect(port=self.b2.ports['P1'], destination=self.b1.ports['P1'])
-        h = (self.p2[1]-self.p1[1])/2 + self.radius
-        # self.b2.move(midpoint=self.b2.ports['P1'], destination=[self.ports['T2'].midpoint[0], h])
-        self.b2.move(midpoint=self.b2.ports['P2'], destination=[self.ports['T2'].midpoint[0], h])
+        # print(self.b1.transformation)
 
-        r1 = self.route_straight(self.b1.ports['P2'], self.ports['T1'])
-        # r2 = self.route_straight(self.b2.ports['P2'], self.ports['T2'])
-        # r3 = self.route_straight(self.b2.ports['P1'], self.b1.ports['P1'])
+        # self.b2.connect(port=self.b2.ports['P1'], destination=self.b1.ports['P1'])
+        self.b2.connect(port=self.b2.ports['P2'], destination=self.b1.ports['P1'])
+        h = (self.p2[1]-self.p1[1])/2 + self.radius
+        self.b2.move(midpoint=self.b2.ports['P1'], destination=[self.ports['T2'].midpoint[0], h])
+
+        r1 = self.route_straight(self.b1.ports['P2'], t1)
+        r2 = self.route_straight(self.b2.ports['P1'], self.ports['T2'])
+        r3 = self.route_straight(self.b2.ports['P2'], self.b1.ports['P1'])
+
+        # r1 = self.route_straight(self.b1.ports['P2'], self.ports['T1'])
+        # # r2 = self.route_straight(self.b2.ports['P2'], self.ports['T2'])
+        # # r3 = self.route_straight(self.b2.ports['P1'], self.b1.ports['P1'])
 
         D = spira.Cell(name='Q1')
-        D += [self.b1, self.b2]
+        D += self.b1
+        D += self.b2
+        # D += r1
+        # D += r2
+        # D += r3
+
+        # D += [self.b1, self.b2]
 
         # D += [self.b1, self.b2, r1, r2, r3]
 
@@ -50,23 +77,37 @@ class RouteBase180(__Manhattan__):
         h = (self.p2[1]-self.p1[1])/2 - self.radius
         self.b1.move(midpoint=self.b1.ports['P1'], destination=[0, h])
 
-        # self.b2.connect(port=self.b2.ports['P1'], destination=self.b1.ports['P2'])
-        self.b2.connect(port=self.b2.ports['P2'], destination=self.b1.ports['P2'])
-        h = (self.p2[1]-self.p1[1])/2 + self.radius
-        self.b2.move(midpoint=self.b2.ports['P1'], destination=[self.ports['T2'].midpoint[0], h])
+        # print(self.b1.transformation)
 
-        r1 = self.route_straight(self.b2.ports['P1'], self.ports['T2'])
-        r2 = self.route_straight(self.b1.ports['P1'], self.ports['T1'])
-        r3 = self.route_straight(self.b2.ports['P2'], self.b1.ports['P2'])
+        # self.b2.connect(port=self.b2.ports['P1'], destination=self.b1.ports['P2'])
+        # # self.b2.connect(port=self.b2.ports['P2'], destination=self.b1.ports['P2'])
+        # # h = (self.p2[1]-self.p1[1])/2 + self.radius
+        # # self.b2.move(midpoint=self.b2.ports['P1'], destination=[self.ports['T2'].midpoint[0], h])
+
+        print('\n\n')
+        # print(self.b1.ports)
+        # print('T1')
+        # print(self.ports['T1'])
+        print(self.b2.ports['P1'])
+        # self.b2.connect(port=self.b2.ports['P1'], destination=self.b1.ports['P2'])
+        self.b2.connect(port='P1', destination=self.b1.ports['P2'])
+        print(self.b2.ports['P1'])
+        print('\n\n')
+
+        # r1 = self.route_straight(self.b2.ports['P1'], self.ports['T2'])
+        # r2 = self.route_straight(self.b1.ports['P1'], self.ports['T1'])
+        # r3 = self.route_straight(self.b2.ports['P2'], self.b1.ports['P2'])
 
         D = spira.Cell(name='Q2')
-        D += [self.b1, self.b2, r1, r2, r3]
+        D += self.b1
+        D += self.b2
+        # D += [self.b1, self.b2, r1, r2, r3]
 
-        D += self.ports['T1']
-        D += self.ports['T2']
+        # D += self.ports['T1']
+        # D += self.ports['T2']
 
-        D.rotate(angle=self.port1.orientation, center=self.p1)
-        D.move(midpoint=self.ports['T1'], destination=self.port1)
+        # D.rotate(angle=self.port1.orientation, center=self.p1)
+        # D.move(midpoint=self.ports['T1'], destination=self.port1)
 
         return spira.SRef(D)
 

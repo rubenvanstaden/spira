@@ -39,10 +39,13 @@ class __ProcessLayer__(Cell):
         return self.elementals[0]
 
     def commit_to_gdspy(self, cell=None, transformation=None):
-        P = self.elementals[0].commit_to_gdspy(cell=cell, transformation=transformation)
+        # cell = gdspy.Cell(self.name, exclude_from_current=True)
+        for e in self.elementals:
+            e.commit_to_gdspy(cell=cell, transformation=transformation)
         for p in self.ports:
             p.commit_to_gdspy(cell=cell, transformation=transformation)
-        return P
+        # return P
+        return cell
 
 
 class __PortConstructor__(__ProcessLayer__):
@@ -108,8 +111,8 @@ class __PortConstructor__(__ProcessLayer__):
             name = '{}_e{}'.format(self.ps_layer.layer.name, i)
             x = np.sign(clockwise) * (xpts[i+1] - xpts[i])
             y = np.sign(clockwise) * (ypts[i] - ypts[i+1])
-            # orientation = (np.arctan2(x, y) * 180/np.pi) - 90
-            orientation = (np.arctan2(x, y) * 180/np.pi)
+            orientation = (np.arctan2(x, y) * 180/np.pi) - 90
+            # orientation = (np.arctan2(x, y) * 180/np.pi)
             midpoint = [(xpts[i+1] + xpts[i])/2, (ypts[i+1] + ypts[i])/2]
             width = np.abs(np.sqrt((xpts[i+1] - xpts[i])**2 + (ypts[i+1]-ypts[i])**2))
             edges += spira.EdgeTerminal(

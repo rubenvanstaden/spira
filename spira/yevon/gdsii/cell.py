@@ -122,6 +122,7 @@ class CellAbstract(gdspy.Cell, __Cell__):
         return self
 
     def __rotate__(self, angle=45, center=(0,0)):
+        # print('\n--- Rotate Cell ---')
         from spira.yevon import process as pc
         from spira.yevon.gdsii.polygon import PolygonAbstract
         if angle == 0:
@@ -137,30 +138,9 @@ class CellAbstract(gdspy.Cell, __Cell__):
         self.ports = PortList()
         for p in ports:
             p.midpoint = utils.rotate_algorithm(p.midpoint, angle, center)
-            p.orientation = np.mod(p.orientation + angle, 360)
+            # p.orientation = np.mod(p.orientation + angle, 360)
             self.ports += p
         return self
-
-    # def get_ports(self, level=None):
-    #     """ Returns copies of all the ports of the Device. """
-    #     port_list = [deepcopy(p) for p in self.ports]
-    #     if level is None or level > 0:
-    #         for r in self.elementals.sref:
-
-    #             if level is None:
-    #                 new_level = None
-    #             else:
-    #                 new_level = level - 1
-
-    #             ref_ports = r.ref.get_ports(level=new_level)
-
-    #             ref_ports_transformed = []
-    #             for rp in ref_ports:
-    #                 pt = rp.transform_copy(r.transformation)
-    #                 ref_ports_transformed.append(pt)
-    #             port_list += ref_ports_transformed
-
-    #     return port_list
 
 
 class Cell(CellAbstract):
@@ -236,12 +216,6 @@ class Cell(CellAbstract):
         for S in self.elementals.sref:
             S.expand_transform()
             S.ref.expand_transform()
-        # for e in self.elementals:
-        #     if isinstance(e, SRef):
-        #         e.expand_transform()
-        #         e.ref.expand_transform()
-        #     else:
-        #         e.expand_transform()
         return self
 
     @property

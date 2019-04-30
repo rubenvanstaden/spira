@@ -23,8 +23,9 @@ class __RefElemental__(__Elemental__):
 
     def __deepcopy__(self, memo):
         return SRef(
+            # reference=deepcopy(self.ref),
+            reference=self.ref,
             midpoint=deepcopy(self.midpoint),
-            reference=deepcopy(self.ref),
             transformation=deepcopy(self.transformation),
             port_locks=self.port_locks,
             node_id=deepcopy(self.node_id)
@@ -43,6 +44,7 @@ class __RefElemental__(__Elemental__):
             ports=deepcopy(self.ref.ports)
         )
         S = S.transform(self.transformation)
+        # S = S.transform(self.transformation + spira.Translation(self.midpoint))
         self.ref = S
         self.transformation = None
         return self
@@ -53,14 +55,14 @@ class SRefAbstract(gdspy.CellReference, __RefElemental__):
     midpoint = CoordField(default=(0,0))
 
     def __translate__(self, dx=0, dy=0):
-        print('Translation SRef')
+        # print('Translation SRef')
         self.origin = self.midpoint
         super().translate(dx=dx, dy=dy)
         self.midpoint = self.origin
         return self
 
     def __rotate__(self, angle=45, center=(0,0)):
-        print('Rotation SRef')
+        # print('Rotation SRef')
         if angle == 0:
             return self
         if issubclass(type(center), __Port__):
@@ -69,9 +71,7 @@ class SRefAbstract(gdspy.CellReference, __RefElemental__):
             center = center.convert_to_array()
         if isinstance(self.midpoint, Coord):
             self.midpoint = self.midpoint.convert_to_array()
-
         self.midpoint = utils.rotate_algorithm(self.midpoint, angle, center)
-
         return self
 
     def __reflect__(self, p1=(0,0), p2=(1,0)):
@@ -79,7 +79,15 @@ class SRefAbstract(gdspy.CellReference, __RefElemental__):
         return self
 
     def commit_to_gdspy(self, cell, transformation=None):
-        self.ref.commit_to_gdspy(cell=cell, transformation=self.transformation)
+        # if self.transformation is None:
+        #     tf = spira.Translation(self.midpoint)
+        # else:
+        #     tf = self.transformation + spira.Translation(self.midpoint)
+        tf = self.transformation
+        print('--- Commit SRef to gdspy ---')
+        print(tf)
+        print('----------------------------')
+        self.ref.commit_to_gdspy(cell=cell, transformation=tf)
 
     def dependencies(self):
         from spira.yevon.gdsii.cell_list import CellList
@@ -108,8 +116,22 @@ class SRefAbstract(gdspy.CellReference, __RefElemental__):
     def ports(self):
         ports = spira.PortList()
         for p in self.ref.ports:
-            ports += p.transform_copy(self.transformation)
+            # print(p)
+            port = p.transform_copy(self.transformation)
+            # print(port)
+            # print('++++++++')
+            ports += port
+            # ports += p.transform_copy(self.transformation)
+            # if self.transformation is None:
+            #     tf = spira.Translation(self.midpoint)
+            # else:
+            #     tf = self.transformation + spira.Translation(self.midpoint)
+            # ports += p.transform_copy(tf)
         return ports
+
+    # def move(self, position):
+    #     self.midpoint = Coord(self.midpoint[0] + position[0], self.midpoint[1] + position[1])
+    #     return self
 
     def move(self, midpoint=(0,0), destination=None, axis=None):
 
@@ -117,16 +139,16 @@ class SRefAbstract(gdspy.CellReference, __RefElemental__):
             destination = midpoint
             midpoint = [0,0]
 
-        # if issubclass(type(midpoint), __Port__):
-        #     o = midpoint.midpoint
-        print(midpoint)
         if isinstance(midpoint, Coord):
             o = midpoint
         elif np.array(midpoint).size == 2:
             o = midpoint
-        elif midpoint in self.ports:
-            o = self.ports[midpoint].midpoint
-            print(o)
+        # elif midpoint in self.ports:
+            # o = self.ports[midpoint].midpoint
+        elif midpoint in self.ports.get_names():
+            o = self.ports[midpoint.name].midpoint
+        elif issubclass(type(midpoint), __Port__):
+            o = midpoint.midpoint
         else:
             raise ValueError("[PHIDL] [DeviceReference.move()] ``midpoint`` " +
                                 "not array-like, a port, or port name")
@@ -137,8 +159,10 @@ class SRefAbstract(gdspy.CellReference, __RefElemental__):
             d = destination
         elif np.array(destination).size == 2:
             d = destination
-        elif destination in self.ports:
-            d = self.ports[destination].midpoint
+        # elif destination in self.ports:
+        #     d = self.ports[destination].midpoint
+        elif destination in self.ports.get_names():
+            d = self.ports[destination.name].midpoint
         else:
             raise ValueError("[PHIDL] [DeviceReference.move()] ``destination`` " +
                                 "not array-like, a port, or port name")
@@ -147,36 +171,16 @@ class SRefAbstract(gdspy.CellReference, __RefElemental__):
         d = Coord(d[0], d[1])
 
         dxdy = d - o
-        # dxdy = np.array([d[0], d[1]]) - np.array([o[0], o[1]])
-
-        if self.transformation is None:
-            self.transformation = spira.Translation(translation=dxdy)
-        else:
-            self.transformation += spira.Translation(translation=dxdy)
-
+        self.midpoint = Coord(self.midpoint) + dxdy
+        # self.transformation = spira.Translation(translation=dxdy)(self).transformation
         return self
 
-    # def move(self, midpoint=(0,0), destination=None, axis=None):
-    #     d, o = utils.move_algorithm(obj=self, midpoint=midpoint, destination=destination, axis=axis)
-    #     dxdy = np.array(d) - np.array(o)
-    #     if not isinstance(self.midpoint, Coord):
-    #         self.midpoint = Coord(self.midpoint)
-    #     # self.midpoint = np.array(self.midpoint) + np.array(dxdy)
-    #     # self.midpoint += dxdy
-    #     if self.transformation is None:
-    #         self.transformation = spira.Translation(translation=dxdy)
-    #     else:
-    #         self.transformation += spira.Translation(translation=dxdy)
-    #     # self.midpoint.move(dxdy)
-    #     return self
-
     def connect(self, port, destination):
-        """  """
-        # if port in self.ports.keys():
-        #     p = self.ports[port]
-        # if port in self.ports.get_names():
-        if port in self.ports:
-            p = self.ports[port]
+        if port in self.ports.get_names():
+            if issubclass(type(port), __Port__):
+                p = self.ports[port.name]
+            elif isinstance(port, str):
+                p = self.ports[port]
         elif issubclass(type(port), __Port__):
             p = port
         else:
@@ -184,16 +188,15 @@ class SRefAbstract(gdspy.CellReference, __RefElemental__):
                 "valid port name - received ({}), ports available " +
                 "are ({})".format(port, self.ports.get_names()))
         angle = 180 + destination.orientation - p.orientation
-        # self.__rotate__(angle=angle, center=p.midpoint)
-        # self.__rotate__(angle=angle, center=(10*1e6, 0))
+        # self.transformation = spira.Rotation(rotation=angle, center=p.midpoint)(self).transformation
 
-        if self.transformation is None:
-            self.transformation = spira.Rotation(rotation=angle, center=p.midpoint)
-        else:
-            self.transformation += spira.Rotation(rotation=angle, center=p.midpoint)
+        print(angle)
+        if not isinstance(self.midpoint, Coord):
+            self.midpoint = Coord(self.midpoint[0], self.midpoint[1])
 
+        T = spira.Rotation(angle)
+        self.midpoint.transform(T)
         self.move(midpoint=p, destination=destination)
-
         return self
 
     def align(self, p1, p2, distance):
@@ -256,7 +259,7 @@ class SRef(SRefAbstract):
 
     def __repr__(self):
         name = self.ref.name
-        return ("[SPiRA: SRef] (\"{}\", transforms {})".format(name, self.transformation))
+        return ("[SPiRA: SRef] (\"{}\", midpoint {}, transforms {})".format(name, self.midpoint, self.transformation))
 
     def __str__(self):
         return self.__repr__()

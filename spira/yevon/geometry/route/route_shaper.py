@@ -13,6 +13,7 @@ from spira.yevon.rdd.layer import PhysicalLayerField
 from spira.yevon.layer import LayerField
 from spira.yevon.geometry.coord import CoordField, Coord
 from spira.core.descriptor import DataField, FunctionField
+from spira.yevon.geometry.ports.base import PortField
 from spira.yevon.rdd import get_rule_deck
 
 
@@ -84,7 +85,8 @@ class RouteArcShape(__RouteSimple__):
 
     def create_orientation2(self):
         # return self.start_angle + self.theta + 180 - 180*(self.theta<0)
-        return self.start_angle + self.theta - 180*(self.theta<0)
+        # return self.start_angle + self.theta - 180*(self.theta<0)
+        return self.start_angle + self.theta + 180*(self.theta<0)
 
     def create_angle1(self):
         angle1 = (self.start_angle + 0) * np.pi/180
@@ -148,8 +150,8 @@ class RouteSquareShape(__RouteSimple__):
 
 class RouteSimple(__RouteSimple__):
 
-    port1 = DataField()
-    port2 = DataField()
+    port1 = PortField()
+    port2 = PortField()
 
     num_path_pts = IntegerField(default=99)
 
@@ -181,17 +183,16 @@ class RouteSimple(__RouteSimple__):
 
     def create_points(self, points):
 
-        # point_a = np.array(self.port1.midpoint)
         point_a = self.port1.midpoint
         if self.width_input is None:
             self.width_input = self.port1.width
-        # point_b = np.array(self.port2.midpoint)
         point_b = self.port2.midpoint
         if self.width_output is None:
             self.width_output = self.port2.width
 
         if round(abs(mod(self.port1.orientation - self.port2.orientation, 360)), 3) != 180:
             raise ValueError('Ports do not face eachother.')
+
         orientation = self.port1.orientation + 90
 
         separation = Coord(point_b) - Coord(point_a)

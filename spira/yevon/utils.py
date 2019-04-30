@@ -26,7 +26,10 @@ def reflect_algorithm(points, p1=(0,0), p2=(1,0)):
 
 
 def rotate_algorithm(points, angle=45, center=(0,0)):
-    points = list(points)
+    if isinstance(points, Coord):
+        points = points.convert_to_array()
+    if isinstance(center, Coord):
+        center = center.convert_to_array()
     angle = angle*np.pi/180
     ca = np.cos(angle)
     sa = np.sin(angle)

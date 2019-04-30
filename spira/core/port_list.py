@@ -35,8 +35,11 @@ class PortList(TypedList):
             return self.get_from_label(key)
 
     def __contains__(self, item):
+        # print(item)
         for p in self._list:
-            if p.name == item.name:
+            # if p.name == item.name:
+            if p == item:
+                # print('TRUE')
                 return True
         return False
 

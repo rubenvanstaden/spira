@@ -19,7 +19,7 @@ class TestGeneral(spira.Cell):
 
         r1 = RouteSimple(port1=p1, port2=p2, path_type='straight', width_type='straight')
         r2 = RoutePointShape(path=points, width=1*1e6)
-        r3 = RouteArcShape(start_angle=0, theta=90, angle_resolution=5)
+        r3 = RouteArcShape(start_angle=0, theta=-90, angle_resolution=5)
         r4 = RouteSquareShape()
 
         elems += spira.SRef(

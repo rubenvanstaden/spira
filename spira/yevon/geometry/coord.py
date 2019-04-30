@@ -2,11 +2,16 @@ import math
 import numpy as np
 from spira.core.param.restrictions import RestrictType
 from spira.core.descriptor import DataFieldDescriptor
+from spira.core.transformable import Transformable
 
 
-class Coord(object):
-    """
+class Coord(Transformable):
+    """ Special SPiRA coordinate that can be transformed and moved.
 
+    Example
+    -------
+    >>> c = Coord(0,0)
+    >>> [SPiRA: Coord] ()
     """
 
     def __init__(self, *args):
@@ -16,9 +21,9 @@ class Coord(object):
             self.x, self.y = args[0][0], args[0][1]
 
     def __getitem__(self, index):
-        if index == 0: 
+        if index == 0:
             return self.x
-        if index == 1: 
+        if index == 1:
             return self.y
         raise IndexError("Coord type only supports index 0 and 1")
 
@@ -34,6 +39,18 @@ class Coord(object):
     def __iter__(self):
         for index in range(2):
             yield self[index]
+
+    def transform(self, transformation):
+        print('Coord Transform')
+        print(self)
+        C = transformation.apply_to_coord(self)
+        print(C)
+        self.x = C.x
+        self.y = C.y
+        return self
+
+    def transform_copy(self, transformation):
+        return transformation.apply_to_coord(Coord(self.x, self.y))
 
     def move(self, position):
         """ Move the coordinate by a displacement vector. """

@@ -7,6 +7,7 @@ from spira.core.transformation import TransformationField
 
 
 class __Transformable__(MixinBowl):
+    """ Transformable base class. """
 
     def transform(self, transformation):
         return self

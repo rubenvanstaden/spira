@@ -193,8 +193,11 @@ class __Shape__(FieldInitializer):
         """ number of points in the shape """
         return self.__len__()
 
+    @property
     def center_of_mass(self):
         c = np.mean(self.points[0], 0)
+        # print(self.points)
+        # c = np.mean(self.points, 0)
         return [c[0], c[1]]
         # return Coord2(COM[0], COM[1]) 
 

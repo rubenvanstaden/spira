@@ -54,37 +54,42 @@ class __Port__(__Elemental__):
 
     def encloses(self, polygon):
         return pyclipper.PointInPolygon(self.midpoint, polygon) != 0
-
+        
     def transform(self, transformation):
         if transformation is not None:
-            transformation.apply_to_object(self)
+            self.midpoint = transformation.apply_to_coord(self.midpoint)
+            self.orientation = transformation.apply_to_angle(self.orientation)
         return self
+
+    # def transform(self, transformation):
+    #     if transformation is not None:
+    #         transformation.apply_to_object(self)
+    #     return self
         
-    def transform_copy(self, transformation):
-        T = deepcopy(self)
-        T.transform(transformation)
-        return T
+    # def transform_copy(self, transformation):
+    #     T = deepcopy(self)
+    #     T.transform(transformation)
+    #     return T
 
-    def __reflect__(self):
-        """ Reflect around the x-axis. """
-        print('\n--- Reflecting Port ---')
-        self.midpoint = [self.midpoint[0], -self.midpoint[1]]
-        self.orientation = -self.orientation
-        self.orientation = np.mod(self.orientation, 360)
-        # self.reflection = True
-        return self
+    # def __reflect__(self):
+    #     """ Reflect around the x-axis. """
+    #     self.midpoint = [self.midpoint[0], -self.midpoint[1]]
+    #     self.orientation = -self.orientation
+    #     self.orientation = np.mod(self.orientation, 360)
+    #     # self.reflection = True
+    #     return self
 
-    def __rotate__(self, angle=45, center=(0,0)):
-        """ Rotate port around the center with angle. """
-        self.orientation += angle
-        self.orientation = np.mod(self.orientation, 360)
-        self.midpoint = utils.rotate_algorithm(self.midpoint, angle=angle, center=center)
-        return self
+    # def __rotate__(self, angle=45, center=(0,0)):
+    #     """ Rotate port around the center with angle. """
+    #     self.orientation += angle
+    #     self.orientation = np.mod(self.orientation, 360)
+    #     self.midpoint = utils.rotate_algorithm(self.midpoint, angle=angle, center=center)
+    #     return self
 
-    def __translate__(self, dx, dy):
-        """ Translate port by dx and dy. """
-        self.midpoint = self.midpoint + np.array([dx, dy])
-        return self
+    # def __translate__(self, dx, dy):
+    #     """ Translate port by dx and dy. """
+    #     self.midpoint = self.midpoint + np.array([dx, dy])
+    #     return self
 
     def move(self, midpoint=(0,0), destination=None, axis=None):
         d, o = utils.move_algorithm(obj=self, midpoint=midpoint, destination=destination, axis=axis)
@@ -118,17 +123,22 @@ class __PhysicalPort__(__Port__):
     ps_layer = PhysicalLayerField()
     text_type = NumberField(default=RDD.GDSII.TEXT)
 
-    label = DataField(fdef_name='create_label')
+    # label = DataField(fdef_name='create_label')
 
-    def create_label(self):
-        lbl = spira.Label(
-            position=self.midpoint,
-            text=self.name,
-            gds_layer=self.gds_layer,
-            texttype=self.text_type,
-            color=color.COLOR_GHOSTWHITE
-        )
-        return lbl
+    # # def create_label(self):
+    # @property
+    # def label(self):
+    #     lbl = spira.Label(
+    #         position=self.midpoint,
+    #         text=self.name,
+    #         gds_layer=self.gds_layer,
+    #         texttype=self.text_type,
+    #         orientation=self.orientation,
+    #         color=color.COLOR_GHOSTWHITE
+    #     )
+    #     # lbl.__rotate__(angle=self.orientation)
+    #     # lbl.move(midpoint=lbl.position, destination=self.midpoint)
+    #     return lbl
 
 
 class __VerticalPort__(__PhysicalPort__):

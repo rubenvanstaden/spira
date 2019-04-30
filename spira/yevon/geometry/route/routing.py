@@ -1,7 +1,6 @@
 import spira.all as spira
 import numpy as np
-# from spira import shapes
-# from spira import pc
+from copy import deepcopy
 from spira.yevon.geometry.route.manhattan import __Manhattan__
 from spira.yevon.geometry.route.manhattan90 import Route90
 from spira.yevon.geometry.route.manhattan180 import Route180
@@ -31,9 +30,9 @@ class Route(Structure, __Manhattan__):
     route_straight = DataField(fdef_name='create_route_straight')
     route_auto = DataField(fdef_name='create_route_auto')
     
-    # route_transformation = TransformationField(allow_none=True, default=None)
-
     def create_angle(self):
+        print(self.port1)
+        print(self.port2)
         if self.port1 and self.port2:
             angle_diff = self.port1.orientation - self.port2.orientation
             angle = np.round(np.abs(np.mod(angle_diff, 360)), 3)
@@ -41,6 +40,7 @@ class Route(Structure, __Manhattan__):
         return None
 
     def determine_type(self):
+        print(':: Determine type of route...')
         if self.cell is not None:
             self.__type__ = 'layout'
         if self.angle is not None:
@@ -58,6 +58,8 @@ class Route(Structure, __Manhattan__):
         if len(self.port_list) > 0:
             self.__type__ = 'auto'
 
+        print(self.__type__)
+
     def create_route_90(self):
         R1 = Route90(
             port1=self.port1,
@@ -67,10 +69,15 @@ class Route(Structure, __Manhattan__):
             ps_layer=self.ps_layer,
             gds_layer=self.gds_layer
         )
+        # R = spira.Cell(
+        #     name='M90',
+        #     elementals=R1.elementals,
+        #     ports=R1.ports
+        # )
         R = spira.Cell(
             name='M90',
-            elementals=R1.elementals,
-            ports=R1.ports
+            elementals=deepcopy(R1.elementals),
+            ports=deepcopy(R1.ports)
         )
         r = spira.SRef(R)
         return r
