@@ -8,7 +8,7 @@ from spira.core.param.restrictions import RestrictType
 from spira.core.initializer import FieldInitializer
 from spira.core.descriptor import DataFieldDescriptor, FunctionField, DataField
 from spira.core.elem_list import ElementList, ElementalListField
-from spira.yevon.geometry.coord import CoordField
+from spira.yevon.geometry.coord import CoordField, Coord
 from spira.yevon.visualization.color import ColorField
 from spira.yevon.visualization import color
 from spira.core.param.variables import NumberField
@@ -96,50 +96,57 @@ class CellAbstract(gdspy.Cell, __Cell__):
 
     def move(self, midpoint=(0,0), destination=None, axis=None):
         from spira.yevon import process as pc
-        d, o = utils.move_algorithm(obj=self, midpoint=midpoint, destination=destination, axis=axis)
+        from spira.yevon.geometry.ports.base import __Port__
+        # d, o = utils.move_algorithm(obj=self, midpoint=midpoint, destination=destination, axis=axis)
+
+        if destination is None:
+            destination = midpoint
+            midpoint = [0,0]
+    
+        if issubclass(type(midpoint), __Port__):
+            o = midpoint.midpoint
+        elif isinstance(midpoint, Coord):
+            o = midpoint
+        elif np.array(midpoint).size == 2:
+            o = midpoint
+        elif midpoint in obj.ports:
+            o = obj.ports[midpoint].midpoint
+        else:
+            raise ValueError("[PHIDL] [DeviceReference.move()] ``midpoint`` " +
+                                "not array-like, a port, or port name")
+    
+        if issubclass(type(destination), __Port__):
+            d = destination.midpoint
+        elif isinstance(destination, Coord):
+            d = destination
+        elif np.array(destination).size == 2:
+            d = destination
+        elif destination in obj.ports:
+            d = obj.ports[destination].midpoint
+        else:
+            raise ValueError("[PHIDL] [DeviceReference.move()] ``destination`` " +
+                                "not array-like, a port, or port name")
+    
+        if axis == 'x':
+            d = (d[0], o[1])
+        if axis == 'y':
+            d = (o[0], d[1])
+    
+        d = Coord(d[0], d[1])
+        o = Coord(o[0], o[1])
+
+        print('')
+        print(self)
+        print('[*] Moving elementals:')
         for e in self.elementals:
-            e.move(destination=d, midpoint=o)
+            print(e)
+            e.move(midpoint=o, destination=d)
+        print('')
+
         for p in self.ports:
             mc = np.array(p.midpoint) + np.array(d) - np.array(o)
             p.move(midpoint=p.midpoint, destination=mc)
-        return self
 
-    def __translate__(self, dx, dy):
-        for e in self.elementals:
-            e.__translate__(dx=dx, dy=dy)
-        for p in self.ports:
-            p.__translate__(dx=dx, dy=dy)
-        return self
-
-    def __reflect__(self, p1=(0,0), p2=(1,0)):
-        for e in self.elementals:
-            if not issubclass(type(e), LabelAbstract):
-                e.__reflect__(p1, p2)
-        for p in self.ports:
-            p.midpoint = utils.reflect_algorithm(p.midpoint, p1, p2)
-            phi = np.arctan2(p2[1]-p1[1], p2[0]-p1[0])*180 / np.pi
-            p.orientation = 2*phi - p.orientation
-        return self
-
-    def __rotate__(self, angle=45, center=(0,0)):
-        # print('\n--- Rotate Cell ---')
-        from spira.yevon import process as pc
-        from spira.yevon.gdsii.polygon import PolygonAbstract
-        if angle == 0:
-            return self
-        for e in self.elementals:
-            if issubclass(type(e), PolygonAbstract):
-                e.__rotate__(angle=angle, center=center)
-            elif isinstance(e, SRef):
-                e.__rotate__(angle=angle, center=center)
-            elif issubclass(type(e), ProcessLayer):
-                e.__rotate__(angle=angle, center=center)
-        ports = self.ports
-        self.ports = PortList()
-        for p in ports:
-            p.midpoint = utils.rotate_algorithm(p.midpoint, angle, center)
-            # p.orientation = np.mod(p.orientation + angle, 360)
-            self.ports += p
         return self
 
 

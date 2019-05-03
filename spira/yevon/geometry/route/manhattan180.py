@@ -20,32 +20,25 @@ class RouteBase180(__Manhattan__):
         t1 = deepcopy(self.ports['T1'])
         t2 = deepcopy(self.ports['T2'])
         
-        # bp1 = deepcopy(self.b1.ports['P2'])
-
-        # print('********************')
-        # print(self.b1.ports['P2'])
-        # self.b1.connect(port=bp1, destination=t1)
         self.b1.connect(port=self.b1.ports['P2'], destination=t1)
-        # # self.b1.transformation.apply_to_object(self.b1)
-        # print(self.p1)
-        # print(self.p2)
-        # print(self.radius)
-        h = (self.p2[1]-self.p1[1])/2 - self.radius
+        h = (self.p2[1]-self.p1[1])/2
+        # h = (self.p2[1]-self.p1[1])/2 - self.radius
         # h = (self.p2[1]-self.p1[1]) - self.radius
-        # print(h)
-        # print(self.b1.ports['P2'])
         self.b1.move(midpoint=self.b1.ports['P2'], destination=[0, h])
+        
+        # self.b2.connect(port=self.b2.ports['P2'], destination=t2)
 
-        # print(self.b1.transformation)
+        print(self.b1.ports)
+        print(self.b2.ports)
 
-        # self.b2.connect(port=self.b2.ports['P1'], destination=self.b1.ports['P1'])
-        self.b2.connect(port=self.b2.ports['P2'], destination=self.b1.ports['P1'])
-        h = (self.p2[1]-self.p1[1])/2 + self.radius
-        self.b2.move(midpoint=self.b2.ports['P1'], destination=[self.ports['T2'].midpoint[0], h])
+        # # self.b2.connect(port=self.b2.ports['P1'], destination=self.b1.ports['P1'])
+        # self.b2.connect(port=self.b2.ports['P2'], destination=self.b1.ports['P1'])
+        # h = (self.p2[1]-self.p1[1])/2 + self.radius
+        # self.b2.move(midpoint=self.b2.ports['P1'], destination=[self.ports['T2'].midpoint[0], h])
 
-        r1 = self.route_straight(self.b1.ports['P2'], t1)
-        r2 = self.route_straight(self.b2.ports['P1'], self.ports['T2'])
-        r3 = self.route_straight(self.b2.ports['P2'], self.b1.ports['P1'])
+        # r1 = self.route_straight(self.b1.ports['P2'], t1)
+        # r2 = self.route_straight(self.b2.ports['P1'], self.ports['T2'])
+        # r3 = self.route_straight(self.b2.ports['P2'], self.b1.ports['P1'])
 
         # r1 = self.route_straight(self.b1.ports['P2'], self.ports['T1'])
         # # r2 = self.route_straight(self.b2.ports['P2'], self.ports['T2'])
@@ -77,22 +70,20 @@ class RouteBase180(__Manhattan__):
         h = (self.p2[1]-self.p1[1])/2 - self.radius
         self.b1.move(midpoint=self.b1.ports['P1'], destination=[0, h])
 
-        # print(self.b1.transformation)
-
         # self.b2.connect(port=self.b2.ports['P1'], destination=self.b1.ports['P2'])
         # # self.b2.connect(port=self.b2.ports['P2'], destination=self.b1.ports['P2'])
         # # h = (self.p2[1]-self.p1[1])/2 + self.radius
         # # self.b2.move(midpoint=self.b2.ports['P1'], destination=[self.ports['T2'].midpoint[0], h])
 
-        print('\n\n')
-        # print(self.b1.ports)
-        # print('T1')
-        # print(self.ports['T1'])
-        print(self.b2.ports['P1'])
-        # self.b2.connect(port=self.b2.ports['P1'], destination=self.b1.ports['P2'])
-        self.b2.connect(port='P1', destination=self.b1.ports['P2'])
-        print(self.b2.ports['P1'])
-        print('\n\n')
+        # print('\n\n')
+        # # print(self.b1.ports)
+        # # print('T1')
+        # # print(self.ports['T1'])
+        # print(self.b2.ports['P1'])
+        # # self.b2.connect(port=self.b2.ports['P1'], destination=self.b1.ports['P2'])
+        # self.b2.connect(port='P1', destination=self.b1.ports['P2'])
+        # print(self.b2.ports['P1'])
+        # print('\n\n')
 
         # r1 = self.route_straight(self.b2.ports['P1'], self.ports['T2'])
         # r2 = self.route_straight(self.b1.ports['P1'], self.ports['T1'])

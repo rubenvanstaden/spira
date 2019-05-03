@@ -1,6 +1,7 @@
 import gdspy
 import spira.all as spira
 import numpy as np
+from copy import deepcopy
 from spira.yevon.gdsii.base import __Group__
 from spira.yevon.properties.geometry import __GeometryProperties__
 from spira.yevon.geometry.coord import Coord
@@ -8,45 +9,51 @@ from spira.yevon.geometry.coord import Coord
 
 class CellProperties(__Group__, __GeometryProperties__):
 
+    _cid = 0
+
     __gdspy_cell__ = None
 
     def get_gdspy_cell(self):
-        if self.__gdspy_cell__ is None:
-            self.set_gdspy_cell()
+        # if self.__gdspy_cell__ is None:
+        #     self.set_gdspy_cell()
+        self.set_gdspy_cell()
         return self.__gdspy_cell__
 
     def set_gdspy_cell(self):
-        glib = gdspy.GdsLibrary(name=self.name)
-        cell = spira.Cell(name=self.name, elementals=self.elementals)
+        name = '{}_{}'.format(self.name, CellProperties._cid)
+        CellProperties._cid += 1
+        print(name)
+        glib = gdspy.GdsLibrary(name=name)
+        cell = spira.Cell(name=self.name, elementals=deepcopy(self.elementals))
+        # cell = spira.Cell(name=self.name, elementals=self.elementals)
         self.__gdspy_cell__ = cell.construct_gdspy_tree(glib)
 
     def convert_references(self, c, c2dmap):
         for e in c.elementals.flat_elems():
             G = c2dmap[c]
             if isinstance(e, spira.SRef):
+
+                if not isinstance(e.midpoint, Coord):
+                    e.midpoint = Coord(e.midpoint[0], e.midpoint[1])
+
                 # if e.transformation is None:
                 #     tf = spira.Translation(e.midpoint) 
                 # else:
                 #     tf = e.transformation + spira.Translation(e.midpoint)
-                # T = e.transformation
 
-                # print('\n--- Convert Ref ---')
+                tf = e.transformation
+
                 # print(tf)
-                # print(type(tf))
-                # print('--------------------\n')
-                # if tf is not None:
-                #     e = tf.appl
-                # print(e)
-                # if not isinstance(e.midpoint, Coord):
-                #     raise ValueError('Not Coord')
-                #     # e.midpoint = e.midpoint.convert_to_array()
+
+                # e.midpoint = tf(e.midpoint)
+
+                e.midpoint = tf.apply_to_coord(e.midpoint)
                 
                 if isinstance(e.midpoint, Coord):
                     origin = e.midpoint.convert_to_array()
+                else:
+                    origin = e.midpoint
 
-                # if not isinstance(e.midpoint, Coord):
-                #     e.midpoint = Coord(e.midpoint[0], e.midpoint[1])
-    
                 # T = spira.Translation(e.midpoint)
 
                 # if T is not None:

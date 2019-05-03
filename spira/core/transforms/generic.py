@@ -2,6 +2,7 @@ import numpy as np
 from spira.core.transformation import ReversibleTransform
 
 from spira.yevon import utils
+from numpy.linalg import norm
 from spira.core.param.variables import *
 from spira.yevon.geometry.coord import CoordField, Coord
 from spira.core.descriptor import FunctionField, SetFunctionField
@@ -57,6 +58,8 @@ class GenericTransform(ReversibleTransform):
         )
 
     def __translate__(self, coord):
+        if not isinstance(self.translation, Coord):
+            self.translation = Coord(self.translation[0], self.translation[1])
         return Coord(coord[0] + self.translation.x, coord[1] + self.translation.y)
 
     def __rotate__(self, coord):
@@ -64,6 +67,41 @@ class GenericTransform(ReversibleTransform):
 
     def __magnify__(self, coord):
         return Coord(coord[0] * self.magnification, coord[1] * self.magnification)
+        
+    def __reflect__(self, coords, p1=(0,0), p2=(1,0)):
+
+        if self.reflection is True:
+            points = np.array(coords.convert_to_array())
+            p1 = np.array(p1)
+            p2 = np.array(p2)
+            print(points)
+            if np.asarray(points).ndim == 1:
+                print('wmefuebfk')
+                t = np.dot((p2-p1), (points-p1))/norm(p2-p1)**2
+                pts = 2*(p1 + (p2-p1)*t) - points
+            if np.asarray(points).ndim == 2:
+                raise ValueError('This is a array, not an coordinate.')
+                # t = np.dot((p2-p1), (p2-p1))/norm(p2-p1)**2
+                # pts = np.array([2*(p1 + (p2-p1)*t) - p for p in points])
+        else:
+            pts = coords
+        pts = Coord(pts[0], pts[1])
+        return pts
+
+    def __reflect_array__(self, coords, p1=(0,0), p2=(1,0)):
+        print('Reflection Array!!!')
+        if self.reflection is True:
+            points = np.array(coords); p1 = np.array(p1); p2 = np.array(p2)
+            if np.asarray(points).ndim == 1:
+                # t = np.dot((p2-p1), (points-p1))/norm(p2-p1)**2
+                # pts = 2*(p1 + (p2-p1)*t) - points
+                raise ValueError('This is a coordinate, not an array.')
+            if np.asarray(points).ndim == 2:
+                t = np.dot((p2-p1), (p2-p1))/norm(p2-p1)**2
+                pts = np.array([2*(p1 + (p2-p1)*t) - p for p in points])
+        else:
+            pts = coords
+        return pts
 
     def __translate_array__(self, coords):
         coords += np.array([self.translation.x, self.translation.y])
@@ -80,18 +118,18 @@ class GenericTransform(ReversibleTransform):
         return coords
 
     def apply_to_coord(self, coord):
-        # coord = self.__v_flip__(coord)# first flip 
-        coord = self.__rotate__(coord)# then magnify
-        coord = self.__magnify__(coord)# then rotate
-        coord = self.__translate__(coord) # finally translate
+        coord = self.__reflect__(coord)
+        coord = self.__rotate__(coord)
+        coord = self.__magnify__(coord)
+        coord = self.__translate__(coord)
         return coord
 
     def apply_to_array(self, coords):
-        # coords = self.__v_flip_array__(coords)# first flip 
         coords = coords[0]
-        coords = self.__rotate_array__(coords)# then rotate
-        coords = self.__magnify_array__(coords)# then magnify
-        coords = self.__translate_array__(coords) # finally translate
+        coords = self.__reflect_array__(coords)
+        coords = self.__rotate_array__(coords)
+        coords = self.__magnify_array__(coords)
+        coords = self.__translate_array__(coords)
         return coords
 
     def apply_to_angle(self, angle):
@@ -104,8 +142,12 @@ class GenericTransform(ReversibleTransform):
     def __add__(self, other):
         if issubclass(type(other), GenericTransform):
             T = GenericTransform()
-            T.reflection = (not self.reflection and other.reflection)
-            T.rotation = self.rotation + other.rotation
+
+            if other.reflection is True: S_1 = -1
+            else: S_1 = 1
+
+            T.reflection = (not self.reflection == other.reflection)
+            T.rotation = S_1 * (self.rotation + other.rotation)
             T.translation = Coord(self.translation) + other.translation
         else:
             raise ValueError('Not implemented!')
@@ -162,10 +204,10 @@ class __ConvertableTransform__(GenericTransform):
     def __convert_transform__(self):
         self.__class__ = BASE
 
-    translation = ConvertField(BASE, 'translation', __convert_transform__)
+    reflection = ConvertField(BASE, 'reflection', __convert_transform__)
     rotation = ConvertField(BASE, 'rotation', __convert_transform__)
-    # reflection = ConvertProperty(BASE, "reflection", __convert_transform__)
-    # magnification = ConvertProperty(BASE, "magnification", __convert_transform__)
+    translation = ConvertField(BASE, 'translation', __convert_transform__)
+    # magnification = ConvertProperty(BASE, 'magnification', __convert_transform__)
 
     def __add__(self, other):
         self.__convert_transform__()

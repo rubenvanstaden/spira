@@ -14,6 +14,7 @@ from spira.core.transforms import *
 from spira.core.descriptor import DataFieldDescriptor, FunctionField, DataField
 
 from spira.core.param.variables import *
+from spira.yevon.geometry.line import *
 
 
 class __RefElemental__(__Elemental__):
@@ -23,11 +24,11 @@ class __RefElemental__(__Elemental__):
 
     def __deepcopy__(self, memo):
         return SRef(
-            # reference=deepcopy(self.ref),
-            reference=self.ref,
+            reference=deepcopy(self.ref),
+            # reference=self.ref,
             midpoint=deepcopy(self.midpoint),
             transformation=deepcopy(self.transformation),
-            port_locks=self.port_locks,
+            # port_locks=self.port_locks,
             node_id=deepcopy(self.node_id)
         )
 
@@ -54,39 +55,14 @@ class SRefAbstract(gdspy.CellReference, __RefElemental__):
 
     midpoint = CoordField(default=(0,0))
 
-    def __translate__(self, dx=0, dy=0):
-        # print('Translation SRef')
-        self.origin = self.midpoint
-        super().translate(dx=dx, dy=dy)
-        self.midpoint = self.origin
-        return self
-
-    def __rotate__(self, angle=45, center=(0,0)):
-        # print('Rotation SRef')
-        if angle == 0:
-            return self
-        if issubclass(type(center), __Port__):
-            center = center.midpoint
-        if isinstance(center, Coord):
-            center = center.convert_to_array()
-        if isinstance(self.midpoint, Coord):
-            self.midpoint = self.midpoint.convert_to_array()
-        self.midpoint = utils.rotate_algorithm(self.midpoint, angle, center)
-        return self
-
-    def __reflect__(self, p1=(0,0), p2=(1,0)):
-        self.midpoint = utils.reflect_algorithm(self.midpoint)
-        return self
-
     def commit_to_gdspy(self, cell, transformation=None):
+        self.midpoint = Coord(self.midpoint[0], self.midpoint[1])
         # if self.transformation is None:
         #     tf = spira.Translation(self.midpoint)
         # else:
         #     tf = self.transformation + spira.Translation(self.midpoint)
         tf = self.transformation
-        print('--- Commit SRef to gdspy ---')
-        print(tf)
-        print('----------------------------')
+        # print(tf)
         self.ref.commit_to_gdspy(cell=cell, transformation=tf)
 
     def dependencies(self):
@@ -116,17 +92,8 @@ class SRefAbstract(gdspy.CellReference, __RefElemental__):
     def ports(self):
         ports = spira.PortList()
         for p in self.ref.ports:
-            # print(p)
-            port = p.transform_copy(self.transformation)
-            # print(port)
-            # print('++++++++')
-            ports += port
-            # ports += p.transform_copy(self.transformation)
-            # if self.transformation is None:
-            #     tf = spira.Translation(self.midpoint)
-            # else:
-            #     tf = self.transformation + spira.Translation(self.midpoint)
-            # ports += p.transform_copy(tf)
+            ports += p.transform_copy(self.transformation)
+            # ports += p.transform_copy(self.transformation).move(self.midpoint)
         return ports
 
     # def move(self, position):
@@ -134,6 +101,12 @@ class SRefAbstract(gdspy.CellReference, __RefElemental__):
     #     return self
 
     def move(self, midpoint=(0,0), destination=None, axis=None):
+        """ Move the reference internal port to the destination.
+
+        Example:
+        --------
+        >>> S.move()
+        """
 
         if destination is None:
             destination = midpoint
@@ -176,6 +149,12 @@ class SRefAbstract(gdspy.CellReference, __RefElemental__):
         return self
 
     def connect(self, port, destination):
+        """ Connect the reference internal port with an external port.
+
+        Example:
+        --------
+        >>> S.connect()
+        """
         if port in self.ports.get_names():
             if issubclass(type(port), __Port__):
                 p = self.ports[port.name]
@@ -188,20 +167,37 @@ class SRefAbstract(gdspy.CellReference, __RefElemental__):
                 "valid port name - received ({}), ports available " +
                 "are ({})".format(port, self.ports.get_names()))
         angle = 180 + destination.orientation - p.orientation
-        # self.transformation = spira.Rotation(rotation=angle, center=p.midpoint)(self).transformation
 
-        print(angle)
         if not isinstance(self.midpoint, Coord):
             self.midpoint = Coord(self.midpoint[0], self.midpoint[1])
 
-        T = spira.Rotation(angle)
+        T = spira.Rotation(angle, center=p.midpoint)
         self.midpoint.transform(T)
+        self.transform(T)
         self.move(midpoint=p, destination=destination)
+
         return self
 
-    def align(self, p1, p2, distance):
-        """  """
-        pass
+    def align(self, port, destination, distance):
+        """ Align the reference using an internal port with an external port. 
+        
+        Example:
+        --------
+        >>> S.align()
+        """
+        destination = deepcopy(destination)
+        self.connect(port, destination)
+        
+        angle = destination.orientation - 90
+        angle = np.mod(angle, 360)
+        L = line_from_point_angle(point=destination.midpoint, angle=angle)
+        dx, dy = L.get_coord_from_distance(destination, distance)
+
+        T = spira.Translation(translation=Coord(dx, dy))
+        self.midpoint.transform(T)
+        self.transform(T)
+
+        return self
 
 
 class SRef(SRefAbstract):
@@ -217,9 +213,6 @@ class SRef(SRefAbstract):
     >>> sref = spira.SRef(structure=cell)
     """
 
-    port_locks = DictField(default={})
-    port_connects = DictField(default={})
-
     def get_alias(self):
         if not hasattr(self, '__alias__'):
             self.__alias__ = '_S0'
@@ -234,16 +227,6 @@ class SRef(SRefAbstract):
         __RefElemental__.__init__(self, **kwargs)
 
         self.ref = reference
-
-        # self._local_ports = {}
-        # self._parent_ports = []
-
-        # for p in reference.ports:
-        #     self._parent_ports.append(p)
-        # for t in reference.terms:
-        #     self._parent_ports.append(t)
-
-        # self.iports = {}
 
     # def __repr__(self):
     #     name = self.ref.name
@@ -264,12 +247,12 @@ class SRef(SRefAbstract):
     def __str__(self):
         return self.__repr__()
 
-    @property
-    def translation(self):
-        if self.transformation is not None:
-            return self.transformation.translation
-        else:
-            return 0.0
+    # @property
+    # def translation(self):
+    #     if self.transformation is not None:
+    #         return self.transformation.translation
+    #     else:
+    #         return 0.0
 
     @property
     def rotation(self):

@@ -19,16 +19,16 @@ class TestGeneral(spira.Cell):
 
         r1 = RouteSimple(port1=p1, port2=p2, path_type='straight', width_type='straight')
         r2 = RoutePointShape(path=points, width=1*1e6)
-        r3 = RouteArcShape(start_angle=0, theta=-90, angle_resolution=5)
+        r3 = RouteArcShape(start_angle=0, theta=90, angle_resolution=5)
         r4 = RouteSquareShape()
 
         elems += spira.SRef(
-            # reference=RouteGeneral(route_shape=r1, gds_layer=spira.Layer(number=1)), 
+            # reference=RouteGeneral(route_shape=r1, gds_layer=spira.Layer(number=1)),
             reference=RouteGeneral(route_shape=r1, connect_layer=RDD.PLAYER.M0), 
             midpoint=(0*1e6, 0*1e6)
         )
         elems += spira.SRef(
-            # reference=RouteGeneral(route_shape=r2, gds_layer=spira.Layer(number=2)), 
+            # reference=RouteGeneral(route_shape=r2, gds_layer=spira.Layer(number=2)),
             reference=RouteGeneral(route_shape=r2, connect_layer=RDD.PLAYER.M1),
             midpoint=(25*1e6, 0*1e6)
         )

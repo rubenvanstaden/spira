@@ -80,13 +80,20 @@ class RouteArcShape(__RouteSimple__):
         return self.width
 
     def create_orientation1(self):
-        # return self.start_angle + 180*(self.theta<0)
-        return self.start_angle + 180*(self.theta<0) - 180
+        # return self.start_angle - 90 + 180*(self.theta<0)
+        
+        angle = self.start_angle + 180*(self.theta<0)
+        # print(self)
+        # print(angle)
+        return angle
+        # return self.start_angle + 180*(self.theta<0) - 180
 
     def create_orientation2(self):
+        # return self.start_angle + self.theta + 90 - 180*(self.theta<0)
+
         # return self.start_angle + self.theta + 180 - 180*(self.theta<0)
         # return self.start_angle + self.theta - 180*(self.theta<0)
-        return self.start_angle + self.theta + 180*(self.theta<0)
+        return self.start_angle + self.theta - 180*(self.theta<0)
 
     def create_angle1(self):
         angle1 = (self.start_angle + 0) * np.pi/180
@@ -290,6 +297,9 @@ class RouteGeneral(Cell):
     route_shape = ShapeField(doc='Shape of the routing polygon.')
     connect_layer = PhysicalLayerField(default=RDD.DEF.PDEFAULT)
 
+    p1_name = StringField(default='P1')
+    p2_name = StringField(default='P2')
+
     port_input = DataField(fdef_name='create_port_input')
     port_output = DataField(fdef_name='create_port_output')
 
@@ -303,7 +313,8 @@ class RouteGeneral(Cell):
         return ll
 
     def create_port_input(self):
-        term = spira.Terminal(name='P1',
+        # term = spira.Terminal(name='P1',
+        term = spira.Terminal(name=self.p1_name,
             midpoint=self.route_shape.m1,
             width=self.route_shape.w1,
             orientation=self.route_shape.o1,
@@ -312,7 +323,8 @@ class RouteGeneral(Cell):
         return term
 
     def create_port_output(self):
-        term = spira.Terminal(name='P2',
+        # term = spira.Terminal(name='P2',
+        term = spira.Terminal(name=self.p2_name,
             midpoint=self.route_shape.m2,
             width=self.route_shape.w2,
             orientation=self.route_shape.o2,

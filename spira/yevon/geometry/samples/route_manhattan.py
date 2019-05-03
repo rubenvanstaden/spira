@@ -36,8 +36,8 @@ class Test_Manhattan_180(spira.Cell):
 
     def create_elementals(self, elems):
 
-        # elems += self.test_q1_180()
-        elems += self.test_q2_180()
+        elems += self.test_q1_180()
+        # elems += self.test_q2_180()
         # elems += self.test_q3_180()
         # elems += self.test_q4_180()
 

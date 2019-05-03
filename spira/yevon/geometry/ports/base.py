@@ -86,10 +86,10 @@ class __Port__(__Elemental__):
     #     self.midpoint = utils.rotate_algorithm(self.midpoint, angle=angle, center=center)
     #     return self
 
-    # def __translate__(self, dx, dy):
-    #     """ Translate port by dx and dy. """
-    #     self.midpoint = self.midpoint + np.array([dx, dy])
-    #     return self
+    def __translate__(self, dx, dy):
+        """ Translate port by dx and dy. """
+        self.midpoint = self.midpoint + np.array([dx, dy])
+        return self
 
     def move(self, midpoint=(0,0), destination=None, axis=None):
         d, o = utils.move_algorithm(obj=self, midpoint=midpoint, destination=destination, axis=axis)

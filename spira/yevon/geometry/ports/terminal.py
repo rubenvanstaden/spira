@@ -68,10 +68,31 @@ class Terminal(__HorizontalPort__):
                 self.midpoint = Coord(self.midpoint[0], self.midpoint[1])
             if not isinstance(other.midpoint, Coord):
                 other.midpoint = Coord(other.midpoint[0], other.midpoint[1])
-            return ((self.midpoint == other.midpoint) and (self.orientation == other.orientation))
+            return ((self.name == other.name) and (self.midpoint == other.midpoint) and (self.orientation == other.orientation))
 
     def __ne__(self, other):
         return (self.midpoint != other.midpoint or (self.orientation != other.orientation)) 
+        
+    def transform(self, transformation):
+        if transformation is not None:
+            self.midpoint = transformation.apply_to_coord(self.midpoint)
+            self.orientation = transformation.apply_to_angle(self.orientation)
+        return self
+
+    def transform_copy(self, transformation):
+        if transformation is not None:
+            port = self.__class__(
+                name=self.name,
+                midpoint=transformation.apply_to_coord(self.midpoint), 
+                orientation=deepcopy(transformation.apply_to_angle(self.orientation))
+            )
+        else:
+            port = self.__class__(
+                name=self.name,
+                midpoint=deepcopy(self.midpoint),
+                orientation=deepcopy(self.orientation)
+            )
+        return port
 
     def commit_to_gdspy(self, cell=None, transformation=None):
         if self.__repr__() not in list(Terminal.__committed__.keys()):
@@ -111,7 +132,7 @@ class Terminal(__HorizontalPort__):
         rect_shape = shapes.RectangleShape(p1=[0, 0], p2=[dx, dy])
         ply = spira.Polygon(shape=rect_shape, gds_layer=self.edgelayer)
         angle = self.orientation - 90
-        print(self.midpoint)
+        # print(self.midpoint)
         # T = spira.Rotation(rotation=angle) + spira.Translation(self.midpoint)
         T = spira.Rotation(rotation=angle)
         ply.transform(T)
@@ -129,6 +150,9 @@ class Terminal(__HorizontalPort__):
         arrow_shape.apply_merge
         ply = spira.Polygon(shape=arrow_shape, gds_layer=self.arrowlayer)
         angle = self.orientation
+        # print(self)
+        # print(angle)
+        # print('')
         T = spira.Rotation(rotation=angle)
         ply.transform(T)
         ply.move(midpoint=arrow_shape.center_of_mass, destination=self.midpoint)

@@ -37,12 +37,12 @@ class __Polygon__(gdspy.PolygonSet, __Elemental__):
             gds_layer=deepcopy(self.gds_layer)
         )
 
-    # def __deepcopy__(self, memo):
-    #     ply = self.modified_copy(
-    #         shape=deepcopy(self.shape),
-    #         gds_layer=deepcopy(self.gds_layer),
-    #     )
-    #     return ply
+    def __deepcopy__(self, memo):
+        ply = self.modified_copy(
+            shape=deepcopy(self.shape),
+            gds_layer=deepcopy(self.gds_layer),
+        )
+        return ply
 
     def __add__(self, other):
         polygons = []
@@ -157,6 +157,7 @@ class PolygonAbstract(__Polygon__):
         
     def transform(self, transformation):
         if transformation is not None:
+            print('\n\n[] Polygon Transform')
             print(transformation)
             print(type(transformation))
             self.shape.points = transformation.apply_to_array(self.shape.points)

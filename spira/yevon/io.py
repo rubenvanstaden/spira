@@ -9,36 +9,36 @@ from spira.yevon.utils import scale_coord_up as scu
 from spira.yevon.utils import scale_polygon_down as spd
 from spira.yevon.utils import scale_polygon_up as spu
 from copy import copy, deepcopy
-# from spira import LOG
+from spira.core.transforms import *
 
 import numpy as np
 from numpy.linalg import norm
 
 
-def __reflect__(points, p1=(0,0), p2=(1,0)):
-    points = np.array(points); p1 = np.array(p1); p2 = np.array(p2)
-    if np.asarray(points).ndim == 1:
-        t = np.dot((p2-p1), (points-p1))/norm(p2-p1)**2
-        pts = 2*(p1 + (p2-p1)*t) - points
-    if np.asarray(points).ndim == 2:
-        t = np.dot((p2-p1), (p2-p1))/norm(p2-p1)**2
-        pts = np.array([2*(p1 + (p2-p1)*t) - p for p in points])
-    return pts
+# def __reflect__(points, p1=(0,0), p2=(1,0)):
+#     points = np.array(points); p1 = np.array(p1); p2 = np.array(p2)
+#     if np.asarray(points).ndim == 1:
+#         t = np.dot((p2-p1), (points-p1))/norm(p2-p1)**2
+#         pts = 2*(p1 + (p2-p1)*t) - points
+#     if np.asarray(points).ndim == 2:
+#         t = np.dot((p2-p1), (p2-p1))/norm(p2-p1)**2
+#         pts = np.array([2*(p1 + (p2-p1)*t) - p for p in points])
+#     return pts
 
 
-def __rotate__(points, angle=45, center=(0,0)):
-    angle = angle*np.pi/180
-    ca = np.cos(angle)
-    sa = np.sin(angle)
-    sa = np.array((-sa, sa))
-    c0 = np.array(center)
-    if np.asarray(points).ndim == 2:
-        pts = (points - c0) * ca + (points - c0)[:,::-1] * sa + c0
-        pts = np.round(pts, 6)
-    if np.asarray(points).ndim == 1:
-        pts = (points - c0) * ca + (points - c0)[::-1] * sa + c0
-        pts = np.round(pts, 6)
-    return pts
+# def __rotate__(points, angle=45, center=(0,0)):
+#     angle = angle*np.pi/180
+#     ca = np.cos(angle)
+#     sa = np.sin(angle)
+#     sa = np.array((-sa, sa))
+#     c0 = np.array(center)
+#     if np.asarray(points).ndim == 2:
+#         pts = (points - c0) * ca + (points - c0)[:,::-1] * sa + c0
+#         pts = np.round(pts, 6)
+#     if np.asarray(points).ndim == 1:
+#         pts = (points - c0) * ca + (points - c0)[::-1] * sa + c0
+#         pts = np.round(pts, 6)
+#     return pts
 
 
 def current_path(filename):
@@ -63,8 +63,6 @@ def map_references(c, c2dmap):
             # e.port_locks = {port.node_id:port.locked for port in e.ref.ports}
 
 
-
-
 def wrap_labels(cell, c2dmap):
     for l in cell.get_labels():
         D = c2dmap[cell]
@@ -81,32 +79,71 @@ def wrap_references(cell, c2dmap):
     for e in cell.elements:
         if isinstance(e, gdspy.CellReference):
             ref_device = deepcopy(c2dmap[e.ref_cell])
-            center = ref_device.center
-            ref_device.move(midpoint=center, destination=(0,0))
+            center = Coord(ref_device.center[0], ref_device.center[1])
+            print(ref_device.center)
+            ref_device.center = (0,0)
+            # ref_device.move(midpoint=center, destination=(0,0))
+            print('origin center: {}'.format(ref_device.center))
+            print('')
 
-            midpoint = np.array(scu(e.origin))
-            S = spira.SRef(structure=ref_device)
+            point = scu(e.origin)
+            midpoint = Coord(point[0], point[1])
+            S = spira.SRef(reference=ref_device, midpoint=(0,0))
 
             if e.x_reflection == True:
-                center = __reflect__(points=center)
+                T = Reflection(reflection=True)
+                center = T.apply_to_coord(center)
+                S.transform(T)
+
             if e.rotation is not None:
-                center = __rotate__(points=center, angle=e.rotation)
+                angle = e.rotation
+                T = Rotation(rotation=angle)
+                center = T.apply_to_coord(center)
+                S.transform(T)
 
-            tf = {
-                'midpoint': midpoint + center,
-                'rotation': e.rotation,
-                'magnification': e.magnification,
-                'reflection': e.x_reflection
-            }
+            # origin = Coord(center[0], center[1])
+            # m = midpoint
+            # m = center
+            m = midpoint + center
+            # m = midpoint - center
+            origin = Coord(m[0], m[1])
 
-            S.transform(tf)
+            T = Translation(translation=origin)
+            S.transform(T)
+            print(S.transformation)
+
             c2dmap[cell] += S
+
+
+# def wrap_references(cell, c2dmap):
+#     """ Move all cell centers to the origin. """
+#     for e in cell.elements:
+#         if isinstance(e, gdspy.CellReference):
+#             ref_device = deepcopy(c2dmap[e.ref_cell])
+#             center = ref_device.center
+#             ref_device.move(midpoint=center, destination=(0,0))
+
+#             midpoint = np.array(scu(e.origin))
+#             S = spira.SRef(structure=ref_device)
+
+#             if e.x_reflection == True:
+#                 center = __reflect__(points=center)
+#             if e.rotation is not None:
+#                 center = __rotate__(points=center, angle=e.rotation)
+
+#             tf = {
+#                 'midpoint': midpoint + center,
+#                 'rotation': e.rotation,
+#                 'magnification': e.magnification,
+#                 'reflection': e.x_reflection
+#             }
+
+#             S.transform(tf)
+#             c2dmap[cell] += S
 
 
 def import_gds(filename, cellname=None, flatten=False, dups_layer={}):
     """  """
-
-    # LOG.header('Imported GDS file -> \'{}\''.format(filename))
 
     gdsii_lib = gdspy.GdsLibrary(name='SPiRA-Cell')
     gdsii_lib.read_gds(filename)

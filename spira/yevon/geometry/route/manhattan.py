@@ -130,7 +130,12 @@ class __Manhattan__(Cell):
                 width=self.port1.width,
                 size=(self.radius, self.radius)
             )
-        B1 = RouteGeneral(route_shape=rs, connect_layer=self.ps_layer)
+        B1 = RouteGeneral(
+            p1_name='Port1',
+            p2_name='Port2',
+            route_shape=rs, 
+            connect_layer=self.ps_layer
+        )
         return spira.SRef(B1)
 
     # def create_arc_bend_1(self):

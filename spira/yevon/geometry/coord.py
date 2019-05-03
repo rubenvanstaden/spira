@@ -28,9 +28,9 @@ class Coord(Transformable):
         raise IndexError("Coord type only supports index 0 and 1")
 
     def __setitem__(self, index, value):
-        if index == 0: 
+        if index == 0:
             self.x = value
-        elif index == 1: 
+        elif index == 1:
             self.y = value
         else:
             raise IndexError("Coord type only supports index 0 and 1")
@@ -41,10 +41,7 @@ class Coord(Transformable):
             yield self[index]
 
     def transform(self, transformation):
-        print('Coord Transform')
-        print(self)
         C = transformation.apply_to_coord(self)
-        print(C)
         self.x = C.x
         self.y = C.y
         return self
@@ -71,7 +68,7 @@ class Coord(Transformable):
     def __ne__(self, other):
         return (other == None) or (abs(self[0] - other[0]) > 10e-10) or (abs(self[1] - other[1]) > 10e-10)
 
-    def distance(self, other):    
+    def distance(self, other):
         """ The distance to another coordinate """
         return math.sqrt((other[0] - self.x)**2 + (other[1] - self.y)**2)
 
@@ -117,7 +114,7 @@ class Coord(Transformable):
         return 'Coord({}, {})'.format(self.x, self.y)
 
     def dot(self, other):
-        return np.conj(self.x) * other[0] + np.conj(self.y) * other[1]        
+        return np.conj(self.x) * other[0] + np.conj(self.y) * other[1]
 
     def __abs__(self):
         return math.sqrt(abs(self.x) ** 2 + abs(self.y) ** 2)
@@ -130,7 +127,6 @@ class Coord(Transformable):
 
 
 def CoordField(**kwargs):
-    from spira.yevon.geometry.coord import Coord
     if 'default' not in kwargs:
         kwargs['default'] = Coord(0,0)
     R = RestrictType(Coord)

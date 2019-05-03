@@ -46,6 +46,7 @@ class Rotation(__ConvertableTransform__):
         if hasattr(self, "__ca__"):
             self.translation = Coord(center.x * (1 - self.__ca__) + center.y * self.__sa__,
                                       center.y * (1 - self.__ca__) - center.x * self.__sa__)
+                                      
     # center = SetFunctionField("__center__", set_rotation_center, restriction=RestrictType(Coord), default=(0.0, 0.0))
     center = SetFunctionField("__center__", set_rotation_center, default=(0.0, 0.0))
 

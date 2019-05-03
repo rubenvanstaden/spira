@@ -36,19 +36,11 @@ class __GeometryProperties__(__Properties__):
 
     @property
     def center(self):
-        if self.bbox is None:
-            c = ''
-        else:
-            c = np.sum(self.bbox, 0)/2
-            # c = (0,0)
-        return c
-        # return np.sum(self.bbox, 0)/2
+        return np.sum(self.bbox, 0)/2
 
     @center.setter
     def center(self, destination):
-        self.move(destination=destination, midpoint=self.center)
-        # print(self.transformation)
-        # self.transformation.apply_to_object(self)
+        self.move(midpoint=self.center, destination=destination)
 
     @property
     def xpos(self):

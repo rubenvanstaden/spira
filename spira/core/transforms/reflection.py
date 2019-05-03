@@ -10,13 +10,24 @@ class Reflection(GenericTransform):
 
     reflection = getattr(GenericTransform, 'reflection')
 
-    def apply_to_object(self, item):
-        if self.reflection is True:
-            item = item.__reflect__(p1=(0,0), p2=(1,0))
-        else:
-            item = self
-        # item = item.__translate__(self)
-        return item
+    def apply_to_coord(self, coord):      
+        coord = self.__reflect__(coord)
+        print(type(coord))
+        coord = self.__translate__(coord)
+        return coord
+
+    def apply_to_array(self, coords):      
+        coords = self.__reflect_array__(coords)
+        coords = self.__translate_array__(coords)
+        return coord
+
+    # def apply_to_object(self, item):
+    #     if self.reflection is True:
+    #         item = item.__reflect__(p1=(0,0), p2=(1,0))
+    #     else:
+    #         item = self
+    #     # item = item.__translate__(self)
+    #     return item
 
 
 class __ReflectionMixin__(object):
