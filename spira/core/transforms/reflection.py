@@ -10,13 +10,12 @@ class Reflection(GenericTransform):
 
     reflection = getattr(GenericTransform, 'reflection')
 
-    def apply_to_coord(self, coord):      
+    def apply_to_coord(self, coord):
         coord = self.__reflect__(coord)
-        print(type(coord))
         coord = self.__translate__(coord)
         return coord
 
-    def apply_to_array(self, coords):      
+    def apply_to_array(self, coords):
         coords = self.__reflect_array__(coords)
         coords = self.__translate_array__(coords)
         return coord

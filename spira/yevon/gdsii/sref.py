@@ -27,8 +27,9 @@ class __RefElemental__(__Elemental__):
             reference=deepcopy(self.ref),
             # reference=self.ref,
             midpoint=deepcopy(self.midpoint),
+            # midpoint=self.midpoint,
             transformation=deepcopy(self.transformation),
-            # port_locks=self.port_locks,
+            # transformation=self.transformation,
             node_id=deepcopy(self.node_id)
         )
 
@@ -61,9 +62,9 @@ class SRefAbstract(gdspy.CellReference, __RefElemental__):
         #     tf = spira.Translation(self.midpoint)
         # else:
         #     tf = self.transformation + spira.Translation(self.midpoint)
-        tf = self.transformation
-        # print(tf)
-        self.ref.commit_to_gdspy(cell=cell, transformation=tf)
+        # tf = self.transformation
+        # self.ref.commit_to_gdspy(cell=cell, transformation=tf)
+        self.ref.commit_to_gdspy(cell=cell)
 
     def dependencies(self):
         from spira.yevon.gdsii.cell_list import CellList

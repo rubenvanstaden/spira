@@ -40,8 +40,14 @@ if __name__ == '__main__':
     # file_name = '/home/therealtyler/code/phd/spira/spira/technologies/aist/layouts/stable/dff.gds'
     # file_name = '/home/therealtyler/code/phd/spira/spira/technologies/aist/layouts/stable/and.gds'
     # file_name = '/home/therealtyler/code/phd/spira/spira/technologies/aist/layouts/stable/jj_hierarchy.gds'
-    file_name = '/home/therealtyler/code/phd/spira/spira/technologies/aist/layouts/stable/jj_hierarchy_lvl3.gds'
-    # file_name = '/home/therealtyler/code/phd/spira/spira/technologies/aist/layouts/stable/jj_hierarchy_v0.1.gds'
+    # file_name = '/home/therealtyler/code/phd/spira/spira/technologies/aist/layouts/stable/jj_hierarchy_lvl3.gds'
+    # file_name = '/home/therealtyler/code/phd/spira/spira/technologies/aist/layouts/stable/jj_hierarchy_lvl3_rotation.gds'
+    # file_name = '/home/therealtyler/code/phd/spira/spira/technologies/aist/layouts/stable/jj_hierarchy_lvl3_reflection.gds'
+
+    # file_name = '/home/therealtyler/code/phd/spira/spira/technologies/aist/layouts/stable/jj_hierarchy_lvl4.gds'
+    # file_name = '/home/therealtyler/code/phd/spira/spira/technologies/aist/layouts/stable/jj_hierarchy_lvl4_rotation.gds'
+    file_name = '/home/therealtyler/code/phd/spira/spira/technologies/aist/layouts/stable/jj_hierarchy_lvl4_reflection.gds'
+
     # file_name = '{}/technologies/{}.gds'.format(os.getcwd(), name)
     print(file_name)
     # filename = io.current_path(name)

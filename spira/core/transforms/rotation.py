@@ -32,23 +32,27 @@ class Rotation(__ConvertableTransform__):
             # self.__sa__ = np.sin(value * constants.DEG2RAD)
             self.__ca__ = np.cos(value * (np.pi/180))
             self.__sa__ = np.sin(value * (np.pi/180))
-        if hasattr(self, "__center__"):
+        if hasattr(self, '__center__'):
             center = self.__center__
-            self.translation = Coord(center.x * (1 - self.__ca__) + center.y * self.__sa__,
-                                      center.y * (1 - self.__ca__) - center.x * self.__sa__)
-           
-    rotation = SetFunctionField("__rotation__", set_rotation, default = 0.0)
+            self.translation = Coord(
+                center.x * (1 - self.__ca__) + center.y * self.__sa__,
+                center.y * (1 - self.__ca__) - center.x * self.__sa__
+            )
+
+    rotation = SetFunctionField('__rotation__', set_rotation, default = 0.0)
 
     def set_rotation_center(self, center):
         if not isinstance(center, Coord):
             center = Coord(center[0], center[1])
         self.__rotation_center__ = center
-        if hasattr(self, "__ca__"):
-            self.translation = Coord(center.x * (1 - self.__ca__) + center.y * self.__sa__,
-                                      center.y * (1 - self.__ca__) - center.x * self.__sa__)
-                                      
+        if hasattr(self, '__ca__'):
+            self.translation = Coord(
+                center.x * (1 - self.__ca__) + center.y * self.__sa__,
+                center.y * (1 - self.__ca__) - center.x * self.__sa__
+            )
+
     # center = SetFunctionField("__center__", set_rotation_center, restriction=RestrictType(Coord), default=(0.0, 0.0))
-    center = SetFunctionField("__center__", set_rotation_center, default=(0.0, 0.0))
+    center = SetFunctionField('__center__', set_rotation_center, default=(0.0, 0.0))
 
     def apply_to_coord(self, coord):
         coord = self.__rotate__(coord)
@@ -56,6 +60,7 @@ class Rotation(__ConvertableTransform__):
         return coord
 
     def apply_to_array(self, coords):
+        # print('==============================')
         # print(coords)
         coords = coords[0]
         coords = self.__rotate_array__(coords)

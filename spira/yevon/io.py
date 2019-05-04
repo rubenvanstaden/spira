@@ -80,15 +80,12 @@ def wrap_references(cell, c2dmap):
         if isinstance(e, gdspy.CellReference):
             ref_device = deepcopy(c2dmap[e.ref_cell])
             center = Coord(ref_device.center[0], ref_device.center[1])
-            print(ref_device.center)
-            ref_device.center = (0,0)
-            # ref_device.move(midpoint=center, destination=(0,0))
-            print('origin center: {}'.format(ref_device.center))
-            print('')
+            # ref_device.center = (0,0)
+            D = ref_device.move(midpoint=center, destination=(0,0))
 
             point = scu(e.origin)
             midpoint = Coord(point[0], point[1])
-            S = spira.SRef(reference=ref_device, midpoint=(0,0))
+            S = spira.SRef(reference=D, midpoint=(0,0))
 
             if e.x_reflection == True:
                 T = Reflection(reflection=True)
@@ -96,21 +93,23 @@ def wrap_references(cell, c2dmap):
                 S.transform(T)
 
             if e.rotation is not None:
-                angle = e.rotation
-                T = Rotation(rotation=angle)
+                T = Rotation(rotation=e.rotation)
                 center = T.apply_to_coord(center)
                 S.transform(T)
 
-            # origin = Coord(center[0], center[1])
-            # m = midpoint
-            # m = center
             m = midpoint + center
-            # m = midpoint - center
             origin = Coord(m[0], m[1])
-
+            
             T = Translation(translation=origin)
-            S.transform(T)
-            print(S.transformation)
+            # S.transform(T)
+            S.midpoint = Coord(S.midpoint[0], S.midpoint[1])
+            S.midpoint.transform(T)
+
+            # if e.rotation is not None:
+            #     # T = Rotation(rotation=e.rotation, center=origin)
+            #     T = Rotation(rotation=e.rotation)
+            #     S.transform(T)
+            #     # S.midpoint.transform(T)
 
             c2dmap[cell] += S
 
@@ -182,7 +181,7 @@ def import_gds(filename, cellname=None, flatten=False, dups_layer={}):
 
     for cell in cell_list:
         wrap_references(cell, c2dmap)
-        wrap_labels(cell, c2dmap)
+        # wrap_labels(cell, c2dmap)
 
     top_spira_cell = c2dmap[topcell]
     if flatten == True:

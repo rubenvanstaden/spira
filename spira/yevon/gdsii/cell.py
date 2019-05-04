@@ -53,6 +53,18 @@ class __Cell__(FieldInitializer, metaclass=MetaCell):
         else:
             self.elementals += other
         return self
+        
+    # def __deepcopy__(self, memo):
+    #     print('wjfbwejfbjwekfbwejewkjfbkjbjfbijkbjrjvfdnivndfijvndkv')
+    #     cell = Cell(
+    #         name=self.name,
+    #         elementals=deepcopy(self.elementals),
+    #         ports=deepcopy(self.ports)
+    #     )
+    #     cell.__name__ = self.name
+    #     cell.name = self.name
+    #     print(cell)
+    #     return cell
 
 
 class CellAbstract(gdspy.Cell, __Cell__):
@@ -89,6 +101,7 @@ class CellAbstract(gdspy.Cell, __Cell__):
     def commit_to_gdspy(self, cell, transformation=None):
         cell = gdspy.Cell(self.name, exclude_from_current=True)
         for e in self.elementals:
+            # e = deepcopy(e)
             e.commit_to_gdspy(cell=cell, transformation=transformation)
         for p in self.ports:
             p.commit_to_gdspy(cell=cell, transformation=transformation)
@@ -135,13 +148,8 @@ class CellAbstract(gdspy.Cell, __Cell__):
         d = Coord(d[0], d[1])
         o = Coord(o[0], o[1])
 
-        print('')
-        print(self)
-        print('[*] Moving elementals:')
         for e in self.elementals:
-            print(e)
             e.move(midpoint=o, destination=d)
-        print('')
 
         for p in self.ports:
             mc = np.array(p.midpoint) + np.array(d) - np.array(o)

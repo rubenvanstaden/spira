@@ -22,9 +22,9 @@ class CellProperties(__Group__, __GeometryProperties__):
     def set_gdspy_cell(self):
         name = '{}_{}'.format(self.name, CellProperties._cid)
         CellProperties._cid += 1
-        print(name)
+        # print(name)
         glib = gdspy.GdsLibrary(name=name)
-        cell = spira.Cell(name=self.name, elementals=deepcopy(self.elementals))
+        cell = spira.Cell(name=name, elementals=deepcopy(self.elementals))
         # cell = spira.Cell(name=self.name, elementals=self.elementals)
         self.__gdspy_cell__ = cell.construct_gdspy_tree(glib)
 
@@ -41,32 +41,19 @@ class CellProperties(__Group__, __GeometryProperties__):
                 # else:
                 #     tf = e.transformation + spira.Translation(e.midpoint)
 
-                tf = e.transformation
+                # tf = e.transformation
+                # if tf is not None:
+                #     e.midpoint = tf.apply_to_coord(e.midpoint)
 
-                # print(tf)
-
-                # e.midpoint = tf(e.midpoint)
-
-                e.midpoint = tf.apply_to_coord(e.midpoint)
-                
                 if isinstance(e.midpoint, Coord):
                     origin = e.midpoint.convert_to_array()
                 else:
                     origin = e.midpoint
 
-                # T = spira.Translation(e.midpoint)
-
-                # if T is not None:
-                #     origin = T(e.midpoint)
-                #     origin = origin.convert_to_array()
-                # else:
-                #     origin = e.midpoint.convert_to_array()
-
                 G.add(
                     gdspy.CellReference(
                         ref_cell=c2dmap[e.ref],
                         origin=origin,
-                        # origin=e.midpoint,
                         rotation=e.rotation,
                         magnification=e.magnification,
                         x_reflection=e.reflection
@@ -87,7 +74,14 @@ class CellProperties(__Group__, __GeometryProperties__):
 
     @property
     def bbox(self):
-        cell = self.get_gdspy_cell()
+        D = deepcopy(self)
+        D.name = '{}_copy'.format(D.name)
+        cell = D.get_gdspy_cell()
+
+        # print(cell)
+        # for e in cell.elements:
+        #     print(e)
+
         bbox = cell.get_bounding_box()
         if bbox is None:
             bbox = ((0,0),(0,0))

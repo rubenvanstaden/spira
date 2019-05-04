@@ -76,25 +76,19 @@ class GenericTransform(ReversibleTransform):
             p2 = np.array(p2)
             print(points)
             if np.asarray(points).ndim == 1:
-                print('wmefuebfk')
                 t = np.dot((p2-p1), (points-p1))/norm(p2-p1)**2
                 pts = 2*(p1 + (p2-p1)*t) - points
             if np.asarray(points).ndim == 2:
                 raise ValueError('This is a array, not an coordinate.')
-                # t = np.dot((p2-p1), (p2-p1))/norm(p2-p1)**2
-                # pts = np.array([2*(p1 + (p2-p1)*t) - p for p in points])
         else:
             pts = coords
         pts = Coord(pts[0], pts[1])
         return pts
 
     def __reflect_array__(self, coords, p1=(0,0), p2=(1,0)):
-        print('Reflection Array!!!')
         if self.reflection is True:
             points = np.array(coords); p1 = np.array(p1); p2 = np.array(p2)
             if np.asarray(points).ndim == 1:
-                # t = np.dot((p2-p1), (points-p1))/norm(p2-p1)**2
-                # pts = 2*(p1 + (p2-p1)*t) - points
                 raise ValueError('This is a coordinate, not an array.')
             if np.asarray(points).ndim == 2:
                 t = np.dot((p2-p1), (p2-p1))/norm(p2-p1)**2
@@ -118,7 +112,7 @@ class GenericTransform(ReversibleTransform):
         return coords
 
     def apply_to_coord(self, coord):
-        coord = self.__reflect__(coord)
+        # coord = self.__reflect__(coord)
         coord = self.__rotate__(coord)
         coord = self.__magnify__(coord)
         coord = self.__translate__(coord)
@@ -126,7 +120,7 @@ class GenericTransform(ReversibleTransform):
 
     def apply_to_array(self, coords):
         coords = coords[0]
-        coords = self.__reflect_array__(coords)
+        # coords = self.__reflect_array__(coords)
         coords = self.__rotate_array__(coords)
         coords = self.__magnify_array__(coords)
         coords = self.__translate_array__(coords)
