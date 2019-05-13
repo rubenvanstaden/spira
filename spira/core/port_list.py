@@ -35,11 +35,9 @@ class PortList(TypedList):
             return self.get_from_label(key)
 
     def __contains__(self, item):
-        # print(item)
         for p in self._list:
             # if p.name == item.name:
             if p == item:
-                # print('TRUE')
                 return True
         return False
 
@@ -48,22 +46,65 @@ class PortList(TypedList):
             if self._list[i] is key:
                 return list.__delitem__(self._list, i)
 
-    def flat_copy(self, level = -1):
+    def __and__(self, other):
+        from spira.yevon.gdsii.polygon import Polygon
+        from spira.yevon import process as pc
+        from spira.yevon.geometry.ports.terminal import Terminal
+        P = self.__class__()
+        if isinstance(other, Polygon):
+            pass
+        elif issubclass(type(other), pc.ProcessLayer):
+            for p in self._list:
+                if isinstance(p, Terminal):
+                    if p.edge & other.elementals[0]:
+                        p.locked = False
+                        P.append(p)
+        else:
+            raise ValueError('Type must be either Polygon or ProcessLayer.')
+        return P
+
+    def __sub__(self, other):
+        pass
+
+    def __or__(self, other):
+        pass
+
+    def union(self, other):
+        return self.__or__(self, other)
+
+    def intersection(self, other):
+        return self.__and__(self, other)
+
+    def difference(self, other):
+        return self.__sub__(self, other)
+
+    def update_layer_copy(self, layer):
+        P = self.__class__()
+        for p in self._list:
+            p.edgelayer = layer
+            P.append(p)
+        return P
+
+    # RDD.TERMS.EDGE_LAYER
+    # RDD.TERMS.ARROW_LAYER
+    # RDD.TERMS.UNLOCKED_LAYER
+
+    def flat_copy(self, level=-1):
         el = PortList()
         for e in self._list:
             el += e.flat_copy(level)
         return el
 
-    # def move(self, position):
-    #     for c in self._list:
-    #         c.move(position)
-    #     return self
+    def move(self, position):
+        for c in self._list:
+            c.move(position)
+        return self
 
-    # def move_copy(self, position):
-    #     T = self.__class__()
-    #     for c in self._list:
-    #         T.append(c.move_copy(position))
-    #     return T
+    def move_copy(self, position):
+        T = self.__class__()
+        for c in self._list:
+            T.append(c.move_copy(position))
+        return T
 
     def transform_copy(self, transformation):
         T = self.__class__()
@@ -88,19 +129,15 @@ class PortList(TypedList):
         return L
 
     def x_sorted(self):
-        """return a copy of the list sorted on the x position"""
         return self.__class__(sorted(self._list, key=lambda f: f.position[0]))
 
     def x_sorted_backward(self):
-        """return a copy of the list reverse sorted on the x position"""
         return self.__class__(sorted(self._list, key=lambda f: (-f.position[0])))
 
     def y_sorted(self):
-        """return a copy of the list sorted on the y position"""
         return self.__class__(sorted(self._list, key=lambda f: f.position[1]))
 
     def y_sorted_backward(self):
-        """return a copy of the list reverse sorted on the y position"""
         return self.__class__(sorted(self._list, key=lambda f: (-f.position[1])))
 
     def sorted_in_direction(self, direction):

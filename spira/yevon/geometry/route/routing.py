@@ -12,6 +12,9 @@ from spira.core.param.variables import *
 from spira.core.descriptor import DataField
 
 
+__all__ = ['Route']
+
+
 RDD = get_rule_deck()
 
 
@@ -29,10 +32,8 @@ class Route(Structure, __Manhattan__):
     route_path = DataField(fdef_name='create_route_path')
     route_straight = DataField(fdef_name='create_route_straight')
     route_auto = DataField(fdef_name='create_route_auto')
-    
+
     def create_angle(self):
-        print(self.port1)
-        print(self.port2)
         if self.port1 and self.port2:
             angle_diff = self.port1.orientation - self.port2.orientation
             angle = np.round(np.abs(np.mod(angle_diff, 360)), 3)
@@ -40,7 +41,7 @@ class Route(Structure, __Manhattan__):
         return None
 
     def determine_type(self):
-        print(':: Determine type of route...')
+        # print(':: Determine type of route...')
         if self.cell is not None:
             self.__type__ = 'layout'
         if self.angle is not None:
@@ -57,8 +58,6 @@ class Route(Structure, __Manhattan__):
 
         if len(self.port_list) > 0:
             self.__type__ = 'auto'
-
-        print(self.__type__)
 
     def create_route_90(self):
         R1 = Route90(
@@ -117,42 +116,19 @@ class Route(Structure, __Manhattan__):
         route_shape = RouteSimple(
             port1=self.port1,
             port2=self.port2,
-            # path_type='sine',
-            # width_type='sine'
             path_type='straight',
             width_type='straight'
         )
-        route_shape.apply_merge
-        R = RouteGeneral(
-            route_shape=route_shape,
-            connect_layer=self.ps_layer
-        )
-        r = spira.SRef(R)
-        # if self.route_transformation is not None:
-        #     r.transform(transform=self.route_transformation.apply())
-        r.connect(port=r.ports['P1'], destination=self.port1)
-        return r
-
-    # def create_route_auto(self):
-    #     R = spira.Cell(name='Auto Router')
-    #     for x in range(0, len(self.port_list), 2):
-    #         route_cell = Route(
-    #             port1=self.port_list[x],
-    #             port2=self.port_list[x+1],
-    #             ps_layer=self.ps_layer,
-    #             radius=0.1*1e6
-    #         )
-    #         R += spira.SRef(route_cell)
-    #     D = spira.Cell(name='Device Router')
-    #     points = []
-    #     for e in R.flatten():
-    #         if isinstance(e, spira.Polygon):
-    #             for p in e.points:
-    #                 points.append(p)
-    #     route_shape = shapes.Shape(points=points)
-    #     route_shape.apply_merge
-    #     D += pc.Polygon(points=route_shape.points, ps_layer=self.ps_layer, enable_edges=False) 
-    #     return spira.SRef(D)
+        # # route_shape.apply_merge
+        R = RouteGeneral(route_shape=route_shape, connect_layer=self.ps_layer)
+        S = spira.SRef(R)
+        R = spira.Rotation(45) + spira.Translation((0,0))
+        # self.transform(R)
+        # S.transform(R)
+        S.connect(port=S.ports['P1'], destination=self.port1)
+        T = S.transformation
+        # self.transform(T)
+        return S
 
     def create_route_auto(self):
         R = spira.Cell(name='Auto Router')
@@ -160,7 +136,7 @@ class Route(Structure, __Manhattan__):
         term_list = []
         for x in range(0, len(self.port_list)):
             p = self.port_list[x]
-            if isinstance(p, spira.Term):
+            if isinstance(p, spira.Terminal):
                 term_list.append(p)
             elif isinstance(p, spira.Connector):
                 for c in p.ports:
@@ -231,6 +207,13 @@ class Route(Structure, __Manhattan__):
 
         elems += r1
 
+        # elems = elems.transform(self.transformation)
+
         return elems
+
+    def create_ports(self, ports):
+        ports = super().create_ports(ports)
+        ports = ports.transform(self.transformation)
+        return ports
 
 

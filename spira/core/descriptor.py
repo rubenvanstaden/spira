@@ -1,4 +1,5 @@
 from spira.core.param.restrictions import RestrictNothing
+from spira.core.processors import ParameterProcessor
 
 
 __all__ = ['DataFieldDescriptor', 'FunctionField', 'DataField']
@@ -38,12 +39,17 @@ class BaseField(object):
 
 
 class DataFieldDescriptor(BaseField):
-    __keywords__ = ['default', 'fdef_name', 'restrictions', 'locked']
+    __keywords__ = ['default', 'fdef_name', 'restriction', 'locked', 'preprocess']
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
         self.locked = False
+
+        if 'preprocess' in kwargs:
+            self.preprocess = kwargs['preprocess']
+        else:
+            self.preprocess = ParameterProcessor()
 
         if 'allow_none' in kwargs:
             self.allow_none = kwargs['allow_none']
@@ -85,7 +91,8 @@ class DataFieldDescriptor(BaseField):
             f = self.get_param_function(obj)
             if f is None:
                 if hasattr(self, 'default'):
-                    value = self.default
+                    # value = self.default
+                    value = self.preprocess(self.default, obj)
                 else:
                     value = None
             else:
@@ -126,8 +133,12 @@ class DataFieldDescriptor(BaseField):
         """
         if self.locked:
             raise ValueError("Cannot assign to locked parameter '{}' of '{}'".format(self.name, type(obj).__name__))
-        self.__check_restriction__(obj, value)
-        obj.__store__[self.__name__] = value
+        if self.preprocess is not None:
+            v = self.preprocess(value, obj)
+        else:
+            v = value
+        self.__check_restriction__(obj, v)
+        obj.__store__[self.__name__] = v
 
     def bind_property(self, cls, name):
         self.name = name
@@ -200,10 +211,17 @@ class SetFunctionField(BaseField):
         self.name = internal_member_name
         self.locked = False
         self.allow_none = False
+
+        if 'preprocess' in kwargs:
+            self.preprocess = kwargs['preprocess']
+        else:
+            self.preprocess = ParameterProcessor()
+
         if 'restriction' in kwargs:
             self.restriction = kwargs['restriction']
         else:
             self.restriction = RestrictNothing()
+
         super().__init__(**kwargs)
 
     def __get_default__(self):
@@ -221,11 +239,10 @@ class SetFunctionField(BaseField):
         else:
             if hasattr(self, 'default'):
                 d = self.__get_default__()
-                return d
-                # if self.preprocess is None:
-                #     return d
-                # else:
-                #     return self.preprocess(d, obj)
+                if self.preprocess is None:
+                    return d
+                else:
+                    return self.preprocess(d, obj)
             elif self.allow_none:
                 return None
             else:

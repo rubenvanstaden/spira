@@ -75,28 +75,28 @@ class Line(Transformable, FieldInitializer):
         x0 = destination.midpoint[0]
         y0 = destination.midpoint[1]
 
-        angle = self.angle_deg
-        angle = np.mod(angle, 360)
-
-        if 90 < angle <= 270:
-            x = x0 + d / np.sqrt(1 + m**2)
-        elif (0 < angle <= 90) or (270 < angle <= 360):
-            x = x0 - d / np.sqrt(1 + m**2)
+        if m is None:
+            dx, dy = 0, distance
         else:
-            raise ValueError('Angle {} not accepted.'.format(angle))
-
-        y = m*(x - x0) + y0
-        
-        dx = x - x0
-        dy = y - y0
-
+            angle = self.angle_deg
+            angle = np.mod(angle, 360)
+            if 90 < angle <= 270:
+                x = x0 + d / np.sqrt(1 + m**2)
+            elif (0 < angle <= 90) or (270 < angle <= 360):
+                x = x0 - d / np.sqrt(1 + m**2)
+            else:
+                raise ValueError('Angle {} not accepted.'.format(angle))
+            y = m*(x - x0) + y0
+            dx = x - x0
+            dy = y - y0
+    
         return (dx, dy)
 
     def intersection(self, line):
         """ gives intersection of line with other line """
         if (self.b * line.a - self.a * line.b) == 0.0:
             return None
-        return Coord2(-(self.b * line.c - line.b * self.c) / (self.b * line.a - self.a * line.b),
+        return Coord(-(self.b * line.c - line.b * self.c) / (self.b * line.a - self.a * line.b),
                       (self.a * line.c - line.a * self.c) / (self.b * line.a - self.a * line.b))
 
     def closest_point(self, point):
@@ -155,8 +155,8 @@ def line_from_two_points(point1, point2):
 
 
 def line_from_point_angle(point, angle):
-    """ creates StraightLine object from point and angle """
-    if abs(angle % 180.0 - 90.0) <= 1E-8:
+    """ Creates StraightLine object from point and angle. """
+    if abs(angle % 180.0 - 90.0) <= 1e-12:
         return line_from_two_points(point, Coord(0.0, 1) + point)
     slope = np.tan(DEG2RAD * angle)
     return Line(slope, -1, point[1] - slope * point[0])

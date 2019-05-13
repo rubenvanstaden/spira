@@ -180,7 +180,7 @@ def test_elem_port():
     p1.translate(dx=10, dy=5)
     assert p1.midpoint == [12, 4]
 
-# -------------------------------------------- spira.Term -------------------------------------------
+# -------------------------------------------- spira.Terminal -------------------------------------------
 
 def test_elem_terminal():
     class TerminalExample(spira.Cell):
@@ -196,9 +196,9 @@ def test_elem_terminal():
             return ports
     cell = TerminalExample()
     terms = cell.term_ports
-    assert isinstance(terms['P1'], spira.Term)
-    assert isinstance(cell.ports[0], spira.Term)
-    assert isinstance(cell.terms[0], spira.Term)
+    assert isinstance(terms['P1'], spira.Terminal)
+    assert isinstance(cell.ports[0], spira.Terminal)
+    assert isinstance(cell.terms[0], spira.Terminal)
 
 # -------------------------------------------- spira.Layer -------------------------------------------
 

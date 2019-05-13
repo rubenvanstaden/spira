@@ -160,12 +160,6 @@ class ElementList(__ElementList__):
                     yield elem
         return _flatten(self._list)
 
-    # def flat_copy(self, level=-1):
-    #     el = ElementList()
-    #     for e in self._list:
-    #         el += e.flat_copy(level)
-    #     return el
-
     def commit_to_gdspy(self, cell, transformation=None):
         for e in self._list:
             if isinstance(e, ElementList):
@@ -199,27 +193,6 @@ class ElementList(__ElementList__):
             return flat_list
         else:
             return [self._list]
-
-    # def flatten(self):
-    #     from spira.yevon.gdsii.cell import Cell
-    #     from spira.yevon.gdsii.polygon import PolygonAbstract
-    #     from spira.yevon.gdsii.sref import SRef
-    #     from spira.yevon.geometry.ports.port import __Port__
-    #     from spira.core.port_list import PortList
-    #     if isinstance(self, collections.Iterable):
-    #         flat_list = ElementList()
-    #         for i in self._list:
-    #             if issubclass(type(i), Cell):
-    #                 i = i.flat_copy()
-    #             elif isinstance(i, SRef):
-    #                 i = i.flat_copy()
-    #             # if not issubclass(type(i), __Port__):
-    #             if not isinstance(i, PortList):
-    #                 for a in i.flatten():
-    #                     flat_list += a
-    #         return flat_list
-    #     else:
-    #         return [self._list]
 
     def isstored(self, pp):
         for e in self._list:

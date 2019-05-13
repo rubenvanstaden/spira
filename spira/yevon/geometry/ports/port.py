@@ -24,22 +24,8 @@ class Port(Group, __VerticalPort__):
         super().__init__(**kwargs)
 
     def __repr__(self):
-        return ("[SPiRA: Port] (name {}, number {}, datatype {}, midpoint {}, " +
-            "radius {}, orientation {})").format(self.name,
-            self.gds_layer.number, self.gds_layer.datatype, self.midpoint,
-            self.radius, self.orientation
-        )
+        return ("[SPiRA: Port] (name {}, number {}, datatype {}, midpoint {}, radius {})").format(self.name, self.gds_layer.number, self.gds_layer.datatype, self.midpoint, self.radius)
         
-    # def commit_to_gdspy(self, cell=None):
-    #     if self.__repr__() not in list(__Port__.__committed__.keys()):
-    #         self.surface.commit_to_gdspy(cell=cell)
-    #         self.label.commit_to_gdspy(cell=cell)
-    #         Port.__committed__.update({self.__repr__(): self})
-    #     else:
-    #         p = Port.__committed__[self.__repr__()]
-    #         p.surface.commit_to_gdspy(cell=cell)
-    #         p.label.commit_to_gdspy(cell=cell)
-
     def create_surface(self):
         from spira.yevon.geometry import shapes
         shape = shapes.CircleShape(
@@ -50,12 +36,35 @@ class Port(Group, __VerticalPort__):
         ply = spira.Polygon(shape=shape, gds_layer=layer)
         ply.move(midpoint=ply.center, destination=self.midpoint)
         return ply
-
-    def create_elementals(self, elems):
-        elems += self.surface
-        elems += self.label
-        return elems
-
+    @property
+    def label(self):
+        lbl = spira.Label(
+            position=self.midpoint,
+            text=self.name,
+            gds_layer=self.gds_layer,
+            texttype=self.text_type,
+            # color=color.COLOR_GHOSTWHITE
+        )
+        # lbl.__rotate__(angle=self.orientation)
+        # lbl.move(midpoint=lbl.position, destination=self.midpoint)
+        return lbl
+    # def create_elementals(self, elems):
+    #     elems += self.surface
+    #     elems += self.label
+    #     return elems
+    def commit_to_gdspy(self, cell=None, transformation=None):
+        if self.__repr__() not in list(Port.__committed__.keys()):
+            self.surface.commit_to_gdspy(cell=cell, transformation=transformation)
+            self.label.commit_to_gdspy(cell=cell, transformation=transformation)
+            # self.arrow.commit_to_gdspy(cell=cell)
+            # self.label.commit_to_gdspy(cell=cell)
+            Port.__committed__.update({self.__repr__(): self})
+        else:
+            p = Port.__committed__[self.__repr__()]
+            # p.edge.commit_to_gdspy(cell=cell, transformation=transformation)
+            p.surface.commit_to_gdspy(cell=cell)
+            p.label.commit_to_gdspy(cell=cell)
+           
 
 
 

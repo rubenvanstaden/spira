@@ -17,7 +17,7 @@ class Polygon(ProcessLayer):
 
     color = ColorField(default=color.COLOR_BLUE_VIOLET)
     points = ElementalListField()
-    
+
     # def __deepcopy__(self, memo):
     #     return Polygon(
     #         points=self.points,
@@ -30,8 +30,8 @@ class Polygon(ProcessLayer):
     def create_elementals(self, elems):
         ply = spira.Polygon(shape=self.points, gds_layer=self.layer)
 
-        if self.transformation is not None:
-            ply.transform_copy(self.transformation)
+        # if self.transformation is not None:
+        #     ply.transform_copy(self.transformation)
             
         elems += ply
         return elems

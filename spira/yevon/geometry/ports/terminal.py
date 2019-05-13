@@ -29,6 +29,7 @@ class Terminal(__HorizontalPort__):
     width = NumberField(default=2*1e6)
 
     edgelayer = LayerField(name='Edge', number=63)
+    unlocked_layer = LayerField(name='Unlocked', number=100)
     arrowlayer = LayerField(name='Arrow', number=77)
 
     # edge = DataField(fdef_name='create_edge')
@@ -55,7 +56,7 @@ class Terminal(__HorizontalPort__):
         super().__init__(**kwargs)
 
     def __repr__(self):
-        return ("[SPiRA: Terminal] (name {}, midpoint {} orientation {})").format(self.name, self.midpoint, self.orientation)
+        return ("[SPiRA: Terminal] (name {}, locked {}, midpoint {} orientation {} width {})").format(self.name, self.locked, self.midpoint, self.orientation, self.width)
 
     def __str__(self):
         return self.__repr__()
@@ -79,18 +80,38 @@ class Terminal(__HorizontalPort__):
             self.orientation = transformation.apply_to_angle(self.orientation)
         return self
 
+    # def transform_copy(self, transformation):
+    #     if transformation is not None:
+    #         port = self.__class__(
+    #             name=self.name,
+    #             midpoint=transformation.apply_to_coord(deepcopy(self.midpoint)),
+    #             orientation=transformation.apply_to_angle(deepcopy(self.orientation)),
+    #             width=self.width
+    #         )
+    #     else:
+    #         port = self.__class__(
+    #             name=self.name,
+    #             midpoint=deepcopy(self.midpoint),
+    #             orientation=deepcopy(self.orientation),
+    #             width=self.width
+    #         )
+    #     return port
+
     def transform_copy(self, transformation):
         if transformation is not None:
-            port = self.__class__(
+            port = Terminal(
                 name=self.name,
-                midpoint=transformation.apply_to_coord(self.midpoint), 
-                orientation=deepcopy(transformation.apply_to_angle(self.orientation))
+                # midpoint=self.midpoint,
+                midpoint=transformation.apply_to_coord(deepcopy(self.midpoint)),
+                orientation=transformation.apply_to_angle(deepcopy(self.orientation)),
+                width=self.width
             )
         else:
-            port = self.__class__(
+            port = Terminal(
                 name=self.name,
                 midpoint=deepcopy(self.midpoint),
-                orientation=deepcopy(self.orientation)
+                orientation=deepcopy(self.orientation),
+                width=self.width
             )
         return port
 
@@ -98,17 +119,17 @@ class Terminal(__HorizontalPort__):
         if self.__repr__() not in list(Terminal.__committed__.keys()):
             # self.edge.commit_to_gdspy(cell=cell, transformation=transformation)
             # self.arrow.commit_to_gdspy(cell=cell, transformation=transformation)
-            # self.label.commit_to_gdspy(cell=cell, transformation=transformation)
-            self.edge.commit_to_gdspy(cell=cell)
-            self.arrow.commit_to_gdspy(cell=cell)
-            self.label.commit_to_gdspy(cell=cell)
+            self.label.commit_to_gdspy(cell=cell, transformation=transformation)
+            # self.edge.commit_to_gdspy(cell=cell)
+            # self.arrow.commit_to_gdspy(cell=cell)
+            # self.label.commit_to_gdspy(cell=cell)
             Terminal.__committed__.update({self.__repr__(): self})
         else:
             p = Terminal.__committed__[self.__repr__()]
-            p.edge.commit_to_gdspy(cell=cell)
-            p.arrow.commit_to_gdspy(cell=cell)
+            # p.edge.commit_to_gdspy(cell=cell, transformation=transformation)
+            # p.arrow.commit_to_gdspy(cell=cell)
             p.label.commit_to_gdspy(cell=cell)
-
+            
     @property
     def label(self):
         lbl = spira.Label(
@@ -130,16 +151,16 @@ class Terminal(__HorizontalPort__):
         dx = self.length
         dy = self.width - dx
         rect_shape = shapes.RectangleShape(p1=[0, 0], p2=[dx, dy])
-        ply = spira.Polygon(shape=rect_shape, gds_layer=self.edgelayer)
-        angle = self.orientation - 90
-        # print(self.midpoint)
-        # T = spira.Rotation(rotation=angle) + spira.Translation(self.midpoint)
+        if self.locked is True:
+            ply = spira.Polygon(shape=rect_shape, gds_layer=self.edgelayer)
+        else:
+            ply = spira.Polygon(shape=rect_shape, gds_layer=self.unlocked_layer)
+        ply.center = (0,0)
+        angle = self.orientation
         T = spira.Rotation(rotation=angle)
         ply.transform(T)
-        ply.move(midpoint=rect_shape.center_of_mass, destination=self.midpoint)
-
-        # ply.__rotate__(angle=angle)
-        # ply.move(midpoint=ply.center, destination=self.midpoint)
+        ply.move_new(self.midpoint)
+        # ply.move(midpoint=rect_shape.center_of_mass, destination=self.midpoint)
         return ply
 
     # def create_arrow(self):
@@ -149,19 +170,11 @@ class Terminal(__HorizontalPort__):
         arrow_shape = shapes.ArrowShape(a=self.length, b=self.length/2, c=self.length*2)
         arrow_shape.apply_merge
         ply = spira.Polygon(shape=arrow_shape, gds_layer=self.arrowlayer)
-        angle = self.orientation
-        # print(self)
-        # print(angle)
-        # print('')
+        ply.center = (0,0)
+        angle = self.orientation - 90
         T = spira.Rotation(rotation=angle)
         ply.transform(T)
-        ply.move(midpoint=arrow_shape.center_of_mass, destination=self.midpoint)
-
-        # ply.__rotate__(angle=self.orientation)
-        # ply.move(midpoint=arrow_shape.center_of_mass, destination=self.midpoint)
-
-        # ply.move(midpoint=ply.ply_center, destination=self.midpoint)
-        # ply.move(midpoint=(0,0), destination=self.midpoint)
+        ply.move_new(self.midpoint)
         return ply
 
     def encloses(self, points):
@@ -201,12 +214,15 @@ class EdgeTerminal(Terminal):
     >>> term = spira.Terminal()
     """
 
+    # def __repr__(self):
+    #     return ("[SPiRA: spira.EdgeTerminal] (name {}, number {}, datatype {}, midpoint {}, " +
+    #         "width {}, orientation {})").format(self.name,
+    #         self.gds_layer.number, self.gds_layer.datatype, self.midpoint,
+    #         self.width, self.orientation
+    #     )
+        
     def __repr__(self):
-        return ("[SPiRA: EdgeTerm] (name {}, number {}, datatype {}, midpoint {}, " +
-            "width {}, orientation {})").format(self.name,
-            self.gds_layer.number, self.gds_layer.datatype, self.midpoint,
-            self.width, self.orientation
-        )
+        return ("[SPiRA: Terminal] (name {}, locked {}, midpoint {} orientation {} width {})").format(self.name, self.locked, self.midpoint, self.orientation, self.width)
 
     def __reflect__(self):
         """ Do not reflect EdgeTerms when reference is reflected. """

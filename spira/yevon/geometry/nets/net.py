@@ -76,8 +76,8 @@ class Net(__Net__, PortProperties):
     #         points = [utils.c2d(self.mesh_data.points[i]) for i in triangle]
     #         # for D in self.primitives:
     #         for D in self.ports:
-    #             if isinstance(D, (spira.Port, spira.Term)):
-    #                 if not isinstance(D, (spira.Dummy, spira.EdgeTerm)):
+    #             if isinstance(D, (spira.Port, spira.Terminal)):
+    #                 if not isinstance(D, (spira.Dummy, spira.spira.EdgeTerminal)):
     #                     if D.encloses(points):
     #                         self.g.node[n]['device'] = D
     #             else:

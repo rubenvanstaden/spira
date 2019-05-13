@@ -1,6 +1,9 @@
 import spira.all as spira
 import numpy as np
 from spira.core import param
+from spira.core.param.variables import *
+from spira.yevon.geometry.coord import CoordField
+from spira.core.descriptor import DataField
 from spira.yevon.geometry.shapes.shape import *
 
 

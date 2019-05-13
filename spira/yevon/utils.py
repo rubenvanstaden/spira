@@ -1,11 +1,9 @@
-import spira.all as spira
 import gdspy
 import math
 import pyclipper
 import numpy as np
 import networkx as nx
 from numpy.linalg import norm
-from spira.yevon.geometry.coord import Coord
 
 from spira.settings import SCALE_DOWN, SCALE_UP, OFFSET
 
@@ -13,82 +11,83 @@ from spira.settings import SCALE_DOWN, SCALE_UP, OFFSET
 st = pyclipper.scale_to_clipper
 sf = pyclipper.scale_from_clipper
 
+# from spira.yevon.geometry.coord import Coord
 
-def reflect_algorithm(points, p1=(0,0), p2=(1,0)):
-    points = np.array(points); p1 = np.array(p1); p2 = np.array(p2)
-    if np.asarray(points).ndim == 1:
-        t = np.dot((p2-p1), (points-p1))/norm(p2-p1)**2
-        pts = 2*(p1 + (p2-p1)*t) - points
-    if np.asarray(points).ndim == 2:
-        t = np.dot((p2-p1), (p2-p1))/norm(p2-p1)**2
-        pts = np.array([2*(p1 + (p2-p1)*t) - p for p in points])
-    return pts
-
-
-def rotate_algorithm(points, angle=45, center=(0,0)):
-    if isinstance(points, Coord):
-        points = points.convert_to_array()
-    if isinstance(center, Coord):
-        center = center.convert_to_array()
-    angle = angle*np.pi/180
-    ca = np.cos(angle)
-    sa = np.sin(angle)
-    sa = np.array((-sa, sa))
-    c0 = np.array(center)
-    if np.asarray(points).ndim == 2:
-        pts = (points - c0) * ca + (points - c0)[:,::-1] * sa + c0
-        pts = np.round(pts, 6)
-    if np.asarray(points).ndim == 1:
-        pts = (points - c0) * ca + (points - c0)[::-1] * sa + c0
-        pts = np.round(pts, 6)
-    return pts
+# def reflect_algorithm(points, p1=(0,0), p2=(1,0)):
+#     points = np.array(points); p1 = np.array(p1); p2 = np.array(p2)
+#     if np.asarray(points).ndim == 1:
+#         t = np.dot((p2-p1), (points-p1))/norm(p2-p1)**2
+#         pts = 2*(p1 + (p2-p1)*t) - points
+#     if np.asarray(points).ndim == 2:
+#         t = np.dot((p2-p1), (p2-p1))/norm(p2-p1)**2
+#         pts = np.array([2*(p1 + (p2-p1)*t) - p for p in points])
+#     return pts
 
 
-def move_algorithm(obj, midpoint=(0,0), destination=None, axis=None):
-    """ Moves elements of the Device from the midpoint point
-    to the destination. Both midpoint and destination can be
-    1x2 array-like, Port, or a key corresponding to one of
-    the Ports in this device """
+# def rotate_algorithm(points, angle=45, center=(0,0)):
+#     if isinstance(points, Coord):
+#         points = points.to_nparray()
+#     if isinstance(center, Coord):
+#         center = center.to_nparray()
+#     angle = angle*np.pi/180
+#     ca = np.cos(angle)
+#     sa = np.sin(angle)
+#     sa = np.array((-sa, sa))
+#     c0 = np.array(center)
+#     if np.asarray(points).ndim == 2:
+#         pts = (points - c0) * ca + (points - c0)[:,::-1] * sa + c0
+#         pts = np.round(pts, 6)
+#     if np.asarray(points).ndim == 1:
+#         pts = (points - c0) * ca + (points - c0)[::-1] * sa + c0
+#         pts = np.round(pts, 6)
+#     return pts
 
-    from spira.yevon.geometry.ports.base import __Port__
 
-    if destination is None:
-        destination = midpoint
-        midpoint = [0,0]
+# def move_algorithm(obj, midpoint=(0,0), destination=None, axis=None):
+#     """ Moves elements of the Device from the midpoint point
+#     to the destination. Both midpoint and destination can be
+#     1x2 array-like, Port, or a key corresponding to one of
+#     the Ports in this device """
 
-    if issubclass(type(midpoint), __Port__):
-        o = midpoint.midpoint
-    elif isinstance(midpoint, Coord):
-        o = midpoint
-    elif np.array(midpoint).size == 2:
-        o = midpoint
-    elif midpoint in obj.ports:
-        o = obj.ports[midpoint].midpoint
-    else:
-        raise ValueError("[PHIDL] [DeviceReference.move()] ``midpoint`` " +
-                            "not array-like, a port, or port name")
+#     from spira.yevon.geometry.ports.base import __Port__
 
-    if issubclass(type(destination), __Port__):
-        d = destination.midpoint
-    elif isinstance(destination, Coord):
-        d = destination
-    elif np.array(destination).size == 2:
-        d = destination
-    elif destination in obj.ports:
-        d = obj.ports[destination].midpoint
-    else:
-        raise ValueError("[PHIDL] [DeviceReference.move()] ``destination`` " +
-                            "not array-like, a port, or port name")
+#     if destination is None:
+#         destination = midpoint
+#         midpoint = [0,0]
 
-    if axis == 'x':
-        d = (d[0], o[1])
-    if axis == 'y':
-        d = (o[0], d[1])
+#     if issubclass(type(midpoint), __Port__):
+#         o = midpoint.midpoint
+#     elif isinstance(midpoint, Coord):
+#         o = midpoint
+#     elif np.array(midpoint).size == 2:
+#         o = midpoint
+#     elif midpoint in obj.ports:
+#         o = obj.ports[midpoint].midpoint
+#     else:
+#         raise ValueError("[PHIDL] [DeviceReference.move()] ``midpoint`` " +
+#                             "not array-like, a port, or port name")
 
-    d = Coord(d[0], d[1])
-    o = Coord(o[0], o[1])
+#     if issubclass(type(destination), __Port__):
+#         d = destination.midpoint
+#     elif isinstance(destination, Coord):
+#         d = destination
+#     elif np.array(destination).size == 2:
+#         d = destination
+#     elif destination in obj.ports:
+#         d = obj.ports[destination].midpoint
+#     else:
+#         raise ValueError("[PHIDL] [DeviceReference.move()] ``destination`` " +
+#                             "not array-like, a port, or port name")
 
-    return d, o
+#     if axis == 'x':
+#         d = (d[0], o[1])
+#     if axis == 'y':
+#         d = (o[0], d[1])
+
+#     d = Coord(d[0], d[1])
+#     o = Coord(o[0], o[1])
+
+#     return d, o
 
 
 def nodes_combine(g, algorithm):

@@ -5,6 +5,7 @@ from spira.core.transformable import Transformable
 from spira.core.transforms.generic import GenericTransform, __ConvertableTransform__
 from spira.core.descriptor import FunctionField, SetFunctionField
 from spira.core.param.restrictions import RestrictType
+from spira.yevon import constants
 
 
 class Rotation(__ConvertableTransform__):
@@ -28,11 +29,10 @@ class Rotation(__ConvertableTransform__):
                 self.__ca__ = 0.0
                 self.__sa__ = -1.0
         else:
-            # self.__ca__ = np.cos(value * constants.DEG2RAD)
-            # self.__sa__ = np.sin(value * constants.DEG2RAD)
-            self.__ca__ = np.cos(value * (np.pi/180))
-            self.__sa__ = np.sin(value * (np.pi/180))
+            self.__ca__ = np.cos(value * constants.DEG2RAD)
+            self.__sa__ = np.sin(value * constants.DEG2RAD)
         if hasattr(self, '__center__'):
+            print('A')
             center = self.__center__
             self.translation = Coord(
                 center.x * (1 - self.__ca__) + center.y * self.__sa__,
@@ -58,38 +58,23 @@ class Rotation(__ConvertableTransform__):
         coord = self.__rotate__(coord)
         coord = self.__translate__(coord)
         return coord
+        
+    def reverse_on_coord(self, coord):      
+        coord = self.__inv_translate__(coord)
+        coord = self.__inv_rotate__(coord)
+        return coord
 
     def apply_to_array(self, coords):
-        # print('==============================')
-        # print(coords)
         coords = coords[0]
         coords = self.__rotate_array__(coords)
         coords = self.__translate_array__(coords)
-        # print(coords)
+        coords = np.array([coords])
         return coords
 
     def apply_to_angle(self, angle):
         a = angle
         a += self.rotation
         return a % 360.0
-
-    # # center = CoordField(default=(0,0))
-    # # rotation = getattr(GenericTransform, 'rotation')
-
-    # def set_rotation(self, value):
-    #     self.__rot__ = value
-    #     if hasattr(self, '__center__'):
-    #         center = self.__center__
-    #         # self.translation = Coord(center[0], center[1])
-
-    # rotation = SetFunctionField('__rot__', set_rotation, default=0)
-
-    # def set_center(self, value):
-    #     self.__center__ = value
-    #     # if hasattr(self, '__rot__'):
-    #     #     self.translation = Coord(value[0], value[1])
-
-    # center = SetFunctionField('__center__', set_center, default=0)
 
 
 class __RotationMixin__(object):

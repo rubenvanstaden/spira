@@ -7,12 +7,12 @@ from copy import copy, deepcopy
 from spira.core.initializer import FieldInitializer
 from numpy.linalg import norm
 
-from spira.yevon.geometry.coord import CoordField
+from spira.yevon.geometry.coord import CoordField, Coord
 from spira.core.param.variables import *
 from spira.core.descriptor import DataFieldDescriptor, DataField
 
 
-# __all__ = ['Shape', 'ShapeField', 'PointArrayField']
+__all__ = ['Shape', 'ShapeField', 'PointArrayField']
 
 
 class PointArrayField(DataFieldDescriptor):
@@ -26,13 +26,13 @@ class PointArrayField(DataFieldDescriptor):
             value = self.__operations__([])
         else:
             # value = self.__operations__(value)
-            value = self.__operations__([c.convert_to_array() if isinstance(c, Coord) else c for c in value]) 
+            value = self.__operations__([c.to_nparray() if isinstance(c, Coord) else c for c in value]) 
         obj.__store__[self.__name__] = value
         return value 
         # if (value is None):
         #     value = self.__process__([])
         # else:
-        #     value = self.__process__([c.convert_to_array() if isinstance(c, Coord) else c for c in value])
+        #     value = self.__process__([c.to_nparray() if isinstance(c, Coord) else c for c in value])
         # return value 
 
     def __operations__(self, points):
@@ -174,7 +174,7 @@ class __Shape__(FieldInitializer):
 
     @property
     def orientation(self):
-        """ Returns the orientation of the shape: 
+        """ Returns the orientation of the shape:
         +1(counterclock) or -1(clock) """
         # FIXME: Error with multiple shapes: [[[s1], [s2]]]
         pts = self.points[0]
@@ -190,46 +190,36 @@ class __Shape__(FieldInitializer):
 
     @property
     def count(self):
-        """ number of points in the shape """
+        """ Number of points in the shape """
         return self.__len__()
 
     @property
     def center_of_mass(self):
+        """ Get the center of mass of the shape. 
+        Note, this is not the same as the bounding box center."""
         c = np.mean(self.points[0], 0)
-        # print(self.points)
-        # c = np.mean(self.points, 0)
         return [c[0], c[1]]
-        # return Coord2(COM[0], COM[1]) 
 
     def move(self, pos):
         p = np.array([pos[0], pos[1]])
         self.points += p
         return self
 
-    # @property
-    # def reverse(self):
-    #     pass
-
-    # def transform(self):
-    #     pass
-
-    # def encloses(self):
-    #     pass
-
-    # def index(self, item):
-    #     pass
+    def transform(self, transformation):
+        self.points = transformation.apply_to_array(self.points)
+        return self
 
 
 class Shape(__Shape__):
-    """ A shape is a geometrical object that 
-    calculates the points that will be used 
+    """ A shape is a geometrical object that
+    calculates the points that will be used
     to generate a polygon object.
-    
+
     Examples
     --------
     >>> shape = shapes.Shape(points=[])
     """
-    
+
     doc = StringField()
 
     def __init__(self, points=None, **kwargs):

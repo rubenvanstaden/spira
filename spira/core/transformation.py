@@ -1,6 +1,5 @@
 import numpy as np
 from numpy.linalg import norm
-import spira.all as spira
 
 from spira.core.initializer import FieldInitializer
 from spira.core.param.restrictions import RestrictType
@@ -14,7 +13,6 @@ class Transform(FieldInitializer):
         pass
 
     def apply_to_copy(self, item):
-        """ Applies the transform to a copy of the transformable item. """
         if isinstance(item, list):
             raise ValueError('Not implemented yet!')
             # from .shape import Shape
@@ -24,17 +22,12 @@ class Transform(FieldInitializer):
             return item.transform_copy(self)
 
     def __call__(self, item):
-        # print('--- Calling transform ---')
-        # print(self)
-        # print(item)
-        # print('')
         if item is None:
             return self
         if isinstance(item, Transform):
             return item + self
         else:
             return self.apply_to_copy(item)
-            # raise ValueError('Call not implemented!')
 
     def __add__(self, other):
         if other is None:
@@ -95,9 +88,18 @@ class CompoundTransform(Transform):
         elif isinstance(transforms, CompoundTransform):
             self.__subtransforms__ = []
             self.__subtransforms__.extend(transforms)
-        else:            
+        else:
             self.__subtransforms__ = [transforms]
         super().__init__(**kwargs)
+
+    def __repr__(self):
+        return str(self.__subtransforms__)
+
+    def __str__(self):
+        return self.__repr__()
+
+    def id_string(self):
+        return self.__repr__()
 
     def __add__(self, other):
         T = CompoundTransform(self)
@@ -109,8 +111,8 @@ class CompoundTransform(Transform):
         return self
 
     def add(self, other):
-        if other is None: 
-            return 
+        if other is None:
+            return
         if isinstance(other, CompoundTransform):
             for c in other.__subtransforms__:
                 self.add(other)
@@ -119,12 +121,16 @@ class CompoundTransform(Transform):
             self.__subtransforms__.append(other)
         else:
             raise TypeError("Cannot add object of type " + str(type(other)) + " to transform")
-        
-    def apply_to_object(self, item):
-        """ Apply transformation to elementals."""
+
+    def apply_to_coord(self, coord):
         for c in self.__subtransforms__:
-            item = c.apply_to_object(item)
-        return item
+            coord = c.apply_to_coord(coord)
+        return coord
+
+    def apply_to_array(self, coords):
+        for c in self.__subtransforms__:
+            coords = c.apply_to_array(coords)
+        return coords
 
     def is_identity(self):
         for c in self.__subtransforms__:

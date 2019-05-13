@@ -1,4 +1,3 @@
-import spira.all as spira
 import numpy as np
 from copy import deepcopy
 from numpy.linalg import norm

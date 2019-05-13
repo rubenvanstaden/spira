@@ -5,7 +5,6 @@ from spira.core import param
 from spira.yevon.geometry import shapes
 from spira.yevon import process as pc
 from spira.netex.containers import __CellContainer__, __NetContainer__
-from spira.netex.net import Net
 from copy import copy, deepcopy
 import networkx as nx
 from spira.yevon import utils
@@ -310,7 +309,7 @@ class Structure(__NetlistCell__):
         for m in self.merged_layers:
         # for m in self.metals:
             for p in m.ports:
-                if isinstance(p, (spira.Term, spira.EdgeTerm)):
+                if isinstance(p, (spira.Terminal, spira.spira.EdgeTerminal)):
                     edgelayer = deepcopy(p.gds_layer)
                     arrowlayer = deepcopy(p.gds_layer)
                     edgelayer.datatype = self.edge_datatype
@@ -325,21 +324,3 @@ class Structure(__NetlistCell__):
                     )
                     ports += term
         return ports
-
-    def create_nets(self, nets):
-        for pl in RDD.PLAYER.get_physical_layers(purposes='METAL'):
-            polygons = self.get_metals(pl)
-            if len(polygons) > 0:
-                nets += Net(
-                    name='{}'.format(pl.layer),
-                    lcar=self.lcar,
-                    level=self.level,
-                    algorithm=self.algorithm,
-                    layer=pl.layer,
-                    polygons=polygons,
-                    route_nodes=self.routes,
-                    primitives=self.primitives,
-                    bounding_boxes=self.contacts
-                )
-        return nets
-

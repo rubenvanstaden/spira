@@ -22,7 +22,6 @@ class CellProperties(__Group__, __GeometryProperties__):
     def set_gdspy_cell(self):
         name = '{}_{}'.format(self.name, CellProperties._cid)
         CellProperties._cid += 1
-        # print(name)
         glib = gdspy.GdsLibrary(name=name)
         cell = spira.Cell(name=name, elementals=deepcopy(self.elementals))
         # cell = spira.Cell(name=self.name, elementals=self.elementals)
@@ -30,35 +29,37 @@ class CellProperties(__Group__, __GeometryProperties__):
 
     def convert_references(self, c, c2dmap):
         for e in c.elementals.flat_elems():
+        # for e in c.elementals:
             G = c2dmap[c]
             if isinstance(e, spira.SRef):
 
                 if not isinstance(e.midpoint, Coord):
                     e.midpoint = Coord(e.midpoint[0], e.midpoint[1])
+                    
+                # FIXME: Has to be removed for layout transformations.
 
                 # if e.transformation is None:
-                #     tf = spira.Translation(e.midpoint) 
+                #     T = spira.Translation(e.midpoint) 
                 # else:
-                #     tf = e.transformation + spira.Translation(e.midpoint)
+                #     T = e.transformation + spira.Translation(e.midpoint)
+                # e.midpoint = T.apply_to_coord(e.midpoint)
 
-                # tf = e.transformation
-                # if tf is not None:
-                #     e.midpoint = tf.apply_to_coord(e.midpoint)
-
-                if isinstance(e.midpoint, Coord):
-                    origin = e.midpoint.convert_to_array()
-                else:
-                    origin = e.midpoint
-
-                G.add(
-                    gdspy.CellReference(
-                        ref_cell=c2dmap[e.ref],
-                        origin=origin,
-                        rotation=e.rotation,
-                        magnification=e.magnification,
-                        x_reflection=e.reflection
-                    )
+                T = e.transformation
+                if T is not None:
+                    e.midpoint = T.apply_to_coord(e.midpoint)
+                
+                ref = gdspy.CellReference(
+                    ref_cell=c2dmap[e.ref],
+                    origin=e.midpoint.to_nparray(),
+                    rotation=e.rotation,
+                    magnification=e.magnification,
+                    x_reflection=e.reflection
                 )
+                
+                # T = e._translation
+                # ref.translate(dx=T[0], dy=T[1])
+
+                G.add(ref)
 
     def construct_gdspy_tree(self, glib):
         d = self.dependencies()
@@ -75,13 +76,7 @@ class CellProperties(__Group__, __GeometryProperties__):
     @property
     def bbox(self):
         D = deepcopy(self)
-        D.name = '{}_copy'.format(D.name)
         cell = D.get_gdspy_cell()
-
-        # print(cell)
-        # for e in cell.elements:
-        #     print(e)
-
         bbox = cell.get_bounding_box()
         if bbox is None:
             bbox = ((0,0),(0,0))

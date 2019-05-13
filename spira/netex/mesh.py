@@ -224,8 +224,8 @@ class MeshLabeled(MeshAbstract):
         for n, triangle in self.__triangle_nodes__().items():
             points = [utils.c2d(self.points[i]) for i in triangle]
             for D in self.primitives:
-                if isinstance(D, (spira.Port, spira.Term)):
-                    if not isinstance(D, (spira.Dummy, spira.EdgeTerm)):
+                if isinstance(D, (spira.Port, spira.Terminal)):
+                    if not isinstance(D, (spira.Dummy, spira.spira.EdgeTerminal)):
                         if D.encloses(points):
                             self.g.node[n]['device'] = D
                 else:

@@ -1,4 +1,6 @@
-# import spira.yevon.properties
+
+
+from spira.yevon.constants import *
 
 from spira.core.all import *
 
@@ -17,6 +19,7 @@ from spira.yevon.gdsii import *
 from spira.yevon.visualization import *
 from spira.yevon.rdd.layer import *
 
+from spira.netex import *
 from spira.netex.pcell import *
 # from spira.netex.devices import *
 # from spira.netex.circuits import *

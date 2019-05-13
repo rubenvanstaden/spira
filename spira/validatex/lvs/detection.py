@@ -1,12 +1,28 @@
 import spira.all as spira
+from spira.yevon.rdd import get_rule_deck
+from copy import deepcopy
 
 
-RDD = spira.get_rule_deck()
+RDD = get_rule_deck()
+
+
+__all__ = ['device_detector', 'circuit_detector']
+
+
+def map_references(c, c2dmap):
+    for e in c.elementals.sref:
+        if e.ref in c2dmap.keys():
+            e.ref = c2dmap[e.ref]
+            e._parent_ports = e.ref.ports
+            e._local_ports = {(port.name, port.gds_layer.number, port.midpoint[0], port.midpoint[1]):deepcopy(port) for port in e.ref.ports}
+            e.port_locks = {(port.name, port.gds_layer.number, port.midpoint[0], port.midpoint[1]):port.locked for port in e.ref.ports}
+            # e._local_ports = {port.node_id:deepcopy(port) for port in e.ref.ports}
+            # e.port_locks = {port.node_id:port.locked for port in e.ref.ports}
 
 
 def device_detector(cell):
     from spira.netex.devices import Device
-    from spira.yevon.geometry.contact import DeviceTemplate
+    from spira.netex.contact import DeviceTemplate
 
     c2dmap = {}
     for C in cell.dependencies():
@@ -31,8 +47,9 @@ def device_detector(cell):
                     c2dmap.update({C: D})
         else:
             c2dmap.update({C: C})
-    for c in cell.dependencies():
-        map_references(c, c2dmap)
+            
+    # for c in cell.dependencies():
+    #     map_references(c, c2dmap)
 
     return c2dmap[cell]
 
@@ -49,7 +66,8 @@ def circuit_detector(cell):
                 c2dmap.update({C: D})
         else:
             c2dmap.update({C: C})
-    for c in cell.dependencies():
-        map_references(c, c2dmap)
+
+    # for c in cell.dependencies():
+    #     map_references(c, c2dmap)
         
     return c2dmap[cell]

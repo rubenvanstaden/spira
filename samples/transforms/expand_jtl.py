@@ -2,6 +2,10 @@ import spira.all as spira
 from spira.yevon.geometry import shapes
 from spira.yevon.geometry.coord import Coord
 from expand_transform import Junction
+from spira.yevon.rdd import get_rule_deck
+
+
+RDD = get_rule_deck()
 
 
 class Jtl(spira.Cell):
@@ -30,40 +34,26 @@ class Jtl(spira.Cell):
         return elems
 
 
-# ----------------------------------------------------------------------------------------------------------------------
+# --------------------------------------------------------------------------------------------------------------------
 
 
 if __name__ == '__main__':
-    
+
     jtl= Jtl()
-    
+
     jtl.expand_transform()
 
-    # print('\n--- Original SRef ---')
-    # for s in c.elementals:
-    #     if isinstance(s, spira.SRef):
-    #         print(s)
-    #         print(s.ref)
-    #         s = s.expand_transform()
-    
-    # print('\n--- Expanded SRef ---')
-    # for s in c.elementals:
-    #     if isinstance(s, spira.SRef):
-    #         print(s)
-    #         print(s.ref)
-    #         for e1 in s.ref.elementals:
-    #             if isinstance(e1, spira.SRef):
-    #                 print(type(e1.transformation))
-    #                 print(e1.transformation)
-    #                 e1 = e1.expand_transform()
-
-    for k, v in jtl['Junction_S1'].alias_cells.items():
-        print(k, v)
+    # for k, v in jtl['Junction_S1'].alias_cells.items():
+    #     print(k, v)
 
     ply = jtl['Junction_S1']['Jj_S0']['J5']
-    
-    ply.stretch(sx=1, sy=2)
-    
+    print(ply)
+
+    # ply.stretch(factor=(1,2))
+    T = spira.Stretch(stretch_factor=(2,1))
+    ply.transform(T)
+
+    print(ply)
     jtl.output()
 
 

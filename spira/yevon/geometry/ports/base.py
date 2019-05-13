@@ -15,8 +15,9 @@ from spira.core.param.variables import *
 from spira.yevon.visualization.color import ColorField
 from spira.yevon.layer import LayerField
 from spira.core.descriptor import DataField
-from spira.yevon.geometry.coord import CoordField
+from spira.yevon.geometry.coord import CoordField, Coord
 from spira.yevon.rdd.layer import PhysicalLayerField
+from spira.yevon.geometry.vector import Vector
 
 
 RDD = get_rule_deck()
@@ -26,9 +27,6 @@ class __Port__(__Elemental__):
 
     name = StringField()
 
-    midpoint = CoordField()
-    orientation = NumberField(default=0)
-
     parent = DataField()
     locked = BoolField(default=True)
     pid = StringField()
@@ -36,7 +34,7 @@ class __Port__(__Elemental__):
     def __add__(self, other):
         if other is None:
             return self
-        p1 = np.array(self.midpoint) + np.array(other)
+        p1 = Coord(self.midpoint[0], self.midpoint[1]) + Coord(other[0], other[1])
         return p1
 
     def flat_copy(self, level=-1):
@@ -44,58 +42,28 @@ class __Port__(__Elemental__):
         E.transform_copy(self.transformation)
         return E
 
-    @property
-    def x(self):
-        return self.midpoint[0]
-
-    @property
-    def y(self):
-        return self.midpoint[1]
-
     def encloses(self, polygon):
         return pyclipper.PointInPolygon(self.midpoint, polygon) != 0
-        
+
     def transform(self, transformation):
         if transformation is not None:
             self.midpoint = transformation.apply_to_coord(self.midpoint)
-            self.orientation = transformation.apply_to_angle(self.orientation)
         return self
 
-    # def transform(self, transformation):
-    #     if transformation is not None:
-    #         transformation.apply_to_object(self)
-    #     return self
-        
-    # def transform_copy(self, transformation):
-    #     T = deepcopy(self)
-    #     T.transform(transformation)
-    #     return T
-
-    # def __reflect__(self):
-    #     """ Reflect around the x-axis. """
-    #     self.midpoint = [self.midpoint[0], -self.midpoint[1]]
-    #     self.orientation = -self.orientation
-    #     self.orientation = np.mod(self.orientation, 360)
-    #     # self.reflection = True
-    #     return self
-
-    # def __rotate__(self, angle=45, center=(0,0)):
-    #     """ Rotate port around the center with angle. """
-    #     self.orientation += angle
-    #     self.orientation = np.mod(self.orientation, 360)
-    #     self.midpoint = utils.rotate_algorithm(self.midpoint, angle=angle, center=center)
-    #     return self
-
-    def __translate__(self, dx, dy):
-        """ Translate port by dx and dy. """
-        self.midpoint = self.midpoint + np.array([dx, dy])
+    def move(self, coordinate):
+        self.midpoint.move(coordinate)
         return self
 
-    def move(self, midpoint=(0,0), destination=None, axis=None):
-        d, o = utils.move_algorithm(obj=self, midpoint=midpoint, destination=destination, axis=axis)
-        dx, dy = np.array(d) - o
-        self.__translate__(dx, dy)
-        return self
+    # def __translate__(self, dx, dy):
+    #     """ Translate port by dx and dy. """
+    #     self.midpoint = self.midpoint + np.array([dx, dy])
+    #     return self
+
+    # def move(self, midpoint=(0,0), destination=None, axis=None):
+    #     d, o = utils.move_algorithm(obj=self, midpoint=midpoint, destination=destination, axis=axis)
+    #     dx, dy = np.array(d) - o
+    #     self.__translate__(dx, dy)
+    #     return self
 
     def distance(self, other):
         return norm(np.array(self.midpoint) - np.array(other.midpoint))
@@ -144,8 +112,10 @@ class __PhysicalPort__(__Port__):
 class __VerticalPort__(__PhysicalPort__):
     __committed__ = {}
 
+    midpoint = CoordField()
 
-class __HorizontalPort__(__PhysicalPort__):
+
+class __HorizontalPort__(Vector, __PhysicalPort__):
     __committed__ = {}
 
 

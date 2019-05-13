@@ -6,9 +6,8 @@ from numpy.linalg import norm
 from spira.core.param.variables import *
 from spira.yevon.geometry.coord import CoordField, Coord
 from spira.core.descriptor import FunctionField, SetFunctionField
-
-
-DEG2RAD = np.pi/180
+from spira.core.transformation import Transform
+from spira.yevon import constants
 
 
 class GenericTransform(ReversibleTransform):
@@ -35,15 +34,10 @@ class GenericTransform(ReversibleTransform):
                 self.__ca__ = 0.0
                 self.__sa__ = -1.0
         else:
-            self.__ca__ = np.cos(value * DEG2RAD)
-            self.__sa__ = np.sin(value * DEG2RAD)
+            self.__ca__ = np.cos(value * constants.DEG2RAD)
+            self.__sa__ = np.sin(value * constants.DEG2RAD)
 
-    rotation = SetFunctionField("__rotation__", set_rotation, default=0.0)
-
-    # def set_rotation(self, value):
-    #     self.__rot__ = value
-
-    # rotation = SetFunctionField('__rot__', set_rotation, default=0)
+    rotation = SetFunctionField('__rotation__', set_rotation, default=0.0)
 
     reflection = BoolField(default=False)
     magnification = NumberField(default=1)
@@ -58,23 +52,35 @@ class GenericTransform(ReversibleTransform):
         )
 
     def __translate__(self, coord):
-        if not isinstance(self.translation, Coord):
-            self.translation = Coord(self.translation[0], self.translation[1])
-        return Coord(coord[0] + self.translation.x, coord[1] + self.translation.y)
+        C = Coord(coord[0] + self.translation.x, coord[1] + self.translation.y)
+        return C
 
     def __rotate__(self, coord):
         return Coord(coord[0] * self.__ca__ - coord[1] * self.__sa__, coord[0] * self.__sa__ + coord[1] * self.__ca__)
 
     def __magnify__(self, coord):
         return Coord(coord[0] * self.magnification, coord[1] * self.magnification)
+
+    def __inv_translate__(self, coord):
+        return Coord(coord[0] - self.translation.x, coord[1] - self.translation.y)
+    
+    def __inv_rotate__(self, coord):
+        return Coord(coord[0] * self.__ca__ + coord[1] * self.__sa__, - coord[0] * self.__sa__ + coord[1] * self.__ca__)
+
+    def __inv_magnify__(self, coord):
+        return Coord(coord[0] / self.magnification, coord[1] / self.magnification)
+
+    # def __inv_v_flip__(self, coord):
+    #     if self.v_mirror:
+    #         return Coord(coord[0], - coord[1])
+    #     else:
+    #         return Coord(coord[0], coord[1])
         
     def __reflect__(self, coords, p1=(0,0), p2=(1,0)):
-
         if self.reflection is True:
-            points = np.array(coords.convert_to_array())
+            points = np.array(coords.to_nparray())
             p1 = np.array(p1)
             p2 = np.array(p2)
-            print(points)
             if np.asarray(points).ndim == 1:
                 t = np.dot((p2-p1), (points-p1))/norm(p2-p1)**2
                 pts = 2*(p1 + (p2-p1)*t) - points
@@ -98,7 +104,7 @@ class GenericTransform(ReversibleTransform):
         return pts
 
     def __translate_array__(self, coords):
-        coords += np.array([self.translation.x, self.translation.y])
+        coords += np.array([int(self.translation.x), int(self.translation.y)])
         return coords
 
     def __rotate_array__(self, coords):
@@ -124,6 +130,7 @@ class GenericTransform(ReversibleTransform):
         coords = self.__rotate_array__(coords)
         coords = self.__magnify_array__(coords)
         coords = self.__translate_array__(coords)
+        coords = np.array([coords])
         return coords
 
     def apply_to_angle(self, angle):
@@ -144,7 +151,7 @@ class GenericTransform(ReversibleTransform):
             T.rotation = S_1 * (self.rotation + other.rotation)
             T.translation = Coord(self.translation) + other.translation
         else:
-            raise ValueError('Not implemented!')
+            T = Transform.__add__(self, other)
         return T
 
     def __iadd__(self, other):

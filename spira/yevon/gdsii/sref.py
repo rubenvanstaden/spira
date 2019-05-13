@@ -14,10 +14,13 @@ from spira.core.transforms import *
 from spira.core.descriptor import DataFieldDescriptor, FunctionField, DataField
 
 from spira.core.param.variables import *
+from spira.yevon.geometry.vector import *
 from spira.yevon.geometry.line import *
 
 
 class __RefElemental__(__Elemental__):
+
+    __committed__ = {}
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -27,29 +30,59 @@ class __RefElemental__(__Elemental__):
             reference=deepcopy(self.ref),
             # reference=self.ref,
             midpoint=deepcopy(self.midpoint),
-            # midpoint=self.midpoint,
             transformation=deepcopy(self.transformation),
-            # transformation=self.transformation,
             node_id=deepcopy(self.node_id)
         )
 
     def __eq__(self, other):
         if not isinstance(other, SRef):
             return False
-        return (self.ref == other.ref) and (self.midpoint == other.position) and (self.transformation == other.transformation) 
+        return (self.ref == other.ref) and (self.midpoint == other.position) and (self.transformation == other.transformation)
 
     def expand_transform(self):
+
+        if self.transformation is None:
+            name = self.ref.name + '_None'
+        else:
+            name = self.ref.name + self.transformation.id_string()
+
         S = spira.Cell(
-            name=self.ref.name + self.transformation.id_string(),
+            # name=self.ref.name + self.transformation.id_string(),
+            name=name,
             alias=self.ref.alias + self.alias,
             elementals=deepcopy(self.ref.elementals),
             ports=deepcopy(self.ref.ports)
         )
-        S = S.transform(self.transformation)
-        # S = S.transform(self.transformation + spira.Translation(self.midpoint))
+
+        if self.transformation is None:
+            tf = spira.Translation(self.midpoint)
+        else:
+            tf= self.transformation + spira.Translation(self.midpoint)
+
+        S = S.transform(tf)
+
+        # NOTE: Applies expantion hierarchically.
+        # Expands all references in the cell.
+        S.expand_transform()
+
         self.ref = S
         self.transformation = None
+        self.midpoint = (0,0)
         return self
+
+    def flat_expand(self):
+        from spira.yevon import process as pc
+        S = self.expand_transform()
+        C = spira.Cell(name=S.ref.name + '_ExpandedCell')
+        def flat_polygons(subj, cell):
+            for e in cell.elementals:
+                if issubclass(type(e), pc.ProcessLayer):
+                    subj += e
+                elif isinstance(e, spira.SRef):
+                    flat_polygons(subj=subj, cell=e.ref)
+            return subj
+        D = flat_polygons(C, S.ref)
+        return D
 
 
 class SRefAbstract(gdspy.CellReference, __RefElemental__):
@@ -57,14 +90,27 @@ class SRefAbstract(gdspy.CellReference, __RefElemental__):
     midpoint = CoordField(default=(0,0))
 
     def commit_to_gdspy(self, cell, transformation=None):
-        self.midpoint = Coord(self.midpoint[0], self.midpoint[1])
-        # if self.transformation is None:
-        #     tf = spira.Translation(self.midpoint)
-        # else:
-        #     tf = self.transformation + spira.Translation(self.midpoint)
-        # tf = self.transformation
-        # self.ref.commit_to_gdspy(cell=cell, transformation=tf)
-        self.ref.commit_to_gdspy(cell=cell)
+
+        if self.__repr__() not in list(__RefElemental__.__committed__.keys()):
+
+            # # tf = self.transformation
+            # if self.transformation is None:
+            #     tf = spira.Translation(self.midpoint)
+            # else:
+            #     tf = self.transformation + spira.Translation(self.midpoint)
+            # if transformation is not None:
+            #     tf = tf + transformation
+            # self.ref.commit_to_gdspy(cell=cell, transformation=tf)
+
+            self.ref.commit_to_gdspy(cell=cell)
+
+            __RefElemental__.__committed__.update({self.__repr__(): self})
+        else:
+            __RefElemental__.__committed__[self.__repr__()]
+
+    def transform_copy(self, transformation):
+        self = super().transform_copy(transformation)
+        return self.expand_transform()
 
     def dependencies(self):
         from spira.yevon.gdsii.cell_list import CellList
@@ -83,18 +129,28 @@ class SRefAbstract(gdspy.CellReference, __RefElemental__):
             el += self
             return el
         el = self.ref.elementals.flat_copy(level-1)
-        if self.transformation is None:
-            el.transform(Translation(self.midpoint))
-        else:
-            el.transform(self.transformation + Translation(self.midpoint))
+        # if self.transformation is None:
+        #     el.transform(Translation(self.midpoint))
+        # else:
+        #     el.transform(self.transformation + Translation(self.midpoint))
         return el
 
     @property
     def ports(self):
         ports = spira.PortList()
         for p in self.ref.ports:
-            ports += p.transform_copy(self.transformation)
+
+            # ports += p.transform_copy(self.transformation)
             # ports += p.transform_copy(self.transformation).move(self.midpoint)
+
+            pp = p.transform_copy(self.transformation).move(self.midpoint)
+            # T = spira.Rotation(90, center=(-10*1e6, 0))
+            # pp = pp.transform(T)
+            ports += pp
+
+            # if self.transformation is not None:
+            #     ports += p.transform_copy(self.transformation).move(self.midpoint).transform(-self.transformation)
+
         return ports
 
     # def move(self, position):
@@ -141,12 +197,8 @@ class SRefAbstract(gdspy.CellReference, __RefElemental__):
             raise ValueError("[PHIDL] [DeviceReference.move()] ``destination`` " +
                                 "not array-like, a port, or port name")
 
-        o = Coord(o[0], o[1])
-        d = Coord(d[0], d[1])
-
-        dxdy = d - o
-        self.midpoint = Coord(self.midpoint) + dxdy
-        # self.transformation = spira.Translation(translation=dxdy)(self).transformation
+        position = np.array([d[0], d[1]]) - np.array([o[0], o[1]])
+        self.midpoint = Coord(self.midpoint[0] + position[0], self.midpoint[1] + position[1])
         return self
 
     def connect(self, port, destination):
@@ -167,40 +219,35 @@ class SRefAbstract(gdspy.CellReference, __RefElemental__):
             raise ValueError("[SPiRA] connect() did not receive a Port or " +
                 "valid port name - received ({}), ports available " +
                 "are ({})".format(port, self.ports.get_names()))
-        angle = 180 + destination.orientation - p.orientation
 
-        if not isinstance(self.midpoint, Coord):
-            self.midpoint = Coord(self.midpoint[0], self.midpoint[1])
+        if not isinstance(destination, spira.Terminal):
+            raise ValueError('Destination is not a terminal.')
 
-        T = spira.Rotation(angle, center=p.midpoint)
-        self.midpoint.transform(T)
+        T = vector_match_transform(v1=p, v2=destination)
         self.transform(T)
-        self.move(midpoint=p, destination=destination)
 
         return self
 
     def align(self, port, destination, distance):
-        """ Align the reference using an internal port with an external port. 
-        
+        """ Align the reference using an internal port with an external port.
+
         Example:
         --------
         >>> S.align()
         """
         destination = deepcopy(destination)
         self.connect(port, destination)
-        
-        angle = destination.orientation - 90
-        angle = np.mod(angle, 360)
-        L = line_from_point_angle(point=destination.midpoint, angle=angle)
+
+        L = line_from_point_angle(point=destination.midpoint, angle=destination.orientation)
         dx, dy = L.get_coord_from_distance(destination, distance)
 
-        T = spira.Translation(translation=Coord(dx, dy))
-        self.midpoint.transform(T)
+        T = spira.Translation(translation=(dx, dy))
         self.transform(T)
 
         return self
 
 
+from spira.core.transforms.generic import GenericTransform
 class SRef(SRefAbstract):
     """ Cell reference (SRef) is the reference to a cell layout
     to create a hierarchical layout structure. It creates copies
@@ -247,31 +294,35 @@ class SRef(SRefAbstract):
 
     def __str__(self):
         return self.__repr__()
-
-    # @property
-    # def translation(self):
-    #     if self.transformation is not None:
-    #         return self.transformation.translation
-    #     else:
-    #         return 0.0
+        
+    @property
+    def _translation(self):
+        # if self.transformation is not None:
+        if issubclass(type(self.transformation), GenericTransform):
+            return self.transformation.translation
+        else:
+            return (0,0)
 
     @property
     def rotation(self):
-        if self.transformation is not None:
+        # if self.transformation is not None:
+        if issubclass(type(self.transformation), GenericTransform):
             return self.transformation.rotation
         else:
             return 0.0
 
     @property
     def reflection(self):
-        if self.transformation is not None:
+        # if self.transformation is not None:
+        if issubclass(type(self.transformation), GenericTransform):
             return self.transformation.reflection
         else:
             return False
 
     @property
     def magnification(self):
-        if self.transformation is not None:
+        # if self.transformation is not None:
+        if issubclass(type(self.transformation), GenericTransform):
             return self.transformation.magnification
         else:
             return 1.0

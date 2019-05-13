@@ -3,6 +3,7 @@ import numpy as np
 from spira.core.param.restrictions import RestrictType
 from spira.core.descriptor import DataFieldDescriptor
 from spira.core.transformable import Transformable
+from spira.core.processors import ProcessorTypeCast
 
 
 class Coord(Transformable):
@@ -122,14 +123,18 @@ class Coord(Transformable):
     def id_string(self):
         return "%d_%d" % (self.x * 1000, self.y * 1000)
 
-    def convert_to_array(self):
+    def to_nparray(self):
         return [self.x, self.y]
 
 
-def CoordField(**kwargs):
+RESTRICT_COORD = RestrictType(Coord)
+
+
+def CoordField(restriction=None, preprocess=None, **kwargs):
     if 'default' not in kwargs:
         kwargs['default'] = Coord(0,0)
-    R = RestrictType(Coord)
-    return DataFieldDescriptor(restrictions=R, **kwargs)
+    R = RESTRICT_COORD & restriction
+    P = ProcessorTypeCast(Coord) + preprocess
+    return DataFieldDescriptor(restriction=R, preprocess=P, **kwargs)
 
 

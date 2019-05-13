@@ -5,6 +5,10 @@ from spira.core.initializer import FieldInitializer
 from spira.core.initializer import MetaElemental
 from spira.core.descriptor import FunctionField
 from spira.core.elem_list import ElementalListField
+from spira.yevon.rdd import get_rule_deck
+
+
+RDD = get_rule_deck()
 
 
 class __Elemental__(Transformable, FieldInitializer, metaclass=MetaElemental):
@@ -27,8 +31,8 @@ class __Elemental__(Transformable, FieldInitializer, metaclass=MetaElemental):
     def flatten(self):
         return [self]
 
-    def commit_to_gdspy(self, cell, transformation=None):
-        return None
+    # def commit_to_gdspy(self, cell, transformation=None):
+    #     return None
 
     def dependencies(self):
         return None
@@ -68,9 +72,9 @@ class __Group__(FieldInitializer):
     #         e.commit_to_gdspy(cell=cell, transformation=transformation)
     #     return cell
 
-    def append(self, element):
+    def append(self, elemental):
         el = self.elementals
-        el.append(element)
+        el.append(elemental)
         self.elementals = el
 
     def extend(self, elems):
@@ -82,24 +86,21 @@ class __Group__(FieldInitializer):
             el.extend(elems)
         self.elementals = el  
 
-    def __iadd__(self, element):
+    def __iadd__(self, elemental):
         from spira.yevon import process as pc
         from spira.yevon.geometry.ports.base import __Port__
         """ Add elemental and reduce the class to a simple compound elementals. """
-        if isinstance(element, (list, spira.ElementList)):
-            self.extend(element)
-        elif isinstance(element, (__Elemental__, pc.ProcessLayer)):
-            self.append(element)
-        elif element is None:
+        if isinstance(elemental, (list, spira.ElementList)):
+            self.extend(elemental)
+        elif isinstance(elemental, (__Elemental__, pc.ProcessLayer)):
+            self.append(elemental)
+        elif elemental is None:
             return self
-        elif issubclass(type(element), __Port__):
+        elif issubclass(type(elemental), __Port__):
             self.ports += other
         else:
-            raise TypeError("Invalid type " + str(type(element)) + " in __Group__.__iadd__().")
+            raise TypeError("Invalid type " + str(type(elemental)) + " in __Group__.__iadd__().")
         return self
-
-    def add_el(self, elems):
-        self.elementals += elems
 
     def flatten(self, level = -1):
         self.elementals = self.elementals.flat_copy(level=level)
@@ -127,3 +128,32 @@ class __Group__(FieldInitializer):
 
     # def __ne__(self, other):
     #     return not self.__eq__(other)
+
+    # def generate_physical_polygons(self, pl):
+    #     elems = spira.ElementList()
+    #     R = self.cell.elementals.flat_copy()
+    #     Rm = R.get_polygons(layer=pl.layer)
+    #     for i, e in enumerate(Rm):
+    #         if len(e.polygons[0]) == 4:
+    #             alias = 'devices_box_{}_{}_{}'.format(pl.layer.number, self.cell.node_id, i)
+    #             poly = spira.Polygons(shape=e.polygons)
+    #             elems += pc.Box(name=alias, player=pl, center=poly.center, w=poly.dx, h=poly.dy, level=self.level)
+    #         else:
+    #             alias = 'ply_{}_{}_{}'.format(pl.layer.number, self.cell.node_id, i)
+    #             elems += pc.Polygon(name=alias, player=pl, points=e.polygons, level=self.level)
+    #     return elems
+
+    # def create_metals(self, elems):
+    #     for player in RDD.PLAYER.get_physical_layers(purposes='METAL'):
+    #         for e in self.generate_physical_polygons(player):
+    #             elems += e
+    #     return elems
+
+    # def create_contacts(self, elems):
+    #     for player in RDD.PLAYER.get_physical_layers(purposes=['VIA', 'JJ']):
+    #         for e in self.generate_physical_polygons(player):
+    #             elems += e
+    #     return elem
+
+
+

@@ -1,6 +1,10 @@
 import spira.all as spira
 from spira.yevon.geometry import shapes
 from spira.yevon.geometry.coord import Coord
+from spira.yevon.rdd import get_rule_deck
+
+
+RDD = get_rule_deck()
 
 
 class Jj(spira.Cell):
@@ -100,75 +104,85 @@ class Junction(spira.Cell):
         return elems
 
 
-junction = Junction()
 
-junction = junction.expand_transform()
+if __name__ == '__main__':
+    
+    
+    junction = Junction()
+    
+    # junction = junction.expand_transform()
 
+    C = spira.Cell(name='TestingCell')
 
-# print('\n--- Original SRef ---')
-# for s in junction.elementals:
-#     if isinstance(s, spira.SRef):
-#         print(s)
-#         print(s.ref)
-#         s = s.expand_transform()
+    S = spira.SRef(junction)
+    T = spira.Stretch(stretch_factor=(2,1))
+    S = T(S)
+    C += S
+    C.output()
 
-# print('\n--- Expanded SRef ---')
-# for s in junction.elementals:
-#     if isinstance(s, spira.SRef):
-#         print(s)
-#         print(s.ref)
-#         for e1 in s.ref.elementals:
-#             if isinstance(e1, spira.SRef):
-#                 print(type(e1.transformation))
-#                 print(e1.transformation)
-#                 e1 = e1.expand_transform()
-
-# print('\n--- Expanded SRef Level 2 ---')
-# for s in junction.elementals:
-#     if isinstance(s, spira.SRef):
-#         for e1 in s.ref.elementals:
-#             if isinstance(e1, spira.SRef):
-#                 print(type(e1.transformation))
-#                 print(e1.transformation)
-
-# print('\n--- Elementals ---')
-# for e1 in junction.elementals:
-#     print(e1)
-
-
-print('\n=========================================================================================\n')
-
-
-# c1 = spira.Cell(name='ExpandedCell')
-
-# def flat_polygons(subj, cell):
-#     for e1 in cell.elementals:
-#         if isinstance(e1, spira.Polygon):
-#             subj += e1
-#         elif isinstance(e1, spira.SRef):
-#             flat_polygons(subj=subj, cell=e1.ref)
-#     return subj
-
-# cell = flat_polygons(c1, junction)
-
-
-# c2 = spira.Cell(name='Stretch')
-
-# p1 = junction.top.ref.elementals[1].ref.elementals[0]
-# p2 = junction.bot.ref.elementals[1]
-
-# p1.stretch(sx=1, sy=2)
-
-# c2 += p1
-# c2 += p2
-
-ply = junction['Jj_S0']['J5']
-
-ply.stretch(sx=1, sy=2)
-
-
-junction.output()
-# cell.output()
-# c2.output()
+    # print('\n--- Original SRef ---')
+    # for s in junction.elementals:
+    #     if isinstance(s, spira.SRef):
+    #         print(s)
+    #         print(s.ref)
+    #         s = s.expand_transform()
+    
+    # print('\n--- Expanded SRef ---')
+    # for s in junction.elementals:
+    #     if isinstance(s, spira.SRef):
+    #         print(s)
+    #         print(s.ref)
+    #         for e1 in s.ref.elementals:
+    #             if isinstance(e1, spira.SRef):
+    #                 print(type(e1.transformation))
+    #                 print(e1.transformation)
+    #                 e1 = e1.expand_transform()
+    
+    # print('\n--- Expanded SRef Level 2 ---')
+    # for s in junction.elementals:
+    #     if isinstance(s, spira.SRef):
+    #         for e1 in s.ref.elementals:
+    #             if isinstance(e1, spira.SRef):
+    #                 print(type(e1.transformation))
+    #                 print(e1.transformation)
+    
+    # print('\n--- Elementals ---')
+    # for e1 in junction.elementals:
+    #     print(e1)
+    
+    
+    print('\n=========================================================================================\n')
+    
+    
+    # c1 = spira.Cell(name='ExpandedCell')
+    
+    # def flat_polygons(subj, cell):
+    #     for e1 in cell.elementals:
+    #         if isinstance(e1, spira.Polygon):
+    #             subj += e1
+    #         elif isinstance(e1, spira.SRef):
+    #             flat_polygons(subj=subj, cell=e1.ref)
+    #     return subj
+    
+    # cell = flat_polygons(c1, junction)
+    
+    
+    # c2 = spira.Cell(name='Stretch')
+    
+    # p1 = junction.top.ref.elementals[1].ref.elementals[0]
+    # p2 = junction.bot.ref.elementals[1]
+    
+    # p1.stretch(sx=1, sy=2)
+    
+    # c2 += p1
+    # c2 += p2
+    
+    # ply = junction['Jj_S0']['J5']
+    
+    # ply.stretch(sx=1, sy=2, center=(0, 6*1e6))
+    
+    # junction.output()
+    # cell.output()
+    # c2.output()
 
 

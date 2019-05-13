@@ -179,7 +179,7 @@
 #         # if (value is None):
 #         #     value = self.__process__([])
 #         # else:
-#         #     value = self.__process__([c.convert_to_array() if isinstance(c, Coord) else c for c in value])
+#         #     value = self.__process__([c.to_nparray() if isinstance(c, Coord) else c for c in value])
 #         # return value 
 
 #     def __operations__(self, points):

@@ -1,17 +1,17 @@
 import spira.all as spira
-from spira.core import param
-from spira import pc
 from spira.netex.structure import Structure
+from spira.yevon import process as pc
+from spira.yevon.rdd import get_rule_deck
 
 
-RDD = spira.get_rule_deck()
+RDD = get_rule_deck()
 
 
 class ViaTemplate(spira.Cell):
 
-    layer1 = param.LayerField(number=3)
-    layer2 = param.LayerField(number=8)
-    via_layer = param.LayerField(number=9)
+    layer1 = spira.LayerField(number=3)
+    layer2 = spira.LayerField(number=8)
+    via_layer = spira.LayerField(number=9)
 
     def create_elementals(self, elems):
         M1 = spira.ElementList()
@@ -37,7 +37,7 @@ class ViaTemplate(spira.Cell):
                             e.ports[0] = spira.Port(
                                 name=e.name,
                                 midpoint=prev_port.midpoint,
-                                orientation=prev_port.orientation,
+                                # orientation=prev_port.orientation,
                                 # gds_layer=M.ps_layer.layer
                                 gds_layer=ll
                             )
@@ -53,7 +53,7 @@ class ViaTemplate(spira.Cell):
                             e.ports[1] = spira.Port(
                                 name=e.name,
                                 midpoint=prev_port.midpoint,
-                                orientation=prev_port.orientation,
+                                # orientation=prev_port.orientation,
                                 # gds_layer=M.ps_layer.layer
                                 gds_layer=ll
                             )
@@ -140,15 +140,10 @@ class DeviceTemplate(Structure):
             default_via = RDD.DEVICES[key].PCELL()
             is_possibly_match = True
 
-            # print(key)
-            # print(self.contacts)
-            # print('--------------')
-            # print(default_via.contacts)
-
-            if len(self.contacts) != len(default_via.contacts):
-                is_possibly_match = False
-            if len(self.merged_layers) != len(default_via.merged_layers):
-                is_possibly_match = False
+            # if len(self.contacts) != len(default_via.contacts):
+            #     is_possibly_match = False
+            # if len(self.merged_layers) != len(default_via.merged_layers):
+            #     is_possibly_match = False
 
             # FIXME: Only works for AiST process.
             # if is_possibly_match:
@@ -173,17 +168,17 @@ class DeviceTemplate(Structure):
                         if e.name != 'P_metal':
                             self_ports += e.gds_layer.node_id
 
-            if is_possibly_match:
-                default_ports = spira.ElementList()
-                for e in default_via.contacts:
-                    default_ports += e.ps_layer
+            # if is_possibly_match:
+            #     default_ports = spira.ElementList()
+            #     for e in default_via.contacts:
+            #         default_ports += e.ps_layer
 
-                self_ports = spira.ElementList()
-                for e in self.contacts:
-                    self_ports += e.ps_layer
+            #     self_ports = spira.ElementList()
+            #     for e in self.contacts:
+            #         self_ports += e.ps_layer
 
-                if set(default_ports) != set(self_ports):
-                    is_possibly_match = False
+            #     if set(default_ports) != set(self_ports):
+            #         is_possibly_match = False
 
             if is_possibly_match:
                 self.__type__ = key

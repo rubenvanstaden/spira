@@ -9,6 +9,9 @@ from spira.yevon.geometry.coord import CoordField
 
 
 class Box(ProcessLayer):
+    """
+
+    """
 
     w = NumberField(default=1.0)
     h = NumberField(default=1.0)

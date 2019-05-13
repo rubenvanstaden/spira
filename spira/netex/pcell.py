@@ -1,11 +1,12 @@
 from spira.yevon.gdsii.cell import Cell
 from spira.core.elem_list import ElementalListField
+from spira.netex.containers import __CellContainer__
 
 
-__all__ = ['PCell']
+__all__ = ['PCell', 'Device', 'Circuit']
 
 
-class PCell(Cell):
+class PCell(__CellContainer__):
     """  """
 
     routes = ElementalListField(fdef_name='create_routes')
@@ -27,6 +28,13 @@ class PCell(Cell):
 
         return elems
 
+
+class Device(PCell):
+    pass
+
+
+class Circuit(PCell):
+    pass
 
 
 

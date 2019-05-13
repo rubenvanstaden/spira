@@ -8,6 +8,7 @@ class Test_Manhattan_180(spira.Cell):
     """ Routes with ports facing eachother in a 180 degree. """
 
     def test_q1_180(self):
+        print('Testing Q1: 180')
         p1 = spira.Terminal(name='P1', midpoint=(0,0), orientation=0, width=2*1e6)
         p2 = spira.Terminal(name='P2', midpoint=(40*1e6, 20*1e6), orientation=180, width=2*1e6)
         # rm = Route(port1=p1, port2=p2, radius=8*1e6)
@@ -16,6 +17,7 @@ class Test_Manhattan_180(spira.Cell):
         # return spira.SRef(reference=rm, midpoint=(5*1e6, 5*1e6))
 
     def test_q2_180(self):
+        print('Testing Q2: 180')
         p1 = spira.Terminal(name='P1', midpoint=(0,0), orientation=0, width=2*1e6)
         p2 = spira.Terminal(name='P2', midpoint=(-40*1e6,20*1e6), orientation=180, width=2*1e6)
         rm = Route(port1=p1, port2=p2, radius=8*1e6)
@@ -23,23 +25,25 @@ class Test_Manhattan_180(spira.Cell):
         # return spira.SRef(rm, midpoint=(-5*1e6,5*1e6))
 
     def test_q3_180(self):
+        print('Testing Q3: 180')
         p1 = spira.Terminal(name='P1', midpoint=(0,0), orientation=180, width=2*1e6)
         p2 = spira.Terminal(name='P2', midpoint=(-40*1e6,-20*1e6), orientation=0, width=2*1e6)
         rm = Route(port1=p1, port2=p2, radius=8*1e6)
         return spira.SRef(rm, midpoint=(-5*1e6,-5*1e6))
 
     def test_q4_180(self):
-        p1 = spira.Terminal(name='P1', midpoint=(0,0), orientation=180, width=2*1e6)
-        p2 = spira.Terminal(name='P2', midpoint=(40*1e6,-20*1e6), orientation=0, width=2*1e6)
+        print('Testing Q4: 180')
+        p1 = spira.Terminal(name='P1', midpoint=(0,0), orientation=-90, width=2*1e6)
+        p2 = spira.Terminal(name='P2', midpoint=(40*1e6,-20*1e6), orientation=90, width=2*1e6)
         rm = Route(port1=p1, port2=p2, radius=8*1e6)
         return spira.SRef(rm, midpoint=(5*1e6,-5*1e6))
 
     def create_elementals(self, elems):
 
-        elems += self.test_q1_180()
+        # elems += self.test_q1_180()
         # elems += self.test_q2_180()
         # elems += self.test_q3_180()
-        # elems += self.test_q4_180()
+        elems += self.test_q4_180()
 
         return elems
 
@@ -48,6 +52,7 @@ class Test_Manhattan_90(spira.Cell):
     """ Routes with ports facing eachother in a 90 degree. """
 
     def test_q1_90(self):
+        print('Testing Q1: 90')
         p1 = spira.Terminal(name='P1', midpoint=(0,0), orientation=0, width=2*1e6)
         p2 = spira.Terminal(name='P2', midpoint=(40*1e6,20*1e6), orientation=90, width=2*1e6)
         rm = Route(port1=p1, port2=p2, radius=8*1e6)
@@ -56,6 +61,7 @@ class Test_Manhattan_90(spira.Cell):
         # return spira.SRef(reference=rm, midpoint=(5*1e6,5*1e6))
 
     def test_q2_90(self):
+        print('Testing Q2: 90')
         p1 = spira.Terminal(name='P1', midpoint=(0,0), orientation=0, width=2*1e6)
         p2 = spira.Terminal(name='P2', midpoint=(-40*1e6,20*1e6), orientation=-90, width=2*1e6)
         rm = Route(port1=p1, port2=p2, radius=8*1e6)
@@ -63,13 +69,15 @@ class Test_Manhattan_90(spira.Cell):
         return spira.SRef(rm, midpoint=(-5*1e6,5*1e6))
 
     def test_q3_90(self):
-        p1 = spira.Terminal(name='P1', midpoint=(0,0), orientation=180, width=2*1e6)
-        p2 = spira.Terminal(name='P2', midpoint=(-40*1e6,-20*1e6), orientation=-90, width=2*1e6)
+        print('Testing Q3: 90')
+        p1 = spira.Terminal(name='P1', midpoint=(0,0), orientation=-90, width=2*1e6)
+        p2 = spira.Terminal(name='P2', midpoint=(-40*1e6,-20*1e6), orientation=0, width=2*1e6)
         rm = Route(port1=p1, port2=p2, radius=8*1e6)
         # return spira.SRef(rm, midpoint=(200*1e6,400*1e6))
         return spira.SRef(rm, midpoint=(-5*1e6,-5*1e6))
 
     def test_q4_90(self):
+        print('Testing Q4: 90')
         """ P1 has an orientation of 180. """
         p1 = spira.Terminal(name='P1', midpoint=(0,0), orientation=180, width=2*1e6)
         p2 = spira.Terminal(name='P2', midpoint=(40*1e6,-20*1e6), orientation=90, width=2*1e6)
@@ -110,7 +118,7 @@ class Test_Manhattan_90(spira.Cell):
         # elems += self.test_q1_90()
         # elems += self.test_q2_90()
         elems += self.test_q3_90()
-        elems += self.test_q4_90()
+        # elems += self.test_q4_90()
 
         # # Angle positive
         # elems += self.test_q1_90_2()
@@ -247,9 +255,9 @@ class TestManhattan(spira.Cell):
 
     def create_elementals(self, elems):
 
-        # elems += spira.SRef(reference=Test_Manhattan_90(), midpoint=(0,0))
+        elems += spira.SRef(reference=Test_Manhattan_90(), midpoint=(0,0))
         # elems += spira.SRef(reference=Test_Manhattan_180(), midpoint=(250*1e6, 0))
-        elems += spira.SRef(reference=Test_Manhattan_180(), midpoint=(0,0))
+        # elems += spira.SRef(reference=Test_Manhattan_180(), midpoint=(0,0))
         # elems += spira.SRef(Test_Manhattan_Horizontal(), midpoint=(0,-250*1e6))
         # elems += spira.SRef(Test_Manhattan_Vertical(), midpoint=(250*1e6, -250*1e6))
         # elems += spira.SRef(Test_Manhattan_180_SimilarAngles(), midpoint=(500*1e6, -250*1e6))

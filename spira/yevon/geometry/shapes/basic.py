@@ -1,16 +1,18 @@
 import gdspy
-import spira.all as spira
 import math
 import numpy as np
 from spira.core import param
 from spira.settings import DEG2RAD
+from spira.yevon.geometry.coord import CoordField
 from spira.yevon.geometry.shapes.shape import *
+from spira.core.param.variables import *
 
 
 class RectangleShape(Shape):
+    """ Creates a rectangular shape. """
 
-    p1 = CoordField(default=(0,0))
-    p2 = CoordField(default=(2*1e6,2*1e6))
+    p1 = CoordField(default=(0,0), doc='Bottom left corner coordinate.')
+    p2 = CoordField(default=(2*1e6,2*1e6), doc='Top right corner coodinate.')
 
     def create_points(self, points):
         pts = [[self.p1[0], self.p1[1]], [self.p1[0], self.p2[1]],
@@ -20,9 +22,10 @@ class RectangleShape(Shape):
 
 
 class BoxShape(Shape):
+    """ Creates a box shape. """
 
-    width = NumberField(default=1*1e6)
-    height = NumberField(default=1*1e6)
+    width = NumberField(default=1*1e6, doc='Width of the box shape.')
+    height = NumberField(default=1*1e6, doc='Height of the box shape.')
 
     def create_points(self, points):
         cx = self.center[0]
@@ -38,11 +41,12 @@ class BoxShape(Shape):
 
 
 class CircleShape(Shape):
+    """ Creates a circle shape. """
 
-    box_size = CoordField(default=(2.0*1e6, 2.0*1e6))
-    start_angle = FloatField(default=0.0)
-    end_angle = FloatField(default=360.0)
-    angle_step = IntegerField(default=3)
+    box_size = CoordField(default=(2.0*1e6, 2.0*1e6), doc='The width and height of the circle as a coordinate.')
+    start_angle = FloatField(default=0.0, doc='Starting angle of the circle shape.')
+    end_angle = FloatField(default=360.0, doc='Degree to which the circle must be completed.')
+    angle_step = IntegerField(default=3, doc='The smoothness of the circle.')
 
     def create_points(self, points):
         sa = self.start_angle * DEG2RAD
@@ -113,6 +117,14 @@ class BasicTriangle(Shape):
         points = [pts]
         return points
 
+    # def create_points(self, points):
+    #     p1 = [0, 0]
+    #     p2 = [p1[0]+self.b, p1[1]]
+    #     p3 = [p1[0], p1[1]+self.a]
+    #     pts = np.array([p1, p2, p3])
+    #     points = [pts]
+    #     return points
+
 
 class TriangleShape(BasicTriangle):
 
@@ -134,5 +146,14 @@ class ArrowShape(TriangleShape):
         box.move(pos=(0, -height/2))
         points.extend(box.points)
         return points
+
+
+# class ArrowShape(Shape):
+
+#     def create_points(self, points):
+
+#         tri = TriangleShape()
+
+#         return points
 
 

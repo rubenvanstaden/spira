@@ -57,7 +57,7 @@ class LabelAbstract(__Label__):
             #     texttype=self.texttype
             # )
 
-            if self.transformation is None:
+            if transformation is None:
                 L = gdspy.Label(self.text,
                     deepcopy(self.position),
                     anchor='o',
@@ -66,22 +66,24 @@ class LabelAbstract(__Label__):
                     texttype=self.texttype
                 )
             else:
-                self.transformation.apply_to_object(self)
+                self.position = transformation.apply_to_coord(self.position)
+                self.orientation = transformation.apply_to_angle(self.orientation)
                 L = gdspy.Label(self.text,
-                    deepcopy(self.position)+[10*16, 0],
+                    deepcopy(self.position),
                     anchor='o',
-                    rotation=self.transformation.rotation,
-                    magnification=self.transformation.magnification,
-                    x_reflection=self.transformation.reflection,
+                    rotation=self.orientation,
+                    magnification=transformation.magnification,
+                    x_reflection=transformation.reflection,
                     layer=self.gds_layer.number,
                     texttype=self.texttype
                 )
 
             # LabelAbstract.__committed__.update({self.__repr__():L})
-            LabelAbstract.__committed__.update({self.node_id:L})
+            # LabelAbstract.__committed__.update({self.node_id:L})
         else:
+            pass
             # L = LabelAbstract.__committed__[self.__repr__()]
-            L = LabelAbstract.__committed__[self.node_id]
+            # L = LabelAbstract.__committed__[self.node_id]
             # if transformation is not None:
             
             # transformation.apply_to_object(L)
@@ -89,23 +91,70 @@ class LabelAbstract(__Label__):
             cell.add(L)
         return L
 
-    def __reflect__(self, p1=(0,1), p2=(0,0), angle=None):
-        self.position = [self.position[0], -self.position[1]]
-        self.rotation = self.rotation * (-1)
-        self.rotation = np.mod(self.rotation, 360)
-        return self
 
-    def __rotate__(self, angle=45, center=(0,0)):
-        # print('--- Rotate Label ---')
-        self.position = utils.rotate_algorithm(self.position, angle=angle, center=[0, 0])
-        self.rotation += angle
-        self.rotation = np.mod(self.rotation, 360)
-        return self
+    # def commit_to_gdspy(self, cell=None, transformation=None):
+    #     # if self.__repr__() not in list(LabelAbstract.__committed__.keys()):
+    #     if self.node_id not in list(LabelAbstract.__committed__.keys()):
+    #         # L = gdspy.Label(self.text,
+    #         #     deepcopy(self.position),
+    #         #     anchor='o',
+    #         #     rotation=self.rotation,
+    #         #     magnification=self.magnification,
+    #         #     # x_reflection=self.reflection,
+    #         #     x_reflection=self.x_reflection,
+    #         #     layer=self.gds_layer.number,
+    #         #     texttype=self.texttype
+    #         # )
+
+    #         if self.transformation is None:
+    #             L = gdspy.Label(self.text,
+    #                 deepcopy(self.position),
+    #                 anchor='o',
+    #                 rotation=self.orientation,
+    #                 layer=self.gds_layer.number,
+    #                 texttype=self.texttype
+    #             )
+    #         else:
+    #             self.transformation.apply_to_object(self)
+    #             L = gdspy.Label(self.text,
+    #                 deepcopy(self.position)+[10*16, 0],
+    #                 anchor='o',
+    #                 rotation=self.transformation.rotation,
+    #                 magnification=self.transformation.magnification,
+    #                 x_reflection=self.transformation.reflection,
+    #                 layer=self.gds_layer.number,
+    #                 texttype=self.texttype
+    #             )
+
+    #         # LabelAbstract.__committed__.update({self.__repr__():L})
+    #         LabelAbstract.__committed__.update({self.node_id:L})
+    #     else:
+    #         # L = LabelAbstract.__committed__[self.__repr__()]
+    #         L = LabelAbstract.__committed__[self.node_id]
+    #         # if transformation is not None:
+            
+    #         # transformation.apply_to_object(L)
+    #     if cell is not None:
+    #         cell.add(L)
+    #     return L
+
+    # def __reflect__(self, p1=(0,1), p2=(0,0), angle=None):
+    #     self.position = [self.position[0], -self.position[1]]
+    #     self.rotation = self.rotation * (-1)
+    #     self.rotation = np.mod(self.rotation, 360)
+    #     return self
+
+    # def __rotate__(self, angle=45, center=(0,0)):
+    #     # print('--- Rotate Label ---')
+    #     self.position = utils.rotate_algorithm(self.position, angle=angle, center=[0, 0])
+    #     self.rotation += angle
+    #     self.rotation = np.mod(self.rotation, 360)
+    #     return self
         
-    def __translate__(self, dx, dy):
-        # print('--- Translate Label ---')
-        super().translate(dx=dx, dy=dy)
-        return self
+    # def __translate__(self, dx, dy):
+    #     # print('--- Translate Label ---')
+    #     super().translate(dx=dx, dy=dy)
+    #     return self
 
     def encloses(self, ply):
         if isinstance(ply, spira.Polygon):
@@ -156,7 +205,7 @@ class Label(LabelAbstract):
             text=self.text,
             position=self.position,
             anchor=str('o'),
-            # rotation=self.orientation,
+            rotation=self.orientation,
             # rotation=self.rotation,
             # magnification=self.magnification,
             # x_reflection=self.reflection,
@@ -175,34 +224,26 @@ class Label(LabelAbstract):
         #         "rot: {2}, mag: {3}, ref: {4}, layer: {5}, " +
         #         "texttype: {6})").format(*params)
 
-    # @property
-    # def translation(self):
-    #     if self.transformation is not None:
-    #         return self.transformation.translation
-    #     else:
-    #         return 0.0
+    def transform(self, transformation):
+        if transformation is not None:
+            self.position = transformation.apply_to_coord(self.position)
+            self.orientation = transformation.apply_to_angle(self.orientation)
+        return self
 
-    # @property
-    # def rotation(self):
-    #     if self.transformation is not None:
-    #         return self.transformation.rotation
-    #     else:
-    #         return 0.0
-
-    # @property
-    # def reflection(self):
-    #     if self.transformation is not None:
-    #         return self.transformation.reflection
-    #     else:
-    #         return False
-
-    # @property
-    # def magnification(self):
-    #     if self.transformation is not None:
-    #         return self.transformation.magnification
-    #     else:
-    #         return 1.
-
+    def transform_copy(self, transformation):
+        if transformation is not None:
+            port = self.__class__(
+                name=self.name,
+                midpoint=transformation.apply_to_coord(self.midpoint), 
+                orientation=deepcopy(transformation.apply_to_angle(self.orientation))
+            )
+        else:
+            port = self.__class__(
+                name=self.name,
+                midpoint=deepcopy(self.midpoint),
+                orientation=deepcopy(self.orientation)
+            )
+        return por
 
 
 

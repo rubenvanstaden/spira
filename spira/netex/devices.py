@@ -5,7 +5,6 @@ from spira.core.param.variables import *
 from spira.yevon.visualization.color import ColorField
 
 from copy import copy, deepcopy
-from spira.netex.net import Net
 from spira.yevon.geometry import shapes
 from spira.yevon.visualization import color
 from spira.netex.structure import Structure

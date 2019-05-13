@@ -37,16 +37,13 @@ class Translation(__ConvertableTransform__):
             return GenericTransform.__iadd__(self, other)
 
     def __neg__(self):
-        """ helper methods which returns the reverse transformation """
+        """ Helper methods which returns the reverse transformation """
         return Translation(Coord(-self.translation.x, -self.translation.y))
 
     def is_identity(self):
-        """ returns True if the transformation does nothing """
+        """ Returns True if the transformation does nothing """
         return ((self.translation.x == 0.0) and
                 (self.translation.y == 0.0) )
-
-    # def apply_to_object(self, item):
-    #     return item.__translate__(dx=self.translation[0], dy=self.translation[1])
 
 
 class __TranslationMixin__(object):

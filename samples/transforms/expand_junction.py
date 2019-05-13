@@ -1,6 +1,11 @@
 import spira.all as spira
 from spira.yevon.geometry import shapes
 from spira.yevon.geometry.coord import Coord
+from spira.yevon import process as pc
+from spira.yevon.rdd import get_rule_deck
+
+
+RDD = get_rule_deck()
 
 
 class Jj(spira.Cell):
@@ -8,8 +13,9 @@ class Jj(spira.Cell):
     def create_elementals(self, elems):
 
         shape_hexagon = shapes.ConvexShape(radius=7*1e6)
-        ply = spira.Polygon(alias='J5', shape=shape_hexagon, gds_layer=spira.Layer(number=11))
-        ply.center = (0,0)
+        ply = pc.Polygon(points=shape_hexagon.points, ps_layer=RDD.PLAYER.JJ)
+        # ply = spira.Polygon(alias='J5', shape=shape_hexagon, gds_layer=spira.Layer(number=11))
+        # ply.center = (0,0)
         elems += ply
 
         return elems
@@ -20,13 +26,15 @@ class ResVia(spira.Cell):
     def create_elementals(self, elems):
 
         shape_rectangle = shapes.RectangleShape(p1=(-7.5*1e6, -13.2*1e6), p2=(7.5*1e6, -8.2*1e6))
-        ply = spira.Polygon(shape=shape_rectangle, gds_layer=spira.Layer(number=11))
-        ply.center = (0,0)
+        ply = pc.Polygon(points=shape_rectangle.points, ps_layer=RDD.PLAYER.RES)
+        # ply = spira.Polygon(shape=shape_rectangle, gds_layer=spira.Layer(number=11))
+        # ply.center = (0,0)
         elems += ply
 
         shape_rectangle = shapes.RectangleShape(p1=(-4*1e6, -12*1e6), p2=(4.1*1e6, -10*1e6))
-        ply = spira.Polygon(shape=shape_rectangle, gds_layer=spira.Layer(number=10))
-        ply.center = (0,0)
+        ply = pc.Polygon(points=shape_rectangle.points, ps_layer=RDD.PLAYER.RC)
+        # ply = spira.Polygon(shape=shape_rectangle, gds_layer=spira.Layer(number=10))
+        # ply.center = (0,0)
         elems += ply
 
         return elems
@@ -46,7 +54,8 @@ class Top(spira.Cell):
         s_res = spira.SRef(ResVia(), transformation=t2)
 
         shape_rectangle = shapes.RectangleShape(p1=(-10*1e6, -23*1e6), p2=(10*1e6, 10*1e6))
-        ply = spira.Polygon(shape=shape_rectangle, gds_layer=spira.Layer(number=7))
+        ply = pc.Polygon(points=shape_rectangle.points, ps_layer=RDD.PLAYER.COU)
+        # ply = spira.Polygon(shape=shape_rectangle, gds_layer=spira.Layer(number=7))
         elems += ply
 
         elems += s_jj
@@ -68,7 +77,8 @@ class Bot(spira.Cell):
         s_res = spira.SRef(ResVia(), transformation=t2)
 
         shape_rectangle = shapes.RectangleShape(p1=(-10*1e6, -55*1e6), p2=(10*1e6, -35*1e6))
-        ply = spira.Polygon(shape=shape_rectangle, gds_layer=spira.Layer(number=7))
+        ply = pc.Polygon(points=shape_rectangle.points, ps_layer=RDD.PLAYER.COU)
+        # ply = spira.Polygon(shape=shape_rectangle, gds_layer=spira.Layer(number=7))
         elems += ply
 
         elems += s_res
@@ -88,7 +98,8 @@ class Junction(spira.Cell):
         t1, t2 = self.get_transforms()
 
         shape_rectangle = shapes.RectangleShape(p1=(-13*1e6, -60*1e6), p2=(13*1e6, 12*1e6))
-        ply = spira.Polygon(alias='M4', shape=shape_rectangle, gds_layer=spira.Layer(number=5))
+        ply = pc.Polygon(points=shape_rectangle.points, ps_layer=RDD.PLAYER.BAS)
+        # ply = spira.Polygon(alias='M4', shape=shape_rectangle, gds_layer=spira.Layer(number=5))
         elems += ply
 
         s_top = spira.SRef(alias='S1', reference=Top(), transformation=t1)
@@ -106,9 +117,16 @@ if __name__ == '__main__':
     
     junction = Junction()
     
-    junction = junction.expand_transform()
-    
-    
+    # junction = junction.expand_transform()
+
+    C = spira.Cell(name='TestingCell')
+
+    S = spira.SRef(junction)
+    T = spira.Stretch(stretch_factor=(2,1))
+    S = T(S)
+    C += S
+    C.output()
+
     # print('\n--- Original SRef ---')
     # for s in junction.elementals:
     #     if isinstance(s, spira.SRef):
@@ -166,12 +184,11 @@ if __name__ == '__main__':
     # c2 += p1
     # c2 += p2
     
-    ply = junction['Jj_S0']['J5']
+    # ply = junction['Jj_S0']['J5']
     
-    ply.stretch(sx=1, sy=2, center=(0, 6*1e6))
+    # ply.stretch(sx=1, sy=2, center=(0, 6*1e6))
     
-    
-    junction.output()
+    # junction.output()
     # cell.output()
     # c2.output()
 

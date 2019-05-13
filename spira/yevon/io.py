@@ -13,32 +13,7 @@ from spira.core.transforms import *
 
 import numpy as np
 from numpy.linalg import norm
-
-
-# def __reflect__(points, p1=(0,0), p2=(1,0)):
-#     points = np.array(points); p1 = np.array(p1); p2 = np.array(p2)
-#     if np.asarray(points).ndim == 1:
-#         t = np.dot((p2-p1), (points-p1))/norm(p2-p1)**2
-#         pts = 2*(p1 + (p2-p1)*t) - points
-#     if np.asarray(points).ndim == 2:
-#         t = np.dot((p2-p1), (p2-p1))/norm(p2-p1)**2
-#         pts = np.array([2*(p1 + (p2-p1)*t) - p for p in points])
-#     return pts
-
-
-# def __rotate__(points, angle=45, center=(0,0)):
-#     angle = angle*np.pi/180
-#     ca = np.cos(angle)
-#     sa = np.sin(angle)
-#     sa = np.array((-sa, sa))
-#     c0 = np.array(center)
-#     if np.asarray(points).ndim == 2:
-#         pts = (points - c0) * ca + (points - c0)[:,::-1] * sa + c0
-#         pts = np.round(pts, 6)
-#     if np.asarray(points).ndim == 1:
-#         pts = (points - c0) * ca + (points - c0)[::-1] * sa + c0
-#         pts = np.round(pts, 6)
-#     return pts
+from spira.validatex.lvs.detection import *
 
 
 def current_path(filename):
@@ -52,15 +27,15 @@ def debug_path(filename):
     return path
 
 
-def map_references(c, c2dmap):
-    for e in c.elementals.sref:
-        if e.ref in c2dmap.keys():
-            e.ref = c2dmap[e.ref]
-            e._parent_ports = e.ref.ports
-            e._local_ports = {(port.name, port.gds_layer.number, port.midpoint[0], port.midpoint[1]):deepcopy(port) for port in e.ref.ports}
-            e.port_locks = {(port.name, port.gds_layer.number, port.midpoint[0], port.midpoint[1]):port.locked for port in e.ref.ports}
-            # e._local_ports = {port.node_id:deepcopy(port) for port in e.ref.ports}
-            # e.port_locks = {port.node_id:port.locked for port in e.ref.ports}
+# def map_references(c, c2dmap):
+#     for e in c.elementals.sref:
+#         if e.ref in c2dmap.keys():
+#             e.ref = c2dmap[e.ref]
+#             e._parent_ports = e.ref.ports
+#             e._local_ports = {(port.name, port.gds_layer.number, port.midpoint[0], port.midpoint[1]):deepcopy(port) for port in e.ref.ports}
+#             e.port_locks = {(port.name, port.gds_layer.number, port.midpoint[0], port.midpoint[1]):port.locked for port in e.ref.ports}
+#             # e._local_ports = {port.node_id:deepcopy(port) for port in e.ref.ports}
+#             # e.port_locks = {port.node_id:port.locked for port in e.ref.ports}
 
 
 def wrap_labels(cell, c2dmap):
@@ -141,7 +116,7 @@ def wrap_references(cell, c2dmap):
 #             c2dmap[cell] += S
 
 
-def import_gds(filename, cellname=None, flatten=False, dups_layer={}):
+def import_gds(filename, cellname=None, flatten=False, pcell=True):
     """  """
 
     gdsii_lib = gdspy.GdsLibrary(name='SPiRA-Cell')
@@ -183,12 +158,34 @@ def import_gds(filename, cellname=None, flatten=False, dups_layer={}):
         wrap_references(cell, c2dmap)
         # wrap_labels(cell, c2dmap)
 
+    # top_spira_cell = c2dmap[topcell]
+    # if flatten == True:
+    #     D = spira.Cell(name='import_gds')
+    #     return D
+    # else:
+    #     return top_spira_cell
+
     top_spira_cell = c2dmap[topcell]
     if flatten == True:
-        D = spira.Cell(name='import_gds')
-        return D
+        C = spira.Cell(name='import_gds')
     else:
-        return top_spira_cell
+        C = top_spira_cell
+
+    if pcell is True:
+        D = parameterize_cell(C)
+    else:
+        D = C
+
+    return D
+
+
+def parameterize_cell(cell):
+    """ Parameterizes a hand-crafted layout. """
+
+    C = device_detector(cell=cell)
+    D = circuit_detector(cell=C)
+
+    return D
 
 
 

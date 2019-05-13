@@ -10,6 +10,13 @@ from spira.yevon.geometry.coord import CoordField
 
 
 class Rectangle(ProcessLayer):
+    """
+
+    Example
+    -------
+    >>> p = pc.Rectangle(p1=(0,0), p2=(10,0), ps_layer=RDD.PLAYER.M6)
+    >>> [SPiRA: Rectangle] ()
+    """
 
     p1 = CoordField(default=(0,0))
     p2 = CoordField(default=(2,2))
@@ -30,3 +37,4 @@ class Rectangle(ProcessLayer):
         #     ply.transform(transform=self.pc_transformation.apply())
         elems += ply
         return elems
+        

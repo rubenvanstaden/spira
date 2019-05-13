@@ -53,9 +53,8 @@ class __Cell__(FieldInitializer, metaclass=MetaCell):
         else:
             self.elementals += other
         return self
-        
+
     # def __deepcopy__(self, memo):
-    #     print('wjfbwejfbjwekfbwejewkjfbkjbjfbijkbjrjvfdnivndfijvndkv')
     #     cell = Cell(
     #         name=self.name,
     #         elementals=deepcopy(self.elementals),
@@ -63,7 +62,6 @@ class __Cell__(FieldInitializer, metaclass=MetaCell):
     #     )
     #     cell.__name__ = self.name
     #     cell.name = self.name
-    #     print(cell)
     #     return cell
 
 
@@ -98,11 +96,14 @@ class CellAbstract(gdspy.Cell, __Cell__):
                 e1.ref.flat_polygons(subj=subj)
         return subj
 
-    def commit_to_gdspy(self, cell, transformation=None):
+    def commit_to_gdspy(self, cell=None, transformation=None):
+        # if cell is None:
+        #     cell = gdspy.Cell(self.name, exclude_from_current=True)
         cell = gdspy.Cell(self.name, exclude_from_current=True)
         for e in self.elementals:
-            # e = deepcopy(e)
-            e.commit_to_gdspy(cell=cell, transformation=transformation)
+            # e.commit_to_gdspy(cell=cell, transformation=transformation)
+            if not isinstance(e, SRef):
+                e.commit_to_gdspy(cell=cell, transformation=transformation)
         for p in self.ports:
             p.commit_to_gdspy(cell=cell, transformation=transformation)
         return cell
@@ -230,7 +231,7 @@ class Cell(CellAbstract):
     def expand_transform(self):
         for S in self.elementals.sref:
             S.expand_transform()
-            S.ref.expand_transform()
+            # S.ref.expand_transform()
         return self
 
     @property
@@ -296,3 +297,4 @@ def CellField(name=None, elementals=None, ports=None, library=None, **kwargs):
         kwargs['default'] = Cell(name=name, elementals=elementals, library=library)
     R = RestrictType(Cell)
     return DataFieldDescriptor(restrictions=R, **kwargs)
+

@@ -27,8 +27,6 @@ class GdsiiLayout(object):
         if cell is None:
             gdspy.LayoutViewer(library=glib)
         else:
-            print(cell)
-            print(type(cell))
             gdspy.LayoutViewer(library=glib, cells=cell)
 
         # gdspy.LayoutViewer(library=glib, cells='Circuit_AiST_CELL_1')

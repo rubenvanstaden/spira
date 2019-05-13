@@ -14,6 +14,7 @@ from spira.yevon.layer import LayerField
 from spira.core.param.variables import *
 from spira.core.descriptor import DataField
 from spira.core.elem_list import ElementalListField
+from spira.yevon import constants
 
 
 __all__ = ['ProcessLayer']
@@ -39,12 +40,10 @@ class __ProcessLayer__(Cell):
         return self.elementals[0]
 
     def commit_to_gdspy(self, cell=None, transformation=None):
-        # cell = gdspy.Cell(self.name, exclude_from_current=True)
         for e in self.elementals:
             e.commit_to_gdspy(cell=cell, transformation=transformation)
-        for p in self.ports:
-            p.commit_to_gdspy(cell=cell, transformation=transformation)
-        # return P
+        # for p in self.ports:
+        #     p.commit_to_gdspy(cell=cell, transformation=transformation)
         return cell
 
 
@@ -111,8 +110,7 @@ class __PortConstructor__(__ProcessLayer__):
             name = '{}_e{}'.format(self.ps_layer.layer.name, i)
             x = np.sign(clockwise) * (xpts[i+1] - xpts[i])
             y = np.sign(clockwise) * (ypts[i] - ypts[i+1])
-            orientation = (np.arctan2(x, y) * 180/np.pi) - 90
-            # orientation = (np.arctan2(x, y) * 180/np.pi)
+            orientation = (np.arctan2(x, y) * constants.RAD2DEG)
             midpoint = [(xpts[i+1] + xpts[i])/2, (ypts[i+1] + ypts[i])/2]
             width = np.abs(np.sqrt((xpts[i+1] - xpts[i])**2 + (ypts[i+1]-ypts[i])**2))
             edges += spira.EdgeTerminal(
@@ -124,9 +122,6 @@ class __PortConstructor__(__ProcessLayer__):
                 length=0.5*1e6,
                 edgelayer=spira.Layer(number=70),
                 arrowlayer=spira.Layer(number=78),
-                # local_connect=self.polygon.node_id,
-                # is_edge=True,
-                # pid=self.node_id
             )
 
         return edges
@@ -140,11 +135,18 @@ class ProcessLayer(__PortConstructor__):
     level = IntegerField(default=0)
     error = IntegerField(default=0)
     enable_edges = BoolField(default=True)
+    
+    # def __repr__(self):
+    #     return ("[SPiRA: ProcessLayer(\'{}\')] {} ports)").format(
+    #         self.ps_layer.layer.number,
+    #         self.ports.__len__()
+    #     )
 
     def __repr__(self):
         return ("[SPiRA: ProcessLayer(\'{}\')] {} center, {} ports)").format(
             self.ps_layer.layer.number,
-            self.center,
+            # self.center,
+            self.elementals[0].shape.center_of_mass,
             self.ports.__len__()
         )
 
