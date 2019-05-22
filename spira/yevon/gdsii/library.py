@@ -2,13 +2,12 @@ import os
 import gdspy
 import spira.all as spira
 
-# from spira.core import param
-from spira.core.param.variables import *
+from spira.core.parameters.variables import *
 from spira.yevon.io import import_gds
-from spira.core.elem_list import ElementList
+from spira.yevon.gdsii.elem_list import ElementList
 from spira.yevon.gdsii.cell_list import CellList
-from spira.core.initializer import FieldInitializer
-from spira.core.descriptor import DataField
+from spira.core.parameters.initializer import FieldInitializer
+from spira.core.parameters.descriptor import DataField
 from spira.core.mixin import MixinBowl
 from spira.yevon.rdd import get_rule_deck
 

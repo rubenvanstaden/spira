@@ -1,6 +1,6 @@
 
 
-class __Properties__(object):
+class __Property__(object):
     """ Base class for properties. """
     pass
 

@@ -1,9 +1,17 @@
 import spira.all as spira
+from spira.yevon.geometry import shapes
 from spira.yevon import constants
 from spira.yevon.geometry.vector import *
 
 
 class PortBasics(spira.Cell):
+
+    def create_elementals(self, elems):
+
+        shape = shapes.RectangleShape(p1=(-2.5*1e6, -2.5*1e6), p2=(2.5*1e6, 2.5*1e6))
+        elems += spira.Polygon(shape=shape, gds_layer=spira.Layer(number=1))
+
+        return elems
 
     def create_ports(self, ports):
 
@@ -49,8 +57,8 @@ class PortConstants(spira.Cell):
 if __name__ == '__main__':
 
     # D = PortBasics()
-    # D = PortVectorBasics()
-    D = PortConstants()
+    D = PortVectorBasics()
+    # D = PortConstants()
     D.output()
 
 

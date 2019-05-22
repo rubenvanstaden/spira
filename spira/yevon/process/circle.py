@@ -1,13 +1,11 @@
 import spira.all as spira
-from spira.core import param
-# from spira import shapes
 from spira.yevon.geometry import shapes
 from spira.yevon.process.processlayer import ProcessLayer
 
-from spira.core.param.variables import *
+from spira.core.parameters.variables import *
 from spira.yevon.geometry.coord import CoordField
 from spira.yevon.visualization.color import ColorField
-from spira.core.descriptor import DataField
+from spira.core.parameters.descriptor import DataField
 
 
 class Circle(ProcessLayer):

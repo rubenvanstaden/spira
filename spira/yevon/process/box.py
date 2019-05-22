@@ -4,7 +4,7 @@ from copy import deepcopy
 from spira.yevon.geometry.shapes.basic import BoxShape
 from spira.yevon.process.processlayer import ProcessLayer
 
-from spira.core.param.variables import *
+from spira.core.parameters.variables import *
 from spira.yevon.geometry.coord import CoordField
 
 
@@ -27,12 +27,8 @@ class Box(ProcessLayer):
 
     def create_elementals(self, elems):
         shape = BoxShape(width=self.w, height=self.h)
-        shape.apply_merge
+        # shape.apply_merge
         ply = spira.Polygon(shape=shape, gds_layer=self.ps_layer.layer)
-
-        if self.transformation is not None:
-            ply.transform_copy(self.transformation)
-
-        ply.center = self.center
+        # ply.center = self.center
         elems += ply
         return elems

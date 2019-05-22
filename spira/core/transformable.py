@@ -32,17 +32,17 @@ class Transformable(__Transformable__):
 
     __transform_type__ = Transform
 
-    transformation = TransformationField(allow_none=True, default=None)
+    transformation = TransformationField()
 
-    def __init__(self, **kwargs):
+    # def __init__(self, **kwargs):
+    def __init__(self, transformation=None, **kwargs):
+        if (not 'transformation' in kwargs) or (transformation != None):
+            kwargs['transformation'] = transformation
         super().__init__(**kwargs)
 
     def transform(self, transformation=None):
         if issubclass(type(transformation), self.__transform_type__):
-            if self.transformation is None:
-                self.transformation = transformation
-            else:
-                self.transformation = self.transformation + transformation
+            self.transformation = self.transformation + transformation
         elif transformation is None:
             return
         else:

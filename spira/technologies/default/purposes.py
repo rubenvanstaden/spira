@@ -16,6 +16,7 @@ RDD.PURPOSE.TERM = PurposeLayer(name='Terminal ports specified by the designer',
 RDD.PURPOSE.PROTECTION = PurposeLayer(name='Protection layer for via structures', datatype=17, symbol='PRO')
 RDD.PURPOSE.EDGE = PurposeLayer(name='Edge', datatype=18, symbol='PRO', doc='Layer that represents a polygon edge.')
 RDD.PURPOSE.ARROW = PurposeLayer(name='Arrow', datatype=19, symbol='PRO', doc='Layer that represents the direction of a polygon edge terminal.')
+RDD.PURPOSE.BOUNDARY_BOX = PurposeLayer(name='Bounding Box', datatype=20, symbol='BBOX', doc='Layer that represents the direction of a polygon edge terminal.')
 
 # ---------------------------------- Primitive Layers --------------------------------
 

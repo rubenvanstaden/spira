@@ -3,15 +3,16 @@ import numpy as np
 from spira.yevon.geometry.coord import CoordField, Coord
 from spira.core.transformable import Transformable
 from spira.core.transforms.generic import GenericTransform, __ConvertableTransform__
-from spira.core.descriptor import FunctionField, SetFunctionField
-from spira.core.param.restrictions import RestrictType
+from spira.core.parameters.descriptor import FunctionField, SetFunctionField
+from spira.core.parameters.processors import ProcessorTypeCast
+from spira.core.parameters.restrictions import RestrictType
 from spira.yevon import constants
 
 
 class Rotation(__ConvertableTransform__):
 
-    def __init__(self, rotation=0, center=(0,0), **kwargs):
-        super().__init__(rotation=rotation, center=center, **kwargs)
+    def __init__(self, rotation=0, rotation_center=(0,0), **kwargs):
+        super().__init__(rotation=rotation, rotation_center=rotation_center, **kwargs)
 
     def set_rotation(self, value):
         self.__rotation__ = value % 360.0
@@ -31,44 +32,53 @@ class Rotation(__ConvertableTransform__):
         else:
             self.__ca__ = np.cos(value * constants.DEG2RAD)
             self.__sa__ = np.sin(value * constants.DEG2RAD)
-        if hasattr(self, '__center__'):
+        if hasattr(self, '__rotation_center__'):
             print('A')
-            center = self.__center__
+            rotation_center = self.__rotation_center__
             self.translation = Coord(
-                center.x * (1 - self.__ca__) + center.y * self.__sa__,
-                center.y * (1 - self.__ca__) - center.x * self.__sa__
+                rotation_center.x * (1 - self.__ca__) + rotation_center.y * self.__sa__,
+                rotation_center.y * (1 - self.__ca__) - rotation_center.x * self.__sa__
             )
 
-    rotation = SetFunctionField('__rotation__', set_rotation, default = 0.0)
+    rotation = SetFunctionField('__rotation__', set_rotation, default=0.0)
 
-    def set_rotation_center(self, center):
-        if not isinstance(center, Coord):
-            center = Coord(center[0], center[1])
-        self.__rotation_center__ = center
+    def set_rotation_center(self, rotation_center):
+        if not isinstance(rotation_center, Coord):
+            rotation_center = Coord(rotation_center[0], rotation_center[1])
+        self.__rotation_center__ = rotation_center
         if hasattr(self, '__ca__'):
             self.translation = Coord(
-                center.x * (1 - self.__ca__) + center.y * self.__sa__,
-                center.y * (1 - self.__ca__) - center.x * self.__sa__
+                rotation_center.x * (1 - self.__ca__) + rotation_center.y * self.__sa__,
+                rotation_center.y * (1 - self.__ca__) - rotation_center.x * self.__sa__
             )
 
-    # center = SetFunctionField("__center__", set_rotation_center, restriction=RestrictType(Coord), default=(0.0, 0.0))
-    center = SetFunctionField('__center__', set_rotation_center, default=(0.0, 0.0))
+    rotation_center = SetFunctionField(
+        local_name='__rotation_center__', 
+        fset=set_rotation_center, 
+        restriction=RestrictType(Coord), 
+        preprocess=ProcessorTypeCast(Coord), 
+        default=(0.0, 0.0)
+    )
+
+    def __neg__(self):
+        """ Returns the reverse transformation. """
+        return Rotation(-self.rotation, self.rotation_center)
 
     def apply_to_coord(self, coord):
         coord = self.__rotate__(coord)
         coord = self.__translate__(coord)
         return coord
-        
+
     def reverse_on_coord(self, coord):      
         coord = self.__inv_translate__(coord)
         coord = self.__inv_rotate__(coord)
         return coord
 
     def apply_to_array(self, coords):
-        coords = coords[0]
+        # coords = coords[0]
         coords = self.__rotate_array__(coords)
         coords = self.__translate_array__(coords)
-        coords = np.array([coords])
+        # coords = np.array([coords])
         return coords
 
     def apply_to_angle(self, angle):
@@ -79,11 +89,11 @@ class Rotation(__ConvertableTransform__):
 
 class __RotationMixin__(object):
 
-    def _rotate(self, rotation=0, center=(0,0)):
-        return self.transform(Rotation(rotation, center))
+    def _rotate(self, rotation=0, rotation_center=(0,0)):
+        return self.transform(Rotation(rotation, rotation_center))
 
-    def rotate_copy(self, rotation=0, center=(0,0)):
-        return self.transform_copy(Rotation(rotation, center))
+    def rotate_copy(self, rotation=0, rotation_center=(0,0)):
+        return self.transform_copy(Rotation(rotation, rotation_center))
 
 
 Transformable.mixin(__RotationMixin__)

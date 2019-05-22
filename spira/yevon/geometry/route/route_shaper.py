@@ -6,12 +6,12 @@ from spira.yevon.gdsii.cell import Cell
 from numpy.linalg import norm
 from numpy import sqrt, pi, cos, sin, log, exp, sinh, mod
 
-from spira.core.param.variables import *
+from spira.core.parameters.variables import *
 from spira.yevon.geometry.shapes import ShapeField
 from spira.yevon.rdd.layer import PhysicalLayerField
 from spira.yevon.layer import LayerField
 from spira.yevon.geometry.coord import CoordField, Coord
-from spira.core.descriptor import DataField, FunctionField
+from spira.core.parameters.descriptor import DataField, FunctionField
 from spira.yevon.geometry.ports.base import PortField
 from spira.yevon.rdd import get_rule_deck
 from spira.yevon import constants

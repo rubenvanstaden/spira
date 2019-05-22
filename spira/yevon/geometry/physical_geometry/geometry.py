@@ -1,17 +1,22 @@
-# from spira.core.initializer import FieldInitializer
 import os
 import pygmsh
+import meshio
 import networkx as nx
-from spira.yevon.gdsii.base import __Group__
-from spira.core.param.variables import *
-from spira.core.descriptor import DataField
-from spira.yevon.utils import numpy_to_list
+
+from spira.yevon.gdsii.group import __Group__
+from spira.core.parameters.variables import *
+from spira.yevon.utils.geometry import numpy_to_list
+from spira.core.parameters.descriptor import DataField
+
+
+class __Geometry__(object):
+    pass
 
 
 class Geometry(__Group__):
-    
+
     _ID = 0
-    
+
     name = StringField(default='NoName')
     lcar = NumberField(default=1e6)
     height = FloatField(default=0.0)
@@ -19,8 +24,11 @@ class Geometry(__Group__):
     algorithm = IntegerField(default=6)
     dimension = IntegerField(default=2)
 
-    physical_surfaces = DataField(fdef_name='create_physical_surfaces')
+    # TODO: Add GMSH geometry parameter.
+    # geom = GmshField(algorithm=6, scaling_factor=1e-6, coherence_mesh=True)
+
     mesh_data = DataField(fdef_name='create_mesh_data')
+    physical_surfaces = DataField(fdef_name='create_physical_surfaces')
 
     def __init__(self, elementals=None, **kwargs):
         super().__init__(elementals=elementals, **kwargs)
@@ -34,33 +42,31 @@ class Geometry(__Group__):
         self.geom.add_raw_code('Coherence Mesh;')
 
     def create_physical_surfaces(self):
+        """ Creates physical surfaces that is compatible
+        with the GMSH library for mesh generation. """
 
-        if self.holes == 0:
-            holes = None
-        else:
-            holes = self.holes
-
-        ps = []
-        for ply in self.elementals:
-            for i, points in enumerate(ply.points):
-                c_points = numpy_to_list(points, self.height, unit=1e-6)
-                surface_label = '{}_{}_{}_{}'.format(
-                    ply.gds_layer.number,
-                    ply.gds_layer.datatype,
-                    Geometry._ID, i
-                )
-                gp = self.geom.add_polygon(c_points, lcar=self.lcar, make_surface=True, holes=holes)
-                self.geom.add_physical(gp.surface, label=surface_label)
-                ps.append([gp.surface, gp.line_loop])
-                Geometry._ID += 1
-        return ps
+        if self.holes == 0: holes = None
+        else: holes = self.holes
+        surfaces = []
+        for i, ply in enumerate(self.elementals):
+            pts = numpy_to_list(ply.points, self.height, unit=1e-6)
+            surface_label = '{}_{}_{}_{}'.format(
+                ply.gds_layer.number,
+                ply.gds_layer.datatype,
+                Geometry._ID, i
+            )
+            gp = self.geom.add_polygon(pts, lcar=self.lcar, make_surface=True, holes=holes)
+            self.geom.add_physical(gp.surface, label=surface_label)
+            surfaces.append([gp.surface, gp.line_loop])
+            Geometry._ID += 1
+        return surfaces
 
     def create_mesh_data(self):
+        """ Generates the mesh data from the 
+        created physical surfaces. """
 
-        ps = self.physical_surfaces
-
-        if len(ps) > 1:
-            self.geom.boolean_union(ps)
+        if len(self.physical_surfaces) > 1:
+            self.geom.boolean_union(self.physical_surfaces)
 
         directory = os.getcwd() + '/debug/gmsh/'
         mesh_file = '{}{}.msh'.format(directory, self.name)
@@ -69,8 +75,6 @@ class Geometry(__Group__):
 
         if not os.path.exists(directory):
             os.makedirs(directory)
-
-        mesh_data = None
 
         mesh_data = pygmsh.generate_mesh(
             self.geom,
@@ -81,10 +85,8 @@ class Geometry(__Group__):
             geo_filename=geo_file
         )
 
-        # FIXME: WARNING:root:Binary Gmsh needs c_int (typically numpy.int32) integers (got int64). Converting.
-        # mm = meshio.Mesh(*mesh_data)
-        # meshio.write(mesh_file, mm)
-        # meshio.write(vtk_file, mm)
+        meshio.write(mesh_file, mesh_data)
+        meshio.write(vtk_file, mesh_data)
 
         return mesh_data
 

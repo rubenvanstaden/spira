@@ -1,9 +1,8 @@
-import spira.all as spira
 import gdspy
 import numpy as np
-from spira.core import param
-from spira import shapes, pc
-from spira import utils
+import spira.all as spira
+from spira.yevon.utils import geometry as geom
+from spira.yevon.geometry import shapes
 
 
 RDD = spira.get_rule_deck()
@@ -13,14 +12,21 @@ class TestPolygons(spira.Cell):
 
     def create_elementals(self, elems):
 
-        points = [[(0, 0), (2*1e6, 2*1e6), (2*1e6, 6*1e6), (-6*1e6, 6*1e6), (-6*1e6, -6*1e6), (-4*1e6, -4*1e6), (-4*1e6, 4*1e6), (0, 4*1e6)]]
-        pp = pc.Polygon(points=points, ps_layer=RDD.PLAYER.COU)
+        points = [
+            (0, 0), (2*1e6, 2*1e6), 
+            (2*1e6, 6*1e6), (-6*1e6, 6*1e6), 
+            (-6*1e6, -6*1e6), (-4*1e6, -4*1e6), 
+            (-4*1e6, 4*1e6), (0, 4*1e6)
+        ]
+        shape = shapes.Shape(points=points)
+        pp = spira.Polygon(shape=shape, ps_layer=RDD.PLAYER.COU)
 
         plys = spira.ElementList()
-        pl = utils.cut(ply=pp, position=[-3*1e6, 3*1e6], axis=0)
+        pl = geom.cut(ply=pp, position=[-3*1e6, 3*1e6], axis=0)
 
         for p in pl:
-            ply = pc.Polygon(points=p.points, ps_layer=RDD.PLAYER.COU)
+            s1 = shapes.Shape(points=p.points)
+            ply = spira.Polygon(shape=s1, ps_layer=RDD.PLAYER.COU)
             plys += ply
             elems += p
 

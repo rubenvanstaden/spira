@@ -3,9 +3,9 @@ from spira.core.transformation import ReversibleTransform
 
 from spira.yevon import utils
 from numpy.linalg import norm
-from spira.core.param.variables import *
+from spira.core.parameters.variables import *
 from spira.yevon.geometry.coord import CoordField, Coord
-from spira.core.descriptor import FunctionField, SetFunctionField
+from spira.core.parameters.descriptor import FunctionField, SetFunctionField
 from spira.core.transformation import Transform
 from spira.yevon import constants
 
@@ -15,8 +15,6 @@ class GenericTransform(ReversibleTransform):
 
     def __init__(self, translation=(0,0), rotation=0, **kwargs):
         super().__init__(translation=translation, rotation=rotation, **kwargs)
-
-    translation = CoordField()
 
     def set_rotation(self, value):
         self.__rotation__ = value % 360.0
@@ -38,18 +36,24 @@ class GenericTransform(ReversibleTransform):
             self.__sa__ = np.sin(value * constants.DEG2RAD)
 
     rotation = SetFunctionField('__rotation__', set_rotation, default=0.0)
-
-    reflection = BoolField(default=False)
     magnification = NumberField(default=1)
+    reflection = BoolField(default=False)
+    translation = CoordField()
 
     def __str__(self):
         """ Gives a string representing the transform. """
-        return "_M=%s-R=%s-RF=%s-MN=%s" % (
+        return "_(T {}, R {}, RF {}, M {})".format(
             str(self.translation),
             str(self.rotation),
             str(self.reflection),
             str(self.magnification)
         )
+        # return "_M=%s-R=%s-RF=%s-MN=%s" % (
+        #     str(self.translation),
+        #     str(self.rotation),
+        #     str(self.reflection),
+        #     str(self.magnification)
+        # )
 
     def __translate__(self, coord):
         C = Coord(coord[0] + self.translation.x, coord[1] + self.translation.y)
@@ -70,15 +74,9 @@ class GenericTransform(ReversibleTransform):
     def __inv_magnify__(self, coord):
         return Coord(coord[0] / self.magnification, coord[1] / self.magnification)
 
-    # def __inv_v_flip__(self, coord):
-    #     if self.v_mirror:
-    #         return Coord(coord[0], - coord[1])
-    #     else:
-    #         return Coord(coord[0], coord[1])
-        
     def __reflect__(self, coords, p1=(0,0), p2=(1,0)):
         if self.reflection is True:
-            points = np.array(coords.to_nparray())
+            points = np.array(coords.to_ndarray())
             p1 = np.array(p1)
             p2 = np.array(p2)
             if np.asarray(points).ndim == 1:
@@ -104,7 +102,8 @@ class GenericTransform(ReversibleTransform):
         return pts
 
     def __translate_array__(self, coords):
-        coords += np.array([int(self.translation.x), int(self.translation.y)])
+        # coords += np.array([int(self.translation.x), int(self.translation.y)])
+        coords += np.array([self.translation.x, self.translation.y])
         return coords
 
     def __rotate_array__(self, coords):
@@ -125,12 +124,10 @@ class GenericTransform(ReversibleTransform):
         return coord
 
     def apply_to_array(self, coords):
-        coords = coords[0]
         # coords = self.__reflect_array__(coords)
         coords = self.__rotate_array__(coords)
         coords = self.__magnify_array__(coords)
         coords = self.__translate_array__(coords)
-        coords = np.array([coords])
         return coords
 
     def apply_to_angle(self, angle):
@@ -197,7 +194,7 @@ class GenericTransform(ReversibleTransform):
 
 BASE = GenericTransform
 
-from spira.core.descriptor import ConvertField
+from spira.core.parameters.descriptor import ConvertField
 class __ConvertableTransform__(GenericTransform):
     """ Converts a transform to a GenericTransform when adding 
     or subtracting multiple transforms. """
@@ -208,7 +205,7 @@ class __ConvertableTransform__(GenericTransform):
     reflection = ConvertField(BASE, 'reflection', __convert_transform__)
     rotation = ConvertField(BASE, 'rotation', __convert_transform__)
     translation = ConvertField(BASE, 'translation', __convert_transform__)
-    # magnification = ConvertProperty(BASE, 'magnification', __convert_transform__)
+    magnification = ConvertField(BASE, 'magnification', __convert_transform__)
 
     def __add__(self, other):
         self.__convert_transform__()

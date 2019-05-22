@@ -31,7 +31,7 @@ class ProcessLayer(spira.Cell):
 
     def create_elementals(self, elems):
 
-        elems += self.ref_point
+        # elems += self.ref_point
         elems += self.t1
 
         return elems
@@ -40,8 +40,10 @@ class ProcessLayer(spira.Cell):
 
         T = self.get_transforms()
 
-        p1 = spira.Terminal(midpoint=(self.width/2*1e6, 0), orientation=180, width=self.width*1e6)
-        p2 = spira.Terminal(midpoint=(self.width/2*1e6, self.length*1e6), orientation=0, width=self.width*1e6)
+        p1 = spira.Terminal(midpoint=(self.width/2*1e6, 0), orientation=-90, width=self.width*1e6)
+        p2 = spira.Terminal(midpoint=(self.width/2*1e6, self.length*1e6), orientation=90, width=self.width*1e6)
+
+        # ports += [p1, p2]
 
         ports += p1.transform_copy(T)
         ports += p2.transform_copy(T)
@@ -51,13 +53,29 @@ class ProcessLayer(spira.Cell):
 
 class HorizontalConnections(spira.Cell):
 
+    ref_point = spira.DataField(fdef_name='create_ref_point')
+
+    def create_ref_point(self):
+        shape = shapes.RectangleShape(p1=(-2.5*1e6, -2.5*1e6), p2=(2.5*1e6, 2.5*1e6))
+        ply = spira.Polygon(shape=shape, gds_layer=spira.Layer(number=1))
+        return ply
+
     def create_elementals(self, elems):
 
         pc = ProcessLayer()
+        elems += self.ref_point
 
-        S = spira.SRef(pc, midpoint=(0,0))
+        T = spira.Rotation(0)
+        # T += spira.vector_match_transform(v1=pc.ports[0], v2=self.ports[0])
+        S = spira.SRef(pc, midpoint=(10*1e6,0), transformation=T)
 
-        S.connect(port=pc.ports[0], destination=self.ports[0])
+        # print(S.ports)
+        S.ports
+        print(S.transformation)
+        S.connect(port=S.ports[0], destination=self.ports[0])
+        S.ports
+        print(S.transformation)
+        # print(S.ports)
 
         elems += S
 
@@ -65,7 +83,7 @@ class HorizontalConnections(spira.Cell):
 
     def create_ports(self, ports):
 
-        p1 = spira.Terminal(midpoint=(50*1e6, 0), orientation=-45, width=10*1e6)
+        p1 = spira.Terminal(midpoint=(50*1e6, 0), orientation=135, width=10*1e6)
 
         ports += p1
 
@@ -98,13 +116,11 @@ class HorizontalAlignment(spira.Cell):
 # -------------------------------------------------------------------------------------------------------------------
 
 
-cell = spira.Cell(name='Transformations')
+# cell = spira.Cell(name='Transformations')
 
-# t1 = ProcessLayer()
-# t1.output()
-
-# D = HorizontalConnections()
-D = HorizontalAlignment()
+# D = ProcessLayer()
+D = HorizontalConnections()
+# D = HorizontalAlignment()
 D.output()
 
 # cell.output()

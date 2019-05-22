@@ -1,6 +1,4 @@
-# import spira.all as spira
 import spira.all as spira
-# from spira.all import *
 from spira.yevon.geometry import shapes
 from spira.yevon.geometry.coord import Coord
 

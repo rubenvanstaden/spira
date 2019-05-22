@@ -1,12 +1,12 @@
 import numpy as np
 
-from spira.core.initializer import FieldInitializer
+from spira.core.parameters.initializer import FieldInitializer
 from spira.core.transformable import Transformable
-from spira.core.param.variables import NumberField
-from spira.core.descriptor import DataFieldDescriptor
+from spira.core.parameters.variables import NumberField
+from spira.core.parameters.descriptor import DataFieldDescriptor
 from spira.yevon.geometry.coord import Coord
 from spira.core.transforms import *
-from spira.core.descriptor import FunctionField
+from spira.core.parameters.descriptor import FunctionField
 from spira.yevon import constants
 
 
@@ -80,7 +80,7 @@ class Vector(Transformable, FieldInitializer):
         if not isinstance(other, Vector):
             return False
         return self.midpoint == other.midpoint and (self.angle_deg == other.angle_deg)
-    
+
     def __ne__(self, other):
         return self.midpoint != other.midpoint or (self.angle_deg != other.angle_deg)
 
@@ -106,10 +106,9 @@ def vector_from_two_points(point1, point2):
 def vector_match_transform(v1, v2):
     """ Returns transformation to realign vectort 1 to match midpoint and opposite orientation of vector 2 """
     angle = 180.0 + v2.orientation - v1.orientation
-    # angle = vector2.orientation - vector1.orientation
     T = Translation(v2.midpoint - v1.midpoint)
-    # R = Rotation(rotation=angle, center=v2.midpoint)
-    R = Rotation(rotation=angle, center=v1.midpoint)
+    # R = Rotation(rotation=angle, rotation_center=v2.midpoint)
+    R = Rotation(rotation=angle, rotation_center=v1.midpoint)
     return T + R
 
 

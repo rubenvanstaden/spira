@@ -16,7 +16,8 @@ class PolygonProperties(__GeometryProperties__):
 
     @property
     def bbox(self):
-        self.polygons = np.array(self.points)
-        return self.get_bounding_box()
+        # self.polygons = np.array([self.points])
+        # return self.get_bounding_box()
+        return self.bbox_info().bounding_box
 
 

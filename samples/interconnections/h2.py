@@ -1,8 +1,7 @@
 import spira.all as spira
 from spira.yevon.geometry import shapes
 from spira.yevon.geometry.coord import Coord
-from spira.yevon import process as pc
-from spira.netex.containers import __CellContainer__
+from spira.yevon.netlist.containers import __CellContainer__
 from spira.yevon.rdd import get_rule_deck
 
 
@@ -12,9 +11,9 @@ RDD = get_rule_deck()
 class Poly(spira.Cell):
 
     def get_polygons(self):
-        p1 = pc.Rectangle(p1=(0, 0), p2=(10*1e6, 2*1e6), ps_layer=RDD.PLAYER.COU)
-        p2 = pc.Rectangle(p1=(0, 0), p2=(10*1e6, 4*1e6), ps_layer=RDD.PLAYER.COU)
-        p3 = pc.Rectangle(p1=(0, 0), p2=(10*1e6, 6*1e6), ps_layer=RDD.PLAYER.COU)
+        p1 = spira.Rectangle(p1=(0, 0), p2=(10*1e6, 2*1e6), ps_layer=RDD.PLAYER.COU)
+        p2 = spira.Rectangle(p1=(0, 0), p2=(10*1e6, 4*1e6), ps_layer=RDD.PLAYER.COU)
+        p3 = spira.Rectangle(p1=(0, 0), p2=(10*1e6, 6*1e6), ps_layer=RDD.PLAYER.COU)
         return p1, p2, p3
 
 
@@ -83,12 +82,17 @@ if __name__ == '__main__':
     D = H3()
     S = spira.SRef(D, midpoint=(0,0))
 
-    connector = Connector(cell=S.flat_expand())
-    connector.ports
+    E = S.flat_expand_transform_copy()
+    # print(E)
+    E.output()
+
+    # connector = Connector(cell=E)
+    # # connector.ports
     # connector.output()
 
     # cell += spira.SRef(connector)
-    cell += S
-    cell.output()
+
+    # cell += S
+    # cell.output()
 
 

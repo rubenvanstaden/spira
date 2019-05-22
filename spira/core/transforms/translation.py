@@ -17,6 +17,12 @@ class Translation(__ConvertableTransform__):
     def apply_to_array(self, coords):
         return self.__translate_array__(coords)
 
+    def reverse_on_coord(self, coord):      
+        return self.__inv_translate__(coord)
+
+    def reverse_on_array(self, coords):      
+        return self.__inv_translate_array__(coords)
+
     def __add__(self, other):
         """ Returns the concatenation of this transform and other """
         if other is None:

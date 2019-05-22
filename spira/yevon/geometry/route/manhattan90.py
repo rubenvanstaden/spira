@@ -1,6 +1,5 @@
 import spira.all as spira
 import numpy as np
-from spira.core import param
 from spira.yevon.geometry import shapes
 from spira.yevon import process as pc
 from spira.yevon.geometry.route.route_shaper import RouteSimple, RouteGeneral

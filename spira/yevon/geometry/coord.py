@@ -1,9 +1,9 @@
 import math
 import numpy as np
-from spira.core.param.restrictions import RestrictType
-from spira.core.descriptor import DataFieldDescriptor
+from spira.core.parameters.restrictions import RestrictType
+from spira.core.parameters.descriptor import DataFieldDescriptor
 from spira.core.transformable import Transformable
-from spira.core.processors import ProcessorTypeCast
+from spira.core.parameters.processors import ProcessorTypeCast
 
 
 class Coord(Transformable):
@@ -123,7 +123,7 @@ class Coord(Transformable):
     def id_string(self):
         return "%d_%d" % (self.x * 1000, self.y * 1000)
 
-    def to_nparray(self):
+    def to_ndarray(self):
         return [self.x, self.y]
 
 

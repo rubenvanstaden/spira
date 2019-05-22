@@ -6,9 +6,9 @@ from spira.yevon import utils
 from spira.yevon.gdsii.base import __Elemental__
 from spira.yevon.rdd import get_rule_deck
 
-from spira.core.param.variables import *
+from spira.core.parameters.variables import *
 from spira.yevon.layer import LayerField
-from spira.core.descriptor import DataField
+from spira.core.parameters.descriptor import DataField
 from spira.yevon.geometry.coord import CoordField
 from spira.yevon.geometry.ports.base import __VerticalPort__
 from spira.yevon.gdsii.group import Group
@@ -54,14 +54,11 @@ class Port(Group, __VerticalPort__):
     #     return elems
     def commit_to_gdspy(self, cell=None, transformation=None):
         if self.__repr__() not in list(Port.__committed__.keys()):
-            self.surface.commit_to_gdspy(cell=cell, transformation=transformation)
-            self.label.commit_to_gdspy(cell=cell, transformation=transformation)
-            # self.arrow.commit_to_gdspy(cell=cell)
-            # self.label.commit_to_gdspy(cell=cell)
+            self.surface.commit_to_gdspy(cell=cell)
+            self.label.commit_to_gdspy(cell=cell)
             Port.__committed__.update({self.__repr__(): self})
         else:
             p = Port.__committed__[self.__repr__()]
-            # p.edge.commit_to_gdspy(cell=cell, transformation=transformation)
             p.surface.commit_to_gdspy(cell=cell)
             p.label.commit_to_gdspy(cell=cell)
            

@@ -6,9 +6,8 @@ import plotly.graph_objs as go
 import plotly.offline as offline
 from spira import log as LOG
 from spira.yevon.io import *
-from spira.yevon.utils import scale_coord_down as scd
-from spira.core.param.field.typed_graph import EdgeCapacitor
-from spira.core.param.field.typed_graph import EdgeInductor
+from spira.yevon.utils.geometry import scale_coord_down as scd
+from spira.core.typed_graph import EdgeCapacitor, EdgeInductor
 from spira.yevon.visualization import color
 from spira import settings
 from spira.core.outputs.base import Outputs
@@ -142,7 +141,7 @@ class PlotlyGraph(object):
                 label = G.node[n]['device']
             elif 'branch' in G.node[n]:
                 label = G.node[n]['branch']
-            else:
+            elif 'surface' in G.node[n]:
                 label = G.node[n]['surface']
 
             if label:

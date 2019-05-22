@@ -1,9 +1,8 @@
-# from spira.core import param
-from spira.core.param.variables import StringField, IntegerField
-from spira.core.initializer import FieldInitializer
+from spira.core.parameters.variables import StringField, IntegerField
+from spira.core.parameters.initializer import FieldInitializer
 from copy import deepcopy
-from spira.core.descriptor import DataFieldDescriptor, DataField
-from spira.core.param.restrictions import RestrictType
+from spira.core.parameters.descriptor import DataFieldDescriptor, DataField
+from spira.core.parameters.restrictions import RestrictType
 
 
 __all__ = ['Layer', 'LayerField']
@@ -11,11 +10,6 @@ __all__ = ['Layer', 'LayerField']
 
 class Layer(FieldInitializer):
 
-    # doc = param.StringField()
-    # name = param.StringField()
-    # number = param.IntegerField(default=0)
-    # datatype = param.IntegerField(default=0)
-    
     doc = StringField()
     name = StringField()
     number = IntegerField(default=0)

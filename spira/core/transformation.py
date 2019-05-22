@@ -1,16 +1,25 @@
 import numpy as np
 from numpy.linalg import norm
 
-from spira.core.initializer import FieldInitializer
-from spira.core.param.restrictions import RestrictType
-from spira.core.descriptor import DataFieldDescriptor
+from spira.core.parameters.initializer import FieldInitializer
+from spira.core.parameters.restrictions import RestrictType
+from spira.core.parameters.descriptor import DataFieldDescriptor
+from spira.core.parameters.processors import ProcessorTypeCast
 
 
 class Transform(FieldInitializer):
     """ Abstract base class for generic transform. """
 
-    def apply_to_object(self, item):
-        pass
+    def apply(self, item):
+        """ Apply the transform directly on the object, without making a copy. """
+        if isinstance(item, list):
+            raise ValueError('Not implemented yet!')
+            # from .shape import Shape
+            # L = Shape(item)
+            # L.transform(self)
+            # return L
+        else: 
+            return item.transform(self)
 
     def apply_to_copy(self, item):
         if isinstance(item, list):
@@ -22,6 +31,7 @@ class Transform(FieldInitializer):
             return item.transform_copy(self)
 
     def __call__(self, item):
+        """ Apply the transform on the object, after having made a copy. """
         if item is None:
             return self
         if isinstance(item, Transform):
@@ -207,8 +217,30 @@ class ReversibleCompoundTransform(CompoundTransform, ReversibleTransform):
         return T
 
 
-def TransformationField(name='noname', number=0, datatype=0, **kwargs):
+class ProcessoTransformation(ProcessorTypeCast):
+    def __init__(self):
+        ProcessorTypeCast.__init__(self, Transform)
+        # ProcessorTypeCast.__init__(self, CompoundTransform)
+        # ProcessorTypeCast.__init__(self, ReversibleTransform)
+        # super().__init__(ReversibleTransform)
+
+    def process(self, value, obj=None):
+        from spira.core.transforms.identity import IdentityTransform
+        if value is None:
+            return IdentityTransform()
+        else:
+            return ProcessorTypeCast.process(self, value, obj)
+
+
+# def TransformationField(name='noname', number=0, datatype=0, **kwargs):
+def TransformationField(restriction=None, preprocess=None, **kwargs):
     from spira.core.transformation import Transform
-    R = RestrictType(Transform)
-    return DataFieldDescriptor(restrictions=R, **kwargs)
+    R = RestrictType(Transform) & restriction
+    P = ProcessoTransformation() + preprocess
+    if 'default' in kwargs:
+        default = kwargs['default']
+    else:
+        default = None
+    # return DataFieldDescriptor(default=default, restrictions=R, **kwargs)
+    return DataFieldDescriptor(default=default, restrictions=R, preprocess=P, **kwargs)
 

@@ -4,20 +4,20 @@ import networkx as nx
 from copy import copy, deepcopy
 from spira.yevon import utils
 
-from spira.core.param.restrictions import RestrictType
-from spira.core.initializer import FieldInitializer
-from spira.core.descriptor import DataFieldDescriptor, FunctionField, DataField
-from spira.core.elem_list import ElementList, ElementalListField
+from spira.core.parameters.restrictions import RestrictType
+from spira.core.parameters.initializer import FieldInitializer
+from spira.core.parameters.descriptor import DataFieldDescriptor, FunctionField, DataField
+from spira.yevon.gdsii.elem_list import ElementList, ElementalListField
 from spira.yevon.geometry.coord import CoordField, Coord
 from spira.yevon.visualization.color import ColorField
 from spira.yevon.visualization import color
-from spira.core.param.variables import NumberField
-from spira.core.initializer import MetaCell
-from spira.core.port_list import PortList
+from spira.core.parameters.variables import NumberField
+from spira.core.parameters.initializer import MetaCell
+from spira.yevon.geometry.ports.port_list import PortList
 from spira.yevon.gdsii import *
-from spira.yevon.rdd import get_rule_deck
 from spira.core.mixin import MixinBowl
 from spira.yevon.gdsii.sref import SRef
+from spira.yevon.rdd import get_rule_deck
 
 
 RDD = get_rule_deck()
@@ -87,31 +87,28 @@ class CellAbstract(gdspy.Cell, __Cell__):
         return C
 
     def flat_polygons(self, subj):
-        from spira.yevon.process.processlayer import ProcessLayer
         from spira.yevon.gdsii.sref import SRef
-        for e1 in self.elementals:
-            if isinstance(e1, ProcessLayer):
-                subj += e1
-            elif isinstance(e1, SRef):
-                e1.ref.flat_polygons(subj=subj)
+        from spira.yevon.gdsii.polygon import Polygon
+        for e in self.elementals:
+            if isinstance(e, Polygon):
+                subj += e
+            elif isinstance(e, SRef):
+                e.ref.flat_polygons(subj=subj)
         return subj
 
-    def commit_to_gdspy(self, cell=None, transformation=None):
+    def commit_to_gdspy(self, cell=None):
         # if cell is None:
         #     cell = gdspy.Cell(self.name, exclude_from_current=True)
         cell = gdspy.Cell(self.name, exclude_from_current=True)
         for e in self.elementals:
-            # e.commit_to_gdspy(cell=cell, transformation=transformation)
             if not isinstance(e, SRef):
-                e.commit_to_gdspy(cell=cell, transformation=transformation)
+                e.commit_to_gdspy(cell=cell)
         for p in self.ports:
-            p.commit_to_gdspy(cell=cell, transformation=transformation)
+            p.commit_to_gdspy(cell=cell)
         return cell
 
     def move(self, midpoint=(0,0), destination=None, axis=None):
-        from spira.yevon import process as pc
         from spira.yevon.geometry.ports.base import __Port__
-        # d, o = utils.move_algorithm(obj=self, midpoint=midpoint, destination=destination, axis=axis)
 
         if destination is None:
             destination = midpoint
@@ -145,7 +142,7 @@ class CellAbstract(gdspy.Cell, __Cell__):
             d = (d[0], o[1])
         if axis == 'y':
             d = (o[0], d[1])
-    
+
         d = Coord(d[0], d[1])
         o = Coord(o[0], o[1])
 
@@ -157,6 +154,49 @@ class CellAbstract(gdspy.Cell, __Cell__):
             p.move(midpoint=p.midpoint, destination=mc)
 
         return self
+
+    def stretch_port(self, port, destination):
+        """ The elemental by moving the subject port, without distorting the entire elemental. 
+        Note: The opposite port position is used as the stretching center."""
+        from spira.core.transforms import stretching
+        from spira.yevon.geometry import bbox_info
+        from spira.yevon.gdsii.polygon import Polygon
+        opposite_port = bbox_info.get_opposite_boundary_port(self, port)
+        T = stretching.stretch_elemental_by_port(self, opposite_port, port, destination)
+        # print(port.bbox)
+        if port.bbox is True:
+            self = T(self)
+        else:
+            for i, e in enumerate(self.elementals):
+                if isinstance(e, Polygon):
+                    if e.id_string() == port.local_pid:
+                        self.elementals[i] = T(e)
+        return self
+
+    def flat_expand_transform_copy(self):
+        from spira.yevon.gdsii.sref import SRef
+        from spira.yevon.gdsii.polygon import Polygon
+        from spira.yevon.geometry.ports.terminal import Terminal
+        S = self.expand_transform()
+        C = self.__class__(name=S.name + '_ExpandedCell')
+        def flat_polygons(subj, cell):
+            for e in cell.elementals:
+                if isinstance(e, Polygon):
+                    subj += e
+                elif isinstance(e, SRef):
+                    flat_polygons(subj=subj, cell=e.ref)
+            for p in cell.ports:
+                port = Terminal(
+                    name=p.name + "_" + cell.name,
+                    midpoint=deepcopy(p.midpoint),
+                    orientation=deepcopy(p.orientation),
+                    width=deepcopy(p.width),
+                    local_pid=p.local_pid
+                )
+                subj.ports += port
+            return subj
+        D = flat_polygons(C, S)
+        return D
 
 
 class Cell(CellAbstract):
@@ -231,7 +271,6 @@ class Cell(CellAbstract):
     def expand_transform(self):
         for S in self.elementals.sref:
             S.expand_transform()
-            # S.ref.expand_transform()
         return self
 
     @property
@@ -262,7 +301,7 @@ class Cell(CellAbstract):
             raise ValueError('Alias {} key not found!'.format(keys[0]))
 
         return item
-
+        
 
 class Connector(Cell):
     """

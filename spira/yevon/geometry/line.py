@@ -1,9 +1,9 @@
 import numpy as np
 
-from spira.core.initializer import FieldInitializer
+from spira.core.parameters.initializer import FieldInitializer
 from spira.core.transformable import Transformable
-from spira.core.param.variables import NumberField
-from spira.core.descriptor import DataFieldDescriptor
+from spira.core.parameters.variables import NumberField
+from spira.core.parameters.descriptor import DataFieldDescriptor
 from spira.yevon.geometry.coord import Coord
 
 

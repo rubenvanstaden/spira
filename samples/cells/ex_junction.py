@@ -2,7 +2,6 @@ import spira.all as spira
 from spira.yevon.geometry import shapes
 from spira.yevon.geometry.coord import Coord
 from spira.yevon.rdd import get_rule_deck
-from spira.yevon import process as pc
 
 
 RDD = get_rule_deck()
@@ -50,7 +49,7 @@ class Top(spira.Cell):
         s_jj = spira.SRef(Jj(), transformation=t1)
         s_res = spira.SRef(ResVia(), transformation=t2)
 
-        elems += pc.Rectangle(p1=(-10*1e6, -15*1e6), p2=(10*1e6, 10*1e6), ps_layer=RDD.PLAYER.COU)
+        elems += spira.Rectangle(p1=(-10*1e6, -15*1e6), p2=(10*1e6, 10*1e6), ps_layer=RDD.PLAYER.COU)
 
         elems += s_jj
         elems += s_res
@@ -70,7 +69,7 @@ class Bot(spira.Cell):
 
         s_res = spira.SRef(ResVia(), transformation=t2)
 
-        elems += pc.Rectangle(p1=(-10*1e6, -55*1e6), p2=(10*1e6, -25*1e6), ps_layer=RDD.PLAYER.COU)
+        elems += spira.Rectangle(p1=(-10*1e6, -55*1e6), p2=(10*1e6, -25*1e6), ps_layer=RDD.PLAYER.COU)
 
         elems += s_res
 
@@ -90,23 +89,19 @@ class Junction(spira.Cell):
         t1, t2 = self.get_transforms()
 
         s_top = spira.SRef(alias='S1', reference=Top(), transformation=t1)
-        s_bot = spira.SRef(alias='S2', reference=Bot(), transformation=t2)
+        # s_bot = spira.SRef(alias='S2', reference=Bot(), transformation=t2)
 
-        elems += pc.Rectangle(p1=(-13*1e6, -60*1e6), p2=(13*1e6, 12*1e6), ps_layer=RDD.PLAYER.BAS)
+        # elems += spira.Rectangle(p1=(-13*1e6, -60*1e6), p2=(13*1e6, 12*1e6), ps_layer=RDD.PLAYER.BAS)
 
         elems += s_top
-        elems += s_bot
+        # elems += s_bot
 
         return elems
 
 
 if __name__ == '__main__':
 
-    junction = Junction()
-    # junction = junction.expand_transform()
-    junction.output()
-
-    # D = Top()
-    # D.output()
+    D = Junction()
+    D.output()
 
 

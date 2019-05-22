@@ -3,24 +3,21 @@ import numpy
 import inspect
 import numpy as np
 import spira.all as spira
-from copy import copy, deepcopy
 
 from spira.yevon.geometry.ports.base import __Port__
-from spira.core import param
 from spira.yevon.gdsii.base import __Elemental__
 from spira.yevon.geometry.coord import CoordField, Coord
 from spira.yevon import utils
 from spira.core.transforms import *
-from spira.core.descriptor import DataFieldDescriptor, FunctionField, DataField
+from spira.core.parameters.descriptor import DataFieldDescriptor, FunctionField, DataField
 
-from spira.core.param.variables import *
+from spira.core.parameters.variables import *
 from spira.yevon.geometry.vector import *
 from spira.yevon.geometry.line import *
+from copy import copy, deepcopy
 
 
 class __RefElemental__(__Elemental__):
-
-    __committed__ = {}
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -41,76 +38,59 @@ class __RefElemental__(__Elemental__):
 
     def expand_transform(self):
 
-        if self.transformation is None:
-            name = self.ref.name + '_None'
-        else:
-            name = self.ref.name + self.transformation.id_string()
-
-        S = spira.Cell(
-            # name=self.ref.name + self.transformation.id_string(),
-            name=name,
+        C = spira.Cell(
+            name=self.ref.name + self.transformation.id_string(),
             alias=self.ref.alias + self.alias,
             elementals=deepcopy(self.ref.elementals),
             ports=deepcopy(self.ref.ports)
         )
 
-        if self.transformation is None:
-            tf = spira.Translation(self.midpoint)
-        else:
-            tf= self.transformation + spira.Translation(self.midpoint)
-
-        S = S.transform(tf)
+        T = self.transformation + spira.Translation(self.midpoint)
+        C = C.transform(T)
 
         # NOTE: Applies expantion hierarchically.
         # Expands all references in the cell.
-        S.expand_transform()
+        C.expand_transform()
 
-        self.ref = S
-        self.transformation = None
+        self.ref = C
+        self.transformation = spira.IdentityTransform()
         self.midpoint = (0,0)
+
         return self
 
-    def flat_expand(self):
-        from spira.yevon import process as pc
+    def flat_expand_transform_copy(self):
         S = self.expand_transform()
         C = spira.Cell(name=S.ref.name + '_ExpandedCell')
         def flat_polygons(subj, cell):
             for e in cell.elementals:
-                if issubclass(type(e), pc.ProcessLayer):
+                if isinstance(e, spira.Polygon):
                     subj += e
                 elif isinstance(e, spira.SRef):
                     flat_polygons(subj=subj, cell=e.ref)
+            for p in cell.ports:
+                port = spira.Terminal(
+                    # name=p.name + "_" + cell.name,
+                    name=p.name,
+                    locked=False,
+                    midpoint=deepcopy(p.midpoint),
+                    orientation=deepcopy(p.orientation),
+                    width=deepcopy(p.width),
+                    local_pid=p.local_pid
+                )
+                subj.ports += port
             return subj
         D = flat_polygons(C, S.ref)
-        return D
+        return self.__class__(reference=D)
 
 
 class SRefAbstract(gdspy.CellReference, __RefElemental__):
 
+    supp = IntegerField(default=1)
     midpoint = CoordField(default=(0,0))
 
-    def commit_to_gdspy(self, cell, transformation=None):
-
-        if self.__repr__() not in list(__RefElemental__.__committed__.keys()):
-
-            # # tf = self.transformation
-            # if self.transformation is None:
-            #     tf = spira.Translation(self.midpoint)
-            # else:
-            #     tf = self.transformation + spira.Translation(self.midpoint)
-            # if transformation is not None:
-            #     tf = tf + transformation
-            # self.ref.commit_to_gdspy(cell=cell, transformation=tf)
-
-            self.ref.commit_to_gdspy(cell=cell)
-
-            __RefElemental__.__committed__.update({self.__repr__(): self})
-        else:
-            __RefElemental__.__committed__[self.__repr__()]
-
-    def transform_copy(self, transformation):
-        self = super().transform_copy(transformation)
-        return self.expand_transform()
+    # def transform_copy(self, transformation):
+    #     self = super().transform_copy(transformation)
+        # return self.expand_transform()
 
     def dependencies(self):
         from spira.yevon.gdsii.cell_list import CellList
@@ -123,35 +103,19 @@ class SRefAbstract(gdspy.CellReference, __RefElemental__):
         return self.ref.flatten()
 
     def flat_copy(self, level=-1):
-        """  """
         if level == 0:
             el = spira.ElementList()
             el += self
             return el
         el = self.ref.elementals.flat_copy(level-1)
-        # if self.transformation is None:
-        #     el.transform(Translation(self.midpoint))
-        # else:
-        #     el.transform(self.transformation + Translation(self.midpoint))
+        T = self.transformation + Translation(self.midpoint)
+        el.transform(T)
         return el
 
     @property
-    def ports(self):
-        ports = spira.PortList()
-        for p in self.ref.ports:
-
-            # ports += p.transform_copy(self.transformation)
-            # ports += p.transform_copy(self.transformation).move(self.midpoint)
-
-            pp = p.transform_copy(self.transformation).move(self.midpoint)
-            # T = spira.Rotation(90, center=(-10*1e6, 0))
-            # pp = pp.transform(T)
-            ports += pp
-
-            # if self.transformation is not None:
-            #     ports += p.transform_copy(self.transformation).move(self.midpoint).transform(-self.transformation)
-
-        return ports
+    def bbox_info(self):
+        T = self.transformation + Translation(self.midpoint)
+        return self.ref.bbox_info.transform(T)
 
     # def move(self, position):
     #     self.midpoint = Coord(self.midpoint[0] + position[0], self.midpoint[1] + position[1])
@@ -208,13 +172,13 @@ class SRefAbstract(gdspy.CellReference, __RefElemental__):
         --------
         >>> S.connect()
         """
-        if port in self.ports.get_names():
+        if issubclass(type(port), __Port__):
+            p = port
+        elif port in self.ports.get_names():
             if issubclass(type(port), __Port__):
                 p = self.ports[port.name]
             elif isinstance(port, str):
                 p = self.ports[port]
-        elif issubclass(type(port), __Port__):
-            p = port
         else:
             raise ValueError("[SPiRA] connect() did not receive a Port or " +
                 "valid port name - received ({}), ports available " +
@@ -225,6 +189,7 @@ class SRefAbstract(gdspy.CellReference, __RefElemental__):
 
         T = vector_match_transform(v1=p, v2=destination)
         self.transform(T)
+        self.supp = 2
 
         return self
 
@@ -244,6 +209,36 @@ class SRefAbstract(gdspy.CellReference, __RefElemental__):
         T = spira.Translation(translation=(dx, dy))
         self.transform(T)
 
+        return self
+
+    def stretch_port(self, port, destination):
+        """
+        The elemental by moving the subject port, without
+        distorting the entire elemental. Note: The opposite port
+        position is used as the stretching center.
+
+        Example
+        -------
+        >>> S_s = S.stretch_port()
+        """
+        from spira.core.transforms import stretching
+        from spira.yevon.geometry import bbox_info
+        from spira.yevon.gdsii.polygon import Polygon
+        opposite_port = bbox_info.get_opposite_boundary_port(self, port)
+        T = stretching.stretch_elemental_by_port(self, opposite_port, port, destination)
+        # print(port.bbox)
+        if port.bbox is True:
+            self = T(self)
+        else:
+            for i, e in enumerate(self.ref.elementals):
+                if isinstance(e, Polygon):
+                    print('---------------')
+                    print(e.id_string())
+                    print(port.local_pid)
+                    print('')
+                    if e.id_string() == port.local_pid:
+                        print(e)
+                        self.ref.elementals[i] = T(e)
         return self
 
 
@@ -268,6 +263,9 @@ class SRef(SRefAbstract):
 
     def set_alias(self, value):
         self.__alias__ = '_' + value
+        
+    def __hash__(self):
+        return hash(self.__repr__())
 
     alias = FunctionField(get_alias, set_alias, doc='Functions to generate an alias for cell name.')
 
@@ -294,7 +292,15 @@ class SRef(SRefAbstract):
 
     def __str__(self):
         return self.__repr__()
-        
+
+    def stretch(self, stretch_transform):
+        S = self.flat_expand_transform_copy()
+        for i, e in enumerate(S.ref.elementals):
+            S.ref.elementals[i] = stretch_transform(e)
+        # D.elementals = S(D.elementals)
+        return S
+        # return self
+
     @property
     def _translation(self):
         # if self.transformation is not None:

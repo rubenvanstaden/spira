@@ -1,6 +1,5 @@
 import spira.all as spira
-from spira.core import param
-from spira.core.initializer import FieldInitializer
+from spira.core.parameters.initializer import FieldInitializer
 
 
 class __DesignRule__(FieldInitializer):

@@ -39,7 +39,7 @@ class TranslatePolygon(spira.Cell):
     def create_elementals(self, elems):
 
         elems += self.ref_point
-        elems += self.t1
+        # elems += self.t1
         # elems += self.t2
         # elems += self.t3
 
@@ -223,8 +223,8 @@ class StretchPolygon(spira.Cell):
 
 cell = spira.Cell(name='Transformations')
 
-# t1 = TranslatePolygon()
-# t1.output()
+t1 = TranslatePolygon()
+t1.output()
 
 # t2 = RotatePolygon()
 # t2.output()
@@ -235,8 +235,8 @@ cell = spira.Cell(name='Transformations')
 # t4 = TransformPolygon()
 # t4.output()
 
-t5 = StretchPolygon()
-t5.output()
+# t5 = StretchPolygon()
+# t5.output()
 
 # cell += spira.SRef(t1, midpoint=(0, 0))
 # cell += spira.SRef(t2, midpoint=(50*1e6, 0))

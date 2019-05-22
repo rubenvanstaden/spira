@@ -1,5 +1,4 @@
 import spira.all as spira
-from spira.core import param
 
 
 RDD = spira.get_rule_deck()

@@ -6,10 +6,10 @@ from spira.yevon.geometry.route.manhattan90 import Route90
 from spira.yevon.geometry.route.manhattan180 import Route180
 from spira.yevon.geometry.route.route_shaper import RouteSimple, RouteGeneral, RoutePointShape
 from spira.yevon.visualization import color
-from spira.netex.structure import Structure
+from spira.yevon.netlist.structure import Structure
 from spira.yevon.rdd import get_rule_deck
-from spira.core.param.variables import *
-from spira.core.descriptor import DataField
+from spira.core.parameters.variables import *
+from spira.core.parameters.descriptor import DataField
 
 
 __all__ = ['Route']
@@ -41,8 +41,9 @@ class Route(Structure, __Manhattan__):
         return None
 
     def determine_type(self):
-        # print(':: Determine type of route...')
         if self.cell is not None:
+            self.__type__ = 'layout'
+        if len(self.metals) > 0:
             self.__type__ = 'layout'
         if self.angle is not None:
             if (self.angle == 0) or (self.angle == 180):
@@ -126,7 +127,7 @@ class Route(Structure, __Manhattan__):
         # self.transform(R)
         # S.transform(R)
         S.connect(port=S.ports['P1'], destination=self.port1)
-        T = S.transformation
+        # T = S.transformation
         # self.transform(T)
         return S
 
@@ -202,7 +203,8 @@ class Route(Structure, __Manhattan__):
         if self.__type__ == 'auto':
             r1 = self.route_auto
         if self.__type__ == 'layout':
-            R = RouteGeneral(elementals=self.merged_layers, ports=[])
+            # R = RouteGeneral(elementals=self.merged_layers, ports=[])
+            R = RouteGeneral(elementals=self.metals, ports=[])
             r1 = spira.SRef(R)
 
         elems += r1
@@ -213,7 +215,11 @@ class Route(Structure, __Manhattan__):
 
     def create_ports(self, ports):
         ports = super().create_ports(ports)
-        ports = ports.transform(self.transformation)
+        
+        if self.__type__ == 'straight':
+            T = self.route_straight.transformation
+            ports = ports.transform(T)
+            
         return ports
 
 

@@ -1,27 +1,44 @@
-import networkx as nx
 import numpy as np
+import networkx as nx
+
+from spira.core.parameters.variables import GraphField
 from spira.yevon.geometry.physical_geometry.geometry import Geometry
-from spira.core.descriptor import DataField
+from spira.core.parameters.descriptor import DataField
 from spira.yevon.rdd import get_rule_deck
 
 
 RDD = get_rule_deck()
 
 
+# TODO: Make the Net a transformable.
+
+
 class __Net__(Geometry):
-    """ Constructs a graph from the physical geometry generated 
-    from the list of elementals. """
+    """ Constructs a graph from the physical geometry
+    generated from the list of elementals. """
+
+    g = GraphField()
 
     mesh_graph = DataField(fdef_name='create_mesh_graph')
     triangles = DataField(fdef_name='create_triangles')
     physical_triangles = DataField(fdef_name='create_physical_triangles')
-    
+
     def __init__(self, elementals=None, **kwargs):
         super().__init__(elementals=elementals, **kwargs)
-        
-        self.g = nx.Graph() 
-
         self.mesh_graph
+        # self.g = nx.Graph()
+
+    # def __getitem__(self, n):
+    #     return self.g.node[n]
+
+    def transform(self, transformation):
+        pass
+
+    def transform_copy(self, transformation):
+        pass
+
+    def move(self, coordinate):
+        pass
 
     def create_triangles(self):
         if 'triangle' not in self.mesh_data.cells:
@@ -40,14 +57,15 @@ class __Net__(Geometry):
 
     def create_mesh_graph(self):
         """ Create a graph from the meshed geometry. """
+        # print(self.mesh_data)
         ll = len(self.mesh_data.points)
         A = np.zeros((ll, ll), dtype=np.int64)
         for n, triangle in enumerate(self.triangles):
-            self.add_edges(n, triangle, A)
+            self.__add_edges__(n, triangle, A)
         for n, triangle in enumerate(self.triangles):
-            self.add_positions(n, triangle)
+            self.__add_positions__(n, triangle)
 
-    def add_edges(self, n, tri, A):
+    def __add_edges__(self, n, tri, A):
         def update_adj(self, t1, adj_mat, v_pair):
             if (adj_mat[v_pair[0]][v_pair[1]] != 0):
                 t2 = adj_mat[v_pair[0]][v_pair[1]] - 1
@@ -60,7 +78,16 @@ class __Net__(Geometry):
         for v_pair in list(zip(v1, v2)):
             update_adj(self, n, A, v_pair)
 
-    def add_new_node(self, n, D, pos):
+    def __add_positions__(self, n, tri):
+        pp = self.mesh_data.points
+        n1, n2, n3 = pp[tri[0]], pp[tri[1]], pp[tri[2]]
+        sum_x = (n1[0] + n2[0] + n3[0]) / (3.0*RDD.GDSII.GRID)
+        sum_y = (n1[1] + n2[1] + n3[1]) / (3.0*RDD.GDSII.GRID)
+        self.g.node[n]['vertex'] = tri
+        # self.g.node[n]['pos'] = [sum_x, sum_y]
+        self.g.node[n]['position'] = Coord(sum_x, sum_y)
+
+    def __add_new_node__(self, n, D, pos):
         l1 = spira.Layer(name='Label', number=104)
         label = spira.Label(
             position=pos,
@@ -76,14 +103,6 @@ class __Net__(Geometry):
             display='{}'.format(l1.name)
         )
         self.g.add_edge(n, num+1)
-
-    def add_positions(self, n, tri):
-        pp = self.mesh_data.points
-        n1, n2, n3 = pp[tri[0]], pp[tri[1]], pp[tri[2]]
-        sum_x = (n1[0] + n2[0] + n3[0]) / (3.0*RDD.GDSII.GRID)
-        sum_y = (n1[1] + n2[1] + n3[1]) / (3.0*RDD.GDSII.GRID)
-        self.g.node[n]['vertex'] = tri
-        self.g.node[n]['pos'] = [sum_x, sum_y]
 
     def __layer_triangles_dict__(self):
         """

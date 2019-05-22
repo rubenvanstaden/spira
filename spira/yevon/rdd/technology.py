@@ -130,7 +130,7 @@ class ProcessTree(__DataTree__):
         return items
 
 
-# from spira.core.descriptor import DataFieldDescriptor
+# from spira.core.parameters.descriptor import DataFieldDescriptor
 # def ProcessTreeField(name='', datatype=0, symbol=''):
 #     F = ProcessTree(name=name, datatype=datatype, symbol='')
 #     return DataFieldDescriptor(default=F)

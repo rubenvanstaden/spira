@@ -89,6 +89,12 @@ RDD.CC.WIDTH = 0.5
 RDD.CC.M5_METAL = 1.0
 RDD.CC.COLOR = '#B6EBE6'
 
+RDD.BBOX = ProcessTree()
+RDD.BBOX.LAYER = Layer(name='BBOX', number=13)
+RDD.BBOX.WIDTH = 0.5
+RDD.BBOX.M5_METAL = 1.0
+RDD.BBOX.COLOR = '#B6EBE6'
+
 # ------------------------------- Physical Metals -------------------------------
 
 RDD.PLAYER = PhysicalTree()
@@ -107,6 +113,10 @@ RDD.PLAYER.GC = PhysicalLayer(layer=RDD.GC.LAYER, purpose=RDD.PURPOSE.PRIM.VIA, 
 RDD.PLAYER.BC = PhysicalLayer(layer=RDD.BC.LAYER, purpose=RDD.PURPOSE.PRIM.VIA, data=RDD.BC)
 RDD.PLAYER.JC = PhysicalLayer(layer=RDD.JC.LAYER, purpose=RDD.PURPOSE.PRIM.VIA, data=RDD.JC)
 RDD.PLAYER.CC = PhysicalLayer(layer=RDD.CC.LAYER, purpose=RDD.PURPOSE.PRIM.VIA, data=RDD.CC)
+
+# ------------------------------- DEFAULT ----------------------------------
+
+RDD.PLAYER.BBOX = PhysicalLayer(layer=RDD.BBOX.LAYER, purpose=RDD.PURPOSE.BOUNDARY_BOX, data=RDD.BBOX)
 
 # ------------------------------ Primitive TCells -------------------------------
 

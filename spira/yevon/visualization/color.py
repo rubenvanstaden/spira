@@ -1,8 +1,8 @@
 import spira.all as spira
-from spira.core.param.variables import StringField, IntegerField
-from spira.core.initializer import FieldInitializer
-from spira.core.descriptor import DataFieldDescriptor
-from spira.core.param.restrictions import RestrictType
+from spira.core.parameters.variables import StringField, IntegerField
+from spira.core.parameters.initializer import FieldInitializer
+from spira.core.parameters.descriptor import DataFieldDescriptor
+from spira.core.parameters.restrictions import RestrictType
 
 
 # Color Map: https://www.rapidtables.com/web/color/html-color-codes.html

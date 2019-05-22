@@ -1,9 +1,9 @@
 import os
-import spira.all as spira
-import numpy as np
-import networkx as nx
 import pygmsh
 import meshio
+import numpy as np
+import networkx as nx
+import spira.all as spira
 from spira.yevon.geometry import shapes
 from spira.yevon.gdsii.group import Group
 from spira.core.initializer import FieldInitializer
@@ -104,10 +104,8 @@ class Metals(spira.Cell):
         return elems
 
     def create_ports(self, ports):
-
         ports += spira.Terminal(midpoint=(0, 2.5*1e6), width=5*1e6, ps_layer=RDD.PLAYER.COU)
         ports += spira.Terminal(midpoint=(100*1e6, -47.5*1e6), width=5*1e6, orientation=180, ps_layer=RDD.PLAYER.COU)
-
         return ports
 
     def get_metals(self, pl):
@@ -138,8 +136,8 @@ class Metals(spira.Cell):
 if __name__ == '__main__':
 
     # 1.)
-    # pc = ProcessLayer()
-    # pc.output()
+    pc = ProcessLayer()
+    pc.output()
 
     # 2.)
     # cell = spira.Cell(name='MetalCell')
@@ -160,11 +158,11 @@ if __name__ == '__main__':
     # # pc.transform(spira.Rotation(30))
     # pc.output()
 
-    # 5.)
-    metal = Metals()
-    # g = metal.nets.disjoint()
-    g = metal.nets[0].g
-    metal.plotly_netlist(G=g, graphname='metal', labeltext='id')
-    metal.output()
+    # # 5.)
+    # metal = Metals()
+    # # g = metal.nets.disjoint()
+    # g = metal.nets[0].g
+    # metal.plotly_netlist(G=g, graphname='metal', labeltext='id')
+    # metal.output()
 
 

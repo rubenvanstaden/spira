@@ -3,11 +3,11 @@ import spira.all as spira
 import gdspy
 import pathlib
 import numpy as np
-from spira.yevon.utils import c3d
-from spira.yevon.utils import scale_coord_down as scd
-from spira.yevon.utils import scale_coord_up as scu
-from spira.yevon.utils import scale_polygon_down as spd
-from spira.yevon.utils import scale_polygon_up as spu
+from spira.yevon.utils.geometry import c3d
+from spira.yevon.utils.geometry import scale_coord_down as scd
+from spira.yevon.utils.geometry import scale_coord_up as scu
+from spira.yevon.utils.geometry import scale_polygon_down as spd
+from spira.yevon.utils.geometry import scale_polygon_up as spu
 from copy import copy, deepcopy
 from spira.core.transforms import *
 

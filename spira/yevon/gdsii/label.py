@@ -3,11 +3,10 @@ import gdspy
 import pyclipper
 import numpy as np
 from copy import copy, deepcopy
-from spira.core import param
 from spira.yevon.visualization import color
 from spira.yevon.gdsii.base import __Elemental__
 from spira.yevon.layer import LayerField
-from spira.core.param.variables import *
+from spira.core.parameters.variables import *
 from spira.yevon.visualization.color import ColorField
 from spira.yevon.geometry.coord import Coord, CoordField
 from spira.yevon import utils
@@ -18,7 +17,12 @@ __all__ = ['Label']
 
 class __Label__(gdspy.Label, __Elemental__):
 
-    __committed__ = {}
+    gds_layer = LayerField()
+    text = StringField(default='no_text')
+    texttype = IntegerField(default=0)
+
+    def __init__(self, position, **kwargs):
+        super().__init__(position, **kwargs)
 
     def __eq__(self, other):
         return self.id == other.id
@@ -30,131 +34,14 @@ class __Label__(gdspy.Label, __Elemental__):
         )
         return c_label
 
-
-class LabelAbstract(__Label__):
-
-    gds_layer = LayerField()
-    text = StringField(default='no_text')
-    texttype = IntegerField(default=0)
-    # rotation = NumberField(default=0)
-    # reflection = BoolField(default=False)
-    # magnification = NumberField(default=1.0)
-
-    def __init__(self, position, **kwargs):
-        super().__init__(position, **kwargs)
-
-    def commit_to_gdspy(self, cell=None, transformation=None):
-        # if self.__repr__() not in list(LabelAbstract.__committed__.keys()):
-        if self.node_id not in list(LabelAbstract.__committed__.keys()):
-            # L = gdspy.Label(self.text,
-            #     deepcopy(self.position),
-            #     anchor='o',
-            #     rotation=self.rotation,
-            #     magnification=self.magnification,
-            #     # x_reflection=self.reflection,
-            #     x_reflection=self.x_reflection,
-            #     layer=self.gds_layer.number,
-            #     texttype=self.texttype
-            # )
-
-            if transformation is None:
-                L = gdspy.Label(self.text,
-                    deepcopy(self.position),
-                    anchor='o',
-                    rotation=self.orientation,
-                    layer=self.gds_layer.number,
-                    texttype=self.texttype
-                )
-            else:
-                self.position = transformation.apply_to_coord(self.position)
-                self.orientation = transformation.apply_to_angle(self.orientation)
-                L = gdspy.Label(self.text,
-                    deepcopy(self.position),
-                    anchor='o',
-                    rotation=self.orientation,
-                    magnification=transformation.magnification,
-                    x_reflection=transformation.reflection,
-                    layer=self.gds_layer.number,
-                    texttype=self.texttype
-                )
-
-            # LabelAbstract.__committed__.update({self.__repr__():L})
-            # LabelAbstract.__committed__.update({self.node_id:L})
-        else:
-            pass
-            # L = LabelAbstract.__committed__[self.__repr__()]
-            # L = LabelAbstract.__committed__[self.node_id]
-            # if transformation is not None:
-            
-            # transformation.apply_to_object(L)
-        if cell is not None:
-            cell.add(L)
-        return L
-
-
-    # def commit_to_gdspy(self, cell=None, transformation=None):
-    #     # if self.__repr__() not in list(LabelAbstract.__committed__.keys()):
-    #     if self.node_id not in list(LabelAbstract.__committed__.keys()):
-    #         # L = gdspy.Label(self.text,
-    #         #     deepcopy(self.position),
-    #         #     anchor='o',
-    #         #     rotation=self.rotation,
-    #         #     magnification=self.magnification,
-    #         #     # x_reflection=self.reflection,
-    #         #     x_reflection=self.x_reflection,
-    #         #     layer=self.gds_layer.number,
-    #         #     texttype=self.texttype
-    #         # )
-
-    #         if self.transformation is None:
-    #             L = gdspy.Label(self.text,
-    #                 deepcopy(self.position),
-    #                 anchor='o',
-    #                 rotation=self.orientation,
-    #                 layer=self.gds_layer.number,
-    #                 texttype=self.texttype
-    #             )
-    #         else:
-    #             self.transformation.apply_to_object(self)
-    #             L = gdspy.Label(self.text,
-    #                 deepcopy(self.position)+[10*16, 0],
-    #                 anchor='o',
-    #                 rotation=self.transformation.rotation,
-    #                 magnification=self.transformation.magnification,
-    #                 x_reflection=self.transformation.reflection,
-    #                 layer=self.gds_layer.number,
-    #                 texttype=self.texttype
-    #             )
-
-    #         # LabelAbstract.__committed__.update({self.__repr__():L})
-    #         LabelAbstract.__committed__.update({self.node_id:L})
-    #     else:
-    #         # L = LabelAbstract.__committed__[self.__repr__()]
-    #         L = LabelAbstract.__committed__[self.node_id]
-    #         # if transformation is not None:
-            
-    #         # transformation.apply_to_object(L)
-    #     if cell is not None:
-    #         cell.add(L)
-    #     return L
-
-    # def __reflect__(self, p1=(0,1), p2=(0,0), angle=None):
-    #     self.position = [self.position[0], -self.position[1]]
-    #     self.rotation = self.rotation * (-1)
-    #     self.rotation = np.mod(self.rotation, 360)
-    #     return self
-
-    # def __rotate__(self, angle=45, center=(0,0)):
-    #     # print('--- Rotate Label ---')
-    #     self.position = utils.rotate_algorithm(self.position, angle=angle, center=[0, 0])
-    #     self.rotation += angle
-    #     self.rotation = np.mod(self.rotation, 360)
-    #     return self
-        
-    # def __translate__(self, dx, dy):
-    #     # print('--- Translate Label ---')
-    #     super().translate(dx=dx, dy=dy)
-    #     return self
+    def convert_to_gdspy(self):
+        return gdspy.Label(self.text,
+            deepcopy(self.position),
+            anchor='o',
+            rotation=self.orientation,
+            layer=self.gds_layer.number,
+            texttype=self.texttype
+        )
 
     def encloses(self, ply):
         if isinstance(ply, spira.Polygon):
@@ -177,7 +64,7 @@ class LabelAbstract(__Label__):
         return self
 
 
-class Label(LabelAbstract):
+class Label(__Label__):
     """ Label that contains a text description.
 
     Example
@@ -206,7 +93,6 @@ class Label(LabelAbstract):
             position=self.position,
             anchor=str('o'),
             rotation=self.orientation,
-            # rotation=self.rotation,
             # magnification=self.magnification,
             # x_reflection=self.reflection,
             layer=self.gds_layer.number,
@@ -225,25 +111,18 @@ class Label(LabelAbstract):
         #         "texttype: {6})").format(*params)
 
     def transform(self, transformation):
-        if transformation is not None:
-            self.position = transformation.apply_to_coord(self.position)
-            self.orientation = transformation.apply_to_angle(self.orientation)
+        self.position = transformation.apply_to_coord(self.position)
+        self.orientation = transformation.apply_to_angle(self.orientation)
         return self
 
     def transform_copy(self, transformation):
-        if transformation is not None:
-            port = self.__class__(
-                name=self.name,
-                midpoint=transformation.apply_to_coord(self.midpoint), 
-                orientation=deepcopy(transformation.apply_to_angle(self.orientation))
-            )
-        else:
-            port = self.__class__(
-                name=self.name,
-                midpoint=deepcopy(self.midpoint),
-                orientation=deepcopy(self.orientation)
-            )
-        return por
+        port = self.__class__(
+            name=self.name,
+            gds_layer=deepcopy(self.gds_layer),
+            midpoint=transformation.apply_to_coord(self.midpoint), 
+            orientation=transformation.apply_to_angle(self.orientation)
+        )
+        return port
 
 
 

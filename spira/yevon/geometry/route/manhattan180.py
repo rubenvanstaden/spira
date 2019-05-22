@@ -4,10 +4,10 @@ from spira.yevon import process as pc
 from spira.yevon.geometry import shapes
 from spira.yevon.geometry.route.route_shaper import RouteSimple
 from spira.yevon.geometry.route.route_shaper import RouteGeneral
-from spira.yevon.utils import scale_coord_up as scu
+from spira.yevon.utils.geometry import scale_coord_up as scu
 from spira.yevon.geometry.route.manhattan import __Manhattan__
 
-from spira.core.descriptor import DataField
+from spira.core.parameters.descriptor import DataField
 from spira.yevon.geometry.vector import *
 from copy import deepcopy
 

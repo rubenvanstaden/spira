@@ -1,10 +1,9 @@
-# from spira.core import param
-from spira.core.param.variables import StringField, IntegerField
+from spira.core.parameters.variables import StringField, IntegerField
 from spira.yevon.layer import LayerField
 from spira.yevon.rdd.technology import ProcessTree
-from spira.core.initializer import FieldInitializer
-from spira.core.descriptor import DataFieldDescriptor, DataField
-from spira.core.param.restrictions import RestrictType
+from spira.core.parameters.initializer import FieldInitializer
+from spira.core.parameters.descriptor import DataFieldDescriptor, DataField
+from spira.core.parameters.restrictions import RestrictType
 
 
 class PurposeLayer(FieldInitializer):

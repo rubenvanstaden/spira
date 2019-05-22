@@ -1,8 +1,10 @@
 from spira.yevon.gdsii.cell import __Cell__
-from spira.core.param.field.typed_list import TypedList
+from spira.core.typed_list import TypedList
 
 
 class CellList(TypedList):
+
+    __item_type__ = __Cell__
 
     def __getitem__(self, key):
         if isinstance(key, str):

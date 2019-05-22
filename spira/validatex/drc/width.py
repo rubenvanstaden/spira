@@ -1,5 +1,4 @@
 import spira.all as spira
-from spira.core import param
 from spira.lrc.rules import __SingleLayerDesignRule__
 from copy import deepcopy
 

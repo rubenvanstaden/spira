@@ -6,15 +6,14 @@ from copy import copy, deepcopy
 from numpy.linalg import norm
 from spira.yevon import utils
 
-from spira.core import param
 from spira.yevon.gdsii.base import __Elemental__
 from spira.yevon.rdd import get_rule_deck
 
-from spira.core.param.variables import *
+from spira.core.parameters.variables import *
 from spira.yevon.layer import LayerField
-from spira.core.descriptor import DataField
+from spira.core.parameters.descriptor import DataField
 from spira.yevon.geometry.coord import CoordField
-from spira.core.descriptor import DataField, FunctionField
+from spira.core.parameters.descriptor import DataField, FunctionField
 from spira.yevon.geometry.ports.base import __HorizontalPort__
 from spira.yevon.gdsii.group import Group
 from spira.yevon.geometry.coord import Coord
@@ -26,14 +25,25 @@ RDD = get_rule_deck()
 class Terminal(__HorizontalPort__):
     """  """
 
+    local_pid = StringField()
+    bbox = BoolField(default=False)
+
     width = NumberField(default=2*1e6)
 
     edgelayer = LayerField(name='Edge', number=63)
     unlocked_layer = LayerField(name='Unlocked', number=100)
     arrowlayer = LayerField(name='Arrow', number=77)
 
-    # edge = DataField(fdef_name='create_edge')
-    # arrow = DataField(fdef_name='create_arrow')
+    edge = DataField(fdef_name='create_edge')
+    arrow = DataField(fdef_name='create_arrow')
+    
+    # def __deepcopy__(self, memo):
+    #     ply = self.modified_copy(
+    #         midpoint=deepcopy(self.midpoint),
+    #         orientation=deepcopy(self.orientation),
+    #         gds_layer=deepcopy(self.gds_layer)
+    #     )
+    #     return ply
 
     def get_length(self):
         if not hasattr(self, '__length__'):
@@ -52,11 +62,21 @@ class Terminal(__HorizontalPort__):
 
     length = FunctionField(get_length, set_length, doc='Set the width of the terminal edge.')
 
+    def get_alias(self):
+        if not hasattr(self, '__alias__'):
+            self.__alias__ = self.gds_layer.name
+        return self.__alias__
+
+    def set_alias(self, value):
+        self.__alias__ = value
+
+    alias = FunctionField(get_alias, set_alias, doc='Functions to generate an alias for cell name.')
+
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
     def __repr__(self):
-        return ("[SPiRA: Terminal] (name {}, locked {}, midpoint {} orientation {} width {})").format(self.name, self.locked, self.midpoint, self.orientation, self.width)
+        return ("[SPiRA: Terminal] (name {}, alias {}, locked {}, midpoint {} orientation {} width {})").format(self.name, self.alias, self.locked, self.midpoint, self.orientation, self.width)
 
     def __str__(self):
         return self.__repr__()
@@ -75,68 +95,53 @@ class Terminal(__HorizontalPort__):
         return (self.midpoint != other.midpoint or (self.orientation != other.orientation)) 
         
     def transform(self, transformation):
-        if transformation is not None:
-            self.midpoint = transformation.apply_to_coord(self.midpoint)
-            self.orientation = transformation.apply_to_angle(self.orientation)
+        self.midpoint = transformation.apply_to_coord(deepcopy(self.midpoint))
+        self.orientation = transformation.apply_to_angle(deepcopy(self.orientation))
         return self
 
-    # def transform_copy(self, transformation):
-    #     if transformation is not None:
-    #         port = self.__class__(
-    #             name=self.name,
-    #             midpoint=transformation.apply_to_coord(deepcopy(self.midpoint)),
-    #             orientation=transformation.apply_to_angle(deepcopy(self.orientation)),
-    #             width=self.width
-    #         )
-    #     else:
-    #         port = self.__class__(
-    #             name=self.name,
-    #             midpoint=deepcopy(self.midpoint),
-    #             orientation=deepcopy(self.orientation),
-    #             width=self.width
-    #         )
-    #     return port
-
     def transform_copy(self, transformation):
-        if transformation is not None:
-            port = Terminal(
-                name=self.name,
-                # midpoint=self.midpoint,
-                midpoint=transformation.apply_to_coord(deepcopy(self.midpoint)),
-                orientation=transformation.apply_to_angle(deepcopy(self.orientation)),
-                width=self.width
-            )
-        else:
-            port = Terminal(
-                name=self.name,
-                midpoint=deepcopy(self.midpoint),
-                orientation=deepcopy(self.orientation),
-                width=self.width
-            )
+        port = Terminal(
+            name=self.name,
+            # alias = self.name + transformation.id_string(),
+            midpoint=transformation.apply_to_coord(deepcopy(self.midpoint)),
+            orientation=transformation.apply_to_angle(deepcopy(self.orientation)),
+            # midpoint=transformation.apply_to_coord(self.midpoint),
+            # orientation=transformation.apply_to_angle(self.orientation),
+            # gds_layer=self.gds_layer,
+            # text_type=self.text_type,
+            locked=deepcopy(self.locked),
+            width=self.width,
+            local_pid=self.local_pid
+        )
         return port
 
-    def commit_to_gdspy(self, cell=None, transformation=None):
+    def commit_to_gdspy(self, cell=None):
         if self.__repr__() not in list(Terminal.__committed__.keys()):
-            # self.edge.commit_to_gdspy(cell=cell, transformation=transformation)
-            # self.arrow.commit_to_gdspy(cell=cell, transformation=transformation)
-            self.label.commit_to_gdspy(cell=cell, transformation=transformation)
-            # self.edge.commit_to_gdspy(cell=cell)
+            self.edge.commit_to_gdspy(cell=cell)
             # self.arrow.commit_to_gdspy(cell=cell)
-            # self.label.commit_to_gdspy(cell=cell)
+            self.label.commit_to_gdspy(cell=cell)
             Terminal.__committed__.update({self.__repr__(): self})
         else:
             p = Terminal.__committed__[self.__repr__()]
-            # p.edge.commit_to_gdspy(cell=cell, transformation=transformation)
+            p.edge.commit_to_gdspy(cell=cell)
             # p.arrow.commit_to_gdspy(cell=cell)
             p.label.commit_to_gdspy(cell=cell)
-            
+
     @property
     def label(self):
+        if self.locked is True:
+            layer = self.gds_layer
+            text_type = self.text_type
+        else:
+            layer = self.unlocked_layer
+            text_type = self.unlocked_layer
         lbl = spira.Label(
             position=self.midpoint,
             text=self.name,
-            gds_layer=self.gds_layer,
-            texttype=self.text_type,
+            # text=self.alias,
+            gds_layer=layer,
+            # texttype=text_type,
+            texttype=33,
             orientation=self.orientation,
             # color=color.COLOR_GHOSTWHITE
         )
@@ -144,17 +149,22 @@ class Terminal(__HorizontalPort__):
         # lbl.move(midpoint=lbl.position, destination=self.midpoint)
         return lbl
 
-    # def create_edge(self):
-    @property
-    def edge(self):
+    def create_edge(self):
+        from spira.yevon.rdd.layer import PhysicalLayer
         from spira.yevon.geometry import shapes
         dx = self.length
         dy = self.width - dx
         rect_shape = shapes.RectangleShape(p1=[0, 0], p2=[dx, dy])
+        # if self.locked is True:
+        #     ply = spira.Polygon(shape=rect_shape, gds_layer=self.edgelayer, enable_edges=False)
+        # else:
+        #     ply = spira.Polygon(shape=rect_shape, gds_layer=self.unlocked_layer, enable_edge=False)
+        ps1 = PhysicalLayer(layer=self.edgelayer)
+        ps2 = PhysicalLayer(layer=self.unlocked_layer)
         if self.locked is True:
-            ply = spira.Polygon(shape=rect_shape, gds_layer=self.edgelayer)
+            ply = spira.Polygon(shape=rect_shape, ps_layer=ps1, enable_edges=False)
         else:
-            ply = spira.Polygon(shape=rect_shape, gds_layer=self.unlocked_layer)
+            ply = spira.Polygon(shape=rect_shape, ps_layer=ps2, enable_edges=False)
         ply.center = (0,0)
         angle = self.orientation
         T = spira.Rotation(rotation=angle)
@@ -163,13 +173,11 @@ class Terminal(__HorizontalPort__):
         # ply.move(midpoint=rect_shape.center_of_mass, destination=self.midpoint)
         return ply
 
-    # def create_arrow(self):
-    @property
-    def arrow(self):
+    def create_arrow(self):
         from spira.yevon.geometry import shapes
         arrow_shape = shapes.ArrowShape(a=self.length, b=self.length/2, c=self.length*2)
-        arrow_shape.apply_merge
-        ply = spira.Polygon(shape=arrow_shape, gds_layer=self.arrowlayer)
+        # arrow_shape.apply_merge
+        ply = spira.Polygon(shape=arrow_shape, gds_layer=self.arrowlayer, enable_edges=False)
         ply.center = (0,0)
         angle = self.orientation - 90
         T = spira.Rotation(rotation=angle)

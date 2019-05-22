@@ -1,10 +1,11 @@
 import gdspy
-import spira.all as spira
 import numpy as np
+import spira.all as spira
+
 from copy import deepcopy
-from spira.yevon.gdsii.base import __Group__
-from spira.yevon.properties.geometry import __GeometryProperties__
+from spira.yevon.gdsii.group import __Group__
 from spira.yevon.geometry.coord import Coord
+from spira.yevon.properties.geometry import __GeometryProperties__
 
 
 class CellProperties(__Group__, __GeometryProperties__):
@@ -28,34 +29,27 @@ class CellProperties(__Group__, __GeometryProperties__):
         self.__gdspy_cell__ = cell.construct_gdspy_tree(glib)
 
     def convert_references(self, c, c2dmap):
-        for e in c.elementals.flat_elems():
         # for e in c.elementals:
+        for e in c.elementals.flat_elems():
             G = c2dmap[c]
             if isinstance(e, spira.SRef):
 
-                if not isinstance(e.midpoint, Coord):
-                    e.midpoint = Coord(e.midpoint[0], e.midpoint[1])
-                    
+                # if not isinstance(e.midpoint, Coord):
+                #     e.midpoint = Coord(e.midpoint[0], e.midpoint[1])
+
                 # FIXME: Has to be removed for layout transformations.
-
-                # if e.transformation is None:
-                #     T = spira.Translation(e.midpoint) 
-                # else:
-                #     T = e.transformation + spira.Translation(e.midpoint)
-                # e.midpoint = T.apply_to_coord(e.midpoint)
-
                 T = e.transformation
-                if T is not None:
-                    e.midpoint = T.apply_to_coord(e.midpoint)
-                
+                # T = e.transformation + spira.Translation(e.midpoint)
+                e.midpoint = T.apply_to_coord(e.midpoint)
+
                 ref = gdspy.CellReference(
                     ref_cell=c2dmap[e.ref],
-                    origin=e.midpoint.to_nparray(),
+                    origin=e.midpoint.to_ndarray(),
                     rotation=e.rotation,
                     magnification=e.magnification,
                     x_reflection=e.reflection
                 )
-                
+
                 # T = e._translation
                 # ref.translate(dx=T[0], dy=T[1])
 

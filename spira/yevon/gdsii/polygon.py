@@ -2,30 +2,47 @@ import gdspy
 import pyclipper
 import hashlib
 import numpy as np
-import spira.all as spira
 
-from spira.core import param
-from spira.yevon import utils
+from spira.core.transforms import stretching
+from spira.yevon.geometry import bbox_info
+from spira.yevon.utils import clipping
 from copy import copy, deepcopy
 from spira.yevon.visualization import color
 from spira.yevon.gdsii.base import __Elemental__
-from spira.yevon import utils
-from spira.yevon.properties.polygon import PolygonProperties
 from spira.yevon.layer import LayerField
-from spira.core.param.variables import *
+from spira.core.parameters.variables import *
 from spira.yevon.geometry.coord import CoordField, Coord
 from spira.yevon.visualization.color import ColorField
-from spira.core.descriptor import DataFieldDescriptor, FunctionField, DataField
+from spira.core.parameters.descriptor import DataFieldDescriptor, FunctionField, DataField
 from spira.yevon.geometry.ports.base import __Port__
 from spira.core.transforms.stretching import *
+from spira.yevon.geometry.shapes import Shape, ShapeField
+from spira.yevon.geometry import shapes
+from spira.yevon.rdd.layer import PhysicalLayerField
+from spira.yevon.gdsii.group import Group
+from spira.yevon.rdd import get_rule_deck
 
 
-__all__ = ['Polygon']
+RDD = get_rule_deck()
+
+
+__all__ = [
+    'Polygon',
+    'Rectangle',
+    'Box',
+    'Circle',
+    'Convex',
+    'Cross',
+    'Wedge',
+    'Parabolic',
+    'PolygonGroup'
+]
 
 
 class __Polygon__(gdspy.PolygonSet, __Elemental__):
 
     __committed__ = {}
+    ps_layer = PhysicalLayerField(default=RDD.PLAYER.COU)
 
     def __eq__(self, other):
         return self.id == other.id
@@ -40,9 +57,13 @@ class __Polygon__(gdspy.PolygonSet, __Elemental__):
         )
 
     def __deepcopy__(self, memo):
+        # print('ports')
+        # print(self.ports)
         ply = self.modified_copy(
             shape=deepcopy(self.shape),
+            # ports=deepcopy(self.ports),
             gds_layer=deepcopy(self.gds_layer),
+            ps_layer=deepcopy(self.ps_layer)
         )
         return ply
 
@@ -61,7 +82,7 @@ class __Polygon__(gdspy.PolygonSet, __Elemental__):
         return self
 
     def __sub__(self, other):
-        points = utils.boolean(
+        points = clipping.boolean(
             subj=self.shape.points,
             clip=other.shape.points,
             method='not'
@@ -69,9 +90,9 @@ class __Polygon__(gdspy.PolygonSet, __Elemental__):
         return points
 
     def __and__(self, other):
-        pp = utils.boolean(
-            subj=other.shape.points,
-            clip=self.shape.points,
+        pp = clipping.boolean(
+            subj=[other.shape.points],
+            clip=[self.shape.points],
             method='and'
         )
         if len(pp) > 0:
@@ -80,7 +101,7 @@ class __Polygon__(gdspy.PolygonSet, __Elemental__):
             return None
 
     def __or__(self, other):
-        pp = utils.boolean(
+        pp = clipping.boolean(
             subj=other.shape.points,
             clip=self.shape.points,
             method='or'
@@ -109,25 +130,34 @@ class PolygonAbstract(__Polygon__):
 
     name = StringField()
     gds_layer = LayerField()
-    direction = IntegerField(default=0)
 
     @property
     def count(self):
-        # FIXME: For multiple polygons
-        return np.size(self.shape.points[0], 0)
+        return np.size(self.shape.points, 0)
 
     @property
-    def layer(self):
-        return self.gds_layer.layer
+    def layer_number(self):
+        # return self.gds_layer.layer
+        return self.ps_layer.layer.number
 
     @property
-    def datatype(self):
-        return self.gds_layer.datatype
+    def layer_datatype(self):
+        # return self.gds_layer.datatype
+        return self.ps_layer.layer.datatype
+
+    @property
+    def bbox_info(self):
+        return self.shape.bbox_info.transform_copy(self.transformation)
+
+    @property
+    def hash_polygon(self):
+        pts = np.array([self.shape.points])
+        polygon_hashes = np.sort([hashlib.sha1(p).digest() for p in pts])
+        return polygon_hashes
 
     def encloses(self, point):
-        for points in self.points:
-            if pyclipper.PointInPolygon(point, points) == 0:
-                return False
+        if pyclipper.PointInPolygon(point, self.points) == 0:
+            return False
         return True
 
     def flat_copy(self, level=-1):
@@ -138,71 +168,46 @@ class PolygonAbstract(__Polygon__):
         E.transform_copy(self.transformation)
         return E
 
-    # def fillet(self, radius, angle_resolution=128, precision=0.001*1e6):
-    #     super().fillet(radius=radius, points_per_2pi=angle_resolution, precision=precision)
-    #     self.shape.points = self.polygons
-    #     return self
-
-    # def stretch(self, sx, sy=None, center=(0,0)):
-    #     super().scale(scalex=sx, scaley=sy, center=center)
-    #     self.shape.points = self.polygons
-    #     return self
+    def fillet(self, radius, angle_resolution=128, precision=0.001*1e6):
+        super().fillet(radius=radius, points_per_2pi=angle_resolution, precision=precision)
+        self.shape.points = self.polygons
+        return self
 
     def stretch(self, factor=(1,1), center=(0,0)):
         self = scale_elemental(self, scaling=factor, scale_center=center)
         return self
 
+    def stretch_port(self, port, destination):
+        """ The elemental by moving the subject port, without distorting the entire elemental. 
+        Note: The opposite port position is used as the stretching center."""
+        opposite_port = bbox_info.get_opposite_boundary_port(self, port)
+        return stretching.stretch_elemental_by_port(self, opposite_port, port, destination)
+
     def transform_copy(self, transformation):
-        if transformation is not None:
-            new_shape = deepcopy(self.shape)
-            new_shape = new_shape.transform(transformation)
-            poly = self.__class__(
-                name=self.name,
-                # shape.points=transformation.apply_to_array(self.shape.points)
-                shape=new_shape
-            )
-        else:
-            poly = self.__class__(
-                name=self.name,
-                shape=deepcopy(self.shape),
-            )
+        new_shape = deepcopy(self.shape)
+        new_shape = new_shape.transform(transformation)
+        new_ports = deepcopy(self.ports)
+        new_ports = new_ports.transform(transformation)
+        poly = self.__class__(
+            name=self.name,
+            shape=new_shape,
+            ports=new_ports,
+            gds_layer=deepcopy(self.gds_layer),
+            ps_layer=deepcopy(self.ps_layer)
+        )
         return poly
 
-    def transform(self, transformation):
-        if transformation is not None:
-            self.shape.points = transformation.apply_to_array(self.shape.points)
-            # self.shape.points = np.array([self.shape.points])
-        # self.alias = self.__repr__() + transformation.id_string()
-        # print(self.alias)
-        return self
+    def id_string(self):
+        return self.__repr__()
 
-    def merge(self):
-        sc = 2**30
-        polygons = pyclipper.scale_to_clipper(self.points, sc)
-        points = []
-        for poly in polygons:
-            if pyclipper.Orientation(poly) is False:
-                reverse_poly = pyclipper.ReversePath(poly)
-                solution = pyclipper.SimplifyPolygon(reverse_poly)
-            else:
-                solution = pyclipper.SimplifyPolygon(poly)
-            for sol in solution:
-                points.append(sol)
-        value = boolean(subj=points, method='or')
-        PTS = []
-        mc = pyclipper.scale_from_clipper(value, sc)
-        for pts in pyclipper.SimplifyPolygons(mc):
-            PTS.append(np.array(pts))
-        self.shape.points = np.array(pyclipper.CleanPolygons(PTS))
-        self.polygons = self.shape.points
+    def transform(self, transformation):
+        self.ports.transform(transformation)
+        self.shape.points = transformation.apply_to_array(self.shape.points)
+        # self.alias = self.alias + transformation.id_string()
         return self
 
     def fast_boolean(self, other, operation):
-        mm = gdspy.fast_boolean(
-            self.shape.points,
-            other.shape.points,
-            operation=operation
-        )
+        mm = gdspy.fast_boolean(self.points, other.points, operation=operation)
         return Polygon(shape=mm.points, gds_layer=self.gds_layer)
 
 
@@ -217,9 +222,11 @@ class Polygon(PolygonAbstract):
     >>> ply = spira.Polygon(shape=rect_shape, gds_layer=layer)
     """
 
-    color = ColorField(default=color.COLOR_BLUE_VIOLET)
+    # _ID = 0
 
-    _ID = 0
+    shape = ShapeField()
+    enable_edges = BoolField(default=True)
+    color = ColorField(default=color.COLOR_BLUE_VIOLET)
 
     def get_alias(self):
         if not hasattr(self, '__alias__'):
@@ -227,21 +234,12 @@ class Polygon(PolygonAbstract):
         return self.__alias__
 
     def set_alias(self, value):
-        self.__alias__ = value
+        if value is not None:
+            self.__alias__ = value
 
     alias = FunctionField(get_alias, set_alias, doc='Functions to generate an alias for cell name.')
 
-    def __init__(self, shape, **kwargs):
-        from spira.yevon.geometry.shapes.shape import __Shape__
-        from spira.yevon.geometry.shapes.shape import Shape
-
-        if issubclass(type(shape), __Shape__):
-            self.shape = shape
-        elif isinstance(shape, (list, set, np.ndarray)):
-            self.shape = Shape(points=shape)
-        else:
-            raise ValueError('Shape type not supported!')
-
+    def __init__(self, **kwargs):
         __Elemental__.__init__(self, **kwargs)
         gdspy.PolygonSet.__init__(self,
             polygons=self.shape.points,
@@ -249,8 +247,7 @@ class Polygon(PolygonAbstract):
             datatype=self.gds_layer.datatype,
             verbose=False
         )
-
-        Polygon._ID += 1
+        # Polygon._ID += 1
 
     # def __repr__(self):
     #     if self is None:
@@ -263,11 +260,17 @@ class Polygon(PolygonAbstract):
     def __repr__(self):
         if self is None:
             return 'Polygon is None!'
-        polygon_hashes = np.sort([hashlib.sha1(p).digest() for p in self.shape.points])
-        return ("[SPiRA: Polygon {}] ({} center, {} area " +
-                "{} vertices, layer {}, datatype {}, hash {})").format(Polygon._ID,
-                self.shape.center_of_mass, self.ply_area, sum([len(p) for p in self.shape.points]),
-                self.gds_layer.number, self.gds_layer.datatype, polygon_hashes)
+        return ("[SPiRA: Polygon {} {}] ({} center, {} area {} vertices, layer {}, datatype {}, hash {})").format(
+            self.alias,
+            # Polygon._ID,
+            0,
+            self.bbox_info.center, 
+            self.ply_area, 
+            sum([len(p) for p in self.shape.points]),
+            self.layer_number,
+            self.layer_datatype, 
+            self.hash_polygon
+        )
 
     def __str__(self):
         return self.__repr__()
@@ -276,12 +279,6 @@ class Polygon(PolygonAbstract):
     #     self.transform(self.transformation)
     #     # self.transformation = None
     #     return self
-
-    def __translate__(self, dx, dy):
-        self.polygons = self.shape.points
-        tt = super().translate(dx=dx, dy=dy)
-        self.shape.points = self.polygons
-        return self
 
     def move_new(self, position):
         p = np.array([position[0], position[1]])
@@ -322,49 +319,39 @@ class Polygon(PolygonAbstract):
 
         return self
 
-    @property
-    def ply_bbox(self):
-        # self.polygons = np.array(self.shape.points)
-        bb = self.get_bounding_box()
-        return bb
-        # return self.get_bounding_box()
+    def convert_to_gdspy(self):
+        # TODO: Apply transformations here!
+        return gdspy.Polygon(
+            points=self.points, 
+            layer=self.layer_number, 
+            datatype=self.layer_datatype, 
+            verbose=False
+        )
+        # new_poly = deepcopy(self)
+        # # new_poly = self
+        # pts = np.array([new_poly.points])
+        # P = gdspy.PolygonSet(
+        #     # polygons=deepcopy(new_poly.shape.points),
+        #     # polygons=new_poly.shape.points,
+        #     polygons=pts,
+        #     layer=new_poly.layer_number,
+        #     datatype=new_poly.layer_datatype,
+        #     verbose=False
+        # )
+        # return P
 
-    @property
-    def ply_center(self):
-
-        self.polygons = self.shape.points
-        ply = deepcopy(self.polygons)
-        bb = np.array(((min(pts[:, 0].min() for pts in ply),
-                        min(pts[:, 1].min() for pts in ply)),
-                       (max(pts[:, 0].max() for pts in ply),
-                        max(pts[:, 1].max() for pts in ply))))
-        pp = np.sum(bb, 0)/2
-        return pp
-
-        # print(self.shape.points)
-        # return self.shape.center_of_mass
-        # pts = self.ply_bbox
-        # c = np.mean(pts, 0)
-        # return [c[0], c[1]]
-        # return np.sum(self.ply_bbox, 0)/2
-
-    def commit_to_gdspy(self, cell=None, transformation=None):
+    def commit_to_gdspy(self, cell=None):
         # if self.__repr__() not in list(PolygonAbstract.__committed__.keys()):
         if self.node_id not in list(Polygon.__committed__.keys()):
-
-            # if transformation is not None:
-            #     # self.transform(transformation)
-            #     Dp = deepcopy(self)
-            #     new_poly = Dp.transform(transformation)
-            # else:
-            #     new_poly = deepcopy(self)
-
             new_poly = deepcopy(self)
-
+            # new_poly = self
+            pts = np.array([new_poly.points])
             P = gdspy.PolygonSet(
-                polygons=deepcopy(new_poly.shape.points),
-                layer=new_poly.gds_layer.number,
-                datatype=new_poly.gds_layer.datatype,
+                # polygons=deepcopy(new_poly.shape.points),
+                # polygons=new_poly.shape.points,
+                polygons=pts,
+                layer=new_poly.layer_number,
+                datatype=new_poly.layer_datatype,
                 verbose=False
             )
             # PolygonAbstract.__committed__.update({self.__repr__():P})
@@ -372,12 +359,132 @@ class Polygon(PolygonAbstract):
         else:
             # P = PolygonAbstract.__committed__[self.__repr__()]
             P = Polygon.__committed__[self.node_id]
+
         if cell is not None:
             cell.add(P)
+
+        # if not self.disable_edge_ports:
+        #     for p in self.ports:
+        #         p.commit_to_gdspy(cell=cell)
+
+        # return cell
+
+        # FIXME: Returns the polygon so as to 
+        # apply gdspy operations on it.
         return P
 
 
-Polygon.mixin(PolygonProperties)
+class PolygonGroup(Group, Polygon):
+    """ Collection of polygon elementals. Boolean
+    operation can be applied on these polygons.
+
+    Example
+    -------
+    >>> cp = spira.PolygonCollection()
+    """
+
+    def create_elementals(self, elems):
+
+        return elems
 
 
+def Rectangle(ps_layer, p1=(0,0), p2=(2,2), center=(0,0), alias=None):
+    """ Creates a rectangular shape that can be used in 
+    GDSII format as a polygon object.
+
+    Example
+    -------
+    >>> p = spira.Rectangle(p1=(0,0), p2=(10,0), ps_layer=RDD.PLAYER.M6)
+    >>> [SPiRA: Rectangle] ()
+    """
+    shape = shapes.RectangleShape(p1=p1, p2=p2)
+    return Polygon(alias=alias, shape=shape, ps_layer=ps_layer)
+
+
+def Box(ps_layer, width=1, height=1, center=(0,0), alias=None):
+    """ Creates a box shape that can be used in 
+    GDSII format as a polygon object.
+
+    Example
+    -------
+    >>> p = spira.Box(p1=(0,0), p2=(10,0), ps_layer=RDD.PLAYER.M6)
+    >>> [SPiRA: Rectangle] ()
+    """
+    shape = shapes.BoxShape(width=width, height=height)
+    return Polygon(alias=alias, shape=shape, ps_layer=ps_layer)
+
+
+def Circle(ps_layer, box_size=(1,1), angle_step=1, center=(0,0), alias=None):
+    """ Creates a circle shape that can be used in 
+    GDSII format as a polygon object.
+
+    Example
+    -------
+    >>> p = spira.Circle(p1=(0,0), p2=(10,0), ps_layer=RDD.PLAYER.M6)
+    >>> [SPiRA: Rectangle] ()
+    """
+    shape = shapes.CircleShape(box_size=box_size, angle_step=angle_step)
+    return Polygon(alias=alias, shape=shape, ps_layer=ps_layer)
+
+
+def Convex(ps_layer, radius=1.0*1e6, num_sides=6, center=(0,0), alias=None):
+    """ Creates a circle shape that can be used in 
+    GDSII format as a polygon object.
+
+    Example
+    -------
+    >>> p = spira.Circle(p1=(0,0), p2=(10,0), ps_layer=RDD.PLAYER.M6)
+    >>> [SPiRA: Rectangle] ()
+    """
+    shape = shapes.ConvexShape(radius=radius, num_sides=num_sides)
+    return Polygon(alias=alias, shape=shape, ps_layer=ps_layer)
+
+
+def Cross(ps_layer, box_size=20*1e6, thickness=5*1e6, center=(0,0), alias=None):
+    """ Creates a circle shape that can be used in 
+    GDSII format as a polygon object.
+
+    Example
+    -------
+    >>> p = spira.Circle(p1=(0,0), p2=(10,0), ps_layer=RDD.PLAYER.M6)
+    >>> [SPiRA: Rectangle] ()
+    """
+    shape = shapes.CrossShape(box_size=box_size, thickness=thickness)
+    return Polygon(alias=alias, shape=shape, ps_layer=ps_layer)
+
+
+def Wedge(ps_layer, begin_coord=(0,0), end_coord=(10*1e6,0), begin_width=3*1e6, end_width=1*1e6, center=(0,0), alias=None):
+    """ Creates a circle shape that can be used in 
+    GDSII format as a polygon object.
+
+    Example
+    -------
+    >>> p = spira.Circle(p1=(0,0), p2=(10,0), ps_layer=RDD.PLAYER.M6)
+    >>> [SPiRA: Rectangle] ()
+    """
+    shape = shapes.WedgeShape(
+        begin_coord=begin_coord, 
+        end_coord=end_coord, 
+        begin_width=begin_width, 
+        end_width=end_width
+    )
+    return Polygon(alias=alias, shape=shape, ps_layer=ps_layer)
+
+
+def Parabolic(ps_layer, begin_coord=(0,0), end_coord=(10*1e6,0), begin_width=3*1e6, end_width=1*1e6, center=(0,0), alias=None):
+    """ Creates a circle shape that can be used in 
+    GDSII format as a polygon object.
+
+    Example
+    -------
+    >>> p = spira.Circle(p1=(0,0), p2=(10,0), ps_layer=RDD.PLAYER.M6)
+    >>> [SPiRA: Rectangle] ()
+    """
+    shape = shapes.ParabolicShape(
+        begin_coord=begin_coord, 
+        end_coord=end_coord, 
+        begin_width=begin_width, 
+        end_width=end_width
+    )
+    return Polygon(alias=alias, shape=shape, ps_layer=ps_layer)
 

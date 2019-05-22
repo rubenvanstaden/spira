@@ -1,48 +1,40 @@
-import pyclipper
 import gdspy
+import pyclipper
 import numpy as np
-from spira.core import param
-from spira.yevon.utils import *
 from copy import copy, deepcopy
-from spira.core.initializer import FieldInitializer
 from numpy.linalg import norm
 
+from spira.yevon.utils import *
+from spira.yevon import constants
+# from spira.yevon.geometry.bbox_info import *
+from spira.yevon.geometry import bbox_info
+from spira.core.parameters.variables import *
+from spira.yevon.geometry.ports.port_list import PortList
 from spira.yevon.geometry.coord import CoordField, Coord
-from spira.core.param.variables import *
-from spira.core.descriptor import DataFieldDescriptor, DataField
+from spira.core.parameters.initializer import FieldInitializer
+from spira.core.parameters.processors import ProcessorTypeCast
+from spira.core.parameters.descriptor import DataFieldDescriptor, DataField
 
 
-__all__ = ['Shape', 'ShapeField', 'PointArrayField']
+__all__ = ['Shape', 'ShapeField', 'PointArrayField', 'shape_edge_ports']
 
 
 class PointArrayField(DataFieldDescriptor):
-
-    __type__ = np.array([])
+    """  """
 
     def call_param_function(self, obj):
         f = self.get_param_function(obj)
         value = f([])
         if value is None:
-            value = self.__operations__([])
+            value = self.__process__([])
         else:
-            # value = self.__operations__(value)
-            value = self.__operations__([c.to_nparray() if isinstance(c, Coord) else c for c in value]) 
-        obj.__store__[self.__name__] = value
-        return value 
-        # if (value is None):
-        #     value = self.__process__([])
-        # else:
-        #     value = self.__process__([c.to_nparray() if isinstance(c, Coord) else c for c in value])
-        # return value 
+            value = self.__process__([c.to_ndarray() if isinstance(c, Coord) else c for c in value])
+        self.__cache_parameter_value__(obj, value)
+        return value
 
-    def __operations__(self, points):
-        return points
-
-    # def __process__(self, points):
-    def __operations__(self, points):
-        from spira.yevon.geometry.shapes.shape import Shape
+    def __process__(self, points):
         if isinstance(points, Shape):
-            return array(points.points)
+            return np.array(points.points)
         elif isinstance(points, (list, np.ndarray)):
             if len(points):
                 element = points[0]
@@ -53,19 +45,17 @@ class PointArrayField(DataFieldDescriptor):
                 return points_as_array
             else:
                 return np.ndarray((0, 2))
-        # elif isinstance(points, Coord2):
-        #     return array([[points.x, points.y]])
-        # elif isinstance(points, tuple):
-        #     return array([[points[0], points[1]]])
+        elif isinstance(points, Coord):
+            return np.array([[points.x, points.y]])
+        elif isinstance(points, tuple):
+            return np.array([[points[0], points[1]]])
         else:
-            raise TypeError("Invalid type of points in setting value of PointsDefinitionProperty: " + str(type(points))) 
+            raise TypeError("Invalid type of points in setting " +
+                "value of PointsDefinitionProperty: " + str(type(points)))
 
     def __set__(self, obj, points):
-        obj.__store__[self.__name__] = points
-        
-    # def __deepcopy__(self, memo):
-    #     from copy import deepcopy
-    #     return deepcopy(obj)
+        points = self.__process__(points)
+        self.__externally_set_parameter_value__(obj, points)
 
 
 class __Shape__(FieldInitializer):
@@ -73,111 +63,43 @@ class __Shape__(FieldInitializer):
     center = CoordField()
     clockwise = BoolField(default=False)
     points = PointArrayField(fdef_name='create_points')
-    apply_merge = DataField(fdef_name='create_merged_points')
-    simplify = DataField(fdef_name='create_simplified_points')
-    edges = DataField(fdef_name='create_edge_lines')
 
     def __init__(self, **kwargs):
+    # def __init__(self, points=None, **kwargs):
+        # if (points is not None):
+        #     if (isinstance(points, list) or isinstance(points, np.ndarray) or isinstance(points, Shape) or isinstance(points, tuple)):
+        #         if (len(points) > 0):
+        #             kwargs["points"] = point
         super().__init__(**kwargs)
 
     def create_points(self, points):
         return points
 
-    # def create_merged_points(self):
-    #     """  """
-    #     from spira.yevon.utils import scale_polygon_up as spu
-    #     from spira.yevon.utils import scale_polygon_down as spd
-    #     polygons = spd(self.points, value=1e-0)
-    #     points = []
-    #     for poly in polygons:
-    #         if pyclipper.Orientation(poly) is False:
-    #             reverse_poly = pyclipper.ReversePath(poly)
-    #             solution = pyclipper.SimplifyPolygon(reverse_poly)
-    #         else:
-    #             solution = pyclipper.SimplifyPolygon(poly)
-    #         for sol in solution:
-    #             points.append(sol)
-    #     self.points = boolean(subj=points, method='or')
-    #     self.points = spu(self.points, value=1e0)
-    #     return self
+    def is_closed(self):
+        return True
 
-    def create_merged_points(self):
-        """  """
-        from spira.yevon.utils import scale_polygon_up as spu
-        from spira.yevon.utils import scale_polygon_down as spd
-        sc = 2**30
-        polygons = pyclipper.scale_to_clipper(self.points, sc)
-        points = []
-        for poly in polygons:
-            if pyclipper.Orientation(poly) is False:
-                reverse_poly = pyclipper.ReversePath(poly)
-                solution = pyclipper.SimplifyPolygon(reverse_poly)
-            else:
-                solution = pyclipper.SimplifyPolygon(poly)
-            for sol in solution:
-                points.append(sol)
-        value = boolean(subj=points, method='or')
-        PTS = []
-        mc = pyclipper.scale_from_clipper(value, sc)
-        for pts in pyclipper.SimplifyPolygons(mc):
-            PTS.append(np.array(pts))
-        cln_pts = pyclipper.CleanPolygons(PTS)
-        self.points = np.array([np.array(p) for p in cln_pts])
-        return self
+    @property
+    def x_coords(self):
+        """ Returns the x coordinates """
+        return self.points[:, 0]
 
-    def create_simplified_points(self):
-        """  """
-        from shapely.geometry import Polygon as ShapelyPolygon
-        value = 1
-        polygons = self.points
-        self.points = []
-        for points in polygons:
-            factor = (len(points)/100) * 1e5 * value
-            sp = ShapelyPolygon(points).simplify(factor)
-            pp = [[p[0], p[1]] for p in sp.exterior.coords]
-            self.points.append(pp)
-        return self
+    @property
+    def y_coords(self):
+        """ Returns the y coordinates """
+        return self.points[:, 1]
 
-    def reflect(self, p1=(0,1), p2=(0,0)):
-        """ Reflect across a line. """
-        points = np.array(self.points[0])
-        p1 = np.array(p1)
-        p2 = np.array(p2)
-        if np.asarray(points).ndim == 1:
-            t = np.dot((p2-p1), (points-p1))/norm(p2-p1)**2
-            pts = 2*(p1 + (p2-p1)*t) - points
-        if np.asarray(points).ndim == 2:
-            pts = np.array([0, 0])
-            for p in points:
-                t = np.dot((p2-p1), (p-p1))/norm(p2-p1)**2
-                r = np.array(2*(p1 + (p2-p1)*t) - p)
-                pts = np.vstack((pts, r))
-        self.points = [pts]
-        return self
-
-    def rotate(self, angle=45, center=(0,0)):
-        """ Rotate points with an angle around a center. """
-        points = np.array(self.points[0])
-        angle = angle*np.pi/180
-        ca = np.cos(angle)
-        sa = np.sin(angle)
-        sa = np.array((-sa, sa))
-        c0 = np.array(center)
-        if np.asarray(points).ndim == 2:
-            pts = (points - c0) * ca + (points - c0)[:,::-1] * sa + c0
-            pts = np.round(pts, 6)
-        if np.asarray(points).ndim == 1:
-            pts = (points - c0) * ca + (points - c0)[::-1] * sa + c0
-            pts = np.round(pts, 6)
-        self.points = [pts]
-        return self
+    @property
+    def center_of_mass(self):
+        """ Get the center of mass of the shape.
+        Note: This is not the same as the bounding box center."""
+        c = np.mean(self.points, 0)
+        return [c[0], c[1]]
 
     @property
     def orientation(self):
-        """ Returns the orientation of the shape:
-        +1(counterclock) or -1(clock) """
-        # FIXME: Error with multiple shapes: [[[s1], [s2]]]
-        pts = self.points[0]
+        """ Returns the orientation of the shape.
+        Counterclockwise returns +1 and clockwise returns -1. """
+        pts = self.points
         T = np.roll(np.roll(pts, 1, 1), 1, 0)
         return -np.sign(sum(np.diff(pts * T, 1, 1)))
 
@@ -194,11 +116,20 @@ class __Shape__(FieldInitializer):
         return self.__len__()
 
     @property
-    def center_of_mass(self):
-        """ Get the center of mass of the shape. 
-        Note, this is not the same as the bounding box center."""
-        c = np.mean(self.points[0], 0)
-        return [c[0], c[1]]
+    def bbox_info(self):
+        return bbox_info.bbox_info_from_numpy_array(self.points)
+
+    def segments(self):
+        """ Returns a list of point pairs 
+        with the segments of the shape. """
+        p = self.points
+        if len(p) < 2:
+            return []
+        if self.is_closed():
+            segments = zip(p, roll(p, 1, 0))
+        else:
+            segments = zip(p[:-1], p[1:])
+        return segments
 
     def move(self, pos):
         p = np.array([pos[0], pos[1]])
@@ -208,6 +139,9 @@ class __Shape__(FieldInitializer):
     def transform(self, transformation):
         self.points = transformation.apply_to_array(self.points)
         return self
+
+    def id_string(self):
+        return self.__str__()
 
 
 class Shape(__Shape__):
@@ -227,14 +161,31 @@ class Shape(__Shape__):
         if points is not None:
             self.points = points
 
+    def __repr__(self):
+        return "[SPiRA: Shape] (points {})".format(self.center_of_mass)
+        # return "[SPiRA: Shape] (points {})".format(self.points)
+        # """ string representation """
+        # L = ["Shape ["]
+        # L += [("(%d, %d)" % (c[0], c[1])) for c in self.points[0]]
+        # L += ["]"]
+        # return "".join(L)
+
+    def __str__(self):
+        return self.__repr__()
+
     def __deepcopy__(self, memo):
         shape = self.modified_copy(
-            points = deepcopy(self.points)
+            points=deepcopy(self.points)
         )
         return shape
 
+    def __getitem__(self, index):
+        """ Access a point. """
+        p = self.points[index]
+        return Coord(p[0], p[1])
+
     def __contains__(self, point):
-        """ Checks if point is on the shape. """
+        """ Checks if point is in the shape. """
         return np.prod(sum(self.points == np.array(point[0], point[1]), 0))
 
     def __eq__(self, other):
@@ -245,17 +196,60 @@ class Shape(__Shape__):
         return not self.__eq__(other)
 
     def __len__(self):
-        pass
+        """ Number of points in the shape """
+        return size(self.points, 0)
 
 
-def ShapeField(points=[], doc='', **kwargs):
+def ShapeField(points=[], doc='', restriction=None, preprocess=None, **kwargs):
     from spira.yevon.geometry.shapes.shape import Shape
     if 'default' not in kwargs:
         kwargs['default'] = Shape(points, doc=doc)
-    R = RestrictType(Shape)
-    return DataFieldDescriptor(restrictions=R, **kwargs)
+    R = RestrictType(Shape) & restriction
+    P = ProcessorTypeCast(Shape) + preprocess
+    return DataFieldDescriptor(restrictions=R, preprocess=P, **kwargs)
 
 
+from spira.yevon.layer import Layer
+from spira.yevon.geometry.ports.terminal import EdgeTerminal
+def shape_edge_ports(shape, layer, local_pid):
+
+    xpts = list(shape.x_coords)
+    ypts = list(shape.y_coords)
+
+    n = len(xpts)
+    xpts.append(xpts[0])
+    ypts.append(ypts[0]) 
+
+    clockwise = 0
+    for i in range(0, n):
+        clockwise += ((xpts[i+1] - xpts[i]) * (ypts[i+1] + ypts[i]))
+
+    if layer.name == 'BBOX': bbox = True
+    else: bbox = False
+
+    edges = PortList()
+    for i in range(0, n):
+        name = '{}_e{}'.format(layer.name, i)
+        x = np.sign(clockwise) * (xpts[i+1] - xpts[i])
+        y = np.sign(clockwise) * (ypts[i] - ypts[i+1])
+        orientation = (np.arctan2(x, y) * constants.RAD2DEG)
+        midpoint = [(xpts[i+1] + xpts[i])/2, (ypts[i+1] + ypts[i])/2]
+        width = np.abs(np.sqrt((xpts[i+1] - xpts[i])**2 + (ypts[i+1]-ypts[i])**2))
+        P = EdgeTerminal(
+            name=name,
+            # gds_layer=self.layer,
+            bbox=bbox,
+            gds_layer=layer,
+            midpoint=midpoint,
+            orientation=orientation,
+            width=width,
+            length=0.5*1e6,
+            edgelayer=Layer(number=70),
+            arrowlayer=Layer(number=78),
+            local_pid=local_pid
+        )
+        edges += P
+    return edges
 
 
 

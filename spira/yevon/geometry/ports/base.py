@@ -6,15 +6,14 @@ from copy import copy, deepcopy
 from numpy.linalg import norm
 from spira.yevon import utils
 
-from spira.core import param
 from spira.yevon.visualization import color
 from spira.yevon.gdsii.base import __Elemental__
 from spira.yevon.rdd import get_rule_deck
 
-from spira.core.param.variables import *
+from spira.core.parameters.variables import *
 from spira.yevon.visualization.color import ColorField
 from spira.yevon.layer import LayerField
-from spira.core.descriptor import DataField
+from spira.core.parameters.descriptor import DataField
 from spira.yevon.geometry.coord import CoordField, Coord
 from spira.yevon.rdd.layer import PhysicalLayerField
 from spira.yevon.geometry.vector import Vector
@@ -42,28 +41,16 @@ class __Port__(__Elemental__):
         E.transform_copy(self.transformation)
         return E
 
-    def encloses(self, polygon):
-        return pyclipper.PointInPolygon(self.midpoint, polygon) != 0
+    def encloses(self, points):
+        return pyclipper.PointInPolygon(self.midpoint, points) != 0
 
     def transform(self, transformation):
-        if transformation is not None:
-            self.midpoint = transformation.apply_to_coord(self.midpoint)
+        self.midpoint = transformation.apply_to_coord(self.midpoint)
         return self
 
     def move(self, coordinate):
         self.midpoint.move(coordinate)
         return self
-
-    # def __translate__(self, dx, dy):
-    #     """ Translate port by dx and dy. """
-    #     self.midpoint = self.midpoint + np.array([dx, dy])
-    #     return self
-
-    # def move(self, midpoint=(0,0), destination=None, axis=None):
-    #     d, o = utils.move_algorithm(obj=self, midpoint=midpoint, destination=destination, axis=axis)
-    #     dx, dy = np.array(d) - o
-    #     self.__translate__(dx, dy)
-    #     return self
 
     def distance(self, other):
         return norm(np.array(self.midpoint) - np.array(other.midpoint))
@@ -122,3 +109,5 @@ class __HorizontalPort__(Vector, __PhysicalPort__):
 def PortField(midpoint=[0, 0], **kwargs):
     R = RestrictType(__Port__)
     return DataFieldDescriptor(restrictions=R, **kwargs)
+
+

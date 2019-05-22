@@ -3,18 +3,16 @@ import gdspy
 import numpy as np
 import networkx as nx
 from copy import deepcopy
-from spira.core import param
-from spira.netex.mesh import Mesh
-from spira.netex.geometry import Geometry
 from spira.yevon.rdd import get_rule_deck
 from spira.yevon.gdsii.cell import Cell
 
 from spira.yevon.rdd.layer import PhysicalLayerField
 from spira.yevon.layer import LayerField
-from spira.core.param.variables import *
-from spira.core.descriptor import DataField
-from spira.core.elem_list import ElementalListField
+from spira.core.parameters.variables import *
+from spira.core.parameters.descriptor import DataField
+from spira.yevon.gdsii.elem_list import ElementalListField
 from spira.yevon import constants
+from spira.yevon.geometry.shapes.shape import ShapeField
 
 
 __all__ = ['ProcessLayer']
@@ -27,23 +25,16 @@ class __ProcessLayer__(Cell):
 
     doc = StringField()
     layer = DataField(fdef_name='create_layer')
-    points = DataField(fdef_name='create_points')
-    polygon = DataField(fdef_name='create_polygon')
+    shape = ShapeField()
 
     def create_layer(self):
         return None
 
-    def create_points(self):
-        return self.elementals[0].shape.points
-
-    def create_polygon(self):
-        return self.elementals[0]
-
-    def commit_to_gdspy(self, cell=None, transformation=None):
+    def commit_to_gdspy(self, cell=None):
         for e in self.elementals:
-            e.commit_to_gdspy(cell=cell, transformation=transformation)
-        # for p in self.ports:
-        #     p.commit_to_gdspy(cell=cell, transformation=transformation)
+            e.commit_to_gdspy(cell=cell)
+        for p in self.ports:
+            p.commit_to_gdspy(cell=cell)
         return cell
 
 
@@ -92,11 +83,18 @@ class __PortConstructor__(__ProcessLayer__):
 
     def create_edge_ports(self, edges):
 
-        PTS = []
-        for pts in self.points:
-            PTS.append(np.array(pts))
-        xpts = list(PTS[0][:, 0])
-        ypts = list(PTS[0][:, 1])
+        # PTS = []
+        # for pts in self.points:
+        #     PTS.append(np.array(pts))
+        # xpts = list(PTS[0][:, 0])
+        # ypts = list(PTS[0][:, 1])
+
+        # PTS = np.array(self.points)
+        # xpts = list(PTS[:, 0])
+        # ypts = list(PTS[:, 1])
+
+        xpts = list(self.shape.x_coords)
+        ypts = list(self.shape.y_coords)
 
         n = len(xpts)
         xpts.append(xpts[0])

@@ -19,8 +19,8 @@ from spira.yevon.gdsii import *
 from spira.yevon.visualization import *
 from spira.yevon.rdd.layer import *
 
-from spira.netex import *
-from spira.netex.pcell import *
+from spira.yevon.netlist import *
+# from spira.yevon.net import *
 # from spira.netex.devices import *
 # from spira.netex.circuits import *
 

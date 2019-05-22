@@ -1,8 +1,8 @@
 import numpy as np
-from spira.yevon.properties.base import __Properties__
+from spira.yevon.properties.base import __Property__
 
 
-class __GeometryProperties__(__Properties__):
+class __GeometryProperties__(__Property__):
 
     @property
     def xmax(self):
@@ -36,7 +36,7 @@ class __GeometryProperties__(__Properties__):
 
     @property
     def center(self):
-        return np.sum(self.bbox, 0)/2
+        return self.bbox_info.center
 
     @center.setter
     def center(self, destination):

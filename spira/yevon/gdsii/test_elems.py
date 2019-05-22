@@ -1,7 +1,6 @@
 import spira.all as spira
 import pytest
 import numpy as np
-from spira.core import param
 from spira import shapes
 from spira.yevon.rdd.layer import PurposeLayer
 
