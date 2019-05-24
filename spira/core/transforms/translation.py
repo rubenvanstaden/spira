@@ -1,4 +1,5 @@
 import spira.all as spira
+from copy import deepcopy
 from spira.core.transformable import Transformable
 from spira.yevon.geometry.coord import Coord
 from spira.core.transforms.generic import __ConvertableTransform__, GenericTransform
@@ -26,7 +27,7 @@ class Translation(__ConvertableTransform__):
     def __add__(self, other):
         """ Returns the concatenation of this transform and other """
         if other is None:
-            return copy.deepcopy(self)
+            return deepcopy(self)
         if isinstance(other, Translation):
             return Translation(Coord(self.translation.x + other.translation.x, self.translation[1] + other.translation[1]))
         else:

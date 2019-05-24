@@ -14,7 +14,8 @@ __all__ = [
     'bbox_info_from_point_list',
     'bbox_info_from_numpy_array',
     'bbox_info_from_coord',
-    'get_opposite_boundary_port'
+    'get_opposite_boundary_port',
+    'bbox_info_cell'
 ]
 
 
@@ -364,6 +365,16 @@ def get_opposite_boundary_port(elem, subj_port):
         if geom.angle_diff(p.orientation, subj_port.orientation) == 180:
             return p
     return None
+
+
+def bbox_info_cell(elem):
+    from spira.yevon.gdsii.cell import Cell
+    from spira.yevon.gdsii.polygon import Polygon
+    bbox_shape = elem.bbox_info.bounding_box
+    bbox_ply = Polygon(shape=bbox_shape)
+    D = Cell(name='BBoxCell')
+    D += bbox_ply
+    return D
 
 
 from spira.core.parameters.restrictions import RestrictNothing

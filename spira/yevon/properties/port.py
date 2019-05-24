@@ -40,6 +40,8 @@ class CellPortProperty(PortProperty):
 
 class TransformablePortProperty(PortProperty, Transformable):
     def __create_ports__(self, ports):
+        print(self)
+        print(self.transformation)
         ports = self.create_ports(ports).transform_copy(self.transformation)
         # ports = self.create_ports(ports)
         # print(ports)

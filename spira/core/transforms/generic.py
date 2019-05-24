@@ -76,7 +76,7 @@ class GenericTransform(ReversibleTransform):
 
     def __reflect__(self, coords, p1=(0,0), p2=(1,0)):
         if self.reflection is True:
-            points = np.array(coords.to_ndarray())
+            points = np.array(coords.to_numpy_array())
             p1 = np.array(p1)
             p2 = np.array(p2)
             if np.asarray(points).ndim == 1:

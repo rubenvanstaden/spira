@@ -45,7 +45,8 @@ class __RefElemental__(__Elemental__):
             ports=deepcopy(self.ref.ports)
         )
 
-        T = self.transformation + spira.Translation(self.midpoint)
+        # T = self.transformation + spira.Translation(self.midpoint)
+        T = self.transformation
         C = C.transform(T)
 
         # NOTE: Applies expantion hierarchically.
@@ -53,7 +54,8 @@ class __RefElemental__(__Elemental__):
         C.expand_transform()
 
         self.ref = C
-        self.transformation = spira.IdentityTransform()
+        # self.transformation = spira.IdentityTransform()
+        self.transformation = None
         self.midpoint = (0,0)
 
         return self
@@ -83,14 +85,67 @@ class __RefElemental__(__Elemental__):
         return self.__class__(reference=D)
 
 
-class SRefAbstract(gdspy.CellReference, __RefElemental__):
+class ARef(__RefElemental__):
+    pass
+
+
+class SRef(gdspy.CellReference, __RefElemental__):
+    """ 
+    Cell reference (SRef) is the reference to a cell layout
+    to create a hierarchical layout structure. It creates copies
+    of the ports and terminals defined by the cell. These
+    copied ports can be used to connect different
+    cell reference instances.
+
+    Examples
+    --------
+    >>> cell = spira.Cell(name='Layout')
+    >>> sref = spira.SRef(structure=cell)
+    """
+
+    def get_alias(self):
+        if not hasattr(self, '__alias__'):
+            self.__alias__ = '_S0'
+        return self.__alias__
+
+    def set_alias(self, value):
+        self.__alias__ = '_' + value
+
+    def __hash__(self):
+        return hash(self.__repr__())
+
+    alias = FunctionField(get_alias, set_alias, doc='Functions to generate an alias for cell name.')
+
+    def __init__(self, reference, **kwargs):
+        __RefElemental__.__init__(self, **kwargs)
+        self.ref = reference
+
+    def __repr__(self):
+        name = self.ref.name
+        return ("[SPiRA: SRef] (\"{}\", midpoint {}, transforms {})".format(name, self.midpoint, self.transformation))
+
+    def __str__(self):
+        return self.__repr__()
+
+    def id_string(self):
+        return self.__repr__()
+
+    @property
+    def polygons(self):
+        elems = spira.ElementList()
+        for p in self.ref.elementals:
+            elems += p.transform_copy(self.transformation)
+        return elems
+
+
+
 
     supp = IntegerField(default=1)
     midpoint = CoordField(default=(0,0))
 
     # def transform_copy(self, transformation):
     #     self = super().transform_copy(transformation)
-        # return self.expand_transform()
+    #     return self.expand_transform()
 
     def dependencies(self):
         from spira.yevon.gdsii.cell_list import CellList
@@ -211,6 +266,21 @@ class SRefAbstract(gdspy.CellReference, __RefElemental__):
 
         return self
 
+    def stretch(self, factor=(1,1), center=(0,0)):
+        S = self.flat_expand_transform_copy()
+        T = spira.Stretch(stretch_factor=factor, stretch_center=center)
+        for i, e in enumerate(S.ref.elementals):
+            T.apply(S.ref.elementals[i])
+        return self
+
+    def stretch_copy(self, factor=(1,1), center=(0,0)):
+        pass
+        # S = self.flat_expand_transform_copy()
+        # T = spira.Stretch(stretch_factor=factor, stretch_center=center)
+        # for i, e in enumerate(S.ref.elementals):
+        #     T.apply(S.ref.elementals[i])
+        # return self
+
     def stretch_port(self, port, destination):
         """
         The elemental by moving the subject port, without
@@ -226,123 +296,18 @@ class SRefAbstract(gdspy.CellReference, __RefElemental__):
         from spira.yevon.gdsii.polygon import Polygon
         opposite_port = bbox_info.get_opposite_boundary_port(self, port)
         T = stretching.stretch_elemental_by_port(self, opposite_port, port, destination)
-        # print(port.bbox)
         if port.bbox is True:
-            self = T(self)
+            for i, e in enumerate(self.ref.elementals):
+                T.apply(self.ref.elementals[i])
         else:
             for i, e in enumerate(self.ref.elementals):
                 if isinstance(e, Polygon):
-                    print('---------------')
-                    print(e.id_string())
-                    print(port.local_pid)
-                    print('')
                     if e.id_string() == port.local_pid:
-                        print(e)
-                        self.ref.elementals[i] = T(e)
+                        opposite_port = bbox_info.get_opposite_boundary_port(e, port)
+                        Tn = stretching.stretch_elemental_by_port(self, opposite_port, port, destination)
+                        # self.ref.elementals[i] = Tn(e)
+                        Tn.apply(self.ref.elementals[i])
         return self
-
-
-from spira.core.transforms.generic import GenericTransform
-class SRef(SRefAbstract):
-    """ Cell reference (SRef) is the reference to a cell layout
-    to create a hierarchical layout structure. It creates copies
-    of the ports and terminals defined by the cell. These
-    copied ports can be used to connect different
-    cell reference instances.
-
-    Examples
-    --------
-    >>> cell = spira.Cell(name='Layout')
-    >>> sref = spira.SRef(structure=cell)
-    """
-
-    def get_alias(self):
-        if not hasattr(self, '__alias__'):
-            self.__alias__ = '_S0'
-        return self.__alias__
-
-    def set_alias(self, value):
-        self.__alias__ = '_' + value
-        
-    def __hash__(self):
-        return hash(self.__repr__())
-
-    alias = FunctionField(get_alias, set_alias, doc='Functions to generate an alias for cell name.')
-
-    def __init__(self, reference, **kwargs):
-        __RefElemental__.__init__(self, **kwargs)
-
-        self.ref = reference
-
-    # def __repr__(self):
-    #     name = self.ref.name
-    #     return ("[SPiRA: SRef] (\"{}\", at {}, srefs {}, cells {}, " +
-    #        "polygons {}, ports {}, labels {})").format(
-    #         name, self.midpoint,
-    #         len(self.ref.elementals.sref),
-    #         len(self.ref.elementals.cells),
-    #         len(self.ref.elementals.polygons),
-    #         len(self.ref.ports),
-    #         len(self.ref.elementals.labels)
-    #     )
-
-    def __repr__(self):
-        name = self.ref.name
-        return ("[SPiRA: SRef] (\"{}\", midpoint {}, transforms {})".format(name, self.midpoint, self.transformation))
-
-    def __str__(self):
-        return self.__repr__()
-
-    def stretch(self, stretch_transform):
-        S = self.flat_expand_transform_copy()
-        for i, e in enumerate(S.ref.elementals):
-            S.ref.elementals[i] = stretch_transform(e)
-        # D.elementals = S(D.elementals)
-        return S
-        # return self
-
-    @property
-    def _translation(self):
-        # if self.transformation is not None:
-        if issubclass(type(self.transformation), GenericTransform):
-            return self.transformation.translation
-        else:
-            return (0,0)
-
-    @property
-    def rotation(self):
-        # if self.transformation is not None:
-        if issubclass(type(self.transformation), GenericTransform):
-            return self.transformation.rotation
-        else:
-            return 0.0
-
-    @property
-    def reflection(self):
-        # if self.transformation is not None:
-        if issubclass(type(self.transformation), GenericTransform):
-            return self.transformation.reflection
-        else:
-            return False
-
-    @property
-    def magnification(self):
-        # if self.transformation is not None:
-        if issubclass(type(self.transformation), GenericTransform):
-            return self.transformation.magnification
-        else:
-            return 1.0
-
-    @property
-    def polygons(self):
-        # FIXME: Assums all elementals are ply.Polygon.
-        elems = spira.ElementList()
-        for p in self.ref.elementals:
-            elems += p.transform_copy(self.transformation)
-        return elems
-
-
-
 
 
 

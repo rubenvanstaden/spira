@@ -28,7 +28,7 @@ class PointArrayField(DataFieldDescriptor):
         if value is None:
             value = self.__process__([])
         else:
-            value = self.__process__([c.to_ndarray() if isinstance(c, Coord) else c for c in value])
+            value = self.__process__([c.to_numpy_array() if isinstance(c, Coord) else c for c in value])
         self.__cache_parameter_value__(obj, value)
         return value
 

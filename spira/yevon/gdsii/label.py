@@ -34,9 +34,18 @@ class __Label__(gdspy.Label, __Elemental__):
         )
         return c_label
 
-    def convert_to_gdspy(self):
+    def convert_to_gdspy(self, transformation=None):
+        T = self.transformation + transformation
+        # self.transform(T)
+        self.position = T.apply_to_coord(self.position)
+        self.orientation = T.apply_to_angle(self.orientation)
+        if isinstance(self.position, Coord):
+            position = self.position.to_numpy_array()
+        else:
+            position = self.position
         return gdspy.Label(self.text,
-            deepcopy(self.position),
+            # deepcopy(self.position),
+            position=position,
             anchor='o',
             rotation=self.orientation,
             layer=self.gds_layer.number,
@@ -62,6 +71,9 @@ class __Label__(gdspy.Label, __Elemental__):
         dx, dy = np.array(d) - o
         super().translate(dx, dy)
         return self
+
+    def id_string(self):
+        return self.__repr__()
 
 
 class Label(__Label__):
@@ -110,19 +122,19 @@ class Label(__Label__):
         #         "rot: {2}, mag: {3}, ref: {4}, layer: {5}, " +
         #         "texttype: {6})").format(*params)
 
-    def transform(self, transformation):
-        self.position = transformation.apply_to_coord(self.position)
-        self.orientation = transformation.apply_to_angle(self.orientation)
-        return self
+    # def transform(self, transformation):
+    #     self.position = transformation.apply_to_coord(self.position)
+    #     self.orientation = transformation.apply_to_angle(self.orientation)
+    #     return self
 
-    def transform_copy(self, transformation):
-        port = self.__class__(
-            name=self.name,
-            gds_layer=deepcopy(self.gds_layer),
-            midpoint=transformation.apply_to_coord(self.midpoint), 
-            orientation=transformation.apply_to_angle(self.orientation)
-        )
-        return port
+    # def transform_copy(self, transformation):
+    #     port = self.__class__(
+    #         name=self.name,
+    #         gds_layer=deepcopy(self.gds_layer),
+    #         midpoint=transformation.apply_to_coord(self.midpoint), 
+    #         orientation=transformation.apply_to_angle(self.orientation)
+    #     )
+    #     return port
 
 
 

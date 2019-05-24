@@ -81,6 +81,9 @@ class Terminal(__HorizontalPort__):
     def __str__(self):
         return self.__repr__()
 
+    def id_string(self):
+        return self.__repr__()
+
     def __eq__(self, other):
         if isinstance(other, str):
             return (self.name == other)
@@ -93,7 +96,7 @@ class Terminal(__HorizontalPort__):
 
     def __ne__(self, other):
         return (self.midpoint != other.midpoint or (self.orientation != other.orientation)) 
-        
+
     def transform(self, transformation):
         self.midpoint = transformation.apply_to_coord(deepcopy(self.midpoint))
         self.orientation = transformation.apply_to_angle(deepcopy(self.orientation))
@@ -114,18 +117,6 @@ class Terminal(__HorizontalPort__):
             local_pid=self.local_pid
         )
         return port
-
-    def commit_to_gdspy(self, cell=None):
-        if self.__repr__() not in list(Terminal.__committed__.keys()):
-            self.edge.commit_to_gdspy(cell=cell)
-            # self.arrow.commit_to_gdspy(cell=cell)
-            self.label.commit_to_gdspy(cell=cell)
-            Terminal.__committed__.update({self.__repr__(): self})
-        else:
-            p = Terminal.__committed__[self.__repr__()]
-            p.edge.commit_to_gdspy(cell=cell)
-            # p.arrow.commit_to_gdspy(cell=cell)
-            p.label.commit_to_gdspy(cell=cell)
 
     @property
     def label(self):
@@ -167,9 +158,9 @@ class Terminal(__HorizontalPort__):
             ply = spira.Polygon(shape=rect_shape, ps_layer=ps2, enable_edges=False)
         ply.center = (0,0)
         angle = self.orientation
-        T = spira.Rotation(rotation=angle)
+        T = spira.Rotation(rotation=angle) + spira.Translation(self.midpoint)
         ply.transform(T)
-        ply.move_new(self.midpoint)
+        # ply.move_new(self.midpoint)
         # ply.move(midpoint=rect_shape.center_of_mass, destination=self.midpoint)
         return ply
 
@@ -180,9 +171,9 @@ class Terminal(__HorizontalPort__):
         ply = spira.Polygon(shape=arrow_shape, gds_layer=self.arrowlayer, enable_edges=False)
         ply.center = (0,0)
         angle = self.orientation - 90
-        T = spira.Rotation(rotation=angle)
+        T = spira.Rotation(rotation=angle) + spira.Translation(self.midpoint)
         ply.transform(T)
-        ply.move_new(self.midpoint)
+        # ply.move_new(self.midpoint)
         return ply
 
     def encloses(self, points):

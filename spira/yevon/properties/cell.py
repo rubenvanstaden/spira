@@ -44,7 +44,7 @@ class CellProperties(__Group__, __GeometryProperties__):
 
                 ref = gdspy.CellReference(
                     ref_cell=c2dmap[e.ref],
-                    origin=e.midpoint.to_ndarray(),
+                    origin=e.midpoint.to_numpy_array(),
                     rotation=e.rotation,
                     magnification=e.magnification,
                     x_reflection=e.reflection

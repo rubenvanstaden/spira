@@ -123,7 +123,7 @@ class Coord(Transformable):
     def id_string(self):
         return "%d_%d" % (self.x * 1000, self.y * 1000)
 
-    def to_ndarray(self):
+    def to_numpy_array(self):
         return [self.x, self.y]
 
 

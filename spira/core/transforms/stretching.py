@@ -93,12 +93,8 @@ def stretch_elemental_by_port(elem, const_port, subj_port, destination):
     elif p2.orientation == 90:
         T = Stretch(stretch_factor=(1,sf), stretch_center=p1.midpoint)
     elif p2.orientation == 180:
-        T = Stretch(stretch_factor=(-sf,1), stretch_center=p1.midpoint)
+        T = Stretch(stretch_factor=(sf,1), stretch_center=p1.midpoint)
     elif p2.orientation == 270:
-        T = Stretch(stretch_factor=(1,-sf), stretch_center=p1.midpoint)
-    # print(elem)
-    # T.apply(elem)
-    # elem = T(elem)
-    # return elem
+        T = Stretch(stretch_factor=(1,sf), stretch_center=p1.midpoint)
     return T
 

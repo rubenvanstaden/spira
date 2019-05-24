@@ -2,6 +2,7 @@ import spira.all as spira
 from spira.yevon.geometry import shapes
 from spira.yevon.geometry.coord import Coord
 from spira.yevon.rdd import get_rule_deck
+from spira.yevon.geometry.bbox_info import bbox_info_cell
 
 
 RDD = get_rule_deck()
@@ -86,16 +87,20 @@ def test_reference_manual():
 
     D = spira.Cell(name='Device')
     p1 = spira.Cross(ps_layer=RDD.PLAYER.COU)
+    D += p1
+
+    D1 = spira.Cell(name='SubDevice')
     p2 = spira.Wedge(ps_layer=RDD.PLAYER.BAS)
-    D += [p1, p2]
+    D1 += p2
+
+    D += spira.SRef(D1)
 
     S = spira.SRef(reference=D)
 
-    T = spira.Stretch(stretch_factor=(5,1))
-    E = S.stretch(T)
+    # E = S.stretch(factor=(3,1))
 
-    # E = S.flat_expand_transform_copy()
-    # # print(E.ports)
+    F = S.flat_expand_transform_copy()
+    # print(E.ports)
     # print(E.ports['BAS_e2'])
 
     # T = spira.Stretch(stretch_factor=(5,1))
@@ -106,12 +111,21 @@ def test_reference_manual():
     # print(E)
     # # newCell = T(E)
 
-    # newCell = E.stretch_port(port=E.ports['BAS_e2'], destination=(50*1e6, 0))
-    # # newCell = E.stretch_port(port=D.bbox_info.ports['BBOX_e1'], destination=(50*1e6, 0))
+    B = bbox_info_cell(D)
+    # print(B.ports)
+    print(D.bbox_info.ports)
+
+    # debug_view(F.ref)
+
+    # NOTE: Stretch a specific polygon.
+    E = F.stretch_port(port=F.ports['BAS_e2'], destination=(50*1e6, 0))
+
+    # NOTE: Stretch the entire reference using the bounding box ports.
+    # E = F.stretch_port(port=D.bbox_info.ports['BBOX_e1'], destination=(50*1e6, 0))
 
     cell = spira.Cell(name='StretchCell')
-    # cell += newCell
-    cell += E
+    # cell += E
+    cell += S
     cell.output()
 
 

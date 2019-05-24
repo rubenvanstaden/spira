@@ -10,6 +10,8 @@ from spira.core.parameters.processors import ProcessorTypeCast
 class Transform(FieldInitializer):
     """ Abstract base class for generic transform. """
 
+    _ID = 0
+
     def apply(self, item):
         """ Apply the transform directly on the object, without making a copy. """
         if isinstance(item, list):
@@ -97,6 +99,8 @@ class CompoundTransform(Transform):
             self.__subtransforms__ = transforms
         elif isinstance(transforms, CompoundTransform):
             self.__subtransforms__ = []
+            print(self.__subtransforms__)
+            print(transforms)
             self.__subtransforms__.extend(transforms)
         else:
             self.__subtransforms__ = [transforms]
@@ -107,6 +111,12 @@ class CompoundTransform(Transform):
 
     def __str__(self):
         return self.__repr__()
+        
+    def __getitem__(self, key):
+        return self.__subtransforms__[key]
+
+    # def __iter__(self):
+    #     return self
 
     def id_string(self):
         return self.__repr__()
@@ -119,6 +129,24 @@ class CompoundTransform(Transform):
     def __iadd__(self, other):
         self.add(other)
         return self
+
+    def apply(self, item):
+        """ apply the transform to the transformable item """
+        if isinstance(item, list):
+            pass
+            # from .shape import Shape
+            # L = Shape(item)
+            # for c in self.__subtransforms__:
+            #     L = c.apply(L)
+            # return L
+        else:
+            for c in self.__subtransforms__:
+                item = c.apply(item)
+
+    def apply_to_angle(self, angle):
+        # FIXME: This is required for transforming polygon ports.
+        # This is currently just a temporary fix.
+        return angle
 
     def add(self, other):
         if other is None:

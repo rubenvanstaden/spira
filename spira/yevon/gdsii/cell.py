@@ -54,16 +54,6 @@ class __Cell__(FieldInitializer, metaclass=MetaCell):
             self.elementals += other
         return self
 
-    # def __deepcopy__(self, memo):
-    #     cell = Cell(
-    #         name=self.name,
-    #         elementals=deepcopy(self.elementals),
-    #         ports=deepcopy(self.ports)
-    #     )
-    #     cell.__name__ = self.name
-    #     cell.name = self.name
-    #     return cell
-
 
 class CellAbstract(gdspy.Cell, __Cell__):
 
@@ -95,17 +85,6 @@ class CellAbstract(gdspy.Cell, __Cell__):
             elif isinstance(e, SRef):
                 e.ref.flat_polygons(subj=subj)
         return subj
-
-    def commit_to_gdspy(self, cell=None):
-        # if cell is None:
-        #     cell = gdspy.Cell(self.name, exclude_from_current=True)
-        cell = gdspy.Cell(self.name, exclude_from_current=True)
-        for e in self.elementals:
-            if not isinstance(e, SRef):
-                e.commit_to_gdspy(cell=cell)
-        for p in self.ports:
-            p.commit_to_gdspy(cell=cell)
-        return cell
 
     def move(self, midpoint=(0,0), destination=None, axis=None):
         from spira.yevon.geometry.ports.base import __Port__
@@ -156,14 +135,20 @@ class CellAbstract(gdspy.Cell, __Cell__):
         return self
 
     def stretch_port(self, port, destination):
-        """ The elemental by moving the subject port, without distorting the entire elemental. 
-        Note: The opposite port position is used as the stretching center."""
+        """ 
+        The elemental by moving the subject port, without
+        distorting the entire elemental. Note: The opposite
+        port position is used as the stretching center. 
+
+        Example
+        -------
+        >>> 
+        """
         from spira.core.transforms import stretching
         from spira.yevon.geometry import bbox_info
         from spira.yevon.gdsii.polygon import Polygon
         opposite_port = bbox_info.get_opposite_boundary_port(self, port)
         T = stretching.stretch_elemental_by_port(self, opposite_port, port, destination)
-        # print(port.bbox)
         if port.bbox is True:
             self = T(self)
         else:
@@ -301,7 +286,7 @@ class Cell(CellAbstract):
             raise ValueError('Alias {} key not found!'.format(keys[0]))
 
         return item
-        
+
 
 class Connector(Cell):
     """

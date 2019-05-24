@@ -41,7 +41,6 @@ __all__ = [
 
 class __Polygon__(gdspy.PolygonSet, __Elemental__):
 
-    __committed__ = {}
     ps_layer = PhysicalLayerField(default=RDD.PLAYER.COU)
 
     def __eq__(self, other):
@@ -56,16 +55,14 @@ class __Polygon__(gdspy.PolygonSet, __Elemental__):
             gds_layer=deepcopy(self.gds_layer)
         )
 
-    def __deepcopy__(self, memo):
-        # print('ports')
-        # print(self.ports)
-        ply = self.modified_copy(
-            shape=deepcopy(self.shape),
-            # ports=deepcopy(self.ports),
-            gds_layer=deepcopy(self.gds_layer),
-            ps_layer=deepcopy(self.ps_layer)
-        )
-        return ply
+    # def __deepcopy__(self, memo):
+    #     ply = self.modified_copy(
+    #         shape=deepcopy(self.shape),
+    #         ports=deepcopy(self.ports),
+    #         gds_layer=deepcopy(self.gds_layer),
+    #         ps_layer=deepcopy(self.ps_layer)
+    #     )
+    #     return ply
 
     def __add__(self, other):
         polygons = []
@@ -137,12 +134,10 @@ class PolygonAbstract(__Polygon__):
 
     @property
     def layer_number(self):
-        # return self.gds_layer.layer
         return self.ps_layer.layer.number
 
     @property
     def layer_datatype(self):
-        # return self.gds_layer.datatype
         return self.ps_layer.layer.datatype
 
     @property
@@ -161,12 +156,8 @@ class PolygonAbstract(__Polygon__):
         return True
 
     def flat_copy(self, level=-1):
-        E = self.modified_copy(
-            shape=deepcopy(self.shape),
-            transformation=self.transformation
-        )
-        E.transform_copy(self.transformation)
-        return E
+        E = self.modified_copy(shape=deepcopy(self.shape), transformation=self.transformation)
+        return E.transform_copy(self.transformation)
 
     def fillet(self, radius, angle_resolution=128, precision=0.001*1e6):
         super().fillet(radius=radius, points_per_2pi=angle_resolution, precision=precision)
@@ -174,8 +165,12 @@ class PolygonAbstract(__Polygon__):
         return self
 
     def stretch(self, factor=(1,1), center=(0,0)):
-        self = scale_elemental(self, scaling=factor, scale_center=center)
-        return self
+        T = spira.Stretch(stretch_factor=factor, stretch_center=center)
+        return T.apply(self)
+
+    def stretch_copy(self, factor=(1,1), center=(0,0)):
+        T = spira.Stretch(stretch_factor=factor, stretch_center=center)
+        return T.apply_copy(self)
 
     def stretch_port(self, port, destination):
         """ The elemental by moving the subject port, without distorting the entire elemental. 
@@ -183,32 +178,8 @@ class PolygonAbstract(__Polygon__):
         opposite_port = bbox_info.get_opposite_boundary_port(self, port)
         return stretching.stretch_elemental_by_port(self, opposite_port, port, destination)
 
-    def transform_copy(self, transformation):
-        new_shape = deepcopy(self.shape)
-        new_shape = new_shape.transform(transformation)
-        new_ports = deepcopy(self.ports)
-        new_ports = new_ports.transform(transformation)
-        poly = self.__class__(
-            name=self.name,
-            shape=new_shape,
-            ports=new_ports,
-            gds_layer=deepcopy(self.gds_layer),
-            ps_layer=deepcopy(self.ps_layer)
-        )
-        return poly
-
     def id_string(self):
         return self.__repr__()
-
-    def transform(self, transformation):
-        self.ports.transform(transformation)
-        self.shape.points = transformation.apply_to_array(self.shape.points)
-        # self.alias = self.alias + transformation.id_string()
-        return self
-
-    def fast_boolean(self, other, operation):
-        mm = gdspy.fast_boolean(self.points, other.points, operation=operation)
-        return Polygon(shape=mm.points, gds_layer=self.gds_layer)
 
 
 class Polygon(PolygonAbstract):
@@ -249,36 +220,21 @@ class Polygon(PolygonAbstract):
         )
         # Polygon._ID += 1
 
-    # def __repr__(self):
-    #     if self is None:
-    #         return 'Polygon is None!'
-    #     return ("[SPiRA: Polygon] ({} area " +
-    #             "{} vertices, layer {}, datatype {})").format(
-    #             self.ply_area, sum([len(p) for p in self.shape.points]),
-    #             self.gds_layer.number, self.gds_layer.datatype)
-
     def __repr__(self):
         if self is None:
             return 'Polygon is None!'
-        return ("[SPiRA: Polygon {} {}] ({} center, {} area {} vertices, layer {}, datatype {}, hash {})").format(
-            self.alias,
-            # Polygon._ID,
-            0,
-            self.bbox_info.center, 
-            self.ply_area, 
+        return ("[SPiRA: Polygon {} {}] (center {}, area {}, vertices {}, layer {}, datatype {}, hash {})").format(
+            self.alias, 0,
+            self.bbox_info.center,
+            self.ply_area,
             sum([len(p) for p in self.shape.points]),
             self.layer_number,
-            self.layer_datatype, 
+            self.layer_datatype,
             self.hash_polygon
         )
 
     def __str__(self):
         return self.__repr__()
-
-    # def expand_transform(self):
-    #     self.transform(self.transformation)
-    #     # self.transformation = None
-    #     return self
 
     def move_new(self, position):
         p = np.array([position[0], position[1]])
@@ -319,59 +275,18 @@ class Polygon(PolygonAbstract):
 
         return self
 
-    def convert_to_gdspy(self):
-        # TODO: Apply transformations here!
+    def convert_to_gdspy(self, transformation=None):
+        """ Converts a SPiRA polygon to a Gdspy polygon.
+        The extra transformation parameter is the 
+        polygon edge ports. """
+        T = self.transformation + transformation
+        shape = self.shape.transform(T)
         return gdspy.Polygon(
-            points=self.points, 
-            layer=self.layer_number, 
-            datatype=self.layer_datatype, 
+            points=shape.points,
+            layer=self.layer_number,
+            datatype=self.layer_datatype,
             verbose=False
         )
-        # new_poly = deepcopy(self)
-        # # new_poly = self
-        # pts = np.array([new_poly.points])
-        # P = gdspy.PolygonSet(
-        #     # polygons=deepcopy(new_poly.shape.points),
-        #     # polygons=new_poly.shape.points,
-        #     polygons=pts,
-        #     layer=new_poly.layer_number,
-        #     datatype=new_poly.layer_datatype,
-        #     verbose=False
-        # )
-        # return P
-
-    def commit_to_gdspy(self, cell=None):
-        # if self.__repr__() not in list(PolygonAbstract.__committed__.keys()):
-        if self.node_id not in list(Polygon.__committed__.keys()):
-            new_poly = deepcopy(self)
-            # new_poly = self
-            pts = np.array([new_poly.points])
-            P = gdspy.PolygonSet(
-                # polygons=deepcopy(new_poly.shape.points),
-                # polygons=new_poly.shape.points,
-                polygons=pts,
-                layer=new_poly.layer_number,
-                datatype=new_poly.layer_datatype,
-                verbose=False
-            )
-            # PolygonAbstract.__committed__.update({self.__repr__():P})
-            Polygon.__committed__.update({self.node_id:P})
-        else:
-            # P = PolygonAbstract.__committed__[self.__repr__()]
-            P = Polygon.__committed__[self.node_id]
-
-        if cell is not None:
-            cell.add(P)
-
-        # if not self.disable_edge_ports:
-        #     for p in self.ports:
-        #         p.commit_to_gdspy(cell=cell)
-
-        # return cell
-
-        # FIXME: Returns the polygon so as to 
-        # apply gdspy operations on it.
-        return P
 
 
 class PolygonGroup(Group, Polygon):
