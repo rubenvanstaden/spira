@@ -7,7 +7,7 @@ from spira.yevon import utils
 from spira.core.parameters.restrictions import RestrictType
 from spira.core.parameters.initializer import FieldInitializer
 from spira.core.parameters.descriptor import DataFieldDescriptor, FunctionField, DataField
-from spira.yevon.gdsii.elem_list import ElementList, ElementalListField
+from spira.yevon.gdsii.elem_list import ElementalList, ElementalListField
 from spira.yevon.geometry.coord import CoordField, Coord
 from spira.yevon.visualization.color import ColorField
 from spira.yevon.visualization import color
@@ -75,16 +75,6 @@ class CellAbstract(gdspy.Cell, __Cell__):
         name = '{}_{}'.format(self.name, 'flat'),
         C = Cell(name, self.elementals.flat_copy(level=level))
         return C
-
-    def flat_polygons(self, subj):
-        from spira.yevon.gdsii.sref import SRef
-        from spira.yevon.gdsii.polygon import Polygon
-        for e in self.elementals:
-            if isinstance(e, Polygon):
-                subj += e
-            elif isinstance(e, SRef):
-                e.ref.flat_polygons(subj=subj)
-        return subj
 
     def move(self, midpoint=(0,0), destination=None, axis=None):
         from spira.yevon.geometry.ports.base import __Port__
@@ -226,9 +216,9 @@ class Cell(CellAbstract):
         if library is not None:
             self.library = library
         if elementals is not None:
-            self.elementals = elementals
+            self.elementals = ElementalList(elementals)
         if ports is not None:
-            self.ports = ports
+            self.ports = PortList(ports)
 
     def __repr__(self):
         if hasattr(self, 'elementals'):

@@ -43,7 +43,7 @@ class PCell(__CellContainer__):
             r = Route(cell=self.cell)
             routes += spira.SRef(r)
         else:
-            el = spira.ElementList()
+            el = spira.ElementalList()
             elems = self.create_elementals(el)
             for e in elems:
                 if isinstance(e, spira.SRef):

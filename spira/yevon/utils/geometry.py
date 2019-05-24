@@ -111,7 +111,7 @@ def numpy_to_list(points, start_height, unit=None):
 
 def cut(ply, position, axis):
     import spira.all as spira
-    plys = spira.ElementList()
+    plys = spira.ElementalList()
     gp = ply.commit_to_gdspy()
     pl = gdspy.slice(objects=[gp], position=position, axis=axis)
     for p in pl:

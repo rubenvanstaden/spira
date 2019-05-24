@@ -47,7 +47,7 @@ def route_nodes(net):
                         net.g.node[n]['route'] = pp
 
     for R in net.route_nodes:
-        if isinstance(R, spira.ElementList):
+        if isinstance(R, spira.ElementalList):
             for r in R:
                 r_func(r)
         else:

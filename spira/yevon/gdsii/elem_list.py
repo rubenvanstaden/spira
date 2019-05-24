@@ -12,7 +12,7 @@ class ElementFilterMixin(Transformable):
     # def get_polygons(self, layer=None, cell_type=None):
     #     from spira.yevon.layer import Layer
     #     from spira.yevon.rdd.layer import PurposeLayer
-    #     elems = ElementList()
+    #     elems = ElementalList()
     #     if layer is None:
     #         raise ValueError('Layer not set.')
     #     for ply in self.polygons:
@@ -37,7 +37,7 @@ class ElementFilterMixin(Transformable):
     def get_polygons(self, layer=None):
         from spira.yevon.layer import Layer
         from spira.yevon.rdd.layer import PurposeLayer
-        elems = ElementList()
+        elems = ElementalList()
         if layer is None:
             raise ValueError('Layer not set.')
         for ply in self.polygons:
@@ -51,7 +51,7 @@ class ElementFilterMixin(Transformable):
     @property
     def polygons(self):
         from spira.yevon.gdsii.polygon import PolygonAbstract
-        elems = ElementList()
+        elems = ElementalList()
         for e in self._list:
             if issubclass(type(e), PolygonAbstract):
                 elems += e
@@ -60,7 +60,7 @@ class ElementFilterMixin(Transformable):
     @property
     def labels(self):
         from spira.yevon.gdsii.label import Label
-        elems = ElementList()
+        elems = ElementalList()
         for e in self._list:
             if isinstance(e, Label):
                 elems += e
@@ -69,7 +69,7 @@ class ElementFilterMixin(Transformable):
     @property
     def sref(self):
         from spira.yevon.gdsii.sref import SRef
-        elems = ElementList()
+        elems = ElementalList()
         for e in self._list:
             if isinstance(e, SRef):
                 elems += e
@@ -78,7 +78,7 @@ class ElementFilterMixin(Transformable):
     @property
     def cells(self):
         from spira.yevon.gdsii.cell import Cell
-        elems = ElementList()
+        elems = ElementalList()
         for e in self._list:
             if issubclass(type(e), Cell):
             # if isinstance(e, Cell):
@@ -86,7 +86,7 @@ class ElementFilterMixin(Transformable):
         return elems
 
 
-class __ElementList__(TypedList, ElementFilterMixin):
+class __ElementalList__(TypedList, ElementFilterMixin):
 
     def __repr__(self):
         string = '\n'.join('{}'.format(k) for k in enumerate(self._list))
@@ -137,7 +137,7 @@ class __ElementList__(TypedList, ElementFilterMixin):
             yield e 
 
 
-class ElementList(__ElementList__):
+class ElementalList(__ElementalList__):
     __item_type__ = __Elemental__
 
     def dependencies(self):
@@ -184,7 +184,7 @@ class ElementList(__ElementList__):
     def flat_elems(self):
         def _flatten(list_to_flatten):
             for elem in list_to_flatten:
-                if isinstance(elem, (ElementList, list, tuple)):
+                if isinstance(elem, (ElementalList, list, tuple)):
                     for x in _flatten(elem):
                         yield x
                 else:
@@ -193,14 +193,14 @@ class ElementList(__ElementList__):
 
     def commit_to_gdspy(self, cell, transformation=None):
         for e in self._list:
-            if isinstance(e, ElementList):
+            if isinstance(e, ElementalList):
                 e.commit_to_gdspy(cell=cell, transformation=transformation)
             else:
                 e.commit_to_gdspy(cell=cell, transformation=transformation)
         return self
 
     def flat_copy(self, level=-1):
-        el = ElementList()
+        el = ElementalList()
         for e in self._list:
             el += e.flat_copy(level)
         if level == -1:
@@ -213,7 +213,7 @@ class ElementList(__ElementList__):
         from spira.yevon.gdsii.polygon import PolygonAbstract
         from spira.yevon.gdsii.sref import SRef
         if isinstance(self, collections.Iterable):
-            flat_list = ElementList()
+            flat_list = ElementalList()
             for i in self._list:
                 if issubclass(type(i), Cell):
                     i = i.flat_copy()
@@ -231,7 +231,7 @@ class ElementList(__ElementList__):
 
 
 class ElementalListField(DataFieldDescriptor):
-    __type__ = ElementList
+    __type__ = ElementalList
 
     def __init__(self, default=[], **kwargs):
         kwargs['default'] = self.__type__(default)

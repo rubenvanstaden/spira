@@ -54,7 +54,6 @@ class __RefElemental__(__Elemental__):
         C.expand_transform()
 
         self.ref = C
-        # self.transformation = spira.IdentityTransform()
         self.transformation = None
         self.midpoint = (0,0)
 
@@ -132,7 +131,7 @@ class SRef(gdspy.CellReference, __RefElemental__):
 
     @property
     def polygons(self):
-        elems = spira.ElementList()
+        elems = spira.ElementalList()
         for p in self.ref.elementals:
             elems += p.transform_copy(self.transformation)
         return elems
@@ -159,7 +158,7 @@ class SRef(gdspy.CellReference, __RefElemental__):
 
     def flat_copy(self, level=-1):
         if level == 0:
-            el = spira.ElementList()
+            el = spira.ElementalList()
             el += self
             return el
         el = self.ref.elementals.flat_copy(level-1)

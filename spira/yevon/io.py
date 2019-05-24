@@ -139,7 +139,7 @@ def import_gds(filename, cellname=None, flatten=False, pcell=True):
                          'top-level cells, you must specify cellname' +
                          'to select of one of them')
 
-    cell_list = spira.ElementList()
+    cell_list = spira.ElementalList()
     c2dmap = {}
     for cell in gdsii_lib.cell_dict.values():
         D = spira.Cell(name=cell.name)

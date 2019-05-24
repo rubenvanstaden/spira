@@ -30,21 +30,21 @@ class __Elemental__(Transformable, FieldInitializer, metaclass=MetaElemental):
 
     def __add__(self, other):
         if isinstance(other, list):
-            l = spira.ElementList([self])
+            l = spira.ElementalList([self])
             l.extend(other)
             return l
         elif isinstance(other, __Elemental__):
-            return spira.ElementList([self, other])
+            return spira.ElementalList([self, other])
         else:
             raise TypeError("Wrong type of argument for addition in __Elemental__: " + str(type(other)))
 
     def __radd__(self, other):
         if isinstance(other, list):
-            l = spira.ElementList(other)
+            l = spira.ElementalList(other)
             l.append(self)
             return l
         elif isinstance(other, __Elemental__):
-            return spira.ElementList([other, self])
+            return spira.ElementalList([other, self])
         else:
             raise TypeError("Wrong type of argument for addition in __Elemental__: " + str(type(other)))
 

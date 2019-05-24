@@ -26,7 +26,7 @@ def simplify_points(points):
 
 def union_polygons(poly_elems):
     mapping = {}
-    elems = spira.ElementList()
+    elems = spira.ElementalList()
     for e in poly_elems:
         if isinstance(e, spira.Polygon):
             if e.ps_layer not in mapping.keys():

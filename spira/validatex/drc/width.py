@@ -14,7 +14,7 @@ class Width(__SingleLayerDesignRule__):
         return "'{}' must have a width between: min={} max={}".format(self.layer1, self.minimum, self.maximum)
 
     def edge_to_minimum_width(self, e1):
-        ports = spira.ElementList()
+        ports = spira.ElementalList()
         for p in e1.edge_ports:
             p.length = 2*self.minimum*self.um
             ports += p

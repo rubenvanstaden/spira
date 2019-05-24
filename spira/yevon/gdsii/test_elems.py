@@ -62,7 +62,7 @@ def test_cell_list():
 # ----------------------------------------- spira.ElementalList ------------------------------------
 
 def test_elemental_list():
-    el = spira.ElementList()
+    el = spira.ElementalList()
     assert len(el) == 0
 
 # -------------------------------------------- spira.Polygon ----------------------------------------

@@ -176,7 +176,9 @@ class PolygonAbstract(__Polygon__):
         """ The elemental by moving the subject port, without distorting the entire elemental. 
         Note: The opposite port position is used as the stretching center."""
         opposite_port = bbox_info.get_opposite_boundary_port(self, port)
-        return stretching.stretch_elemental_by_port(self, opposite_port, port, destination)
+        T = stretching.stretch_elemental_by_port(self, opposite_port, port, destination)
+        T.apply(self)
+        return self
 
     def id_string(self):
         return self.__repr__()

@@ -4,7 +4,7 @@ import spira.all as spira
 
 from spira.core.parameters.variables import *
 from spira.yevon.io import import_gds
-from spira.yevon.gdsii.elem_list import ElementList
+from spira.yevon.gdsii.elem_list import ElementalList
 from spira.yevon.gdsii.cell_list import CellList
 from spira.core.parameters.initializer import FieldInitializer
 from spira.core.parameters.descriptor import DataField
@@ -22,7 +22,7 @@ class __Library__(FieldInitializer, MixinBowl):
             self.cells.add(other)
             for d in other.dependencies():
                 self.cells.add(d)
-        elif isinstance(other, spira.ElementList):
+        elif isinstance(other, spira.ElementalList):
             for d in other.dependencies():
                 self.cells.add(d)
         return self

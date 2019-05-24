@@ -112,8 +112,8 @@
 
 
 # class ElementalListField(DataFieldDescriptor):
-#     from spira.yevon.gdsii.elem_list import ElementList
-#     __type__ = ElementList
+#     from spira.yevon.gdsii.elem_list import ElementalList
+#     __type__ = ElementalList
 
 #     def __init__(self, default=[], **kwargs):
 #         kwargs['default'] = self.__type__(default)

@@ -19,8 +19,8 @@ class Enclosure(__DoubleLayerDesignRule__):
 
     # def apply(self, elems):
 
-    #     pos_elems = spira.ElementList()
-    #     neg_elems = spira.ElementList()
+    #     pos_elems = spira.ElementalList()
+    #     neg_elems = spira.ElementalList()
 
     #     for C in elems.dependencies():
     #         for S in C.elementals.sref:

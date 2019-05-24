@@ -37,7 +37,7 @@ class __Group__(FieldInitializer):
     def __iadd__(self, elemental):
         from spira.yevon.geometry.ports.base import __Port__
         """ Add elemental and reduce the class to a simple compound elementals. """
-        if isinstance(elemental, (list, spira.ElementList)):
+        if isinstance(elemental, (list, spira.ElementalList)):
             self.extend(elemental)
         elif isinstance(elemental, __Elemental__):
             self.append(elemental)
@@ -66,7 +66,7 @@ class __Group__(FieldInitializer):
     # elementals = ElementalListField(fdef_name='create_elementals', doc='List of elementals to be added to the cell instance.')
 
     # def create_elementals(self, elems):
-    #     result = spira.ElementList()
+    #     result = spira.ElementalList()
     #     return result
 
     # FIXME: For some reason this interferes with the spira.Cell commit.
@@ -93,7 +93,7 @@ class __Group__(FieldInitializer):
     #     return not self.__eq__(other)
 
     # def generate_physical_polygons(self, pl):
-    #     elems = spira.ElementList()
+    #     elems = spira.ElementalList()
     #     R = self.cell.elementals.flat_copy()
     #     Rm = R.get_polygons(layer=pl.layer)
     #     for i, e in enumerate(Rm):
@@ -128,7 +128,7 @@ class Group(__Group__, __Elemental__):
         if not level == 0:
             return self.elementals.flat_copy(level).transform(self.transformation)
         else:
-            return spira.ElementList(self.elementals)
+            return spira.ElementalList(self.elementals)
 
     def expand_transform(self):
         if not self.transformation.is_identity():

@@ -3,7 +3,7 @@ import numpy as np
 
 from spira.yevon.geometry import shapes
 from spira.yevon.rdd import get_rule_deck
-from spira.yevon.gdsii.elem_list import ElementList
+from spira.yevon.gdsii.elem_list import ElementalList
 from spira.yevon.geometry.ports.port_list import PortList
 from spira.yevon.gdsii.polygon import Polygon
 from spira.yevon.utils import clipping
@@ -19,7 +19,7 @@ __all__ = [
 
 
 def get_polygon_by_physical_layer(elems, ps_layer):
-    el = ElementList()
+    el = ElementalList()
     for e in elems.polygons:
         if isinstance(e, pc.Polygon):
             if e.ps_layer == ps_layer:
@@ -34,7 +34,7 @@ def get_polygon_by_physical_layer(elems, ps_layer):
 
 def convert_polygons_to_processlayers(polygon_elems):
     R = polygon_elems.flat_copy()
-    elems = ElementList()
+    elems = ElementalList()
     for ps_layer in RDD.PLAYER.get_physical_layers(purposes='METAL'):
         Rm = R.get_polygons(layer=ps_layer.layer)
         for i, e in enumerate(Rm):

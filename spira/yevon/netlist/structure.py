@@ -160,7 +160,7 @@ class Structure(__NetlistCell__):
         return elems
 
     def get_metals(self, pl):
-        ply_elems = spira.ElementList()
+        ply_elems = spira.ElementalList()
         for M in self.merged_layers:
             if M.layer.is_equal_number(pl.layer):
                 ply_elems += M

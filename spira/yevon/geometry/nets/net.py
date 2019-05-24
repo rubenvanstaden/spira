@@ -69,7 +69,7 @@ class Net(__Net__, PortProperty):
                             self.g.node[n]['route'] = pp
 
         for R in self.route_nodes:
-            if isinstance(R, spira.ElementList):
+            if isinstance(R, spira.ElementalList):
                 for r in R:
                     r_func(r)
             else:

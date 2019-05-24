@@ -64,7 +64,6 @@ class Junction(spira.Cell):
         return elems
 
         # expand_elems = elems.expand_transform()
-        # print(expand_elems)
         # return expand_elems
 
 
@@ -76,10 +75,7 @@ if __name__ == '__main__':
     S = spira.SRef(reference=D)
 
     E = S.flat_expand_transform_copy()
-    # print(E.ports)
-    print(E.ports[3])
-    print(E.ports[16])
-    E = E.stretch_port(port=E.ports[3], destination=E.ports[16].midpoint)
+    E.stretch_port(port=E.ports[3], destination=E.ports[16].midpoint)
 
     cell += S
     # cell += E
