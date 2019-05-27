@@ -49,13 +49,12 @@ class PortList(TypedList, Transformable):
 
     def __and__(self, other):
         from spira.yevon.gdsii.polygon import Polygon
-        # from spira.yevon import process as pc
-        from spira.yevon.geometry.ports.terminal import Terminal
+        from spira.yevon.geometry.ports.port import Port
         P = self.__class__()
         if isinstance(other, Polygon):
         # elif issubclass(type(other), pc.ProcessLayer):
             for p in self._list:
-                if isinstance(p, Terminal):
+                if isinstance(p, Port):
                     if p.edge & other.elementals[0]:
                         p.locked = False
                         P.append(p)

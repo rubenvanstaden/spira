@@ -69,7 +69,7 @@ class __RefElemental__(__Elemental__):
                 elif isinstance(e, spira.SRef):
                     flat_polygons(subj=subj, cell=e.ref)
             for p in cell.ports:
-                port = spira.Terminal(
+                port = spira.Port(
                     # name=p.name + "_" + cell.name,
                     name=p.name,
                     locked=False,
@@ -238,7 +238,7 @@ class SRef(gdspy.CellReference, __RefElemental__):
                 "valid port name - received ({}), ports available " +
                 "are ({})".format(port, self.ports.get_names()))
 
-        if not isinstance(destination, spira.Terminal):
+        if not isinstance(destination, spira.Port):
             raise ValueError('Destination is not a terminal.')
 
         T = vector_match_transform(v1=p, v2=destination)

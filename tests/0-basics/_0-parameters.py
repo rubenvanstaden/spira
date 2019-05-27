@@ -1,51 +1,50 @@
-import spira.all as spira
 import numpy as np
-from spira.core import param
+import spira.all as spira
 
 
 class TestDefault(spira.Cell):
 
-    _integer = param.IntegerField(doc='Integer docstring.')
-    _float = param.FloatField(doc='Float docstring.')
-    _string = param.StringField(doc='String docstring.')
-    _bool = param.BoolField(doc='Boolean docstring.')
-    _list = param.ListField(doc='List docstring.')
-    _dict = param.DictField(doc='Dictionary docstring.')
-    _numpy = param.NumpyArrayField(doc='Numpy Array docstring.')
+    _integer = spira.IntegerField(doc='Integer docstring.')
+    _float = spira.FloatField(doc='Float docstring.')
+    _string = spira.StringField(doc='String docstring.')
+    _bool = spira.BoolField(doc='Boolean docstring.')
+    _list = spira.ListField(doc='List docstring.')
+    _dict = spira.DictField(doc='Dictionary docstring.')
+    _numpy = spira.NumpyArrayField(doc='Numpy Array docstring.')
 
 
 class TestDefaultSet(spira.Cell):
 
-    _integer = param.IntegerField(default=1)
-    _float = param.FloatField(default=1.0)
-    _string = param.StringField(default='Yes')
-    _bool = param.BoolField(default=True)
-    _list = param.ListField(default=[1, 0, 3])
-    _dict = param.DictField(default={'number': 1, 'datatype': 0})
-    _numpy = param.NumpyArrayField(default=np.array([1, 2, 3]))
+    _integer = spira.IntegerField(default=1)
+    _float = spira.FloatField(default=1.0)
+    _string = spira.StringField(default='Yes')
+    _bool = spira.BoolField(default=True)
+    _list = spira.ListField(default=[1, 0, 3])
+    _dict = spira.DictField(default={'number': 1, 'datatype': 0})
+    _numpy = spira.NumpyArrayField(default=np.array([1, 2, 3]))
 
 
 class TestErrors(spira.Cell):
 
-    _integer = param.IntegerField(default=1.0)
-    _float = param.FloatField(default=1)
-    _string = param.StringField(default=2)
-    _bool = param.BoolField(default='True')
-    _list = param.ListField(default=np.array([1, 0, 3]))
-    _dict = param.DictField(default=1)
-    _numpy = param.NumpyArrayField(default=[1, 2, 3])
+    _integer = spira.IntegerField(default=1.0)
+    _float = spira.FloatField(default=1)
+    _string = spira.StringField(default=2)
+    _bool = spira.BoolField(default='True')
+    _list = spira.ListField(default=np.array([1, 0, 3]))
+    _dict = spira.DictField(default=1)
+    _numpy = spira.NumpyArrayField(default=[1, 2, 3])
 
 
 class TestFields(spira.Cell):
 
-    layer = param.LayerField(doc='Layer docstring.')
-    color = param.ColorField(doc='Color docstring.')
-    label = param.LabelField(doc='Label docsring.')
-    port = param.PortField(doc='Port docstring.')
-    shape = param.ShapeField(doc='Shape docstring.')
-    cell = param.CellField(doc='Cell docstring.')
-    ps_layer = param.PhysicalLayerField(doc='Player docstring.')
-    polygon = param.PolygonField(doc='Polygon docstring.')
+    layer = spira.LayerField(doc='Layer docstring.')
+    color = spira.ColorField(doc='Color docstring.')
+    shape = spira.ShapeField(doc='Shape docstring.')
+    cell = spira.CellField(doc='Cell docstring.')
+    ps_layer = spira.PhysicalLayerField(doc='Player docstring.')
+    # label = spira.LabelField(doc='Label docsring.')
+    # port = spira.PortField(doc='Port docstring.')
+    # polygon = spira.PolygonField(doc='Polygon docstring.')
     print(layer.__doc__)
 
 
@@ -59,12 +58,12 @@ if __name__ == '__main__':
     
     print(TestFields.layer.__doc__)
     print(TestFields.color.__doc__)
-    print(TestFields.label.__doc__)
-    print(TestFields.port.__doc__)
     print(TestFields.shape.__doc__)
     print(TestFields.cell.__doc__)
     print(TestFields.ps_layer.__doc__)
-    print(TestFields.polygon.__doc__)
+    # print(TestFields.label.__doc__)
+    # print(TestFields.port.__doc__)
+    # print(TestFields.polygon.__doc__)
 
     # print(cell.layer.__doc__)
     # print(cell.color.__doc__)

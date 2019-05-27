@@ -1,8 +1,8 @@
 import spira.all as spira
 from spira.yevon.geometry import shapes
 from spira.yevon.geometry.coord import Coord
-from spira.yevon.rdd import get_rule_deck
 from spira.yevon.utils.debugging import *
+from spira.yevon.rdd import get_rule_deck
 
 
 RDD = get_rule_deck()

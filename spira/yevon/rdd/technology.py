@@ -79,6 +79,13 @@ class DataTree(__DataTree__):
     def __repr__(self):
         return '[DataTree] ({} keys)'.format(len(self.keys))
 
+        
+class PropertyTree(__DataTree__):
+    """ A hierarchical tree for storing fabrication data. """
+
+    def __repr__(self):
+        return '[PropertyTree] ({} keys)'.format(len(self.keys))
+
 
 class PhysicalTree(__DataTree__):
     """ A hierarchical tree for storing process layer settings. """

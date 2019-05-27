@@ -44,7 +44,7 @@ class __Group__(FieldInitializer):
         elif elemental is None:
             return self
         elif issubclass(type(elemental), __Port__):
-            self.ports += other
+            self.ports += elemental
         else:
             raise TypeError("Invalid type " + str(type(elemental)) + " in __Group__.__iadd__().")
         return self

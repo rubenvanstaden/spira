@@ -91,7 +91,9 @@ class GenericTransform(ReversibleTransform):
 
     def __reflect_array__(self, coords, p1=(0,0), p2=(1,0)):
         if self.reflection is True:
-            points = np.array(coords); p1 = np.array(p1); p2 = np.array(p2)
+            points = np.array(coords)
+            p1 = np.array(p1)
+            p2 = np.array(p2)
             if np.asarray(points).ndim == 1:
                 raise ValueError('This is a coordinate, not an array.')
             if np.asarray(points).ndim == 2:
@@ -117,14 +119,14 @@ class GenericTransform(ReversibleTransform):
         return coords
 
     def apply_to_coord(self, coord):
-        # coord = self.__reflect__(coord)
+        coord = self.__reflect__(coord)
         coord = self.__rotate__(coord)
         coord = self.__magnify__(coord)
         coord = self.__translate__(coord)
         return coord
 
     def apply_to_array(self, coords):
-        # coords = self.__reflect_array__(coords)
+        coords = self.__reflect_array__(coords)
         coords = self.__rotate_array__(coords)
         coords = self.__magnify_array__(coords)
         coords = self.__translate_array__(coords)

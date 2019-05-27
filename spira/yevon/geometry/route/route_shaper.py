@@ -8,11 +8,11 @@ from numpy import sqrt, pi, cos, sin, log, exp, sinh, mod
 
 from spira.core.parameters.variables import *
 from spira.yevon.geometry.shapes import ShapeField
-from spira.yevon.rdd.layer import PhysicalLayerField
-from spira.yevon.layer import LayerField
+from spira.yevon.rdd.physical_layer import PhysicalLayerField
+from spira.yevon.rdd.gdsii_layer import LayerField
 from spira.yevon.geometry.coord import CoordField, Coord
 from spira.core.parameters.descriptor import DataField, FunctionField
-from spira.yevon.geometry.ports.base import PortField
+from spira.yevon.geometry.ports.port import PortField
 from spira.yevon.rdd import get_rule_deck
 from spira.yevon import constants
 
@@ -285,7 +285,8 @@ class RoutePointShape(__RouteSimple__):
 class RouteGeneral(Cell):
 
     route_shape = ShapeField(doc='Shape of the routing polygon.')
-    connect_layer = PhysicalLayerField(default=RDD.DEF.PDEFAULT)
+    connect_layer = PhysicalLayerField()
+    # connect_layer = PhysicalLayerField(default=RDD.DEF.PDEFAULT)
 
     port_input = DataField(fdef_name='create_port_input')
     port_output = DataField(fdef_name='create_port_output')
@@ -301,7 +302,7 @@ class RouteGeneral(Cell):
         return ll
 
     def create_port_input(self):
-        term = spira.Terminal(name='P1',
+        term = spira.Port(name='P1',
             midpoint=self.route_shape.m1,
             width=self.route_shape.w1,
             orientation=self.route_shape.o1,
@@ -310,7 +311,7 @@ class RouteGeneral(Cell):
         return term
 
     def create_port_output(self):
-        term = spira.Terminal(name='P2',
+        term = spira.Port(name='P2',
             midpoint=self.route_shape.m2,
             width=self.route_shape.w2,
             orientation=self.route_shape.o2,
@@ -319,7 +320,6 @@ class RouteGeneral(Cell):
         return term
 
     def create_elementals(self, elems):
-        from spira.yevon import process as pc
         poly = pc.Polygon(
             points=self.route_shape.points,
             ps_layer=self.connect_layer,

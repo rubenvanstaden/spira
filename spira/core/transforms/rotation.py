@@ -75,16 +75,18 @@ class Rotation(__ConvertableTransform__):
         return coord
 
     def apply_to_array(self, coords):
-        # coords = coords[0]
         coords = self.__rotate_array__(coords)
         coords = self.__translate_array__(coords)
-        # coords = np.array([coords])
         return coords
 
     def apply_to_angle(self, angle):
         a = angle
         a += self.rotation
         return a % 360.0
+
+
+def shape_rotate(shape, rotation=90, rotation_center=(0,0)):
+    return Rotation(rotation, rotation_center)(shape)
 
 
 class __RotationMixin__(object):

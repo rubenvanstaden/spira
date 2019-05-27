@@ -10,7 +10,7 @@ from spira.core.parameters.descriptor import DataField
 from spira.core.parameters.descriptor import EXTERNAL_VALUE, CACHED_VALUE
 
 
-__all__ = ['FieldInitializer', 'MetaElemental', 'MetaCell']
+__all__ = ['FieldInitializer']
 
 
 SUPPRESSED = (None,)
@@ -340,56 +340,4 @@ class FieldInitializer(__ParameterInitializer__):
     def validate_parameters(self):
         return True
 
-
-class MetaElemental(MetaInitializer):
-
-    def __call__(cls, *params, **keyword_params):
-        kwargs = cls.__map_parameters__(*params, **keyword_params)
-        instance = super().__call__(**kwargs)
-        instance.__keywords__ = kwargs
-        return instance
-
-
-class MetaCell(MetaInitializer):
-    """
-    Called when an instance of a SPiRA class is
-    created. Pareses all kwargs and passes it to
-    the FieldInitializer for storing.
-
-    class Via(spira.Cell):
-        layer = param.LayerField()
-
-    Gets called here and passes
-    kwargs['layer': 50] to FieldInitializer.
-    >>> via = Via(layer=50)
-    """
-
-    _ID = 0
-
-    def __call__(cls, *params, **keyword_params):
-
-        kwargs = cls.__map_parameters__(*params, **keyword_params)
-
-        from spira import settings
-        lib = None
-        if 'library' in kwargs:
-            lib = kwargs['library']
-            del(kwargs['library'])
-        if lib is None:
-            lib = settings.get_library()
-
-        if 'name' in kwargs:
-            if kwargs['name'] is None:
-                kwargs['__name_prefix__'] = cls.__name__
-
-        cls.__keywords__ = kwargs
-        cls = super().__call__(**kwargs)
-
-        retrieved_cell = lib.get_cell(cell_name=cls.name)
-        if retrieved_cell is None:
-            lib += cls
-            return cls
-        else:
-            del cls
-            return retrieved_cell
 

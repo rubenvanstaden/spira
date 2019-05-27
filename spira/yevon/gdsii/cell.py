@@ -12,7 +12,7 @@ from spira.yevon.geometry.coord import CoordField, Coord
 from spira.yevon.visualization.color import ColorField
 from spira.yevon.visualization import color
 from spira.core.parameters.variables import NumberField
-from spira.core.parameters.initializer import MetaCell
+from spira.core.parameters.initializer import MetaInitializer
 from spira.yevon.geometry.ports.port_list import PortList
 from spira.yevon.gdsii import *
 from spira.core.mixin import MixinBowl
@@ -24,6 +24,50 @@ RDD = get_rule_deck()
 
 
 __all__ = ['Cell', 'Connector', 'CellField']
+
+
+class MetaCell(MetaInitializer):
+    """
+    Called when an instance of a SPiRA class is
+    created. Pareses all kwargs and passes it to
+    the FieldInitializer for storing.
+
+    class Via(spira.Cell):
+        layer = param.LayerField()
+
+    Gets called here and passes
+    kwargs['layer': 50] to FieldInitializer.
+    >>> via = Via(layer=50)
+    """
+
+    _ID = 0
+
+    def __call__(cls, *params, **keyword_params):
+
+        kwargs = cls.__map_parameters__(*params, **keyword_params)
+
+        from spira import settings
+        lib = None
+        if 'library' in kwargs:
+            lib = kwargs['library']
+            del(kwargs['library'])
+        if lib is None:
+            lib = settings.get_library()
+
+        if 'name' in kwargs:
+            if kwargs['name'] is None:
+                kwargs['__name_prefix__'] = cls.__name__
+
+        cls.__keywords__ = kwargs
+        cls = super().__call__(**kwargs)
+
+        retrieved_cell = lib.get_cell(cell_name=cls.name)
+        if retrieved_cell is None:
+            lib += cls
+            return cls
+        else:
+            del cls
+            return retrieved_cell
 
 
 class __Cell__(FieldInitializer, metaclass=MetaCell):
@@ -151,7 +195,7 @@ class CellAbstract(gdspy.Cell, __Cell__):
     def flat_expand_transform_copy(self):
         from spira.yevon.gdsii.sref import SRef
         from spira.yevon.gdsii.polygon import Polygon
-        from spira.yevon.geometry.ports.terminal import Terminal
+        from spira.yevon.geometry.ports.port import Port
         S = self.expand_transform()
         C = self.__class__(name=S.name + '_ExpandedCell')
         def flat_polygons(subj, cell):
@@ -161,7 +205,7 @@ class CellAbstract(gdspy.Cell, __Cell__):
                 elif isinstance(e, SRef):
                     flat_polygons(subj=subj, cell=e.ref)
             for p in cell.ports:
-                port = Terminal(
+                port = Port(
                     name=p.name + "_" + cell.name,
                     midpoint=deepcopy(p.midpoint),
                     orientation=deepcopy(p.orientation),
@@ -280,13 +324,13 @@ class Cell(CellAbstract):
 
 class Connector(Cell):
     """
-    Terminals are horizontal ports that connect SRef instances
+    Ports are horizontal ports that connect SRef instances
     in the horizontal plane. They typcially represents the
     i/o ports of a components.
 
     Examples
     --------
-    >>> term = spira.Terminal()
+    >>> term = spira.Port()
     """
 
     midpoint = CoordField()
@@ -300,8 +344,8 @@ class Connector(Cell):
         )
 
     def create_ports(self, ports):
-        ports += Terminal(name='P1', midpoint=self.midpoint, width=self.width, orientation=self.orientation)
-        ports += Terminal(name='P2', midpoint=self.midpoint, width=self.width, orientation=self.orientation-180)
+        ports += Port(name='P1', midpoint=self.midpoint, width=self.width, orientation=self.orientation)
+        ports += Port(name='P2', midpoint=self.midpoint, width=self.width, orientation=self.orientation-180)
         return ports
 
 

@@ -18,43 +18,49 @@ START_MESSAGE = '{} - {}'.format(VERSION, COPYRIGHT_INFO)
 
 # ----------------------------- Default Globals --------------------------------
 
-DEG2RAD = np.pi / 180.0
-RAD2DEG = 180.0 / np.pi
-
-_current_library = None
+_current_gdsii_library = None
+_current_layerlist = None
 
 DEFAULT_LIBRARY = None
-
-SCALE_UP = 1e+6
-SCALE_DOWN = 1e-6
-OFFSET = 0.3
 
 # ----------------------------- Initialize Library -----------------------------
 
 def initialize():
-    from spira.yevon.gdsii.library import Library
     from spira.yevon.rdd.settings import RDD
+    from spira.yevon.gdsii.library import Library
+    from spira.yevon.rdd.layer_list import LayerList
 
-    global DEFAULT_LIBRARY 
+    global DEFAULT_LIBRARY
     DEFAULT_LIBRARY = Library('SPiRA-default',
         unit=RDD.GDSII.UNIT,
         precision=RDD.GDSII.PRECISION
     )
 
     set_library(DEFAULT_LIBRARY)
+    set_current_layerlist(LayerList())
 
 
 def set_library(library):
     """ Set the working library. """
-    global _current_library
-    _current_library = library
+    global _current_gdsii_library
+    _current_gdsii_library = library
 
 
 def get_library():
     """ Return current working library. """
-    if _current_library is None:
+    if _current_gdsii_library is None:
         initialize()
-    return _current_library
+    return _current_gdsii_library
 
-# --------------------------------- Extras -------------------------------------
+
+def get_current_layerlist():
+    from spira.yevon.rdd.layer_list import LAYER_LIST
+    if _current_layerlist is None:
+        return LAYER_LIST
+    return _current_layerlist
+
+
+def set_current_layerlist(layerlist):
+    global _current_layerlist
+    _current_layerlist = layerlist
 

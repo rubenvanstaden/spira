@@ -9,6 +9,7 @@ from spira.yevon import constants
 # from spira.yevon.geometry.bbox_info import *
 from spira.yevon.geometry import bbox_info
 from spira.core.parameters.variables import *
+from spira.core.transformable import Transformable
 from spira.yevon.geometry.ports.port_list import PortList
 from spira.yevon.geometry.coord import CoordField, Coord
 from spira.core.parameters.initializer import FieldInitializer
@@ -58,7 +59,7 @@ class PointArrayField(DataFieldDescriptor):
         self.__externally_set_parameter_value__(obj, points)
 
 
-class __Shape__(FieldInitializer):
+class __Shape__(Transformable, FieldInitializer):
 
     center = CoordField()
     clockwise = BoolField(default=False)
@@ -209,8 +210,8 @@ def ShapeField(points=[], doc='', restriction=None, preprocess=None, **kwargs):
     return DataFieldDescriptor(restrictions=R, preprocess=P, **kwargs)
 
 
-from spira.yevon.layer import Layer
-from spira.yevon.geometry.ports.terminal import EdgeTerminal
+from spira.yevon.rdd.gdsii_layer import Layer
+from spira.yevon.geometry.ports.port import Port
 def shape_edge_ports(shape, layer, local_pid):
 
     xpts = list(shape.x_coords)
@@ -235,24 +236,53 @@ def shape_edge_ports(shape, layer, local_pid):
         orientation = (np.arctan2(x, y) * constants.RAD2DEG)
         midpoint = [(xpts[i+1] + xpts[i])/2, (ypts[i+1] + ypts[i])/2]
         width = np.abs(np.sqrt((xpts[i+1] - xpts[i])**2 + (ypts[i+1]-ypts[i])**2))
-        P = EdgeTerminal(
+        P = Port(
             name=name,
-            # gds_layer=self.layer,
             bbox=bbox,
-            gds_layer=layer,
+            # layer=layer,
             midpoint=midpoint,
             orientation=orientation,
             width=width,
-            length=0.5*1e6,
-            edgelayer=Layer(number=70),
-            arrowlayer=Layer(number=78),
+            length=0.2*1e6,
             local_pid=local_pid
         )
         edges += P
     return edges
 
 
+# def shape_reflect(self, p1=(0,1), p2=(0,0)):
+#     """ Reflect across a line. """
+#     points = np.array(self.points[0])
+#     p1 = np.array(p1)
+#     p2 = np.array(p2)
+#     if np.asarray(points).ndim == 1:
+#         t = np.dot((p2-p1), (points-p1))/norm(p2-p1)**2
+#         pts = 2*(p1 + (p2-p1)*t) - points
+#     if np.asarray(points).ndim == 2:
+#         pts = np.array([0, 0])
+#         for p in points:
+#             t = np.dot((p2-p1), (p-p1))/norm(p2-p1)**2
+#             r = np.array(2*(p1 + (p2-p1)*t) - p)
+#             pts = np.vstack((pts, r))
+#     self.points = [pts]
+#     return self
 
 
+# def shape_rotate(self, angle=45, center=(0,0)):
+#     """ Rotate points with an angle around a center. """
+#     points = np.array(self.points[0])
+#     angle = angle*np.pi/180
+#     ca = np.cos(angle)
+#     sa = np.sin(angle)
+#     sa = np.array((-sa, sa))
+#     c0 = np.array(center)
+#     if np.asarray(points).ndim == 2:
+#         pts = (points - c0) * ca + (points - c0)[:,::-1] * sa + c0
+#         pts = np.round(pts, 6)
+#     if np.asarray(points).ndim == 1:
+#         pts = (points - c0) * ca + (points - c0)[::-1] * sa + c0
+#         pts = np.round(pts, 6)
+#     self.points = [pts]
+#     return self
 
 

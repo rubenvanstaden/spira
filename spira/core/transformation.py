@@ -99,8 +99,6 @@ class CompoundTransform(Transform):
             self.__subtransforms__ = transforms
         elif isinstance(transforms, CompoundTransform):
             self.__subtransforms__ = []
-            print(self.__subtransforms__)
-            print(transforms)
             self.__subtransforms__.extend(transforms)
         else:
             self.__subtransforms__ = [transforms]

@@ -3,11 +3,11 @@ from spira.yevon.geometry.ports.port_list import PortListField
 from spira.core.transformable import Transformable
 from spira.yevon.gdsii.elem_list import ElementalListField
 from spira.core.parameters.descriptor import DataField
-from spira.yevon.layer import LayerField
+from spira.yevon.rdd.gdsii_layer import LayerField
 from spira.core.parameters.variables import *
 from spira.yevon import constants
 from spira.yevon.geometry.ports.port import Port
-from spira.yevon.layer import Layer
+from spira.yevon.rdd.gdsii_layer import Layer
 from spira.yevon.rdd import get_rule_deck
 from spira.yevon.geometry import shapes
 
@@ -72,19 +72,19 @@ class PolygonPortProperty(TransformablePortProperty):
         if self.error != 0:
             layer = Layer(
                 name=self.name,
-                number=self.layer_number,
+                number=self.layer.number,
                 datatype=self.error
             )
         elif self.level != 0:
             layer = Layer(
                 name=self.name,
-                number=self.layer_number,
+                number=self.layer.number,
                 datatype=self.level
             )
         else:
             layer = Layer(
                 name=self.name,
-                number=self.layer_number,
+                number=self.layer.number,
                 datatype=self.layer_datatype
             )
         return layer
@@ -92,7 +92,7 @@ class PolygonPortProperty(TransformablePortProperty):
     def create_metal_port(self):
         layer = Layer(
             name=self.name,
-            number=self.ps_layer.layer.number,
+            number=self.layer.layer.number,
             datatype=RDD.PURPOSE.METAL.datatype
         )
         return Port(
@@ -125,23 +125,38 @@ class PolygonPortProperty(TransformablePortProperty):
         return [p1, p2]
 
     def create_edge_ports(self, edges):
-        return shapes.shape_edge_ports(self.shape, self.ps_layer, self.id_string())
+        return shapes.shape_edge_ports(self.shape, self.layer, self.id_string())
 
     def create_ports(self, ports):
         # if self.enable_edges:
-        if self.ps_layer.purpose == RDD.PURPOSE.PRIM.JUNCTION:
-            ports += self.contact_ports
-        elif self.ps_layer.purpose == RDD.PURPOSE.PRIM.VIA:
-            ports += self.contact_ports
-        elif self.ps_layer.purpose == RDD.PURPOSE.METAL:
-            if self.level == 1:
-                ports += self.metal_port
-            for edge in self.edge_ports:
-                ports += edge
-        elif self.ps_layer.purpose == RDD.PURPOSE.PROTECTION:
-            for edge in self.edge_ports:
-                ports += edge
+        for edge in self.edge_ports:
+            ports += edge
+        # layer = RDD.GDSII.EXPORT_LAYER_MAP[self.layer]
+        # if layer.datatype == RDD.PURPOSE.METAL:
+        #     if self.level == 1:
+        #         ports += self.metal_port
+        #     for edge in self.edge_ports:
+        #         ports += edge
+        # elif self.layer.purpose == RDD.PURPOSE.PROTECTION:
+        #     for edge in self.edge_ports:
+        #         ports += edge
         return ports
+
+    # def create_ports(self, ports):
+    #     # if self.enable_edges:
+    #     if self.layer.purpose == RDD.PURPOSE.JUNCTION:
+    #         ports += self.contact_ports
+    #     elif self.layer.purpose == RDD.PURPOSE.VIA:
+    #         ports += self.contact_ports
+    #     elif self.layer.purpose == RDD.PURPOSE.METAL:
+    #         if self.level == 1:
+    #             ports += self.metal_port
+    #         for edge in self.edge_ports:
+    #             ports += edge
+    #     elif self.layer.purpose == RDD.PURPOSE.PROTECTION:
+    #         for edge in self.edge_ports:
+    #             ports += edge
+    #     return ports
             
     
 

@@ -1,7 +1,6 @@
 import spira.all as spira
 import numpy as np
 from spira.yevon.geometry import shapes
-from spira.yevon import process as pc
 from spira.yevon.geometry.route.route_shaper import RouteSimple, RouteGeneral
 from spira.yevon.geometry.route.manhattan import __Manhattan__
 
@@ -103,7 +102,6 @@ class Route90Base(__Manhattan__):
         r2 = self.route_straight(self.b2.ports['P1'], self.ports['T2'])
 
         D = spira.Cell(name='Route_Q4_90')
-        print('nuiefbubwfipwe wbfiuwebifbuiwebfifbuwep ibweuipffehw uwewei hfwu ewi f')
         D += [self.b2, r1, r2]
 
         D += self.ports['T1']
@@ -166,21 +164,21 @@ class Route90(Route90Base):
         p1_angle = np.mod(self.port1.orientation, 360)
 
         if angle == 90:
-            ports += spira.Terminal(name='T1',
+            ports += spira.Port(name='T1',
                 width=self.port1.width,
                 orientation=90
             )
-            ports += spira.Terminal(name='T2',
+            ports += spira.Port(name='T2',
                 midpoint=list(np.subtract(p2, p1)),
                 width=self.port2.width,
                 orientation=180
             )
         else:
-            ports += spira.Terminal(name='T1',
+            ports += spira.Port(name='T1',
                 width=self.port1.width,
                 orientation=90
             )
-            ports += spira.Terminal(name='T2',
+            ports += spira.Port(name='T2',
                 midpoint=list(np.subtract(p2, p1)),
                 width=self.port2.width,
                 orientation=0

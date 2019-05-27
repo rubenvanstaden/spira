@@ -68,7 +68,6 @@ class Vector(Transformable, FieldInitializer):
         return Vector(midpoint=self.midpoint, orientation=(self.__angle__ + 180.0) % 360.0)
 
     def __getitem__(self, key):
-        # Behave like a coordinate.
         if key == 0:
             return self.midpoint[0]
         if key == 1:

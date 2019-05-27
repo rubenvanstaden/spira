@@ -6,8 +6,8 @@ import networkx as nx
 import spira.all as spira
 from spira.yevon.geometry import shapes
 from spira.yevon.gdsii.group import Group
-from spira.core.initializer import FieldInitializer
-from spira.yevon.utils import numpy_to_list
+from spira.core.parameters.initializer import FieldInitializer
+from spira.yevon.utils.geometry import numpy_to_list
 from spira.yevon.rdd import get_rule_deck
 
 

@@ -1,6 +1,5 @@
 import spira.all as spira
 import numpy as np
-from spira.yevon import process as pc
 from spira.yevon.geometry import shapes
 from spira.yevon.geometry.route.route_shaper import RouteSimple
 from spira.yevon.geometry.route.route_shaper import RouteGeneral
@@ -387,11 +386,11 @@ class Route180(RouteBase180, RouteParallel):
 
         angle_diff = self.port1.orientation - self.port2.orientation
         if self.port1.orientation == self.port2.orientation:
-            ports += spira.Terminal(name='T1',
+            ports += spira.Port(name='T1',
                 width=self.port1.width,
                 orientation=0
             )
-            ports += spira.Terminal(name='T2',
+            ports += spira.Port(name='T2',
                 midpoint=list(np.subtract(self.p2, self.p1)),
                 width=self.port2.width,
                 orientation=0
@@ -400,12 +399,12 @@ class Route180(RouteBase180, RouteParallel):
             raise ValueError("2. [DEVICE] route() error: Ports do not " +
                 "face each other (orientations must be 180 apart)")
         else:
-            ports += spira.Terminal(name='T1',
+            ports += spira.Port(name='T1',
                 width=self.port1.width,
                 orientation=90
                 # orientation=0
             )
-            ports += spira.Terminal(name='T2',
+            ports += spira.Port(name='T2',
                 midpoint=list(np.subtract(self.p2, self.p1)),
                 width=self.port2.width,
                 orientation=-90

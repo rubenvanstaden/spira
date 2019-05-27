@@ -60,7 +60,7 @@
 # def TermField(midpoint=[0, 0], **kwargs):
 #     from spira.yevon.gdsii.term import Term
 #     if 'default' not in kwargs:
-#         kwargs['default'] = Terminal(midpoint=midpoint)
+#         kwargs['default'] = Port(midpoint=midpoint)
 #     R = RestrictType(Term)
 #     return DataFieldDescriptor(restrictions=R, **kwargs)
 

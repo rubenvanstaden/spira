@@ -29,7 +29,7 @@ class __NetlistSimplifier__(object):
                         locked_nodes.append(n)
             elif 'device' in self.g.node[n]:
                 D = self.g.node[n]['device']
-                if not isinstance(D, spira.spira.EdgeTerminal):
+                if not isinstance(D, spira.spira.Port):
                     locked_nodes.append(n)
         for n in self.g.nodes():
             if n not in locked_nodes:
@@ -51,7 +51,7 @@ class __NetlistSimplifier__(object):
             if 'device' in self.g.node[n]:
                 D = self.g.node[n]['device']
                 if issubclass(type(D), __Port__):
-                    if not isinstance(D, spira.spira.EdgeTerminal):
+                    if not isinstance(D, spira.spira.Port):
                         valid = False
                 if issubclass(type(D), spira.SRef):
                     valid = False
@@ -88,13 +88,13 @@ class __NetlistSimplifier__(object):
         if issubclass(type(Ds), spira.SRef):
             source = 'source: {}'.format(Ds.ref.name)
         elif issubclass(type(Ds), __Port__):
-            if not isinstance(Ds, spira.spira.EdgeTerminal):
+            if not isinstance(Ds, spira.spira.Port):
                 source = 'source: {}'.format(Ds.name)
 
         if issubclass(type(Dt), spira.SRef):
             target = 'target: {}'.format(Dt.ref.name)
         elif issubclass(type(Dt), __Port__):
-            if not isinstance(Dt, spira.spira.EdgeTerminal):
+            if not isinstance(Dt, spira.spira.Port):
                 target = 'target: {}'.format(Dt.name)
 
         return "\n".join([ntype, number, source, target])
@@ -112,7 +112,7 @@ class NetlistSimplifier(__NetlistSimplifier__):
                 if isinstance(D, spira.Dummy):
                     branch_nodes.append(n)
                 if issubclass(type(D), (__Port__, spira.SRef)):
-                    if not isinstance(D, spira.spira.EdgeTerminal):
+                    if not isinstance(D, spira.spira.Port):
                         branch_nodes.append(n)
         return branch_nodes
 
@@ -141,8 +141,8 @@ class NetlistSimplifier(__NetlistSimplifier__):
         for n in self.g.nodes():
             if 'device' in self.g.node[n]:
                 D = self.g.node[n]['device']
-                if issubclass(type(D), spira.Terminal):
-                    if not isinstance(D, spira.spira.EdgeTerminal):
+                if issubclass(type(D), spira.Port):
+                    if not isinstance(D, spira.spira.Port):
                         branch_nodes.append(n)
         return branch_nodes
 
@@ -179,7 +179,7 @@ class NetlistSimplifier(__NetlistSimplifier__):
                         name='Dummy',
                         midpoint=N.position,
                         color=color.COLOR_DARKSEA_GREEN,
-                        node_id=self.g.node[n]['pos']
+                        node_id=self.g.node[n]['position']
                     )
                     del self.g.node[n]['branch']
 

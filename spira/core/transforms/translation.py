@@ -6,6 +6,7 @@ from spira.core.transforms.generic import __ConvertableTransform__, GenericTrans
 
 
 class Translation(__ConvertableTransform__):
+    """  """
 
     def __init__(self, translation=(0,0), **kwargs):
         super().__init__(translation=translation, **kwargs)
@@ -29,7 +30,9 @@ class Translation(__ConvertableTransform__):
         if other is None:
             return deepcopy(self)
         if isinstance(other, Translation):
-            return Translation(Coord(self.translation.x + other.translation.x, self.translation[1] + other.translation[1]))
+            x = self.translation.x + other.translation.x
+            y = self.translation[1] + other.translation[1]
+            return Translation(Coord(x, y))
         else:
             return __ConvertableTransform__.__add__(self, other)
 
@@ -38,7 +41,9 @@ class Translation(__ConvertableTransform__):
         if other is None:
             return self
         if isinstance(other, Translation):
-            self.translation = Coord(self.translation.x + other.translation.x, self.translation.y + other.translation.y)
+            x = self.translation.x + other.translation.x
+            y = self.translation.y + other.translation.y
+            self.translation = Coord(x, y)
             return self
         else:
             return GenericTransform.__iadd__(self, other)
@@ -49,18 +54,16 @@ class Translation(__ConvertableTransform__):
 
     def is_identity(self):
         """ Returns True if the transformation does nothing """
-        return ((self.translation.x == 0.0) and
-                (self.translation.y == 0.0) )
+        return ((self.translation.x == 0.0) and (self.translation.y == 0.0) )
+
+
+def shape_translate(shape, translation=(1,0)):
+    return Translation(translation)(shape)
 
 
 class __TranslationMixin__(object):
-    # def move(self, position):
-    #     return self.transform(Translation(position))
 
-    # def move_copy(self, position):
-    #     return self.transform_copy(Translation(position))
-
-    def _translate(self, translation=(0,0)):
+    def translate(self, translation=(0,0)):
         return self.transform(Translation(translation))
 
     def translate_copy(self, position):

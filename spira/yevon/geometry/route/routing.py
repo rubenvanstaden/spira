@@ -137,7 +137,7 @@ class Route(Structure, __Manhattan__):
         term_list = []
         for x in range(0, len(self.port_list)):
             p = self.port_list[x]
-            if isinstance(p, spira.Terminal):
+            if isinstance(p, spira.Port):
                 term_list.append(p)
             elif isinstance(p, spira.Connector):
                 for c in p.ports:

@@ -7,7 +7,6 @@ import networkx as nx
 from numpy.linalg import norm
 from spira.yevon import constants
 from spira.yevon.rdd import get_rule_deck
-from spira.settings import SCALE_DOWN, SCALE_UP, OFFSET
 
 
 RDD = get_rule_deck()
@@ -18,12 +17,12 @@ def angle_diff(a1, a2):
 
 
 def angle_rad(coord, origin=(0.0, 0.0)):
-    """ absolute angle (radians) of coordinate with respect to origin"""
+    """ Absolute angle (radians) of coordinate with respect to origin"""
     return math.atan2(coord[1] - origin[1], coord[0] - origin[0])
 
 
 def angle_deg(coord, origin=(0.0, 0.0)):
-    """ absolute angle (radians) of coordinate with respect to origin"""
+    """ Absolute angle (radians) of coordinate with respect to origin"""
     return angle_rad(coord, origin) * constants.RAD2DEG
 
 
@@ -71,16 +70,16 @@ def c3d(coord):
 
 
 def scale_coord_up(coord):
-    return [c*SCALE_UP for c in coord]
+    return [c*constants.SCALE_UP for c in coord]
 
 
 def scale_coord_down(coord):
-    return [c*SCALE_DOWN for c in coord]
+    return [c*constants.SCALE_DOWN for c in coord]
 
 
 def scale_polygon_up(polygons, value=None):
     if value is None:
-        value = SCALE_UP
+        value = constants.SCALE_UP
     new_poly = []
     for points in polygons:
         # pp = [[float(p[0]*value), float(p[1]*value)] for p in points]
@@ -92,7 +91,7 @@ def scale_polygon_up(polygons, value=None):
 
 def scale_polygon_down(polygons, value=None):
     if value is None:
-        value = SCALE_DOWN
+        value = constants.SCALE_DOWN
         # value = 1
     # value = 1
     new_poly = []

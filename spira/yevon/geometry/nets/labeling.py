@@ -13,7 +13,7 @@ def device_nodes(net):
     for n, triangle in net.__triangle_nodes__().items():
         points = [geom.c2d(net.mesh_data.points[i]) for i in triangle]
         for D in net.ports:
-            if isinstance(D, (Port, Terminal)):
+            if isinstance(D, (Port, Port)):
                 if D.encloses(points):
                     net.g.node[n]['device'] = D
             else:

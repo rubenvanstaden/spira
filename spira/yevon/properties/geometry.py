@@ -2,7 +2,7 @@ import numpy as np
 from spira.yevon.properties.base import __Property__
 
 
-class __GeometryProperties__(__Property__):
+class __GeometryAspects__(__Property__):
 
     @property
     def xmax(self):
@@ -28,11 +28,11 @@ class __GeometryProperties__(__Property__):
     def dy(self):
         return (self.ymax - self.ymin)
 
-    @property
-    def pbox(self):
-        (a,b), (c,d) = self.bbox
-        points = [[[a,b], [c,b], [c,d], [a,d]]]
-        return points
+    # @property
+    # def pbox(self):
+    #     (a,b), (c,d) = self.bbox
+    #     points = [[[a,b], [c,b], [c,d], [a,d]]]
+    #     return points
 
     @property
     def center(self):

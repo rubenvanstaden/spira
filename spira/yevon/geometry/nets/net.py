@@ -1,12 +1,12 @@
 from spira.yevon.geometry.nets.base import __Net__
 from spira.core.parameters.descriptor import DataField
 from spira.core.parameters.variables import GraphField
-from spira.yevon.rdd.layer import PhysicalLayerField
+from spira.yevon.rdd.physical_layer import PhysicalLayerField
 from spira.yevon.rdd import get_rule_deck
 from spira.yevon.properties.port import PortProperty
 from spira.yevon.utils import geometry as geom
 from spira.yevon.geometry.ports.port import Port
-from spira.yevon.geometry.ports.terminal import Terminal
+from spira.yevon.geometry.ports.port import Port
 
 
 RDD = get_rule_deck()
@@ -32,14 +32,14 @@ class Net(__Net__, PortProperty):
         for key, nodes in triangles.items():
             for n in nodes:
                 for poly in self.elementals:
-                    if poly.encloses(self.g.node[n]['pos']):
+                    if poly.encloses(self.g.node[n]['position']):
                         self.g.node[n]['surface'] = poly
 
     def create_device_nodes(self):
         for n, triangle in self.__triangle_nodes__().items():
             points = [geom.c2d(self.mesh_data.points[i]) for i in triangle]
             for D in self.ports:
-                if isinstance(D, (Port, Terminal)):
+                if isinstance(D, (Port, Port)):
                     if D.encloses(points):
                         self.g.node[n]['device'] = D
                 else:
@@ -59,13 +59,13 @@ class Net(__Net__, PortProperty):
             if issubclass(type(R), pc.ProcessLayer):
                 R_ply = R.elementals[0]
                 for n in self.g.nodes():
-                    if R_ply.encloses(self.g.node[n]['pos']):
+                    if R_ply.encloses(self.g.node[n]['position']):
                         self.g.node[n]['route'] = R
             else:
                 for pp in R.ref.metals:
                     R_ply = pp.elementals[0]
                     for n in self.g.nodes():
-                        if R_ply.encloses(self.g.node[n]['pos']):
+                        if R_ply.encloses(self.g.node[n]['position']):
                             self.g.node[n]['route'] = pp
 
         for R in self.route_nodes:
@@ -80,7 +80,7 @@ class Net(__Net__, PortProperty):
             for B in self.bounding_boxes:
                 for ply in B.elementals.polygons:
                     for n in self.g.nodes():
-                        if ply.encloses(self.g.node[n]['pos']):
+                        if ply.encloses(self.g.node[n]['position']):
                             self.g.node[n]['device'] = B.S
                             self.g.node[n]['device'].node_id = '{}_{}'.format(B.S.ref.name, B.S.midpoint)
 

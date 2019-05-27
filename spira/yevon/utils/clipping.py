@@ -3,8 +3,6 @@ import numpy as np
 import spira.all as spira
 from spira.yevon import constants
 
-from spira.settings import SCALE_DOWN, SCALE_UP, OFFSET
-
 
 st = pyclipper.scale_to_clipper
 sf = pyclipper.scale_from_clipper
@@ -134,7 +132,7 @@ def boolean(subj, clip=None, method=None, closed=True, scale=1):
     return value
 
 
-def offset(points, offset_type=None, scale=OFFSET):
+def offset(points, offset_type=None, scale=constants.OFFSET):
     """ Apply polygon offsetting using Angusj.
     Either blow up polygons or blow it down. """
     pco = pyclipper.PyclipperOffset()
@@ -143,7 +141,7 @@ def offset(points, offset_type=None, scale=OFFSET):
     if offset_type == 'down':
         pp = pco.Execute(-10000)[0]
     elif offset_type == 'up':
-        pp = pco.Execute(scale * SCALE_UP)
+        pp = pco.Execute(scale * constants.SCALE_UP)
     else:
         raise ValueError('Please select the Offset function to use')
     points = []

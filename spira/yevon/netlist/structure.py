@@ -1,6 +1,5 @@
 import numpy as np
 import spira.all as spira
-from spira.yevon import process as pc
 from spira.yevon.netlist.containers import __CellContainer__, __NetContainer__
 from copy import copy, deepcopy
 import networkx as nx
@@ -60,7 +59,7 @@ class __NetlistCell__(__NetContainer__):
 
             device = nx.get_node_attributes(S, 'device')
             surface = nx.get_node_attributes(S, 'surface')
-            center = nx.get_node_attributes(S, 'pos')
+            center = nx.get_node_attributes(S, 'position')
             route = nx.get_node_attributes(S, 'route')
             branch = nx.get_node_attributes(S, 'branch')
 
@@ -82,7 +81,7 @@ class __NetlistCell__(__NetContainer__):
         else:
             raise ValueError('Compare algorithm not implemented!')
 
-        Pos = nx.get_node_attributes(Q, 'pos')
+        Pos = nx.get_node_attributes(Q, 'position')
         Device = nx.get_node_attributes(Q, 'device')
         Polygon = nx.get_node_attributes(Q, 'surface')
         Route = nx.get_node_attributes(Q, 'route')
@@ -99,7 +98,7 @@ class __NetlistCell__(__NetContainer__):
         for n in g1.nodes():
             for key, value in Pos.items():
                 if n == list(key)[0]:
-                    g1.node[n]['pos'] = [value[0], value[1]]
+                    g1.node[n]['position'] = [value[0], value[1]]
 
             for key, value in Device.items():
                 if n == list(key)[0]:

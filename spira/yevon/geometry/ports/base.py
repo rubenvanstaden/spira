@@ -8,31 +8,41 @@ from spira.yevon import utils
 
 from spira.yevon.visualization import color
 from spira.yevon.gdsii.base import __Elemental__
-from spira.yevon.rdd import get_rule_deck
 
 from spira.core.parameters.variables import *
 from spira.yevon.visualization.color import ColorField
-from spira.yevon.layer import LayerField
+from spira.yevon.rdd.gdsii_layer import LayerField
 from spira.core.parameters.descriptor import DataField
 from spira.yevon.geometry.coord import CoordField, Coord
-from spira.yevon.rdd.layer import PhysicalLayerField
+from spira.yevon.rdd.physical_layer import PhysicalLayerField
 from spira.yevon.geometry.vector import Vector
+from spira.core.parameters.descriptor import RestrictedParameter
+from spira.core.parameters.initializer import FieldInitializer
+from spira.yevon.rdd.process_layer import ProcessField
+from spira.yevon.rdd.purpose_layer import PurposeLayerField
+from spira.yevon.rdd import get_rule_deck
 
 
 RDD = get_rule_deck()
 
 
-class __Port__(__Elemental__):
+class __Port__(FieldInitializer):
+    """  """
 
+    doc = StringField()
     name = StringField()
 
-    parent = DataField()
+
+class __PhysicalPort__(__Port__):
+
+    process = ProcessField(default=RDD.PROCESS.VIRTUAL)
+    purpose = PurposeLayerField(default=RDD.PURPOSE.PORT.EDGE_DISABLED)
     locked = BoolField(default=True)
-    pid = StringField()
+    local_pid = StringField(default='none_local_pid')
+    text_type = NumberField(default=RDD.GDSII.TEXT)
 
     def __add__(self, other):
-        if other is None:
-            return self
+        if other is None: return self
         p1 = Coord(self.midpoint[0], self.midpoint[1]) + Coord(other[0], other[1])
         return p1
 
@@ -68,46 +78,5 @@ class __Port__(__Elemental__):
     @property
     def key(self):
         return (self.name, self.gds_layer.number, self.midpoint[0], self.midpoint[1])
-
-
-class __PhysicalPort__(__Port__):
-
-    color = ColorField(default=color.COLOR_GRAY)
-
-    gds_layer = LayerField(name='PortLayer', number=64)
-    ps_layer = PhysicalLayerField()
-    text_type = NumberField(default=RDD.GDSII.TEXT)
-
-    # label = DataField(fdef_name='create_label')
-
-    # # def create_label(self):
-    # @property
-    # def label(self):
-    #     lbl = spira.Label(
-    #         position=self.midpoint,
-    #         text=self.name,
-    #         gds_layer=self.gds_layer,
-    #         texttype=self.text_type,
-    #         orientation=self.orientation,
-    #         color=color.COLOR_GHOSTWHITE
-    #     )
-    #     # lbl.__rotate__(angle=self.orientation)
-    #     # lbl.move(midpoint=lbl.position, destination=self.midpoint)
-    #     return lbl
-
-
-class __VerticalPort__(__PhysicalPort__):
-    __committed__ = {}
-
-    midpoint = CoordField()
-
-
-class __HorizontalPort__(Vector, __PhysicalPort__):
-    __committed__ = {}
-
-
-def PortField(midpoint=[0, 0], **kwargs):
-    R = RestrictType(__Port__)
-    return DataFieldDescriptor(restrictions=R, **kwargs)
 
 

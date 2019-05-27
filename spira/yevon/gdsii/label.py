@@ -5,21 +5,30 @@ import numpy as np
 from copy import copy, deepcopy
 from spira.yevon.visualization import color
 from spira.yevon.gdsii.base import __Elemental__
-from spira.yevon.layer import LayerField
+# from spira.yevon.rdd.gdsii_layer import LayerField
+from spira.yevon.rdd.process_layer import ProcessField
 from spira.core.parameters.variables import *
 from spira.yevon.visualization.color import ColorField
 from spira.yevon.geometry.coord import Coord, CoordField
 from spira.yevon import utils
+from spira.yevon.rdd.physical_layer import PhysicalLayer
+from spira.yevon.rdd.purpose_layer import PurposeLayerField
+from spira.yevon.rdd import get_rule_deck
+
+
+RDD = get_rule_deck()
 
 
 __all__ = ['Label']
 
 
-class __Label__(gdspy.Label, __Elemental__):
+# class __Label__(gdspy.Label, __Elemental__):
+class __Label__(__Elemental__):
+    """  """
 
-    gds_layer = LayerField()
     text = StringField(default='no_text')
-    texttype = IntegerField(default=0)
+    process = ProcessField(default=RDD.PROCESS.VIRTUAL)
+    purpose = PurposeLayerField(default=RDD.PURPOSE.TEXT)
 
     def __init__(self, position, **kwargs):
         super().__init__(position, **kwargs)
@@ -43,13 +52,15 @@ class __Label__(gdspy.Label, __Elemental__):
             position = self.position.to_numpy_array()
         else:
             position = self.position
+        ps = PhysicalLayer(self.process, self.purpose)
+        layer = RDD.GDSII.EXPORT_LAYER_MAP[ps]
         return gdspy.Label(self.text,
             # deepcopy(self.position),
             position=position,
             anchor='o',
             rotation=self.orientation,
-            layer=self.gds_layer.number,
-            texttype=self.texttype
+            layer=layer.number,
+            texttype=layer.datatype
         )
 
     def encloses(self, ply):
@@ -86,7 +97,6 @@ class Label(__Label__):
     """
 
     route = StringField(default='no_route')
-    color = ColorField(default=color.COLOR_BLUE)
     orientation = NumberField(default=0)
 
     def __init__(self, position, **kwargs):
@@ -100,21 +110,21 @@ class Label(__Label__):
             raise ValueError('Position type not supported!')
 
         __Elemental__.__init__(self, **kwargs)
-        gdspy.Label.__init__(self,
-            text=self.text,
-            position=self.position,
-            anchor=str('o'),
-            rotation=self.orientation,
-            # magnification=self.magnification,
-            # x_reflection=self.reflection,
-            layer=self.gds_layer.number,
-            texttype=self.texttype
-        )
+        # gdspy.Label.__init__(self,
+        #     text=self.text,
+        #     position=self.position,
+        #     anchor=str('o'),
+        #     rotation=self.orientation,
+        #     # magnification=self.magnification,
+        #     # x_reflection=self.reflection,
+        #     layer=self.gds_layer.number,
+        #     texttype=self.texttype
+        # )
 
     def __repr__(self):
         if self is None:
             return 'Label is None!'
-        return ("[SPiRA: Label] ({}, at ({}), texttype: {})").format(self.text, self.position, self.texttype)
+        return ("[SPiRA: Label] ({}, at ({}), texttype: {})").format(self.text, self.position, self.process)
         # params = [ self.text, self.position, self.rotation,
         #            self.magnification, self.reflection,
         #            self.layer, self.texttype ]

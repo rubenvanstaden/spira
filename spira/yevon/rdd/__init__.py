@@ -10,5 +10,6 @@ def get_rule_deck():
     return RULE_DECK_DATABASE
 
 def initialize_default():
-    from spira.technologies.default import purposes
-    from spira.technologies.default import database
+    from spira.technologies import default
+    # from spira.technologies.default import purposes
+    # from spira.technologies.default import database

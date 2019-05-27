@@ -5,10 +5,10 @@ import spira.all as spira
 from copy import deepcopy
 from spira.yevon.gdsii.group import __Group__
 from spira.yevon.geometry.coord import Coord
-from spira.yevon.properties.geometry import __GeometryProperties__
+from spira.yevon.properties.geometry import __GeometryAspects__
 
 
-class CellProperties(__Group__, __GeometryProperties__):
+class CellAspects(__Group__, __GeometryAspects__):
 
     _cid = 0
 
@@ -21,8 +21,8 @@ class CellProperties(__Group__, __GeometryProperties__):
         return self.__gdspy_cell__
 
     def set_gdspy_cell(self):
-        name = '{}_{}'.format(self.name, CellProperties._cid)
-        CellProperties._cid += 1
+        name = '{}_{}'.format(self.name, CellAspects._cid)
+        CellAspects._cid += 1
         glib = gdspy.GdsLibrary(name=name)
         cell = spira.Cell(name=name, elementals=deepcopy(self.elementals))
         # cell = spira.Cell(name=self.name, elementals=self.elementals)

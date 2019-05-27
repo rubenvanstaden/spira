@@ -179,25 +179,25 @@ def test_elem_port():
     p1.translate(dx=10, dy=5)
     assert p1.midpoint == [12, 4]
 
-# -------------------------------------------- spira.Terminal -------------------------------------------
+# -------------------------------------------- spira.Port -------------------------------------------
 
 def test_elem_terminal():
-    class TerminalExample(spira.Cell):
+    class PortExample(spira.Cell):
         width = param.FloatField(default=10)
         height = param.FloatField(default=1)
         def create_ports(self, ports):
-            ports += spira.Terminal(
+            ports += spira.Port(
                 name='P1',
                 midpoint=(10,0), 
                 width=self.height, 
                 orientation=180
             )
             return ports
-    cell = TerminalExample()
+    cell = PortExample()
     terms = cell.term_ports
-    assert isinstance(terms['P1'], spira.Terminal)
-    assert isinstance(cell.ports[0], spira.Terminal)
-    assert isinstance(cell.terms[0], spira.Terminal)
+    assert isinstance(terms['P1'], spira.Port)
+    assert isinstance(cell.ports[0], spira.Port)
+    assert isinstance(cell.terms[0], spira.Port)
 
 # -------------------------------------------- spira.Layer -------------------------------------------
 

@@ -1,11 +1,13 @@
-import gdspy
 import math
+import gdspy
 import numpy as np
-from spira.settings import DEG2RAD
+
+from spira.yevon import constants
 from spira.yevon.geometry.coord import CoordField
 from spira.yevon.geometry.shapes.shape import *
 from spira.core.parameters.variables import *
 from spira.yevon.utils import geometry as geom
+from spira.core.transforms.reflection import shape_reflect
 
 
 class RectangleShape(Shape):
@@ -49,8 +51,8 @@ class CircleShape(Shape):
     angle_step = IntegerField(default=3, doc='The smoothness of the circle.')
 
     def create_points(self, points):
-        sa = self.start_angle * DEG2RAD
-        ea = self.end_angle * DEG2RAD 
+        sa = self.start_angle * constants.DEG2RAD
+        ea = self.end_angle * constants.DEG2RAD 
         h_radius = self.box_size[0] / 2.0
         v_radius = self.box_size[1] / 2.0
         n_s = float(self.end_angle - self.start_angle) / self.angle_step
@@ -98,44 +100,6 @@ class ConvexShape(Shape):
             y0 = self.radius * np.sin((i + 0.5) * angle_step + math.pi / 2)
             pts.append((self.center[0] + x0, self.center[1] + y0))
         points = pts
-        return points
-
-
-class BasicTriangle(Shape):
-
-    a = FloatField(default=2*1e6)
-    b = FloatField(default=0.5*1e6)
-    c = FloatField(default=1*1e6)
-
-    def create_points(self, points):
-        p1 = [0, 0]
-        p2 = [p1[0]+self.b, p1[1]]
-        p3 = [p1[0], p1[1]+self.a]
-        points = np.array([p1, p2, p3])
-        return points
-
-
-class TriangleShape(BasicTriangle):
-
-    def create_points(self, points):
-        points = super().create_points(points)
-        triangle = BasicTriangle(a=self.a, b=self.b, c=self.c)
-        # triangle.reflect()
-        # print(points)
-        points = list(points)
-        points.extend(triangle.points)
-        return points
-
-
-class ArrowShape(TriangleShape):
-
-    # TODO: Implement point_list properties.
-    def create_points(self, points):
-        points = super().create_points(points)
-        height = 3*self.c
-        box = BoxShape(width=self.b/2, height=height)
-        box.move(pos=(0, -height/2))
-        points.extend(box.points)
         return points
 
 
@@ -247,5 +211,61 @@ class ParabolicShape(Shape):
         pts += east_shape
         return pts
 
+
+class BasicTriangle(Shape):
+
+    a = FloatField(default=2*1e6)
+    b = FloatField(default=0.5*1e6)
+    c = FloatField(default=1*1e6)
+
+    def create_points(self, points):
+        p1 = [0, 0]
+        p2 = [p1[0]+self.b, p1[1]]
+        p3 = [p1[0], p1[1]+self.a]
+        points = np.array([p1, p2, p3])
+        return points
+
+
+class TriangleShape(BasicTriangle):
+
+    def create_points(self, points):
+        points = super().create_points(points)
+        triangle = BasicTriangle(a=self.a, b=self.b, c=self.c)
+        print(triangle.points)
+        triangle = shape_reflect(triangle, reflection=False)
+        print(triangle.points)
+        print('')
+        # points = list(points)
+        # points.extend(triangle.points)
+        # return points
+        return triangle.points
+
+
+# class ArrowShape(TriangleShape):
+
+#     # TODO: Implement point_list properties.
+#     def create_points(self, points):
+#         points = super().create_points(points)
+#         height = 3*self.c
+#         box = BoxShape(width=self.b/2, height=height)
+#         box.move(pos=(0, -height/2))
+#         points.extend(box.points)
+#         return points
+
+
+class ArrowShape(Shape):
+
+    width = FloatField(default=1*1e6)
+    length = FloatField(default=10*1e6)
+    head = FloatField(default=3*1e6)
+
+    def create_points(self, points):
+        w = self.width
+        l = self.length
+        h = self.head
+        points = np.array([
+            [0,0], [l,0], [l-h,2*w], [l-h,w], [0,w]
+        ])
+        return points
 
 

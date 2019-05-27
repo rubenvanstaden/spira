@@ -4,6 +4,7 @@ import networkx as nx
 from spira.core.parameters.variables import GraphField
 from spira.yevon.geometry.physical_geometry.geometry import Geometry
 from spira.core.parameters.descriptor import DataField
+from spira.yevon.geometry.coord import Coord
 from spira.yevon.rdd import get_rule_deck
 
 
@@ -84,7 +85,7 @@ class __Net__(Geometry):
         sum_x = (n1[0] + n2[0] + n3[0]) / (3.0*RDD.GDSII.GRID)
         sum_y = (n1[1] + n2[1] + n3[1]) / (3.0*RDD.GDSII.GRID)
         self.g.node[n]['vertex'] = tri
-        # self.g.node[n]['pos'] = [sum_x, sum_y]
+        # self.g.node[n]['position'] = [sum_x, sum_y]
         self.g.node[n]['position'] = Coord(sum_x, sum_y)
 
     def __add_new_node__(self, n, D, pos):

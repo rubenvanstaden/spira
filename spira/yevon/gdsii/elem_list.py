@@ -50,10 +50,10 @@ class ElementFilterMixin(Transformable):
 
     @property
     def polygons(self):
-        from spira.yevon.gdsii.polygon import PolygonAbstract
+        from spira.yevon.gdsii.polygon import Polygon
         elems = ElementalList()
         for e in self._list:
-            if issubclass(type(e), PolygonAbstract):
+            if isinstance(e, Polygon):
                 elems += e
         return elems
 
@@ -143,12 +143,9 @@ class ElementalList(__ElementalList__):
     def dependencies(self):
         import spira.all as spira
         from spira.yevon.gdsii.cell_list import CellList
-        from spira.yevon import process as pc
-        from spira.yevon.process.processlayer import ProcessLayer
         cells = CellList()
         for e in self._list:
-            if not issubclass(type(e), ProcessLayer):
-                cells.add(e.dependencies())
+            cells.add(e.dependencies())
         return cells
 
     def add(self, item):

@@ -46,7 +46,11 @@ class BaseField(object):
 class DataFieldDescriptor(BaseField):
     __keywords__ = ['default', 'fdef_name', 'restriction', 'locked', 'preprocess']
 
-    def __init__(self, **kwargs):
+    def __init__(self, local_name=None, **kwargs):
+
+        # self.__name__ = local_name
+        # self.name = local_name
+
         super().__init__(**kwargs)
 
         self.locked = False
@@ -198,7 +202,6 @@ class DataFieldDescriptor(BaseField):
     def call_param_function(self, obj):
         f = self.get_param_function(obj)
         value = f()
-        # obj.__store__[self.__name__] = value
         new_value = self.__cache_parameter_value__(obj, value)
         return value
 
@@ -350,5 +353,6 @@ class DataField(DataFieldDescriptor):
     pass
 
 
-
+class RestrictedParameter(DataFieldDescriptor):
+    pass
 

@@ -1,9 +1,10 @@
 import numpy as np
 import spira.all as spira
 from spira.yevon.visualization import color
+from spira.yevon.rdd import get_rule_deck
 
-from spira.technologies.mit import devices as dev
-from spira.technologies.mit.rdd.database import RDD
+
+RDD = get_rule_deck()
 
 
 # class ProcessPolygons(spira.PCell):
@@ -15,7 +16,7 @@ class ProcessPolygons(spira.Cell):
                   [2*1e6, 6*1e6], [-6*1e6, 6*1e6],
                   [-6*1e6, -6*1e6], [-4*1e6, -4*1e6],
                   [-4*1e6, 4*1e6], [0, 4*1e6]]
-        p1 = spira.Polygon(alias='M6', shape=points, ps_layer=RDD.PLAYER.M6)
+        p1 = spira.Polygon(alias='M1', shape=points, ps_layer=RDD.PLAYER.M1)
         elems += p1
 
         # p2 = spira.Rectangle(p1=(-10*1e6, 2*1e6), p2=(-5*1e6, 4*1e6), ps_layer=RDD.PLAYER.M6)
@@ -25,13 +26,13 @@ class ProcessPolygons(spira.Cell):
 
     def create_ports(self, ports):
 
-        ply = self.elementals['M6']
+        ply = self.elementals['M1']
 
-        ply.ports['M6_e0'].locked = False
-        ply.ports['M6_e4'].locked = False
+        ply.ports['M1_e0'].locked = False
+        ply.ports['M1_e4'].locked = False
 
-        ports += ply.ports['M6_e0']
-        ports += ply.ports['M6_e4']
+        ports += ply.ports['M1_e0']
+        ports += ply.ports['M1_e4']
 
         return ports
 
@@ -40,7 +41,7 @@ class ProcessPolygons(spira.Cell):
         elems = self.elementals
         ports = self.ports
 
-        nets += spira.Net(elementals=elems, ports=ports, ps_layer=RDD.PLAYER.M6)
+        nets += spira.Net(elementals=elems, ports=ports, ps_layer=RDD.PLAYER.M1)
 
         return nets
 

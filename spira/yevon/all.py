@@ -13,11 +13,15 @@ from spira.yevon.geometry.nets import *
 from spira.yevon.geometry.physical_geometry.geometry import *
 from spira.yevon.geometry.route import *
 
-from spira.yevon.layer import *
+# from spira.yevon.layer import *
+from spira.yevon.rdd.gdsii_layer import *
+from spira.yevon.rdd.process_layer import *
+from spira.yevon.rdd.purpose_layer import *
+from spira.yevon.rdd.physical_layer import *
 from spira.yevon.gdsii import *
 
 from spira.yevon.visualization import *
-from spira.yevon.rdd.layer import *
+# from spira.yevon.rdd.layer import *
 
 from spira.yevon.netlist import *
 # from spira.yevon.net import *

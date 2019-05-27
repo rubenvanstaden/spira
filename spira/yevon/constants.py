@@ -4,6 +4,10 @@ import numpy as np
 DEG2RAD = np.pi / 180.0
 RAD2DEG = 180.0 / np.pi
 
+SCALE_UP = 1e+6
+SCALE_DOWN = 1e-6
+OFFSET = 0.3
+
 PATH_TYPE_NORMAL = 0
 PATH_TYPE_ROUNDED = 1
 PATH_TYPE_EXTENDED = 2

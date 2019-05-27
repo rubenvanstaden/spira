@@ -95,8 +95,8 @@ class PlotlyGraph(object):
         edges['text'] = []
 
         for e in G.edges():
-            x0, y0 = G.node[e[0]]['pos']
-            x1, y1 = G.node[e[1]]['pos']
+            x0, y0 = G.node[e[0]]['position']
+            x1, y1 = G.node[e[1]]['position']
 
             edges['x_pos'] += [x0, x1, None]
             edges['y_pos'] += [y0, y1, None]
@@ -130,7 +130,7 @@ class PlotlyGraph(object):
         nodes['color'] = []
 
         for n in G.nodes():
-            x, y = G.node[n]['pos']
+            x, y = G.node[n]['position']
 
             nodes['x_pos'].append(x)
             nodes['y_pos'].append(y)
@@ -152,8 +152,8 @@ class PlotlyGraph(object):
                     nodes['color'].append(label.color.hexcode)
                 elif isinstance(label, spira.SRef):
                     nodes['color'].append(label.ref.color.hexcode)
-                # elif isinstance(label, (spira.Port, spira.Terminal, spira.Dummy)):
-                elif isinstance(label, (spira.Port, spira.Terminal)):
+                # elif isinstance(label, (spira.Port, spira.Port, spira.Dummy)):
+                elif isinstance(label, (spira.Port, spira.Port)):
                     nodes['color'].append(label.color.hexcode)
                 elif issubclass(type(label), __ProcessLayer__):
                     nodes['color'].append(label.ps_layer.data.COLOR.hexcode)
