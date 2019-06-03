@@ -17,7 +17,7 @@ from spira.yevon.geometry.ports.port_list import PortList
 from spira.yevon.gdsii import *
 from spira.core.mixin import MixinBowl
 from spira.yevon.gdsii.sref import SRef
-from spira.yevon.rdd import get_rule_deck
+from spira.yevon.process import get_rule_deck
 
 
 RDD = get_rule_deck()
@@ -106,19 +106,18 @@ class CellAbstract(gdspy.Cell, __Cell__):
             self.__name__ = self.__name_generator__(self)
         return self.__name__
 
-    def flatten(self):
-        self.elementals = self.elementals.flatten()
-        return self.elementals
-
     def dependencies(self):
         deps = self.elementals.dependencies()
         deps += self
         return deps
 
+    def flatten(self):
+        self.elementals = self.elementals.flatten()
+        return self.elementals
+
     def flat_copy(self, level=-1):
-        name = '{}_{}'.format(self.name, 'flat'),
-        C = Cell(name, self.elementals.flat_copy(level=level))
-        return C
+        name = '{}_{}'.format(self.name, 'Flat'),
+        return self.__class__(name, self.elementals.flat_copy(level=level))
 
     def move(self, midpoint=(0,0), destination=None, axis=None):
         from spira.yevon.geometry.ports.base import __Port__
@@ -224,13 +223,12 @@ class Cell(CellAbstract):
 
     um = NumberField(default=1e6)
     name = DataField(fdef_name='create_name', doc='Name of the cell instance.')
-    routes = ElementalListField(fdef_name='create_routes')
-    color = ColorField(default=color.COLOR_DARK_SLATE_GREY, doc='Color that a default cell will represent in a netlist.')
 
     _next_uid = 0
 
-    def create_routes(self, routes):
-        return routes
+    # routes = ElementalListField(fdef_name='create_routes')
+    # def create_routes(self, routes):
+    #     return routes
 
     def get_alias(self):
         if not hasattr(self, '__alias__'):
@@ -263,21 +261,25 @@ class Cell(CellAbstract):
             self.elementals = ElementalList(elementals)
         if ports is not None:
             self.ports = PortList(ports)
-
+            
     def __repr__(self):
         if hasattr(self, 'elementals'):
-            elems = self.elementals
-            return ("[SPiRA: Cell(\'{}\')] " +
-                    "({} elementals: {} sref, {} cells, {} polygons, " +
-                    "{} labels, {} ports)").format(
-                        self.name,
-                        elems.__len__(),
-                        elems.sref.__len__(),
-                        elems.cells.__len__(),
-                        elems.polygons.__len__(),
-                        elems.labels.__len__(),
-                        self.ports.__len__()
-                    )
+            return ("[SPiRA: Cell(\'{}\')] (elementals {}, ports {})").format(self.name, self.elementals.__len__(), self.ports.__len__())
+
+    # def __repr__(self):
+    #     if hasattr(self, 'elementals'):
+    #         elems = self.elementals
+    #         return ("[SPiRA: Cell(\'{}\')] " +
+    #                 "({} elementals: {} sref, {} cells, {} polygons, " +
+    #                 "{} labels, {} ports)").format(
+    #                     self.name,
+    #                     elems.__len__(),
+    #                     elems.sref.__len__(),
+    #                     elems.cells.__len__(),
+    #                     elems.polygons.__len__(),
+    #                     elems.labels.__len__(),
+    #                     self.ports.__len__()
+    #                 )
 
     def __str__(self):
         return self.__repr__()
@@ -291,6 +293,12 @@ class Cell(CellAbstract):
         for S in self.elementals.sref:
             S.expand_transform()
         return self
+
+    def is_layer_in_cell(self, layer):
+        for e in self.flatten():
+            if e.layer == layer:
+                return True
+        return False
 
     @property
     def alias_cells(self):

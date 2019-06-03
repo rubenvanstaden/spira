@@ -1,1 +1,1 @@
-from .geometry import Geometry
+from .geometry import GmshGeometry

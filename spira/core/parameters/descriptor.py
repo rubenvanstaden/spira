@@ -89,7 +89,6 @@ class DataFieldDescriptor(BaseField):
             f = self.get_param_function(obj)
             if f is None:
                 if hasattr(self, 'default'):
-                    # value = self.default
                     value = self.preprocess(self.default, obj)
                 else:
                     value = None
@@ -103,7 +102,6 @@ class DataFieldDescriptor(BaseField):
                     raise ValueError("Cannot set parameter {} of {} to None.".format(self.name, obj.__class__.__name__))
             else:
                 raise ValueError("Invalid parameter assignment '{}' of cell '{}' with value '{}', which is not compatible with '{}'.".format(self.name, obj.__class__.__name__, str(value), str(self.restriction)))
-        # self.__check_restriction__(obj, value)
         return value
 
     def __set__(self, obj, value):
@@ -136,7 +134,6 @@ class DataFieldDescriptor(BaseField):
         else:
             v = value
         self.__check_restriction__(obj, v)
-        # obj.__store__[self.__name__] = v
         self.__externally_set_parameter_value__(obj, v)
 
     def __externally_set_parameter_value__(self, obj, value):  # FIXME : add subscribe new value / unsubscribe old value
@@ -238,9 +235,11 @@ class FunctionField(BaseField):
 
 
 class SetFunctionField(BaseField):
-    """property which calls a set method to set the variables,
+    """
+    Parameter which calls a set method to set the variables,
     but it is stored in a known attribute, so a get method
-    need not be specified. A restriction can be specified."""
+    need not be specified. A restriction can be specified.
+    """
 
     def __init__(self, local_name, fset, **kwargs):
         self.fset = fset

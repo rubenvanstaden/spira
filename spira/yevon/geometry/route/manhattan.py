@@ -6,12 +6,11 @@ from spira.yevon.geometry.route.route_shaper import RouteSimple
 from spira.yevon.geometry.route.route_shaper import RouteGeneral
 from spira.yevon.geometry.route.route_shaper import RouteArcShape
 from spira.yevon.geometry.route.route_shaper import RouteSquareShape
-from spira.yevon.rdd import get_rule_deck
+from spira.yevon.process import get_rule_deck
 
 from spira.yevon.geometry.ports.port import PortField
 from spira.core.parameters.variables import *
-from spira.yevon.rdd.gdsii_layer import LayerField
-from spira.yevon.rdd.physical_layer import PhysicalLayerField
+from spira.yevon.process.gdsii_layer import LayerField
 from spira.core.parameters.descriptor import DataField, FunctionField
 from copy import deepcopy
 
@@ -25,9 +24,10 @@ class __Manhattan__(Cell):
     port2 = PortField(default=None)
 
     length = NumberField(default=20*1e6)
-    gds_layer = LayerField(number=13)
+    layer = LayerField(number=13)
+    # gds_layer = LayerField(number=13)
     # ps_layer = PhysicalLayerField(default=RDD.DEF.PDEFAULT)
-    ps_layer = PhysicalLayerField()
+    # ps_layer = PhysicalLayerField()
     # bend_type = StringField(default='rectangle')
     bend_type = StringField(default='circular')
 

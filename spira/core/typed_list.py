@@ -2,10 +2,13 @@ from spira.core.parameters.initializer import FieldInitializer
 
 
 class TypedList(FieldInitializer, list):
+    """
+
+    """
+
     __item_type__ = object
 
     def __init__(self, items=[]):
-        # self._list = list(items)
         self._list = []
         if isinstance(items, list) or isinstance(items, set):
             self.extend(items)

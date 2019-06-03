@@ -7,7 +7,7 @@ from spira.yevon.geometry.route.manhattan180 import Route180
 from spira.yevon.geometry.route.route_shaper import RouteSimple, RouteGeneral, RoutePointShape
 from spira.yevon.visualization import color
 from spira.yevon.netlist.structure import Structure
-from spira.yevon.rdd import get_rule_deck
+from spira.yevon.process import get_rule_deck
 from spira.core.parameters.variables import *
 from spira.core.parameters.descriptor import DataField
 
@@ -41,10 +41,10 @@ class Route(Structure, __Manhattan__):
         return None
 
     def determine_type(self):
+
         if self.cell is not None:
             self.__type__ = 'layout'
-        if len(self.metals) > 0:
-            self.__type__ = 'layout'
+
         if self.angle is not None:
             if (self.angle == 0) or (self.angle == 180):
                 if (self.p2[1] != self.p1[1]) or (self.p2[0] != self.p1[0]):
@@ -60,13 +60,16 @@ class Route(Structure, __Manhattan__):
         if len(self.port_list) > 0:
             self.__type__ = 'auto'
 
+        if len(self.metals) > 0:
+            self.__type__ = 'layout'
+
     def create_route_90(self):
         R1 = Route90(
             port1=self.port1,
             port2=self.port2,
             radius=self.radius,
             length=self.length,
-            ps_layer=self.ps_layer,
+            layer=self.layer,
             gds_layer=self.gds_layer
         )
         # R = spira.Cell(
@@ -88,7 +91,7 @@ class Route(Structure, __Manhattan__):
             port2=self.port2,
             radius=self.radius,
             length=self.length,
-            ps_layer=self.ps_layer,
+            layer=self.layer,
             gds_layer=self.gds_layer
         )
         R = spira.Cell(
@@ -107,13 +110,14 @@ class Route(Structure, __Manhattan__):
         route_shape.apply_merge
         R = RouteGeneral(
             route_shape=route_shape, 
-            connect_layer=self.ps_layer
+            connect_layer=self.layer
         )
         r = spira.SRef(R)
         # r.connect(port=r.ports['P1'], destination=self.port1)
         return r
 
     def create_route_straight(self):
+        print('STRAIGHT')
         route_shape = RouteSimple(
             port1=self.port1,
             port2=self.port2,
@@ -121,14 +125,11 @@ class Route(Structure, __Manhattan__):
             width_type='straight'
         )
         # # route_shape.apply_merge
-        R = RouteGeneral(route_shape=route_shape, connect_layer=self.ps_layer)
+        R = RouteGeneral(route_shape=route_shape, layer=self.layer)
         S = spira.SRef(R)
-        R = spira.Rotation(45) + spira.Translation((0,0))
-        # self.transform(R)
+        # R = spira.Rotation(45) + spira.Translation((0,0))
         # S.transform(R)
-        S.connect(port=S.ports['P1'], destination=self.port1)
-        # T = S.transformation
-        # self.transform(T)
+        # S.connect(port=S.ports['P1'], destination=self.port1)
         return S
 
     def create_route_auto(self):
@@ -147,7 +148,7 @@ class Route(Structure, __Manhattan__):
             route_cell = Route(
                 port1=term_list[x],
                 port2=term_list[x+1],
-                ps_layer=self.ps_layer, 
+                layer=self.layer, 
                 radius=0.1*1e6)
             R += spira.SRef(route_cell)
         D = spira.Cell(name='Device Router')
@@ -158,16 +159,16 @@ class Route(Structure, __Manhattan__):
                     points.append(p)
         route_shape = shapes.Shape(points=points)
         route_shape.apply_merge
-        D += pc.Polygon(points=route_shape.points, ps_layer=self.ps_layer, enable_edges=False) 
+        D += pc.Polygon(points=route_shape.points, layer=self.layer, enable_edges=False) 
         return spira.SRef(D)
 
     def create_metals(self, elems):
         if self.cell is not None:
             for e in self.cell.elementals:
                 if issubclass(type(e), spira.Polygon):
-                    for ps_layer in RDD.PLAYER.get_physical_layers(purposes='METAL'):
-                        if ps_layer.layer.number == e.gds_layer.number:
-                            elems += pc.Polygon(points=e.shape.points, ps_layer=ps_layer)
+                    for layer in RDD.PLAYER.get_physical_layers(purposes='METAL'):
+                        if layer.layer.number == e.gds_layer.number:
+                            elems += pc.Polygon(points=e.shape.points, layer=layer)
         elif self.__type__ == '90':
             r1 = self.route_90
             for e in r1.polygons:
@@ -215,11 +216,12 @@ class Route(Structure, __Manhattan__):
 
     def create_ports(self, ports):
         ports = super().create_ports(ports)
-        
-        if self.__type__ == 'straight':
-            T = self.route_straight.transformation
-            ports = ports.transform(T)
-            
+
+        # if self.__type__ == 'straight':
+            # print(self.route_straight.ports)
+        #     T = self.route_straight.transformation
+        #     ports = ports.transform(T)
+
         return ports
 
 

@@ -18,9 +18,9 @@ from spira.core.transforms.stretching import *
 from spira.yevon.geometry.shapes import Shape, ShapeField
 from spira.yevon.geometry import shapes
 from spira.yevon.gdsii.group import Group
-from spira.yevon.rdd.gdsii_layer import Layer
-from spira.yevon.rdd.physical_layer import PhysicalLayer
-from spira.yevon.rdd import get_rule_deck
+from spira.yevon.process.gdsii_layer import Layer
+from spira.yevon.process.physical_layer import PhysicalLayer
+from spira.yevon.process import get_rule_deck
 
 
 RDD = get_rule_deck()
@@ -42,6 +42,23 @@ __all__ = [
 class __Polygon__(__LayerElemental__):
 
     shape = ShapeField()
+    enable_edges = BoolField(default=True)
+
+    # def __eq__(self, other):
+    #     return self.id == other.id
+
+    def __hash__(self):
+        return hash(self.id)
+
+    # FIXME: This have to be removed, but for some reason 
+    # it gives an error when copying the layer object.
+    def __deepcopy__(self, memo):
+        return self.__class__(
+            shape=deepcopy(self.shape),
+            # ports=deepcopy(self.ports),
+            layer=deepcopy(self.layer),
+            transformation=deepcopy(self.transformation)
+        )
 
     @property
     def count(self):
@@ -57,34 +74,20 @@ class __Polygon__(__LayerElemental__):
         polygon_hashes = np.sort([hashlib.sha1(p).digest() for p in pts])
         return polygon_hashes
 
-    def __eq__(self, other):
-        return self.id == other.id
-
-    def __hash__(self):
-        return hash(self.id)
-
-    # def __copy__(self):
-    #     return self.modified_copy(
-    #         shape=deepcopy(self.shape),
-    #         layer=deepcopy(self.layer)
-    #     )
-
-    # def __deepcopy__(self, memo):
-    #     ply = self.modified_copy(
-    #         shape=deepcopy(self.shape),
-    #         ports=deepcopy(self.ports),
-    #         layer=deepcopy(self.layer),
-    #         layer=deepcopy(self.layer)
-    #     )
-    #     return ply
-
     def encloses(self, point):
-        if pyclipper.PointInPolygon(point, self.points) == 0:
-            return False
-        return True
+        return not pyclipper.PointInPolygon(point, p.points) == 0
+        # if pyclipper.PointInPolygon(point, self.points) == 0:
+        #     return False
+        # return True
 
     def flat_copy(self, level=-1):
-        E = self.modified_copy(shape=deepcopy(self.shape), transformation=self.transformation)
+        # E = self.modified_copy(
+        # E = self.
+        #     shape=deepcopy(self.shape), 
+        #     layer=deepcopy(self.layer), 
+        #     transformation=self.transformation
+        # )
+        E = deepcopy(self)
         return E.transform_copy(self.transformation)
 
     def fillet(self, radius, angle_resolution=128, precision=0.001*1e6):
@@ -101,8 +104,11 @@ class __Polygon__(__LayerElemental__):
         return T.apply_copy(self)
 
     def stretch_port(self, port, destination):
-        """ The elemental by moving the subject port, without distorting the entire elemental. 
-        Note: The opposite port position is used as the stretching center."""
+        """
+        The elemental by moving the subject port, without 
+        distorting the entire elemental. Note: The opposite 
+        port position is used as the stretching center.
+        """
         opposite_port = bbox_info.get_opposite_boundary_port(self, port)
         T = stretching.stretch_elemental_by_port(self, opposite_port, port, destination)
         T.apply(self)
@@ -110,52 +116,7 @@ class __Polygon__(__LayerElemental__):
 
     def id_string(self):
         return self.__repr__()
-
-
-class Polygon(__Polygon__):
-    """ Elemental that connects shapes to the GDSII file format.
-    Polygon are objects that represents the shapes in a layout.
-
-    Examples
-    --------
-    >>> layer = spira.Layer(number=99)
-    >>> rect_shape = spira.RectangleShape(p1=[0,0], p2=[1,1])
-    >>> ply = spira.Polygon(shape=rect_shape, layer=layer)
-    """
-
-    # _ID = 0
-
-    enable_edges = BoolField(default=True)
-
-    def get_alias(self):
-        if not hasattr(self, '__alias__'):
-            self.__alias__ = self.layer.name
-        return self.__alias__
-
-    def set_alias(self, value):
-        if value is not None:
-            self.__alias__ = value
-
-    alias = FunctionField(get_alias, set_alias, doc='Functions to generate an alias for cell name.')
-
-    def __init__(self, shape, layer, **kwargs):
-        super().__init__(shape=shape, layer=layer, **kwargs)
-
-    def __repr__(self):
-        if self is None:
-            return 'Polygon is None!'
-        return ("[SPiRA: Polygon {} {}] (center {}, area {}, vertices {}, layer {}, datatype {}, hash {})").format(
-            self.alias, 0,
-            self.bbox_info.center,
-            self.ply_area,
-            sum([len(p) for p in self.shape.points]),
-            self.layer.number,
-            self.layer.datatype,
-            self.hash_polygon
-        )
-
-    def __str__(self):
-        return self.__repr__()
+        # return str(self.hash_polygon)
 
     def move(self, midpoint=(0,0), destination=None, axis=None):
         """  """
@@ -186,15 +147,58 @@ class Polygon(__Polygon__):
         self.translate(dxdy)
         return self
 
+
+class Polygon(__Polygon__):
+    """ Elemental that connects shapes to the GDSII file format.
+    Polygon are objects that represents the shapes in a layout.
+
+    Examples
+    --------
+    >>> layer = spira.Layer(number=99)
+    >>> rect_shape = spira.RectangleShape(p1=[0,0], p2=[1,1])
+    >>> ply = spira.Polygon(shape=rect_shape, layer=layer)
+    """
+
+    def get_alias(self):
+        if not hasattr(self, '__alias__'):
+            self.__alias__ = self.layer.name
+        return self.__alias__
+
+    def set_alias(self, value):
+        if value is not None:
+            self.__alias__ = value
+
+    alias = FunctionField(get_alias, set_alias, doc='Functions to generate an alias for cell name.')
+
+    def __init__(self, shape, layer, **kwargs):
+        super().__init__(shape=shape, layer=layer, **kwargs)
+
+    def __repr__(self):
+        if self is None:
+            return 'Polygon is None!'
+        return ("[SPiRA: Polygon {} {}] (center {}, area {}, vertices {}, layer {}, datatype {}, hash {})").format(
+            self.alias, 0,
+            self.bbox_info.center,
+            self.area,
+            sum([len(p) for p in self.shape.points]),
+            self.layer.number,
+            self.layer.datatype,
+            self.hash_polygon
+        )
+
+    def __str__(self):
+        return self.__repr__()
+
     def convert_to_gdspy(self, transformation=None):
         """
         Converts a SPiRA polygon to a Gdspy polygon.
-        The extra transformation parameter is the 
-        polygon edge ports. 
+        The extra transformation parameter is the
+        polygon edge ports.
         """
         layer = RDD.GDSII.EXPORT_LAYER_MAP[self.layer]
         T = self.transformation + transformation
-        shape = self.shape.transform(T)
+        shape = deepcopy(self.shape).transform(T)
+        # shape = self.shape
         return gdspy.Polygon(
             points=shape.points,
             layer=layer.number,
@@ -230,7 +234,7 @@ def Rectangle(layer, p1=(0,0), p2=(2,2), center=(0,0), alias=None):
     return Polygon(alias=alias, shape=shape, layer=layer)
 
 
-def Box(layer, width=1, height=1, center=(0,0), alias=None):
+def Box(layer, width=1, height=1, center=(0,0), alias=None, enable_edges=False):
     """ Creates a box shape that can be used in 
     GDSII format as a polygon object.
 
@@ -240,7 +244,7 @@ def Box(layer, width=1, height=1, center=(0,0), alias=None):
     >>> [SPiRA: Rectangle] ()
     """
     shape = shapes.BoxShape(width=width, height=height)
-    return Polygon(alias=alias, shape=shape, layer=layer)
+    return Polygon(alias=alias, shape=shape, layer=layer, enable_edges=enable_edges)
 
 
 def Circle(layer, box_size=(1,1), angle_step=1, center=(0,0), alias=None):

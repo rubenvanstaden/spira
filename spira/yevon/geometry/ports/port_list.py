@@ -9,7 +9,6 @@ from spira.yevon.geometry.ports.base import __Port__
 class PortList(TypedList, Transformable):
     __item_type__ = __Port__
 
-    # port_angle_decision = FloatField(default=90.0)
     port_angle_decision = FloatField(default=0.0)
 
     def __repr__(self):
@@ -50,13 +49,29 @@ class PortList(TypedList, Transformable):
     def __and__(self, other):
         from spira.yevon.gdsii.polygon import Polygon
         from spira.yevon.geometry.ports.port import Port
+        from spira.yevon.visualization.viewer import PortLayout
+        from copy import deepcopy
         P = self.__class__()
         if isinstance(other, Polygon):
-        # elif issubclass(type(other), pc.ProcessLayer):
             for p in self._list:
                 if isinstance(p, Port):
-                    if p.edge & other.elementals[0]:
-                        p.locked = False
+                    L = PortLayout(port=p)
+                    # if p.edge & other.elementals[0]:
+                    # print(L.edge.points)
+                    print(other.points)
+                    # print('')
+                    s = other.shape.transform_copy(other.transformation)
+                    print(s.points)
+                    print('')
+                    # s = other.shape.transform(other.transformation)
+                    # if L.edge & other:
+                    print(L.edge.shape.points)
+                    if L.edge.shape & s:
+                        print('YESSSSSSSS!!!')
+                        # p.locked = False
+                        print(p.purpose)
+                        p.unlock
+                        print(p.purpose)
                         P.append(p)
         else:
             raise ValueError('Type must be either Polygon or ProcessLayer.')
@@ -84,10 +99,6 @@ class PortList(TypedList, Transformable):
             P.append(p)
         return P
 
-    # RDD.TERMS.EDGE_LAYER
-    # RDD.TERMS.ARROW_LAYER
-    # RDD.TERMS.UNLOCKED_LAYER
-
     def flat_copy(self, level=-1):
         el = PortList()
         for e in self._list:
@@ -104,6 +115,11 @@ class PortList(TypedList, Transformable):
         for c in self._list:
             T.append(c.move_copy(position))
         return T
+
+    @property
+    def unlock(self):
+        for p in self._list: p.unlock
+        return self
 
     def transform_copy(self, transformation):
         T = self.__class__()

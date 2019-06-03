@@ -1,10 +1,10 @@
 from spira.yevon.geometry.nets.base import __Net__
 from spira.core.parameters.descriptor import DataField
 from spira.core.parameters.variables import GraphField
-from spira.yevon.rdd.physical_layer import PhysicalLayerField
-from spira.yevon.rdd import get_rule_deck
-from spira.yevon.properties.port import PortProperty
+from spira.yevon.process import get_rule_deck
+from spira.yevon.aspects.port import PortProperty
 from spira.yevon.utils import geometry as geom
+from spira.yevon.process.gdsii_layer import LayerField
 from spira.yevon.geometry.ports.port import Port
 from spira.yevon.geometry.ports.port import Port
 
@@ -14,7 +14,7 @@ RDD = get_rule_deck()
 
 class Net(__Net__, PortProperty):
 
-    ps_layer = PhysicalLayerField()
+    layer = LayerField()
 
     surface_nodes = DataField(fdef_name='create_surface_nodes')
     device_nodes = DataField(fdef_name='create_device_nodes')

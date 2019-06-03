@@ -5,7 +5,7 @@ from spira.yevon.netlist.containers import __CellContainer__
 from spira.yevon.utils.elementals import *
 from spira.core.parameters.variables import *
 from spira.yevon.geometry.route import Route
-from spira.yevon.properties.base import __Property__
+from spira.yevon.aspects.base import __Aspects__
 from spira.yevon.utils import clipping
 
 
@@ -32,11 +32,20 @@ class PCell(__CellContainer__):
                 if isinstance(S, spira.SRef):
                     structs += S
         else:
-            for e in self.create_elementals([]):
+            el = spira.ElementalList()
+            for e in self.create_elementals(el):
                 if isinstance(e, spira.SRef):
-                    if issubclass(type(e), (Device, Circuit)):
-                        structs += e
+                    structs += e
+                    # if issubclass(type(e.ref), (Device, Circuit)):
+                        # structs += e
         return structs
+        
+    # def create_routes(self, routes):
+    #     el = spira.ElementalList()
+    #     elems = self.create_elementals(el)
+    #     for e in elems:
+    #         routes += e
+    #     return routes
 
     def create_routes(self, routes):
         if self.cell is not None:
@@ -49,9 +58,13 @@ class PCell(__CellContainer__):
                 if isinstance(e, spira.SRef):
                     if issubclass(type(e.ref), Route):
                         routes += e
+            # print('metals!!!')
             metals = clipping.union_polygons(elems)
-            R = Route(metals=metals)
-            routes += spira.SRef(R)
+            # print(metals)
+            # print('mewfkjebwjfk')
+            if len(metals) > 0:
+                R = Route(metals=metals)
+                routes += spira.SRef(R)
         return routes
 
     # def create_metals(self, elems):
@@ -61,12 +74,12 @@ class PCell(__CellContainer__):
 
     def __create_elementals__(self, elems):
 
-        print('PCell __create_elementals__')
+        # print('PCell __create_elementals__')
 
-        # for e in self.structures:
-        #     elems += e
+        for e in self.structures:
+            elems += e
 
-        print('Adding routes...')
+        # print('Adding routes...')
         for e in self.routes:
             elems += e
 

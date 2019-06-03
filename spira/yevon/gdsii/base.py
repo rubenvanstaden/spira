@@ -4,8 +4,8 @@ from spira.core.transformable import Transformable
 from spira.core.parameters.initializer import FieldInitializer
 from spira.core.parameters.initializer import MetaInitializer
 from spira.core.parameters.descriptor import FunctionField
-from spira.yevon.rdd.gdsii_layer import LayerField
-from spira.yevon.rdd import get_rule_deck
+from spira.yevon.process.gdsii_layer import LayerField
+from spira.yevon.process import get_rule_deck
 
 
 RDD = get_rule_deck()
@@ -64,27 +64,28 @@ class __Elemental__(Transformable, FieldInitializer, metaclass=MetaElemental):
     def dependencies(self):
         return None
 
-    # def commit_to_gdspy(self, cell, transformation=None):
-    #     return None
-
 
 class __LayerElemental__(__Elemental__):
+    """  """
 
     layer = LayerField()
 
+    # def __init__(self, **kwargs):
+    #     super().__init__(**kwargs)
+
     def __init__(self, layer=0, transformation=None, **kwargs):
-        super().__init__(transformation=transformation, layer=layer, **kwargs)
-        
+        super().__init__(layer=layer, transformation=transformation, **kwargs)
+
     def __eq__(self, other):
         if other == None:
             return False
-        if (not isinstance(other, __LayerElemental__)):
+        if not isinstance(other, __LayerElemental__):
             return False
-        if (other.layer.key != self.layer.key):
+        if other.layer.key != self.layer.key:
             return False                
-        if (self.shape.transform_copy(self.transformation) != other.shape.transform_copy(other.transformation)):
+        if self.shape.transform_copy(self.transformation) != other.shape.transform_copy(other.transformation):
             return False
         return True
-    
+
     def __ne__(self,other):
         return not self.__eq__(other)      

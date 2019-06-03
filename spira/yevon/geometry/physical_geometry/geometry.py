@@ -13,7 +13,7 @@ class __Geometry__(object):
     pass
 
 
-class Geometry(__Group__):
+class GmshGeometry(__Group__):
 
     _ID = 0
 
@@ -48,7 +48,7 @@ class Geometry(__Group__):
         if self.holes == 0: holes = None
         else: holes = self.holes
         surfaces = []
-        for i, ply in enumerate(self.elementals):
+        for i, ply in enumerate(self.process_polygons):
             pts = numpy_to_list(ply.points, self.height, unit=1e-6)
             surface_label = '{}_{}_{}_{}'.format(
                 ply.gds_layer.number,

@@ -3,7 +3,7 @@ import spira.all as spira
 from spira.yevon.netlist.containers import __CellContainer__, __NetContainer__
 from copy import copy, deepcopy
 import networkx as nx
-from spira.yevon.rdd import get_rule_deck
+from spira.yevon.process import get_rule_deck
 from spira.yevon.gdsii.elem_list import ElementalListField
 from spira.core.parameters.variables import *
 from spira.yevon.geometry import shapes

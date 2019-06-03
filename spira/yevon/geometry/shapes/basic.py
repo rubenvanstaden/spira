@@ -231,10 +231,7 @@ class TriangleShape(BasicTriangle):
     def create_points(self, points):
         points = super().create_points(points)
         triangle = BasicTriangle(a=self.a, b=self.b, c=self.c)
-        print(triangle.points)
         triangle = shape_reflect(triangle, reflection=False)
-        print(triangle.points)
-        print('')
         # points = list(points)
         # points.extend(triangle.points)
         # return points
@@ -263,9 +260,16 @@ class ArrowShape(Shape):
         w = self.width
         l = self.length
         h = self.head
+        cx = self.center[0]
+        cy = self.center[1]
+        overhang = h * 0.25
         points = np.array([
-            [0,0], [l,0], [l-h,2*w], [l-h,w], [0,w]
+            [cx-l/2, cy-w/2], [cx-l/2, cy+w/2], [cx+(l/2-h), cy+w/2], 
+            [cx+(l/2-h), w+overhang], [cx+l/2, cy-w/2]
         ])
+        # points = np.array([
+        #     [0,0], [l,0], [l-h, w+overhang], [l-h,w], [0,w]
+        # ])
         return points
 
 

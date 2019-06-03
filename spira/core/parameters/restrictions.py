@@ -138,3 +138,41 @@ class RestrictContains(__ParameterRestriction__):
         return  "Contains Restriction: {}".format(str(self.allowed_values))
 
 
+class RestrictValueList(__ParameterRestriction__):
+    """ restrict the argument to a list of allowed values """
+    def __init__(self, allowed_values):
+        self.allowed_values = allowed_values
+
+    def validate(self, value, obj=None):
+        return value in self.allowed_values
+
+    def __repr__(self):
+        return "Value List Restriction: [" + ",".join([str(T) for T in self.allowed_values]) + "]"
+
+
+class RestrictList(__ParameterRestriction__):
+    """ subject all individual elements of an iterable to a certain restriction """
+    def __init__(self, restriction):
+        self.restriction = restriction
+
+    def validate(self, value, obj=None):
+        try:
+            for i in value:
+                if not self.restriction.validate(i):
+                    return False
+            return True
+        except:
+            return False
+
+    def __repr__(self):
+        return "List Restriction: %s" % self.restriction
+
+
+class RestrictTypeList(RestrictList):
+    """ restrict the argument to a list which contains a given type or types. Pass a type or tuple of types """
+    def __init__(self, allowed_types):
+        super().__init__(restriction=RestrictType(allowed_types))
+
+    def __repr__(self):
+        return "Type List Restriction:" + ",".join([T.__name__ for T in self.restriction.allowed_types])
+

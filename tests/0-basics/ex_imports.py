@@ -1,4 +1,0 @@
-from spira.all import *
-
-
-

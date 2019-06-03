@@ -2,7 +2,7 @@ import numpy as np
 from spira.yevon.geometry.shapes.shape import shape_edge_ports
 from spira.yevon.geometry.coord import Coord
 from spira.core.transformable import Transformable
-from spira.yevon.rdd import get_rule_deck
+from spira.yevon.process import get_rule_deck
 
 
 RDD = get_rule_deck()
@@ -221,21 +221,20 @@ class BoundaryInfo(Transformable):
         return shapes.Shape([(self.__west, self.__south), (self.__east, self.__north)])
 
     def __bounding_box_array__(self):
-        """ np array with the corner point of the enclosing rectangle """
+        """ Numpy array with the corner points of the enclosing rectangle. """
         if not self.__is_initialized__(): return None
         return np.array([(self.__west, self.__south),
                          (self.__east, self.__south),
                          (self.__east, self.__north),
                          (self.__west, self.__north)])
 
-    @property
-    def bounding_box(self):
-        if not self.__is_initialized__(): return None
+    def bounding_box(self, margin=0):
         from spira.yevon.geometry import shapes
-        return shapes.Shape([(self.__west, self.__south),
-                             (self.__east, self.__south),
-                             (self.__east, self.__north),
-                             (self.__west, self.__north)])
+        if not self.__is_initialized__(): return None
+        return shapes.Shape([(self.__west-margin, self.__south-margin),
+                             (self.__east+margin, self.__south-margin),
+                             (self.__east+margin, self.__north+margin),
+                             (self.__west-margin, self.__north+margin)])
 
     @property
     def area(self):
@@ -246,7 +245,7 @@ class BoundaryInfo(Transformable):
 
     @property
     def ports(self):
-        return shape_edge_ports(self.bounding_box, RDD.PLAYER.BBOX, self.id_string())
+        return shape_edge_ports(self.bounding_box(), RDD.PLAYER.BBOX, self.id_string())
 
     def encloses(self, other, inclusive=False):
         """ Checks whether point is in bounding box """
@@ -355,22 +354,22 @@ def bbox_info(shape):
 
 
 def get_opposite_boundary_port(elem, subj_port):
-    """ Get the bounding box port that has the opposite 
-    direction of the subject port. """
+    """ 
+    Get the bounding box port that has the 
+    opposite direction of the subject port. 
+    """
     from spira.yevon.utils import geometry as geom
-    from spira.yevon.gdsii.polygon import Polygon
-    bbox_shape = elem.bbox_info.bounding_box
-    bbox_ply = Polygon(shape=bbox_shape)
-    for p in bbox_ply.ports:
-        if geom.angle_diff(p.orientation, subj_port.orientation) == 180:
-            return p
+    from spira.yevon.geometry.shapes import shape_edge_ports
+    bbox_shape = elem.bbox_info.bounding_box()
+    for p in shape_edge_ports(shape=bbox_shape, layer=RDD.PLAYER.BBOX):
+        if geom.angle_diff(p.orientation, subj_port.orientation) == 180: return p
     return None
 
 
 def bbox_info_cell(elem):
     from spira.yevon.gdsii.cell import Cell
     from spira.yevon.gdsii.polygon import Polygon
-    bbox_shape = elem.bbox_info.bounding_box
+    bbox_shape = elem.bbox_info.bounding_box()
     bbox_ply = Polygon(shape=bbox_shape)
     D = Cell(name='BBoxCell')
     D += bbox_ply

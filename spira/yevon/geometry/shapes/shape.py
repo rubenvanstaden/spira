@@ -15,6 +15,10 @@ from spira.yevon.geometry.coord import CoordField, Coord
 from spira.core.parameters.initializer import FieldInitializer
 from spira.core.parameters.processors import ProcessorTypeCast
 from spira.core.parameters.descriptor import DataFieldDescriptor, DataField
+from spira.yevon.process import get_rule_deck
+
+
+RDD = get_rule_deck()
 
 
 __all__ = ['Shape', 'ShapeField', 'PointArrayField', 'shape_edge_ports']
@@ -67,17 +71,14 @@ class __Shape__(Transformable, FieldInitializer):
 
     def __init__(self, **kwargs):
     # def __init__(self, points=None, **kwargs):
-        # if (points is not None):
-        #     if (isinstance(points, list) or isinstance(points, np.ndarray) or isinstance(points, Shape) or isinstance(points, tuple)):
-        #         if (len(points) > 0):
-        #             kwargs["points"] = point
+    #     if (points is not None):
+    #         if (isinstance(points, list) or isinstance(points, np.ndarray) or isinstance(points, Shape) or isinstance(points, tuple)):
+    #             if (len(points) > 0):
+    #                 kwargs["points"] = point
         super().__init__(**kwargs)
 
     def create_points(self, points):
         return points
-
-    def is_closed(self):
-        return True
 
     @property
     def x_coords(self):
@@ -88,6 +89,10 @@ class __Shape__(Transformable, FieldInitializer):
     def y_coords(self):
         """ Returns the y coordinates """
         return self.points[:, 1]
+
+    @property
+    def is_closed(self):
+        return True
 
     @property
     def center_of_mass(self):
@@ -120,6 +125,7 @@ class __Shape__(Transformable, FieldInitializer):
     def bbox_info(self):
         return bbox_info.bbox_info_from_numpy_array(self.points)
 
+    @property
     def segments(self):
         """ Returns a list of point pairs 
         with the segments of the shape. """
@@ -146,7 +152,8 @@ class __Shape__(Transformable, FieldInitializer):
 
 
 class Shape(__Shape__):
-    """ A shape is a geometrical object that
+    """ 
+    A shape is a geometrical object that
     calculates the points that will be used
     to generate a polygon object.
 
@@ -174,11 +181,14 @@ class Shape(__Shape__):
     def __str__(self):
         return self.__repr__()
 
-    def __deepcopy__(self, memo):
-        shape = self.modified_copy(
-            points=deepcopy(self.points)
-        )
-        return shape
+    # # NOTE: For some reason is required for deepcopy in `create_edge_ports`.
+    # def __deepcopy__(self, memo):
+    #     # shape = self.modified_copy(
+    #     shape = self.__class__(
+    #         points=deepcopy(self.points),
+    #         transformation=deepcopy(self.transformation)
+    #     )
+    #     return shape
 
     def __getitem__(self, index):
         """ Access a point. """
@@ -210,9 +220,9 @@ def ShapeField(points=[], doc='', restriction=None, preprocess=None, **kwargs):
     return DataFieldDescriptor(restrictions=R, preprocess=P, **kwargs)
 
 
-from spira.yevon.rdd.gdsii_layer import Layer
+from spira.yevon.process.gdsii_layer import Layer
 from spira.yevon.geometry.ports.port import Port
-def shape_edge_ports(shape, layer, local_pid):
+def shape_edge_ports(shape, layer, local_pid='None'):
 
     xpts = list(shape.x_coords)
     ypts = list(shape.y_coords)
@@ -236,10 +246,12 @@ def shape_edge_ports(shape, layer, local_pid):
         orientation = (np.arctan2(x, y) * constants.RAD2DEG)
         midpoint = [(xpts[i+1] + xpts[i])/2, (ypts[i+1] + ypts[i])/2]
         width = np.abs(np.sqrt((xpts[i+1] - xpts[i])**2 + (ypts[i+1]-ypts[i])**2))
+        ps_layer = RDD.GDSII.IMPORT_LAYER_MAP[layer]
         P = Port(
             name=name,
             bbox=bbox,
-            # layer=layer,
+            process=ps_layer.process,
+            purpose=RDD.PURPOSE.PORT.EDGE_DISABLED,
             midpoint=midpoint,
             orientation=orientation,
             width=width,

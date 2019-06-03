@@ -15,6 +15,9 @@ from spira.core.parameters.variables import *
 from spira.yevon.geometry.vector import *
 from spira.yevon.geometry.line import *
 from copy import copy, deepcopy
+from spira.core.transforms import stretching
+from spira.yevon.geometry import bbox_info
+from spira.yevon.gdsii.polygon import Polygon
 
 
 class __RefElemental__(__Elemental__):
@@ -32,8 +35,7 @@ class __RefElemental__(__Elemental__):
         )
 
     def __eq__(self, other):
-        if not isinstance(other, SRef):
-            return False
+        if not isinstance(other, SRef): return False
         return (self.ref == other.ref) and (self.midpoint == other.position) and (self.transformation == other.transformation)
 
     def expand_transform(self):
@@ -45,8 +47,7 @@ class __RefElemental__(__Elemental__):
             ports=deepcopy(self.ref.ports)
         )
 
-        # T = self.transformation + spira.Translation(self.midpoint)
-        T = self.transformation
+        T = self.transformation + spira.Translation(self.midpoint)
         C = C.transform(T)
 
         # NOTE: Applies expantion hierarchically.
@@ -68,28 +69,24 @@ class __RefElemental__(__Elemental__):
                     subj += e
                 elif isinstance(e, spira.SRef):
                     flat_polygons(subj=subj, cell=e.ref)
-            for p in cell.ports:
-                port = spira.Port(
-                    # name=p.name + "_" + cell.name,
-                    name=p.name,
-                    locked=False,
-                    midpoint=deepcopy(p.midpoint),
-                    orientation=deepcopy(p.orientation),
-                    width=deepcopy(p.width),
-                    local_pid=p.local_pid
-                )
-                subj.ports += port
+            # for p in cell.ports:
+            #     port = spira.Port(
+            #         # name=p.name + "_" + cell.name,
+            #         name=p.name,
+            #         locked=False,
+            #         midpoint=deepcopy(p.midpoint),
+            #         orientation=deepcopy(p.orientation),
+            #         width=deepcopy(p.width),
+            #         local_pid=p.local_pid
+            #     )
+            #     subj.ports += port
             return subj
         D = flat_polygons(C, S.ref)
         return self.__class__(reference=D)
 
 
-class ARef(__RefElemental__):
-    pass
-
-
-class SRef(gdspy.CellReference, __RefElemental__):
-    """ 
+class SRef(__RefElemental__):
+    """
     Cell reference (SRef) is the reference to a cell layout
     to create a hierarchical layout structure. It creates copies
     of the ports and terminals defined by the cell. These
@@ -102,6 +99,9 @@ class SRef(gdspy.CellReference, __RefElemental__):
     >>> sref = spira.SRef(structure=cell)
     """
 
+    supp = IntegerField(default=1)
+    midpoint = CoordField(default=(0,0))
+
     def get_alias(self):
         if not hasattr(self, '__alias__'):
             self.__alias__ = '_S0'
@@ -109,9 +109,6 @@ class SRef(gdspy.CellReference, __RefElemental__):
 
     def set_alias(self, value):
         self.__alias__ = '_' + value
-
-    def __hash__(self):
-        return hash(self.__repr__())
 
     alias = FunctionField(get_alias, set_alias, doc='Functions to generate an alias for cell name.')
 
@@ -126,25 +123,11 @@ class SRef(gdspy.CellReference, __RefElemental__):
     def __str__(self):
         return self.__repr__()
 
+    def __hash__(self):
+        return hash(self.__repr__())
+
     def id_string(self):
         return self.__repr__()
-
-    @property
-    def polygons(self):
-        elems = spira.ElementalList()
-        for p in self.ref.elementals:
-            elems += p.transform_copy(self.transformation)
-        return elems
-
-
-
-
-    supp = IntegerField(default=1)
-    midpoint = CoordField(default=(0,0))
-
-    # def transform_copy(self, transformation):
-    #     self = super().transform_copy(transformation)
-    #     return self.expand_transform()
 
     def dependencies(self):
         from spira.yevon.gdsii.cell_list import CellList
@@ -170,10 +153,6 @@ class SRef(gdspy.CellReference, __RefElemental__):
     def bbox_info(self):
         T = self.transformation + Translation(self.midpoint)
         return self.ref.bbox_info.transform(T)
-
-    # def move(self, position):
-    #     self.midpoint = Coord(self.midpoint[0] + position[0], self.midpoint[1] + position[1])
-    #     return self
 
     def move(self, midpoint=(0,0), destination=None, axis=None):
         """ Move the reference internal port to the destination.
@@ -216,7 +195,9 @@ class SRef(gdspy.CellReference, __RefElemental__):
                                 "not array-like, a port, or port name")
 
         position = np.array([d[0], d[1]]) - np.array([o[0], o[1]])
-        self.midpoint = Coord(self.midpoint[0] + position[0], self.midpoint[1] + position[1])
+        # self.midpoint = Coord(self.midpoint[0] + position[0], self.midpoint[1] + position[1])
+        dxdy = Coord(self.midpoint[0] + position[0], self.midpoint[1] + position[1])
+        self.translate(dxdy)
         return self
 
     def connect(self, port, destination):
@@ -269,8 +250,10 @@ class SRef(gdspy.CellReference, __RefElemental__):
         S = self.flat_expand_transform_copy()
         T = spira.Stretch(stretch_factor=factor, stretch_center=center)
         for i, e in enumerate(S.ref.elementals):
-            T.apply(S.ref.elementals[i])
+            # T.apply(S.ref.elementals[i])
+            S.ref.elementals[i].transform(T)
         return self
+        # return S
 
     def stretch_copy(self, factor=(1,1), center=(0,0)):
         pass
@@ -290,9 +273,6 @@ class SRef(gdspy.CellReference, __RefElemental__):
         -------
         >>> S_s = S.stretch_port()
         """
-        from spira.core.transforms import stretching
-        from spira.yevon.geometry import bbox_info
-        from spira.yevon.gdsii.polygon import Polygon
         opposite_port = bbox_info.get_opposite_boundary_port(self, port)
         T = stretching.stretch_elemental_by_port(self, opposite_port, port, destination)
         if port.bbox is True:
@@ -304,10 +284,12 @@ class SRef(gdspy.CellReference, __RefElemental__):
                     if e.id_string() == port.local_pid:
                         opposite_port = bbox_info.get_opposite_boundary_port(e, port)
                         Tn = stretching.stretch_elemental_by_port(self, opposite_port, port, destination)
-                        # self.ref.elementals[i] = Tn(e)
                         Tn.apply(self.ref.elementals[i])
         return self
 
+
+class ARef(__RefElemental__):
+    pass
 
 
 

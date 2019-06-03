@@ -6,7 +6,7 @@ import networkx as nx
 
 from numpy.linalg import norm
 from spira.yevon import constants
-from spira.yevon.rdd import get_rule_deck
+from spira.yevon.process import get_rule_deck
 
 
 RDD = get_rule_deck()

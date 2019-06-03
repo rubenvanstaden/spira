@@ -5,18 +5,14 @@ import spira.all as spira
 
 from copy import copy, deepcopy
 from numpy.linalg import norm
-from spira.yevon import utils
-from spira.yevon.gdsii.base import __Elemental__
 from spira.core.parameters.variables import *
-from spira.yevon.rdd.gdsii_layer import LayerField
-from spira.core.parameters.descriptor import DataField
 from spira.yevon.geometry.coord import CoordField
-from spira.core.parameters.descriptor import DataField, FunctionField
+from spira.core.parameters.descriptor import FunctionField
 from spira.yevon.geometry.ports.base import __PhysicalPort__
-from spira.yevon.gdsii.group import Group
 from spira.yevon.geometry.coord import Coord
-from spira.yevon.geometry.vector import Vector
-from spira.yevon.rdd import get_rule_deck
+from spira.yevon.geometry.vector import *
+from spira.yevon.geometry.line import *
+from spira.yevon.process import get_rule_deck
 
 
 RDD = get_rule_deck()
@@ -43,10 +39,10 @@ class Port(Vector, __PhysicalPort__):
     #         else:
     #             self.__length__ = RDD.GDSII.TERM_WIDTH
     #     return self.__length__
-    
+
     def get_length(self):
         if not hasattr(self, '__length__'):
-            self.__length__ = 1*1e6
+            self.__length__ = 0.5*1e6
         return self.__length__
 
     def set_length(self, value):
@@ -89,20 +85,25 @@ class Port(Vector, __PhysicalPort__):
     def id_string(self):
         return self.__repr__()
 
+    @property
+    def unlock(self):
+        self.purpose = RDD.PURPOSE.PORT.EDGE_ENABLED
+        return self
+
     def transform(self, transformation):
-        self.midpoint = transformation.apply_to_coord(deepcopy(self.midpoint))
-        self.orientation = transformation.apply_to_angle(deepcopy(self.orientation))
+        self.midpoint = transformation.apply_to_coord(self.midpoint)
+        self.orientation = transformation.apply_to_angle(self.orientation)
         return self
 
     def transform_copy(self, transformation):
         port = Port(
             name=self.name,
             # alias = self.name + transformation.id_string(),
-            # midpoint=transformation.apply_to_coord(deepcopy(self.midpoint)),
-            # orientation=transformation.apply_to_angle(deepcopy(self.orientation)),
             midpoint=transformation.apply_to_coord(self.midpoint),
             orientation=transformation.apply_to_angle(self.orientation),
             locked=deepcopy(self.locked),
+            process=self.process,
+            purpose=self.purpose,
             width=self.width,
             length=self.length,
             local_pid=self.local_pid
@@ -129,11 +130,56 @@ class Port(Vector, __PhysicalPort__):
         self.orientation = np.arctan2(dx,dy)*180/np.pi
         self.width = np.sqrt(dx**2 + dy**2)
 
+    def connect(self, port, destination):
+        T = vector_match_transform(v1=port, v2=destination)
+        self.transform(T)
+        return self
+    
+    def align(self, port, destination, distance):
+        destination = deepcopy(destination)
+        self = self.connect(port, destination)
+    
+        L = line_from_point_angle(point=destination.midpoint, angle=destination.orientation)
+        dx, dy = L.get_coord_from_distance(destination, distance)
+    
+        T = spira.Translation(translation=(dx, dy))
+        self.transform(T)
+        return self
+
 
 def PortField(local_name=None, restriction=None, **kwargs):
     R = RestrictType(Port) & restriction
     return RestrictedParameter(local_name, restrictions=R, **kwargs)
 
 
+def point_in_port_polygon(port, point):
+    pass
+
+
+# def point_in_port_polygon(port, point):
+#     from spira.yevon.process.physical_layer import PhysicalLayer
+#     dw = port.width
+#     dl = port.length
+#     layer = PhysicalLayer(process=port.process, purpose=port.purpose)
+#     p = spira.Box(width=dw, height=dl, layer=layer)
+#     p.center = (0,0)
+#     angle = port.orientation - 90
+#     T = spira.Rotation(rotation=angle)
+#     T += spira.Translation(port.midpoint)
+#     p.transform(T)
+
+#     print(p)
+#     print(p.points)
+
+#     pp = pyclipper.PointInPolygon(point, p.points) != 0
+
+#     print(pp)
+
+#     return pp
+
+#     # if pp == 0:
+#     #     return False
+#     # else:
+#     #     return True
 
 

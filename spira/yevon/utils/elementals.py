@@ -2,7 +2,7 @@ import spira.all as spira
 import numpy as np
 
 from spira.yevon.geometry import shapes
-from spira.yevon.rdd import get_rule_deck
+from spira.yevon.process import get_rule_deck
 from spira.yevon.gdsii.elem_list import ElementalList
 from spira.yevon.geometry.ports.port_list import PortList
 from spira.yevon.gdsii.polygon import Polygon

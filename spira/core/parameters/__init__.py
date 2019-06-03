@@ -82,7 +82,7 @@
 
 
 # def PurposeLayerField(name='', datatype=0, symbol='', **kwargs):
-#     from spira.yevon.rdd.layer import PurposeLayer
+#     from spira.yevon.process.layer import PurposeLayer
 #     if 'default' not in kwargs:
 #         kwargs['default'] = PurposeLayer(name=name, datatype=datatype, symbol='')
 #     R = RestrictType(PurposeLayer)
@@ -90,7 +90,7 @@
 
 
 # def PhysicalLayerField(layer=None, purpose=None, **kwargs):
-#     from spira.yevon.rdd.layer import PhysicalLayer
+#     from spira.yevon.process.layer import PhysicalLayer
 #     if 'default' not in kwargs:
 #         kwargs['default'] = PhysicalLayer(layer=layer, purpose=purpose)
 #     R = RestrictType(PhysicalLayer)

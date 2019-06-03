@@ -23,7 +23,7 @@ class OutputGdsii(FieldInitializer):
         self.gdspy_cell = self.collector(cell)
 
     def collect_labels(self, item, cl, extra_transform=None):
-        if item.node_id in list(self.__collected_labels__.keys()):
+        if item.node_id in list(cl.keys()):
             # L = self.__collected_labels__[item.node_id]
             pass
         else:
@@ -54,37 +54,40 @@ class OutputGdsii(FieldInitializer):
 
     def collect_ports(self, cell):
         from spira.yevon.visualization.viewer import PortLayout
+        _polygon_ports = []
         for c in cell.dependencies():
-            cp, cl = {}, {}
+            cp, cl, C_ports = {}, {}, {}
             G = self.__collected_cells__[c]
-            _polygon_ports = []
+            
+            for p in c.ports:
+                # self.collect_polygons(p.edge, cp)
+                L = PortLayout(port=p)
+                for e in L.elementals:
+                    if isinstance(e, Polygon):
+                        self.collect_polygons(e, cp)
+                    elif isinstance(e, Label):
+                        self.collect_labels(e, cl)
+
             for e in c.elementals:
                 if isinstance(e, Polygon):
-                    for p in e.ports:
+                    if e.enable_edges is True:
+                        for p in e.ports:
+                        # pl = spira.PortList()
+                        # for p in e.create_ports(pl):
+                            if p.id_string() not in _polygon_ports:
 
-                        # self.collect_polygons(p.edge, cp, e.transformation)
-                        # self.collect_polygons(p.arrow, cp, e.transformation)
-                        # self.collect_labels(p.label, cl, e.transformation)
+                                # print(e.transformation)
+                                # print(p)
+                                # p = p.transform(e.transformation)
+                                # print(p)
 
-                        p.transform(e.transformation)
-                        
-                        L = PortLayout(port=p)
-                        for e in L.elementals:
-                            if isinstance(e, Polygon):
-                                self.collect_polygons(e, cp)
-                            elif isinstance(e, Label):
-                                self.collect_labels(e, cl)
-
-                        # self.collect_polygons(p.edge, cp)
-                        # self.collect_polygons(p.arrow, cp)
-                        # self.collect_labels(p.label, cl)
-
-                        _polygon_ports.append(p.id_string())
-            # for p in c.ports:
-            #     if p.id_string() not in _polygon_ports:
-            #         self.collect_polygons(p.edge, cp)
-            #         self.collect_polygons(p.arrow, cp)
-            #         self.collect_labels(p.label, cl)
+                                L = PortLayout(port=p, transformation=e.transformation)
+                                for e in L.elementals:
+                                    if isinstance(e, Polygon):
+                                        self.collect_polygons(e, cp)
+                                    elif isinstance(e, Label):
+                                        self.collect_labels(e, cl)
+                                _polygon_ports.append(p.id_string())
 
             for e in cp.values():
                 G.add(e)
@@ -102,25 +105,10 @@ class OutputGdsii(FieldInitializer):
                 elif isinstance(e, Label):
                     self.collect_labels(e, cl)
 
-            for p in c.ports:
-                # self.collect_polygons(p.edge, cp)
-                L = PortLayout(port=p)
-                for e in L.elementals:
-                    if isinstance(e, Polygon):
-                        self.collect_polygons(e, cp)
-                    elif isinstance(e, Label):
-                        self.collect_labels(e, cl)
-                
-
             for e in cp.values():
                 G.add(e)
             for e in cl.values():
                 G.add(e)
-            
-            # for e in self.__collected_polygons__.values():
-            #     G.add(e)
-            # for e in self.__collected_labels__.values():
-            #     G.add(e)
 
     def collect_srefs(self, cell):
         for c in cell.dependencies():
@@ -159,16 +147,6 @@ class OutputGdsii(FieldInitializer):
         self.collect_ports(item)
         self.collect_cells(item)
 
-        # for c in item.dependencies():
-        #     G = self.__collected_cells__[c]
-        #     for e, p in self.__collected_polygons__.items():
-        #         print(e)
-        #         print(p)
-        #         print('')
-        #         G.add(e)
-        #     # for e in self.__collected_labels__.values():
-        #     #     G.add(e)
-
         # NOTE: Gdspy cells must first be constructed, 
         # before adding them as references.
         self.collect_srefs(item)
@@ -187,12 +165,20 @@ class GdsiiLayout(object):
     def output(self, name=None, units=None, grid=None, layer_map=None):
         gdspy_library = gdspy.GdsLibrary(name=self.name)
 
-        # self.construct_gdspy_tree(glib)
-
         G = OutputGdsii(cell=self)
         G.gdspy_output(gdspy_library)
 
         gdspy.LayoutViewer(library=gdspy_library)
+
+        writer = gdspy.GdsWriter('jtl_lieze_v1.gds', unit=1.0e-12, precision=1.0e-12)
+        for name, cell in gdspy_library.cell_dict.items():
+            writer.write_cell(cell)
+            del cell
+        writer.close()
+
+
+
+
 
     # def output(self, name=None, cell=None):
     #     from spira.yevon.gdsii.cell import __Cell__

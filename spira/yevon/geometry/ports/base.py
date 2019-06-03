@@ -11,16 +11,15 @@ from spira.yevon.gdsii.base import __Elemental__
 
 from spira.core.parameters.variables import *
 from spira.yevon.visualization.color import ColorField
-from spira.yevon.rdd.gdsii_layer import LayerField
+from spira.yevon.process.gdsii_layer import LayerField
 from spira.core.parameters.descriptor import DataField
 from spira.yevon.geometry.coord import CoordField, Coord
-from spira.yevon.rdd.physical_layer import PhysicalLayerField
 from spira.yevon.geometry.vector import Vector
 from spira.core.parameters.descriptor import RestrictedParameter
 from spira.core.parameters.initializer import FieldInitializer
-from spira.yevon.rdd.process_layer import ProcessField
-from spira.yevon.rdd.purpose_layer import PurposeLayerField
-from spira.yevon.rdd import get_rule_deck
+from spira.yevon.process.process_layer import ProcessField
+from spira.yevon.process.purpose_layer import PurposeLayerField
+from spira.yevon.process import get_rule_deck
 
 
 RDD = get_rule_deck()

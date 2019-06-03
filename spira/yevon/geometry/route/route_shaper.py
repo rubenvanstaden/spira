@@ -8,12 +8,12 @@ from numpy import sqrt, pi, cos, sin, log, exp, sinh, mod
 
 from spira.core.parameters.variables import *
 from spira.yevon.geometry.shapes import ShapeField
-from spira.yevon.rdd.physical_layer import PhysicalLayerField
-from spira.yevon.rdd.gdsii_layer import LayerField
+# from spira.yevon.process.physical_layer import PhysicalLayerField
+from spira.yevon.process.gdsii_layer import LayerField
 from spira.yevon.geometry.coord import CoordField, Coord
 from spira.core.parameters.descriptor import DataField, FunctionField
 from spira.yevon.geometry.ports.port import PortField
-from spira.yevon.rdd import get_rule_deck
+from spira.yevon.process import get_rule_deck
 from spira.yevon import constants
 
 
@@ -224,7 +224,7 @@ class RouteSimple(__RouteSimple__):
             final_width=width_fun,
             final_distance=None
         )
-        points = route_path.polygons
+        points = route_path.polygons[0]
         return points
 
 
@@ -284,9 +284,9 @@ class RoutePointShape(__RouteSimple__):
 
 class RouteGeneral(Cell):
 
+    layer = LayerField()
+
     route_shape = ShapeField(doc='Shape of the routing polygon.')
-    connect_layer = PhysicalLayerField()
-    # connect_layer = PhysicalLayerField(default=RDD.DEF.PDEFAULT)
 
     port_input = DataField(fdef_name='create_port_input')
     port_output = DataField(fdef_name='create_port_output')
@@ -295,7 +295,7 @@ class RouteGeneral(Cell):
 
     def create_gds_layer(self):
         ll = spira.Layer(
-            number=self.connect_layer.layer.number,
+            number=self.layer.number,
             # datatype=RDD.PURPOSE.TERM.datatype
             datatype=22
         )
@@ -306,7 +306,7 @@ class RouteGeneral(Cell):
             midpoint=self.route_shape.m1,
             width=self.route_shape.w1,
             orientation=self.route_shape.o1,
-            gds_layer=self.gds_layer
+            # gds_layer=self.gds_layer
         )
         return term
 
@@ -315,17 +315,16 @@ class RouteGeneral(Cell):
             midpoint=self.route_shape.m2,
             width=self.route_shape.w2,
             orientation=self.route_shape.o2,
-            gds_layer=self.gds_layer
+            # gds_layer=self.gds_layer
         )
         return term
 
     def create_elementals(self, elems):
-        poly = pc.Polygon(
-            points=self.route_shape.points,
-            ps_layer=self.connect_layer,
+        poly = spira.Polygon(
+            shape=self.route_shape,
+            layer=self.layer,
             enable_edges=False
         )
-        # poly = spira.Polygon(shape=self.route_shape)
         elems += poly
         return elems
 

@@ -61,7 +61,7 @@ class __Group__(FieldInitializer):
 
     @property
     def bbox_info(self):
-        return self.elementals.bbox_info()
+        return self.elementals.bbox_info
 
     # elementals = ElementalListField(fdef_name='create_elementals', doc='List of elementals to be added to the cell instance.')
 

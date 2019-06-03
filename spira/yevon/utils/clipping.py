@@ -9,7 +9,9 @@ sf = pyclipper.scale_from_clipper
 
 
 def simplify_points(points):
-    """  """
+    """
+
+    """
     from shapely.geometry import Polygon as ShapelyPolygon
     value = 1
     polygons = points
@@ -23,26 +25,33 @@ def simplify_points(points):
 
 
 def union_polygons(poly_elems):
+    """
+    
+    """
     mapping = {}
     elems = spira.ElementalList()
     for e in poly_elems:
         if isinstance(e, spira.Polygon):
-            if e.ps_layer not in mapping.keys():
-                mapping[e.ps_layer] = list(np.array([e.shape.points]))
+            if e.layer not in mapping.keys():
+                mapping[e.layer] = list(np.array([e.shape.points]))
             else:
-                mapping[e.ps_layer].append(e.shape.points)
-    for ps_layer, points in mapping.items():
+                mapping[e.layer].append(e.shape.points)
+    # print(mapping)
+    for layer, points in mapping.items():
         pts_group = union_points(points)
         for uid, pts in enumerate(pts_group):
-            elems += spira.Polygon(shape=pts, ps_layer=ps_layer)
-            # name = 'metal_{}_{}_{}'.format('NAME', ps_layer.layer.number, uid)
+            elems += spira.Polygon(shape=pts, layer=layer)
+            # name = 'metal_{}_{}_{}'.format('NAME', layer.layer.number, uid)
             # shape = shapes.Shape(points=pts)
-            # ply = spira.Polygon(shape=pts, ps_layer=ps_layer)
+            # ply = spira.Polygon(shape=pts, layer=layer)
             # elems += ply
     return elems
         
 
 def union_points(pts):
+    """
+    
+    """
     points = convert_to_pyclipper_array(pts)
     points = boolean(subj=points, method='or')
     points = convert_to_numpy_array(points)
@@ -74,6 +83,9 @@ def union_points(pts):
 
 
 def convert_to_pyclipper_array(pts):
+    """
+    
+    """
     polygons = pyclipper.scale_to_clipper(pts, constants.CLIPPER_SCALE)
     points = []
     for poly in polygons:
@@ -88,6 +100,9 @@ def convert_to_pyclipper_array(pts):
 
 
 def convert_to_numpy_array(pts):
+    """
+    
+    """
     new_points = []
     mc = pyclipper.scale_from_clipper(pts, constants.CLIPPER_SCALE)
     for ps in pyclipper.SimplifyPolygons(mc):
@@ -98,7 +113,10 @@ def convert_to_numpy_array(pts):
 
 
 def boolean(subj, clip=None, method=None, closed=True, scale=1):
-    from spira.yevon.gdsii.polygon import PolygonAbstract
+    """
+    
+    """
+    from spira.yevon.gdsii.polygon import Polygon
 
     if clip is None and len(subj) <= 1:
         return subj
@@ -106,9 +124,9 @@ def boolean(subj, clip=None, method=None, closed=True, scale=1):
     sc = 1/scale
 
     pc = pyclipper.Pyclipper()
-    if issubclass(type(subj), PolygonAbstract):
+    if isinstance(subj, Polygon):
         subj = subj.polygons
-    if issubclass(type(clip), PolygonAbstract):
+    if isinstance(clip, Polygon):
         clip = clip.polygons
     if clip is not None:
         # pc.AddPaths(st(clip, sc), pyclipper.PT_CLIP, True)
@@ -133,8 +151,10 @@ def boolean(subj, clip=None, method=None, closed=True, scale=1):
 
 
 def offset(points, offset_type=None, scale=constants.OFFSET):
-    """ Apply polygon offsetting using Angusj.
-    Either blow up polygons or blow it down. """
+    """ 
+    Apply polygon offsetting using Angusj.
+    Either blow up polygons or blow it down. 
+    """
     pco = pyclipper.PyclipperOffset()
     pco.AddPath(points, pyclipper.JT_MITER, pyclipper.ET_CLOSEDPOLYGON)
     pp = None

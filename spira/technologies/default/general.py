@@ -1,17 +1,23 @@
-from spira.yevon.rdd.all import *
-from spira.yevon.rdd import RULE_DECK_DATABASE as RDD
+from spira.yevon.process.all import *
+from spira.yevon.process import RULE_DECK_DATABASE as RDD
 
 # ---------------------------------- GDSII ---------------------------------------
 
-RDD.GDSII = DataTree()
+RDD.GDSII = ParameterDatabase()
 RDD.GDSII.TEXT = 64
 RDD.GDSII.UNIT = 1e-6
 RDD.GDSII.GRID = 1e-12
 RDD.GDSII.PRECISION = 1e-9
 
+# ---------------------------------- Engines ---------------------------------------
+
+# RDD.ENGINE.GEOMETRY = GMSH
+# RDD.ENGINE.SPICE = JOSIM_ENGINE
+# RDD.ENGINE.IMPEDANCE = INDUCTEX_ENGINE
+
 # ---------------------------------- Process ---------------------------------------
 
-RDD.PROCESS = ProcessTree()
+RDD.PROCESS = ProcessLayerDatabase()
 
 RDD.PROCESS.VIRTUAL = ProcessLayer(name='Virtual Layer', symbol='VIR')
 RDD.PROCESS.LABEL = ProcessLayer(name='Contact 3', symbol='LBL')
@@ -21,16 +27,22 @@ RDD.PROCESS.SKY = ProcessLayer(name='Sky Plane', symbol='SKY')
 RDD.PROCESS.M1 = ProcessLayer(name='Metal 1', symbol='M1')
 RDD.PROCESS.M2 = ProcessLayer(name='Metal 2', symbol='M2')
 RDD.PROCESS.M3 = ProcessLayer(name='Metal 3', symbol='M3')
+RDD.PROCESS.M4 = ProcessLayer(name='Metal 4', symbol='M4')
+RDD.PROCESS.M5 = ProcessLayer(name='Metal 5', symbol='M5')
+RDD.PROCESS.M6 = ProcessLayer(name='Metal 6', symbol='M6')
+RDD.PROCESS.M7 = ProcessLayer(name='Metal 7', symbol='M7')
+RDD.PROCESS.J1 = ProcessLayer(name='Junction 1', symbol='J1')
 RDD.PROCESS.C1 = ProcessLayer(name='Contact 1', symbol='C1')
 RDD.PROCESS.C2 = ProcessLayer(name='Contact 2', symbol='C2')
 RDD.PROCESS.C3 = ProcessLayer(name='Contact 3', symbol='C3')
 
 # ---------------------------------- Layer Purposes ----------------------------------
 
-RDD.PURPOSE = ProcessTree()
+RDD.PURPOSE = PurposeLayerDatabase()
 
 RDD.PURPOSE.GROUND = PurposeLayer(name='Ground plane polygons', symbol='GND')
 RDD.PURPOSE.METAL = PurposeLayer(name='Polygon metals', symbol='METAL')
+RDD.PURPOSE.ROUTE = PurposeLayer(name='Metal routes', symbol='ROUTE')
 RDD.PURPOSE.SKY = PurposeLayer(name='Sky plane polygons', symbol='SKY')
 RDD.PURPOSE.PROTECTION = PurposeLayer(name='Protection layer for via structures', symbol='PRO')
 RDD.PURPOSE.VIA = PurposeLayer(name='Via layer', symbol='VIA')
@@ -43,15 +55,15 @@ RDD.PURPOSE.BOUNDARY_BOX = PurposeLayer(name='Bounding Box', symbol='BBOX', doc=
 
 # ---------------------------------- Port Purposes ------------------------------------
 
-RDD.PURPOSE.PORT = ProcessTree()
+RDD.PURPOSE.PORT = ProcessLayerDatabase()
 RDD.PURPOSE.PORT.CONTACT = PurposeLayer(name='Port ports specified by the designer', symbol='TERM')
 RDD.PURPOSE.PORT.EDGE_ENABLED = PurposeLayer(name='Edge', symbol='EDGEE', doc='Layer that represents a polygon edge.')
 RDD.PURPOSE.PORT.EDGE_DISABLED = PurposeLayer(name='Edge', symbol='EDGED', doc='Layer that represents a polygon edge.')
-RDD.PURPOSE.PORT.DIRECTION = PurposeLayer(name='Arrow', symbol='DIR', doc='Layer that represents the direction of a polygon edge terminal.')
+RDD.PURPOSE.PORT.DIRECTION = PurposeLayer(name='Arrow', symbol='DIR', doc='Layer that represents the direction of a edge terminal.')
 
 # ---------------------------------- Error Purposes ------------------------------------
 
-RDD.PURPOSE.ERROR = ProcessTree()
+RDD.PURPOSE.ERROR = ProcessLayerDatabase()
 RDD.PURPOSE.ERROR.SPACING = PurposeLayer(name='nTron layer', symbol='SP')
 RDD.PURPOSE.ERROR.MIN_WIDTH = PurposeLayer(name='nTron layer', symbol='MAXW')
 RDD.PURPOSE.ERROR.MAX_WIDTH = PurposeLayer(name='nTron layer', symbol='MINW')
@@ -61,14 +73,14 @@ RDD.PURPOSE.ERROR.DENSITY = PurposeLayer(name='nTron layer', symbol='OVR')
 
 # ------------------------------- DEFAULT ----------------------------------
 
-RDD.PLAYER = PhysicalTree()
+RDD.PLAYER = Database()
 
-RDD.PORT = PropertyTree()
+RDD.PORT = ParameterDatabase()
 RDD.PORT.WIDTH = 0.5
 
 # --------------------------------- Name Generator -------------------------------------
 
-class TechAdminTree(DynamicDataTree):
+class TechAdminTree(DelayedDatabase):
     """ A technology tree with a name generator. """
     def initialize(self):
         from spira.yevon.gdsii.generators import NameGenerator
@@ -82,9 +94,9 @@ RDD.ADMIN = TechAdminTree()
 
 # ------------------------------ Display Resources -------------------------------
 
-# class DisplayDatabase(DynamicDataTree):
+# class DisplayDatabase(DelayedDatabase):
 #     def initialize(self):
-#         from spira.yevon.rdd.physical_layer import PhysicalLayer
+#         from spira.yevon.process.physical_layer import PhysicalLayer
 #         from ipkiss.visualisation.display_style import DisplayStyle, DisplayStyleSet
 #         from ipkiss.visualisation import color
 #         from spira.yevon.visualization import *

@@ -9,7 +9,7 @@ from spira.yevon.gdsii.cell_list import CellList
 from spira.core.parameters.initializer import FieldInitializer
 from spira.core.parameters.descriptor import DataField
 from spira.core.mixin import MixinBowl
-from spira.yevon.rdd import get_rule_deck
+from spira.yevon.process import get_rule_deck
 
 
 RDD = get_rule_deck()

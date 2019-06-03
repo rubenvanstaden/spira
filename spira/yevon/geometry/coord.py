@@ -1,7 +1,7 @@
 import math
 import numpy as np
 from spira.core.parameters.restrictions import RestrictType
-from spira.core.parameters.descriptor import DataFieldDescriptor
+from spira.core.parameters.descriptor import RestrictedParameter
 from spira.core.transformable import Transformable
 from spira.core.parameters.processors import ProcessorTypeCast
 
@@ -135,6 +135,6 @@ def CoordField(restriction=None, preprocess=None, **kwargs):
         kwargs['default'] = Coord(0,0)
     R = RESTRICT_COORD & restriction
     P = ProcessorTypeCast(Coord) + preprocess
-    return DataFieldDescriptor(restriction=R, preprocess=P, **kwargs)
+    return RestrictedParameter(restriction=R, preprocess=P, **kwargs)
 
 

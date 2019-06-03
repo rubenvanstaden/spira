@@ -187,7 +187,12 @@ class GenericTransform(ReversibleTransform):
         pass
 
     def __neg__(self):
-        pass
+        from spira.core.transforms.translation import Translation
+        from spira.core.transforms.rotation import Rotation
+        
+        T = Translation(translation=-self.translation)
+        T += Rotation(rotation=-self.rotation, rotation_center=(0,0))
+        return T
 
     def id_string(self):
         """ Gives a hash of the transform (for naming purposes) """
