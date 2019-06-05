@@ -63,6 +63,10 @@ class Port(Vector, __PhysicalPort__):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
+        if 'locked' in kwargs:
+            if kwargs['locked'] is True:
+                self.purpose = RDD.PURPOSE.PORT.EDGE_DISABLED
+
     def __repr__(self):
         return ("[SPiRA: Port] (name {}, alias {}, locked {}, midpoint {} orientation {} width {})").format(self.name, self.alias, self.locked, self.midpoint, self.orientation, self.width)
 
@@ -101,7 +105,6 @@ class Port(Vector, __PhysicalPort__):
             # alias = self.name + transformation.id_string(),
             midpoint=transformation.apply_to_coord(self.midpoint),
             orientation=transformation.apply_to_angle(self.orientation),
-            locked=deepcopy(self.locked),
             process=self.process,
             purpose=self.purpose,
             width=self.width,

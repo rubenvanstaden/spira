@@ -295,9 +295,9 @@ class Cell(CellAbstract):
         return self
 
     def is_layer_in_cell(self, layer):
-        for e in self.flatten():
-            if e.layer == layer:
-                return True
+        D = deepcopy(self)
+        for e in D.flatten():
+            return (e.layer == layer)
         return False
 
     @property

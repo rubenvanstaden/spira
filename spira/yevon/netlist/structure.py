@@ -29,39 +29,39 @@ class __NetlistCell__(__NetContainer__):
         """ Combine all nodes of the same type into one node. """
 
         def compare_d2s(u, v):
-            if ('device' in self.g.node[u]):
-                if ('device' not in self.g.node[v]):
-                    if self.g.node[u]['device'].node_id == self.g.node[v]['surface'].node_id:
+            if ('device_reference' in self.g.node[u]):
+                if ('device_reference' not in self.g.node[v]):
+                    if self.g.node[u]['device_reference'].node_id == self.g.node[v]['process_polygon'].node_id:
                         return True
-            if ('device' in self.g.node[v]):
-                if ('device' not in self.g.node[u]):
-                    if self.g.node[v]['device'].node_id == self.g.node[u]['surface'].node_id:
+            if ('device_reference' in self.g.node[v]):
+                if ('device_reference' not in self.g.node[u]):
+                    if self.g.node[v]['device_reference'].node_id == self.g.node[u]['process_polygon'].node_id:
                         return True
                         
         def compare_s2s(u, v):
-            if ('surface' in self.g.node[u]) and ('surface' in self.g.node[v]):
-                if ('device' not in self.g.node[u]) and ('device' not in self.g.node[v]):
-                    if self.g.node[u]['surface'].node_id == self.g.node[v]['surface'].node_id:
+            if ('process_polygon' in self.g.node[u]) and ('process_polygon' in self.g.node[v]):
+                if ('device_reference' not in self.g.node[u]) and ('device_reference' not in self.g.node[v]):
+                    if self.g.node[u]['process_polygon'].node_id == self.g.node[v]['process_polygon'].node_id:
                         return True
 
         def compare_d2d(u, v):
-            if ('device' in self.g.node[u]) and ('device' in self.g.node[v]):
-                if self.g.node[u]['device'].node_id == self.g.node[v]['device'].node_id:
+            if ('device_reference' in self.g.node[u]) and ('device_reference' in self.g.node[v]):
+                if self.g.node[u]['device_reference'].node_id == self.g.node[v]['device_reference'].node_id:
                     return True
 
         def compare_b2b(u, v):
-            if ('branch' in self.g.node[u]) and ('branch' in self.g.node[v]):
-                if self.g.node[u]['branch'].node_id == self.g.node[v]['branch'].node_id:
+            if ('branch_node' in self.g.node[u]) and ('branch_node' in self.g.node[v]):
+                if self.g.node[u]['branch_node'].node_id == self.g.node[v]['branch_node'].node_id:
                     return True
 
         def sub_nodes(b):
             S = self.g.subgraph(b)
 
-            device = nx.get_node_attributes(S, 'device')
-            surface = nx.get_node_attributes(S, 'surface')
+            device = nx.get_node_attributes(S, 'device_reference')
+            surface = nx.get_node_attributes(S, 'process_polygon')
             center = nx.get_node_attributes(S, 'position')
             route = nx.get_node_attributes(S, 'route')
-            branch = nx.get_node_attributes(S, 'branch')
+            branch = nx.get_node_attributes(S, 'branch_node')
 
             sub_pos = list()
             for value in center.values():
@@ -82,10 +82,10 @@ class __NetlistCell__(__NetContainer__):
             raise ValueError('Compare algorithm not implemented!')
 
         Pos = nx.get_node_attributes(Q, 'position')
-        Device = nx.get_node_attributes(Q, 'device')
-        Polygon = nx.get_node_attributes(Q, 'surface')
+        Device = nx.get_node_attributes(Q, 'device_reference')
+        Polygon = nx.get_node_attributes(Q, 'process_polygon')
         Route = nx.get_node_attributes(Q, 'route')
-        Branches = nx.get_node_attributes(Q, 'branch')
+        Branches = nx.get_node_attributes(Q, 'branch_node')
 
         Edges = nx.get_edge_attributes(Q, 'weight')
 
@@ -103,16 +103,16 @@ class __NetlistCell__(__NetContainer__):
             for key, value in Device.items():
                 if n == list(key)[0]:
                     if n in value:
-                        g1.node[n]['device'] = value[n]
+                        g1.node[n]['device_reference'] = value[n]
 
             for key, value in Branches.items():
                 if n == list(key)[0]:
                     if n in value:
-                        g1.node[n]['branch'] = value[n]
+                        g1.node[n]['branch_node'] = value[n]
 
             for key, value in Polygon.items():
                 if n == list(key)[0]:
-                    g1.node[n]['surface'] = value[n]
+                    g1.node[n]['process_polygon'] = value[n]
 
             for key, value in Route.items():
                 if n == list(key)[0]:

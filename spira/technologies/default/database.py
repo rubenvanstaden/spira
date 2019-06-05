@@ -141,12 +141,12 @@ RDD.GDSII.PURPOSE_DATATYPE_MAP = {
 }
 
 RDD.GDSII.EXPORT_LAYER_MAP = MapPhysicalToGdsii(
-    process_layer_map=RDD.GDSII.PROCESS_LAYER_MAP, 
+    process_layer_map=RDD.GDSII.PROCESS_LAYER_MAP,
     purpose_datatype_map=RDD.GDSII.PURPOSE_DATATYPE_MAP
 )
 
 RDD.GDSII.IMPORT_LAYER_MAP = MapGdsiiToPhysical(
-    process_layer_map=RDD.GDSII.PROCESS_LAYER_MAP, 
+    process_layer_map=RDD.GDSII.PROCESS_LAYER_MAP,
     purpose_datatype_map=RDD.GDSII.PURPOSE_DATATYPE_MAP
 )
 
@@ -160,4 +160,11 @@ RDD.VMODEL.PROCESS_FLOW = VModelProcessFlow(
     active_processes=[RDD.PROCESS.M1, RDD.PROCESS.M2, RDD.PROCESS.M3]
 )
 
+# ------------------------------------- Net FIlters ----------------------------------------------
 
+# f = ToggledCompoundFilter()
+
+# RDD.NETS.FILTER = 
+
+
+# RDD.NETS = NetDatabase()

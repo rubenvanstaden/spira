@@ -35,7 +35,7 @@ class __GeometryAspects__(__Aspects__):
     @property
     def ypos(self):
         return self.center[1]
-        
+
     @property
     def center(self):
         return self.bbox_info.center

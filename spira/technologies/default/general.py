@@ -11,9 +11,9 @@ RDD.GDSII.PRECISION = 1e-9
 
 # ---------------------------------- Engines ---------------------------------------
 
-# RDD.ENGINE.GEOMETRY = GMSH
-# RDD.ENGINE.SPICE = JOSIM_ENGINE
-# RDD.ENGINE.IMPEDANCE = INDUCTEX_ENGINE
+# RDD.ENGINE.GEOMETRY = 'GMSH_ENGINE'
+# RDD.ENGINE.SPICE = 'JOSIM_ENGINE'
+# RDD.ENGINE.IMPEDANCE = 'INDUCTEX_ENGINE'
 
 # ---------------------------------- Process ---------------------------------------
 
@@ -80,7 +80,7 @@ RDD.PORT.WIDTH = 0.5
 
 # --------------------------------- Name Generator -------------------------------------
 
-class TechAdminTree(DelayedDatabase):
+class AdminDatabase(DelayedDatabase):
     """ A technology tree with a name generator. """
     def initialize(self):
         from spira.yevon.gdsii.generators import NameGenerator
@@ -90,56 +90,5 @@ class TechAdminTree(DelayedDatabase):
             process_name=''
         )
 
-RDD.ADMIN = TechAdminTree()
+RDD.ADMIN = AdminDatabase()
 
-# ------------------------------ Display Resources -------------------------------
-
-# class DisplayDatabase(DelayedDatabase):
-#     def initialize(self):
-#         from spira.yevon.process.physical_layer import PhysicalLayer
-#         from ipkiss.visualisation.display_style import DisplayStyle, DisplayStyleSet
-#         from ipkiss.visualisation import color
-#         from spira.yevon.visualization import *
-
-#         self.PREDEFINED_STYLE_SETS = TechnologyTree()        
-
-#         DISPLAY_BLACK = DisplayStyle(color=color.COLOR_BLACK, edgewidth = 0.0)
-#         DISPLAY_WHITE = DisplayStyle(color=color.COLOR_WHITE, edgewidth = 0.0)
-#         DISPLAY_INVERSION = DisplayStyle(color=color.COLOR_BLUE, alpha = 0.5, edgewidth = 1.0)
-#         DISPLAY_DF = DisplayStyle(color=color.COLOR_GREEN, alpha = 0.5, edgewidth = 1.0)
-#         DISPLAY_LF = DisplayStyle(color=color.COLOR_YELLOW, alpha = 0.5, edgewidth = 1.0)
-#         DISPLAY_TEXT = DisplayStyle(color=color.COLOR_MAGENTA, alpha = 0.5, edgewidth = 1.0)
-#         DISPLAY_HOLE = DisplayStyle(color=color.COLOR_RED, alpha = 0.5, edgewidth = 1.0)
-#         DISPLAY_ALIGNMENT = DisplayStyle(color=color.COLOR_CYAN, alpha = 0.5, edgewidth = 1.0) 
-
-#         style_set = DisplayStyleSet()
-#         style_set.background = DISPLAY_WHITE
-#         process_display_order = [ 
-#             RDD.PROCESS.GND,
-#             RDD.PROCESS.M1,
-#             RDD.PROCESS.C1,
-#             RDD.PROCESS.M2,
-#             RDD.PROCESS.C2,
-#             RDD.PROCESS.M3,
-#             RDD.PROCESS.C3,
-#             RDD.PROCESS.SKY,
-#         ]
-
-#         for process in process_display_order:
-#             style_set += [
-#                 (PhysicalLayer(process, RDD.PURPOSE.LF_AREA),   DISPLAY_INVERSION),
-#                 (PhysicalLayer(process, RDD.PURPOSE.DF_AREA),   DISPLAY_INVERSION),
-#                 (PhysicalLayer(process, RDD.PURPOSE.DF.MARKER), DISPLAY_ALIGNMENT),
-#                 (PhysicalLayer(process, RDD.PURPOSE.LF.MARKER), DISPLAY_ALIGNMENT),
-#                 (PhysicalLayer(process, RDD.PURPOSE.LF.LINE),   DISPLAY_DF),
-#                 (PhysicalLayer(process, RDD.PURPOSE.LF.ISLAND), DISPLAY_DF),
-#                 (PhysicalLayer(process, RDD.PURPOSE.DF.TEXT),   DISPLAY_TEXT),
-#                 (PhysicalLayer(process, RDD.PURPOSE.DF.HOLE),   DISPLAY_HOLE),
-#                 (PhysicalLayer(process, RDD.PURPOSE.DF.TRENCH), DISPLAY_LF),
-#                 (PhysicalLayer(process, RDD.PURPOSE.DF.SQUARE), DISPLAY_HOLE),
-#             ]
-
-#         self.PREDEFINED_STYLE_SETS.PURPOSE_HIGHLIGHT  = style_set
-
-# RDD.DISPLAY = DisplayDatabase()
-# # RDD.overwrite_allowed.append('DISPLAY')

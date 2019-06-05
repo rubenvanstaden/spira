@@ -1,24 +1,15 @@
-import spira.all as spira
 import gdspy
 import pyclipper
 import numpy as np
-from copy import copy, deepcopy
+import spira.all as spira
+
 from numpy.linalg import norm
-from spira.yevon import utils
-
-from spira.yevon.visualization import color
-from spira.yevon.gdsii.base import __Elemental__
-
 from spira.core.parameters.variables import *
-from spira.yevon.visualization.color import ColorField
-from spira.yevon.process.gdsii_layer import LayerField
-from spira.core.parameters.descriptor import DataField
-from spira.yevon.geometry.coord import CoordField, Coord
-from spira.yevon.geometry.vector import Vector
-from spira.core.parameters.descriptor import RestrictedParameter
 from spira.core.parameters.initializer import FieldInitializer
+from spira.yevon.geometry.coord import Coord
 from spira.yevon.process.process_layer import ProcessField
 from spira.yevon.process.purpose_layer import PurposeLayerField
+from spira.yevon.process.physical_layer import PLayer
 from spira.yevon.process import get_rule_deck
 
 
@@ -30,13 +21,13 @@ class __Port__(FieldInitializer):
 
     doc = StringField()
     name = StringField()
+    locked = BoolField(default=False)
 
 
 class __PhysicalPort__(__Port__):
 
     process = ProcessField(default=RDD.PROCESS.VIRTUAL)
-    purpose = PurposeLayerField(default=RDD.PURPOSE.PORT.EDGE_DISABLED)
-    locked = BoolField(default=True)
+    purpose = PurposeLayerField(default=RDD.PURPOSE.PORT.EDGE_ENABLED)
     local_pid = StringField(default='none_local_pid')
     text_type = NumberField(default=RDD.GDSII.TEXT)
 
@@ -44,6 +35,20 @@ class __PhysicalPort__(__Port__):
         if other is None: return self
         p1 = Coord(self.midpoint[0], self.midpoint[1]) + Coord(other[0], other[1])
         return p1
+
+    @property
+    def layer(self):
+        return PLayer(self.process, self.purpose)
+
+    @property
+    def key(self):
+        return (self.name, self.layer, self.midpoint[0], self.midpoint[1])
+
+    @property
+    def normal(self):
+        dx = np.cos((self.orientation)*np.pi/180)
+        dy = np.sin((self.orientation)*np.pi/180)
+        return np.array([self.midpoint, self.midpoint + np.array([dx,dy])])
 
     def flat_copy(self, level=-1):
         E = self.modified_copy(transformation=self.transformation)
@@ -64,18 +69,8 @@ class __PhysicalPort__(__Port__):
     def distance(self, other):
         return norm(np.array(self.midpoint) - np.array(other.midpoint))
 
-    def connect(self, S, P):
-        """ Connects the port to a specific polygon in a cell reference. """
-        self.node_id = '{}_{}'.format(S.ref.name, P.id)
-
-    @property
-    def normal(self):
-        dx = np.cos((self.orientation)*np.pi/180)
-        dy = np.sin((self.orientation)*np.pi/180)
-        return np.array([self.midpoint, self.midpoint + np.array([dx,dy])])
-
-    @property
-    def key(self):
-        return (self.name, self.gds_layer.number, self.midpoint[0], self.midpoint[1])
+    # def connect(self, S, P):
+    #     """ Connects the port to a specific polygon in a cell reference. """
+    #     self.node_id = '{}_{}'.format(S.ref.name, P.id)
 
 

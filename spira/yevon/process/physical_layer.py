@@ -9,7 +9,7 @@ from spira.core.parameters.restrictions import RestrictType
 from spira.yevon.process.gdsii_layer import Layer
 
 
-__all__ = ['PhysicalLayer']
+__all__ = ['PhysicalLayer', 'PLayer']
 
 
 class PhysicalLayer(Layer):
@@ -77,5 +77,6 @@ class PhysicalLayer(Layer):
         return (self.process.symbol, self.purpose.symbol)
 
 
+PLayer = PhysicalLayer
 
     

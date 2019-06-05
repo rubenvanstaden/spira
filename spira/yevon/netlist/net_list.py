@@ -1,7 +1,7 @@
 import networkx as nx
 
 from spira.core.typed_list import TypedList
-from spira.yevon.geometry.nets.base import __Net__
+from spira.yevon.geometry.nets.net import __Net__
 from spira.core.parameters.variables import FloatField
 from spira.core.parameters.descriptor import DataFieldDescriptor
 from spira.core.parameters.restrictions import RestrictType
@@ -37,16 +37,16 @@ class NetList(TypedList):
             el += e.flat_copy(level)
         return el
 
-    # def move(self, position):
-    #     for c in self._list:
-    #         c.move(position)
-    #     return self
+    def move(self, position):
+        for c in self._list:
+            c.move(position)
+        return self
 
-    # def move_copy(self, position):
-    #     T = self.__class__()
-    #     for c in self._list:
-    #         T.append(c.move_copy(position))
-    #     return T
+    def move_copy(self, position):
+        T = self.__class__()
+        for c in self._list:
+            T.append(c.move_copy(position))
+        return T
 
     def transform_copy(self, transformation):
         T = self.__class__()

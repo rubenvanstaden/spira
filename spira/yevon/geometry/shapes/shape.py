@@ -211,10 +211,7 @@ class Shape(__Shape__):
         return size(self.points, 0)
 
 
-def ShapeField(points=[], doc='', restriction=None, preprocess=None, **kwargs):
-    from spira.yevon.geometry.shapes.shape import Shape
-    if 'default' not in kwargs:
-        kwargs['default'] = Shape(points, doc=doc)
+def ShapeField(restriction=None, preprocess=None, **kwargs):
     R = RestrictType(Shape) & restriction
     P = ProcessorTypeCast(Shape) + preprocess
     return DataFieldDescriptor(restrictions=R, preprocess=P, **kwargs)
@@ -250,6 +247,7 @@ def shape_edge_ports(shape, layer, local_pid='None'):
         P = Port(
             name=name,
             bbox=bbox,
+            locked=True,
             process=ps_layer.process,
             purpose=RDD.PURPOSE.PORT.EDGE_DISABLED,
             midpoint=midpoint,

@@ -186,19 +186,19 @@ class BoundaryInfo(Transformable):
     """ height """
 
     @property
-    def north_west(self): 
+    def north_west(self):
         return (self.__west, self.__north)
 
     @property
-    def north_east(self): 
+    def north_east(self):
         return (self.__east, self.__north)
 
     @property
-    def south_west(self): 
+    def south_west(self):
         return (self.__west, self.__south)
 
     @property
-    def south_east(self): 
+    def south_east(self):
         return (self.__east, self.__south)
 
     def get_border_on_one_side(self, side):

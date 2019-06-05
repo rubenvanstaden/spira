@@ -1,4 +1,6 @@
+import numpy as np
 import spira.all as spira
+
 from spira.core.parameters.variables import StringField, IntegerField
 from spira.core.parameters.initializer import FieldInitializer
 from spira.core.parameters.descriptor import DataFieldDescriptor
@@ -11,11 +13,6 @@ from spira.core.parameters.restrictions import RestrictType
 class Color(FieldInitializer):
     """ Defines a color in terms of a name and RGB values. """
 
-    # name = param.StringField(default='black')
-    # red = param.IntegerField(default=0)
-    # green = param.IntegerField(default=0)
-    # blue = param.IntegerField(default=0)
-    
     name = StringField(default='black')
     red = IntegerField(default=0)
     green = IntegerField(default=0)
@@ -28,8 +25,7 @@ class Color(FieldInitializer):
         return (self.red, self.green, self.blue)
 
     def numpy_array(self):
-        import numpy
-        return numpy.array([self.red, self.green, self.blue])
+        return np.array([self.red, self.green, self.blue])
 
     def set(self, red, green, blue):
         self.red = red

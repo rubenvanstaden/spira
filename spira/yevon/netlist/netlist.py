@@ -23,12 +23,12 @@ class __NetlistSimplifier__(object):
         remove_nodes = []
         text = self.__get_called_id__()
         for n in self.g.nodes():
-            if 'branch' in self.g.node[n]:
-                if isinstance(self.g.node[n]['branch'], spira.Label):
-                    if self.g.node[n]['branch'].text == text:
+            if 'branch_node' in self.g.node[n]:
+                if isinstance(self.g.node[n]['branch_node'], spira.Label):
+                    if self.g.node[n]['branch_node'].text == text:
                         locked_nodes.append(n)
-            elif 'device' in self.g.node[n]:
-                D = self.g.node[n]['device']
+            elif 'device_reference' in self.g.node[n]:
+                D = self.g.node[n]['device_reference']
                 if not isinstance(D, spira.spira.Port):
                     locked_nodes.append(n)
         for n in self.g.nodes():
@@ -48,8 +48,8 @@ class __NetlistSimplifier__(object):
         if t not in self.__branch_nodes__:
             valid = False
         for n in path[1:-1]:
-            if 'device' in self.g.node[n]:
-                D = self.g.node[n]['device']
+            if 'device_reference' in self.g.node[n]:
+                D = self.g.node[n]['device_reference']
                 if issubclass(type(D), __Port__):
                     if not isinstance(D, spira.spira.Port):
                         valid = False
@@ -79,11 +79,11 @@ class __NetlistSimplifier__(object):
         return '__{}__'.format(self._ID)
 
     def __branch_id__(self, i, s, t):
-        ntype = 'nodetype: {}'.format('branch')
+        ntype = 'nodetype: {}'.format('branch_node')
         number = 'number: {}'.format(i)
 
-        Ds = self.g.node[s]['device']
-        Dt = self.g.node[t]['device']
+        Ds = self.g.node[s]['device_reference']
+        Dt = self.g.node[t]['device_reference']
 
         if issubclass(type(Ds), spira.SRef):
             source = 'source: {}'.format(Ds.ref.name)
@@ -107,8 +107,8 @@ class NetlistSimplifier(__NetlistSimplifier__):
         """ Nodes that defines different conducting branches. """
         branch_nodes = list()
         for n in self.g.nodes():
-            if 'device' in self.g.node[n]:
-                D = self.g.node[n]['device']
+            if 'device_reference' in self.g.node[n]:
+                D = self.g.node[n]['device_reference']
                 if isinstance(D, spira.Dummy):
                     branch_nodes.append(n)
                 if issubclass(type(D), (__Port__, spira.SRef)):
@@ -122,8 +122,8 @@ class NetlistSimplifier(__NetlistSimplifier__):
         from spira.netex.devices import Via
         branch_nodes = list()
         for n in self.g.nodes():
-            if 'device' in self.g.node[n]:
-                D = self.g.node[n]['device']
+            if 'device_reference' in self.g.node[n]:
+                D = self.g.node[n]['device_reference']
                 if issubclass(type(D), spira.SRef):
                     if issubclass(type(D.ref), Via):
                         if len([i for i in self.g[n]]) > 2:
@@ -139,8 +139,8 @@ class NetlistSimplifier(__NetlistSimplifier__):
         """ Nodes that defines different conducting branches. """
         branch_nodes = list()
         for n in self.g.nodes():
-            if 'device' in self.g.node[n]:
-                D = self.g.node[n]['device']
+            if 'device_reference' in self.g.node[n]:
+                D = self.g.node[n]['device_reference']
                 if issubclass(type(D), spira.Port):
                     if not isinstance(D, spira.spira.Port):
                         branch_nodes.append(n)
@@ -173,15 +173,15 @@ class NetlistSimplifier(__NetlistSimplifier__):
                 dummies.add(p[-1])
 
             for n in dummies:
-                if 'branch' in self.g.node[n]:
-                    N = self.g.node[n]['branch']
-                    self.g.node[n]['device'] = spira.Dummy(
+                if 'branch_node' in self.g.node[n]:
+                    N = self.g.node[n]['branch_node']
+                    self.g.node[n]['device_reference'] = spira.Dummy(
                         name='Dummy',
                         midpoint=N.position,
                         color=color.COLOR_DARKSEA_GREEN,
                         node_id=self.g.node[n]['position']
                     )
-                    del self.g.node[n]['branch']
+                    del self.g.node[n]['branch_node']
 
     def generate_branches(self):
         """  """
@@ -202,8 +202,8 @@ class NetlistSimplifier(__NetlistSimplifier__):
                 text = self.__get_called_id__()
                 node_id = self.__branch_id__(i, path[0], path[-1])
                 for n in path[1:-1]:
-                    lbl = self.g.node[n]['surface']
-                    self.g.node[n]['branch'] = spira.Label(
+                    lbl = self.g.node[n]['process_polygon']
+                    self.g.node[n]['branch_node'] = spira.Label(
                         position=lbl.center,
                         text=text,
                         route=self.g.node[n]['route'].node_id,

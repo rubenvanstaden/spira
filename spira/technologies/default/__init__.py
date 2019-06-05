@@ -15,4 +15,5 @@ RDD.desc = 'Default SPiRA process information, that mimics a general SFQ fabrica
 
 from .general import *
 from .database import *
+from .display_resources import *
 

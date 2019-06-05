@@ -1,45 +1,45 @@
-from spira.core.parameters.initializer import FieldInitializer
-from spira.core.parameters.variables import *
-import spira.all as spira
+# from spira.core.parameters.initializer import FieldInitializer
+# from spira.core.parameters.variables import *
+# import spira.all as spira
 
 
-class SimulationParameters(FieldInitializer):
+# class SimulationParameters(FieldInitializer):
 
-    def __set_parameters__(self, obj, **kwargs):
-        pass
+#     def __set_parameters__(self, obj, **kwargs):
+#         pass
 
-    def __init__(self, **kwargs):
-        pass
-
-
-class SimulationDefinition():
-    simul_params = DictField(doc='A set of simulation parameters.')
+#     def __init__(self, **kwargs):
+#         pass
 
 
-class CellSimulationDefinition(SimulationDefinition):
-
-    def __init__(self, simul_params):
-        pass
+# class SimulationDefinition():
+#     simul_params = DictField(doc='A set of simulation parameters.')
 
 
-class __SimulationGeometry__(SimulationParameters):
+# class CellSimulationDefinition(SimulationDefinition):
 
-    cell = spira.CellField()
-    geometry = spira.DataField(fdef_name='create_geometry')
-
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
+#     def __init__(self, simul_params):
+#         pass
 
 
-class CellSimulationGeometry(__SimulationGeometry__):
+# class __SimulationGeometry__(SimulationParameters):
 
-    def create_geometry(self):
-        vp = virtual_process_model()
-        return vp.geometry
+#     cell = spira.CellField()
+#     geometry = spira.DataField(fdef_name='create_geometry')
+
+#     def __init__(self, **kwargs):
+#         super().__init__(**kwargs)
 
 
-def generate_simulation_geometry(cell, output=None):
+# class CellSimulationGeometry(__SimulationGeometry__):
 
-    simul_geom = CellSimulationGeometry()
+#     def create_geometry(self):
+#         vp = virtual_process_model()
+#         return vp.geometry
+
+
+# def generate_simulation_geometry(cell, output=None):
+
+#     simul_geom = CellSimulationGeometry()
 
 

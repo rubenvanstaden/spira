@@ -1,71 +1,12 @@
 import gdspy
 import numpy as np
-import spira.all as spira
 
 from copy import deepcopy
 from spira.yevon.gdsii.group import __Group__
-from spira.yevon.geometry.coord import Coord
 from spira.yevon.aspects.geometry import __GeometryAspects__
 
 
 class CellAspects(__Group__, __GeometryAspects__):
-
-    _cid = 0
-
-    __gdspy_cell__ = None
-
-    def get_gdspy_cell(self):
-        # if self.__gdspy_cell__ is None:
-        #     self.set_gdspy_cell()
-        self.set_gdspy_cell()
-        return self.__gdspy_cell__
-
-    def set_gdspy_cell(self):
-        name = '{}_{}'.format(self.name, CellAspects._cid)
-        CellAspects._cid += 1
-        glib = gdspy.GdsLibrary(name=name)
-        cell = spira.Cell(name=name, elementals=deepcopy(self.elementals))
-        # cell = spira.Cell(name=self.name, elementals=self.elementals)
-        self.__gdspy_cell__ = cell.construct_gdspy_tree(glib)
-
-    def convert_references(self, c, c2dmap):
-        # for e in c.elementals:
-        for e in c.elementals.flat_elems():
-            G = c2dmap[c]
-            if isinstance(e, spira.SRef):
-
-                # if not isinstance(e.midpoint, Coord):
-                #     e.midpoint = Coord(e.midpoint[0], e.midpoint[1])
-
-                # FIXME: Has to be removed for layout transformations.
-                T = e.transformation
-                # T = e.transformation + spira.Translation(e.midpoint)
-                e.midpoint = T.apply_to_coord(e.midpoint)
-
-                ref = gdspy.CellReference(
-                    ref_cell=c2dmap[e.ref],
-                    origin=e.midpoint.to_numpy_array(),
-                    rotation=e.rotation,
-                    magnification=e.magnification,
-                    x_reflection=e.reflection
-                )
-
-                # T = e._translation
-                # ref.translate(dx=T[0], dy=T[1])
-
-                G.add(ref)
-
-    def construct_gdspy_tree(self, glib):
-        d = self.dependencies()
-        c2dmap = {}
-        for c in d:
-            G = c.commit_to_gdspy(cell=c)
-            c2dmap.update({c:G})
-        for c in d:
-            self.convert_references(c, c2dmap)
-            if c.name not in glib.cell_dict.keys():
-                glib.add(c2dmap[c])
-        return c2dmap[self]
 
     @property
     def bbox(self):
@@ -76,4 +17,96 @@ class CellAspects(__Group__, __GeometryAspects__):
             bbox = ((0,0),(0,0))
         return np.array(bbox)
 
+
+
+
+
+
+# from spira.yevon.gdsii.cell import Cell
+# from spira.yevon.aspects.base import __Aspects__
+# from spira.yevon.gdsii.elem_list import ElementalListField, ElementalList
+# from spira.yevon.filters.layer_filter import LayerFilterAllow
+# from spira.yevon.utils import clipping
+# from spira.yevon.gdsii.polygon import Polygon
+# from spira.yevon.process import get_rule_deck
+
+
+# RDD = get_rule_deck()
+
+
+# def union_process_polygons(elems, process):
+
+#     el = ElementalList()
+
+#     for layer in RDD.get_physical_layers_by_process(processes=process):
+#         LF = LayerFilterAllow(layers=[layer])
+#         points = []
+#         for e in LF(elems.polygons):
+#             points.append(e.points)
+#         merged_points = clipping.union_points(points)
+#         for uid, pts in enumerate(merged_points):
+#             el += Polygon(shape=pts, layer=layer)
+#         return el
+
+
+# # def get_process_elementals(elems, process):
+
+# #     el = ElementalList()
+
+# #     for layer in RDD.get_physical_layers_by_process(processes=process):
+# #         LF = LayerFilterAllow(layers=[layer])
+# #         points = []
+# #         for e in LF(elems.polygons):
+# #             points.append(e.points)
+# #         merged_points = clipping.union_points(points)
+# #         for uid, pts in enumerate(merged_points):
+# #             el += Polygon(shape=pts, layer=layer)
+# #         return el
+
+
+# class ElementalsForModelling(__Aspects__):
+#     """
+#     Convert the cell elementals into a new set
+#     of elements for every active process.
+#     """
+
+#     process_elementals = ElementalListField()
+
+#     def create_process_elementals(self, elems):
+#         for process in RDD.VMODEL.PROCESS_FLOW.active_processes:
+#             # for e in get_process_elementals(self.elementals, process=process):
+#             for e in union_process_polygons(self.elementals, process=process):
+#                 elems += e
+#         return elems
+
+#     def write_gdsii_mask(self, **kwargs):
+#         D = Cell(name=self.name + '_VMODEL', elementals=self.process_elementals)
+#         D.output()
+
+
+# class ReferenceBlocks(__Aspects__):
+
+#     block_elementals = ElementalListField()
+
+#     def create_block_elementals(self, elems):
+
+#         for e in self.elementals.sref:
+#             for layer in RDD.get_physical_layers_by_purpose(purposes=['METAL', 'GND']):
+#                 if e.ref.is_layer_in_cell(layer):
+#                     bbox_shape = e.bbox_info.bounding_box()
+#                     elems += Polygon(shape=bbox_shape, layer=layer)
+
+#         return elems
+
+#     def write_gdsii_blocks(self, **kwargs):
+#         D = Cell(name=self.name + '_BLOCKS', elementals=self.block_elementals)
+#         D.output()
+
+
+# # Cell.mixin(ElementalsForModelling)
+# # Cell.mixin(ReferenceBlocks)
+
+
+# # You have the different virtual models of defining the polygons structures,
+# # before generating a physical gmsh geomtery.
 

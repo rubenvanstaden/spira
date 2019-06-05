@@ -1,86 +1,157 @@
-from spira.yevon.geometry.nets.base import __Net__
-from spira.core.parameters.descriptor import DataField
+import numpy as np
+import networkx as nx
+
+from spira.yevon.geometry.physical_geometry.geometry import GmshGeometry
 from spira.core.parameters.variables import GraphField
+from spira.core.parameters.descriptor import DataField
+from spira.yevon.geometry.coord import Coord
+from spira.yevon.vmodel.geometry import GeometryField
 from spira.yevon.process import get_rule_deck
-from spira.yevon.aspects.port import PortProperty
-from spira.yevon.utils import geometry as geom
-from spira.yevon.process.gdsii_layer import LayerField
-from spira.yevon.geometry.ports.port import Port
-from spira.yevon.geometry.ports.port import Port
 
 
 RDD = get_rule_deck()
 
 
-class Net(__Net__, PortProperty):
+__all__ = ['Net']
 
-    layer = LayerField()
 
-    surface_nodes = DataField(fdef_name='create_surface_nodes')
-    device_nodes = DataField(fdef_name='create_device_nodes')
-    boundary_nodes = DataField(fdef_name='create_boundary_nodes')
-    routes = DataField(fdef_name='create_route_nodes')
+# from spira.core.transformable import Transformable
+# class __Net__(Transformable):
+    # pass
 
-    def __init__(self, elementals=None, **kwargs):
-        super().__init__(elementals=elementals, **kwargs)
 
-        self.surface_nodes
-        self.device_nodes
+from spira.core.parameters.initializer import FieldInitializer
+class __Net__(FieldInitializer):
 
-    def create_surface_nodes(self):
-        triangles = self.__layer_triangles_dict__()
-        for key, nodes in triangles.items():
-            for n in nodes:
-                for poly in self.elementals:
-                    if poly.encloses(self.g.node[n]['position']):
-                        self.g.node[n]['surface'] = poly
-
-    def create_device_nodes(self):
-        for n, triangle in self.__triangle_nodes__().items():
-            points = [geom.c2d(self.mesh_data.points[i]) for i in triangle]
-            for D in self.ports:
-                if isinstance(D, (Port, Port)):
-                    if D.encloses(points):
-                        self.g.node[n]['device'] = D
-                else:
-                    for p in D.ports:
-                        if p.gds_layer.number == self.layer.number:
-                            if p.encloses(points):
-                                if 'device' in self.g.node[n]:
-                                    self.__add_new_node__(n, D, p.midpoint)
-                                else:
-                                    self.g.node[n]['device'] = D
-
-    def create_route_nodes(self):
-        """  """
-        from spira import pc
-
-        def r_func(R):
-            if issubclass(type(R), pc.ProcessLayer):
-                R_ply = R.elementals[0]
-                for n in self.g.nodes():
-                    if R_ply.encloses(self.g.node[n]['position']):
-                        self.g.node[n]['route'] = R
+    def _add_edges(self, n, tri, A):
+        def update_adj(self, t1, adj_mat, v_pair):
+            if (adj_mat[v_pair[0]][v_pair[1]] != 0):
+                t2 = adj_mat[v_pair[0]][v_pair[1]] - 1
+                self.g.add_edge(t1, t2, label=None)
             else:
-                for pp in R.ref.metals:
-                    R_ply = pp.elementals[0]
-                    for n in self.g.nodes():
-                        if R_ply.encloses(self.g.node[n]['position']):
-                            self.g.node[n]['route'] = pp
+                adj_mat[v_pair[0]][v_pair[1]] = t1 + 1
+                adj_mat[v_pair[1]][v_pair[0]] = t1 + 1
+        v1 = [tri[0], tri[1], tri[2]]
+        v2 = [tri[1], tri[2], tri[0]]
+        for v_pair in list(zip(v1, v2)):
+            update_adj(self, n, A, v_pair)
 
-        for R in self.route_nodes:
-            if isinstance(R, spira.ElementalList):
-                for r in R:
-                    r_func(r)
-            else:
-                r_func(R)
-    
-    def create_boundary_nodes(self):
-        if self.level > 1:
-            for B in self.bounding_boxes:
-                for ply in B.elementals.polygons:
-                    for n in self.g.nodes():
-                        if ply.encloses(self.g.node[n]['position']):
-                            self.g.node[n]['device'] = B.S
-                            self.g.node[n]['device'].node_id = '{}_{}'.format(B.S.ref.name, B.S.midpoint)
+    def _add_positions(self, n, tri):
+        pp = self.mesh_data.points
+        n1, n2, n3 = pp[tri[0]], pp[tri[1]], pp[tri[2]]
+        sum_x = (n1[0] + n2[0] + n3[0]) / (3.0*RDD.GDSII.GRID)
+        sum_y = (n1[1] + n2[1] + n3[1]) / (3.0*RDD.GDSII.GRID)
+        self.g.node[n]['vertex'] = tri
+        self.g.node[n]['position'] = Coord(sum_x, sum_y)
 
+
+class Net(__Net__):
+    """
+    Constructs a graph from the physical geometry
+    generated from the list of elementals.
+    """
+
+    g = GraphField()
+
+    geom = GeometryField()
+    mesh_graph = DataField(fdef_name='create_mesh_graph')
+    mesh_data = DataField(fdef_name='create_mesh_data')
+    triangles = DataField(fdef_name='create_triangles')
+    physical_triangles = DataField(fdef_name='create_physical_triangles')
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.mesh_graph
+        # self.g = nx.Graph()
+        # self.create_mesh_data()
+
+    # def __getitem__(self, n):
+    #     return self.g.node[n]
+
+    def transform(self, transformation):
+        pass
+
+    def transform_copy(self, transformation):
+        pass
+
+    def move(self, coordinate):
+        pass
+
+    def create_mesh_data(self):
+        return self.geom.mesh_data
+
+    def create_triangles(self):
+        if 'triangle' not in self.mesh_data.cells:
+            raise ValueError('Triangle not found in cells')
+        return self.mesh_data.cells['triangle']
+
+    def create_physical_triangles(self):
+        if 'triangle' not in self.mesh_data.cell_data:
+            raise ValueError('Triangle not in meshio cell_data')
+        if 'gmsh:physical' not in self.mesh_data.cell_data['triangle']:
+            raise ValueError('Physical not found in meshio triangle')
+        return self.mesh_data.cell_data['triangle']['gmsh:physical'].tolist()
+
+    def create_mesh_graph(self):
+        """ Create a graph from the meshed geometry. """
+        ll = len(self.mesh_data.points)
+        A = np.zeros((ll, ll), dtype=np.int64)
+
+        for n, triangle in enumerate(self.triangles):
+            self._add_edges(n, triangle, A)
+        for n, triangle in enumerate(self.triangles):
+            self._add_positions(n, triangle)
+
+    def add_new_node(self, n, D, pos):
+        l1 = spira.Layer(name='Label', number=104)
+        label = spira.Label(
+            position=pos,
+            text='new',
+            gds_layer = l1
+        )
+        label.node_id = '{}_{}'.format(n, n)
+        num = self.g.number_of_nodes()
+        self.g.add_node(num+1,
+            pos=pos,
+            device=D,
+            surface=label,
+            display='{}'.format(l1.name)
+        )
+        self.g.add_edge(n, num+1)
+
+    def process_triangles(self):
+        """
+        Arguments
+        ---------
+        tri : list
+            The surface_id of the triangle
+            corresponding to the index value.
+        key -> 5_0_1 (layer_datatype_polyid)
+        value -> [1 2] (1=surface_id 2=triangle)
+        """
+
+        triangles = {}
+        for name, value in self.mesh_data.field_data.items():
+            for n in self.g.nodes():
+                surface_id = value[0]
+                if self.physical_triangles[n] == surface_id:
+                    layer = int(name.split('_')[0])
+                    datatype = int(name.split('_')[1])
+                    key = (layer, datatype)
+                    if key in triangles:
+                        triangles[key].append(n)
+                    else:
+                        triangles[key] = [n]
+        return triangles
+
+    def triangle_nodes(self):
+        """ Get triangle field_data in list form. """
+        nodes = []
+        for v in self.process_triangles().values():
+            nodes.extend(v)
+        triangles = {}
+        for n in nodes:
+            for node, triangle in enumerate(self.triangles):
+                if n == node:
+                    triangles[n] = triangle
+        return triangles

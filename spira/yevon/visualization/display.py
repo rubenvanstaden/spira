@@ -18,14 +18,16 @@ __all__ = [
 class DisplayStyle(FieldInitializer):
     """  """
 
+    alpha = FloatField(default=1.0)
+    edgewidth = FloatField(default=1.0)
+
     color = ColorField(default=COLOR_BLACK)
     edgecolor = ColorField(default=COLOR_BLACK)
     stipple = StippleField(default=STIPPLE_NONE)    
-    # alpha = RestrictedProperty(restriction = RESTRICT_FRACTION, default = 1.0)
-    alpha = FloatField(default=1.0)
 
     def __str__(self):
-        return "DisplayStyle : color: %s - edgecolor: %s - stipple: %s - alpha: %f - edgewidth: %f - visible: %s" %(str(self.color),str(self.edgecolor),str(self.stipple), self.alpha,self.edgewidth,self.visible)
+        class_string = "[SPiRA: DisplayStyle] (color {}, stipple {}, alpha {}, edgewidth {})"
+        return class_string.format(self.color.name, str(self.stipple), self.alpha, self.edgewidth)
 
     def blend(self, other, fraction_first_color = 0.33):
         result_color_red = fraction_first_color * self.color.red + (1.0-fraction_first_color) * other.color.red 
@@ -45,7 +47,12 @@ class DisplayStyle(FieldInitializer):
 
 
 class DisplayStyleSet(list):
-    pass
+
+    def __getitem__(self, value):
+        for item in self:
+            if item[0] == value:
+                return item[1]
+        return None
 
 
 class ProcessorDisplayStyle(ProcessorTypeCast):

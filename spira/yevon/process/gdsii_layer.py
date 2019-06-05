@@ -121,9 +121,7 @@ class Layer(__Layer__):
         return (self.number, self.datatype)
 
     def is_equal_number(self, other):
-        if self.number == other.number:
-            return True
-        return False
+        return (self.number == other.number)
 
 
 def LayerField(local_name=None, restriction=None, **kwargs):

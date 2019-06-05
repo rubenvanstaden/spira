@@ -11,6 +11,10 @@ from spira.core.typed_graph import EdgeCapacitor, EdgeInductor
 from spira.yevon.visualization import color
 from spira import settings
 from spira.core.outputs.base import Outputs
+from spira.yevon.process import get_rule_deck
+
+
+RDD = get_rule_deck()
 
 
 class PlotlyGraph(object):
@@ -109,18 +113,15 @@ class PlotlyGraph(object):
 
             edge = G[e[0]][e[1]]
 
-            if 'surface' in edge:
-                if isinstance(edge['surface'], EdgeCapacitor):
-                    edges['text'].append(edge['surface'].id)
-                if isinstance(edge['surface'], EdgeInductor):
-                    edges['text'].append(edge['surface'].id)
+            if 'process_polygon' in edge:
+                if isinstance(edge['process_polygon'], EdgeCapacitor):
+                    edges['text'].append(edge['process_polygon'].id)
+                if isinstance(edge['process_polygon'], EdgeInductor):
+                    edges['text'].append(edge['process_polygon'].id)
 
         return edges
 
     def _create_nodes(self, G, labeltext):
-        import spira.all as spira
-        from spira.yevon.process.processlayer import __ProcessLayer__
-        from spira.yevon.gdsii.polygon import __Polygon__
 
         nodes = {}
 
@@ -135,35 +136,26 @@ class PlotlyGraph(object):
             nodes['x_pos'].append(x)
             nodes['y_pos'].append(y)
 
-            label = None
+            if 'device_reference' in G.node[n]:
+                node_object = G.node[n]['device_reference']
+            elif 'branch_node' in G.node[n]:
+                node_object = G.node[n]['branch_node']
+            elif 'process_polygon' in G.node[n]:
+                node_object = G.node[n]['process_polygon']
+            # else:
+            #     raise ValueError('Node object not found!')
 
-            if 'device' in G.node[n]:
-                label = G.node[n]['device']
-            elif 'branch' in G.node[n]:
-                label = G.node[n]['branch']
-            elif 'surface' in G.node[n]:
-                label = G.node[n]['surface']
+            # text = '({}) {}'.format(n, node_object.node_id)
+            text = '({}) {}'.format(n, node_object.id_string())
+            nodes['text'].append(text)
+            
+            nodes['color'].append(G.node[n]['display'].color.hexcode)
 
-            if label:
-                text = '({}) {}'.format(n, label.node_id)
-                nodes['text'].append(text)
+            # if 'display' in G.node[n]:
+            #     nodes['color'].append(G.node[n]['display'].color.hexcode)
 
-                if isinstance(label, spira.Label):
-                    nodes['color'].append(label.color.hexcode)
-                elif isinstance(label, spira.SRef):
-                    nodes['color'].append(label.ref.color.hexcode)
-                # elif isinstance(label, (spira.Port, spira.Port, spira.Dummy)):
-                elif isinstance(label, (spira.Port, spira.Port)):
-                    nodes['color'].append(label.color.hexcode)
-                elif issubclass(type(label), __ProcessLayer__):
-                    nodes['color'].append(label.ps_layer.data.COLOR.hexcode)
-                elif issubclass(type(label), __Polygon__):
-                    nodes['color'].append(label.color.hexcode)
-                else:
-                    raise ValueError('Unsupported graph node type: {}'.format(type(label)))
-
-                if 'connect' in G.node[n]:
-                    nodes['color'] = [color.COLOR_WHITE]
+            # if 'connect' in G.node[n]:
+            #     nodes['color'] = [color.COLOR_WHITE]
 
         return nodes
 

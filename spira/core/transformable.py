@@ -39,6 +39,7 @@ class Transformable(__Transformable__):
         if (not 'transformation' in kwargs) or (transformation != None):
             kwargs['transformation'] = transformation
         super().__init__(**kwargs)
+        # __Transformable__.__init__(self, **kwargs)
 
     def transform(self, transformation=None):
         if issubclass(type(transformation), self.__transform_type__):

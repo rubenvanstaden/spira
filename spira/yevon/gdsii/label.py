@@ -48,12 +48,6 @@ class __Label__(__LayerElemental__):
         if commit_to_gdspy: self.gdspy_commit = True
         return c_label
 
-    # def move(self, midpoint=(0,0), destination=None, axis=None):
-    #     d, o = utils.move_algorithm(obj=self, midpoint=midpoint, destination=destination, axis=axis)
-    #     dxdy = np.array(d) - o
-    #     self.translate(dxdy)
-    #     return self
-
     def id_string(self):
         return self.__repr__()
 
@@ -67,9 +61,8 @@ class Label(__Label__):
     >>> [SPiRA: Label] (P1 at (0,0), texttype 0)
     """
 
-    route = StringField(default='no_route')
-    orientation = NumberField(default=0)
     position = CoordField(default=(0,0))
+    orientation = NumberField(default=0)
 
     def __init__(self, position, **kwargs):
         super().__init__(position=position, **kwargs)

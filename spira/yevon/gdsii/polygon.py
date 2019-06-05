@@ -44,13 +44,10 @@ class __Polygon__(__LayerElemental__):
     shape = ShapeField()
     enable_edges = BoolField(default=True)
 
-    # def __eq__(self, other):
-    #     return self.id == other.id
-
     def __hash__(self):
         return hash(self.id)
 
-    # FIXME: This have to be removed, but for some reason 
+    # FIXME: This have to be removed, but for some reason
     # it gives an error when copying the layer object.
     def __deepcopy__(self, memo):
         return self.__class__(
@@ -70,15 +67,11 @@ class __Polygon__(__LayerElemental__):
 
     @property
     def hash_polygon(self):
-        pts = np.array([self.shape.points])
-        polygon_hashes = np.sort([hashlib.sha1(p).digest() for p in pts])
-        return polygon_hashes
+        # pts = np.array([self.shape.points])
+        return np.sort([hashlib.sha1(p).digest() for p in self.points])
 
     def encloses(self, point):
-        return not pyclipper.PointInPolygon(point, p.points) == 0
-        # if pyclipper.PointInPolygon(point, self.points) == 0:
-        #     return False
-        # return True
+        return not pyclipper.PointInPolygon(point, self.points) == 0
 
     def flat_copy(self, level=-1):
         # E = self.modified_copy(
