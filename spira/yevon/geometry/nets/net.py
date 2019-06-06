@@ -2,7 +2,7 @@ import numpy as np
 import networkx as nx
 
 from spira.yevon.geometry.physical_geometry.geometry import GmshGeometry
-from spira.core.parameters.variables import GraphField
+from spira.core.parameters.variables import GraphField, StringField
 from spira.core.parameters.descriptor import DataField
 from spira.yevon.geometry.coord import Coord
 from spira.yevon.vmodel.geometry import GeometryField
@@ -15,13 +15,10 @@ RDD = get_rule_deck()
 __all__ = ['Net']
 
 
-# from spira.core.transformable import Transformable
-# class __Net__(Transformable):
-    # pass
-
-
+from spira.core.transformable import Transformable
 from spira.core.parameters.initializer import FieldInitializer
-class __Net__(FieldInitializer):
+class __Net__(Transformable, FieldInitializer):
+    """  """
 
     def _add_edges(self, n, tri, A):
         def update_adj(self, t1, adj_mat, v_pair):
@@ -45,13 +42,39 @@ class __Net__(FieldInitializer):
         self.g.node[n]['position'] = Coord(sum_x, sum_y)
 
 
+
+# from spira.core.parameters.initializer import FieldInitializer
+# class __Net__(FieldInitializer):
+
+#     def _add_edges(self, n, tri, A):
+#         def update_adj(self, t1, adj_mat, v_pair):
+#             if (adj_mat[v_pair[0]][v_pair[1]] != 0):
+#                 t2 = adj_mat[v_pair[0]][v_pair[1]] - 1
+#                 self.g.add_edge(t1, t2, label=None)
+#             else:
+#                 adj_mat[v_pair[0]][v_pair[1]] = t1 + 1
+#                 adj_mat[v_pair[1]][v_pair[0]] = t1 + 1
+#         v1 = [tri[0], tri[1], tri[2]]
+#         v2 = [tri[1], tri[2], tri[0]]
+#         for v_pair in list(zip(v1, v2)):
+#             update_adj(self, n, A, v_pair)
+
+#     def _add_positions(self, n, tri):
+#         pp = self.mesh_data.points
+#         n1, n2, n3 = pp[tri[0]], pp[tri[1]], pp[tri[2]]
+#         sum_x = (n1[0] + n2[0] + n3[0]) / (3.0*RDD.GDSII.GRID)
+#         sum_y = (n1[1] + n2[1] + n3[1]) / (3.0*RDD.GDSII.GRID)
+#         self.g.node[n]['vertex'] = tri
+#         self.g.node[n]['position'] = Coord(sum_x, sum_y)
+
+
 class Net(__Net__):
     """
     Constructs a graph from the physical geometry
     generated from the list of elementals.
     """
 
-    g = GraphField()
+    # g = GraphField()
 
     geom = GeometryField()
     mesh_graph = DataField(fdef_name='create_mesh_graph')
@@ -59,17 +82,29 @@ class Net(__Net__):
     triangles = DataField(fdef_name='create_triangles')
     physical_triangles = DataField(fdef_name='create_physical_triangles')
 
+    name = StringField(default='no_name')
+
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+        self.g = nx.Graph()
         self.mesh_graph
         # self.g = nx.Graph()
         # self.create_mesh_data()
+
+    def __repr__(self):
+        class_string = "[SPiRA: Net] (name \'{}\', nodes {}, geom {})"
+        return class_string.format(self.name, len(self.g), self.geom.process.symbol)
+
+    def __str__(self):
+        return self.__repr__()
 
     # def __getitem__(self, n):
     #     return self.g.node[n]
 
     def transform(self, transformation):
-        pass
+        for n in self.g.nodes():
+            self.g.node[n]['position'] = transformation.apply_to_coord(self.g.node[n]['position'])
+        return self
 
     def transform_copy(self, transformation):
         pass
@@ -134,14 +169,15 @@ class Net(__Net__):
         for name, value in self.mesh_data.field_data.items():
             for n in self.g.nodes():
                 surface_id = value[0]
-                if self.physical_triangles[n] == surface_id:
-                    layer = int(name.split('_')[0])
-                    datatype = int(name.split('_')[1])
-                    key = (layer, datatype)
-                    if key in triangles:
-                        triangles[key].append(n)
-                    else:
-                        triangles[key] = [n]
+                if n in self.physical_triangles:
+                    if self.physical_triangles[n] == surface_id:
+                        layer = int(name.split('_')[0])
+                        datatype = int(name.split('_')[1])
+                        key = (layer, datatype)
+                        if key in triangles:
+                            triangles[key].append(n)
+                        else:
+                            triangles[key] = [n]
         return triangles
 
     def triangle_nodes(self):

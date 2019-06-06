@@ -82,8 +82,6 @@ def scale_polygon_up(polygons, value=None):
         value = constants.SCALE_UP
     new_poly = []
     for points in polygons:
-        # pp = [[float(p[0]*value), float(p[1]*value)] for p in points]
-        # pp = np.array([np.array([float(p[0]*value), float(p[1]*value)]) for p in points])
         pp = np.array([np.array([np.floor(float(p[0]*value)), np.floor(float(p[1]*value))]) for p in points])
         new_poly.append(pp)
     return new_poly
@@ -92,13 +90,8 @@ def scale_polygon_up(polygons, value=None):
 def scale_polygon_down(polygons, value=None):
     if value is None:
         value = constants.SCALE_DOWN
-        # value = 1
-    # value = 1
     new_poly = []
     for points in polygons:
-        # pp = [[float(p[0]*value), float(p[1]*value)] for p in points]
-        # pp = np.array([np.array([float(p[0]*value), float(p[1]*value)]) for p in points])
-        # pp = np.array([np.array([np.floor(float(p[0]*value)), np.floor(float(p[1]*value))]) for p in points])
         pp = np.array([np.array([np.floor(np.int32(p[0]*value)), np.floor(np.int32(p[1]*value))]) for p in points])
         new_poly.append(pp)
     return new_poly

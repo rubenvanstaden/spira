@@ -40,8 +40,6 @@ class MetaCell(MetaInitializer):
     >>> via = Via(layer=50)
     """
 
-    _ID = 0
-
     def __call__(cls, *params, **keyword_params):
 
         kwargs = cls.__map_parameters__(*params, **keyword_params)
@@ -77,16 +75,16 @@ class __Cell__(FieldInitializer, metaclass=MetaCell):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-    def get_node_id(self):
-        if self.__id__:
-            return self.__id__
-        else:
-            return self.__str__()
+    # def get_node_id(self):
+    #     if self.__id__:
+    #         return self.__id__
+    #     else:
+    #         return self.__str__()
 
-    def set_node_id(self, value):
-        self.__id__ = value
+    # def set_node_id(self, value):
+    #     self.__id__ = value
 
-    node_id = FunctionField(get_node_id, set_node_id, doc='Unique elemental ID.')
+    # node_id = FunctionField(get_node_id, set_node_id, doc='Unique elemental ID.')
 
     def __add__(self, other):
         from spira.yevon.geometry.ports.port import __Port__
@@ -111,13 +109,135 @@ class CellAbstract(gdspy.Cell, __Cell__):
         deps += self
         return deps
 
-    def flatten(self):
-        self.elementals = self.elementals.flatten()
-        return self.elementals
+    # def flatten(self):
+    #     self.elementals = self.elementals.flatten()
+    #     return self.elementals
 
-    def flat_copy(self, level=-1):
-        name = '{}_{}'.format(self.name, 'Flat'),
-        return self.__class__(name, self.elementals.flat_copy(level=level))
+    # def flat_copy(self, level=-1):
+    #     name = '{}_{}'.format(self.name, 'Flat'),
+    #     return self.__class__(name, self.elementals.flat_copy(level=level))
+
+    def is_layer_in_cell(self, layer):
+        D = deepcopy(self)
+        for e in D.flatten():
+            return (e.layer == layer)
+        return False
+
+    @property
+    def alias_cells(self):
+        childs = {}
+        for c in self.dependencies():
+            childs[c.alias] = c
+        return childs
+
+    @property
+    def alias_elems(self):
+        elems = {}
+        for e in self.elementals.polygons:
+            elems[e.alias] = e
+        return elems
+
+    def __getitem__(self, key):
+        from spira.yevon.gdsii.sref import SRef
+        from spira.yevon.gdsii.polygon import Polygon
+        keys = key.split(':')
+
+        item = None
+        if keys[0] in self.alias_cells:
+            item = self.alias_cells[keys[0]]
+        elif keys[0] in self.alias_elems:
+            item = self.alias_elems[keys[0]]
+        else:
+            raise ValueError('Alias {} key not found!'.format(keys[0]))
+
+        return item
+
+
+class Cell(CellAbstract):
+    """ A Cell encapsulates a set of elementals that
+    describes the layout being generated. """
+
+    um = NumberField(default=1e6)
+    name = DataField(fdef_name='create_name', doc='Name of the cell instance.')
+
+    # net = DataField(fdef_name='create_net', doc='Generate a net from the cell metal polygons.')
+
+    _next_uid = 0
+
+    def get_alias(self):
+        if not hasattr(self, '__alias__'):
+            self.__alias__ = self.name.split('__')[0]
+        return self.__alias__
+
+    def set_alias(self, value):
+        self.__alias__ = value
+
+    alias = FunctionField(get_alias, set_alias, doc='Functions to generate an alias for cell name.')
+
+    def __init__(self, name=None, elementals=None, ports=None, nets=None, library=None, **kwargs):
+
+        __Cell__.__init__(self, **kwargs)
+        gdspy.Cell.__init__(self, self.name, exclude_from_current=True)
+
+        if name is not None:
+            # s = '{}_{}'.format(name, self.__class__._ID)
+            s = '{}_{}'.format(name, Cell._next_uid)
+            self.__dict__['__name__'] = s
+            Cell.name.__set__(self, s)
+            # self.__class__._ID += 1
+
+        if library is not None:
+            self.library = library
+        if elementals is not None:
+            self.elementals = ElementalList(elementals)
+        if ports is not None:
+            self.ports = PortList(ports)
+            
+        self.uid = Cell._next_uid
+        Cell._next_uid += 1
+
+    def __repr__(self):
+        class_string = "[SPiRA: Cell(\'{}\')] (elementals {}, ports {})"
+        return class_string.format(self.name, self.elementals.__len__(), self.ports.__len__())
+
+    def __str__(self):
+        return self.__repr__()
+
+    def transform(self, transformation=None):
+        self.elementals.transform(transformation)
+        self.ports.transform(transformation)
+        return self
+
+    def expand_transform(self):
+        for S in self.elementals.sref:
+            S.expand_transform()
+        return self
+
+    def flat_expand_transform_copy(self):
+        from spira.yevon.gdsii.sref import SRef
+        from spira.yevon.gdsii.polygon import Polygon
+        from spira.yevon.geometry.ports.port import Port
+        D = deepcopy(self)
+        S = D.expand_transform()
+        C = Cell(name=S.name + '_ExpandedCell')
+        def flat_polygons(subj, cell):
+            for e in cell.elementals:
+                if isinstance(e, Polygon):
+                    subj += e
+                elif isinstance(e, SRef):
+                    flat_polygons(subj=subj, cell=e.ref)
+            # for p in cell.ports:
+            #     port = Port(
+            #         name=p.name + "_" + cell.name,
+            #         midpoint=deepcopy(p.midpoint),
+            #         orientation=deepcopy(p.orientation),
+            #         width=deepcopy(p.width),
+            #         local_pid=p.local_pid
+            #     )
+            #     subj.ports += port
+            return subj
+        D = flat_polygons(C, S)
+        return D
 
     def move(self, midpoint=(0,0), destination=None, axis=None):
         from spira.yevon.geometry.ports.base import __Port__
@@ -191,143 +311,8 @@ class CellAbstract(gdspy.Cell, __Cell__):
                         self.elementals[i] = T(e)
         return self
 
-    def flat_expand_transform_copy(self):
-        from spira.yevon.gdsii.sref import SRef
-        from spira.yevon.gdsii.polygon import Polygon
-        from spira.yevon.geometry.ports.port import Port
-        S = self.expand_transform()
-        C = self.__class__(name=S.name + '_ExpandedCell')
-        def flat_polygons(subj, cell):
-            for e in cell.elementals:
-                if isinstance(e, Polygon):
-                    subj += e
-                elif isinstance(e, SRef):
-                    flat_polygons(subj=subj, cell=e.ref)
-            for p in cell.ports:
-                port = Port(
-                    name=p.name + "_" + cell.name,
-                    midpoint=deepcopy(p.midpoint),
-                    orientation=deepcopy(p.orientation),
-                    width=deepcopy(p.width),
-                    local_pid=p.local_pid
-                )
-                subj.ports += port
-            return subj
-        D = flat_polygons(C, S)
-        return D
-
-
-class Cell(CellAbstract):
-    """ A Cell encapsulates a set of elementals that
-    describes the layout being generated. """
-
-    um = NumberField(default=1e6)
-    name = DataField(fdef_name='create_name', doc='Name of the cell instance.')
-
-    _next_uid = 0
-
-    # routes = ElementalListField(fdef_name='create_routes')
-    # def create_routes(self, routes):
-    #     return routes
-
-    def get_alias(self):
-        if not hasattr(self, '__alias__'):
-            self.__alias__ = self.name.split('__')[0]
-        return self.__alias__
-
-    def set_alias(self, value):
-        self.__alias__ = value
-
-    alias = FunctionField(get_alias, set_alias, doc='Functions to generate an alias for cell name.')
-
-    def __init__(self, name=None, elementals=None, ports=None, nets=None, library=None, **kwargs):
-
-        __Cell__.__init__(self, **kwargs)
-        gdspy.Cell.__init__(self, self.name, exclude_from_current=True)
-
-        self.g = nx.Graph()
-        self.uid = Cell._next_uid
-        Cell._next_uid += 1
-
-        if name is not None:
-            s = '{}_{}'.format(name, self.__class__._ID)
-            self.__dict__['__name__'] = s
-            Cell.name.__set__(self, s)
-            self.__class__._ID += 1
-
-        if library is not None:
-            self.library = library
-        if elementals is not None:
-            self.elementals = ElementalList(elementals)
-        if ports is not None:
-            self.ports = PortList(ports)
-            
-    def __repr__(self):
-        if hasattr(self, 'elementals'):
-            return ("[SPiRA: Cell(\'{}\')] (elementals {}, ports {})").format(self.name, self.elementals.__len__(), self.ports.__len__())
-
-    # def __repr__(self):
-    #     if hasattr(self, 'elementals'):
-    #         elems = self.elementals
-    #         return ("[SPiRA: Cell(\'{}\')] " +
-    #                 "({} elementals: {} sref, {} cells, {} polygons, " +
-    #                 "{} labels, {} ports)").format(
-    #                     self.name,
-    #                     elems.__len__(),
-    #                     elems.sref.__len__(),
-    #                     elems.cells.__len__(),
-    #                     elems.polygons.__len__(),
-    #                     elems.labels.__len__(),
-    #                     self.ports.__len__()
-    #                 )
-
-    def __str__(self):
-        return self.__repr__()
-
-    def transform(self, transformation=None):
-        self.elementals.transform(transformation)
-        self.ports.transform(transformation)
-        return self
-
-    def expand_transform(self):
-        for S in self.elementals.sref:
-            S.expand_transform()
-        return self
-
-    def is_layer_in_cell(self, layer):
-        D = deepcopy(self)
-        for e in D.flatten():
-            return (e.layer == layer)
-        return False
-
-    @property
-    def alias_cells(self):
-        childs = {}
-        for c in self.dependencies():
-            childs[c.alias] = c
-        return childs
-
-    @property
-    def alias_elems(self):
-        elems = {}
-        for e in self.elementals.polygons:
-            elems[e.alias] = e
-        return elems
-
-    def __getitem__(self, key):
-        from spira.yevon.gdsii.sref import SRef
-        from spira.yevon.gdsii.polygon import Polygon
-        keys = key.split(':')
-
-        item = None
-        if keys[0] in self.alias_cells:
-            item = self.alias_cells[keys[0]]
-        elif keys[0] in self.alias_elems:
-            item = self.alias_elems[keys[0]]
-        else:
-            raise ValueError('Alias {} key not found!'.format(keys[0]))
-
-        return item
+    def nets(self):
+        return self.elementals.nets()
 
 
 class Connector(Cell):

@@ -2,6 +2,10 @@ import pyclipper
 import numpy as np
 import spira.all as spira
 from spira.yevon import constants
+from spira.yevon.process import get_rule_deck
+
+
+RDD = get_rule_deck()
 
 
 st = pyclipper.scale_to_clipper
@@ -24,28 +28,28 @@ def simplify_points(points):
     return self
 
 
-def union_polygons(poly_elems):
-    """
+# def union_polygons(poly_elems):
+#     """
     
-    """
-    mapping = {}
-    elems = spira.ElementalList()
-    for e in poly_elems:
-        if isinstance(e, spira.Polygon):
-            if e.layer not in mapping.keys():
-                mapping[e.layer] = list(np.array([e.shape.points]))
-            else:
-                mapping[e.layer].append(e.shape.points)
-    # print(mapping)
-    for layer, points in mapping.items():
-        pts_group = union_points(points)
-        for uid, pts in enumerate(pts_group):
-            elems += spira.Polygon(shape=pts, layer=layer)
-            # name = 'metal_{}_{}_{}'.format('NAME', layer.layer.number, uid)
-            # shape = shapes.Shape(points=pts)
-            # ply = spira.Polygon(shape=pts, layer=layer)
-            # elems += ply
-    return elems
+#     """
+#     mapping = {}
+#     elems = spira.ElementalList()
+#     for e in poly_elems:
+#         if isinstance(e, spira.Polygon):
+#             if e.layer not in mapping.keys():
+#                 mapping[e.layer] = list(np.array([e.shape.points]))
+#             else:
+#                 mapping[e.layer].append(e.shape.points)
+#     # print(mapping)
+#     for layer, points in mapping.items():
+#         pts_group = union_points(points)
+#         for uid, pts in enumerate(pts_group):
+#             elems += spira.Polygon(shape=pts, layer=layer)
+#             # name = 'metal_{}_{}_{}'.format('NAME', layer.layer.number, uid)
+#             # shape = shapes.Shape(points=pts)
+#             # ply = spira.Polygon(shape=pts, layer=layer)
+#             # elems += ply
+#     return elems
         
 
 def union_points(pts):
@@ -56,6 +60,36 @@ def union_points(pts):
     points = boolean(subj=points, method='or')
     points = convert_to_numpy_array(points)
     return points
+
+
+def union_polygons(elems):
+    """
+    
+    """
+    el = spira.ElementalList()
+    for i, e1 in enumerate(elems):
+        for j, e2 in enumerate(elems):
+            if i != j:
+                polygons = e1 | e2
+                for p in polygons:
+                    p.layer.purpose = RDD.PURPOSE.UNION
+                el += polygons
+    return e
+
+
+def intersection_polygons(elems):
+    """
+    
+    """
+    el = spira.ElementalList()
+    for i, e1 in enumerate(elems):
+        for j, e2 in enumerate(elems):
+            if i != j:
+                polygons = e1 & e2
+                for p in polygons:
+                    p.layer.purpose = RDD.PURPOSE.INTERSECTED
+                el += polygons
+    return el
 
 
 # def merge_points(pts):

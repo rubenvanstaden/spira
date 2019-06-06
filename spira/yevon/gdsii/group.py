@@ -49,7 +49,7 @@ class __Group__(FieldInitializer):
             raise TypeError("Invalid type " + str(type(elemental)) + " in __Group__.__iadd__().")
         return self
 
-    def flatten(self, level = -1):
+    def flatten(self, level=-1):
         self.elementals = self.elementals.flat_copy(level=level)
         return self
 

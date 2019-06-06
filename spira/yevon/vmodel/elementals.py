@@ -17,13 +17,17 @@ def union_process_polygons(elems, process):
 
     for layer in RDD.get_physical_layers_by_process(processes=process):
         LF = LayerFilterAllow(layers=[layer])
-        points = []
-        for e in LF(elems.polygons):
-            points.append(e.points)
-        merged_points = clipping.union_points(points)
-        for uid, pts in enumerate(merged_points):
-            el += Polygon(shape=pts, layer=layer)
-        return el
+        elems = LF(elems.polygons)
+        if len(elems) > 1:
+            points = []
+            for e in elems:
+                points.append(e.points)
+            merged_points = clipping.union_points(points)
+            for uid, pts in enumerate(merged_points):
+                el += Polygon(shape=pts, layer=layer)
+            return el
+        else:
+            return elems
 
 
 # def get_process_elementals(elems, process):

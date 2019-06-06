@@ -31,7 +31,7 @@ class GmshGeometry(__Geometry__):
 
     _ID = 0
 
-    lcar = NumberField(default=1e6, doc='Mesh characteristic length.')
+    lcar = NumberField(default=1, doc='Mesh characteristic length.')
     algorithm = IntegerField(default=6, doc='Mesh algorithm used by Gmsh.')
     scale_Factor = NumberField(default=1e-6, doc='Mesh coord dimention scaling.')
     coherence_mesh = BoolField(defualt=True, doc='Merge similar points.')
@@ -60,7 +60,6 @@ class GmshGeometry(__Geometry__):
         surfaces = []
         for i, polygon in enumerate(self.process_polygons):
             layer = RDD.GDSII.EXPORT_LAYER_MAP[polygon.layer]
-            print(layer)
             pts = numpy_to_list(polygon.points, start_height=0, unit=1e-6)
             surface_label = '{}_{}_{}_{}'.format(layer.number, layer.datatype, GmshGeometry._ID, i)
             gp = self.geom.add_polygon(pts, lcar=self.lcar, make_surface=True, holes=None)

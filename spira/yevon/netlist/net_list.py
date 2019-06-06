@@ -60,9 +60,7 @@ class NetList(TypedList):
         return self
 
     def disjoint(self):
-        g = []
-        for net in self._list:
-            g.append(net.g)
+        g = [net.g for net in self._list]
         return nx.disjoint_union_all(g)
 
 

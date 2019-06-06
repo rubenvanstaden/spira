@@ -52,6 +52,9 @@ RDD.PURPOSE.HOLE = PurposeLayer(name='Polygon holes', symbol='HOLE')
 RDD.PURPOSE.DUMMY = PurposeLayer(name='Sky plane polygons', symbol='DUM')
 RDD.PURPOSE.TEXT = PurposeLayer(name='Sky plane polygons', symbol='TXT')
 RDD.PURPOSE.BOUNDARY_BOX = PurposeLayer(name='Bounding Box', symbol='BBOX', doc='')
+RDD.PURPOSE.INTERSECTED = PurposeLayer(name='Bounding Box', symbol='AND', doc='')
+RDD.PURPOSE.UNION = PurposeLayer(name='Bounding Box', symbol='OR', doc='')
+RDD.PURPOSE.DIFFERENCE = PurposeLayer(name='Bounding Box', symbol='NOR', doc='')
 
 # ---------------------------------- Port Purposes ------------------------------------
 

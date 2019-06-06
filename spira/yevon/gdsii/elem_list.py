@@ -116,6 +116,13 @@ class ElementalList(__ElementalList__):
             cells.add(e.dependencies())
         return cells
 
+    def nets(self):
+        from spira.yevon.netlist.net_list import NetList
+        nets = NetList()
+        for e in self._list:
+            nets += e.nets()
+        return nets
+
     def expand_transform(self):
         for c in self._list:
             c.expand_transform()

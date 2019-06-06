@@ -145,11 +145,10 @@ class PlotlyGraph(object):
             # else:
             #     raise ValueError('Node object not found!')
 
-            # text = '({}) {}'.format(n, node_object.node_id)
-            text = '({}) {}'.format(n, node_object.id_string())
-            nodes['text'].append(text)
+            # text = '({}) {}'.format(n, node_object.id_string())
+            # nodes['text'].append(text)
             
-            nodes['color'].append(G.node[n]['display'].color.hexcode)
+            # nodes['color'].append(G.node[n]['display'].color.hexcode)
 
             # if 'display' in G.node[n]:
             #     nodes['color'].append(G.node[n]['display'].color.hexcode)

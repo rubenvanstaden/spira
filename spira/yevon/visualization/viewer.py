@@ -1,5 +1,6 @@
 import spira.all as spira
 from spira.yevon.geometry import shapes
+from spira.yevon.geometry.ports.port import ContactPort
 from spira.core.parameters.descriptor import DataField
 from spira.yevon.process.physical_layer import PhysicalLayer
 from spira.yevon.process import get_rule_deck
@@ -54,7 +55,8 @@ class PortLayout(spira.Cell):
 
     def create_elementals(self, elems):
         elems += self.edge
-        elems += self.arrow
         elems += self.label
+        if not isinstance(self.port, ContactPort):
+            elems += self.arrow
         return elems
 

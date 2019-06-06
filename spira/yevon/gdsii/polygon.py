@@ -1,6 +1,5 @@
 import gdspy
 import pyclipper
-import hashlib
 import numpy as np
 
 from spira.core.transforms import stretching
@@ -9,11 +8,11 @@ from spira.yevon.utils import clipping
 from copy import copy, deepcopy
 from spira.yevon.visualization import color
 from spira.yevon.gdsii.base import __LayerElemental__
-from spira.core.parameters.variables import *
 from spira.yevon.geometry.coord import CoordField, Coord
 from spira.yevon.visualization.color import ColorField
 from spira.core.parameters.descriptor import DataFieldDescriptor, FunctionField, DataField
 from spira.yevon.geometry.ports.base import __Port__
+from spira.core.parameters.variables import *
 from spira.core.transforms.stretching import *
 from spira.yevon.geometry.shapes import Shape, ShapeField
 from spira.yevon.geometry import shapes
@@ -47,39 +46,10 @@ class __Polygon__(__LayerElemental__):
     def __hash__(self):
         return hash(self.id)
 
-    # FIXME: This have to be removed, but for some reason
-    # it gives an error when copying the layer object.
-    def __deepcopy__(self, memo):
-        return self.__class__(
-            shape=deepcopy(self.shape),
-            # ports=deepcopy(self.ports),
-            layer=deepcopy(self.layer),
-            transformation=deepcopy(self.transformation)
-        )
-
-    @property
-    def count(self):
-        return np.size(self.shape.points, 0)
-
-    @property
-    def bbox_info(self):
-        return self.shape.bbox_info.transform_copy(self.transformation)
-
-    @property
-    def hash_polygon(self):
-        # pts = np.array([self.shape.points])
-        return np.sort([hashlib.sha1(p).digest() for p in self.points])
-
     def encloses(self, point):
         return not pyclipper.PointInPolygon(point, self.points) == 0
 
     def flat_copy(self, level=-1):
-        # E = self.modified_copy(
-        # E = self.
-        #     shape=deepcopy(self.shape), 
-        #     layer=deepcopy(self.layer), 
-        #     transformation=self.transformation
-        # )
         E = deepcopy(self)
         return E.transform_copy(self.transformation)
 
@@ -108,8 +78,8 @@ class __Polygon__(__LayerElemental__):
         return self
 
     def id_string(self):
-        return self.__repr__()
-        # return str(self.hash_polygon)
+        sid = '{} - hash {}'.format(self.__repr__(), self.hash_polygon)
+        return sid
 
     def move(self, midpoint=(0,0), destination=None, axis=None):
         """  """
@@ -154,7 +124,7 @@ class Polygon(__Polygon__):
 
     def get_alias(self):
         if not hasattr(self, '__alias__'):
-            self.__alias__ = self.layer.name
+            self.__alias__ = self.process
         return self.__alias__
 
     def set_alias(self, value):
@@ -169,18 +139,21 @@ class Polygon(__Polygon__):
     def __repr__(self):
         if self is None:
             return 'Polygon is None!'
-        return ("[SPiRA: Polygon {} {}] (center {}, area {}, vertices {}, layer {}, datatype {}, hash {})").format(
-            self.alias, 0,
-            self.bbox_info.center,
-            self.area,
-            sum([len(p) for p in self.shape.points]),
-            self.layer.number,
-            self.layer.datatype,
-            self.hash_polygon
-        )
+        layer = RDD.GDSII.IMPORT_LAYER_MAP[self.layer]
+        class_string = "[SPiRA: Polygon {}] (center {}, vertices {}, process {}, purpose {})"
+        return class_string.format(self.alias, self.center, self.count, self.process, self.purpose)
 
     def __str__(self):
         return self.__repr__()
+
+    # NOTE: We are not copying the ports, so they
+    # can be re-calculated for the transformed shape.
+    def __deepcopy__(self, memo):
+        return self.__class__(
+            shape=deepcopy(self.shape),
+            layer=deepcopy(self.layer),
+            transformation=deepcopy(self.transformation)
+        )
 
     def convert_to_gdspy(self, transformation=None):
         """
@@ -198,6 +171,44 @@ class Polygon(__Polygon__):
             datatype=layer.datatype,
             verbose=False
         )
+
+    def nets(self):
+        from spira.yevon.geometry.nets.net import Net
+        from spira.yevon.netlist.net_list import NetList
+        from spira.yevon.vmodel.virtual import virtual_process_model
+        from spira.yevon.filters.net_label_filter import NetProcessLabelFilter
+        from spira.yevon.gdsii.cell import Cell
+        from spira.yevon.gdsii.elem_list import ElementalList
+
+        # nets = NetList()
+
+        # D = deepcopy(self)
+
+        D = Cell(name=self.alias)
+        D += deepcopy(self)
+        
+        # print('\n--- SRef ---')
+        # for e in self.elementals.sref:
+        #     print(e)
+        #     nets += e.ref.nets
+
+        vp = virtual_process_model(device=D, process_flow=RDD.VMODEL.PROCESS_FLOW)
+        for process, geometry in vp.geometry.items():
+            print('jkwebffwbjfbwejfkjwfebkjjk')
+            print(geometry.geom)
+            net = Net(name=self.__repr__(), geom=geometry)
+
+            # pp = ElementalList()
+            # for e in D.process_elementals:
+            #     if e.layer.process == process:
+            #         pp += e
+
+            # Fs = NetProcessLabelFilter(process_polygons=pp)
+            # # Fs += spira.NetBlockLabelFilter(references=self.elementals.sref)
+            # # Fs += spira.NetDeviceLabelFilter(device_ports=self.ports)
+
+            # net = Fs(net)
+        return net
 
 
 class PolygonGroup(Group, Polygon):

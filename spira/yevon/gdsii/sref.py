@@ -82,7 +82,11 @@ class __RefElemental__(__Elemental__):
             #     subj.ports += port
             return subj
         D = flat_polygons(C, S.ref)
-        return self.__class__(reference=D)
+        return SRef(reference=D)
+        # return self.__class__(reference=D)
+
+    def net(self):
+        return self.ref.net()
 
 
 class SRef(__RefElemental__):
@@ -135,6 +139,12 @@ class SRef(__RefElemental__):
         d.add(self.ref)
         d.add(self.ref.dependencies())
         return d
+
+    def nets(self):
+        nets = self.ref.nets()
+        T = self.transformation + Translation(self.midpoint)
+        nets.transform(T)
+        return nets 
 
     def flatten(self):
         return self.ref.flatten()

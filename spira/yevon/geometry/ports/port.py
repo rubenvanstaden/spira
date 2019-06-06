@@ -60,8 +60,13 @@ class Port(Vector, __PhysicalPort__):
 
     alias = FunctionField(get_alias, set_alias, doc='Functions to generate an alias for cell name.')
 
+    def __convert_type__(self):
+        self.__class__ = ContactPort
+
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+
+        self.__convert_type__()
 
         if 'locked' in kwargs:
             if kwargs['locked'] is True:
@@ -155,34 +160,17 @@ def PortField(local_name=None, restriction=None, **kwargs):
     return RestrictedParameter(local_name, restrictions=R, **kwargs)
 
 
-def point_in_port_polygon(port, point):
-    pass
+# class ContactPort(__PhysicalPort__):
+class ContactPort(Port):
 
-
-# def point_in_port_polygon(port, point):
-#     from spira.yevon.process.physical_layer import PhysicalLayer
-#     dw = port.width
-#     dl = port.length
-#     layer = PhysicalLayer(process=port.process, purpose=port.purpose)
-#     p = spira.Box(width=dw, height=dl, layer=layer)
-#     p.center = (0,0)
-#     angle = port.orientation - 90
-#     T = spira.Rotation(rotation=angle)
-#     T += spira.Translation(port.midpoint)
-#     p.transform(T)
-
-#     print(p)
-#     print(p.points)
-
-#     pp = pyclipper.PointInPolygon(point, p.points) != 0
-
-#     print(pp)
-
-#     return pp
-
-#     # if pp == 0:
-#     #     return False
-#     # else:
-#     #     return True
+    width = NumberField(default=0.4*1e6)
+    length = NumberField(default=0.4*1e6)
+    
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+    
+    def __repr__(self):
+        return ("[SPiRA: ContactPort] (name {}, alias {}, locked {}, midpoint {} orientation {} width {})").format(self.name, self.alias, self.locked, self.midpoint, self.orientation, self.width)
+    
 
 
