@@ -18,7 +18,7 @@ from spira.yevon.process import get_rule_deck
 RDD = get_rule_deck()
 
 
-__all__ = ['Port', 'PortField']
+__all__ = ['Port', 'PortField', 'ContactPort']
 
 
 class Port(Vector, __PhysicalPort__):
@@ -26,6 +26,8 @@ class Port(Vector, __PhysicalPort__):
 
     bbox = BoolField(default=False)
     width = NumberField(default=2*1e6)
+    port_type = StringField(default='terminal')
+
     # length = NumberField(default=2*1e6)
 
     # def get_length(self):
@@ -60,20 +62,22 @@ class Port(Vector, __PhysicalPort__):
 
     alias = FunctionField(get_alias, set_alias, doc='Functions to generate an alias for cell name.')
 
-    def __convert_type__(self):
-        self.__class__ = ContactPort
-
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-        self.__convert_type__()
+        if 'port_type' in kwargs:
+            if kwargs['port_type'] == 'contact':
+                self.__class__ = ContactPort
+            elif kwargs['port_type'] == 'branch':
+                self.__class__ = BranchPort
 
         if 'locked' in kwargs:
             if kwargs['locked'] is True:
                 self.purpose = RDD.PURPOSE.PORT.EDGE_DISABLED
 
     def __repr__(self):
-        return ("[SPiRA: Port] (name {}, alias {}, locked {}, midpoint {} orientation {} width {})").format(self.name, self.alias, self.locked, self.midpoint, self.orientation, self.width)
+        class_string = "[SPiRA: Port] (name {}, alias {}, locked {}, midpoint {} orientation {} width {})"
+        return class_string.format(self.name, self.alias, self.locked, self.midpoint, self.orientation, self.width)
 
     def __str__(self):
         return self.__repr__()
@@ -160,17 +164,32 @@ def PortField(local_name=None, restriction=None, **kwargs):
     return RestrictedParameter(local_name, restrictions=R, **kwargs)
 
 
+from spira.yevon.process.purpose_layer import PurposeLayerField
 # class ContactPort(__PhysicalPort__):
 class ContactPort(Port):
 
     width = NumberField(default=0.4*1e6)
     length = NumberField(default=0.4*1e6)
+    purpose = PurposeLayerField(default=RDD.PURPOSE.PORT.CONTACT)
     
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
     
     def __repr__(self):
-        return ("[SPiRA: ContactPort] (name {}, alias {}, locked {}, midpoint {} orientation {} width {})").format(self.name, self.alias, self.locked, self.midpoint, self.orientation, self.width)
+        class_string = "[SPiRA: ContactPort] (name {}, alias {}, locked {}, midpoint {} orientation {} width {})"
+        return class_string.format(self.name, self.alias, self.locked, self.midpoint, self.orientation, self.width)
     
 
+class BranchPort(Port):
+
+    width = NumberField(default=0.4*1e6)
+    length = NumberField(default=0.4*1e6)
+    purpose = PurposeLayerField(default=RDD.PURPOSE.PORT.BRANCH)
+    
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+    
+    def __repr__(self):
+        class_string = "[SPiRA: BranchPort] (name {}, alias {}, locked {}, midpoint {} orientation {} width {})"
+        return class_string.format(self.name, self.alias, self.locked, self.midpoint, self.orientation, self.width)
 

@@ -71,10 +71,10 @@ def union_polygons(elems):
         for j, e2 in enumerate(elems):
             if i != j:
                 polygons = e1 | e2
-                for p in polygons:
-                    p.layer.purpose = RDD.PURPOSE.UNION
+                # for p in polygons:
+                #     p.layer.purpose = RDD.PURPOSE.UNION
                 el += polygons
-    return e
+    return el
 
 
 def intersection_polygons(elems):

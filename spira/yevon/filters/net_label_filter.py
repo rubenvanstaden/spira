@@ -4,7 +4,7 @@ from spira.yevon.process.layer_list import LayerList, LayerListField
 from spira.yevon.gdsii.elem_list import ElementalListField
 from spira.yevon.geometry.ports.port_list import PortListField
 from spira.yevon.vmodel.elementals import reference_metal_blocks
-from spira.yevon.geometry.ports import Port
+from spira.yevon.geometry.ports import Port, ContactPort
 from spira.yevon.utils import geometry
 from spira.yevon.process import get_rule_deck
 
@@ -61,10 +61,13 @@ class NetDeviceLabelFilter(__NetFilter__):
         for n, triangle in item.triangle_nodes().items():
             points = [geometry.c2d(item.mesh_data.points[i]) for i in triangle]
             for D in self.device_ports:
-                if isinstance(D, Port):
+                if isinstance(D, ContactPort):
+                    if D.encloses(points):
+                        item.g.node[n]['device_reference'] = D
+                        item.g.node[n]['display'] = RDD.DISPLAY.STYLE_SET[D.layer]
+                elif isinstance(D, Port):
                     if D.purpose == RDD.PURPOSE.PORT.EDGE_ENABLED:
                         if D.encloses(points):
-                            print(D)
                             item.g.node[n]['device_reference'] = D
                             item.g.node[n]['display'] = RDD.DISPLAY.STYLE_SET[D.layer]
                 # else:

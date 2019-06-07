@@ -59,13 +59,15 @@ def snap_points(points, grids_per_unit=None):
 
 def c2d(coord):
     """ Convert coordinate to 2D. """
-    pp = [(coord[i]/(RDD.GDSII.GRID)) for i in range(len(list(coord))-1)]
+    # pp = [(coord[i]/(RDD.GDSII.GRID)) for i in range(len(list(coord))-1)]
+    pp = [coord[i] for i in range(len(list(coord))-1)]
     return pp
 
 
 def c3d(coord):
     """ Convert coordinate to 3D. """
-    pp = [coord[i]*RDD.GDSII.GRID for i in range(len(list(coord)))]
+    # pp = [coord[i]*RDD.GDSII.GRID for i in range(len(list(coord)))]
+    pp = [coord[i] for i in range(len(list(coord)))]
     return pp
 
 

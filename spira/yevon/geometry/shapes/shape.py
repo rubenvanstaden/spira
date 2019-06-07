@@ -146,6 +146,11 @@ class __Shape__(Transformable, FieldInitializer):
     def transform(self, transformation):
         self.points = transformation.apply_to_array(self.points)
         return self
+        
+    # def transform_copy(self, transformation):
+    #     S = deepcopy(self)
+    #     S.points = transformation.apply_to_array(self.points)
+    #     return S
 
     def id_string(self):
         return self.__str__()
@@ -171,24 +176,13 @@ class Shape(__Shape__):
 
     def __repr__(self):
         return "[SPiRA: Shape] (points {})".format(self.center_of_mass)
-        # return "[SPiRA: Shape] (points {})".format(self.points)
-        # """ string representation """
-        # L = ["Shape ["]
-        # L += [("(%d, %d)" % (c[0], c[1])) for c in self.points[0]]
-        # L += ["]"]
-        # return "".join(L)
 
     def __str__(self):
         return self.__repr__()
 
     # # NOTE: For some reason is required for deepcopy in `create_edge_ports`.
     # def __deepcopy__(self, memo):
-    #     # shape = self.modified_copy(
-    #     shape = self.__class__(
-    #         points=deepcopy(self.points),
-    #         transformation=deepcopy(self.transformation)
-    #     )
-    #     return shape
+    #     return Shape(points=deepcopy(self.points), transformation=deepcopy(self.transformation))
 
     def __getitem__(self, index):
         """ Access a point. """

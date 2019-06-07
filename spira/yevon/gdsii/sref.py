@@ -85,8 +85,8 @@ class __RefElemental__(__Elemental__):
         return SRef(reference=D)
         # return self.__class__(reference=D)
 
-    def net(self):
-        return self.ref.net()
+    def net(self, contacts):
+        return self.ref.net(contacts)
 
 
 class SRef(__RefElemental__):

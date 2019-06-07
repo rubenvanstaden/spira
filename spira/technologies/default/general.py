@@ -11,9 +11,10 @@ RDD.GDSII.PRECISION = 1e-9
 
 # ---------------------------------- Engines ---------------------------------------
 
-# RDD.ENGINE.GEOMETRY = 'GMSH_ENGINE'
-# RDD.ENGINE.SPICE = 'JOSIM_ENGINE'
-# RDD.ENGINE.IMPEDANCE = 'INDUCTEX_ENGINE'
+RDD.ENGINE = ParameterDatabase()
+RDD.ENGINE.GEOMETRY = 'GMSH_ENGINE'
+RDD.ENGINE.SPICE = 'JOSIM_ENGINE'
+RDD.ENGINE.IMPEDANCE = 'INDUCTEX_ENGINE'
 
 # ---------------------------------- Process ---------------------------------------
 
@@ -60,6 +61,7 @@ RDD.PURPOSE.DIFFERENCE = PurposeLayer(name='Bounding Box', symbol='NOR', doc='')
 
 RDD.PURPOSE.PORT = ProcessLayerDatabase()
 RDD.PURPOSE.PORT.CONTACT = PurposeLayer(name='Port ports specified by the designer', symbol='TERM')
+RDD.PURPOSE.PORT.BRANCH = PurposeLayer(name='Port ports specified by the designer', symbol='BRANCH')
 RDD.PURPOSE.PORT.EDGE_ENABLED = PurposeLayer(name='Edge', symbol='EDGEE', doc='Layer that represents a polygon edge.')
 RDD.PURPOSE.PORT.EDGE_DISABLED = PurposeLayer(name='Edge', symbol='EDGED', doc='Layer that represents a polygon edge.')
 RDD.PURPOSE.PORT.DIRECTION = PurposeLayer(name='Arrow', symbol='DIR', doc='Layer that represents the direction of a edge terminal.')

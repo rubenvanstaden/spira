@@ -149,6 +149,7 @@ class Polygon(__Polygon__):
     # NOTE: We are not copying the ports, so they
     # can be re-calculated for the transformed shape.
     def __deepcopy__(self, memo):
+        # return Polygon(
         return self.__class__(
             shape=deepcopy(self.shape),
             layer=deepcopy(self.layer),
@@ -172,42 +173,47 @@ class Polygon(__Polygon__):
             verbose=False
         )
 
-    def nets(self):
+    def nets(self, contacts):
         from spira.yevon.geometry.nets.net import Net
         from spira.yevon.netlist.net_list import NetList
         from spira.yevon.vmodel.virtual import virtual_process_model
-        from spira.yevon.filters.net_label_filter import NetProcessLabelFilter
+        from spira.yevon.filters.net_label_filter import NetProcessLabelFilter, NetDeviceLabelFilter
         from spira.yevon.gdsii.cell import Cell
         from spira.yevon.gdsii.elem_list import ElementalList
 
-        # nets = NetList()
-
-        # D = deepcopy(self)
-
         D = Cell(name=self.alias)
         D += deepcopy(self)
-        
-        # print('\n--- SRef ---')
-        # for e in self.elementals.sref:
-        #     print(e)
-        #     nets += e.ref.nets
+        # shape = self.shape.transform(self.transformation)
+        # P = Polygon(shape, layer=deepcopy(self.layer))
+        # D += P
 
         vp = virtual_process_model(device=D, process_flow=RDD.VMODEL.PROCESS_FLOW)
         for process, geometry in vp.geometry.items():
-            print('jkwebffwbjfbwejfkjwfebkjjk')
-            print(geometry.geom)
-            net = Net(name=self.__repr__(), geom=geometry)
+            net = Net(name=self.__repr__(), geometry=geometry)
 
-            # pp = ElementalList()
+            pp = ElementalList()
+
+            for e in geometry.process_polygons:
+                if e.layer.process == process:
+                    pp += e
+            # print(pp)
+
             # for e in D.process_elementals:
             #     if e.layer.process == process:
             #         pp += e
+            # print(pp)
 
-            # Fs = NetProcessLabelFilter(process_polygons=pp)
-            # # Fs += spira.NetBlockLabelFilter(references=self.elementals.sref)
-            # # Fs += spira.NetDeviceLabelFilter(device_ports=self.ports)
+            # print('\n[*] Contacts:')
+            # for c in contacts:
+            #     print(c)
+            # print('')
 
-            # net = Fs(net)
+            Fs = NetProcessLabelFilter(process_polygons=pp)
+            Fs += NetDeviceLabelFilter(device_ports=contacts)
+            # Fs += spira.NetBlockLabelFilter(references=self.elementals.sref)
+
+            # net = Fs(net).transform(self.transformation)
+            net = Fs(net)
         return net
 
 

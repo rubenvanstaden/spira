@@ -63,6 +63,18 @@ class NetList(TypedList):
         g = [net.g for net in self._list]
         return nx.disjoint_union_all(g)
 
+    def disjoint_union_and_combine_nodes(self):
+        from spira.yevon.utils.netlist import nodes_combine
+        g = self.disjoint()
+        g = nodes_combine(g=g, algorithm='d2d')
+        # g = nodes_combine(g=g, algorithm='s2s')
+        return g
+
+    def connect_shared_nodes(self):
+        g = self.disjoint()
+        graphs = list(nx.connected_component_subgraphs(g))
+        return nx.disjoint_union_all(graphs)
+
 
 class NetListField(DataFieldDescriptor):
     __type__ = NetList

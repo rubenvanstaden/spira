@@ -41,11 +41,6 @@ class B(spira.Cell):
         elems += self.get_polygons()
         return elems
 
-    # def create_ports(self, ports):
-    #     p1, p2 = self.get_polygons()
-    #     ports = p1.ports & p2
-    #     return ports
-
 
 class C(spira.Cell):
     """ Cell with boxes to stretch a SRef containing two polygons. """
@@ -70,6 +65,13 @@ class C(spira.Cell):
 
         return elems
 
+    def create_ports(self, ports):
+
+        ports += spira.Port(name='P1', midpoint=(0, 1*1e6), orientation=180, process=RDD.PROCESS.M3)
+        ports += spira.Port(name='P2', midpoint=(28*1e6, 2*1e6), orientation=0, process=RDD.PROCESS.M3)
+
+        return ports
+
     # def create_nets(self, nets):
 
     #     # nets += self.net
@@ -93,23 +95,36 @@ D = C()
 # vp = virtual_process_model(device=D, process_flow=RDD.VMODEL.PROCESS_FLOW)
 # vp.write_gdsii_vmodel()
 
-# vp = virtual_process_intersection(device=D, process_flow=RDD.VMODEL.PROCESS_FLOW)
+vp = virtual_process_intersection(device=D, process_flow=RDD.VMODEL.PROCESS_FLOW)
 # vp.write_gdsii_vinter()
 
-# E = D.expand_transform()
-# E = D.flat_expand_transform_copy()
+E = D.expand_transform()
+E = D.flat_expand_transform_copy()
+
+contacts = vp.__make_contact_ports__()
+contacts += E.ports
+
+nets = E.nets(contacts=contacts)
+
+# print('\n\n[*] Nets:')
+# for n in nets:
+#     print(n)
+# print('')
+
+# g_cell = nets.disjoint()
+g_cell = nets.disjoint_union_and_combine_nodes()
+
+from spira.yevon.geometry.nets.net import CellNet
+
+# cn = CellNet(g=g_cell)
+cn = CellNet()
+cn.g = g_cell
+
+cn.generate_branches()
+
+# E.plotly_netlist(G=g_cell, graphname='metal', labeltext='id')
+E.plotly_netlist(G=cn.g, graphname='metal', labeltext='id')
 # E.output()
-
-nets = D.nets()
-
-print('\n\n[*] Nets:')
-for n in nets:
-    print(n)
-print('')
-
-g = nets.disjoint()
-
-D.plotly_netlist(G=g, graphname='metal', labeltext='id')
 
 
 

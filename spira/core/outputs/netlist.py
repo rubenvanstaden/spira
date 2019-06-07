@@ -124,7 +124,6 @@ class PlotlyGraph(object):
     def _create_nodes(self, G, labeltext):
 
         nodes = {}
-
         nodes['x_pos'] = []
         nodes['y_pos'] = []
         nodes['text'] = []
@@ -136,25 +135,19 @@ class PlotlyGraph(object):
             nodes['x_pos'].append(x)
             nodes['y_pos'].append(y)
 
+            node_value = None
             if 'device_reference' in G.node[n]:
-                node_object = G.node[n]['device_reference']
+                node_value = G.node[n]['device_reference']
             elif 'branch_node' in G.node[n]:
-                node_object = G.node[n]['branch_node']
+                node_value = G.node[n]['branch_node']
             elif 'process_polygon' in G.node[n]:
-                node_object = G.node[n]['process_polygon']
-            # else:
-            #     raise ValueError('Node object not found!')
+                node_value = G.node[n]['process_polygon']
 
-            # text = '({}) {}'.format(n, node_object.id_string())
-            # nodes['text'].append(text)
-            
-            # nodes['color'].append(G.node[n]['display'].color.hexcode)
-
-            # if 'display' in G.node[n]:
-            #     nodes['color'].append(G.node[n]['display'].color.hexcode)
-
-            # if 'connect' in G.node[n]:
-            #     nodes['color'] = [color.COLOR_WHITE]
+            if node_value is not None:
+                text = '({}) {}'.format(n, str(node_value))
+                nodes['text'].append(text)
+                color = G.node[n]['display'].color.hexcode
+                nodes['color'].append(color)
 
         return nodes
 

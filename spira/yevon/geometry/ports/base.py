@@ -61,6 +61,10 @@ class __PhysicalPort__(__Port__):
     def transform(self, transformation):
         self.midpoint = transformation.apply_to_coord(self.midpoint)
         return self
+        
+    def transform_copy(self, transformation):
+        m = transformation.apply_to_coord(self.midpoint)
+        return self.__class__(midpoint=m)
 
     def move(self, coordinate):
         self.midpoint.move(coordinate)

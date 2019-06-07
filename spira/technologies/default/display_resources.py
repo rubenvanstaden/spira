@@ -9,8 +9,12 @@ class DisplayDatabase(DelayedDatabase):
         from spira.yevon.visualization.display import DisplayStyle, DisplayStyleSet
 
         DISPLAY_SALMON = DisplayStyle(color=color.COLOR_SALMON, edgewidth=1.0)
+        DISPLAY_SALMON_LIGHT = DisplayStyle(color=color.COLOR_SALMON_LIGHT, edgewidth=1.0)
+        DISPLAY_SALMON_DARK = DisplayStyle(color=color.COLOR_SALMON_DARK, edgewidth=1.0)
         DISPLAY_TURQUOISE = DisplayStyle(color=color.COLOR_TURQUOISE, edgewidth=1.0)
+        DISPLAY_TURQUOISE_PALE = DisplayStyle(color=color.COLOR_TURQUOISE_PALE, edgewidth=1.0)
         DISPLAY_CORAL = DisplayStyle(color=color.COLOR_CORAL, alpha=0.5, edgewidth=1.0)
+        DISPLAY_CORAL_LIGHT = DisplayStyle(color=color.COLOR_CORAL_LIGHT, alpha=0.5, edgewidth=1.0)
         DISPLAY_WHITE = DisplayStyle(color=color.COLOR_WHITE, alpha=0.5, edgewidth=1.0)
         DISPLAY_LIGHT_GREEN = DisplayStyle(color=color.COLOR_LIGHT_GREEN, edgewidth=1.0)
         DISPLAY_GRAY = DisplayStyle(color=color.COLOR_GRAY, edgewidth=1.0)
@@ -19,10 +23,13 @@ class DisplayDatabase(DelayedDatabase):
         style_set.background = DISPLAY_WHITE
 
         style_set += [
+            (RDD.PLAYER.METAL, DISPLAY_WHITE),
             (RDD.PLAYER.M1.METAL, DISPLAY_SALMON),
             # (RDD.PLAYER.M1.ROUTE, DISPLAY_SALMON),
             (RDD.PLAYER.M1.HOLE, DISPLAY_SALMON),
             (RDD.PLAYER.M1.BBOX, DISPLAY_LIGHT_GREEN),
+            (RDD.PLAYER.M1.PORT_CONTACT, DISPLAY_SALMON_LIGHT),
+            (RDD.PLAYER.M1.PORT_BRANCH, DISPLAY_SALMON_DARK),
             (RDD.PLAYER.M1.PORT_DIRECTION, DISPLAY_SALMON),
             (RDD.PLAYER.M1.EDGE_PORT_ENABLED, DISPLAY_GRAY),
             (RDD.PLAYER.M1.EDGE_PORT_DISABLED, DISPLAY_WHITE),
@@ -31,7 +38,8 @@ class DisplayDatabase(DelayedDatabase):
             # (RDD.PLAYER.M2.ROUTE, DISPLAY_TURQUOISE),
             (RDD.PLAYER.M2.HOLE, DISPLAY_TURQUOISE),
             (RDD.PLAYER.M2.BBOX, DISPLAY_LIGHT_GREEN),
-            (RDD.PLAYER.M2.PORT_DIRECTION, DISPLAY_TURQUOISE),
+            (RDD.PLAYER.M2.PORT_CONTACT, DISPLAY_SALMON_LIGHT),
+            (RDD.PLAYER.M2.PORT_DIRECTION, DISPLAY_TURQUOISE_PALE),
             (RDD.PLAYER.M2.EDGE_PORT_ENABLED, DISPLAY_GRAY),
             (RDD.PLAYER.M2.EDGE_PORT_DISABLED, DISPLAY_WHITE),
             
@@ -39,6 +47,7 @@ class DisplayDatabase(DelayedDatabase):
             # (RDD.PLAYER.M3.ROUTE, DISPLAY_CORAL),
             (RDD.PLAYER.M3.HOLE, DISPLAY_CORAL),
             (RDD.PLAYER.M3.BBOX, DISPLAY_LIGHT_GREEN),
+            (RDD.PLAYER.M3.PORT_CONTACT, DISPLAY_CORAL_LIGHT),
             (RDD.PLAYER.M3.PORT_DIRECTION, DISPLAY_CORAL),
             (RDD.PLAYER.M3.EDGE_PORT_ENABLED, DISPLAY_GRAY),
             (RDD.PLAYER.M3.EDGE_PORT_DISABLED, DISPLAY_WHITE),

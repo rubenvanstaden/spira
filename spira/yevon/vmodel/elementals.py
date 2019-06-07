@@ -20,14 +20,30 @@ def union_process_polygons(elems, process):
         elems = LF(elems.polygons)
         if len(elems) > 1:
             points = []
-            for e in elems:
-                points.append(e.points)
+            # for e in elems:
+                # shape = e.shape.transform(e.transformation)
+                # points.append(shape.points)
+            for e in elems: points.append(e.points)
             merged_points = clipping.union_points(points)
             for uid, pts in enumerate(merged_points):
                 el += Polygon(shape=pts, layer=layer)
             return el
         else:
             return elems
+
+    # for layer in RDD.get_physical_layers_by_process(processes=process):
+    #     LF = LayerFilterAllow(layers=[layer])
+    #     elems = LF(elems.polygons)
+    #     if len(elems) > 1:
+    #         points = []
+    #         for e in elems:
+    #             points.append(e.points)
+    #         merged_points = clipping.union_points(points)
+    #         for uid, pts in enumerate(merged_points):
+    #             el += Polygon(shape=pts, layer=layer)
+    #         return el
+    #     else:
+    #         return elems
 
 
 # def get_process_elementals(elems, process):
@@ -57,7 +73,6 @@ def reference_metal_blocks(S):
 
 
 class ElementalsForModelling(__Aspects__):
-# class ElementalsForModelling(object):
     """
     Convert the cell elementals into a new set
     of elements for every active process.
@@ -78,7 +93,6 @@ class ElementalsForModelling(__Aspects__):
 
 
 class ReferenceBlocks(__Aspects__):
-# class ReferenceBlocks(object):
 
     block_elementals = ElementalListField()
 

@@ -192,7 +192,7 @@ class Cell(CellAbstract):
             self.elementals = ElementalList(elementals)
         if ports is not None:
             self.ports = PortList(ports)
-            
+
         self.uid = Cell._next_uid
         Cell._next_uid += 1
 
@@ -226,15 +226,18 @@ class Cell(CellAbstract):
                     subj += e
                 elif isinstance(e, SRef):
                     flat_polygons(subj=subj, cell=e.ref)
-            # for p in cell.ports:
-            #     port = Port(
-            #         name=p.name + "_" + cell.name,
-            #         midpoint=deepcopy(p.midpoint),
-            #         orientation=deepcopy(p.orientation),
-            #         width=deepcopy(p.width),
-            #         local_pid=p.local_pid
-            #     )
-            #     subj.ports += port
+            for p in cell.ports:
+                port = Port(
+                    name=p.name + "_" + cell.name,
+                    midpoint=deepcopy(p.midpoint),
+                    orientation=deepcopy(p.orientation),
+                    process=deepcopy(p.process),
+                    purpose=deepcopy(p.purpose),
+                    width=deepcopy(p.width),
+                    port_type=p.port_type,
+                    local_pid=p.local_pid
+                )
+                subj.ports += port
             return subj
         D = flat_polygons(C, S)
         return D
@@ -311,8 +314,8 @@ class Cell(CellAbstract):
                         self.elementals[i] = T(e)
         return self
 
-    def nets(self):
-        return self.elementals.nets()
+    def nets(self, contacts):
+        return self.elementals.nets(contacts)
 
 
 class Connector(Cell):

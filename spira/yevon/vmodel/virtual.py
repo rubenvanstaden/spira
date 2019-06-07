@@ -2,6 +2,10 @@ import spira.all as spira
 from spira.yevon.vmodel.elementals import union_process_polygons
 from spira.core.parameters.initializer import FieldInitializer
 from .geometry import GmshGeometry
+from spira.yevon.process import get_rule_deck
+
+
+RDD = get_rule_deck()
 
 
 __all__ = [
@@ -44,15 +48,16 @@ class VirtualProcessModel(__VirtualModel__):
             plys = union_process_polygons(el, process=process)
             if len(plys) > 0:
                 process_polygons[process] = plys
-        print(process_polygons)
         return process_polygons
 
     def create_geometry(self):
         process_geom = {}
         process_polygons = self.__make_polygons__()
         for k, v in process_polygons.items():
-            process_geom[k] = GmshGeometry(process=k, process_polygons=v)
-        # print(process_geom)
+            if RDD.ENGINE.GEOMETRY == 'GMSH_ENGINE':
+                process_geom[k] = GmshGeometry(process=k, process_polygons=v)
+            else:
+                raise ValueError('Geometry engine type not specificied in RDD.')
         return process_geom
 
     def write_gdsii_vmodel(self, **kwargs):
@@ -81,7 +86,12 @@ class VirtualProcessIntersection(__VirtualModel__):
         from spira.yevon.geometry.ports.port_list import PortList
         ports = PortList()
         for i, e in enumerate(self.__make_polygons__()):
-            ports += spira.Port(name='C{}'.format(i), midpoint=e.center)
+            ports += spira.Port(
+                name='C{}'.format(i),
+                midpoint=e.center,
+                process=e.layer.process,
+                port_type='contact'
+            )
         return ports
 
     def write_gdsii_vinter(self, **kwargs):

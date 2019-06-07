@@ -2,7 +2,7 @@ import spira.all as spira
 from spira.yevon.geometry import shapes
 from spira.yevon.geometry.ports.port import ContactPort
 from spira.core.parameters.descriptor import DataField
-from spira.yevon.process.physical_layer import PhysicalLayer
+from spira.yevon.process.physical_layer import PLayer
 from spira.yevon.process import get_rule_deck
 from spira.yevon.geometry.vector import transformation_from_vector
 
@@ -25,7 +25,7 @@ class PortLayout(spira.Cell):
     def create_edge(self):
         dw = self.port.width
         dl = self.port.length
-        layer = PhysicalLayer(process=self.port.process, purpose=self.port.purpose)
+        layer = PLayer(process=self.port.process, purpose=self.port.purpose)
         p = spira.Box(width=dw, height=dl, layer=layer)
         T = transformation_from_vector(self.port) + spira.Rotation(-90)
         # T += self.transformation
@@ -33,7 +33,7 @@ class PortLayout(spira.Cell):
         return p
 
     def create_arrow(self):
-        layer = PhysicalLayer(self.port.process, RDD.PURPOSE.PORT.DIRECTION)
+        layer = PLayer(self.port.process, RDD.PURPOSE.PORT.DIRECTION)
         # w = self.port.length * 3
         w = 0.05*1e6
         # l = 2*1e6
@@ -45,7 +45,7 @@ class PortLayout(spira.Cell):
         return p
 
     def create_label(self):
-        layer = PhysicalLayer(self.port.process, RDD.PURPOSE.PORT.DIRECTION)
+        layer = PLayer(self.port.process, RDD.PURPOSE.PORT.DIRECTION)
         return spira.Label(
             position=self.port.midpoint,
             text=self.port.name,

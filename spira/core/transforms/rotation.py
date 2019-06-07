@@ -33,7 +33,6 @@ class Rotation(__ConvertableTransform__):
             self.__ca__ = np.cos(value * constants.DEG2RAD)
             self.__sa__ = np.sin(value * constants.DEG2RAD)
         if hasattr(self, '__rotation_center__'):
-            print('A')
             rotation_center = self.__rotation_center__
             self.translation = Coord(
                 rotation_center.x * (1 - self.__ca__) + rotation_center.y * self.__sa__,

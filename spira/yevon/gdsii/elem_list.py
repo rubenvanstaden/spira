@@ -100,28 +100,19 @@ class ElementalList(__ElementalList__):
                 SI += e.bbox_info
             return SI
 
-    def dependencies(self):
-        import spira.all as spira
-        from spira.yevon.gdsii.cell_list import CellList
-        cells = CellList()
-        for e in self._list:
-            cells.add(e.dependencies())
-        return cells
-
-    def add(self, item):
-        import spira.all as spira
-        from spira.yevon.gdsii.cell_list import CellList
-        cells = CellList()
-        for e in self._list:
-            cells.add(e.dependencies())
-        return cells
-
-    def nets(self):
+    def nets(self, contacts):
         from spira.yevon.netlist.net_list import NetList
         nets = NetList()
         for e in self._list:
-            nets += e.nets()
+            nets += e.nets(contacts)
         return nets
+
+    def dependencies(self):
+        from spira.yevon.gdsii.cell_list import CellList
+        cells = CellList()
+        for e in self._list:
+            cells.add(e.dependencies())
+        return cells
 
     def expand_transform(self):
         for c in self._list:
@@ -132,6 +123,14 @@ class ElementalList(__ElementalList__):
         for c in self._list:
             c.transform(transformation)
         return self
+
+    def add(self, item):
+        import spira.all as spira
+        from spira.yevon.gdsii.cell_list import CellList
+        cells = CellList()
+        for e in self._list:
+            cells.add(e.dependencies())
+        return cells
 
     def flat_elems(self):
         def _flatten(list_to_flatten):
