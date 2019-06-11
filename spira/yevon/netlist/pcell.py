@@ -87,7 +87,17 @@ class PCell(__CellContainer__):
 
 
 class Device(PCell):
-    pass
+# class Device(Cell):
+    
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        
+    def __repr__(self):
+        class_string = "[SPiRA: Device(\'{}\')] (elementals {}, ports {})"
+        return class_string.format(self.name, self.elementals.__len__(), self.ports.__len__())
+
+    def __str__(self):
+        return self.__repr__()
 
 
 class Circuit(PCell):

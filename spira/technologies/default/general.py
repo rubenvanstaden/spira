@@ -12,8 +12,8 @@ RDD.GDSII.PRECISION = 1e-9
 # ---------------------------------- Engines ---------------------------------------
 
 RDD.ENGINE = ParameterDatabase()
-RDD.ENGINE.GEOMETRY = 'GMSH_ENGINE'
 RDD.ENGINE.SPICE = 'JOSIM_ENGINE'
+RDD.ENGINE.GEOMETRY = 'GMSH_ENGINE'
 RDD.ENGINE.IMPEDANCE = 'INDUCTEX_ENGINE'
 
 # ---------------------------------- Process ---------------------------------------

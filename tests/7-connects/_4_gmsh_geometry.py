@@ -1,0 +1,64 @@
+import spira.all as spira
+from spira.yevon.vmodel.virtual import *
+from tests._03_structures.jtl_bias import JtlBias
+from tests._03_structures.jtl_bias_ports import JtlBiasPorts
+from spira.yevon.process import get_rule_deck
+
+
+RDD = get_rule_deck()
+
+
+class B(spira.Cell):
+    """ Cell with boxes to stretch a SRef containing two polygons. """
+
+    def create_elementals(self, elems):
+
+        p1 = spira.Rectangle(alias='P0', p1=(0, 0), p2=(12*1e6, 2*1e6), layer=RDD.PLAYER.M1.METAL)
+        p2 = spira.Rectangle(alias='P1', p1=(5*1e6, 0), p2=(7*1e6, 8*1e6), layer=RDD.PLAYER.M1.METAL)
+        c = spira.Cell(name='Cs1')
+        c += spira.Rectangle(alias='P2', p1=(0,0), p2=(12*1e6, 2*1e6), layer=RDD.PLAYER.M1.METAL)
+        S = spira.SRef(c, midpoint=(10*1e6, 0))
+
+        elems += p1
+        elems += p2
+        elems += S
+
+        return elems
+
+    def create_ports(self, ports):
+
+
+# -------------------------------------------------------------------------------------------------------------
+
+
+D = B()
+D.output()
+# D.write_gdsii_mask()
+
+# # vp = virtual_process_model(device=D, process_flow=RDD.VMODEL.PROCESS_FLOW)
+# # vp.write_gdsii_vmodel()
+
+# vp = virtual_process_intersection(device=D, process_flow=RDD.VMODEL.PROCESS_FLOW)
+# # vp.write_gdsii_vinter()
+
+# # E = D.expand_transform()
+# E = D.pcell.expand_flat_copy()
+
+# contacts = vp.contact_ports
+
+# for p in E.ports:
+#     if p.locked is False:
+#         contacts += p
+
+# nets = E.nets(contacts=contacts)
+
+# # --- Step 1:
+# g_cell = nets.disjoint()
+# E.plotly_netlist(G=g_cell, graphname='metal', labeltext='id')
+
+
+
+
+
+
+

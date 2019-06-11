@@ -43,12 +43,12 @@ class PolygonAspects(__GeometryAspects__):
         return layer.purpose.symbol
 
     @property
-    def bbox_info(self):
-        return self.shape.bbox_info.transform_copy(self.transformation)
-
-    @property
     def center(self):
         return self.bbox_info.center
+
+    @property
+    def bbox_info(self):
+        return self.shape.bbox_info.transform_copy(self.transformation)
 
     @property
     def hash_polygon(self):

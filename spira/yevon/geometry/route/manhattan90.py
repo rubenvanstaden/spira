@@ -143,7 +143,7 @@ class Route90(Route90Base):
         #             points.append(p)
         # route_shape = shapes.Shape(points=points)
         # route_shape.apply_merge
-        # poly = pc.Polygon(points=route_shape.points, ps_layer=self.ps_layer, enable_edges=False)
+        # poly = pc.Polygon(points=route_shape.points, layer=self.layer, enable_edges=False)
         # elems += poly
 
         elems += R

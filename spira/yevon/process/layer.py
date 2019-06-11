@@ -1,8 +1,158 @@
-# from spira.core.typed_list import TypedList
-# from spira.yevon.process.gdsii_layer import Layer
-# from spira.yevon.process.layer import __Layer__
-# from spira.core.parameters.restrictions import RestrictType
-# from spira.core.parameters.descriptor import DataFieldDescriptor
+
+
+# class MetaLayer(MetaInitializer):
+#     """
+#     Called when a new layer object is created.
+#     First check is layer already exists in current 
+#     layer list. If it does, retreive it and return it.
+#     Otherwise, add this layer to the list and return it. 
+#     """
+
+#     def __call__(cls, *params, **keyword_params):
+
+#         kwargs = cls.__map_parameters__(*params, **keyword_params)
+
+#         if 'layerlist' in kwargs:
+#             layerlist = kwargs['layerlist']
+#             del(kwargs['layerlist'])
+#         else:
+#             layerlist = None
+
+#         if layerlist is None:
+#             layerlist = settings.get_current_layerlist()
+
+#         cls.__keywords__ = kwargs
+#         L = super().__call__(**kwargs)
+#         layer = layerlist.__fast_get_layer__(L.key)
+#         if layer is None:
+#             list.append(layerlist, L)
+#             return L
+#         else:
+#             return layer
+
+
+# class __Layer__(FieldInitializer, metaclass=MetaLayer):
+#     """  """
+
+#     doc = StringField()
+
+#     def __and__(self, other):
+#         if isinstance(other, __Layer__):
+#             return __GeneratedLayerAnd__(self, other)
+#         elif other is None:
+#             return self
+#         else:
+#             raise TypeError("Cannot AND %s with %s" % (type(self),type(other)))
+
+#     def __iand__(self, other):
+#         C = self.__and__(other)
+#         self = C
+#         return self
+
+#     def __or__(self, other):
+#         if isinstance(other, __Layer__):
+#             return __GeneratedLayerOr__(self, other)
+#         elif other is None:
+#             return self
+#         else:
+#             raise TypeError("Cannot OR %s with %s" % (type(self),type(other)))
+
+#     def __ior__(self, other):
+#         C = self.__and__(other)
+#         self = C
+#         return self
+
+#     def __xor__(self, other):
+#         if isinstance(other, __Layer__):
+#             return __GeneratedLayerXor__(self, other)
+#         elif other is None:
+#             return self
+#         else:
+#             raise TypeError("Cannot XOR %s with %s" % (type(self),type(other)))
+
+#     def __ixor__(self, other):
+#         C = self.__xor__(other)
+#         self = C
+#         return self
+
+#     def __invert__(self):
+#         return __GeneratedLayerNot__(self)
+
+
+# class __GeneratedLayer__(__Layer__):
+#     name = StringProperty(allow_none=True)
+
+#     def get_layers(self, lobject):
+#         if isinstance(lobject, __GeneratedLayer__):
+#             return lobject.layers()
+#         else:
+#             return lobject
+
+#     def __str__(self):
+#         if self.name!=None:
+#             return self.name
+#         else:
+#             return self.__repr__()
+
+
+# class __GeneratedSingleLayer__(__GeneratedLayer__):
+#     pass
+
+
+# class __GeneratedDoubleLayer__(__GeneratedLayer__):
+#     def __init__(self, layer1, layer2):
+#         super().__init__()
+#         self.layer1 = layer1
+#         self.layer2 = layer2      
+
+#     def layers(self):
+#         l = LayerList()
+#         l += self.get_layers(self.layer1)
+#         l += self.get_layers(self.layer2)
+#         return l 
+
+
+# class __GeneratedLayerAnd__(__GeneratedDoubleLayer__):    
+#     def __repr__(self):
+#         return "(%s AND %s)" % (self.layer1, self.layer2)
+
+#     def id(self):
+#         return "%s AND %s"%(self.layer1, self.layer2)
+
+
+# class __GeneratedLayerOr__(__GeneratedDoubleLayer__):        
+#     def __repr__(self):
+#         return "(%s OR %s)" % (self.layer1, self.layer2)
+
+#     def id(self):
+#         return "%s OR %s"%(self.layer1, self.layer2)
+
+
+# class __GeneratedLayerXor__(__GeneratedDoubleLayer__):        
+#     def __repr__(self):
+#         return "(%s XOR %s)" % (self.layer1, self.layer2)
+
+#     def id(self):
+#         return "%s XOR %s"%(self.layer1, self.layer2)
+
+
+# class __GeneratedLayerNot__(__GeneratedSingleLayer__):
+#     def __init__(self, layer1):
+#         super().__init__()
+#         self.layer1 = layer1
+
+#     def __repr__(self):
+#         return "(NOT %s)" % (self.layer1)
+
+#     def id(self):
+#         return "NOT %s"%(self.layer1)
+
+#     def layers(self):
+#         l = LayerList()
+#         l += self.get_layers(self.layer1)
+#         return l 
+
+
 
 
 # __all__ = ['LayerList', 'LayerListField']
@@ -156,8 +306,6 @@
 #             value = self.__type__()
 #         new_value = self.__cache_parameter_value__(obj, value)
 #         return new_value
-
-
 
 
 

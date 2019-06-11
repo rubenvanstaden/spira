@@ -26,8 +26,8 @@ class __Manhattan__(Cell):
     length = NumberField(default=20*1e6)
     layer = LayerField(number=13)
     # gds_layer = LayerField(number=13)
-    # ps_layer = PhysicalLayerField(default=RDD.DEF.PDEFAULT)
-    # ps_layer = PhysicalLayerField()
+    # layer = PhysicalLayerField(default=RDD.DEF.PDEFAULT)
+    # layer = PhysicalLayerField()
     # bend_type = StringField(default='rectangle')
     bend_type = StringField(default='circular')
 
@@ -71,7 +71,7 @@ class __Manhattan__(Cell):
             width_type='straight'
         )
         # route_shape.apply_merge
-        R1 = RouteGeneral(route_shape=route_shape, connect_layer=self.ps_layer)
+        R1 = RouteGeneral(route_shape=route_shape, connect_layer=self.layer)
         S = spira.SRef(R1)
         S.connect(port=S.ports['P1'], destination=p1)
         # S.connect(port=p1, destination=p2)
@@ -119,7 +119,7 @@ class __Manhattan__(Cell):
                 width=self.port1.width,
                 size=(self.radius, self.radius)
             )
-        B1 = RouteGeneral(route_shape=rs, connect_layer=self.ps_layer)
+        B1 = RouteGeneral(route_shape=rs, connect_layer=self.layer)
         return spira.SRef(B1)
 
     def create_arc_bend_2(self):
@@ -136,7 +136,7 @@ class __Manhattan__(Cell):
             )
         B1 = RouteGeneral(
             route_shape=rs, 
-            connect_layer=self.ps_layer
+            connect_layer=self.layer
         )
         return spira.SRef(B1)
 

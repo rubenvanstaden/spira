@@ -13,6 +13,7 @@ class DisplayDatabase(DelayedDatabase):
         DISPLAY_SALMON_DARK = DisplayStyle(color=color.COLOR_SALMON_DARK, edgewidth=1.0)
         DISPLAY_TURQUOISE = DisplayStyle(color=color.COLOR_TURQUOISE, edgewidth=1.0)
         DISPLAY_TURQUOISE_PALE = DisplayStyle(color=color.COLOR_TURQUOISE_PALE, edgewidth=1.0)
+        DISPLAY_TURQUOISE_MEDIUM = DisplayStyle(color=color.COLOR_TURQUOISE_MEDIUM, edgewidth=1.0)
         DISPLAY_CORAL = DisplayStyle(color=color.COLOR_CORAL, alpha=0.5, edgewidth=1.0)
         DISPLAY_CORAL_LIGHT = DisplayStyle(color=color.COLOR_CORAL_LIGHT, alpha=0.5, edgewidth=1.0)
         DISPLAY_WHITE = DisplayStyle(color=color.COLOR_WHITE, alpha=0.5, edgewidth=1.0)
@@ -38,7 +39,8 @@ class DisplayDatabase(DelayedDatabase):
             # (RDD.PLAYER.M2.ROUTE, DISPLAY_TURQUOISE),
             (RDD.PLAYER.M2.HOLE, DISPLAY_TURQUOISE),
             (RDD.PLAYER.M2.BBOX, DISPLAY_LIGHT_GREEN),
-            (RDD.PLAYER.M2.PORT_CONTACT, DISPLAY_SALMON_LIGHT),
+            (RDD.PLAYER.M2.PORT_CONTACT, DISPLAY_TURQUOISE_PALE),
+            (RDD.PLAYER.M2.PORT_BRANCH, DISPLAY_TURQUOISE_MEDIUM),
             (RDD.PLAYER.M2.PORT_DIRECTION, DISPLAY_TURQUOISE_PALE),
             (RDD.PLAYER.M2.EDGE_PORT_ENABLED, DISPLAY_GRAY),
             (RDD.PLAYER.M2.EDGE_PORT_DISABLED, DISPLAY_WHITE),

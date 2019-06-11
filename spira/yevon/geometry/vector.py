@@ -4,7 +4,7 @@ from spira.core.parameters.initializer import FieldInitializer
 from spira.core.transformable import Transformable
 from spira.core.parameters.variables import NumberField
 from spira.core.parameters.descriptor import DataFieldDescriptor
-from spira.yevon.geometry.coord import Coord
+from spira.yevon.geometry.coord import Coord, CoordField
 from spira.core.transforms import *
 from spira.core.parameters.descriptor import FunctionField
 from spira.yevon import constants

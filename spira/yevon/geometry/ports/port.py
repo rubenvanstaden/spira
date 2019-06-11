@@ -178,7 +178,10 @@ class ContactPort(Port):
     def __repr__(self):
         class_string = "[SPiRA: ContactPort] (name {}, alias {}, locked {}, midpoint {} orientation {} width {})"
         return class_string.format(self.name, self.alias, self.locked, self.midpoint, self.orientation, self.width)
-    
+
+    def id_string(self):
+        return self.__repr__()
+
 
 class BranchPort(Port):
 

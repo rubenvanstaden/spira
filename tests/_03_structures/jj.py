@@ -31,7 +31,8 @@ class PolygonCell(spira.Cell):
         return elems
 
 
-class Junction(spira.Cell):
+from spira.yevon.netlist.pcell import Device
+class Junction(Device):
 
     def create_elementals(self, elems):
 

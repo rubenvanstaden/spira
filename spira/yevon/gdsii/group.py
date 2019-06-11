@@ -1,7 +1,14 @@
 import spira.all as spira
 from spira.yevon.gdsii.base import __Elemental__
-from spira.yevon.gdsii.elem_list import ElementalListField
+from spira.yevon.gdsii.elem_list import ElementalListField, ElementalList
 from spira.core.parameters.initializer import FieldInitializer
+from spira.yevon.process import get_rule_deck
+
+
+RDD = get_rule_deck()
+
+
+__all__ = ['Group']
 
 
 class __Group__(FieldInitializer):
@@ -62,62 +69,7 @@ class __Group__(FieldInitializer):
     @property
     def bbox_info(self):
         return self.elementals.bbox_info
-
-    # elementals = ElementalListField(fdef_name='create_elementals', doc='List of elementals to be added to the cell instance.')
-
-    # def create_elementals(self, elems):
-    #     result = spira.ElementalList()
-    #     return result
-
-    # FIXME: For some reason this interferes with the spira.Cell commit.
-    # def commit_to_gdspy(self, cell, transformation=None):
-    #     for e in self.elementals:
-    #         e.commit_to_gdspy(cell=cell, transformation=transformation)
-    #     return cell
-
-    # def __eq__(self,other):
-    #     if other == None:
-    #         return False
-    #     if not isinstance(other, spira.Cell):
-    #         return False
-    #     self_el = self.elementals
-    #     other_el = other.elementals
-    #     if len(self_el) != len(other_el):
-    #         return False
-    #     for e1, e2 in zip(self_el, other_el):
-    #         if (e1 != e2):
-    #             return False
-    #     return True
-
-    # def __ne__(self, other):
-    #     return not self.__eq__(other)
-
-    # def generate_physical_polygons(self, pl):
-    #     elems = spira.ElementalList()
-    #     R = self.cell.elementals.flat_copy()
-    #     Rm = R.get_polygons(layer=pl.layer)
-    #     for i, e in enumerate(Rm):
-    #         if len(e.polygons[0]) == 4:
-    #             alias = 'devices_box_{}_{}_{}'.format(pl.layer.number, self.cell.node_id, i)
-    #             poly = spira.Polygons(shape=e.polygons)
-    #             elems += pc.Box(name=alias, player=pl, center=poly.center, w=poly.dx, h=poly.dy, level=self.level)
-    #         else:
-    #             alias = 'ply_{}_{}_{}'.format(pl.layer.number, self.cell.node_id, i)
-    #             elems += pc.Polygon(name=alias, player=pl, points=e.polygons, level=self.level)
-    #     return elems
-
-    # def create_metals(self, elems):
-    #     for player in RDD.PLAYER.get_physical_layers(purposes='METAL'):
-    #         for e in self.generate_physical_polygons(player):
-    #             elems += e
-    #     return elems
-
-    # def create_contacts(self, elems):
-    #     for player in RDD.PLAYER.get_physical_layers(purposes=['VIA', 'JJ']):
-    #         for e in self.generate_physical_polygons(player):
-    #             elems += e
-    #     return elem
-
+    
 
 class Group(__Group__, __Elemental__):
 

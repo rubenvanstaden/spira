@@ -100,11 +100,11 @@ class ElementalList(__ElementalList__):
                 SI += e.bbox_info
             return SI
 
-    def nets(self, contacts):
+    def nets(self, contacts=None, lcar=100):
         from spira.yevon.netlist.net_list import NetList
         nets = NetList()
         for e in self._list:
-            nets += e.nets(contacts)
+            nets += e.nets(contacts, lcar)
         return nets
 
     def dependencies(self):
@@ -144,10 +144,11 @@ class ElementalList(__ElementalList__):
         el = ElementalList()
         for e in self._list:
             el += e.flat_copy(level)
-        if level == -1:
-            return el.flatten()
-        else:
-            return el
+        return el
+        # if level == -1:
+        #     return el.flatten()
+        # else:
+        #     return el
 
     def flatten(self):
         from spira.yevon.gdsii.cell import Cell

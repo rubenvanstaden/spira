@@ -1,5 +1,5 @@
 import numpy as np
-from spira.yevon.geometry.shapes.shape import shape_edge_ports
+# from spira.yevon.geometry.shapes.shape import shape_edge_ports
 from spira.yevon.geometry.coord import Coord
 from spira.core.transformable import Transformable
 from spira.yevon.process import get_rule_deck

@@ -118,8 +118,8 @@ class PolygonPortProperty(PortProperty):
         return shapes.shape_edge_ports(shape, self.layer, self.id_string())
 
     def create_ports(self, ports):
-        ps_layer = RDD.GDSII.IMPORT_LAYER_MAP[self.layer]
-        if ps_layer.purpose.symbol == 'METAL':
+        layer = RDD.GDSII.IMPORT_LAYER_MAP[self.layer]
+        if layer.purpose.symbol == 'METAL':
             for edge in self.edge_ports:
                 ports += edge
         # ports.transform(-self.transformation)

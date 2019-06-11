@@ -106,8 +106,8 @@ class Database(__Database__):
                     else:
                         if value.purpose.symbol == purposes:
                             plist.append(value)
-        if len(plist) == 0:
-            raise ValueError('No physical layer with purpose {} found.'.format(purposes))
+        # if len(plist) == 0:
+        #     raise ValueError('No physical layer with purpose {} found.'.format(purposes))
         return plist
 
     def get_physical_layers_by_process(self, processes):
@@ -128,8 +128,8 @@ class Database(__Database__):
                     for s in symbols:
                         if value.process.symbol == s:
                             plist.append(value)
-        if len(plist) == 0:
-            raise ValueError('No physical layer with purpose {} found.'.format(processes))
+        # if len(plist) == 0:
+        #     raise ValueError('No physical layer with purpose {} found.'.format(processes))
         return plist
 
 

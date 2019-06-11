@@ -169,33 +169,33 @@ class Structure(__NetlistCell__):
         params = {}
         for M in self.metals:
             if issubclass(type(M), pc.ProcessLayer):
-                if M.ps_layer not in params.keys():
-                    params[M.ps_layer] = list(M.shape.points)
+                if M.layer not in params.keys():
+                    params[M.layer] = list(M.shape.points)
                 else:
                     for pp in M.shape.points:
-                        params[M.ps_layer].append(pp)
-        for ps_layer, points in params.items():
+                        params[M.layer].append(pp)
+        for layer, points in params.items():
             shape = shapes.Shape(points=points)
             # shape.apply_merge
             for uid, pts in enumerate(shape.points):
-                name = 'metal_{}_{}_{}'.format('NAME', ps_layer.layer.number, uid)
-                elems += pc.Polygon(name=name, ps_layer=ps_layer, points=[pts])
+                name = 'metal_{}_{}_{}'.format('NAME', layer.layer.number, uid)
+                elems += pc.Polygon(name=name, layer=layer, points=[pts])
         return elems
     
         # params = {}
         # for M in self.metals:
         #     if isinstance(M, pc.ProcessLayer):
-        #         if M.ps_layer not in params.keys():
-        #             params[M.ps_layer] = list(M.polygon.polygons)
+        #         if M.layer not in params.keys():
+        #             params[M.layer] = list(M.polygon.polygons)
         #         else:
         #             for pp in M.polygon.polygons:
-        #                 params[M.ps_layer].append(pp)
-        # for ps_layer, points in params.items():
+        #                 params[M.layer].append(pp)
+        # for layer, points in params.items():
         #     shape = shapes.Shape(points=points)
         #     # shape.apply_merge
         #     for uid, pts in enumerate(shape.points):
-        #         name = self.__metal_name__(uid, ps_layer)
-        #         elems += pc.Polygon(name=name, ps_layer=ps_layer, points=[pts], level=self.level)
+        #         name = self.__metal_name__(uid, layer)
+        #         elems += pc.Polygon(name=name, layer=layer, points=[pts], level=self.level)
         # return elems
 
     # def create_ports(self, ports):
@@ -211,10 +211,10 @@ class Structure(__NetlistCell__):
     #                 edgelayer.datatype = self.edge_datatype
     #                 arrowlayer.datatype = self.arrow_datatype
 
-    #                 name = '{}_{}'.format(m.ps_layer.name, p.name)
+    #                 name = '{}_{}'.format(m.layer.name, p.name)
     #                 term = p.modified_copy(
     #                     name=name,
-    #                     gdslayer=deepcopy(m.ps_layer.layer),
+    #                     gdslayer=deepcopy(m.layer.layer),
     #                     edgelayer=edgelayer,
     #                     arrowlayer=arrowlayer,
     #                     width=1*1e6

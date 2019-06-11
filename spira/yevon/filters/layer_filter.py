@@ -1,6 +1,7 @@
 from spira.log import SPIRA_LOG as LOG
 from spira.yevon.filters.filter import Filter
-from spira.yevon.process.layer_list import LayerList, LayerListField
+# from spira.yevon.process.layer_list import LayerList, LayerListField
+from spira.yevon.process.gdsii_layer import LayerList, LayerListField
 
 
 __all__ = ['LayerFilterAllow', 'LayerFilterDelete']

@@ -28,7 +28,8 @@ DEFAULT_LIBRARY = None
 def initialize():
     from spira.yevon.process.settings import RDD
     from spira.yevon.gdsii.library import Library
-    from spira.yevon.process.layer_list import LayerList
+    # from spira.yevon.process.layer_list import LayerList
+    from spira.yevon.process.gdsii_layer import LayerList
 
     global DEFAULT_LIBRARY
     DEFAULT_LIBRARY = Library('SPiRA-default',
@@ -54,7 +55,8 @@ def get_library():
 
 
 def get_current_layerlist():
-    from spira.yevon.process.layer_list import LayerList
+    # from spira.yevon.process.layer_list import LayerList
+    from spira.yevon.process.gdsii_layer import LayerList
     if _current_layerlist is None:
         return LayerList()
     return _current_layerlist

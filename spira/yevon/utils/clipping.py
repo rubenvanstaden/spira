@@ -81,14 +81,19 @@ def intersection_polygons(elems):
     """
     
     """
+    from copy import deepcopy
     el = spira.ElementalList()
     for i, e1 in enumerate(elems):
         for j, e2 in enumerate(elems):
             if i != j:
+                e1 = deepcopy(e1)
+                e2 = deepcopy(e2)
                 polygons = e1 & e2
+                print(polygons)
                 for p in polygons:
                     p.layer.purpose = RDD.PURPOSE.INTERSECTED
-                el += polygons
+                for p in polygons:
+                    el += p
     return el
 
 

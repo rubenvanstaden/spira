@@ -2,7 +2,7 @@
 import gdspy
 import spira.all as spira
 
-from spira.yevon.geometry.ports.port import point_in_port_polygon
+# from spira.yevon.geometry.ports.port import point_in_port_polygon
 from spira.core.parameters.restrictions import RestrictTypeList
 from spira.yevon.geometry.vector import *
 from spira.yevon.geometry.route.route_shaper import RouteSimple
@@ -24,21 +24,13 @@ class Route(spira.Polygon):
     
     def __init__(self, shape, layer, **kwargs):
         super().__init__(shape=shape, layer=layer, **kwargs)
-
+        
     def __repr__(self):
         if self is None:
             return 'Route is None!'
-        return ("[SPiRA: Route {} {}] (center {}, area {}, vertices {}, layer {}, datatype {}, ports {}, hash {})").format(
-            self.alias, 0,
-            self.bbox_info.center,
-            self.ply_area,
-            sum([len(p) for p in self.shape.points]),
-            self.layer.number,
-            self.layer.datatype,
-            0,
-            # len(self.ports),
-            self.hash_polygon
-        )
+        layer = RDD.GDSII.IMPORT_LAYER_MAP[self.layer]
+        class_string = "[SPiRA: Route {}] (center {}, vertices {}, process {}, purpose {})"
+        return class_string.format(self.alias, self.center, self.count, self.process, self.purpose)
 
     def __str__(self):
         return self.__repr__()

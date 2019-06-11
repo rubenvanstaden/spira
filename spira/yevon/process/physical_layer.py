@@ -17,7 +17,7 @@ class PhysicalLayer(Layer):
 
     Examples
     --------
-    >>> ps_layer = PhysicalLayer()
+    >>> layer = PhysicalLayer()
     """
 
     process = ProcessField()
@@ -31,7 +31,7 @@ class PhysicalLayer(Layer):
         return string.format(self.name, self.process.symbol, self.purpose.symbol)
 
     def __str__(self):
-        return self.__repr__()
+        return 'PLayer {}-{}'.format(self.process.symbol, self.purpose.symbol)
 
     def __hash__(self):
         # return hash(self.node_id)

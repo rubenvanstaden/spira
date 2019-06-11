@@ -31,7 +31,7 @@ class GmshGeometry(__Geometry__):
 
     _ID = 0
 
-    lcar = NumberField(default=10, doc='Mesh characteristic length.')
+    lcar = NumberField(default=100, doc='Mesh characteristic length.')
     algorithm = IntegerField(default=6, doc='Mesh algorithm used by Gmsh.')
     scale_Factor = NumberField(default=1e6, doc='Mesh coord dimention scaling.')
     coherence_mesh = BoolField(defualt=True, doc='Merge similar points.')

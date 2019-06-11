@@ -113,10 +113,10 @@ class CellAbstract(gdspy.Cell, __Cell__):
     #     self.elementals = self.elementals.flatten()
     #     return self.elementals
 
-    # def flat_copy(self, level=-1):
-    #     name = '{}_{}'.format(self.name, 'Flat'),
-    #     return self.__class__(name, self.elementals.flat_copy(level=level))
-
+    def flat_copy(self, level=-1):
+        name = '{}_{}'.format(self.name, 'Flat'),
+        return Cell(name, self.elementals.flat_copy(level=level))
+    
     def is_layer_in_cell(self, layer):
         D = deepcopy(self)
         for e in D.flatten():
@@ -213,10 +213,11 @@ class Cell(CellAbstract):
             S.expand_transform()
         return self
 
-    def flat_expand_transform_copy(self):
+    def expand_flat_no_jj_copy(self):
         from spira.yevon.gdsii.sref import SRef
         from spira.yevon.gdsii.polygon import Polygon
         from spira.yevon.geometry.ports.port import Port
+        from spira.yevon.netlist.pcell import Device
         D = deepcopy(self)
         S = D.expand_transform()
         C = Cell(name=S.name + '_ExpandedCell')
@@ -226,6 +227,48 @@ class Cell(CellAbstract):
                     subj += e
                 elif isinstance(e, SRef):
                     flat_polygons(subj=subj, cell=e.ref)
+            
+            for p in cell.ports:
+                port = Port(
+                    name=p.name + "_" + cell.name,
+                    midpoint=deepcopy(p.midpoint),
+                    orientation=deepcopy(p.orientation),
+                    process=deepcopy(p.process),
+                    purpose=deepcopy(p.purpose),
+                    width=deepcopy(p.width),
+                    port_type=p.port_type,
+                    local_pid=p.local_pid
+                )
+                subj.ports += port
+            return subj
+        D = flat_polygons(C, S)
+        return D
+
+    def expand_flat_copy(self):
+        from spira.yevon.gdsii.sref import SRef
+        from spira.yevon.gdsii.polygon import Polygon
+        from spira.yevon.geometry.ports.port import Port
+        from spira.yevon.netlist.pcell import Device
+        D = deepcopy(self)
+        S = D.expand_transform()
+        C = Cell(name=S.name + '_ExpandedCell')
+        def flat_polygons(subj, cell):
+            for e in cell.elementals:
+                if isinstance(e, Polygon):
+                    subj += e
+                elif isinstance(e, SRef):
+                    if isinstance(e.ref, Device):
+                        subj += e
+                    else:
+                        flat_polygons(subj=subj, cell=e.ref)
+            
+            # for e in cell.elementals:
+            #     if isinstance(e, SRef):
+            #         flat_polygons(subj=subj, cell=e.ref)
+
+            # for e in cell.process_elementals:
+            #     subj += e
+
             for p in cell.ports:
                 port = Port(
                     name=p.name + "_" + cell.name,
@@ -291,7 +334,7 @@ class Cell(CellAbstract):
         return self
 
     def stretch_port(self, port, destination):
-        """ 
+        """
         The elemental by moving the subject port, without
         distorting the entire elemental. Note: The opposite
         port position is used as the stretching center. 
@@ -314,8 +357,8 @@ class Cell(CellAbstract):
                         self.elementals[i] = T(e)
         return self
 
-    def nets(self, contacts):
-        return self.elementals.nets(contacts)
+    def nets(self, contacts=None, lcar=100):
+        return self.elementals.nets(contacts, lcar)
 
 
 class Connector(Cell):

@@ -2,6 +2,10 @@ from spira.core.parameters.variables import DictField
 from spira.core.parameters.initializer import FieldInitializer
 from spira.core.parameters.descriptor import DataField
 from spira.yevon.process.all import *
+from spira.yevon.process import get_rule_deck
+
+
+RDD = get_rule_deck()
 
 
 __all__ = ['MapGdsiiToPhysical', 'MapPhysicalToGdsii']
@@ -25,9 +29,16 @@ class MapGdsiiToPhysical(FieldInitializer):
         if isinstance(key, PhysicalLayer):
             return key
         elif isinstance(key, Layer):
-            pc = self.layer_process_map[key.number]
-            pp = self.datatype_purpose_map[key.datatype]
-            return PhysicalLayer(process=pc, purpose=pp)
+            # FIXME: Add warning here.
+            # pc = self.layer_process_map[key.number]
+            # pp = self.datatype_purpose_map[key.datatype]
+
+            if key.number in self.layer_process_map:
+                pc = self.layer_process_map[key.number]
+                pp = self.datatype_purpose_map[key.datatype]
+                return PhysicalLayer(process=pc, purpose=pp)
+
+            return PhysicalLayer(process=RDD.PROCESS.VIRTUAL, purpose=RDD.PURPOSE.TEXT)
         else:
             raise Exception("Key should be of type PhysicalLayer, but is of type %s." %type(key))
 

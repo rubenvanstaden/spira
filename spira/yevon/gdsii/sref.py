@@ -40,7 +40,8 @@ class __RefElemental__(__Elemental__):
 
     def expand_transform(self):
 
-        C = spira.Cell(
+        # C = spira.Cell(
+        C = self.ref.__class__(
             name=self.ref.name + self.transformation.id_string(),
             alias=self.ref.alias + self.alias,
             elementals=deepcopy(self.ref.elementals),
@@ -60,7 +61,7 @@ class __RefElemental__(__Elemental__):
 
         return self
 
-    def flat_expand_transform_copy(self):
+    def expand_flat_copy(self):
         S = self.expand_transform()
         C = spira.Cell(name=S.ref.name + '_ExpandedCell')
         def flat_polygons(subj, cell):
@@ -85,8 +86,8 @@ class __RefElemental__(__Elemental__):
         return SRef(reference=D)
         # return self.__class__(reference=D)
 
-    def net(self, contacts):
-        return self.ref.net(contacts)
+    # def nets(self, contacts):
+    #     return self.ref.net(contacts)
 
 
 class SRef(__RefElemental__):
@@ -140,20 +141,19 @@ class SRef(__RefElemental__):
         d.add(self.ref.dependencies())
         return d
 
-    def nets(self):
-        nets = self.ref.nets()
-        T = self.transformation + Translation(self.midpoint)
-        nets.transform(T)
+    def nets(self, contacts, lcar=100):
+        from spira.yevon.netlist.pcell import Device
+        if isinstance(self.ref, Device): lcar = 10
+        nets = self.ref.nets(contacts, lcar)
+        # T = self.transformation + Translation(self.midpoint)
+        # nets.transform(T)
         return nets 
 
     def flatten(self):
         return self.ref.flatten()
 
     def flat_copy(self, level=-1):
-        if level == 0:
-            el = spira.ElementalList()
-            el += self
-            return el
+        if level == 0: return spira.ElementalList(self.__copy__())
         el = self.ref.elementals.flat_copy(level-1)
         T = self.transformation + Translation(self.midpoint)
         el.transform(T)
@@ -257,7 +257,7 @@ class SRef(__RefElemental__):
         return self
 
     def stretch(self, factor=(1,1), center=(0,0)):
-        S = self.flat_expand_transform_copy()
+        S = self.expand_flat_copy()
         T = spira.Stretch(stretch_factor=factor, stretch_center=center)
         for i, e in enumerate(S.ref.elementals):
             # T.apply(S.ref.elementals[i])
@@ -267,7 +267,7 @@ class SRef(__RefElemental__):
 
     def stretch_copy(self, factor=(1,1), center=(0,0)):
         pass
-        # S = self.flat_expand_transform_copy()
+        # S = self.expand_flat_copy()
         # T = spira.Stretch(stretch_factor=factor, stretch_center=center)
         # for i, e in enumerate(S.ref.elementals):
         #     T.apply(S.ref.elementals[i])

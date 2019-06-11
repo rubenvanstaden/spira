@@ -1,13 +1,21 @@
-import inspect
 from copy import deepcopy
 from spira import settings
+from spira.core.parameters.variables import *
+# from spira.yevon.process.generated_layers import __Layer__
+from spira.yevon.process.generated_layers import *
 from spira.core.parameters.restrictions import RestrictType
 from spira.core.parameters.variables import StringField, IntegerField
 from spira.core.parameters.descriptor import RestrictedParameter
 from spira.core.parameters.initializer import FieldInitializer, MetaInitializer
+from spira.core.parameters.descriptor import DataFieldDescriptor
+from spira.core.typed_list import TypedList
+
+import inspect
 
 
-__all__ = ['Layer', 'LayerField']
+# __all__ = ['Layer', 'LayerField']
+# __all__ = ['LayerList', 'LayerListField']
+# __all__ = ['Layer', 'LayerField', 'LayerList', 'LayerListField']
 
 
 class MetaLayer(MetaInitializer):
@@ -47,25 +55,274 @@ class __Layer__(FieldInitializer, metaclass=MetaLayer):
     doc = StringField()
 
     def __and__(self, other):
-        pass
+        if isinstance(other, __Layer__):
+            return __GeneratedLayerAnd__(self, other)
+        elif other is None:
+            return self
+        else:
+            raise TypeError("Cannot AND %s with %s" % (type(self),type(other)))
 
     def __iand__(self, other):
-        pass
+        C = self.__and__(other)
+        self = C
+        return self
 
     def __or__(self, other):
-        pass
+        if isinstance(other, __Layer__):
+            return __GeneratedLayerOr__(self, other)
+        elif other is None:
+            return self
+        else:
+            raise TypeError("Cannot OR %s with %s" % (type(self),type(other)))
 
     def __ior__(self, other):
-        pass
+        C = self.__and__(other)
+        self = C
+        return self
 
     def __xor__(self, other):
-        pass
+        if isinstance(other, __Layer__):
+            return __GeneratedLayerXor__(self, other)
+        elif other is None:
+            return self
+        else:
+            raise TypeError("Cannot XOR %s with %s" % (type(self),type(other)))
 
     def __ixor__(self, other):
-        pass
+        C = self.__xor__(other)
+        self = C
+        return self
 
     def __invert__(self):
-        pass
+        return __GeneratedLayerNot__(self)
+
+
+class __GeneratedLayer__(__Layer__):
+    name = StringField(allow_none=True, default=None)
+
+    def get_layers(self, lobject):
+        if isinstance(lobject, __GeneratedLayer__):
+            return lobject.layers()
+        else:
+            return lobject
+
+    def __str__(self):
+        if self.name != None:
+            return self.name
+        else:
+            return self.__repr__()
+
+
+class __GeneratedSingleLayer__(__GeneratedLayer__):
+    pass
+
+
+class __GeneratedDoubleLayer__(__GeneratedLayer__):
+    def __init__(self, layer1, layer2):
+        super().__init__()
+        self.layer1 = layer1
+        self.layer2 = layer2      
+
+    def layers(self):
+        l = LayerList()
+        l += self.get_layers(self.layer1)
+        l += self.get_layers(self.layer2)
+        return l 
+
+
+class __GeneratedLayerAnd__(__GeneratedDoubleLayer__):
+    def __repr__(self):
+        return "(%s AND %s)" % (self.layer1, self.layer2)
+
+    @property
+    def key(self):
+        return "%s AND %s"%(self.layer1, self.layer2)
+
+
+class __GeneratedLayerOr__(__GeneratedDoubleLayer__):        
+    def __repr__(self):
+        return "(%s OR %s)" % (self.layer1, self.layer2)
+
+    @property
+    def key(self):
+        return "%s OR %s"%(self.layer1, self.layer2)
+
+
+class __GeneratedLayerXor__(__GeneratedDoubleLayer__):        
+    def __repr__(self):
+        return "(%s XOR %s)" % (self.layer1, self.layer2)
+
+    @property
+    def key(self):
+        return "%s XOR %s"%(self.layer1, self.layer2)
+
+
+class __GeneratedLayerNot__(__GeneratedSingleLayer__):
+    def __init__(self, layer1):
+        super().__init__()
+        self.layer1 = layer1
+
+    def __repr__(self):
+        return "(NOT %s)" % (self.layer1)
+
+    @property
+    def key(self):
+        return "NOT %s"%(self.layer1)
+
+    def layers(self):
+        l = LayerList()
+        l += self.get_layers(self.layer1)
+        return l 
+
+
+class LayerList(TypedList):
+    """
+    Overload acces routines to get dictionary behaviour 
+    but without using the name as primary key.
+    """
+
+    __item_type__ = __Layer__
+
+    def __getitem__(self, key):
+        if isinstance(key, tuple):
+            for i in self._list:
+                if i.key == key: 
+                    return i
+            raise IndexError("layer " + str(key) + " cannot be found in LayerList.")
+        elif isinstance(key, str):
+            for i in self._list:
+                if i.name == key: 
+                    return i
+            raise IndexError("layer " + str(key) + " cannot be found in LayerList.")
+        else:
+            raise TypeError("Index is wrong type " + str(type(key)) + " in LayerList")
+
+    def __setitem__(self, key, value):
+        if isinstance(key, tuple):
+            for i in range(0, len(self)):
+                if self._list[i].key == key: 
+                    return self._list.__setitem__(self, i, value)
+            self._list.append(self, value)
+        elif isinstance(key, str):
+            for i in range(0, len(self)):
+                if self._list[i].name == key: 
+                    return self._list.__setitem__(self, i, value)
+            self._list.append(self, value)
+        else:
+            raise TypeError("Index is wrong type " + str(type(key)) + " in LayerList")
+
+    def __delitem__(self, key):
+        if isinstance(key, tuple):
+            for i in range(0, len(self)):
+                if self._list.__getitem__(self, i).key == key: 
+                    return self._list.__delitem__(self, i)
+                return
+            return self._list.__delitem__(self, key)
+        if isinstance(key, str):
+            for i in range(0, len(self)):
+                if self._list.__getitem__(self, i).name == key: 
+                    return self._list.__delitem__(self, i)
+                return
+            return self._list.__delitem__(self,key)
+        else:
+            raise TypeError("Index is wrong type " + str(type(key)) + " in LayerList")
+
+    def __contains__(self, item):
+        if isinstance(item, Layer):
+            key = item.key
+        elif isinstance(item, tuple):
+            key = item
+        elif isinstance(item, str):
+            for i in self._list:
+                if i.name == name: 
+                    return True
+            return False
+
+        if isinstance(key, tuple):
+            for i in self._list:
+                if i.key == key:
+                    return True
+            return False
+
+    def __eq__(self, other):
+        return set(self) == set(other)
+
+    # def __hash__(self):
+    #     return do_hash(self)
+
+    def __fast_get_layer__(self, key):
+        for L in self._list:
+            if L.key == key:
+                return L
+        return None
+
+    def index(self, item):
+        if isinstance(item, Layer):
+            key = item.key
+        elif isinstance(item, tuple):
+            key = item
+
+        if isinstance(key, tuple):
+            for i in range(0, len(self)):
+                if self._list.__getitem__(self, i).key == key:
+                    return i
+            raise ValueError("layer " + key + " is not in LayerList")
+        if isinstance(item, str):
+            for i in range(0, len(self)):
+                if self._list.__getitem__(self, i).name == item:
+                    return i
+            raise ValueError("layer " + item + " is not in LayerList")
+        else:
+            raise ValueError("layer " + item + " is not in LayerList")
+
+    def add(self, item, overwrite=False):
+        if isinstance(item, Layer):
+            if not item in self._list:
+                self._list.append(item)
+            elif overwrite:
+                self._list[item.key] = item
+                return
+        elif isinstance(item, LayerList) or isinstance(item, list):
+            for s in item:
+                self.add(s, overwrite)
+        elif isinstance(item, tuple):
+            if overwrite or (not item in self):
+                self.add(Layer(number=item[0], datatype=item[1]), overwrite)
+        else:
+            raise ValueError('Invalid layer list item type.')
+
+    def append(self, other, overwrite = False):
+        return self.add(other, overwrite)
+
+    def extend(self, other, overwrite = False):
+        return self.add(other, overwrite)
+
+    def clear(self):
+        del self._list[:]
+
+
+class LayerListField(DataFieldDescriptor):
+
+    __type__ = LayerList
+
+    def __init__(self, default=[], **kwargs):
+        kwargs['default'] = self.__type__(default)
+        kwargs['restrictions'] = RestrictType([self.__type__])
+        super().__init__(**kwargs)
+
+    def __repr__(self):
+        return ''
+
+    def __str__(self):
+        return ''
+
+    def call_param_function(self, obj):
+        f = self.get_param_function(obj)
+        value = f(self.__type__())
+        if value is None:
+            value = self.__type__()
+        new_value = self.__cache_parameter_value__(obj, value)
+        return new_value
 
 
 class Layer(__Layer__):
@@ -86,6 +343,12 @@ class Layer(__Layer__):
         string = '[SPiRA: Layer] (\'{}\', layer {}, datatype {})'
         return string.format(self.name, self.number, self.datatype)
 
+    def __str__(self):
+        return 'Layer{}'.format(self.number)
+
+    def __hash__(self):
+        return hash(self.key)
+
     def __eq__(self, other):
         if isinstance(other, Layer):
             return self.key == other.key
@@ -97,24 +360,6 @@ class Layer(__Layer__):
             return self.key != other.key
         else:
             raise ValueError('Not Implemented!')
-
-    def __add__(self, other):
-        if isinstance(other, Layer):
-            d = self.number + other.number
-        elif isinstance(other, int):
-            d = self.number + other
-        else:
-            raise ValueError('Not Implemented')
-        return Layer(datatype=d)
-
-    def __iadd__(self, other):
-        if isinstance(other, Layer):
-            self.number += other.number
-        elif isinstance(other, int):
-            self.number += other
-        else:
-            raise ValueError('Not Implemented')
-        return self
 
     @property
     def key(self):

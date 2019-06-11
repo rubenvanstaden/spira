@@ -1,11 +1,14 @@
 from spira.log import SPIRA_LOG as LOG
 from spira.yevon.filters.filter import Filter
-from spira.yevon.process.layer_list import LayerList, LayerListField
+# from spira.yevon.process.layer_list import LayerList, LayerListField
+from spira.yevon.process.gdsii_layer import LayerList, LayerListField
 from spira.yevon.gdsii.elem_list import ElementalListField
 from spira.yevon.geometry.ports.port_list import PortListField
 from spira.yevon.vmodel.elementals import reference_metal_blocks
 from spira.yevon.geometry.ports import Port, ContactPort
 from spira.yevon.utils import geometry
+from spira.yevon.geometry.ports.port import BranchPort
+from copy import deepcopy
 from spira.yevon.process import get_rule_deck
 
 
@@ -63,6 +66,26 @@ class NetDeviceLabelFilter(__NetFilter__):
             for D in self.device_ports:
                 if isinstance(D, ContactPort):
                     if D.encloses(points):
+                        # if 'device_reference' in item.g.node[n]:
+                        #     # D = item.g.node[n]['device_reference']
+                        #     polygon = item.g.node[n]['process_polygon']
+                        #     # position = item.g.node[n]['position']
+                        #     position = deepcopy(D.midpoint)
+                        #     display = item.g.node[n]['display']
+                        #     item.add_new_node(n=n, D=D, polygon=polygon, position=position, display=display)
+
+                        #     # C = item.g.node[n]['device_reference']
+                        #     # port = BranchPort(
+                        #     #     name='D1',
+                        #     #     midpoint=C.midpoint,
+                        #     #     process=RDD.PROCESS.M2,
+                        #     #     purpose=RDD.PURPOSE.PORT.BRANCH
+                        #     # )
+                        #     # item.g.node[n]['device_reference'] = port
+
+                        # else:
+                            # item.g.node[n]['device_reference'] = D
+                            # item.g.node[n]['display'] = RDD.DISPLAY.STYLE_SET[D.layer]
                         item.g.node[n]['device_reference'] = D
                         item.g.node[n]['display'] = RDD.DISPLAY.STYLE_SET[D.layer]
                 elif isinstance(D, Port):
