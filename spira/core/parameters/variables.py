@@ -96,3 +96,10 @@ def GraphField(restriction=None, **kwargs):
     R = GRAPH & restriction
     return RestrictedParameter(restriction=R, **kwargs)
 
+
+def TimeField(local_name=None, restriction=None, **kwargs):
+    import time
+    R = NUMBER & restriction
+    if not 'default' in kwargs:
+        kwargs['default'] = time.time()
+    return RestrictedParameter(local_name, restriction=R, **kwargs)

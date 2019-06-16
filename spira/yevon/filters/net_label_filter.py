@@ -15,7 +15,12 @@ from spira.yevon.process import get_rule_deck
 RDD = get_rule_deck()
 
 
-__all__ = ['NetProcessLabelFilter', 'NetBlockLabelFilter', 'NetDeviceLabelFilter']
+__all__ = [
+    'NetProcessLabelFilter',
+    'NetDeviceLabelFilter',
+    'NetBlockLabelFilter',
+    'NetEdgeFilter'
+]
 
 
 class __NetFilter__(Filter):
@@ -23,6 +28,8 @@ class __NetFilter__(Filter):
 
 
 class NetProcessLabelFilter(__NetFilter__):
+    """  """
+
     process_polygons = ElementalListField()
 
     def __filter___Net____(self, item):
@@ -39,16 +46,53 @@ class NetProcessLabelFilter(__NetFilter__):
         return "[SPiRA: NetLabelFilter] (layer count {})".format(0)
 
 
-class NetBlockLabelFilter(__NetFilter__):
-    references = ElementalListField()
+class NetEdgeFilter(__NetFilter__):
+    """  """
+
+    process_polygons = ElementalListField()
 
     def __filter___Net____(self, item):
-        for S in self.references:
-            for e in reference_metal_blocks(S):
-                for n in item.g.nodes():
-                    if e.encloses(item.g.node[n]['position']):
-                        item.g.node[n]['device_reference'] = S
-                        item.g.node[n]['display'] = RDD.DISPLAY.STYLE_SET[e.layer]
+
+        ELM_TYPE = {1: 'line', 2: 'triangle'}
+
+        # print('Triangles:')
+        # print(item.triangles)
+        # print('Lines:')
+        # print(item.lines)
+        # print('Physical Lines:')
+        # print(item.physical_lines)
+        # print('Field Data:')
+        # for k, v in item.mesh_data.field_data.items():
+        #     print(k, v)
+        # # print(item.process_lines())
+        # # print(item.get_triangles_connected_to_line())
+
+        for key, value in item.mesh_data.field_data.items():
+
+            # line_id = key.split('_')[0]
+            # line_id = key[:-2]
+            line_id = key[1]
+            print(line_id)
+            
+            elm_type = ELM_TYPE[value[1]]
+            if elm_type == 'line':
+
+                for e in self.process_polygons:
+                    pid = e.shape.hash_string
+    
+                    # if line_id == pid:
+                    if line_id == 'b':
+                        i = item.physical_lines.index(value[0])
+                        line = item.lines[i]
+
+                        for n, triangle in enumerate(item.triangles):
+                            if (line[0] in triangle) and (line[1] in triangle):
+                                print('YESSSSSSS')
+                                print(triangle)
+                                
+                                item.g.node[n]['process_polygon'] = e
+                                item.g.node[n]['display'] = RDD.DISPLAY.STYLE_SET[e.layer]
+
         return item
 
     def __repr__(self):
@@ -106,4 +150,22 @@ class NetDeviceLabelFilter(__NetFilter__):
 
     def __repr__(self):
         return "[SPiRA: NetLabelFilter] (layer count {})".format(0)
+
+
+class NetBlockLabelFilter(__NetFilter__):
+    references = ElementalListField()
+
+    def __filter___Net____(self, item):
+        for S in self.references:
+            for e in reference_metal_blocks(S):
+                for n in item.g.nodes():
+                    if e.encloses(item.g.node[n]['position']):
+                        item.g.node[n]['device_reference'] = S
+                        item.g.node[n]['display'] = RDD.DISPLAY.STYLE_SET[e.layer]
+        return item
+
+    def __repr__(self):
+        return "[SPiRA: NetLabelFilter] (layer count {})".format(0)
+
+
 

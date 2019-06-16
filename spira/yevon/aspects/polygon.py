@@ -50,11 +50,6 @@ class PolygonAspects(__GeometryAspects__):
     def bbox_info(self):
         return self.shape.bbox_info.transform_copy(self.transformation)
 
-    @property
-    def hash_polygon(self):
-        pts = np.array([self.shape.points])
-        return np.sort([hashlib.sha1(p).digest() for p in pts])
-
 
 class PolygonClipperAspects(__ClipperAspects__):
     """
@@ -64,7 +59,6 @@ class PolygonClipperAspects(__ClipperAspects__):
     """
 
     def __and__(self, other):
-        from copy import deepcopy
         if self.layer == other.layer:
             s1 = self.shape.transform_copy(self.transformation)
             s2 = other.shape.transform_copy(other.transformation)
@@ -72,6 +66,14 @@ class PolygonClipperAspects(__ClipperAspects__):
             elems = [Polygon(shape=s, layer=self.layer) for s in shapes]
             return elems
         return ElementalList([])
+
+    # NOTE: Does not require to check for layer equivalence.
+    def intersection(self, other):
+        s1 = self.shape.transform_copy(self.transformation)
+        s2 = other.shape.transform_copy(other.transformation)
+        shapes = s1.__and__(s2)
+        elems = [Polygon(shape=s, layer=self.layer) for s in shapes]
+        return elems
 
     def __sub__(self, other):
         if self.layer == other.layer:

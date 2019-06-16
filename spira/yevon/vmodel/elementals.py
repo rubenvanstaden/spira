@@ -73,7 +73,7 @@ class ElementalsForModelling(__Aspects__):
             for e in pg.elementals:
                 elems += e
         D = Cell(name=self.name + '_VMODEL', elementals=elems)
-        D.output()
+        D.gdsii_output()
 
 
 class ReferenceBlocks(__Aspects__):
@@ -90,7 +90,7 @@ class ReferenceBlocks(__Aspects__):
 
     def write_gdsii_blocks(self, **kwargs):
         D = Cell(name=self.name + '_BLOCKS', elementals=self.block_elementals)
-        D.output()
+        D.gdsii_output()
 
 
 Cell.mixin(ElementalsForModelling)

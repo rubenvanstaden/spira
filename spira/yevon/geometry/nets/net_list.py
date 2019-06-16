@@ -1,7 +1,7 @@
 import networkx as nx
 
 from spira.core.typed_list import TypedList
-from spira.yevon.geometry.nets.net import __Net__
+from spira.yevon.geometry.nets.net import __Net__, Net
 from spira.core.parameters.variables import FloatField
 from spira.core.parameters.descriptor import DataFieldDescriptor
 from spira.core.parameters.restrictions import RestrictType
@@ -60,15 +60,9 @@ class NetList(TypedList):
         return self
 
     def disjoint(self):
-        g = [net.g for net in self._list]
-        return nx.disjoint_union_all(g)
-
-    def disjoint_union_and_combine_nodes(self):
-        from spira.yevon.utils.netlist import nodes_combine
-        g = self.disjoint()
-        g = nodes_combine(g=g, algorithm='d2d')
-        # g = nodes_combine(g=g, algorithm='s2s')
-        return g
+        graphs= [net.g for net in self._list]
+        net = Net(g=nx.disjoint_union_all(graphs))
+        return net
 
     def connect_shared_nodes(self):
         g = self.disjoint()

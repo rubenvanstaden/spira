@@ -6,16 +6,16 @@ from spira.core.parameters.variables import *
 from spira.yevon.io import import_gds
 from spira.yevon.gdsii.elem_list import ElementalList
 from spira.yevon.gdsii.cell_list import CellList
-from spira.core.parameters.initializer import FieldInitializer
 from spira.core.parameters.descriptor import DataField
 from spira.core.mixin import MixinBowl
+from spira.yevon.gdsii.unit_grid import UnitGridContainer
 from spira.yevon.process import get_rule_deck
 
 
 RDD = get_rule_deck()
 
 
-class __Library__(FieldInitializer, MixinBowl):
+class __Library__(UnitGridContainer, MixinBowl):
 
     def __add__(self, other):
         if isinstance(other, spira.Cell):
@@ -52,22 +52,34 @@ class __Library__(FieldInitializer, MixinBowl):
         return not self.__eq__(other)
 
 
-class LibraryAbstract(gdspy.GdsLibrary, __Library__):
+# class Library(gdspy.GdsLibrary, __Library__):
+class Library(__Library__):
+    """ 
+    Library contains all the cell and pcell informartion
+    of a given layout connected to a RDD. 
+    
+    Examples
+    --------
+    >>> lib = spira.Library(name='LIB')
+    """
 
-    grid = FloatField(default=RDD.GDSII.GRID)
-    grids_per_unit = DataField(fdef_name='create_grids_per_unit')
-    units_per_grid = DataField(fdef_name='create_units_per_grid')
+    name = StringField(doc='Unique name for the library.')
+    accessed = TimeField(doc='Timestamp at which the library was accessed.')
+    modified = TimeField(doc='Timestamp at which the library was modified.')
 
-    def create_grids_per_unit(self):
-        return self.unit / self.grid
+    def __init__(self, name='spira_library', infile=None, **kwargs):
+        # super().__init__(name=name, infile=None, **kwargs)
+        __Library__.__init__(self, name=name, **kwargs)
+        # gdspy.GdsLibrary.__init__(self, name=name, infile=None, **kwargs)
+        self.cells = CellList()
+        self.graphs = list()
 
-    def create_units_per_grid(self):
-        return self.grid / self.unit
+    def __repr__(self):
+        class_string = "[SPiRA: Library(\'{}\')] ({} cells)"
+        return class_string.format(self.name, self.cells.__len__())
 
-    def validate_parameters(self):
-        if self.grid > self.unit:
-            raise Exception('The grid should be smaller than the unit.')
-        return True
+    def __str__(self):
+        return self.__repr__()
 
     def referenced_structures(self):
         referred_to_list = list()
@@ -86,29 +98,6 @@ class LibraryAbstract(gdspy.GdsLibrary, __Library__):
 
     def clear(self):
         self.cells.clear()
-
-
-class Library(LibraryAbstract):
-    """ Library contains all the cell and pcell informartion
-    of a given layout connected to a RDD. 
-    
-    Examples
-    --------
-    >>> lib = spira.Library(name='LIB')
-    """
-    def __init__(self, name='spira_library', infile=None, **kwargs):
-        super().__init__(name=name, infile=None, **kwargs)
-        self.cells = CellList()
-        self.graphs = list()
-
-    def __repr__(self):
-        return "[SPiRA: Library(\'{}\')] ({} cells)".format(
-            self.name,
-            self.cells.__len__()
-        )
-
-    def __str__(self):
-        return self.__repr__()
 
 
 

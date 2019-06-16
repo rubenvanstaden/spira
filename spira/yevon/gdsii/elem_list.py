@@ -101,7 +101,7 @@ class ElementalList(__ElementalList__):
             return SI
 
     def nets(self, contacts=None, lcar=100):
-        from spira.yevon.netlist.net_list import NetList
+        from spira.yevon.geometry.nets.net_list import NetList
         nets = NetList()
         for e in self._list:
             nets += e.nets(contacts, lcar)

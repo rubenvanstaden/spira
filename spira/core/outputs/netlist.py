@@ -19,7 +19,10 @@ RDD = get_rule_deck()
 
 class PlotlyGraph(object):
 
-    def plotly_netlist(self, G, graphname, labeltext):
+    def netlist_output(self):
+        self._plotly_netlist(G=self.netlist.g, graphname=self.name)
+
+    def _plotly_netlist(self, G, graphname, labeltext='id'):
         edges = self._create_edges(G)
         nodes = self._create_nodes(G, labeltext)
 

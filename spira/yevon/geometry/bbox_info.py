@@ -1,5 +1,4 @@
 import numpy as np
-# from spira.yevon.geometry.shapes.shape import shape_edge_ports
 from spira.yevon.geometry.coord import Coord
 from spira.core.transformable import Transformable
 from spira.yevon.process import get_rule_deck
@@ -144,7 +143,7 @@ class BoundaryInfo(Transformable):
     """ center coordinate """
 
     def get_size(self):
-        if not self.__is_initialized__(): 
+        if not self.__is_initialized__():
             return (0.0, 0.0)
         return Coord(self.__east - self.__west, self.__north - self.__south)
     def set_size(self, value):
@@ -160,7 +159,7 @@ class BoundaryInfo(Transformable):
     """ size: (width, height)"""
 
     def get_width(self):
-        if not self.__is_initialized__(): 
+        if not self.__is_initialized__():
             return 0.0
         return self.__east - self.__west
     def set_width(self, value):
@@ -202,7 +201,7 @@ class BoundaryInfo(Transformable):
         return (self.__east, self.__south)
 
     def get_border_on_one_side(self, side):
-        from ..constants import NORTH, SOUTH, EAST, WEST
+        from spira.yevon.constants import NORTH, SOUTH, EAST, WEST
         if side == NORTH: 
             return self.north
         elif side == SOUTH:
@@ -273,6 +272,17 @@ class BoundaryInfo(Transformable):
                 return (other.__east < self.__east) and (other.__west > self.__west) and (other.__north < self.__north) and (other.__south > self.__south)
             else:
                 raise TypeError("Unsupported type " + str(type(other)) + " in BoundaryInfo.encloses()")
+
+    def snap_to_grid(self, grids_per_unit=None):
+        """ Snaps the boundary box to a given grid or the current grid. """
+        from spira import settings
+        if not self.__is_initialized__(): return self
+        if grids_per_unit is None: grids_per_unit = settings.get_grids_per_unit()
+        self.__west = settings.snap_value(self.__west, grids_per_unit)
+        self.__east = settings.snap_value(self.__east, grids_per_unit)
+        self.__north = settings.snap_value(self.__north, grids_per_unit)
+        self.__south = settings.snap_value(self.__south, grids_per_unit)
+        return self
 
     def move(self, coordinate):
         if self.__is_initialized__():

@@ -310,7 +310,7 @@ class RouteGeneral(Cell):
         )
         return term
 
-    def create_port_output(self):
+    def create_port_gdsii_output(self):
         term = spira.Port(name='P2',
             midpoint=self.route_shape.m2,
             width=self.route_shape.w2,

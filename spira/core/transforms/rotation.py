@@ -90,7 +90,7 @@ def shape_rotate(shape, rotation=90, rotation_center=(0,0)):
 
 class __RotationMixin__(object):
 
-    def _rotate(self, rotation=0, rotation_center=(0,0)):
+    def rotate(self, rotation=0, rotation_center=(0,0)):
         return self.transform(Rotation(rotation, rotation_center))
 
     def rotate_copy(self, rotation=0, rotation_center=(0,0)):

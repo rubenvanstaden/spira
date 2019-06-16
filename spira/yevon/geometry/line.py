@@ -1,5 +1,6 @@
 import numpy as np
 
+from spira.yevon import constants
 from spira.core.parameters.initializer import FieldInitializer
 from spira.core.transformable import Transformable
 from spira.core.parameters.variables import NumberField
@@ -15,10 +16,6 @@ __all__ = [
     'line_from_two_points',
     'line_from_vector'
 ]
-
-
-DEG2RAD = np.pi/180
-RAD2DEG = 180/np.pi
 
 
 class Line(Transformable, FieldInitializer):
@@ -39,8 +36,7 @@ class Line(Transformable, FieldInitializer):
 
     @property
     def slope(self):
-        if self.b == 0:
-            return None
+        if self.b == 0: return None
         return -self.a / self.b
 
     @property
@@ -49,22 +45,22 @@ class Line(Transformable, FieldInitializer):
 
     @property
     def angle_deg(self):
-        return RAD2DEG * self.angle_rad
+        return constants.RAD2DEG * self.angle_rad
 
     @property
     def y_intercept(self):
-        if self.b == 0.0:
-            return None
+        if self.b == 0.0: return None
         return -self.c / -self.b
 
     @property
     def x_intercept(self):
-        if self.a == 0.0:
-            return None
+        if self.a == 0.0: return None
         return -self.c / -self.a
 
     def is_on_line(self, coordinate):
-        return abs(self.a * coordinate[0] + self.b * coordinate[1] + self.c) < 1e-10
+        # print(self.b, self.b, self.c)
+        # print(np.abs(self.a * coordinate[0] + self.b * coordinate[1] + self.c))
+        return abs(self.a * coordinate[0] + self.b * coordinate[1] + self.c) < 1E-10
 
     def distance(self, coordinate):
         return abs(self.a * coordinate[0] + self.b * coordinate[1] + self.c) / np.sqrt(self.a ** 2 + self.b ** 2)
@@ -89,15 +85,15 @@ class Line(Transformable, FieldInitializer):
             y = m*(x - x0) + y0
             dx = x - x0
             dy = y - y0
-    
+
         return (dx, dy)
 
     def intersection(self, line):
         """ gives intersection of line with other line """
-        if (self.b * line.a - self.a * line.b) == 0.0:
-            return None
-        return Coord(-(self.b * line.c - line.b * self.c) / (self.b * line.a - self.a * line.b),
-                      (self.a * line.c - line.a * self.c) / (self.b * line.a - self.a * line.b))
+        if (self.b * line.a - self.a * line.b) == 0.0: return None
+        x = -(self.b * line.c - line.b * self.c) / (self.b * line.a - self.a * line.b)
+        y =  (self.a * line.c - line.a * self.c) / (self.b * line.a - self.a * line.b)
+        return Coord(x, y)
 
     def closest_point(self, point):
         """ Gives closest point on line """
@@ -106,64 +102,67 @@ class Line(Transformable, FieldInitializer):
 
     def is_on_same_side(self, point1, point2):
         """ Returns True is both points are on the same side of the line """
-        return numpy.sign(self.a * point1[0] + self.b * point1[1] + self.c) == np.sign(self.a * point2[0] + self.b * point2[1] + self.c)
+        v1 = self.a * point1[0] + self.b * point1[1] + self.c
+        v2 = self.a * point2[0] + self.b * point2[1] + self.c
+        return np.sign(v1) == np.sign(v2)
 
     def is_parallel(self, other):
         """ Returns True is lines are parallel """
         return abs(self.a * other.b - self.b * other.a) < 1E-10
 
     def __eq__(self, other):
-        return abs(self.a * other.b - self.b * other.a) < 1E-10 and abs(self.c * other.b - self.b * other.c) < 1E-10 and abs(self.a * other.c - self.c * other.a) < 1E-10    
-        
+        v1 = abs(self.a * other.b - self.b * other.a)
+        v2 = abs(self.c * other.b - self.b * other.c)
+        v3 = abs(self.a * other.c - self.c * other.a)
+        return (v1 < 1E-10) and (v2 < 1E-10) and (v3 < 1E-10)
+
     def __ne__(self, other):
         return (not self.__eq__(other))    
-    
+
     def __get_2_points__(self):
-        """ Returns 2 points on the line. If a horizontal or vertical, it returns one point on the axis, and another 1.0 further.
-            If the line is oblique, it returns the intersects with the axes """
-        from .shape import Shape
+        from spira.yevon.geometry import shapes
         if b == 0:
-            return Shape([Coord(-self.c / self.a, 0.0), Coord(-self.c / self.a, 1.0)])
+            return shapes.Shape([Coord(-self.c / self.a, 0.0), Coord(-self.c / self.a, 1.0)])
         elif a == 0: 
-            return Shape([Coord(0.0, -self.c / self.b), Coord(1.0, -self.c / self.b)])
+            return shapes.Shape([Coord(0.0, -self.c / self.b), Coord(1.0, -self.c / self.b)])
         else:
-            return Shape([Coord(-self.c / self.a, 0.0), Coord(0.0, -self.c / self.b)])
-    
+            return shapes.Shape([Coord(-self.c / self.a, 0.0), Coord(0.0, -self.c / self.b)])
+
     def transform(self, transformation):
-        """ transforms the straight line with a given transformation """
         p = self.__get_2_points__().transform(transformation)
         self.a = y2 - y1
         self.b = x1 - x2
         self.c = (x2 - x1) * y1 - (y2 - y1) * x1
-        
+
     def transform_copy(self, transformation):
-        """ transforms a copy of the straight line with a given transformation """
         p = self.__get_2_points__().transform(transformation)
         return line_from_two_points(p[0], p[1])
 
 
 def line_from_slope_intercept(slope, y_intercept):
-    """ creates StraightLine object from slope and y_intercept """
+    """ Creates a Line object from slope and y_intercept. """
     return Line(slope, -1.0, intercept)
 
 
 def line_from_two_points(point1, point2):
-    """ creates StraightLine object from two points """
+    """ Creates a Line object from two points. """
     x1, y1 = point1[0], point1[1]
     x2, y2 = point2[0], point2[1]
-    return Line(y2 - y1, x1 - x2, (x2 - x1) * y1 - (y2 - y1) * x1)
+    a, b = (y2 - y1), (x1 - x2)
+    c = (x2 - x1) * y1 - (y2 - y1) * x1
+    return Line(a=a, b=b, c=c)
 
 
 def line_from_point_angle(point, angle):
-    """ Creates StraightLine object from point and angle. """
+    """ Creates a Line object from point and angle. """
     if abs(angle % 180.0 - 90.0) <= 1e-12:
         return line_from_two_points(point, Coord(0.0, 1) + point)
-    slope = np.tan(DEG2RAD * angle)
+    slope = np.tan(constants.DEG2RAD * angle)
     return Line(slope, -1, point[1] - slope * point[0])
 
 
 def line_from_vector(vector):
-    """ creates StraightLine object from a vector """
+    """ Creates a Line object from a vector. """
     return line_from_point_angle(vector.position, vector.angle_deg)
 
 

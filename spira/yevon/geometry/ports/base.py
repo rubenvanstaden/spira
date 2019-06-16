@@ -61,7 +61,7 @@ class __PhysicalPort__(__Port__):
     def transform(self, transformation):
         self.midpoint = transformation.apply_to_coord(self.midpoint)
         return self
-        
+
     def transform_copy(self, transformation):
         m = transformation.apply_to_coord(self.midpoint)
         return self.__class__(midpoint=m)
@@ -73,8 +73,5 @@ class __PhysicalPort__(__Port__):
     def distance(self, other):
         return norm(np.array(self.midpoint) - np.array(other.midpoint))
 
-    # def connect(self, S, P):
-    #     """ Connects the port to a specific polygon in a cell reference. """
-    #     self.node_id = '{}_{}'.format(S.ref.name, P.id)
 
 

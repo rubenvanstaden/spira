@@ -9,5 +9,5 @@ def debug_view(cell):
     print('[*] List of Ports:')
     print(D.ports)
     print('---------------------------------\n')
-    D.output()
+    D.gdsii_output()
 

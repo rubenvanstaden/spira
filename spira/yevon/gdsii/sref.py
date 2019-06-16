@@ -17,7 +17,6 @@ from spira.yevon.geometry.line import *
 from copy import copy, deepcopy
 from spira.core.transforms import stretching
 from spira.yevon.geometry import bbox_info
-from spira.yevon.gdsii.polygon import Polygon
 
 
 class __RefElemental__(__Elemental__):
@@ -142,7 +141,7 @@ class SRef(__RefElemental__):
         return d
 
     def nets(self, contacts, lcar=100):
-        from spira.yevon.netlist.pcell import Device
+        from spira.yevon.structure.pcell import Device
         if isinstance(self.ref, Device): lcar = 10
         nets = self.ref.nets(contacts, lcar)
         # T = self.transformation + Translation(self.midpoint)
@@ -283,6 +282,7 @@ class SRef(__RefElemental__):
         -------
         >>> S_s = S.stretch_port()
         """
+        from spira.yevon.gdsii.polygon import Polygon
         opposite_port = bbox_info.get_opposite_boundary_port(self, port)
         T = stretching.stretch_elemental_by_port(self, opposite_port, port, destination)
         if port.bbox is True:

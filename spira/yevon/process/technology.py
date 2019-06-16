@@ -99,13 +99,14 @@ class Database(__Database__):
         for key in self['PLAYER'].keys:
             if isinstance(self['PLAYER'][key], PhysicalLayerDatabase):
                 for value in self['PLAYER'][key].values:
-                    if isinstance(purposes, list):
-                        for s in purposes:
-                            if value.purpose.symbol == s:
+                    if hasattr(value, 'purpose'):
+                        if isinstance(purposes, list):
+                            for s in purposes:
+                                if value.purpose.symbol == s:
+                                    plist.append(value)
+                        else:
+                            if value.purpose.symbol == purposes:
                                 plist.append(value)
-                    else:
-                        if value.purpose.symbol == purposes:
-                            plist.append(value)
         # if len(plist) == 0:
         #     raise ValueError('No physical layer with purpose {} found.'.format(purposes))
         return plist
@@ -126,8 +127,9 @@ class Database(__Database__):
             if isinstance(self['PLAYER'][key], PhysicalLayerDatabase):
                 for value in self['PLAYER'][key].values:
                     for s in symbols:
-                        if value.process.symbol == s:
-                            plist.append(value)
+                        if hasattr(value, 'process'):
+                            if value.process.symbol == s:
+                                plist.append(value)
         # if len(plist) == 0:
         #     raise ValueError('No physical layer with purpose {} found.'.format(processes))
         return plist

@@ -135,6 +135,8 @@ class Polygon(__Polygon__):
     >>> ply = spira.Polygon(shape=rect_shape, layer=layer)
     """
 
+    edges = DataField(fdef_name='create_edges')
+
     def get_alias(self):
         if not hasattr(self, '__alias__'):
             self.__alias__ = self.process
@@ -146,21 +148,26 @@ class Polygon(__Polygon__):
 
     alias = FunctionField(get_alias, set_alias, doc='Functions to generate an alias for cell name.')
 
+    _next_uid = 0
+
     def __init__(self, shape, layer, **kwargs):
         super().__init__(shape=shape, layer=layer, **kwargs)
+        
+        self.uid = Polygon._next_uid
+        Polygon._next_uid += 1
 
     def __repr__(self):
         if self is None:
             return 'Polygon is None!'
         layer = RDD.GDSII.IMPORT_LAYER_MAP[self.layer]
-        class_string = "[SPiRA: Polygon {}] (center {}, vertices {}, process {}, purpose {})"
+        class_string = "[SPiRA: Polygon \'{}\'] (center {}, vertices {}, process {}, purpose {})"
         return class_string.format(self.alias, self.center, self.count, self.process, self.purpose)
 
     def __str__(self):
         return self.__repr__()
 
     def id_string(self):
-        sid = '{} - hash {}'.format(self.__repr__(), self.hash_polygon)
+        sid = '{} - hash {}'.format(self.__repr__(), self.shape.hash_string)
         return sid
 
     # NOTE: We are not copying the ports, so they
@@ -190,46 +197,55 @@ class Polygon(__Polygon__):
             verbose=False
         )
 
+    def create_edges(self):
+        from spira.yevon.structure.edges import generate_polygon_edges
+        return generate_polygon_edges(shape=self.shape, layer=self.layer)
+
     def nets(self, contacts=None, lcar=100):
         from spira.yevon.vmodel.geometry import GmshGeometry
         from spira.yevon.geometry.ports.port import ContactPort
-        from spira.yevon.filters.net_label_filter import NetProcessLabelFilter, NetDeviceLabelFilter
+        from spira.yevon.filters.net_label_filter import NetProcessLabelFilter, NetDeviceLabelFilter, NetEdgeFilter
 
         if self.purpose == 'METAL':
-            geometry = GmshGeometry(lcar=lcar, process=self.layer.process, process_polygons=[deepcopy(self)])
+            # geometry = GmshGeometry(lcar=0.1*1e-6, process=self.layer.process, process_polygons=[deepcopy(self)])
+            geometry = GmshGeometry(lcar=10*1e-6, process=self.layer.process, process_polygons=[deepcopy(self)])
     
-            net = Net(name=self.__repr__(), geometry=geometry)
+            net = Net(name=self.process, geometry=geometry)
     
-            Fs = NetProcessLabelFilter(process_polygons=[deepcopy(self)])
-            # Fs += NetDeviceLabelFilter(device_ports=contacts)
+            # Fs = NetProcessLabelFilter(process_polygons=[deepcopy(self)])
+            # # Fs += NetDeviceLabelFilter(device_ports=contacts)
     
-            cc = []
-            for p in self.ports:
-                if isinstance(p, ContactPort):
-                    cc.append(p)
-            print(cc)
+            # cc = []
+            # for p in self.ports:
+            #     if isinstance(p, ContactPort):
+            #         cc.append(p)
+            # print(cc)
     
-            Fs += NetDeviceLabelFilter(device_ports=cc)
+            Fs = NetEdgeFilter(process_polygons=[deepcopy(self)])
+            # # Fs += NetDeviceLabelFilter(device_ports=cc)
     
             net = Fs(net)
+
+            return net
     
-            from spira.yevon.utils.netlist import nodes_combine
-            net.g = nodes_combine(g=net.g, algorithm='d2d')
-            net.g = nodes_combine(g=net.g, algorithm='s2s')
+            # # from spira.yevon.utils.netlist import combine_net_nodes
+            # # net.g = combine_net_nodes(g=net.g, algorithm='d2d')
+            # # net.g = combine_net_nodes(g=net.g, algorithm='s2s')
     
-            from spira.yevon.geometry.nets.net import CellNet
-            cn = CellNet()
-            cn.g = net.g
-            # cn.generate_branches()
-            # cn.detect_dummy_nodes()
-            return cn
+            # from spira.yevon.geometry.nets.net import CellNet
+            # cn = CellNet()
+            # cn.g = net.g
+            # # cn.generate_branches()
+            # # cn.detect_dummy_nodes()
+            # return cn
+
         return []
     
 
 
     # def nets(self, contacts):
     #     from spira.yevon.geometry.nets.net import Net
-    #     from spira.yevon.netlist.net_list import NetList
+    #     from spira.yevon.geometry.nets.net_list import NetList
     #     from spira.yevon.vmodel.virtual import virtual_process_model
     #     from spira.yevon.filters.net_label_filter import NetProcessLabelFilter, NetDeviceLabelFilter
     #     from spira.yevon.gdsii.cell import Cell
@@ -288,10 +304,10 @@ class PolygonGroup(Group, __LayerElemental__):
     -------
     >>> cp = spira.PolygonCollection()
     """
-    
+
     def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-    
+        super().__init__(**kwargs)       
+
     def __repr__(self):
         class_string = "[SPiRA: PolygonGroup] (polygons {}, process {}, purpose {})"
         return class_string.format(self.count, self.process, self.purpose)
@@ -300,9 +316,43 @@ class PolygonGroup(Group, __LayerElemental__):
         return self.__repr__()
 
     def __and__(self, other):
-        # p1 = gdspy.PolygonSet(polygons=[e.points for e in self.elementals])
-        # p2 = gdspy.PolygonSet(polygons=[e.points for e in other.elementals])
+    
+        el = ElementalList()
+        for e1 in self.elementals:
+            for e2 in other.elementals:
+                if e1.shape != e2.shape:
+                    e1 = deepcopy(e1)
+                    e2 = deepcopy(e2)
+                    # polygons = e1 & e2
+                    polygons = e1.intersection(e2)
+                    for p in polygons:
+                        p.layer.purpose = RDD.PURPOSE.INTERSECTED
+                    for p in polygons:
+                        el += p
+        self.elementals = el
+        return self
 
+    # def __and__(self, other):
+    #     pts1, pts2 = [], []
+    #     for e in self.elementals:
+    #         s1 = e.shape.transform_copy(e.transformation)
+    #         pts1.append(s1.points)
+    #     for e in other.elementals:
+    #         s1 = e.shape.transform_copy(e.transformation)
+    #         pts2.append(s1.points)
+
+    #     if (len(pts1) > 0) and (len(pts2) > 0):
+    #         p1 = gdspy.PolygonSet(polygons=pts1)
+    #         p2 = gdspy.PolygonSet(polygons=pts2)
+    #         ply = gdspy.fast_boolean(p1, p2, operation='and')
+    #         elems = ElementalList()
+    #         if ply is not None:
+    #             for points in ply.polygons:
+    #                 elems += Polygon(shape=points, layer=self.layer)
+    #         self.elementals = elems
+    #     return self
+
+    def __xor__(self, other):
         pts1, pts2 = [], []
         for e in self.elementals:
             s1 = e.shape.transform_copy(e.transformation)
@@ -311,38 +361,19 @@ class PolygonGroup(Group, __LayerElemental__):
             s1 = e.shape.transform_copy(e.transformation)
             pts2.append(s1.points)
 
-        p1 = gdspy.PolygonSet(polygons=pts1)
-        p2 = gdspy.PolygonSet(polygons=pts2)
-
-        ply = gdspy.fast_boolean(p1, p2, operation='and')
-        elems = ElementalList()
-        for points in ply.polygons:
-            elems += Polygon(shape=points, layer=self.layer)
-        self.elementals = elems
+        if (len(pts1) > 0) and (len(pts2) > 0):
+            p1 = gdspy.PolygonSet(polygons=pts1)
+            p2 = gdspy.PolygonSet(polygons=pts2)
+    
+            ply = gdspy.fast_boolean(p1, p2, operation='not')
+            elems = ElementalList()
+            for points in ply.polygons:
+                elems += Polygon(shape=points, layer=self.layer)
+            self.elementals = elems
         return self
 
     def __or__(self, other):
         raise ValueError('Not Implemented!')
-
-    def __xor__(self, other):
-        
-        pts1, pts2 = [], []
-        for e in self.elementals:
-            s1 = e.shape.transform_copy(e.transformation)
-            pts1.append(s1.points)
-        for e in other.elementals:
-            s1 = e.shape.transform_copy(e.transformation)
-            pts2.append(s1.points)
-
-        p1 = gdspy.PolygonSet(polygons=pts1)
-        p2 = gdspy.PolygonSet(polygons=pts2)
-
-        ply = gdspy.fast_boolean(p1, p2, operation='not')
-        elems = ElementalList()
-        for points in ply.polygons:
-            elems += Polygon(shape=points, layer=self.layer)
-        self.elementals = elems
-        return self
 
     @property
     def count(self):
@@ -418,7 +449,7 @@ def Box(layer, width=1, height=1, center=(0,0), alias=None, enable_edges=False):
     >>> p = spira.Box(p1=(0,0), p2=(10,0), layer=RDD.PLAYER.M6)
     >>> [SPiRA: Rectangle] ()
     """
-    shape = shapes.BoxShape(width=width, height=height)
+    shape = shapes.BoxShape(width=width, height=height, center=center)
     return Polygon(alias=alias, shape=shape, layer=layer, enable_edges=enable_edges)
 
 

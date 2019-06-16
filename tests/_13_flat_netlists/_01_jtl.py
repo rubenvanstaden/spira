@@ -18,7 +18,7 @@ D = D.pcell
 
 print(D)
 
-D.output()
+D.gdsii_output()
 
 # D.write_gdsii_mask()
 
@@ -42,8 +42,8 @@ nets = D.nets(contacts=contacts)
 # --- Step 1:
 g_cell = nets.disjoint()
 
-# from spira.yevon.utils.netlist import nodes_combine
-# g_cell = nodes_combine(g=g_cell, algorithm='d2d')
+# from spira.yevon.utils.netlist import combine_net_nodes
+# g_cell = combine_net_nodes(g=g_cell, algorithm='d2d')
 
 # E.plotly_netlist(G=g_cell, graphname='metal', labeltext='id')
 

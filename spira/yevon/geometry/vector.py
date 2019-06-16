@@ -99,7 +99,8 @@ def transformation_from_vector(vector):
 
 def vector_from_two_points(point1, point2):
     """ Make a vector out of two points """
-    return Vector(midpoint=point1, orientation=shape_info.angle_deg(point2, point1))
+    from spira.yevon.utils.geometry import angle_deg
+    return Vector(midpoint=point1, orientation=angle_deg(point2, point1))
 
 
 def vector_match_transform(v1, v2):

@@ -4,7 +4,11 @@ from spira.yevon.gdsii.elem_list import ElementalList
 from spira.yevon.geometry.ports.port_list import PortList
 
 
-__all__ = ['ProcessBooleanFilter']
+__all__ = [
+    'ProcessBooleanFilter',
+    'SimplifyFilter',
+    'ViaConnectFilter',
+]
 
 
 class ProcessBooleanFilter(Filter):
@@ -26,5 +30,38 @@ class ProcessBooleanFilter(Filter):
     def __repr__(self):
         return "[SPiRA: ProcessBooleanFilter] ()"
 
+
+class SimplifyFilter(Filter):
+
+    def __filter___Cell____(self, item):
+        # from spira.yevon.gdsii.polygon import Polygon
+        from spira.yevon.utils import clipping
+        from shapely.geometry import Polygon as ShapelyPolygon
+
+        elems = ElementalList()
+        for e in item.elementals.polygons:
+            points = clipping.simplify_points(e.points)
+            elems += e.__class__(shape=points, layer=e.layer, transformation=e.transformation)
+        return item.__class__(elementals=elems)
+
+    def __repr__(self):
+        return "[SPiRA: SimplifyFilter] ()"
+
+
+class ViaConnectFilter(Filter):
+
+    def __filter___Cell____(self, item):
+        from spira.yevon.utils import clipping
+        from spira.yevon.vmodel.virtual import virtual_connect
+        from shapely.geometry import Polygon as ShapelyPolygon
+
+        elems = ElementalList()
+        v_model = virtual_connect(device=item)
+        for e in v_model.connected_elementals:
+            elems += e
+        return item.__class__(elementals=elems)
+
+    def __repr__(self):
+        return "[SPiRA: SimplifyFilter] ()"
 
 

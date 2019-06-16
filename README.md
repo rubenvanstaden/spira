@@ -54,8 +54,8 @@ Examples of using the PCell implementation is given in [examples](https://github
 
 
 ## Future Changes
-* Upgrade Midpoint class to Coord.
-* Create PortList class for special port filtering functionality.
+* Upgrade `Midpoint` class to Coord.
+* Create `PortList` class for special port filtering functionality.
 * Add basic DRC tests in RDD.
 * Fix auto-docs implementation.
 * Add Display class to RDD.
@@ -72,6 +72,13 @@ Examples of using the PCell implementation is given in [examples](https://github
 ## History of changes
 
 ### Version 0.1.0 (XXX, 2019)
+* Changed the default coordinate system to improve port transformations.
+* Updates shapes and polygons to only include single polygons. Multiple 
+polygons are now moved to the PolygonGroup class.
+* Updated ports to extend from the vector class.
+* Added a custom LayerList class that compares already added layers.
+* Created layer mappers.
+
 * Updated mixins to a single MixinBowl meta-configuration.
 * Updated the datatype parameter of ports that represents primitive connects.
 * Updated parameter field to accept an extra restriction argument.

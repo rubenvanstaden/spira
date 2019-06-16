@@ -50,7 +50,7 @@ class MetaCell(MetaInitializer):
             lib = kwargs['library']
             del(kwargs['library'])
         if lib is None:
-            lib = settings.get_library()
+            lib = settings.get_current_library()
 
         if 'name' in kwargs:
             if kwargs['name'] is None:
@@ -217,7 +217,7 @@ class Cell(CellAbstract):
         from spira.yevon.gdsii.sref import SRef
         from spira.yevon.gdsii.polygon import Polygon
         from spira.yevon.geometry.ports.port import Port
-        from spira.yevon.netlist.pcell import Device
+        from spira.yevon.structure.pcell import Device
         D = deepcopy(self)
         S = D.expand_transform()
         C = Cell(name=S.name + '_ExpandedCell')
@@ -248,7 +248,7 @@ class Cell(CellAbstract):
         from spira.yevon.gdsii.sref import SRef
         from spira.yevon.gdsii.polygon import Polygon
         from spira.yevon.geometry.ports.port import Port
-        from spira.yevon.netlist.pcell import Device
+        from spira.yevon.structure.pcell import Device
         D = deepcopy(self)
         S = D.expand_transform()
         C = Cell(name=S.name + '_ExpandedCell')

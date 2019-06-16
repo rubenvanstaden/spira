@@ -1,18 +1,8 @@
 import networkx as nx
 
 
-def nodes_combine(g, algorithm):
+def _combine_nodes(g, algorithm):
     """ Combine all nodes of the same type into one node. """
-
-    def compare_d2s(u, v):
-        if ('device_reference' in g.node[u]):
-            if ('device_reference' not in g.node[v]):
-                if g.node[u]['device_reference'].id_string() == g.node[v]['process_polygon'].id_string():
-                    return True
-        if ('device_reference' in g.node[v]):
-            if ('device_reference' not in g.node[u]):
-                if g.node[v]['device_reference'].id_string() == g.node[u]['process_polygon'].id_string():
-                    return True
 
     def compare_s2s(u, v):
         if ('process_polygon' in g.node[u]) and ('process_polygon' in g.node[v]):
@@ -36,9 +26,9 @@ def nodes_combine(g, algorithm):
         device = nx.get_node_attributes(S, 'device_reference')
         process_polygon = nx.get_node_attributes(S, 'process_polygon')
         center = nx.get_node_attributes(S, 'position')
-        # route = nx.get_node_attributes(S, 'route')
         branch_node = nx.get_node_attributes(S, 'branch_node')
         display = nx.get_node_attributes(S, 'display')
+        # route = nx.get_node_attributes(S, 'route')
 
         sub_pos = list()
         for value in center.values():
@@ -66,9 +56,9 @@ def nodes_combine(g, algorithm):
     Pos = nx.get_node_attributes(Q, 'position')
     Device = nx.get_node_attributes(Q, 'device_reference')
     Polygon = nx.get_node_attributes(Q, 'process_polygon')
-    # Route = nx.get_node_attributes(Q, 'route')
     Branches = nx.get_node_attributes(Q, 'branch_node')
     Display = nx.get_node_attributes(Q, 'display')
+    # Route = nx.get_node_attributes(Q, 'route')
 
     Edges = nx.get_edge_attributes(Q, 'weight')
 
@@ -103,10 +93,6 @@ def nodes_combine(g, algorithm):
                 if n in value:
                     g1.node[n]['display'] = value[n]
 
-        # for key, value in Display.items():
-        #     if n == list(key)[0]:
-        #         g1.node[n]['display'] = value[n]
-
         # for key, value in Route.items():
         #     if n == list(key)[0]:
         #         if n in value:
@@ -115,3 +101,21 @@ def nodes_combine(g, algorithm):
     g = g1
 
     return g1
+
+
+from spira.core.parameters.initializer import FieldInitializer
+class CombineNetNodes(FieldInitializer):
+    pass
+
+    # net = 
+
+
+def combine_net_nodes(net, algorithm=[]):
+    # net = CombineNetNodes()
+    g = net.g
+    for a in algorithm:
+        g = _combine_nodes(g, algorithm=a)
+    net.g = g
+    return net
+
+

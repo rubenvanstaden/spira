@@ -1,12 +1,13 @@
+import math
 import gdspy
 import pyclipper
 import numpy as np
-from copy import copy, deepcopy
+
 from numpy.linalg import norm
+from copy import copy, deepcopy
 
 from spira.yevon.utils import *
 from spira.yevon import constants
-# from spira.yevon.geometry.bbox_info import *
 from spira.yevon.geometry import bbox_info
 from spira.core.parameters.variables import *
 from spira.core.transformable import Transformable
@@ -70,11 +71,6 @@ class __Shape__(Transformable, FieldInitializer):
     points = PointArrayField(fdef_name='create_points')
 
     def __init__(self, **kwargs):
-    # def __init__(self, points=None, **kwargs):
-    #     if (points is not None):
-    #         if (isinstance(points, list) or isinstance(points, np.ndarray) or isinstance(points, Shape) or isinstance(points, tuple)):
-    #             if (len(points) > 0):
-    #                 kwargs["points"] = point
         super().__init__(**kwargs)
 
     def create_points(self, points):
@@ -117,6 +113,13 @@ class __Shape__(Transformable, FieldInitializer):
         return sum(abs(np.diff(pts * T, 1, 1))) * 0.5
 
     @property
+    def hash_string(self):
+        import hashlib
+        pts = np.array([self.points])
+        hash_key = np.sort([hashlib.sha1(p).digest() for p in pts])
+        return str(hash_key)
+
+    @property
     def count(self):
         """ Number of points in the shape """
         return self.__len__()
@@ -132,11 +135,19 @@ class __Shape__(Transformable, FieldInitializer):
         p = self.points
         if len(p) < 2:
             return []
-        if self.is_closed():
-            segments = zip(p, roll(p, 1, 0))
+        if self.is_closed:
+            segments = list(zip(p, np.roll(p, shift=-1, axis=0)))
         else:
-            segments = zip(p[:-1], p[1:])
+            segments = list(zip(p[:-1], p[1:]))
         return segments
+
+    def snap_to_grid(self, grids_per_unit=None):
+        """ Snaps all shape points to grid. """
+        from spira.settings import get_grids_per_unit
+        if grids_per_unit is None:
+            grids_per_unit = get_grids_per_unit()
+        self.points = (np.floor(self.points * grids_per_unit + 0.5)) / grids_per_unit 
+        return self
 
     def move(self, pos):
         p = np.array([pos[0], pos[1]])
@@ -145,6 +156,32 @@ class __Shape__(Transformable, FieldInitializer):
 
     def transform(self, transformation):
         self.points = transformation.apply_to_array(self.points)
+        return self
+
+    def clockwise(self):
+        """ Make sure all points are clockwise ordered. """
+        x, y = self.x_coords, self.y_coords
+        cx, cy = np.mean(x), np.mean(y)
+        a = np.arctan2(y - cy, x - cx)
+        order = a.ravel().argsort()
+        self.points = np.column_stack((x[order], y[order]))
+        return self
+
+    def insert(self, i, item):
+        """ Inserts a list of points. """
+        if isinstance(item, Shape):
+            self.points = np.insert(self.points, i, item.points, axis=0)
+        elif isinstance(item, (list, np.ndarray)):
+            if isinstance(item[0], Coord):
+                item[0] = item[0].to_numpy_array()
+            if len(item) > 1:
+                if isinstance(item[1], Coord):
+                    item[1] = item[1].to_numpy_array()
+            self.points = np.insert(self.points, i, item, axis=0)
+        elif isinstance(item, (Coord, tuple)):
+            self.points = np.insert(self.points, i, [(item[0], item[1])], axis=0)
+        else:
+            raise TypeError("Wrong type " + str(type(item)) + " to extend Shape with")
         return self
         
     # def transform_copy(self, transformation):
@@ -191,12 +228,16 @@ class Shape(__Shape__):
 
     def __contains__(self, point):
         """ Checks if point is in the shape. """
-        return np.prod(sum(self.points == np.array(point[0], point[1]), 0))
+        # return np.prod(sum(self.points == np.array([point[0], point[1]]), 0))
+        return any((self.points[:] == np.array([point[0], point[1]])).all(1))
 
     def __eq__(self, other):
         if not isinstance(other, Shape):
             return False
-
+        if np.array([p1 == p2 for p1, p2 in zip(self.points, other.points)]).all():
+            return True
+        return False
+    
     def __ne__(self, other):
         return not self.__eq__(other)
 
@@ -252,41 +293,3 @@ def shape_edge_ports(shape, layer, local_pid='None'):
         )
         edges += P
     return edges
-
-
-# def shape_reflect(self, p1=(0,1), p2=(0,0)):
-#     """ Reflect across a line. """
-#     points = np.array(self.points[0])
-#     p1 = np.array(p1)
-#     p2 = np.array(p2)
-#     if np.asarray(points).ndim == 1:
-#         t = np.dot((p2-p1), (points-p1))/norm(p2-p1)**2
-#         pts = 2*(p1 + (p2-p1)*t) - points
-#     if np.asarray(points).ndim == 2:
-#         pts = np.array([0, 0])
-#         for p in points:
-#             t = np.dot((p2-p1), (p-p1))/norm(p2-p1)**2
-#             r = np.array(2*(p1 + (p2-p1)*t) - p)
-#             pts = np.vstack((pts, r))
-#     self.points = [pts]
-#     return self
-
-
-# def shape_rotate(self, angle=45, center=(0,0)):
-#     """ Rotate points with an angle around a center. """
-#     points = np.array(self.points[0])
-#     angle = angle*np.pi/180
-#     ca = np.cos(angle)
-#     sa = np.sin(angle)
-#     sa = np.array((-sa, sa))
-#     c0 = np.array(center)
-#     if np.asarray(points).ndim == 2:
-#         pts = (points - c0) * ca + (points - c0)[:,::-1] * sa + c0
-#         pts = np.round(pts, 6)
-#     if np.asarray(points).ndim == 1:
-#         pts = (points - c0) * ca + (points - c0)[::-1] * sa + c0
-#         pts = np.round(pts, 6)
-#     self.points = [pts]
-#     return self
-
-

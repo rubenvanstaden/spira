@@ -59,34 +59,28 @@ class OutputGdsii(FieldInitializer):
             cp, cl, C_ports = {}, {}, {}
             G = self.__collected_cells__[c]
             
-            for p in c.ports:
-                # self.collect_polygons(p.edge, cp)
-                L = PortLayout(port=p)
-                for e in L.elementals:
-                    if isinstance(e, Polygon):
-                        self.collect_polygons(e, cp)
-                    elif isinstance(e, Label):
-                        self.collect_labels(e, cl)
+            # for p in c.ports:
+            #     # self.collect_polygons(p.edge, cp)
+            #     L = PortLayout(port=p)
+            #     for e in L.elementals:
+            #         if isinstance(e, Polygon):
+            #             self.collect_polygons(e, cp)
+            #         elif isinstance(e, Label):
+            #             self.collect_labels(e, cl)
 
             for e in c.elementals:
                 if isinstance(e, Polygon):
                     if e.enable_edges is True:
                         for p in e.ports:
-                        # pl = spira.PortList()
-                        # for p in e.create_ports(pl):
                             if p.id_string() not in _polygon_ports:
 
-                                # print(e.transformation)
-                                # print(p)
-                                # p = p.transform(e.transformation)
-                                # print(p)
+                                # L = PortLayout(port=p, transformation=e.transformation)
+                                # for e in L.elementals:
+                                #     if isinstance(e, Polygon):
+                                #         self.collect_polygons(e, cp)
+                                #     elif isinstance(e, Label):
+                                #         self.collect_labels(e, cl)
 
-                                L = PortLayout(port=p, transformation=e.transformation)
-                                for e in L.elementals:
-                                    if isinstance(e, Polygon):
-                                        self.collect_polygons(e, cp)
-                                    elif isinstance(e, Label):
-                                        self.collect_labels(e, cl)
                                 _polygon_ports.append(p.id_string())
 
             for e in cp.values():
@@ -151,7 +145,7 @@ class OutputGdsii(FieldInitializer):
         # before adding them as references.
         self.collect_srefs(item)
 
-    def gdspy_output(self, library):
+    def gdspy_gdsii_output(self, library):
         """ Writes the SPiRA collected elementals to a gdspy library. """
         for c, G in self.__collected_cells__.items():
             if c.name not in library.cell_dict.keys():
@@ -162,31 +156,34 @@ class GdsiiLayout(object):
     """ Class that generates output formates
     for a layout or library containing layouts. """
 
-    def output(self, name=None, units=None, grid=None, layer_map=None):
+    def gdsii_output(self, name=None, units=None, grid=None, layer_map=None):
+        """ If a name is given, the layout is written to a GDSII file. """
+
         gdspy_library = gdspy.GdsLibrary(name=self.name)
 
         G = OutputGdsii(cell=self)
-        G.gdspy_output(gdspy_library)
+        G.gdspy_gdsii_output(gdspy_library)
 
         gdspy.LayoutViewer(library=gdspy_library)
 
-        writer = gdspy.GdsWriter('jtl_lieze_v1.gds', unit=1.0e-12, precision=1.0e-12)
-        for name, cell in gdspy_library.cell_dict.items():
-            writer.write_cell(cell)
-            del cell
-        writer.close()
+        if name is not None:
+            writer = gdspy.GdsWriter('{}.gds'.format(name), unit=1.0e-12, precision=1.0e-12)
+            for name, cell in gdspy_library.cell_dict.items():
+                writer.write_cell(cell)
+                del cell
+            writer.close()
 
 
 
 
 
-    # def output(self, name=None, cell=None):
+    # def gdsii_output(self, name=None, cell=None):
     #     from spira.yevon.gdsii.cell import __Cell__
 
     #     glib = gdspy.GdsLibrary(name=self.name)
 
     #     if isinstance(self, spira.Library):
-    #         glib = settings.get_library()
+    #         glib = settings.get_current_library()
     #         glib += self
     #         glib.to_gdspy
     #     elif issubclass(type(self), __Cell__):

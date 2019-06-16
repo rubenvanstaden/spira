@@ -5,6 +5,7 @@ import spira.all as spira
 
 from copy import copy, deepcopy
 from numpy.linalg import norm
+from spira.yevon import constants
 from spira.core.parameters.variables import *
 from spira.yevon.geometry.coord import CoordField
 from spira.core.parameters.descriptor import FunctionField
@@ -70,6 +71,8 @@ class Port(Vector, __PhysicalPort__):
                 self.__class__ = ContactPort
             elif kwargs['port_type'] == 'branch':
                 self.__class__ = BranchPort
+            elif kwargs['port_type'] == 'route':
+                self.__class__ = RoutePort
 
         if 'locked' in kwargs:
             if kwargs['locked'] is True:
@@ -126,12 +129,35 @@ class Port(Vector, __PhysicalPort__):
         if pyclipper.PointInPolygon(self.endpoints[0], points) != 0: return True
         elif pyclipper.PointInPolygon(self.endpoints[1], points) != 0: return True
 
+    def get_corner1(self):
+        port_position = self.midpoint
+        port_angle = (self.orientation-90) * constants.DEG2RAD
+        wg_width = self.width
+        port_corner1_x = port_position[0] + (wg_width / 2.0) * np.cos(port_angle-np.pi/2.0)
+        port_corner1_y = port_position[1] + (wg_width / 2.0) * np.sin(port_angle-np.pi/2.0)
+        return Coord(port_corner1_x, port_corner1_y)
+
+    def get_corner2(self):
+        port_position = self.midpoint
+        port_angle = (self.orientation-90) * constants.DEG2RAD
+        wg_width = self.width
+        port_corner2_x = port_position[0] + (wg_width / 2.0) * np.cos(port_angle+np.pi/2.0)
+        port_corner2_y = port_position[1] + (wg_width / 2.0) * np.sin(port_angle+np.pi/2.0)
+        return Coord(port_corner2_x, port_corner2_y)
+
     @property
     def endpoints(self):
-        dx = self.length/2*np.cos((self.orientation - 90)*np.pi/180)
-        dy = self.length/2*np.sin((self.orientation - 90)*np.pi/180)
+
+        angle = (self.orientation - 90) * constants.DEG2RAD
+        dx = self.length/2 * np.cos(angle)
+        dy = self.length/2 * np.sin(angle)
+
         left_point = self.midpoint - np.array([dx,dy])
         right_point = self.midpoint + np.array([dx,dy])
+
+        left_point = left_point.to_numpy_array()
+        right_point = right_point.to_numpy_array()
+
         return np.array([left_point, right_point])
 
     @endpoints.setter
@@ -165,7 +191,6 @@ def PortField(local_name=None, restriction=None, **kwargs):
 
 
 from spira.yevon.process.purpose_layer import PurposeLayerField
-# class ContactPort(__PhysicalPort__):
 class ContactPort(Port):
 
     width = NumberField(default=0.4*1e6)
@@ -195,4 +220,19 @@ class BranchPort(Port):
     def __repr__(self):
         class_string = "[SPiRA: BranchPort] (name {}, alias {}, locked {}, midpoint {} orientation {} width {})"
         return class_string.format(self.name, self.alias, self.locked, self.midpoint, self.orientation, self.width)
+
+
+class RoutePort(Port):
+
+    width = NumberField(default=0.4*1e6)
+    length = NumberField(default=0.4*1e6)
+    purpose = PurposeLayerField(default=RDD.PURPOSE.PORT.BRANCH)
+    
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+    
+    def __repr__(self):
+        class_string = "[SPiRA: BranchPort] (name {}, alias {}, locked {}, midpoint {} orientation {} width {})"
+        return class_string.format(self.name, self.alias, self.locked, self.midpoint, self.orientation, self.width)
+
 

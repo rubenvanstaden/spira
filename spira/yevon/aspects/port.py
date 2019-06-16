@@ -8,8 +8,8 @@ from spira.core.parameters.variables import *
 from spira.yevon import constants
 from spira.yevon.geometry.ports.port import Port
 from spira.yevon.process.gdsii_layer import Layer
-from spira.yevon.process import get_rule_deck
 from spira.yevon.geometry import shapes
+from spira.yevon.process import get_rule_deck
 
 
 RDD = get_rule_deck()

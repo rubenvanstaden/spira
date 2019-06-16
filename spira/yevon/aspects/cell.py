@@ -81,7 +81,7 @@ class CellAspects(__Group__, __GeometryAspects__):
 
 #     def write_gdsii_mask(self, **kwargs):
 #         D = Cell(name=self.name + '_VMODEL', elementals=self.process_elementals)
-#         D.output()
+#         D.gdsii_output()
 
 
 # class ReferenceBlocks(__Aspects__):
@@ -100,7 +100,7 @@ class CellAspects(__Group__, __GeometryAspects__):
 
 #     def write_gdsii_blocks(self, **kwargs):
 #         D = Cell(name=self.name + '_BLOCKS', elementals=self.block_elementals)
-#         D.output()
+#         D.gdsii_output()
 
 
 # # Cell.mixin(ElementalsForModelling)

@@ -41,6 +41,15 @@ class Coord(Transformable):
         for index in range(2):
             yield self[index]
 
+    def snap_to_grid(self, grids_per_unit=None):
+        """ Snap the coordinate to the given or current grid. """
+        from spira import settings
+        if grids_per_unit is None:
+            grids_per_unit = settings.get_grids_per_unit()
+        self.x = math.floor(self.x * grids_per_unit + 0.5) / grids_per_unit
+        self.y = math.floor(self.y * grids_per_unit + 0.5) / grids_per_unit
+        return self
+
     def transform(self, transformation):
         C = transformation.apply_to_coord(self)
         self.x = C.x

@@ -136,7 +136,7 @@ class DataFieldDescriptor(BaseField):
         self.__check_restriction__(obj, v)
         self.__externally_set_parameter_value__(obj, v)
 
-    def __externally_set_parameter_value__(self, obj, value):  # FIXME : add subscribe new value / unsubscribe old value
+    def __externally_set_parameter_value__(self, obj, value):
         clear_cached_values_in_store = True
         if self.__parameter_was_stored__(obj):
             old_value = obj.__store__[self.__name__][0]

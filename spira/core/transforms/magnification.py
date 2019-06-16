@@ -80,7 +80,7 @@ class Magnification(__ConvertableTransform__):
 
 class __Magnification__(object):
 
-    def _magnify(self, magnification=1.0, center=(0,0)):
+    def magnify(self, magnification=1.0, center=(0,0)):
         return self.transform(Magnification(magnification, center))
 
     def magnify_copy(self, magnification=1.0, center=(0,0)):

@@ -323,7 +323,8 @@ class FieldInitializer(__ParameterInitializer__):
                 self.__doc__ = value
             else:
                 if key not in props:
-                    raise ValueError("Keyword argument \'{}\' does not match any properties of {}.".format(key, type(self)))
+                    v = "Keyword argument \'{}\' does not match any parameters of type {}."
+                    raise ValueError(v.format(key, type(self)))
                 if not is_suppressed(value):
                     setattr(self, key, value)
 
