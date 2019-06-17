@@ -26,10 +26,10 @@ class Port(Vector, __PhysicalPort__):
     """  """
 
     bbox = BoolField(default=False)
-    width = NumberField(default=2*1e6)
+    width = NumberField(default=2)
     port_type = StringField(default='terminal')
 
-    # length = NumberField(default=2*1e6)
+    # length = NumberField(default=2)
 
     # def get_length(self):
     #     if not hasattr(self, '__length__'):
@@ -45,7 +45,7 @@ class Port(Vector, __PhysicalPort__):
 
     def get_length(self):
         if not hasattr(self, '__length__'):
-            self.__length__ = 0.5*1e6
+            self.__length__ = 0.5
         return self.__length__
 
     def set_length(self, value):
@@ -193,8 +193,8 @@ def PortField(local_name=None, restriction=None, **kwargs):
 from spira.yevon.process.purpose_layer import PurposeLayerField
 class ContactPort(Port):
 
-    width = NumberField(default=0.4*1e6)
-    length = NumberField(default=0.4*1e6)
+    width = NumberField(default=0.4)
+    length = NumberField(default=0.4)
     purpose = PurposeLayerField(default=RDD.PURPOSE.PORT.CONTACT)
     
     def __init__(self, **kwargs):
@@ -210,8 +210,8 @@ class ContactPort(Port):
 
 class BranchPort(Port):
 
-    width = NumberField(default=0.4*1e6)
-    length = NumberField(default=0.4*1e6)
+    width = NumberField(default=0.4)
+    length = NumberField(default=0.4)
     purpose = PurposeLayerField(default=RDD.PURPOSE.PORT.BRANCH)
     
     def __init__(self, **kwargs):
@@ -224,8 +224,8 @@ class BranchPort(Port):
 
 class RoutePort(Port):
 
-    width = NumberField(default=0.4*1e6)
-    length = NumberField(default=0.4*1e6)
+    width = NumberField(default=0.4)
+    length = NumberField(default=0.4)
     purpose = PurposeLayerField(default=RDD.PURPOSE.PORT.BRANCH)
     
     def __init__(self, **kwargs):

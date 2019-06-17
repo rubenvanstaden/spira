@@ -7,7 +7,6 @@ class __DesignRule__(FieldInitializer):
     doc = param.StringField()
     name = param.StringField()
     violate = param.BoolField()
-    um = param.FloatField(default=1e6)
 
 
 class __SingleLayerDesignRule__(__DesignRule__):

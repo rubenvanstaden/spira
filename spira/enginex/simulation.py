@@ -1,6 +1,7 @@
-# from spira.core.parameters.initializer import FieldInitializer
-# from spira.core.parameters.variables import *
 # import spira.all as spira
+
+# from spira.core.parameters.variables import *
+# from spira.core.parameters.initializer import FieldInitializer
 
 
 # class SimulationParameters(FieldInitializer):

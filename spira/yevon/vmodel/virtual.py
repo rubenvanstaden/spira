@@ -1,7 +1,9 @@
 import spira.all as spira
-# from spira.yevon.vmodel.elementals import union_process_polygons
+
+from spira.yevon.utils.elementals import get_derived_elementals
+from spira.yevon.filters.layer_filter import LayerFilterAllow
 from spira.core.parameters.initializer import FieldInitializer
-from .geometry import GmshGeometry
+from spira.yevon.vmodel.geometry import GmshGeometry
 from spira.yevon.process import get_rule_deck
 
 
@@ -33,17 +35,7 @@ class VirtualProcessModel(__VirtualModel__):
                 raise ValueError('Geometry engine type not specificied in RDD.')
         return process_geom
 
-    # def write_gdsii_vmodel(self, **kwargs):
-    #     elems = spira.ElementalList()
-    #     # for k, v in self.__make_polygons__().items(): elems += v
-    #     for process, 
-    #     D = spira.Cell(name='_VMODEL', elementals=elems)
-    #     D.gdsii_output()
 
-
-from spira.yevon.utils.elementals import get_generated_elementals
-from spira.yevon.filters.layer_filter import LayerFilterAllow
-# class VirtualProcessIntersection(__VirtualModel__):
 class VirtualConnect(__VirtualModel__):
 
     # FIXME: Add a string list restriction.
@@ -71,10 +63,12 @@ class VirtualConnect(__VirtualModel__):
 
             print(self.device.elementals)
 
-            el = get_generated_elementals(elements=self.device.elementals, mapping=mapping)
+            el = get_derived_elementals(elements=self.device.elementals, mapping=mapping)
             for e in el:
-                if e.purpose == 'METAL': pass
-                else: elems += e
+                if e.purpose == 'METAL': 
+                    pass
+                else: 
+                    elems += e
         else:
             pass
             # # D = self.device.expand_flat_copy()

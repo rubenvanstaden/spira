@@ -14,7 +14,7 @@ class RectangleShape(Shape):
     """ Creates a rectangular shape. """
 
     p1 = CoordField(default=(0,0), doc='Bottom left corner coordinate.')
-    p2 = CoordField(default=(2*1e6,2*1e6), doc='Top right corner coodinate.')
+    p2 = CoordField(default=(2,2), doc='Top right corner coodinate.')
 
     def create_points(self, points):
         points = [[self.p1[0], self.p1[1]],
@@ -27,8 +27,8 @@ class RectangleShape(Shape):
 class BoxShape(Shape):
     """ Creates a box shape. """
 
-    width = NumberField(default=1*1e6, doc='Width of the box shape.')
-    height = NumberField(default=1*1e6, doc='Height of the box shape.')
+    width = NumberField(default=1, doc='Width of the box shape.')
+    height = NumberField(default=1, doc='Height of the box shape.')
 
     def create_points(self, points):
         cx = self.center[0]
@@ -45,7 +45,7 @@ class BoxShape(Shape):
 class CircleShape(Shape):
     """ Creates a circle shape. """
 
-    box_size = CoordField(default=(2.0*1e6, 2.0*1e6), doc='The width and height of the circle as a coordinate.')
+    box_size = CoordField(default=(2.0, 2.0), doc='The width and height of the circle as a coordinate.')
     start_angle = FloatField(default=0.0, doc='Starting angle of the circle shape.')
     end_angle = FloatField(default=360.0, doc='Degree to which the circle must be completed.')
     angle_step = IntegerField(default=3, doc='The smoothness of the circle.')
@@ -87,7 +87,7 @@ class CircleShape(Shape):
 
 class ConvexShape(Shape):
 
-    radius = FloatField(default=1.0*1e6)
+    radius = FloatField(default=1.0)
     num_sides = IntegerField(default=6)
 
     def create_points(self, pts):
@@ -106,8 +106,8 @@ class ConvexShape(Shape):
 class CrossShape(Shape):
     """ Thickness sets the width of the arms. """
 
-    box_size = NumberField(default=20*1e6)
-    thickness = NumberField(default=5*1e6)
+    box_size = NumberField(default=20)
+    thickness = NumberField(default=5)
 
     def create_points(self, points):
         points += [(self.center[0]  - self.box_size / 2.0, self.center[1] - self.thickness / 2.0),
@@ -130,9 +130,9 @@ class WedgeShape(Shape):
     """ wedge, or symmetric trapezium. specified by the center of baselines and the length of the baselines """
 
     begin_coord = CoordField(default=(0,0))
-    end_coord = CoordField(default=(10*1e6,0))
-    begin_width = NumberField(default=3*1e6)
-    end_width = NumberField(default=1*1e6)
+    end_coord = CoordField(default=(10,0))
+    begin_width = NumberField(default=3)
+    end_width = NumberField(default=1)
 
     def create_points(self, points):
         dist = geom.distance(self.end_coord, self.begin_coord)
@@ -150,8 +150,8 @@ class ParabolicShape(Shape):
 
     begin_coord = CoordField(default=(0,0))
     end_coord = CoordField(default=(0,0))
-    begin_width = NumberField(default=3*1e6)
-    end_width = NumberField(default=1*1e6)
+    begin_width = NumberField(default=3)
+    end_width = NumberField(default=1)
 
     def create_points(self, pts):
         if (self.begin_width > self.end_width):
@@ -214,9 +214,9 @@ class ParabolicShape(Shape):
 
 class BasicTriangle(Shape):
 
-    a = FloatField(default=2*1e6)
-    b = FloatField(default=0.5*1e6)
-    c = FloatField(default=1*1e6)
+    a = FloatField(default=2)
+    b = FloatField(default=0.5)
+    c = FloatField(default=1)
 
     def create_points(self, points):
         p1 = [0, 0]
@@ -252,9 +252,9 @@ class TriangleShape(BasicTriangle):
 
 class ArrowShape(Shape):
 
-    width = FloatField(default=1*1e6)
-    length = FloatField(default=10*1e6)
-    head = FloatField(default=3*1e6)
+    width = FloatField(default=1)
+    length = FloatField(default=10)
+    head = FloatField(default=3)
 
     def create_points(self, points):
         w = self.width

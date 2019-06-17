@@ -23,7 +23,7 @@ class __Manhattan__(Cell):
     port1 = PortField(default=None)
     port2 = PortField(default=None)
 
-    length = NumberField(default=20*1e6)
+    length = NumberField(default=20)
     layer = LayerField(number=13)
     # gds_layer = LayerField(number=13)
     # layer = PhysicalLayerField(default=RDD.DEF.PDEFAULT)

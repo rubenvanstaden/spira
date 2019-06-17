@@ -31,40 +31,21 @@ class ShapeConnected(__ShapeModifier__):
         for edge in self.edges:
             edge = deepcopy(edge)
             edge = edge.outside.transform(edge.transformation)
+            
+            # for i, s in enumerate(self.segments):
+            #     sl.append(str(i))
+            #     segment_line = line_from_two_points(s[0], s[1])
+            #     for c in edge.bbox_info.bounding_box().snap_to_grid():
+            #         if segment_line.is_on_line(coordinate=c):
+            #             sl[i] = edge.shape.hash_string
+
             for i, s1 in enumerate(self.segments):
-
-                bbox = edge.bbox_info.bounding_box().snap_to_grid()
-
-                print(s1)
-                # print(bbox.segments)
-                # print('')
-
                 sl.append(str(i))
-                # for s2 in edge.shape.segments:
-                for s2 in bbox.segments:
-                    print(s2)
+                bbox_shape = edge.bbox_info.bounding_box().snap_to_grid()
+                for s2 in bbox_shape.segments:
                     if (np.array(s1) == np.array(s2)).all():
                         sl[i] = edge.shape.hash_string
-                print('')
 
-                # segment_line = line_from_two_points(s[0], s[1])
-                # count = 0
-                # sl.append(str(i))
-                # print(s[0], s[1])
-                # # for c in edge.outside.bbox_info.bounding_box().snap_to_grid():
-                # for c in edge.points:
-                #     print(c)
-                #     if segment_line.is_on_line(coordinate=c):
-                #         count += 1
-                #         # NOTE: I believe this is the wrong has string.
-                #         # We want to use the hash of the intersected shape.
-                #         # sl.append(self.hash_string)
-                #     # else:
-                # print(count)
-                # if count == 2:
-                #     # sl[i] = self.hash_string
-                #     sl[i] = edge.shape.hash_string
-                # print('')
         return sl
 
     def create_points(self, points):
@@ -78,7 +59,7 @@ class ShapeConnected(__ShapeModifier__):
                         if c not in self.original_shape:
                             self.original_shape.insert(i=i+1, item=c)
 
-        self.original_shape.clockwise()
+        self.original_shape.make_clockwise()
         points = self.original_shape.points
 
         return points

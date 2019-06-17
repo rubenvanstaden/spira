@@ -19,7 +19,6 @@ from spira.yevon.geometry.shapes import Shape, ShapeField
 from spira.yevon.geometry import shapes
 from spira.yevon.gdsii.group import Group
 from spira.yevon.process.gdsii_layer import Layer
-from spira.yevon.geometry.nets.net import Net
 from spira.yevon.process.physical_layer import PhysicalLayer
 from spira.yevon.process import get_rule_deck
 
@@ -65,11 +64,7 @@ class __Polygon__(__LayerElemental__):
         S.expand_transform()
         return S
 
-    # def flat_copy(self, level=-1):
-    #     E = deepcopy(self)
-    #     return E.transform_copy(self.transformation)
-
-    def fillet(self, radius, angle_resolution=128, precision=0.001*1e6):
+    def fillet(self, radius, angle_resolution=128, precision=0.001):
         super().fillet(radius=radius, points_per_2pi=angle_resolution, precision=precision)
         self.shape.points = self.polygons
         return self
@@ -202,17 +197,17 @@ class Polygon(__Polygon__):
         return generate_polygon_edges(shape=self.shape, layer=self.layer)
 
     def nets(self, contacts=None, lcar=100):
+        from spira.yevon.geometry.nets.net import Net
         from spira.yevon.vmodel.geometry import GmshGeometry
         from spira.yevon.geometry.ports.port import ContactPort
         from spira.yevon.filters.net_label_filter import NetProcessLabelFilter, NetDeviceLabelFilter, NetEdgeFilter
 
         if self.purpose == 'METAL':
             # geometry = GmshGeometry(lcar=0.1*1e-6, process=self.layer.process, process_polygons=[deepcopy(self)])
-            geometry = GmshGeometry(lcar=10*1e-6, process=self.layer.process, process_polygons=[deepcopy(self)])
+            geometry = GmshGeometry(lcar=1*1e-6, process=self.layer.process, process_polygons=[deepcopy(self)])
     
             net = Net(name=self.process, geometry=geometry)
     
-            # Fs = NetProcessLabelFilter(process_polygons=[deepcopy(self)])
             # # Fs += NetDeviceLabelFilter(device_ports=contacts)
     
             # cc = []
@@ -221,7 +216,8 @@ class Polygon(__Polygon__):
             #         cc.append(p)
             # print(cc)
     
-            Fs = NetEdgeFilter(process_polygons=[deepcopy(self)])
+            Fs = NetProcessLabelFilter(process_polygons=[deepcopy(self)])
+            Fs += NetEdgeFilter(process_polygons=[deepcopy(self)])
             # # Fs += NetDeviceLabelFilter(device_ports=cc)
     
             net = Fs(net)
@@ -410,7 +406,20 @@ class PolygonGroup(Group, __LayerElemental__):
         return self
 
     @property
+
     def merge(self):
+        # elems = ElementalList()
+        # if len(self.elementals) > 1:
+        #     for i, e1 in enumerate(self.elementals):
+        #         for j, e2 in enumerate(self.elementals):
+        #             if i != j:
+        #                 polygons = e1 | e2
+        #                 elems += polygons
+        # else:
+        #     elems = self.elementals
+        # self.elementals = elems
+        # return self
+
         elems = ElementalList()
         if len(self.elementals) > 1:
             points = []
@@ -418,7 +427,8 @@ class PolygonGroup(Group, __LayerElemental__):
                 shape = e.shape.transform(e.transformation)
                 points.append(shape.points)
                 # points.append(e.points)
-            merged_points = clipping.union_points(points)
+            # merged_points = clipping.union_points(points)
+            merged_points = clipping.boolean(subj=points, clip_type='or')
             for uid, pts in enumerate(merged_points):
                 elems += Polygon(shape=pts, layer=self.layer)
         else:
@@ -466,7 +476,7 @@ def Circle(layer, box_size=(1,1), angle_step=1, center=(0,0), alias=None):
     return Polygon(alias=alias, shape=shape, layer=layer)
 
 
-def Convex(layer, radius=1.0*1e6, num_sides=6, center=(0,0), alias=None):
+def Convex(layer, radius=1.0, num_sides=6, center=(0,0), alias=None):
     """ Creates a circle shape that can be used in 
     GDSII format as a polygon object.
 
@@ -479,7 +489,7 @@ def Convex(layer, radius=1.0*1e6, num_sides=6, center=(0,0), alias=None):
     return Polygon(alias=alias, shape=shape, layer=layer)
 
 
-def Cross(layer, box_size=20*1e6, thickness=5*1e6, center=(0,0), alias=None):
+def Cross(layer, box_size=20, thickness=5, center=(0,0), alias=None):
     """ Creates a circle shape that can be used in 
     GDSII format as a polygon object.
 
@@ -492,7 +502,7 @@ def Cross(layer, box_size=20*1e6, thickness=5*1e6, center=(0,0), alias=None):
     return Polygon(alias=alias, shape=shape, layer=layer)
 
 
-def Wedge(layer, begin_coord=(0,0), end_coord=(10*1e6,0), begin_width=3*1e6, end_width=1*1e6, center=(0,0), alias=None):
+def Wedge(layer, begin_coord=(0,0), end_coord=(10,0), begin_width=3, end_width=1, center=(0,0), alias=None):
     """ Creates a circle shape that can be used in 
     GDSII format as a polygon object.
 
@@ -510,7 +520,7 @@ def Wedge(layer, begin_coord=(0,0), end_coord=(10*1e6,0), begin_width=3*1e6, end
     return Polygon(alias=alias, shape=shape, layer=layer)
 
 
-def Parabolic(layer, begin_coord=(0,0), end_coord=(10*1e6,0), begin_width=3*1e6, end_width=1*1e6, center=(0,0), alias=None):
+def Parabolic(layer, begin_coord=(0,0), end_coord=(10,0), begin_width=3, end_width=1, center=(0,0), alias=None):
     """ Creates a circle shape that can be used in 
     GDSII format as a polygon object.
 

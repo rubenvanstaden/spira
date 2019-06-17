@@ -11,10 +11,10 @@ class ShapeClipperAspects(__ClipperAspects__):
     """
 
     def __and__(self, other):
-        return clipping.boolean(subj=[self.points], clip=[other.points], method='and')
+        return clipping.boolean(subj=[self.points], clip=[other.points], clip_type='and')
 
     def __sub__(self, other):
-        return clipping.boolean(subj=[self.points], clip=[other.points], method='not')
+        return clipping.boolean(subj=[self.points], clip=[other.points], clip_type='not')
 
     def __or__(self, other):
-        return clipping.boolean(subj=[self.points], clip=[other.points], method='or')
+        return clipping.boolean(subj=[self.points], clip=[other.points], clip_type='or')

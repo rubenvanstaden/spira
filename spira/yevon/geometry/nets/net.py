@@ -40,9 +40,9 @@ class Net(__Net__):
     # g = GraphField()
     g = DataField()
 
-    geometry = GeometryField(allow_none=True, default=None)
-    # mesh_graph = DataField(fdef_name='create_mesh_graph')
     mesh_data = DataField(fdef_name='create_mesh_data')
+    geometry = GeometryField(allow_none=True, default=None)
+
     lines = DataField(fdef_name='create_lines')
     triangles = DataField(fdef_name='create_triangles')
     physical_triangles = DataField(fdef_name='create_physical_triangles')
@@ -69,9 +69,6 @@ class Net(__Net__):
     def __str__(self):
         return self.__repr__()
 
-    # def __getitem__(self, n):
-    #     return self.g.node[n]
-
     def _generate_mesh_graph(self):
         """ Create a graph from the meshed geometry. """
         ll = len(self.mesh_data.points)
@@ -95,15 +92,15 @@ class Net(__Net__):
         for v_pair in list(zip(v1, v2)):
             update_adj(self, n, A, v_pair)
 
-    def _add_positions(self, n, tri):
+    def _add_positions(self, n, triangle):
         pp = self.mesh_data.points
-        n1, n2, n3 = pp[tri[0]], pp[tri[1]], pp[tri[2]]
-        # sum_x = (n1[0] + n2[0] + n3[0]) / (3.0*RDD.GDSII.GRID)
-        # sum_y = (n1[1] + n2[1] + n3[1]) / (3.0*RDD.GDSII.GRID)
-        sum_x = (n1[0] + n2[0] + n3[0]) / (3.0)
-        sum_y = (n1[1] + n2[1] + n3[1]) / (3.0)
-        self.g.node[n]['vertex'] = tri
-        self.g.node[n]['position'] = Coord(sum_x, sum_y)
+        n1, n2, n3 = pp[triangle[0]], pp[triangle[1]], pp[triangle[2]]
+        x = ((n1[0] + n2[0] + n3[0])/3) / RDD.GDSII.GRID
+        y = ((n1[1] + n2[1] + n3[1])/3) / RDD.GDSII.GRID
+        # x = (n1[0] + n2[0] + n3[0])/3
+        # y = (n1[1] + n2[1] + n3[1])/3
+        self.g.node[n]['vertex'] = triangle
+        self.g.node[n]['position'] = Coord(x, y)
         self.g.node[n]['display'] = RDD.DISPLAY.STYLE_SET[RDD.PLAYER.METAL]
 
     def create_mesh_data(self):
@@ -233,6 +230,9 @@ class Net(__Net__):
         return self
 
 
+
+
+# FIXME: Maybe convert this to a BranchList class.
 class CellNet(__Net__):
     """  """
 

@@ -158,7 +158,7 @@ class __Shape__(Transformable, FieldInitializer):
         self.points = transformation.apply_to_array(self.points)
         return self
 
-    def clockwise(self):
+    def make_clockwise(self):
         """ Make sure all points are clockwise ordered. """
         x, y = self.x_coords, self.y_coords
         cx, cy = np.mean(x), np.mean(y)
@@ -288,7 +288,7 @@ def shape_edge_ports(shape, layer, local_pid='None'):
             midpoint=midpoint,
             orientation=orientation,
             width=width,
-            length=0.2*1e6,
+            length=0.2,
             local_pid=local_pid
         )
         edges += P

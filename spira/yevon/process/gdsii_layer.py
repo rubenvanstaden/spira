@@ -2,7 +2,7 @@ from copy import deepcopy
 from spira import settings
 from spira.core.parameters.variables import *
 # from spira.yevon.process.generated_layers import __Layer__
-from spira.yevon.process.generated_layers import *
+# from spira.yevon.process.generated_layers import *
 from spira.core.parameters.restrictions import RestrictType
 from spira.core.parameters.variables import StringField, IntegerField
 from spira.core.parameters.descriptor import RestrictedParameter
@@ -56,7 +56,7 @@ class __Layer__(FieldInitializer, metaclass=MetaLayer):
 
     def __and__(self, other):
         if isinstance(other, __Layer__):
-            return __GeneratedLayerAnd__(self, other)
+            return __DerivedLayerAnd__(self, other)
         elif other is None:
             return self
         else:
@@ -69,7 +69,7 @@ class __Layer__(FieldInitializer, metaclass=MetaLayer):
 
     def __or__(self, other):
         if isinstance(other, __Layer__):
-            return __GeneratedLayerOr__(self, other)
+            return __DerivedLayerOr__(self, other)
         elif other is None:
             return self
         else:
@@ -82,7 +82,7 @@ class __Layer__(FieldInitializer, metaclass=MetaLayer):
 
     def __xor__(self, other):
         if isinstance(other, __Layer__):
-            return __GeneratedLayerXor__(self, other)
+            return __DerivedLayerXor__(self, other)
         elif other is None:
             return self
         else:
@@ -94,14 +94,14 @@ class __Layer__(FieldInitializer, metaclass=MetaLayer):
         return self
 
     def __invert__(self):
-        return __GeneratedLayerNot__(self)
+        return __DerivedLayerNot__(self)
 
 
-class __GeneratedLayer__(__Layer__):
+class __DerivedLayer__(__Layer__):
     name = StringField(allow_none=True, default=None)
 
     def get_layers(self, lobject):
-        if isinstance(lobject, __GeneratedLayer__):
+        if isinstance(lobject, __DerivedLayer__):
             return lobject.layers()
         else:
             return lobject
@@ -113,11 +113,11 @@ class __GeneratedLayer__(__Layer__):
             return self.__repr__()
 
 
-class __GeneratedSingleLayer__(__GeneratedLayer__):
+class __DerivedSingleLayer__(__DerivedLayer__):
     pass
 
 
-class __GeneratedDoubleLayer__(__GeneratedLayer__):
+class __DerivedDoubleLayer__(__DerivedLayer__):
     def __init__(self, layer1, layer2):
         super().__init__()
         self.layer1 = layer1
@@ -130,7 +130,7 @@ class __GeneratedDoubleLayer__(__GeneratedLayer__):
         return l 
 
 
-class __GeneratedLayerAnd__(__GeneratedDoubleLayer__):
+class __DerivedLayerAnd__(__DerivedDoubleLayer__):
     def __repr__(self):
         return "(%s AND %s)" % (self.layer1, self.layer2)
 
@@ -139,7 +139,7 @@ class __GeneratedLayerAnd__(__GeneratedDoubleLayer__):
         return "%s AND %s"%(self.layer1, self.layer2)
 
 
-class __GeneratedLayerOr__(__GeneratedDoubleLayer__):        
+class __DerivedLayerOr__(__DerivedDoubleLayer__):        
     def __repr__(self):
         return "(%s OR %s)" % (self.layer1, self.layer2)
 
@@ -148,7 +148,7 @@ class __GeneratedLayerOr__(__GeneratedDoubleLayer__):
         return "%s OR %s"%(self.layer1, self.layer2)
 
 
-class __GeneratedLayerXor__(__GeneratedDoubleLayer__):        
+class __DerivedLayerXor__(__DerivedDoubleLayer__):        
     def __repr__(self):
         return "(%s XOR %s)" % (self.layer1, self.layer2)
 
@@ -157,7 +157,7 @@ class __GeneratedLayerXor__(__GeneratedDoubleLayer__):
         return "%s XOR %s"%(self.layer1, self.layer2)
 
 
-class __GeneratedLayerNot__(__GeneratedSingleLayer__):
+class __DerivedLayerNot__(__DerivedSingleLayer__):
     def __init__(self, layer1):
         super().__init__()
         self.layer1 = layer1

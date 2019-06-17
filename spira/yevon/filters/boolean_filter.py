@@ -34,7 +34,6 @@ class ProcessBooleanFilter(Filter):
 class SimplifyFilter(Filter):
 
     def __filter___Cell____(self, item):
-        # from spira.yevon.gdsii.polygon import Polygon
         from spira.yevon.utils import clipping
         from shapely.geometry import Polygon as ShapelyPolygon
 

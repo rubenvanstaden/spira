@@ -76,6 +76,8 @@ class CellList(TypedList):
         if item == None:
             return
         # if isinstance(item, (Cell, PCell)):
+        print(item)
+        print(type(item))
         if issubclass(type(item), __Cell__):
             if overwrite:
                 self._list[item.name] = item

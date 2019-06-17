@@ -189,7 +189,7 @@ class DataFieldDescriptor(BaseField):
 
     def get_param_function(self, obj):
         if self.fdef_name is None:
-            if hasattr(obj, self.auto_fdef_name):
+            if hasattr(self, 'auto_fdef_name') and hasattr(obj, self.auto_fdef_name):
                 return getattr(obj, self.auto_fdef_name)
             else:
                 return None

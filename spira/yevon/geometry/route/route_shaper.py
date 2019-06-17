@@ -53,8 +53,8 @@ class __RouteSimple__(shapes.Shape):
 
 class RouteArcShape(__RouteSimple__):
 
-    radius = NumberField(default=5*1e6)
-    width = NumberField(default=1*1e6)
+    radius = NumberField(default=5)
+    width = NumberField(default=1)
     theta = NumberField(default=45)
     start_angle = NumberField(default=0)
     angle_resolution = NumberField(default=15)
@@ -117,9 +117,9 @@ class RouteArcShape(__RouteSimple__):
 class RouteSquareShape(__RouteSimple__):
 
     gds_layer = LayerField(name='ArcLayer', number=91)
-    radius = NumberField(default=5*1e6)
-    width = NumberField(default=1*1e6)
-    size = CoordField(default=(3*1e6,3*1e6))
+    radius = NumberField(default=5)
+    width = NumberField(default=1)
+    size = CoordField(default=(3,3))
 
     def create_midpoint1(self):
         return [-self.size[0], 0]
@@ -230,7 +230,7 @@ class RouteSimple(__RouteSimple__):
 
 class RoutePointShape(__RouteSimple__):
 
-    width = FloatField(default=1*1e8)
+    width = FloatField(default=100)
     angles = DataField(fdef_name='create_angles')
 
     def get_path(self):

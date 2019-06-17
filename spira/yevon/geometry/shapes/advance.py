@@ -9,12 +9,12 @@ from spira.yevon.geometry.shapes.shape import *
 class YtronShape(Shape):
     """ Shape for generating a yTron device. """
 
-    rho = NumberField(default=0.2*1e6)
-    # arm_lengths = param.CoordField(default=(5*1e6, 3*1e6))
-    arm_lengths = CoordField(default=(5*1e6, 3*1e6))
-    source_length = NumberField(default=5*1e6)
-    # arm_widths = param.CoordField(default=(2*1e6, 2*1e6))
-    arm_widths = CoordField(default=(2*1e6, 2*1e6))
+    rho = NumberField(default=0.2)
+    # arm_lengths = param.CoordField(default=(5, 3))
+    arm_lengths = CoordField(default=(5, 3))
+    source_length = NumberField(default=5)
+    # arm_widths = param.CoordField(default=(2, 2))
+    arm_widths = CoordField(default=(2, 2))
     theta = NumberField(default=2.5)
     theta_resolution = NumberField(default=10.0)
 

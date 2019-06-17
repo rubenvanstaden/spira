@@ -132,12 +132,15 @@ class PlotlyGraph(object):
         nodes['text'] = []
         nodes['color'] = []
 
+        # NOTE: First set the default values.
         for n in G.nodes():
             x, y = G.node[n]['position']
-
             nodes['x_pos'].append(x)
             nodes['y_pos'].append(y)
+            nodes['text'].append(n)
+            nodes['color'].append(color.COLOR_BLACK.hexcode)
 
+        for n in G.nodes():
             node_value = None
             if 'device_reference' in G.node[n]:
                 node_value = G.node[n]['device_reference']
@@ -147,10 +150,8 @@ class PlotlyGraph(object):
                 node_value = G.node[n]['process_polygon']
 
             if node_value is not None:
-                text = '({}) {}'.format(n, str(node_value))
-                nodes['text'].append(text)
-                color = G.node[n]['display'].color.hexcode
-                nodes['color'].append(color)
+                nodes['text'][n] = '({}) {}'.format(n, str(node_value))
+                nodes['color'][n] = G.node[n]['display'].color.hexcode
 
         return nodes
 

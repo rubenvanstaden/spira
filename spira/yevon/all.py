@@ -10,13 +10,15 @@ from spira.yevon.geometry.ports import *
 from spira.yevon.geometry.nets import *
 from spira.yevon.geometry.route import *
 
+from spira.yevon.vmodel import *
+
 from spira.yevon.process.all import *
 from spira.yevon.gdsii import *
 from spira.yevon.filters import *
 from spira.yevon.visualization import *
 from spira.yevon.structure import *
 
-from spira.yevon.vmodel import *
+# from spira.yevon.vmodel import *
 # from spira.yevon.utils import *
 
 

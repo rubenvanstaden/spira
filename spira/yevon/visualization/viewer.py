@@ -35,8 +35,8 @@ class PortLayout(spira.Cell):
     def create_arrow(self):
         layer = PLayer(self.port.process, RDD.PURPOSE.PORT.DIRECTION)
         # w = self.port.length * 3
-        w = 0.05*1e6
-        # l = 2*1e6
+        w = 0.05
+        # l = 2
         l = self.port.length * 5
         arrow_shape = shapes.ArrowShape(width=w, length=l, head=l*0.2)
         p = spira.Polygon(shape=arrow_shape, layer=layer, enable_edges=False)

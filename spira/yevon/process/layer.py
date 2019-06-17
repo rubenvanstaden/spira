@@ -38,7 +38,7 @@
 
 #     def __and__(self, other):
 #         if isinstance(other, __Layer__):
-#             return __GeneratedLayerAnd__(self, other)
+#             return __DerivedLayerAnd__(self, other)
 #         elif other is None:
 #             return self
 #         else:
@@ -51,7 +51,7 @@
 
 #     def __or__(self, other):
 #         if isinstance(other, __Layer__):
-#             return __GeneratedLayerOr__(self, other)
+#             return __DerivedLayerOr__(self, other)
 #         elif other is None:
 #             return self
 #         else:
@@ -64,7 +64,7 @@
 
 #     def __xor__(self, other):
 #         if isinstance(other, __Layer__):
-#             return __GeneratedLayerXor__(self, other)
+#             return __DerivedLayerXor__(self, other)
 #         elif other is None:
 #             return self
 #         else:
@@ -76,14 +76,14 @@
 #         return self
 
 #     def __invert__(self):
-#         return __GeneratedLayerNot__(self)
+#         return __DerivedLayerNot__(self)
 
 
-# class __GeneratedLayer__(__Layer__):
+# class __DerivedLayer__(__Layer__):
 #     name = StringProperty(allow_none=True)
 
 #     def get_layers(self, lobject):
-#         if isinstance(lobject, __GeneratedLayer__):
+#         if isinstance(lobject, __DerivedLayer__):
 #             return lobject.layers()
 #         else:
 #             return lobject
@@ -95,11 +95,11 @@
 #             return self.__repr__()
 
 
-# class __GeneratedSingleLayer__(__GeneratedLayer__):
+# class __DerivedSingleLayer__(__DerivedLayer__):
 #     pass
 
 
-# class __GeneratedDoubleLayer__(__GeneratedLayer__):
+# class __DerivedDoubleLayer__(__DerivedLayer__):
 #     def __init__(self, layer1, layer2):
 #         super().__init__()
 #         self.layer1 = layer1
@@ -112,7 +112,7 @@
 #         return l 
 
 
-# class __GeneratedLayerAnd__(__GeneratedDoubleLayer__):    
+# class __DerivedLayerAnd__(__DerivedDoubleLayer__):    
 #     def __repr__(self):
 #         return "(%s AND %s)" % (self.layer1, self.layer2)
 
@@ -120,7 +120,7 @@
 #         return "%s AND %s"%(self.layer1, self.layer2)
 
 
-# class __GeneratedLayerOr__(__GeneratedDoubleLayer__):        
+# class __DerivedLayerOr__(__DerivedDoubleLayer__):        
 #     def __repr__(self):
 #         return "(%s OR %s)" % (self.layer1, self.layer2)
 
@@ -128,7 +128,7 @@
 #         return "%s OR %s"%(self.layer1, self.layer2)
 
 
-# class __GeneratedLayerXor__(__GeneratedDoubleLayer__):        
+# class __DerivedLayerXor__(__DerivedDoubleLayer__):        
 #     def __repr__(self):
 #         return "(%s XOR %s)" % (self.layer1, self.layer2)
 
@@ -136,7 +136,7 @@
 #         return "%s XOR %s"%(self.layer1, self.layer2)
 
 
-# class __GeneratedLayerNot__(__GeneratedSingleLayer__):
+# class __DerivedLayerNot__(__DerivedSingleLayer__):
 #     def __init__(self, layer1):
 #         super().__init__()
 #         self.layer1 = layer1

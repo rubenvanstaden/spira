@@ -4,16 +4,16 @@ from spira import shapes
 
 
 class __ShapeContainer__(shapes.Shape):
-    midpointal_shape = param.ShapeField()
+    original_shape = param.ShapeField()
 
 
 class ShapeNormal(__ShapeContainer__):
 
-    def __init__(self, midpointal_shape, **kwargs):
-        super().__init__(midpointal_shape=midpointal_shape, **kwargs)
+    def __init__(self, original_shape, **kwargs):
+        super().__init__(original_shape=original_shape, **kwargs)
 
     def create_points(self, pts):
-        points = np.array(self.midpointal_shape.points)
+        points = np.array(self.original_shape.points)
         return points
 
 
@@ -21,17 +21,17 @@ class BezierCurve(__ShapeContainer__):
     """ polynomial bezier curve based on a shape with control points """
     steps = param.FloatField(default=100)
 
-    def __init__(self, midpointal_shape, **kwargs):
-        super().__init__(midpointal_shape=midpointal_shape, **kwargs)
+    def __init__(self, original_shape, **kwargs):
+        super().__init__(original_shape=original_shape, **kwargs)
 
     def create_points(self, pts):
         step = 1.0 / self.steps
         t = np.arange(0.0, 1.0 + 0.5 * step, step)
-        P = np.array(self.midpointal_shape.points[0])
+        P = np.array(self.original_shape.points[0])
         Px = np.outer(P[:, 0], np.ones(np.size(t)))
         Py = np.outer(P[:, 1], np.ones(np.size(t)))
 
-        for j in range(len(self.midpointal_shape.points[0]) - 1,  0, -1):
+        for j in range(len(self.original_shape.points[0]) - 1,  0, -1):
             Px = Px[0:j, :] + np.diff(Px, 1, 0) * t
             Py = Py[0:j, :] + np.diff(Py, 1, 0) * t
 
@@ -72,7 +72,7 @@ class BasicSpline(shapes.Shape):
         S = shapes.Shape(points=[[q0_0, q1_0, q2_0, q3_0]])
 
         steps = int(math.ceil(2.0* self.angle / self.angle_step))
-        return BezierCurve(midpointal_shape=S, steps=steps).points
+        return BezierCurve(original_shape=S, steps=steps).points
 
 
 # class AdiabaticSplineCircleSplineShape(Shape):
@@ -145,8 +145,8 @@ class BasicSpline(shapes.Shape):
 
 # s = Shape([[(0.0, 0.0), (1.0, 1.0), (2.0, -1.0), (3.0, 0.0)]])
 s = shapes.Shape([[(0.0, 3.0), (10.0, 3.0), (15.0, 0.0), (18.0, 0.0)]])
-s1 = ShapeNormal(midpointal_shape=s)
-s2 = BezierCurve(midpointal_shape=s)
+s1 = ShapeNormal(original_shape=s)
+s2 = BezierCurve(original_shape=s)
 s3 = BasicSpline()
 
 p1 = np.array(s1.points[0])

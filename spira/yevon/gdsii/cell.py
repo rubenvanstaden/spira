@@ -157,7 +157,6 @@ class Cell(CellAbstract):
     """ A Cell encapsulates a set of elementals that
     describes the layout being generated. """
 
-    um = NumberField(default=1e6)
     name = DataField(fdef_name='create_name', doc='Name of the cell instance.')
 
     # net = DataField(fdef_name='create_net', doc='Generate a net from the cell metal polygons.')
@@ -374,7 +373,7 @@ class Connector(Cell):
 
     midpoint = CoordField()
     orientation = NumberField(default=0.0)
-    width = NumberField(default=2*1e6)
+    width = NumberField(default=2)
 
     def __repr__(self):
         return ("[SPiRA: Connector] (name {}, midpoint {}, " +

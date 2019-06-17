@@ -33,7 +33,7 @@ class GmshGeometry(__Geometry__):
 
     lcar = NumberField(default=100, doc='Mesh characteristic length.')
     algorithm = IntegerField(default=1, doc='Mesh algorithm used by Gmsh.')
-    scale_Factor = NumberField(default=1e-6, doc='Mesh coord dimention scaling.')
+    scale_Factor = NumberField(default=1e0, doc='Mesh coord dimention scaling.')
     coherence_mesh = BoolField(defualt=True, doc='Merge similar points.')
 
     process = ProcessField()
@@ -61,8 +61,8 @@ class GmshGeometry(__Geometry__):
         )
         self.geom.add_raw_code('Mesh.Algorithm = {};'.format(self.algorithm))
         self.geom.add_raw_code('Mesh.ScalingFactor = {};'.format(self.scale_Factor))
-        # if self.coherence_mesh is True:
-        #     self.geom.add_raw_code('Coherence Mesh;')
+        if self.coherence_mesh is True:
+            self.geom.add_raw_code('Coherence Mesh;')
 
     def __physical_surfaces__(self):
         """ Creates physical surfaces that is compatible
@@ -73,20 +73,17 @@ class GmshGeometry(__Geometry__):
         surfaces = []
         for i, polygon in enumerate(self.process_polygons):
             ply = deepcopy(polygon)
-            # ply = polygon
             shape = ply.shape.transform(ply.transformation)
             layer = RDD.GDSII.EXPORT_LAYER_MAP[ply.layer]
             pts = numpy_to_list(shape.points, start_height=0, unit=1e-6)
             surface_label = '{}_{}_{}_{}'.format(layer.number, layer.datatype, GmshGeometry._ID, i)
             gp = self.geom.add_polygon(pts, lcar=self.lcar, make_surface=True, holes=None)
 
-            # Add physicals
-            self.geom.add_physical(gp.surface, label=surface_label)
-            # surfaces.append([gp.surface, gp.line_loop])
             for j, ll in enumerate(gp.lines):
                 line_label = polygon.shape.segment_labels[j] + "_" + str(j)
-                print(line_label)
                 self.geom.add_physical(ll, label=line_label)
+            self.geom.add_physical(gp.surface, label=surface_label)
+            # surfaces.append([gp.surface, gp.line_loop])
 
             surfaces.append(gp)
             GmshGeometry._ID += 1
@@ -102,10 +99,6 @@ class GmshGeometry(__Geometry__):
         self.__physical_surfaces__()
 
         directory = os.getcwd() + '/debug/gmsh/'
-
-        # mesh_file = '{}{}.msh'.format(directory, self.process.symbol)
-        # geo_file = '{}{}.geo'.format(directory, self.process.symbol)
-        # vtk_file = '{}{}.vtu'.format(directory, self.process.symbol)
 
         mesh_file = '{}{}.msh'.format(directory, self.filename)
         geo_file = '{}{}.geo'.format(directory, self.filename)

@@ -29,13 +29,13 @@ class StipplePattern(FieldInitializer):
     name = StringField(allow_none = True)
     pattern = NumpyArrayField()
     matplotlib_hatch = StringField(allow_none = True)
-    
+
     def set(self, pattern):
         self.pattern = pattern
-    
+
     def __eq__(self, other):
         return np.array_equal(self.pattern,other.pattern)
-    
+
     def __str__(self):
         return self.name
 

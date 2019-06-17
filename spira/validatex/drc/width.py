@@ -16,7 +16,7 @@ class Width(__SingleLayerDesignRule__):
     def edge_to_minimum_width(self, e1):
         ports = spira.ElementalList()
         for p in e1.edge_ports:
-            p.length = 2*self.minimum*self.um
+            p.length = 2*self.minimum
             ports += p
         return ports
 
