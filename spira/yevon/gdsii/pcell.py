@@ -1,15 +1,14 @@
 from spira.yevon.gdsii.cell import Cell
-from spira.yevon.structure.containers import __CellContainer__
+from spira.yevon.gdsii.containers import __CellContainer__
 from spira.yevon.utils import clipping
 from spira.yevon.utils import netlist
 from spira.yevon.process.gdsii_layer import LayerField
 from spira.core.parameters.descriptor import DataField
 from spira.yevon.gdsii.elem_list import ElementalListField
 
-from spira.yevon.utils.elementals import *
+from spira.yevon import filters
 from spira.core.parameters.variables import *
-from spira.yevon.filters.boolean_filter import *
-
+from spira.core.parameters.restrictions import RestrictContains
 from spira.yevon.process import get_rule_deck
 
 
@@ -23,11 +22,16 @@ class PCell(Cell):
     """  """
 
     pcell = BoolField(default=True)
-
     routes = ElementalListField()
     structures = ElementalListField()
 
     def __create_elementals__(self, elems):
+
+        F = RDD.PCELLS.FILTERS
+
+        print(F)
+
+        F['via_contact'] = False
 
         if self.pcell is False:
             el = super().__create_elementals__(elems)
@@ -38,12 +42,19 @@ class PCell(Cell):
             el = self.create_elementals(elems)
             el += self.routes
             el += self.structures
+
             D = Cell(elementals=el.flat_copy())
-            F = ProcessBooleanFilter()
-            # F += SimplifyFilter()
-            # F += ViaConnectFilter()
-            # F += MetalConnectFilter()
             elems = F(D).elementals
+
+        # el = self.create_elementals(elems)
+        # el += self.routes
+        # el += self.structures
+
+        # if self.pcell is True:
+        #     D = Cell(elementals=el.flat_copy())
+        #     elems = F(D).elementals
+        # else:
+        #     elems = el
 
         return elems
 
@@ -54,7 +65,7 @@ class Device(PCell):
     top_layer = LayerField()
     via_layer = LayerField()
 
-    lcar = NumberField(default=1)
+    lcar = NumberField(default=RDD.PCELLS.LCAR_DEVICE)
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -70,7 +81,7 @@ class Device(PCell):
 class Circuit(PCell):
     """  """
 
-    lcar = NumberField(default=1)
+    lcar = NumberField(default=RDD.PCELLS.LCAR_CIRCUIT)
 
     def create_netlist(self):
         net = self.nets(lcar=self.lcar).disjoint()

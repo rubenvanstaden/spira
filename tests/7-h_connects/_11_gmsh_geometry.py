@@ -40,34 +40,33 @@ class B(spira.Cell):
 
 D = B()
 
-D.output()
-# D.write_gdsii_mask()
+D.gdsii_output()
 
 
-# vp = virtual_process_model(device=D, process_flow=RDD.VMODEL.PROCESS_FLOW)
-# vp.write_gdsii_vmodel()
+# # vp = virtual_process_model(device=D, process_flow=RDD.VMODEL.PROCESS_FLOW)
+# # vp.write_gdsii_vmodel()
 
-vp = virtual_process_intersection(device=D, process_flow=RDD.VMODEL.PROCESS_FLOW)
-# vp.write_gdsii_vinter()
+# vp = virtual_process_intersection(device=D, process_flow=RDD.VMODEL.PROCESS_FLOW)
+# # vp.write_gdsii_vinter()
 
-# E = D.expand_transform()
-E = D.pcell.expand_flat_copy()
+# # E = D.expand_transform()
+# E = D.pcell.expand_flat_copy()
 
-contacts = vp.contact_ports
+# contacts = vp.contact_ports
 
-for p in E.ports:
-    if p.locked is False:
-        contacts += p
+# for p in E.ports:
+#     if p.locked is False:
+#         contacts += p
 
-nets = E.nets(contacts=contacts)
+# nets = E.nets(contacts=contacts)
 
-# --- Step 1:
-g_cell = nets.disjoint()
+# # --- Step 1:
+# g_cell = nets.disjoint()
 
-# from spira.yevon.utils.netlist import nodes_combine
-# g_cell = nodes_combine(g=g_cell, algorithm='d2d')
+# # from spira.yevon.utils.netlist import nodes_combine
+# # g_cell = nodes_combine(g=g_cell, algorithm='d2d')
 
-E.plotly_netlist(G=g_cell, graphname='metal', labeltext='id')
+# E.plotly_netlist(G=g_cell, graphname='metal', labeltext='id')
 
 
 

@@ -71,7 +71,7 @@ class Junction(spira.Cell):
         # return expand_elems
 
 
-from spira.yevon.netlist.containers import __CellContainer__
+from spira.yevon.gdsii.containers import __CellContainer__
 class JunctionStretch(__CellContainer__):
 
     def create_elementals(self, elems):
@@ -95,4 +95,4 @@ if __name__ == '__main__':
     # S1 = T(S)
     # cell += S1
 
-    cell.output()
+    cell.gdsii_output()

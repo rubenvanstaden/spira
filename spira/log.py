@@ -11,6 +11,7 @@ SPIRA_LOG = logging.getLogger('SPiRA')
 SPIRA_LOG.setLevel(logging.ERROR)
 SPIRA_LOG.addHandler(SPIRA_LOGGING_HANDLER)
 
+
 from colorama import init, Fore, Back, Style
 init(autoreset=True)
 

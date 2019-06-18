@@ -2,7 +2,8 @@ from spira.yevon.gdsii.cell import Cell
 from spira.yevon.aspects.base import __Aspects__
 from spira.yevon.gdsii.elem_list import ElementalListField, ElementalList
 from spira.yevon.filters.layer_filter import LayerFilterAllow
-from spira.yevon.gdsii.polygon import Polygon, PolygonGroup
+from spira.yevon.gdsii.polygon import Polygon
+from spira.yevon.gdsii.polygon_group import PolygonGroup
 from spira.yevon.process import get_rule_deck
 
 
@@ -20,7 +21,6 @@ def get_process_polygons(elementals, operation='or'):
             elif operation == 'and':
                 pg = PolygonGroup(elementals=el, layer=layer).intersect
             elems += pg
-            # elems += pg.elementals
     return elems
 
 
@@ -31,13 +31,13 @@ class ElementalsForModelling(__Aspects__):
     """
 
     process_elementals = ElementalListField()
-    connect_elementals = ElementalListField()
+    overlap_elementals = ElementalListField()
 
     def create_process_elementals(self, elems):
         elems += get_process_polygons(self.elementals, 'or')
         return elems
 
-    def create_connect_elementals(self, elems):
+    def create_overlap_elementals(self, elems):
         elems += get_process_polygons(self.elementals, 'and')
         return elems
 

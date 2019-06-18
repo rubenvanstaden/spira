@@ -14,7 +14,7 @@ __all__ = ['Junction']
 class ResistorCell(spira.Cell):
 
     def create_elementals(self, elems):
-        elems += spira.Rectangle(alias='RES', p1=(-5*1e6, -10*1e6), p2=(5*1e6, 10*1e6), layer=RDD.PLAYER.M2.METAL)
+        elems += spira.Rectangle(alias='RES', p1=(-5, -10), p2=(5, 10), layer=RDD.PLAYER.M2.METAL)
         return elems
 
     def create_ports(self, ports):
@@ -25,25 +25,21 @@ class ResistorCell(spira.Cell):
 class PolygonCell(spira.Cell):
 
     def create_elementals(self, elems):
-        c1 = ResistorCell()
-        elems += spira.SRef(c1)
-        elems += spira.Rectangle(alias='M1', p1=(-10*1e6, -15*1e6), p2=(10*1e6, 15*1e6), layer=RDD.PLAYER.M3.METAL)
+        elems += spira.SRef(reference=ResistorCell())
+        elems += spira.Rectangle(alias='M1', p1=(-10, -15), p2=(10, 15), layer=RDD.PLAYER.M3.METAL)
         return elems
 
 
-from spira.yevon.netlist.pcell import Device
-class Junction(Device):
+class Junction(spira.Device):
 
     def create_elementals(self, elems):
 
-        c1 = PolygonCell()
+        D = PolygonCell()
 
-        s1 = spira.SRef(c1, midpoint=(0,0))
-        elems += s1
+        elems += spira.SRef(reference=D, midpoint=(0,0))
 
-        T = spira.Translation((0*1e6, -40*1e6)) + spira.Rotation(180)
-        s2 = spira.SRef(c1, midpoint=(0,0), transformation=T)
-        elems += s2
+        T = spira.Translation((0, -40)) + spira.Rotation(180)
+        elems += spira.SRef(reference=D, midpoint=(0,0), transformation=T)
 
         # R = spira.Route(
         #     port1=s1.ports['RES_e3'],
@@ -61,12 +57,11 @@ if __name__ == '__main__':
 
     D = Junction()
     S = spira.SRef(reference=D)
+    cell += S
 
-    E = S.flat_expand_transform_copy()
+    # E = S.flat_expand_transform_copy()
     # print(E.ports)
-    E.stretch_port(port=E.ports[3], destination=E.ports[11].midpoint)
+    # E.stretch_port(port=E.ports[3], destination=E.ports[11].midpoint)
+    # cell += E
 
-    cell += E
-    # cell += S
-
-    cell.output()
+    cell.gdsii_output()

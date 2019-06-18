@@ -67,47 +67,6 @@ class PolygonPortProperty(PortProperty):
 
     edge_ports = ElementalListField()
 
-    metal_port = DataField(fdef_name='create_metal_port')
-    contact_ports = DataField(fdef_name='create_contact_ports')
-
-    layer1 = LayerField()
-    layer2 = LayerField()
-
-    def create_metal_port(self):
-        layer = Layer(
-            name=self.name,
-            number=self.layer.layer.number,
-            datatype=RDD.PURPOSE.METAL.datatype
-        )
-        return Port(
-            name='P_metal',
-            midpoint=self.polygon.center,
-            gds_layer=layer
-        )
-
-    def create_contact_ports(self):
-        l1 = Layer(
-            name=self.name,
-            number=self.layer1.number,
-            datatype=RDD.PURPOSE.PRIM.VIA.datatype
-        )
-        p1 = Port(
-            name='P_contact_1',
-            midpoint=self.shape.bbox_info.center,
-            gds_layer=l1
-        )
-        l2 = Layer(
-            name=self.name,
-            number=self.layer2.number,
-            datatype=RDD.PURPOSE.PRIM.VIA.datatype
-        )
-        p2 = Port(
-            name='P_contact_2',
-            midpoint=self.shape.bbox_info.center,
-            gds_layer=l2
-        )
-        return [p1, p2]
-
     def create_edge_ports(self, edges):
         from copy import deepcopy
         # T = deepcopy(self.transformation)

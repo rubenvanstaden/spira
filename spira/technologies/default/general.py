@@ -87,6 +87,7 @@ RDD.PORT.WIDTH = 0.5
 
 class AdminDatabase(DelayedDatabase):
     """ A technology tree with a name generator. """
+
     def initialize(self):
         from spira.yevon.gdsii.generators import NameGenerator
         self.NAME_GENERATOR = NameGenerator(
@@ -96,4 +97,24 @@ class AdminDatabase(DelayedDatabase):
         )
 
 RDD.ADMIN = AdminDatabase()
+
+# ---------------------------- Parameterized Cell Data --------------------------------
+
+class PCellDatabase(DelayedDatabase):
+    
+    def initialize(self):
+        from spira.yevon import filters
+
+        self.LCAR_DEVICE = 1
+        self.LCAR_CIRCUIT = 100
+        
+        f = filters.ToggledCompoundFilter()
+        f += filters.ProcessBooleanFilter(name='boolean')
+        f += filters.SimplifyFilter(name='simplify')
+        f += filters.ViaConnectFilter(name='via_contact')
+        # F += filters.MetalConnectFilter()
+
+        self.FILTERS = f
+
+RDD.PCELLS = PCellDatabase()
 

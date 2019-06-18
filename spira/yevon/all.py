@@ -16,7 +16,6 @@ from spira.yevon.process.all import *
 from spira.yevon.gdsii import *
 from spira.yevon.filters import *
 from spira.yevon.visualization import *
-from spira.yevon.structure import *
 
 # from spira.yevon.vmodel import *
 # from spira.yevon.utils import *

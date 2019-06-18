@@ -12,6 +12,7 @@ __all__ = [
 
 
 class ProcessBooleanFilter(Filter):
+    """  """
     
     def __filter___Cell____(self, item):
         ports = PortList()
@@ -28,10 +29,11 @@ class ProcessBooleanFilter(Filter):
         return item.__class__(elementals=elems, ports=ports)
 
     def __repr__(self):
-        return "[SPiRA: ProcessBooleanFilter] ()"
+        return "<ProcessBooleanFilter: \'{}\'>".format(self.name)
 
 
 class SimplifyFilter(Filter):
+    """  """
 
     def __filter___Cell____(self, item):
         from spira.yevon.utils import clipping
@@ -44,10 +46,11 @@ class SimplifyFilter(Filter):
         return item.__class__(elementals=elems)
 
     def __repr__(self):
-        return "[SPiRA: SimplifyFilter] ()"
+        return "<SimplifyFilter: \'{}\'>".format(self.name)
 
 
 class ViaConnectFilter(Filter):
+    """  """
 
     def __filter___Cell____(self, item):
         from spira.yevon.utils import clipping
@@ -61,6 +64,6 @@ class ViaConnectFilter(Filter):
         return item.__class__(elementals=elems)
 
     def __repr__(self):
-        return "[SPiRA: SimplifyFilter] ()"
+        return "<ViaConnectFilter: \'{}\'>".format(self.name)
 
 

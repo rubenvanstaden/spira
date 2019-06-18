@@ -141,7 +141,7 @@ class SRef(__RefElemental__):
         return d
 
     def nets(self, contacts, lcar=100):
-        from spira.yevon.structure.pcell import Device
+        from spira.yevon.gdsii.pcell import Device
         if isinstance(self.ref, Device): lcar = 10
         nets = self.ref.nets(contacts, lcar)
         # T = self.transformation + Translation(self.midpoint)

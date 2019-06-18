@@ -1,7 +1,7 @@
 import numpy as np
 import spira.all as spira
 from spira.yevon import constants
-from spira.yevon.structure.edges import *
+from spira.yevon.geometry.edges.edges import *
 from spira.technologies.mit.process import RDD
 
 

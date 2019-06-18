@@ -1,7 +1,10 @@
 import pyclipper
 import numpy as np
 import spira.all as spira
+
+from copy import deepcopy
 from spira.yevon import constants
+from spira.yevon.gdsii.elem_list import ElementalList
 from spira.yevon.process import get_rule_deck
 
 
@@ -21,9 +24,9 @@ def boolean(subj, clip=None, clip_type=None, closed=True, scale=1):
         pc.AddPaths(st(clip, sc), pyclipper.PT_CLIP, True)
     pc.AddPaths(st(subj, sc), pyclipper.PT_SUBJECT, closed)
     ct = {
-        'or' : pyclipper.CT_UNION, 
-        'and': pyclipper.CT_INTERSECTION, 
-        'not': pyclipper.CT_DIFFERENCE, 
+        'or' : pyclipper.CT_UNION,
+        'and': pyclipper.CT_INTERSECTION,
+        'not': pyclipper.CT_DIFFERENCE,
         'xor': pyclipper.CT_XOR
     }
     if clip_type not in ct:
@@ -41,8 +44,8 @@ def offset(points, grow=1, accuracy=1.0, jointype='miter'):
     sc = constants.CLIPPER_SCALE
     pco = pyclipper.PyclipperOffset()
     jt = {
-        'round' : pyclipper.JT_ROUND, 
-        'square': pyclipper.JT_SQUARE, 
+        'round' : pyclipper.JT_ROUND,
+        'square': pyclipper.JT_SQUARE,
         'miter' : pyclipper.JT_MITER
     }
     if jointype not in jt:

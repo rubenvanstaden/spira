@@ -1,8 +1,8 @@
 from copy import deepcopy
 from spira import settings
 from spira.core.parameters.variables import *
-# from spira.yevon.process.generated_layers import __Layer__
-# from spira.yevon.process.generated_layers import *
+# from spira.yevon.process.derived_layers import __Layer__
+# from spira.yevon.process.derived_layers import *
 from spira.core.parameters.restrictions import RestrictType
 from spira.core.parameters.variables import StringField, IntegerField
 from spira.core.parameters.descriptor import RestrictedParameter

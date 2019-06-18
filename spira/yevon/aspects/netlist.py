@@ -6,7 +6,6 @@ from spira.yevon.geometry.nets.net_list import NetListField
 
 class NetlistAspects(__Aspects__):
     """ Defines the nets from the defined elementals. """
-    pass
 
     netlist = DataField(fdef_name='create_netlist')
 

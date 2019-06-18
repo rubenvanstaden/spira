@@ -46,6 +46,10 @@ class PolygonAspects(__GeometryAspects__):
     def center(self):
         return self.bbox_info.center
 
+    @center.setter
+    def center(self, destination):
+        self.move(midpoint=self.center, destination=destination)
+
     @property
     def bbox_info(self):
         return self.shape.bbox_info.transform_copy(self.transformation)
@@ -67,14 +71,6 @@ class PolygonClipperAspects(__ClipperAspects__):
             return elems
         return ElementalList([])
 
-    # NOTE: Does not require to check for layer equivalence.
-    def intersection(self, other):
-        s1 = self.shape.transform_copy(self.transformation)
-        s2 = other.shape.transform_copy(other.transformation)
-        shapes = s1.__and__(s2)
-        elems = [Polygon(shape=s, layer=self.layer) for s in shapes]
-        return elems
-
     def __sub__(self, other):
         if self.layer == other.layer:
             s1 = self.shape.transform_copy(self.transformation)
@@ -93,33 +89,11 @@ class PolygonClipperAspects(__ClipperAspects__):
             return elems
         return ElementalList([self, other])
 
-
-# class PolygonClipperAspects(__ClipperAspects__):
-#     """
-
-#     Examples
-#     --------
-#     """
-
-#     def __and__(self, other):
-#         from copy import deepcopy
-#         if self.layer == other.layer:
-#             shapes = self.shape.__and__(other.shape)
-#             elems = [Polygon(shape=s, layer=self.layer) for s in shapes]
-#             return elems
-#         return ElementalList([])
-
-#     def __sub__(self, other):
-#         if self.layer == other.layer:
-#             shapes = self.shape.__sub__(other.shape)
-#             elems = [Polygon(shape=s, layer=self.layer) for s in shapes]
-#             return elems
-#         return ElementalList([self])
-
-#     def __or__(self, other):
-#         if self.layer == other.layer:
-#             shapes = self.shape.__or__(other.shape)
-#             elems = [Polygon(shape=s, layer=self.layer) for s in shapes]
-#             return elems
-#         return ElementalList([self, other])
+    # NOTE: Does not require to check for layer equivalence.
+    def intersection(self, other):
+        s1 = self.shape.transform_copy(self.transformation)
+        s2 = other.shape.transform_copy(other.transformation)
+        shapes = s1.__and__(s2)
+        elems = [Polygon(shape=s, layer=self.layer) for s in shapes]
+        return elems
 

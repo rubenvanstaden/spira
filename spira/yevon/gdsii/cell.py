@@ -216,7 +216,7 @@ class Cell(CellAbstract):
         from spira.yevon.gdsii.sref import SRef
         from spira.yevon.gdsii.polygon import Polygon
         from spira.yevon.geometry.ports.port import Port
-        from spira.yevon.structure.pcell import Device
+        from spira.yevon.gdsii.pcell import Device
         D = deepcopy(self)
         S = D.expand_transform()
         C = Cell(name=S.name + '_ExpandedCell')
@@ -247,7 +247,7 @@ class Cell(CellAbstract):
         from spira.yevon.gdsii.sref import SRef
         from spira.yevon.gdsii.polygon import Polygon
         from spira.yevon.geometry.ports.port import Port
-        from spira.yevon.structure.pcell import Device
+        from spira.yevon.gdsii.pcell import Device
         D = deepcopy(self)
         S = D.expand_transform()
         C = Cell(name=S.name + '_ExpandedCell')

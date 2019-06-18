@@ -14,7 +14,7 @@ class B(spira.Cell):
     def create_elementals(self, elems):
 
         p0 = spira.Rectangle(alias='P0', p1=(0, 0), p2=(12*1e6, 2*1e6), layer=RDD.PLAYER.M1.METAL)
-        p1 = spira.Rectangle(alias='P1', p1=(12*1e6, 9*1e6), p2=(14*1e6, 1*1e6), layer=RDD.PLAYER.M1.METAL)
+        p1 = spira.Rectangle(alias='P1', p1=(11*1e6, -1*1e6), p2=(30*1e6, 3*1e6), layer=RDD.PLAYER.M1.METAL)
 
         c = spira.Cell(name='Cs1')
         c += spira.Rectangle(alias='P2', p1=(0,0), p2=(12*1e6, 2*1e6), layer=RDD.PLAYER.M1.METAL)
@@ -30,7 +30,7 @@ class B(spira.Cell):
         
         ports += spira.Port(name='P1', midpoint=(0, 1*1e6), orientation=180, process=RDD.PROCESS.M3)
         ports += spira.Port(name='P2', midpoint=(22*1e6, 1*1e6), orientation=0, process=RDD.PROCESS.M3)
-        ports += spira.Port(name='P3', midpoint=(13*1e6, 9*1e6), orientation=90, process=RDD.PROCESS.M3)
+        ports += spira.Port(name='P3', midpoint=(30*1e6, 1*1e6), orientation=90, process=RDD.PROCESS.M3)
         
         return ports
 
@@ -38,36 +38,49 @@ class B(spira.Cell):
 # -------------------------------------------------------------------------------------------------------------
 
 
+# from spira.yevon.netlist.containers import __CellContainer__
+# class PCell(__CellContainer__):
+
+
+
+
 D = B()
 
-D.output()
-# D.write_gdsii_mask()
+D.gdsii_output()
 
 
-# vp = virtual_process_model(device=D, process_flow=RDD.VMODEL.PROCESS_FLOW)
-# vp.write_gdsii_vmodel()
+# # vp = virtual_process_model(device=D, process_flow=RDD.VMODEL.PROCESS_FLOW)
+# # vp.write_gdsii_vmodel()
 
-vp = virtual_process_intersection(device=D, process_flow=RDD.VMODEL.PROCESS_FLOW)
-# vp.write_gdsii_vinter()
+# vp = virtual_connect(device=D)
+# # vp.write_gdsii_vinter()
 
-# E = D.expand_transform()
-E = D.pcell.expand_flat_copy()
+# # E = D.expand_transform()
+# E = D.pcell.expand_flat_copy()
 
-contacts = vp.contact_ports
+# E = E.pcell.expand_flat_copy()
 
-for p in E.ports:
-    if p.locked is False:
-        contacts += p
+# for e in E.elementals:
+#     print(e)
 
-nets = E.nets(contacts=contacts)
+# E.output()
 
-# --- Step 1:
-g_cell = nets.disjoint()
+# # --- Nets ---
+# contacts = vp.contact_ports
 
-from spira.yevon.utils.netlist import nodes_combine
-g_cell = nodes_combine(g=g_cell, algorithm='d2d')
+# for p in E.ports:
+#     if p.locked is False:
+#         contacts += p
 
-E.plotly_netlist(G=g_cell, graphname='metal', labeltext='id')
+# nets = E.nets(contacts=contacts)
+
+# # --- Step 1:
+# g_cell = nets.disjoint()
+
+# from spira.yevon.utils.netlist import nodes_combine
+# g_cell = nodes_combine(g=g_cell, algorithm='d2d')
+
+# # E.plotly_netlist(G=g_cell, graphname='metal', labeltext='id')
 
 
 

@@ -1,4 +1,4 @@
-from spira.yevon.structure.edges import EdgeListField
+from spira.yevon.geometry.edges.edge_list import EdgeListField
 from spira.yevon.geometry.shapes.shape import Shape, ShapeField
 from spira.core.parameters.variables import ListField
 from spira.yevon.geometry.line import line_from_two_points

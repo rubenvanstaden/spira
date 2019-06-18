@@ -1,6 +1,6 @@
 import spira.all as spira
 
-from spira.yevon.utils.elementals import get_derived_elementals
+from spira.yevon.vmodel.derived import get_derived_elementals
 from spira.yevon.filters.layer_filter import LayerFilterAllow
 from spira.core.parameters.initializer import FieldInitializer
 from spira.yevon.vmodel.geometry import GmshGeometry
@@ -110,7 +110,7 @@ class VirtualConnect(__VirtualModel__):
     #     return ports
 
     def gdsii_output_virtual_connect(self, **kwargs):
-        
+
         elems = spira.ElementalList()
         for e in self.__make_polygons__():
             elems += e

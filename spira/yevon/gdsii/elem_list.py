@@ -170,6 +170,14 @@ class ElementalList(__ElementalList__):
         for e in self._list:
             return pp == e
 
+    def is_empty(self):
+        if (len(self._list) == 0):
+            return True
+        for e in self._list:
+            if not e.is_empty():
+                return False
+        return True
+
 
 class ElementalListField(DataFieldDescriptor):
     __type__ = ElementalList

@@ -64,7 +64,8 @@ def ListField(restriction=None, **kwargs):
     from .variables import LIST
     if 'default' not in kwargs:
         kwargs['default'] = []
-    return RestrictedParameter(restriction=LIST, **kwargs)
+    R = LIST & restriction
+    return RestrictedParameter(restriction=R, **kwargs)
 
 
 def TupleField(restriction=None, **kwargs):

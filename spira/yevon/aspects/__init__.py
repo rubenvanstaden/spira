@@ -2,7 +2,6 @@ from spira.yevon.gdsii.cell import Cell
 from spira.yevon.gdsii.sref import SRef
 from spira.yevon.gdsii.polygon import __Polygon__
 from spira.yevon.aspects.cell import CellAspects
-# from spira.yevon.aspects.cell import CellAspects, ElementalsForModelling, ReferenceBlocks
 from spira.yevon.aspects.polygon import PolygonAspects, PolygonClipperAspects
 from spira.yevon.aspects.port import PortProperty, SRefPortProperty, PolygonPortProperty, CellPortProperty
 from spira.yevon.aspects.netlist import NetlistAspects
@@ -12,7 +11,9 @@ from spira.yevon.aspects.shape import ShapeClipperAspects
 from spira.yevon.geometry.shapes import Shape
 
 
-def load_properties():
+def load_aspect():
+    """ Mix the aspects into their corresponding classes. """
+
     Cell.mixin(CellAspects)
     Cell.mixin(CellPortProperty)
     Cell.mixin(NetlistAspects)
@@ -27,4 +28,4 @@ def load_properties():
     __Polygon__.mixin(PolygonClipperAspects)
 
 
-load_properties()
+load_aspect()

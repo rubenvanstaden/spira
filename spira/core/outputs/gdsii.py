@@ -122,6 +122,7 @@ class OutputGdsii(FieldInitializer):
                             ref_cell=ref_cell,
                             origin=e.midpoint.to_numpy_array(),
                             rotation=T.rotation,
+                            # rotation=T.orientation,
                             magnification=T.magnification,
                             x_reflection=T.reflection)
                         # self.__collected_srefs__.update({e.id_string():S})

@@ -3,6 +3,9 @@ from spira.core.parameters.variables import StringField
 from spira.log import SPIRA_LOG as LOG
 
 
+__all__ = ['Filter', 'ToggledCompoundFilter']
+
+
 class Filter(FieldInitializer):
     """
 

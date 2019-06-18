@@ -183,7 +183,7 @@ class __Shape__(Transformable, FieldInitializer):
         else:
             raise TypeError("Wrong type " + str(type(item)) + " to extend Shape with")
         return self
-        
+
     # def transform_copy(self, transformation):
     #     S = deepcopy(self)
     #     S.points = transformation.apply_to_array(self.points)
@@ -243,8 +243,11 @@ class Shape(__Shape__):
 
     def __len__(self):
         """ Number of points in the shape """
-        return size(self.points, 0)
+        return np.size(self.points, 0)
 
+    def is_empty(self):
+        return self.__len__() <= 1
+        
 
 def ShapeField(restriction=None, preprocess=None, **kwargs):
     R = RestrictType(Shape) & restriction
