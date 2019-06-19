@@ -33,7 +33,7 @@ class GmshGeometry(__Geometry__):
 
     lcar = NumberField(default=100, doc='Mesh characteristic length.')
     algorithm = IntegerField(default=1, doc='Mesh algorithm used by Gmsh.')
-    scale_Factor = NumberField(default=1e0, doc='Mesh coord dimention scaling.')
+    scale_Factor = NumberField(default=1e-0, doc='Mesh coord dimention scaling.')
     coherence_mesh = BoolField(defualt=True, doc='Merge similar points.')
 
     process = ProcessField()
@@ -80,6 +80,7 @@ class GmshGeometry(__Geometry__):
             gp = self.geom.add_polygon(pts, lcar=self.lcar, make_surface=True, holes=None)
 
             for j, ll in enumerate(gp.lines):
+                # if hasattr(polygon.shape, 'segment_labels'):
                 line_label = polygon.shape.segment_labels[j] + "_" + str(j)
                 self.geom.add_physical(ll, label=line_label)
             self.geom.add_physical(gp.surface, label=surface_label)

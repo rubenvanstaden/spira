@@ -61,8 +61,15 @@ class JtlBiasPorts(spira.PCell):
 
 if __name__ == '__main__':
 
-    D = JtlBiasPorts(pcell=False)
-    D.gdsii_output()
+    D = JtlBiasPorts()
 
+    # from spira.yevon.filters.boolean_filter import MetalConnectFilter
+    # F = MetalConnectFilter()
+    # D = F(D)
+    
+    D.gdsii_output()
+    
+    D = spira.Circuit(name='TestElectricalConnections', elementals=D.elementals)
+    D.netlist_output()
 
 

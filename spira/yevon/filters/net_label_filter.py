@@ -79,7 +79,7 @@ class NetEdgeFilter(__NetFilter__):
 
             # line_id = key.split('_')[0]
             # line_id = key[:-2]
-            line_id = key[1]
+            line_id = key[0]
             
             elm_type = ELM_TYPE[value[1]]
             if elm_type == 'line':
@@ -88,13 +88,14 @@ class NetEdgeFilter(__NetFilter__):
                     pid = e.shape.hash_string
                     
                     # if line_id == pid:
-                    if line_id == 'b':
+                    if line_id == '[':
                         for i, pl in enumerate(item.physical_lines):
                             if pl == value[0]:
                                 for n in get_triangles_containing_line(item, item.lines[i]):
                                     item.g.node[n]['process_polygon'] = e
                                     # FIXME: Change to equal the overlapping edge display.
                                     item.g.node[n]['display'] = RDD.DISPLAY.STYLE_SET[RDD.PLAYER.I5.VIA]
+                                    # item.g.node[n]['display'] = RDD.DISPLAY.STYLE_SET[RDD.PLAYER.M1.HOLE]
                                 
                                 # line = item.lines[i]
                                 # for n, triangle in enumerate(item.triangles):

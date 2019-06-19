@@ -40,11 +40,21 @@ class ElectricalConnections(__Connection__):
             # shape = deepcopy(p.shape).transform(p.transformation).snap_to_grid()
             # cs = ShapeConnected(original_shape=shape, edges=edges)
             # elems += Polygon(shape=cs, layer=p.layer)
+            
+            # cs = ShapeConnected(original_shape=shape, edges=edges)
+            # # p.shape = cs
+            # self.cell.elementals[i].shape = cs
 
-            if i == 0:
+            if i == 2:
                 shape = deepcopy(p.shape).transform(p.transformation).snap_to_grid()
+                # shape = p.shape
+                print(shape.points)
                 cs = ShapeConnected(original_shape=shape, edges=edges)
-                elems += Polygon(shape=cs, layer=p.layer)
+                print(cs.points)
+                # self.cell.elementals[i].shape = cs
+                p.shape = cs
+                # elems += Polygon(shape=cs, layer=p.layer)
+                # elems += p
 
         return elems
 

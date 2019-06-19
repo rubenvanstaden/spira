@@ -145,10 +145,6 @@ class ElementalList(__ElementalList__):
         for e in self._list:
             el += e.flat_copy(level)
         return el
-        # if level == -1:
-        #     return el.flatten()
-        # else:
-        #     return el
 
     def flatten(self):
         from spira.yevon.gdsii.cell import Cell

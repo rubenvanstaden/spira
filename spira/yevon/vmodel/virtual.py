@@ -44,6 +44,7 @@ class VirtualConnect(__VirtualModel__):
     # contact_ports = spira.DataField(fdef_name='create_contact_ports')
     connected_elementals = spira.DataField(fdef_name='create_connected_elementals')
     # connected_elementals = spira.ElementalListField()
+    connected_edges = spira.DataField(fdef_name='create_connected_edges')
 
     def __make_polygons__(self):
 
@@ -82,6 +83,48 @@ class VirtualConnect(__VirtualModel__):
             #         elems += spira.PolygonGroup(elementals=el, layer=layer).intersect
         return elems
 
+    def create_connected_edges(self):
+        from copy import deepcopy
+        from spira.yevon.gdsii.elem_list import ElementalList
+        from spira.yevon.vmodel.derived import get_derived_elementals
+        el = ElementalList()
+        for p1 in deepcopy(self.device.elementals):
+            el += p1
+            for edge in p1.edges:
+                el += edge.outside.transform(edge.transformation)
+
+        # map1 = {RDD.PLAYER.M2.EDGE_CONNECTED : RDD.PLAYER.M2.EDGE_PORT_ENABLED}
+        map1 = {RDD.PLAYER.M5.EDGE_CONNECTED : RDD.PLAYER.M5.EDGE_PORT_ENABLED}
+
+        pg_overlap = self.device.overlap_elementals
+        edges = get_derived_elementals(el, mapping=map1, store_as_edge=True)
+
+        overlap_edges = {}
+
+        # print(pg_overlap)
+        print(edges)
+    
+        for j, pg in enumerate(pg_overlap):
+            for e in pg.elementals:
+                e = deepcopy(e)
+                overlap_edges[e] = []
+                for i, edge in enumerate(edges):
+                    if edge.overlaps(e):
+                        # FIXME: Cannot use this, since Gmsh seems to crach due to the hashing string.
+                        # edges[i].pid = p.id_string()
+                        # edges[i].pid = '{}_{}'.format(p.__repr__(), p.uid)
+                        edges[i].pid = '{}'.format(e.shape.hash_string)
+                        overlap_edges[e].append(edges[i])
+
+        if (len(edges) > 0) and (len(overlap_edges) == 0):
+            e = spira.Polygon(alias='NoPG', shape=[], layer=spira.Layer(1))
+            overlap_edges[e] = []
+            for i, edge in enumerate(edges):
+                edges[i].pid = '{}'.format(e.shape.hash_string)
+                overlap_edges[e].append(edges[i])
+    
+        return overlap_edges
+
     def create_connected_elementals(self):
         for e1 in self.__make_polygons__():
             for e2 in self.device.elementals:
@@ -112,7 +155,14 @@ class VirtualConnect(__VirtualModel__):
     def gdsii_output_virtual_connect(self, **kwargs):
 
         elems = spira.ElementalList()
-        for e in self.__make_polygons__():
+        # for e in self.__make_polygons__():
+        #     elems += e
+
+        for o, edges in self.connected_edges.items():
+            elems += o
+            for e in edges:
+                elems += e.outside
+        for e in self.device.elementals:
             elems += e
 
         D = spira.Cell(name='_VIRTUAL_CONNECT', elementals=elems)
@@ -121,10 +171,6 @@ class VirtualConnect(__VirtualModel__):
 
 def virtual_process_model(device, process_flow):
     return VirtualProcessModel(device=device, process_flow=process_flow)
-
-
-# def virtual_process_intersection(device, process_flow):
-#     return VirtualProcessIntersection(device=device, process_flow=process_flow)
 
 
 def virtual_connect(device):

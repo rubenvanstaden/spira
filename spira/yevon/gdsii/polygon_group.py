@@ -97,7 +97,6 @@ class PolygonGroup(Group, __LayerElemental__):
             for e in self.elementals:
                 shape = e.shape.transform(e.transformation)
                 points.append(shape.points)
-                # points.append(e.points)
             merged_points = clipping.boolean(subj=points, clip_type='or')
             for uid, pts in enumerate(merged_points):
                 elems += Polygon(shape=pts, layer=self.layer)

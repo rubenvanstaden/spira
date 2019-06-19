@@ -38,8 +38,8 @@ class __Polygon__(__LayerElemental__):
     shape = ShapeField()
     enable_edges = BoolField(default=True)
 
-    # def __hash__(self):
-    #     return hash(self.id)
+    def __hash__(self):
+        return hash(self.__repr__())
 
     def encloses(self, point):
         # return not pyclipper.PointInPolygon(point, self.points) == 0
@@ -49,7 +49,8 @@ class __Polygon__(__LayerElemental__):
     def expand_transform(self):
         from spira.core.transforms.identity import IdentityTransform
         if not self.transformation.is_identity():
-            self.shape = self.shape.transform_copy(self.transformation)
+            # self.shape = self.shape.transform_copy(self.transformation)
+            self.shape = deepcopy(self.shape).transform(self.transformation)
             self.transformation = IdentityTransform()
         return self
 
@@ -201,7 +202,7 @@ class Polygon(__Polygon__):
 
         if self.purpose == 'METAL':
             # geometry = GmshGeometry(lcar=0.1*1e-6, process=self.layer.process, process_polygons=[deepcopy(self)])
-            geometry = GmshGeometry(lcar=1*1e-6, process=self.layer.process, process_polygons=[deepcopy(self)])
+            geometry = GmshGeometry(lcar=10*1e-6, process=self.layer.process, process_polygons=[deepcopy(self)])
     
             net = Net(name=self.process, geometry=geometry)
     

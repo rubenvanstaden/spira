@@ -65,6 +65,8 @@ RDD.PURPOSE.PORT.BRANCH = PurposeLayer(name='Port ports specified by the designe
 RDD.PURPOSE.PORT.EDGE_ENABLED = PurposeLayer(name='Edge', symbol='EDGEE', doc='Layer that represents a polygon edge.')
 RDD.PURPOSE.PORT.EDGE_DISABLED = PurposeLayer(name='Edge', symbol='EDGED', doc='Layer that represents a polygon edge.')
 RDD.PURPOSE.PORT.DIRECTION = PurposeLayer(name='Arrow', symbol='DIR', doc='Layer that represents the direction of a edge terminal.')
+RDD.PURPOSE.PORT.INSIDE = PurposeLayer(name='Inside', symbol='IE', doc='The inside edge of the shape.')
+RDD.PURPOSE.PORT.OUTSIDE = PurposeLayer(name='Outside', symbol='OE', doc='The outside edge of the shape.')
 
 # ---------------------------------- Error Purposes ------------------------------------
 
@@ -112,7 +114,7 @@ class PCellDatabase(DelayedDatabase):
         f += filters.ProcessBooleanFilter(name='boolean')
         f += filters.SimplifyFilter(name='simplify')
         f += filters.ViaConnectFilter(name='via_contact')
-        # F += filters.MetalConnectFilter()
+        f += filters.MetalConnectFilter(name='metal_connect')
 
         self.FILTERS = f
 

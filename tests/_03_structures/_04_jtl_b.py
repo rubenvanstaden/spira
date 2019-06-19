@@ -32,10 +32,20 @@ class JtlBias(spira.PCell):
         return elems
 
 
-# -------------------------------------------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------------
 
 
 if __name__ == '__main__':
 
-    D = JtlBias(pcell=False)
+    D = JtlBias()
     D.gdsii_output()
+
+    # from spira.yevon.filters.boolean_filter import MetalConnectFilter
+    # F = MetalConnectFilter()
+    # D = F(D)
+    
+    # D.gdsii_output()
+    
+    D = spira.Circuit(name='TestElectricalConnections', elementals=D.elementals)
+    D.netlist_output()
+

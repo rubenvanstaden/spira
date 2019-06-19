@@ -75,17 +75,6 @@ class __Cell__(FieldInitializer, metaclass=MetaCell):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-    # def get_node_id(self):
-    #     if self.__id__:
-    #         return self.__id__
-    #     else:
-    #         return self.__str__()
-
-    # def set_node_id(self, value):
-    #     self.__id__ = value
-
-    # node_id = FunctionField(get_node_id, set_node_id, doc='Unique elemental ID.')
-
     def __add__(self, other):
         from spira.yevon.geometry.ports.port import __Port__
         if other is None:
@@ -159,8 +148,6 @@ class Cell(CellAbstract):
 
     name = DataField(fdef_name='create_name', doc='Name of the cell instance.')
 
-    # net = DataField(fdef_name='create_net', doc='Generate a net from the cell metal polygons.')
-
     _next_uid = 0
 
     def get_alias(self):
@@ -212,61 +199,31 @@ class Cell(CellAbstract):
             S.expand_transform()
         return self
 
-    def expand_flat_no_jj_copy(self):
-        from spira.yevon.gdsii.sref import SRef
+    def expand_flat_copy(self, exclude_devices=False):
         from spira.yevon.gdsii.polygon import Polygon
         from spira.yevon.geometry.ports.port import Port
         from spira.yevon.gdsii.pcell import Device
-        D = deepcopy(self)
-        S = D.expand_transform()
-        C = Cell(name=S.name + '_ExpandedCell')
-        def flat_polygons(subj, cell):
-            for e in cell.elementals:
-                if isinstance(e, Polygon):
-                    subj += e
-                elif isinstance(e, SRef):
-                    flat_polygons(subj=subj, cell=e.ref)
-            
-            for p in cell.ports:
-                port = Port(
-                    name=p.name + "_" + cell.name,
-                    midpoint=deepcopy(p.midpoint),
-                    orientation=deepcopy(p.orientation),
-                    process=deepcopy(p.process),
-                    purpose=deepcopy(p.purpose),
-                    width=deepcopy(p.width),
-                    port_type=p.port_type,
-                    local_pid=p.local_pid
-                )
-                subj.ports += port
-            return subj
-        D = flat_polygons(C, S)
-        return D
 
-    def expand_flat_copy(self):
-        from spira.yevon.gdsii.sref import SRef
-        from spira.yevon.gdsii.polygon import Polygon
-        from spira.yevon.geometry.ports.port import Port
-        from spira.yevon.gdsii.pcell import Device
-        D = deepcopy(self)
-        S = D.expand_transform()
+        # FIXME: Check this.
+        # D = deepcopy(self)
+        S = self.expand_transform()
         C = Cell(name=S.name + '_ExpandedCell')
         def flat_polygons(subj, cell):
             for e in cell.elementals:
                 if isinstance(e, Polygon):
                     subj += e
                 elif isinstance(e, SRef):
-                    if isinstance(e.ref, Device):
-                        subj += e
-                    else:
+                    if exclude_devices is True:
+                        if isinstance(e.ref, Device): 
+                            subj += e
+                        else: 
+                            flat_polygons(subj=subj, cell=e.ref)
+                    else: 
                         flat_polygons(subj=subj, cell=e.ref)
             
             # for e in cell.elementals:
             #     if isinstance(e, SRef):
             #         flat_polygons(subj=subj, cell=e.ref)
-
-            # for e in cell.process_elementals:
-            #     subj += e
 
             for p in cell.ports:
                 port = Port(
@@ -387,6 +344,7 @@ class Connector(Cell):
         return ports
 
 
+# FIXME: Add restriction parameter.
 def CellField(name=None, elementals=None, ports=None, library=None, **kwargs):
     from spira.yevon.gdsii.cell import Cell
     if 'default' not in kwargs:

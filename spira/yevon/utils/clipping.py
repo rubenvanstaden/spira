@@ -15,14 +15,16 @@ st = pyclipper.scale_to_clipper
 sf = pyclipper.scale_from_clipper
 
 
-def boolean(subj, clip=None, clip_type=None, closed=True, scale=1):
+def boolean(subj, clip=None, clip_type=None, closed=True):
     """ Apply boolean operation of polygons. """
     if clip is None and len(subj) <= 1: return subj
-    sc = constants.CLIPPER_SCALE
     pc = pyclipper.Pyclipper()
+    sc = constants.CLIPPER_SCALE
     if clip is not None:
-        pc.AddPaths(st(clip, sc), pyclipper.PT_CLIP, True)
-    pc.AddPaths(st(subj, sc), pyclipper.PT_SUBJECT, closed)
+        clip_pts = reverse_points(clip)
+        pc.AddPaths(clip_pts, pyclipper.PT_CLIP, True)
+    subj_pts = reverse_points(subj)
+    pc.AddPaths(subj_pts, pyclipper.PT_SUBJECT, closed)
     ct = {
         'or' : pyclipper.CT_UNION,
         'and': pyclipper.CT_INTERSECTION,
@@ -38,7 +40,7 @@ def boolean(subj, clip=None, clip_type=None, closed=True, scale=1):
     return sf(value, sc)
 
 
-def offset(points, grow=1, accuracy=1.0, jointype='miter'):
+def offset(points, grow=1, jointype='miter'):
     """ Grow polygons and return the grown structures. """
     if grow == 0: return points
     sc = constants.CLIPPER_SCALE
@@ -54,12 +56,26 @@ def offset(points, grow=1, accuracy=1.0, jointype='miter'):
         print("Using default ('round')")
         jointype = 'round'
     pco.AddPaths(st([points], sc), jt[jointype], pyclipper.ET_CLOSEDPOLYGON)
-    pts = sf(pco.Execute(grow*sc), sc)
-    return pts
+    return sf(pco.Execute(grow*sc), sc)
+
+
+# NOTE: Maybe automate this in Shape().
+def reverse_points(pts):
+    """ If orientation is clockwise, convert to counter-clockwise. """
+    points = []
+    sc = constants.CLIPPER_SCALE
+    for poly in st(pts, sc):
+        if pyclipper.Orientation(poly) is False:
+            reverse_poly = pyclipper.ReversePath(poly)
+            solution = pyclipper.SimplifyPolygon(reverse_poly)
+        else:
+            solution = pyclipper.SimplifyPolygon(poly)
+        points.extend(solution)
+    return points
 
 
 def simplify_points(points, value=100):
-    """  """
+    """ Simplify curved shapes with more than 199 points. """
     from shapely.geometry import Polygon as ShapelyPolygon
     if len(points) > 199:
         factor = len(points) * value * RDD.GDSII.GRID
@@ -69,23 +85,8 @@ def simplify_points(points, value=100):
     return points
 
 
-def reverse_points(pts):
-    """  """
-    polygons = pyclipper.scale_to_clipper(pts, constants.CLIPPER_SCALE)
-    points = []
-    for poly in polygons:
-        if pyclipper.Orientation(poly) is False:
-            reverse_poly = pyclipper.ReversePath(poly)
-            solution = pyclipper.SimplifyPolygon(reverse_poly)
-        else:
-            solution = pyclipper.SimplifyPolygon(poly)
-        for sol in solution:
-            points.append(sol)
-    return points
-
-
 def clean_points(pts):
-    """  """
+    """ Clean the polygon by getting rid of numerical artifacts. """
     new_points = []
     mc = pyclipper.scale_from_clipper(pts, constants.CLIPPER_SCALE)
     for ps in pyclipper.SimplifyPolygons(mc):

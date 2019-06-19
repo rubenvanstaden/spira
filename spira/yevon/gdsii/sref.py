@@ -85,9 +85,6 @@ class __RefElemental__(__Elemental__):
         return SRef(reference=D)
         # return self.__class__(reference=D)
 
-    # def nets(self, contacts):
-    #     return self.ref.net(contacts)
-
 
 class SRef(__RefElemental__):
     """
@@ -139,14 +136,6 @@ class SRef(__RefElemental__):
         d.add(self.ref)
         d.add(self.ref.dependencies())
         return d
-
-    def nets(self, contacts, lcar=100):
-        from spira.yevon.gdsii.pcell import Device
-        if isinstance(self.ref, Device): lcar = 10
-        nets = self.ref.nets(contacts, lcar)
-        # T = self.transformation + Translation(self.midpoint)
-        # nets.transform(T)
-        return nets 
 
     def flatten(self):
         return self.ref.flatten()
@@ -296,6 +285,14 @@ class SRef(__RefElemental__):
                         Tn = stretching.stretch_elemental_by_port(self, opposite_port, port, destination)
                         Tn.apply(self.ref.elementals[i])
         return self
+
+    def nets(self, contacts, lcar=100):
+        from spira.yevon.gdsii.pcell import Device
+        if isinstance(self.ref, Device): lcar = 10
+        nets = self.ref.nets(contacts, lcar)
+        # T = self.transformation + Translation(self.midpoint)
+        # nets.transform(T)
+        return nets 
 
 
 class ARef(__RefElemental__):

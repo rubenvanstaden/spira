@@ -31,10 +31,32 @@ class Jtl(spira.PCell):
         return elems
 
 
-# -------------------------------------------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------------------
 
 
 if __name__ == '__main__':
 
-    D = Jtl(pcell=False)
+    D = Jtl()
+    # D.gdsii_output()
+    # D.netlist_output()
+    
+    # from spira.yevon.filters.boolean_filter import MetalConnectFilter
+    # F = MetalConnectFilter()
+    # D = F(D)
+    
+    # C = spira.Cell()
+    # for i, p in enumerate(D.elementals.polygons):
+    #     if i == 0:
+    #         print(p)
+    #         print(p.shape.points)
+    #         print('')
+    #         C += p
+
+    # # for e in D.elementals.sref:
+    # #     print(e.ref.elementals)
+
     D.gdsii_output()
+
+    D = spira.Circuit(name='TestElectricalConnections', elementals=D.elementals)
+    D.netlist_output()
+

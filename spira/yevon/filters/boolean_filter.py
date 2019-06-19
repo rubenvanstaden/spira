@@ -2,18 +2,20 @@ from spira.log import SPIRA_LOG as LOG
 from spira.yevon.filters.filter import Filter
 from spira.yevon.gdsii.elem_list import ElementalList
 from spira.yevon.geometry.ports.port_list import PortList
+# from spira.yevon.geometry.edges.edge_list import EdgeListField
 
 
 __all__ = [
     'ProcessBooleanFilter',
     'SimplifyFilter',
     'ViaConnectFilter',
+    'MetalConnectFilter'
 ]
 
 
 class ProcessBooleanFilter(Filter):
     """  """
-    
+
     def __filter___Cell____(self, item):
         ports = PortList()
         elems = ElementalList()
@@ -63,6 +65,23 @@ class ViaConnectFilter(Filter):
             elems += e
         return item.__class__(elementals=elems)
 
+    def __repr__(self):
+        return "<ViaConnectFilter: \'{}\'>".format(self.name)
+
+
+class MetalConnectFilter(Filter):
+    """  """
+
+    def __filter___Cell____(self, item):
+        from spira.yevon.vmodel.virtual import virtual_connect
+        from spira.yevon.geometry.shapes.modifiers import ShapeConnected
+
+        D = item.expand_flat_copy()
+        v_model = virtual_connect(device=D)
+        for i, p in enumerate(D.elementals):
+            p.shape = ShapeConnected(original_shape=p.shape, edges=v_model.connected_edges)
+        return item
+        
     def __repr__(self):
         return "<ViaConnectFilter: \'{}\'>".format(self.name)
 

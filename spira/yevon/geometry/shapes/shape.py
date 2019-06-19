@@ -12,6 +12,7 @@ from spira.yevon.geometry import bbox_info
 from spira.core.parameters.variables import *
 from spira.core.transformable import Transformable
 from spira.yevon.geometry.ports.port_list import PortList
+from spira.core.parameters.variables import ListField
 from spira.yevon.geometry.coord import CoordField, Coord
 from spira.core.parameters.initializer import FieldInitializer
 from spira.core.parameters.processors import ProcessorTypeCast
@@ -116,7 +117,7 @@ class __Shape__(Transformable, FieldInitializer):
     def hash_string(self):
         import hashlib
         pts = np.array([self.points])
-        hash_key = np.sort([hashlib.sha1(p).digest() for p in pts])
+        hash_key = np.sort([hashlib.sha1(p).hexdigest() for p in pts])
         return str(hash_key)
 
     @property
@@ -128,7 +129,7 @@ class __Shape__(Transformable, FieldInitializer):
     def bbox_info(self):
         return bbox_info.bbox_info_from_numpy_array(self.points)
 
-    @property
+    # @property
     def segments(self):
         """ Returns a list of point pairs 
         with the segments of the shape. """
@@ -167,6 +168,92 @@ class __Shape__(Transformable, FieldInitializer):
         self.points = np.column_stack((x[order], y[order]))
         return self
 
+    def remove_identicals(self):
+        """ Removes consecutive identical points """
+        # FIXME: in some cases a series of many points close together 
+        # is removed, even if they form together a valid shape.
+        from spira import settings
+        pts = self.points
+        if len(pts) > 1:
+            identicals = np.prod(abs(pts - np.roll(self.points, -1, 0)) < 0.5 / settings.get_grids_per_unit(), 1)
+            if not self.is_closed:
+                identicals[-1] = False
+            self.points = np.delete(pts, identicals.nonzero()[0], 0)
+        return self
+
+    def remove_straight_angles(self):
+        """ removes points with turn zero or 180 degrees """
+        Shape.remove_identicals(self)
+        pts = self.points
+        if len(pts) > 1:
+            straight = (abs(abs((self.turns_rad() + (0.5 * np.pi)) % np.pi) - 0.5 * np.pi) < 0.00001)  # (self.turns_rad()%np.pi == 0.0)
+            if not self.is_closed:
+                straight[0] = False
+                straight[-1] = False
+            self.points = np.delete(pts, straight.nonzero()[0], 0)
+        return self
+
+    def angles_rad(self):
+        """ returns the angles (radians) of the connection between each point and the next """
+        pts = self.points
+        R = np.roll(pts, -1, 0)
+        radians = np.arctan2(R[:, 1] - pts[:, 1], R[:, 0] - pts[:, 0])
+        return radians
+
+    def turns_rad(self):
+        """ returns the angles (radians) of the turn in each point """
+        a = self.angles_rad()
+        return (a - np.roll(a, 1, 0) + np.pi) % (2 * np.pi) - np.pi
+
+    def intersections(self, other_shape):
+        """ the intersections with this shape and the other shape """
+        from spira.yevon.utils.geometry import intersection, lines_cross, lines_coincide, sort_points_on_line, points_unique
+
+        s = Shape(self.points)
+        s.remove_straight_angles()
+        segments1 = s.segments() 
+        if len(segments1) < 1:
+            return []
+
+        s = Shape(other_shape)
+        s.remove_straight_angles()
+        segments2 = s.segments() 
+        if len(segments2) < 1:
+            return []
+
+        # intersections = []
+        # for s1 in segments1:
+        #     for s2 in segments2:
+        #         if lines_cross(s1[0], s1[1], s2[0], s2[1], inclusive=True):
+        #             print('cross')
+        #             intersections += [intersection(s1[0], s1[1], s2[0], s2[1])]
+        #         elif lines_coincide(s1[0], s1[1], s2[0], s2[1]):
+        #             print('coincide')
+        #             print([s1[0], s1[1], s2[0], s2[1]])
+        #             pl = sort_points_on_line([s1[0], s1[1], s2[0], s2[1]])
+        #             intersections += [pl[1], pl[2]]  # the two middlemost points 
+        
+        intersections = []
+        for s1 in segments1:
+            s1_inter = []
+            for s2 in segments2:
+                if lines_cross(s1[0], s1[1], s2[0], s2[1], inclusive=True):
+                    c = [intersection(s1[0], s1[1], s2[0], s2[1])]
+                    s1_inter += c
+                # elif lines_coincide(s1[0], s1[1], s2[0], s2[1]):
+                #     print('coincide')
+                #     # print([s1[0], s1[1], s2[0], s2[1]])
+                #     pl = sort_points_on_line([s1[0], s1[1], s2[0], s2[1]])
+                #     intersections += [pl[1], pl[2]]  # the two middlemost points 
+
+            if len(s1_inter) > 1:
+                il = s1_inter
+                pl = sort_points_on_line([s1[0], s1[1], il[0], il[1]])
+                intersections += [pl[1], pl[2]]
+
+        intersections = points_unique(intersections)
+        return Shape(intersections)
+
     def insert(self, i, item):
         """ Inserts a list of points. """
         if isinstance(item, Shape):
@@ -184,11 +271,6 @@ class __Shape__(Transformable, FieldInitializer):
             raise TypeError("Wrong type " + str(type(item)) + " to extend Shape with")
         return self
 
-    # def transform_copy(self, transformation):
-    #     S = deepcopy(self)
-    #     S.points = transformation.apply_to_array(self.points)
-    #     return S
-
     def id_string(self):
         return self.__str__()
 
@@ -205,6 +287,7 @@ class Shape(__Shape__):
     """
 
     doc = StringField()
+    segment_labels = ListField(fdef_name='create_segment_labels')
 
     def __init__(self, points=None, **kwargs):
         super().__init__(**kwargs)
@@ -220,6 +303,9 @@ class Shape(__Shape__):
     # # NOTE: For some reason is required for deepcopy in `create_edge_ports`.
     # def __deepcopy__(self, memo):
     #     return Shape(points=deepcopy(self.points), transformation=deepcopy(self.transformation))
+
+    def create_segment_labels(self):
+        return []
 
     def __getitem__(self, index):
         """ Access a point. """
@@ -247,7 +333,7 @@ class Shape(__Shape__):
 
     def is_empty(self):
         return self.__len__() <= 1
-        
+
 
 def ShapeField(restriction=None, preprocess=None, **kwargs):
     R = RestrictType(Shape) & restriction
@@ -258,11 +344,14 @@ def ShapeField(restriction=None, preprocess=None, **kwargs):
 from spira.yevon.process.gdsii_layer import Layer
 from spira.yevon.geometry.ports.port import Port
 def shape_edge_ports(shape, layer, local_pid='None'):
+    
+    edges = PortList()
 
     xpts = list(shape.x_coords)
     ypts = list(shape.y_coords)
 
     n = len(xpts)
+
     xpts.append(xpts[0])
     ypts.append(ypts[0]) 
 
@@ -273,7 +362,6 @@ def shape_edge_ports(shape, layer, local_pid='None'):
     if layer.name == 'BBOX': bbox = True
     else: bbox = False
 
-    edges = PortList()
     for i in range(0, n):
         name = '{}_e{}'.format(layer.name, i)
         x = np.sign(clockwise) * (xpts[i+1] - xpts[i])
