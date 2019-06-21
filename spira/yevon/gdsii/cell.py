@@ -98,10 +98,6 @@ class CellAbstract(gdspy.Cell, __Cell__):
         deps += self
         return deps
 
-    # def flatten(self):
-    #     self.elementals = self.elementals.flatten()
-    #     return self.elementals
-
     def flat_copy(self, level=-1):
         name = '{}_{}'.format(self.name, 'Flat'),
         return Cell(name, self.elementals.flat_copy(level=level))
@@ -203,7 +199,7 @@ class Cell(CellAbstract):
         from spira.yevon.gdsii.polygon import Polygon
         from spira.yevon.geometry.ports.port import Port
         from spira.yevon.gdsii.pcell import Device
-
+        
         # FIXME: Check this.
         # D = deepcopy(self)
         S = self.expand_transform()
@@ -214,16 +210,12 @@ class Cell(CellAbstract):
                     subj += e
                 elif isinstance(e, SRef):
                     if exclude_devices is True:
-                        if isinstance(e.ref, Device): 
+                        if isinstance(e.ref, Device):
                             subj += e
-                        else: 
+                        else:
                             flat_polygons(subj=subj, cell=e.ref)
                     else: 
                         flat_polygons(subj=subj, cell=e.ref)
-            
-            # for e in cell.elementals:
-            #     if isinstance(e, SRef):
-            #         flat_polygons(subj=subj, cell=e.ref)
 
             for p in cell.ports:
                 port = Port(
@@ -237,11 +229,15 @@ class Cell(CellAbstract):
                     local_pid=p.local_pid
                 )
                 subj.ports += port
+
             return subj
+
         D = flat_polygons(C, S)
+
         return D
 
     def move(self, midpoint=(0,0), destination=None, axis=None):
+        """  """
         from spira.yevon.geometry.ports.base import __Port__
 
         if destination is None:
@@ -294,10 +290,6 @@ class Cell(CellAbstract):
         The elemental by moving the subject port, without
         distorting the entire elemental. Note: The opposite
         port position is used as the stretching center. 
-
-        Example
-        -------
-        >>> 
         """
         from spira.core.transforms import stretching
         from spira.yevon.geometry import bbox_info
@@ -313,8 +305,8 @@ class Cell(CellAbstract):
                         self.elementals[i] = T(e)
         return self
 
-    def nets(self, contacts=None, lcar=100):
-        return self.elementals.nets(contacts, lcar)
+    def nets(self, lcar, contacts=None):
+        return self.elementals.nets(lcar=lcar, contacts=contacts)
 
 
 class Connector(Cell):

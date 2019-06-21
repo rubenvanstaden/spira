@@ -268,5 +268,5 @@ if __name__ == '__main__':
 
     cell = spira.Cell(name='Route Tests')
     cell += spira.SRef(reference=TestManhattan())
-    cell.output()
+    cell.gdsii_output()
 

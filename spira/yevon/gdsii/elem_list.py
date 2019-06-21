@@ -104,7 +104,7 @@ class ElementalList(__ElementalList__):
         from spira.yevon.geometry.nets.net_list import NetList
         nets = NetList()
         for e in self._list:
-            nets += e.nets(contacts, lcar)
+            nets += e.nets(lcar=lcar, contacts=contacts)
         return nets
 
     def dependencies(self):

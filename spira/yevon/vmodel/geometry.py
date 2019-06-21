@@ -3,11 +3,11 @@ import pygmsh
 import meshio
 import networkx as nx
 
+from copy import deepcopy
 from spira.yevon.gdsii.elem_list import ElementalListField
 from spira.yevon.process.process_layer import ProcessField
 from spira.core.parameters.initializer import FieldInitializer
 from spira.core.parameters.variables import *
-from spira.yevon.utils.geometry import numpy_to_list
 from spira.core.parameters.descriptor import DataField, FunctionField
 from spira.yevon.process import get_rule_deck
 
@@ -33,7 +33,7 @@ class GmshGeometry(__Geometry__):
 
     lcar = NumberField(default=100, doc='Mesh characteristic length.')
     algorithm = IntegerField(default=1, doc='Mesh algorithm used by Gmsh.')
-    scale_Factor = NumberField(default=1e-0, doc='Mesh coord dimention scaling.')
+    scale_Factor = NumberField(default=1e-6, doc='Mesh coord dimention scaling.')
     coherence_mesh = BoolField(defualt=True, doc='Merge similar points.')
 
     process = ProcessField()
@@ -68,19 +68,16 @@ class GmshGeometry(__Geometry__):
         """ Creates physical surfaces that is compatible
         with the GMSH library for mesh generation. """
 
-        from copy import deepcopy
-
         surfaces = []
         for i, polygon in enumerate(self.process_polygons):
             ply = deepcopy(polygon)
             shape = ply.shape.transform(ply.transformation)
             layer = RDD.GDSII.EXPORT_LAYER_MAP[ply.layer]
-            pts = numpy_to_list(shape.points, start_height=0, unit=1e-6)
+            pts = [[p[0], p[1], 0] for p in shape.points]
             surface_label = '{}_{}_{}_{}'.format(layer.number, layer.datatype, GmshGeometry._ID, i)
             gp = self.geom.add_polygon(pts, lcar=self.lcar, make_surface=True, holes=None)
 
             for j, ll in enumerate(gp.lines):
-                # if hasattr(polygon.shape, 'segment_labels'):
                 line_label = polygon.shape.segment_labels[j] + "_" + str(j)
                 self.geom.add_physical(ll, label=line_label)
             self.geom.add_physical(gp.surface, label=surface_label)
@@ -112,10 +109,10 @@ class GmshGeometry(__Geometry__):
             self.geom, verbose=False, dim=2,
             prune_vertices=False,
             remove_faces=False,
-            geo_filename=geo_file
+            # geo_filename=geo_file
         )
 
-        meshio.write(mesh_file, mesh_data)
+        # meshio.write(mesh_file, mesh_data)
         # meshio.write(vtk_file, mesh_data)
 
         return mesh_data

@@ -6,6 +6,7 @@ from spira.core.parameters.descriptor import DataField
 from spira.yevon.process.gdsii_layer import LayerField
 from spira.core.parameters.variables import *
 from spira.yevon import constants
+from copy import deepcopy
 from spira.yevon.geometry.ports.port import Port
 from spira.yevon.process.gdsii_layer import Layer
 from spira.yevon.geometry import shapes
@@ -48,7 +49,6 @@ class TransformablePortProperty(PortProperty, Transformable):
 
 class SRefPortProperty(TransformablePortProperty):
     def create_ports(self, ports):
-        from copy import deepcopy
         pp = deepcopy(self.ref.ports)
         ports = pp.move(self.midpoint)
         # ports = pp.move_new(self.midpoint)
@@ -68,12 +68,8 @@ class PolygonPortProperty(PortProperty):
     edge_ports = ElementalListField()
 
     def create_edge_ports(self, edges):
-        from copy import deepcopy
-        # T = deepcopy(self.transformation)
         T = self.transformation
-        # shape = self.shape.transform(T)
         shape = deepcopy(self.shape).transform(T)
-        # shape = self.shape
         return shapes.shape_edge_ports(shape, self.layer, self.id_string())
 
     def create_ports(self, ports):
@@ -83,23 +79,5 @@ class PolygonPortProperty(PortProperty):
                 ports += edge
         # ports.transform(-self.transformation)
         return ports
-
-    # def create_ports(self, ports):
-    #     # if self.enable_edges:
-    #     if self.layer.purpose == RDD.PURPOSE.JUNCTION:
-    #         ports += self.contact_ports
-    #     elif self.layer.purpose == RDD.PURPOSE.VIA:
-    #         ports += self.contact_ports
-    #     elif self.layer.purpose == RDD.PURPOSE.METAL:
-    #         if self.level == 1:
-    #             ports += self.metal_port
-    #         for edge in self.edge_ports:
-    #             ports += edge
-    #     elif self.layer.purpose == RDD.PURPOSE.PROTECTION:
-    #         for edge in self.edge_ports:
-    #             ports += edge
-    #     return ports
-            
-    
 
 

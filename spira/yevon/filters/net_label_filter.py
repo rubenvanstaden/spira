@@ -21,6 +21,14 @@ __all__ = [
 ]
 
 
+def get_triangles_containing_line(item, line):
+    nodes = []
+    for n, triangle in enumerate(item.triangles):
+        if (line[0] in triangle) and (line[1] in triangle):
+            nodes.append(n)
+    return nodes
+
+
 class __NetFilter__(Filter):
     pass
 
@@ -35,21 +43,60 @@ class NetProcessLabelFilter(__NetFilter__):
         for key, nodes in triangles.items():
             for n in nodes:
                 for e in self.process_polygons:
+
+                    # print(e.points)
+                    # print(item.g.node[n]['position'])
+                    # print('')
+
                     if e.encloses(item.g.node[n]['position']):
                         item.g.node[n]['process_polygon'] = e
                         item.g.node[n]['display'] = RDD.DISPLAY.STYLE_SET[e.layer]
-        return item
+
+        return [item]
 
     def __repr__(self):
         return "[SPiRA: NetLabelFilter] (layer count {})".format(0)
 
 
-def get_triangles_containing_line(item, line):
-    nodes = []
-    for n, triangle in enumerate(item.triangles):
-        if (line[0] in triangle) and (line[1] in triangle):
-            nodes.append(n)
-    return nodes
+class NetDeviceLabelFilter(__NetFilter__):
+    """ Add 'enabled' ports to the net. """
+
+    device_ports = PortListField()
+
+    def __filter___Net____(self, item):
+        # triangles = item.process_triangles()
+        # for key, nodes in triangles.items():
+        #     for n in nodes:
+        #         for D in self.device_ports:
+        #             if isinstance(D, ContactPort):
+        #                 print(item.g.node[n]['position'])
+        #                 if D.encloses(item.g.node[n]['position']):
+        #                     print(D)
+        #                     print(points)
+        #                     print('')
+        #                     item.g.node[n]['device_reference'] = D
+        #                     item.g.node[n]['display'] = RDD.DISPLAY.STYLE_SET[D.layer]
+                
+        for n, triangle in item.triangle_nodes().items():
+            points = [geometry.c2d(item.mesh_data.points[i]) for i in triangle]
+            for D in self.device_ports:
+                if isinstance(D, ContactPort):
+                    if D.encloses(points):
+                        # print(D)
+                        # print(points)
+                        # print('')
+                        item.g.node[n]['device_reference'] = D
+                        item.g.node[n]['display'] = RDD.DISPLAY.STYLE_SET[D.layer]
+                elif isinstance(D, Port):
+                    if D.purpose == RDD.PURPOSE.PORT.EDGE_ENABLED:
+                        if D.encloses(points):
+                            item.g.node[n]['device_reference'] = D
+                            item.g.node[n]['display'] = RDD.DISPLAY.STYLE_SET[D.layer]
+
+        return [item]
+
+    def __repr__(self):
+        return "[SPiRA: NetLabelFilter] (layer count {})".format(0)
 
 
 class NetEdgeFilter(__NetFilter__):
@@ -94,8 +141,8 @@ class NetEdgeFilter(__NetFilter__):
                                 for n in get_triangles_containing_line(item, item.lines[i]):
                                     item.g.node[n]['process_polygon'] = e
                                     # FIXME: Change to equal the overlapping edge display.
-                                    item.g.node[n]['display'] = RDD.DISPLAY.STYLE_SET[RDD.PLAYER.I5.VIA]
-                                    # item.g.node[n]['display'] = RDD.DISPLAY.STYLE_SET[RDD.PLAYER.M1.HOLE]
+                                    # item.g.node[n]['display'] = RDD.DISPLAY.STYLE_SET[RDD.PLAYER.I5.VIA]
+                                    item.g.node[n]['display'] = RDD.DISPLAY.STYLE_SET[RDD.PLAYER.M1.HOLE]
                                 
                                 # line = item.lines[i]
                                 # for n, triangle in enumerate(item.triangles):
@@ -123,59 +170,6 @@ class NetEdgeFilter(__NetFilter__):
                         #             item.g.node[3]['process_polygon'] = e
                         #             item.g.node[3]['display'] = RDD.DISPLAY.STYLE_SET[e.layer]
 
-        return item
-
-    def __repr__(self):
-        return "[SPiRA: NetLabelFilter] (layer count {})".format(0)
-
-
-class NetDeviceLabelFilter(__NetFilter__):
-    """ Add 'enabled' ports to the net. """
-
-    device_ports = PortListField()
-
-    def __filter___Net____(self, item):
-        for n, triangle in item.triangle_nodes().items():
-            points = [geometry.c2d(item.mesh_data.points[i]) for i in triangle]
-            for D in self.device_ports:
-                if isinstance(D, ContactPort):
-                    if D.encloses(points):
-                        # if 'device_reference' in item.g.node[n]:
-                        #     # D = item.g.node[n]['device_reference']
-                        #     polygon = item.g.node[n]['process_polygon']
-                        #     # position = item.g.node[n]['position']
-                        #     position = deepcopy(D.midpoint)
-                        #     display = item.g.node[n]['display']
-                        #     item.add_new_node(n=n, D=D, polygon=polygon, position=position, display=display)
-
-                        #     # C = item.g.node[n]['device_reference']
-                        #     # port = BranchPort(
-                        #     #     name='D1',
-                        #     #     midpoint=C.midpoint,
-                        #     #     process=RDD.PROCESS.M2,
-                        #     #     purpose=RDD.PURPOSE.PORT.BRANCH
-                        #     # )
-                        #     # item.g.node[n]['device_reference'] = port
-
-                        # else:
-                            # item.g.node[n]['device_reference'] = D
-                            # item.g.node[n]['display'] = RDD.DISPLAY.STYLE_SET[D.layer]
-                        item.g.node[n]['device_reference'] = D
-                        item.g.node[n]['display'] = RDD.DISPLAY.STYLE_SET[D.layer]
-                elif isinstance(D, Port):
-                    if D.purpose == RDD.PURPOSE.PORT.EDGE_ENABLED:
-                        if D.encloses(points):
-                            item.g.node[n]['device_reference'] = D
-                            item.g.node[n]['display'] = RDD.DISPLAY.STYLE_SET[D.layer]
-                # else:
-                #     for p in D.ports:
-                #         if p.gds_layer.number == item.layer.number:
-                #             if p.encloses(points):
-                #                 if 'device_reference' in item.g.node[n]:
-                #                     item.add_new_node(n, D, p.midpoint)
-                #                 else:
-                #                     # TODO: Maybe to item.node_device = D
-                #                     item.g.node[n]['device_reference'] = D
         return item
 
     def __repr__(self):

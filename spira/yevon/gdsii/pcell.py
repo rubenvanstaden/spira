@@ -22,9 +22,10 @@ class PCell(Cell):
     def __create_elementals__(self, elems):
 
         F = RDD.PCELLS.FILTERS
-        F['simplify'] = False
-        F['via_contact'] = False
-        # F['metal_connect'] = False
+        # F['boolean'] = False
+        # F['simplify'] = False
+        # F['via_contact'] = False
+        F['metal_connect'] = False
 
         elems = self.create_elementals(elems)
         elems += self.structures
@@ -32,7 +33,6 @@ class PCell(Cell):
 
         if self.pcell is True:
             D = Cell(elementals=elems).expand_flat_copy(exclude_devices=True)
-            # D = Cell(elementals=el.flat_copy())
             elems = F(D).elementals
 
         return elems
@@ -40,11 +40,12 @@ class PCell(Cell):
 
 class Device(PCell):
 
-    lcar = NumberField(default=RDD.PCELLS.LCAR_DEVICE)
+    # lcar = NumberField(default=RDD.PCELLS.LCAR_DEVICE)
+    lcar = NumberField(default=0.5)
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        
+
     def __repr__(self):
         class_string = "[SPiRA: Device(\'{}\')] (elementals {}, ports {})"
         return class_string.format(self.name, self.elementals.__len__(), self.ports.__len__())
@@ -52,11 +53,43 @@ class Device(PCell):
     def __str__(self):
         return self.__repr__()
 
+    def __create_elementals__(self, elems):
+
+        F = RDD.PCELLS.FILTERS
+        # F['boolean'] = False
+        # F['simplify'] = False
+        # F['via_contact'] = False
+        # F['metal_connect'] = False
+
+        elems = self.create_elementals(elems)
+        elems += self.structures
+        elems += self.routes
+
+        if self.pcell is True:
+            D = Cell(elementals=elems.flat_copy())
+            elems = F(D).elementals
+
+        return elems
+
+    def create_netlist(self):
+        net = self.nets(lcar=self.lcar).disjoint()
+        # net = netlist.combine_net_nodes(net=net, algorithm=['d2d'])
+        # net = netlist.combine_net_nodes(net=net, algorithm=['d2d', 's2s'])
+        return net
+
 
 class Circuit(PCell):
     """  """
 
-    lcar = NumberField(default=RDD.PCELLS.LCAR_CIRCUIT)
+    # lcar = NumberField(default=RDD.PCELLS.LCAR_CIRCUIT)
+    lcar = NumberField(default=1)
+
+    def __repr__(self):
+        class_string = "[SPiRA: Circuit(\'{}\')] (elementals {}, ports {})"
+        return class_string.format(self.name, self.elementals.__len__(), self.ports.__len__())
+
+    def __str__(self):
+        return self.__repr__()
 
     def create_netlist(self):
         net = self.nets(lcar=self.lcar).disjoint()

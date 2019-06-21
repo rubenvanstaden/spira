@@ -95,10 +95,8 @@ class Net(__Net__):
     def _add_positions(self, n, triangle):
         pp = self.mesh_data.points
         n1, n2, n3 = pp[triangle[0]], pp[triangle[1]], pp[triangle[2]]
-        x = ((n1[0] + n2[0] + n3[0])/3) / RDD.GDSII.GRID
-        y = ((n1[1] + n2[1] + n3[1])/3) / RDD.GDSII.GRID
-        # x = (n1[0] + n2[0] + n3[0])/3
-        # y = (n1[1] + n2[1] + n3[1])/3
+        x = (n1[0] + n2[0] + n3[0]) / (3*RDD.GDSII.GRID)
+        y = (n1[1] + n2[1] + n3[1]) / (3*RDD.GDSII.GRID)
         self.g.node[n]['vertex'] = triangle
         self.g.node[n]['position'] = Coord(x, y)
         self.g.node[n]['display'] = RDD.DISPLAY.STYLE_SET[RDD.PLAYER.METAL]

@@ -38,9 +38,9 @@ el += p2
 
 el += spira.Rectangle(p1=(0, 10), p2=(4, 14), layer=RDD.PLAYER.M5.METAL)
 
+from spira.yevon.filters.boolean_filter import MetalConnectFilter
 from spira.yevon.vmodel.virtual import virtual_connect
 from spira.yevon.geometry.shapes.modifiers import ShapeConnected
-from spira.yevon.filters.boolean_filter import MetalConnectFilter
 from spira.yevon.geometry.shapes.shape import Shape
 from copy import deepcopy
 
@@ -48,46 +48,39 @@ device = spira.Cell(name='Device', elementals=el)
 
 D = device
 
-v_model = virtual_connect(device=D)
-# v_model.gdsii_output_virtual_connect()
+
+# v_model = virtual_connect(device=D)
+# # v_model.gdsii_output_virtual_connect()
+
+# # points = np.array)([])
+# for i, e1 in enumerate(D.elementals):
+#     points = []
+#     for e2 in D.elementals:
+#         e1 = deepcopy(e1)
+#         e2 = deepcopy(e2)
+#         if e1 != e2:
+#             overlap_shape = e1.shape.intersections(e2.shape)
+#             points.extend(overlap_shape.points.tolist())
+#     print('[--] Overlapping shape points:')
+#     print(points)
+
+# # for i, p in enumerate(D.elementals):
+
+#     # e1.shape = ShapeConnected(original_shape=e1.shape, overlapping_shape=Shape(points), edges=v_model.connected_edges)
+#     D.elementals[i].shape = ShapeConnected(original_shape=e1.shape, overlapping_shape=Shape(points), edges=v_model.connected_edges)
+#     print('---------')
+#     print(e1.shape.points)
+
+#     # if i == 2:
+#     #     e1.shape = ShapeConnected(original_shape=e1.shape, overlapping_shape=Shape(points), edges=v_model.connected_edges)
+#     #     print('---------')
+#     #     print(e1.shape.points)
+
+# # device.gdsii_output()
 
 
-# points = np.array)([])
-for i, e1 in enumerate(D.elementals):
-    points = []
-    for e2 in D.elementals:
-        e1 = deepcopy(e1)
-        e2 = deepcopy(e2)
-        if e1 != e2:
-            overlap_shape = e1.shape.intersections(e2.shape)
-            points.extend(overlap_shape.points.tolist())
-    print('[--] Overlapping shape points:')
-    print(points)
-
-# for i, p in enumerate(D.elementals):
-
-    # e1.shape = ShapeConnected(original_shape=e1.shape, overlapping_shape=Shape(points), edges=v_model.connected_edges)
-    D.elementals[i].shape = ShapeConnected(original_shape=e1.shape, overlapping_shape=Shape(points), edges=v_model.connected_edges)
-    print('---------')
-    print(e1.shape.points)
-
-    # if i == 2:
-    #     e1.shape = ShapeConnected(original_shape=e1.shape, overlapping_shape=Shape(points), edges=v_model.connected_edges)
-    #     print('---------')
-    #     print(e1.shape.points)
-
-# device.gdsii_output()
-
-# F = MetalConnectFilter()
-# D = F(device)
-
-
-print('\n[--] Elementals:')
-for i, p in enumerate(D.elementals):
-    print(p)
-    print(type(p.shape))
-    print(p.shape.points)
-    print('')
+F = MetalConnectFilter()
+D = F(device)
 
 D.gdsii_output()
 

@@ -42,9 +42,9 @@ class __Polygon__(__LayerElemental__):
         return hash(self.__repr__())
 
     def encloses(self, point):
-        # return not pyclipper.PointInPolygon(point, self.points) == 0
+        from spira.yevon.utils import clipping
         shape = self.shape.transform_copy(self.transformation)
-        return not pyclipper.PointInPolygon(point, shape.points) == 0
+        return clipping.encloses(coord=point, points=shape.points)
 
     def expand_transform(self):
         from spira.core.transforms.identity import IdentityTransform
@@ -55,20 +55,24 @@ class __Polygon__(__LayerElemental__):
         return self
 
     def flat_copy(self, level = -1):
+        """  """
         S = Polygon(layer=self.layer, shape=self.shape, transformation=self.transformation)
         S.expand_transform()
         return S
 
     def fillet(self, radius, angle_resolution=128, precision=0.001):
+        """  """
         super().fillet(radius=radius, points_per_2pi=angle_resolution, precision=precision)
         self.shape.points = self.polygons
         return self
 
     def stretch(self, factor=(1,1), center=(0,0)):
+        """  """
         T = spira.Stretch(stretch_factor=factor, stretch_center=center)
         return T.apply(self)
 
     def stretch_copy(self, factor=(1,1), center=(0,0)):
+        """  """
         T = spira.Stretch(stretch_factor=factor, stretch_center=center)
         return T.apply_copy(self)
 
@@ -176,12 +180,15 @@ class Polygon(__Polygon__):
         The extra transformation parameter is the
         polygon edge ports.
         """
+        from spira.yevon.utils.geometry import scale_polygon_up as spu
         layer = RDD.GDSII.EXPORT_LAYER_MAP[self.layer]
         T = self.transformation + transformation
         shape = deepcopy(self.shape).transform(T)
+        pts = spu([shape.points])
         # shape = self.shape
         return gdspy.Polygon(
-            points=shape.points,
+            # points=shape.points,
+            points=pts,
             layer=layer.number,
             datatype=layer.datatype,
             verbose=False
@@ -194,38 +201,37 @@ class Polygon(__Polygon__):
         from spira.yevon.geometry.edges.edges import generate_polygon_edges
         return generate_polygon_edges(shape=self.shape, layer=self.layer)
 
-    def nets(self, contacts=None, lcar=100):
+    def nets(self, lcar, contacts=None):
         from spira.yevon.geometry.nets.net import Net
         from spira.yevon.vmodel.geometry import GmshGeometry
         from spira.yevon.geometry.ports.port import ContactPort
-        from spira.yevon.filters.net_label_filter import NetProcessLabelFilter, NetDeviceLabelFilter, NetEdgeFilter
+        from spira.yevon import filters
 
         if self.purpose == 'METAL':
-            # geometry = GmshGeometry(lcar=0.1*1e-6, process=self.layer.process, process_polygons=[deepcopy(self)])
-            geometry = GmshGeometry(lcar=10*1e-6, process=self.layer.process, process_polygons=[deepcopy(self)])
-    
-            net = Net(name=self.process, geometry=geometry)
-    
-            # # Fs += NetDeviceLabelFilter(device_ports=contacts)
-    
-            # cc = []
-            # for p in self.ports:
-            #     if isinstance(p, ContactPort):
-            #         cc.append(p)
-            # print(cc)
-    
-            Fs = NetProcessLabelFilter(process_polygons=[deepcopy(self)])
-            Fs += NetEdgeFilter(process_polygons=[deepcopy(self)])
-            # # Fs += NetDeviceLabelFilter(device_ports=cc)
-    
-            net = Fs(net)
 
-            return net
-    
+            if RDD.ENGINE.GEOMETRY == 'GMSH_ENGINE':
+                geometry = GmshGeometry(lcar=lcar,
+                    process=self.layer.process,
+                    process_polygons=[deepcopy(self)])
+
+            cc = []
+            for p in self.ports:
+                if isinstance(p, ContactPort):
+                    cc.append(p)
+
+            F = filters.ToggledCompoundFilter()
+            F += filters.NetProcessLabelFilter(process_polygons=[deepcopy(self)])
+            F += filters.NetDeviceLabelFilter(device_ports=cc)
+            # F += filters.NetEdgeFilter(process_polygons=[deepcopy(self)])
+
+            net = Net(name=self.process, geometry=geometry)
+
+            return F(net)
+
             # # from spira.yevon.utils.netlist import combine_net_nodes
             # # net.g = combine_net_nodes(g=net.g, algorithm='d2d')
             # # net.g = combine_net_nodes(g=net.g, algorithm='s2s')
-    
+
             # from spira.yevon.geometry.nets.net import CellNet
             # cn = CellNet()
             # cn.g = net.g
@@ -234,59 +240,6 @@ class Polygon(__Polygon__):
             # return cn
 
         return []
-    
-
-
-    # def nets(self, contacts):
-    #     from spira.yevon.geometry.nets.net import Net
-    #     from spira.yevon.geometry.nets.net_list import NetList
-    #     from spira.yevon.vmodel.virtual import virtual_process_model
-    #     from spira.yevon.filters.net_label_filter import NetProcessLabelFilter, NetDeviceLabelFilter
-    #     from spira.yevon.gdsii.cell import Cell
-    #     from spira.yevon.gdsii.elem_list import ElementalList
-
-    #     D = Cell(name=self.alias)
-    #     D += deepcopy(self)
-    #     # shape = self.shape.transform(self.transformation)
-    #     # P = Polygon(shape, layer=deepcopy(self.layer))
-    #     # D += P
-        
-    #     # if RDD.ENGINE.GEOMETRY == 'GMSH_ENGINE':
-    #     #     process_geom[pg.process] = GmshGeometry(
-    #     #         process=pg.process, 
-    #     #         process_polygons=pg.elementals
-    #     #     )
-    #     # else:
-    #     #     raise ValueError('Geometry engine type not specificied in RDD.')
-
-    #     vp = virtual_process_model(device=D, process_flow=RDD.VMODEL.PROCESS_FLOW)
-    #     for process, geometry in vp.geometry.items():
-    #         net = Net(name=self.__repr__(), geometry=geometry)
-
-    #         pp = ElementalList()
-
-    #         for e in geometry.process_polygons:
-    #             if e.layer.process == process:
-    #                 pp += e
-    #         # print(pp)
-
-    #         # for e in D.process_elementals:
-    #         #     if e.layer.process == process:
-    #         #         pp += e
-    #         # print(pp)
-
-    #         # print('\n[*] Contacts:')
-    #         # for c in contacts:
-    #         #     print(c)
-    #         # print('')
-
-    #         Fs = NetProcessLabelFilter(process_polygons=pp)
-    #         Fs += NetDeviceLabelFilter(device_ports=contacts)
-    #         # Fs += spira.NetBlockLabelFilter(references=self.elementals.sref)
-
-    #         # net = Fs(net).transform(self.transformation)
-    #         net = Fs(net)
-    #     return net
 
 
 def Rectangle(layer, p1=(0,0), p2=(2,2), center=(0,0), alias=None):

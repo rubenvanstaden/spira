@@ -33,8 +33,6 @@ class ShapeConnected(__ShapeModifier__):
 
         labels = []
 
-        print('wejfbkjfwbjbwekfbwefjkbekfwk')
-        
         for i, s1 in enumerate(self.segments()):
             labels.append(str(i))
 

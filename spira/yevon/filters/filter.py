@@ -126,8 +126,8 @@ class ToggledCompoundFilter(__CompoundFilter__):
             raise KeyError("__ToggledCompoundFilter__: item must be of type bool, is type %s"%(type(item)))
         self._filter_status[key]=item
 
-    def __getitem__(self,key):
-        if not isinstance(key,str):
+    def __getitem__(self, key):
+        if not isinstance(key, str):
             raise KeyError("__ToggledCompoundFilter__: key must be of type str, is type %s"%(type(key)))
         if not key in self._filter_status.keys():
             return True

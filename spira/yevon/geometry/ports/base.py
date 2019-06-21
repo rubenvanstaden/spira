@@ -31,7 +31,15 @@ class __PhysicalPort__(__Port__):
     local_pid = StringField(default='none_local_pid')
     text_type = NumberField(default=RDD.GDSII.TEXT)
 
+    # FIXME: Look at how this is done with elementals.
     def __add__(self, other):
+        """ 
+        Allows for this type of operations:
+
+        Example
+        -------
+        >>> midpoint = self.jj1.ports['P2'] + [-5, 0]
+        """
         if other is None: return self
         p1 = Coord(self.midpoint[0], self.midpoint[1]) + Coord(other[0], other[1])
         return p1
@@ -56,7 +64,8 @@ class __PhysicalPort__(__Port__):
         return E
 
     def encloses(self, points):
-        return pyclipper.PointInPolygon(self.midpoint, points) != 0
+        from spira.yevon.utils import clipping
+        return clipping.encloses(coord=self.midpoint, points=points)
 
     def transform(self, transformation):
         self.midpoint = transformation.apply_to_coord(self.midpoint)

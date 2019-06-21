@@ -286,10 +286,10 @@ class SRef(__RefElemental__):
                         Tn.apply(self.ref.elementals[i])
         return self
 
-    def nets(self, contacts, lcar=100):
+    def nets(self, lcar, contacts=None):
         from spira.yevon.gdsii.pcell import Device
-        if isinstance(self.ref, Device): lcar = 10
-        nets = self.ref.nets(contacts, lcar)
+        # if isinstance(self.ref, Device): lcar = 10
+        nets = self.ref.nets(lcar, contacts)
         # T = self.transformation + Translation(self.midpoint)
         # nets.transform(T)
         return nets 

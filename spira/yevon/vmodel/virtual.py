@@ -57,12 +57,11 @@ class VirtualConnect(__VirtualModel__):
                 mapping[RDD.PLAYER[k].CLAYER_M1] = RDD.VIAS[k].LAYER_STACK['BOT_LAYER']
                 mapping[RDD.PLAYER[k].CLAYER_M2] = RDD.VIAS[k].LAYER_STACK['TOP_LAYER']
 
-            print('\nMapping:')
-            for k, v in mapping.items():
-                print(k, v)
-            print('')
-
-            print(self.device.elementals)
+            # print('\nMapping:')
+            # for k, v in mapping.items():
+            #     print(k, v)
+            # print('')
+            # print(self.device.elementals)
 
             el = get_derived_elementals(elements=self.device.elementals, mapping=mapping)
             for e in el:
@@ -126,6 +125,8 @@ class VirtualConnect(__VirtualModel__):
         return overlap_edges
 
     def create_connected_elementals(self):
+        """ Adds contact ports to each metal polygon connected by a 
+        contact layer and return a list of the updated elementals. """
         for e1 in self.__make_polygons__():
             for e2 in self.device.elementals:
                 for m in ['BOT_LAYER', 'TOP_LAYER']:

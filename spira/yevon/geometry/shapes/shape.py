@@ -211,7 +211,7 @@ class __Shape__(Transformable, FieldInitializer):
 
         s = Shape(self.points)
         s.remove_straight_angles()
-        segments1 = s.segments() 
+        segments1 = s.segments()
         if len(segments1) < 1:
             return []
 
@@ -305,7 +305,10 @@ class Shape(__Shape__):
     #     return Shape(points=deepcopy(self.points), transformation=deepcopy(self.transformation))
 
     def create_segment_labels(self):
-        return []
+        labels = []
+        for i, s1 in enumerate(self.segments()):
+            labels.append(str(i))
+        return labels
 
     def __getitem__(self, index):
         """ Access a point. """

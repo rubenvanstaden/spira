@@ -20,6 +20,9 @@ from spira.yevon import constants
 RDD = get_rule_deck()
 
 
+__all__ = ['RouteArcShape', 'RouteSquareShape', 'RouteSimple', 'RoutePointShape']
+
+
 class __RouteSimple__(shapes.Shape):
     """ Interface class for shaping route patterns. """
 
@@ -230,7 +233,7 @@ class RouteSimple(__RouteSimple__):
 
 class RoutePointShape(__RouteSimple__):
 
-    width = FloatField(default=100)
+    width = NumberField(default=100)
     angles = DataField(fdef_name='create_angles')
 
     def get_path(self):

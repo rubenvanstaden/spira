@@ -59,14 +59,14 @@ class OutputGdsii(FieldInitializer):
             cp, cl, C_ports = {}, {}, {}
             G = self.__collected_cells__[c]
             
-            # for p in c.ports:
-            #     # self.collect_polygons(p.edge, cp)
-            #     L = PortLayout(port=p)
-            #     for e in L.elementals:
-            #         if isinstance(e, Polygon):
-            #             self.collect_polygons(e, cp)
-            #         elif isinstance(e, Label):
-            #             self.collect_labels(e, cl)
+            for p in c.ports:
+                # self.collect_polygons(p.edge, cp)
+                L = PortLayout(port=p)
+                for e in L.elementals:
+                    if isinstance(e, Polygon):
+                        self.collect_polygons(e, cp)
+                    elif isinstance(e, Label):
+                        self.collect_labels(e, cl)
 
             for e in c.elementals:
                 if isinstance(e, Polygon):
@@ -74,12 +74,12 @@ class OutputGdsii(FieldInitializer):
                         for p in e.ports:
                             if p.id_string() not in _polygon_ports:
 
-                                # L = PortLayout(port=p, transformation=e.transformation)
-                                # for e in L.elementals:
-                                #     if isinstance(e, Polygon):
-                                #         self.collect_polygons(e, cp)
-                                #     elif isinstance(e, Label):
-                                #         self.collect_labels(e, cl)
+                                L = PortLayout(port=p, transformation=e.transformation)
+                                for e in L.elementals:
+                                    if isinstance(e, Polygon):
+                                        self.collect_polygons(e, cp)
+                                    elif isinstance(e, Label):
+                                        self.collect_labels(e, cl)
 
                                 _polygon_ports.append(p.id_string())
 
@@ -96,8 +96,8 @@ class OutputGdsii(FieldInitializer):
             for e in c.elementals:
                 if isinstance(e, Polygon):
                     self.collect_polygons(e, cp)
-                elif isinstance(e, Label):
-                    self.collect_labels(e, cl)
+                # elif isinstance(e, Label):
+                #     self.collect_labels(e, cl)
 
             for e in cp.values():
                 G.add(e)
@@ -139,7 +139,7 @@ class OutputGdsii(FieldInitializer):
 
         # NOTE: First collect all port polygons and labels,
         # before commiting them to a cell instance.
-        self.collect_ports(item)
+        # self.collect_ports(item)
         self.collect_cells(item)
 
         # NOTE: Gdspy cells must first be constructed, 
@@ -168,7 +168,9 @@ class GdsiiLayout(object):
         gdspy.LayoutViewer(library=gdspy_library)
 
         if name is not None:
-            writer = gdspy.GdsWriter('{}.gds'.format(name), unit=1.0e-12, precision=1.0e-12)
+            # writer = gdspy.GdsWriter('{}.gds'.format(name), unit=1.0e-12, precision=1.0e-12)
+            writer = gdspy.GdsWriter('{}.gds'.format(name), unit=1.0e-6, precision=1.0e-6)
+            # writer = gdspy.GdsWriter('{}.gds'.format(name), unit=1.0e6, precision=1.0e6)
             for name, cell in gdspy_library.cell_dict.items():
                 writer.write_cell(cell)
                 del cell

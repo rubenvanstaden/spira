@@ -7,6 +7,7 @@ RDD.GDSII = ParameterDatabase()
 RDD.GDSII.TEXT = 64
 RDD.GDSII.UNIT = 1e-6
 RDD.GDSII.GRID = 1e-6
+# RDD.GDSII.GRID = 1e-12
 RDD.GDSII.PRECISION = 1e-9
 
 # ---------------------------------- Engines ---------------------------------------

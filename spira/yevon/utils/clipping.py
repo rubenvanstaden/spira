@@ -37,7 +37,10 @@ def boolean(subj, clip=None, clip_type=None, closed=True):
         print("Using default ('or')")
         clip_type = 'or'
     value = pc.Execute(ct[clip_type], pyclipper.PFT_NONZERO, pyclipper.PFT_NONZERO)
-    return sf(value, sc)
+    # value = clean_points(pts=sf(value, sc))
+    value = clean_points(pts=value)
+    return value
+    # return sf(value, sc)
 
 
 def offset(points, grow=1, jointype='miter'):
@@ -86,15 +89,22 @@ def simplify_points(points, value=100):
 
 
 def clean_points(pts):
-    """ Clean the polygon by getting rid of numerical artifacts. """
-    new_points = []
-    mc = pyclipper.scale_from_clipper(pts, constants.CLIPPER_SCALE)
-    for ps in pyclipper.SimplifyPolygons(mc):
-        new_points.append(np.array(ps))
-    cln_pts = pyclipper.CleanPolygons(new_points)
-    points = np.array([np.array(p) for p in cln_pts])
-    return points
+    """ Clean the polygon by getting rid of numerical artifacts. 
+    This is required to overcome Gmsh parsing errors. """
+    sc = constants.CLIPPER_SCALE
+    spl_pts = pyclipper.SimplifyPolygons(pts)
+    cln_pts = pyclipper.CleanPolygons(spl_pts)
+    pts = sf(cln_pts, sc)
+    return np.array(pts)
 
 
+def encloses(coord, points):
+    sc = constants.CLIPPER_SCALE
+    coord = st(coord.to_list(), sc)
+    points = st(points, sc)
+    # print(coord)
+    # print(points)
+    # print('')
+    return pyclipper.PointInPolygon(coord, points) != 0
 
 

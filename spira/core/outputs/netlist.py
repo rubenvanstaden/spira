@@ -126,20 +126,22 @@ class PlotlyGraph(object):
 
     def _create_nodes(self, G, labeltext):
 
-        nodes = {}
-        nodes['x_pos'] = []
-        nodes['y_pos'] = []
-        nodes['text'] = []
-        nodes['color'] = []
+        def _init_nodes(G):
+            nodes = {}
+            nodes['x_pos'] = []
+            nodes['y_pos'] = []
+            nodes['text'] = []
+            nodes['color'] = []
+            for n in G.nodes():
+                x, y = G.node[n]['position']
+                nodes['x_pos'].append(x)
+                nodes['y_pos'].append(y)
+                nodes['text'].append(n)
+                nodes['color'].append(color.COLOR_BLACK.hexcode)
+            return nodes
 
-        # NOTE: First set the default values.
-        for n in G.nodes():
-            x, y = G.node[n]['position']
-            nodes['x_pos'].append(x)
-            nodes['y_pos'].append(y)
-            nodes['text'].append(n)
-            nodes['color'].append(color.COLOR_BLACK.hexcode)
-
+        nodes = _init_nodes(G=G)
+    
         for n in G.nodes():
             node_value = None
             if 'device_reference' in G.node[n]:
