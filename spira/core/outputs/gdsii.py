@@ -1,10 +1,11 @@
 import os
 import gdspy
-import spira.all as spira
+# import spira.all as spira
 
 from spira import settings
 from spira import log as LOG
 from spira.yevon.gdsii import *
+from spira.core.parameters.variables import *
 from spira.core.mixin import MixinBowl
 from spira.core.outputs.base import Outputs
 from spira.core.parameters.initializer import FieldInitializer
@@ -13,7 +14,11 @@ from spira.core.parameters.initializer import FieldInitializer
 class OutputGdsii(FieldInitializer):
     """ Collects the transformed elementals to be send to Gdspy. """
 
+    disabled_ports = DictField(default={}, doc='Disabled port categories for viewing.')
+
     def __init__(self, cell, **kwargs):
+
+        super().__init__(**kwargs)
 
         self.__collected_cells__ = {}
         self.__collected_srefs__ = {}
@@ -49,7 +54,8 @@ class OutputGdsii(FieldInitializer):
         if item.id_string() in list(cp.keys()):
             pass
         else:
-            P = item.convert_to_gdspy(extra_transform)
+            # P = item.convert_to_gdspy(extra_transform)
+            P = item.convert_to_gdspy()
             cp[item.id_string()] = P
 
     def collect_ports(self, cell):
@@ -58,28 +64,31 @@ class OutputGdsii(FieldInitializer):
         for c in cell.dependencies():
             cp, cl, C_ports = {}, {}, {}
             G = self.__collected_cells__[c]
-            
-            for p in c.ports:
-                # self.collect_polygons(p.edge, cp)
-                L = PortLayout(port=p)
-                for e in L.elementals:
-                    if isinstance(e, Polygon):
-                        self.collect_polygons(e, cp)
-                    elif isinstance(e, Label):
-                        self.collect_labels(e, cl)
+
+            if self.disabled_ports['cells'] is True:
+                for p in c.ports:
+                    L = PortLayout(port=p)
+                    for e in L.elementals:
+                        if isinstance(e, Polygon):
+                            self.collect_polygons(e, cp)
+                        elif isinstance(e, Label):
+                            self.collect_labels(e, cl)
 
             for e in c.elementals:
                 if isinstance(e, Polygon):
                     if e.enable_edges is True:
-                        for p in e.ports:
+                        # for p in e.ports:
+                        # Transform ports to polygon transformation.
+                        for p in e.ports.transform(e.transformation):
                             if p.id_string() not in _polygon_ports:
 
-                                L = PortLayout(port=p, transformation=e.transformation)
-                                for e in L.elementals:
-                                    if isinstance(e, Polygon):
-                                        self.collect_polygons(e, cp)
-                                    elif isinstance(e, Label):
-                                        self.collect_labels(e, cl)
+                                if self.disabled_ports['polygons'] is True:
+                                    L = PortLayout(port=p, transformation=e.transformation)
+                                    for e in L.elementals:
+                                        if isinstance(e, Polygon):
+                                            self.collect_polygons(e, cp)
+                                        elif isinstance(e, Label):
+                                            self.collect_labels(e, cl)
 
                                 _polygon_ports.append(p.id_string())
 
@@ -96,13 +105,11 @@ class OutputGdsii(FieldInitializer):
             for e in c.elementals:
                 if isinstance(e, Polygon):
                     self.collect_polygons(e, cp)
-                # elif isinstance(e, Label):
-                #     self.collect_labels(e, cl)
+                elif isinstance(e, Label):
+                    self.collect_labels(e, cl)
 
-            for e in cp.values():
-                G.add(e)
-            for e in cl.values():
-                G.add(e)
+            for e in cp.values(): G.add(e)
+            for e in cl.values(): G.add(e)
 
     def collect_srefs(self, cell):
         for c in cell.dependencies():
@@ -139,7 +146,7 @@ class OutputGdsii(FieldInitializer):
 
         # NOTE: First collect all port polygons and labels,
         # before commiting them to a cell instance.
-        # self.collect_ports(item)
+        self.collect_ports(item)
         self.collect_cells(item)
 
         # NOTE: Gdspy cells must first be constructed, 
@@ -157,61 +164,27 @@ class GdsiiLayout(object):
     """ Class that generates output formates
     for a layout or library containing layouts. """
 
-    def gdsii_output(self, name=None, units=None, grid=None, layer_map=None):
+    def gdsii_output(self, name=None, units=None, grid=None, layer_map=None, disabled_ports=None):
         """ If a name is given, the layout is written to a GDSII file. """
 
-        gdspy_library = gdspy.GdsLibrary(name=self.name)
+        _default = {'cells': True, 'polygons': True, 'arrows': True, 'labels': True}
 
-        G = OutputGdsii(cell=self)
+        if disabled_ports is not None:
+            _default.update(disabled_ports)
+
+        G = OutputGdsii(cell=self, disabled_ports=_default)
+
+        gdspy_library = gdspy.GdsLibrary(name=self.name)
         G.gdspy_gdsii_output(gdspy_library)
 
         gdspy.LayoutViewer(library=gdspy_library)
 
         if name is not None:
-            # writer = gdspy.GdsWriter('{}.gds'.format(name), unit=1.0e-12, precision=1.0e-12)
-            writer = gdspy.GdsWriter('{}.gds'.format(name), unit=1.0e-6, precision=1.0e-6)
-            # writer = gdspy.GdsWriter('{}.gds'.format(name), unit=1.0e6, precision=1.0e6)
+            writer = gdspy.GdsWriter('{}.gds'.format(name), unit=1.0e-6, precision=1.0e-12)
             for name, cell in gdspy_library.cell_dict.items():
                 writer.write_cell(cell)
                 del cell
             writer.close()
-
-
-
-
-
-    # def gdsii_output(self, name=None, cell=None):
-    #     from spira.yevon.gdsii.cell import __Cell__
-
-    #     glib = gdspy.GdsLibrary(name=self.name)
-
-    #     if isinstance(self, spira.Library):
-    #         glib = settings.get_current_library()
-    #         glib += self
-    #         glib.to_gdspy
-    #     elif issubclass(type(self), __Cell__):
-    #         self.construct_gdspy_tree(glib)
-
-    #     if cell is None:
-    #         gdspy.LayoutViewer(library=glib)
-    #     else:
-    #         gdspy.LayoutViewer(library=glib, cells=cell)
-
-    #     # gdspy.LayoutViewer(library=glib, cells='Circuit_AiST_CELL_1')
-    #     # gdspy.LayoutViewer(library=glib, cells='LayoutConstructor_AiST_CELL_1')
-
-    # # FIXME!
-    # def writer(self, name=None, file_type='gdsii'):
-    #     if name is None:
-    #         file_name = '{}.gds'.format(self.name)
-    #     else:
-    #         file_name = '{}.gds'.format(name)
-    #     glib = gdspy.GdsLibrary(name=self.name)
-    #     writer = gdspy.GdsWriter(file_name, unit=1.0e-6, precision=1.0e-6)
-    #     cell = self.construct_gdspy_tree(glib)
-    #     writer.write_cell(cell)
-    #     del cell
-    #     writer.close()
 
 
 Outputs.mixin(GdsiiLayout)

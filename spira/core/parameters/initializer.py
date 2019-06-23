@@ -258,7 +258,7 @@ class __ParameterInitializer__(metaclass=MetaInitializer):
                 ex_fields.append(i)
         return ex_fields
 
-    def __copy__(self):
+    def _copy__(self):
         kwargs = {}
         for p in self.__external_fields__():
             kwargs[p] = getattr(self, p)
@@ -271,7 +271,7 @@ class __ParameterInitializer__(metaclass=MetaInitializer):
             kwargs[p] = deepcopy(getattr(self, p), memo)
         return self.__class__(**kwargs)
 
-    def modified_copy(self, **override_kwargs):
+    def copy(self, **override_kwargs):
         """ Returns a copy, but where the user can
         override properties using. """
         kwargs = {}

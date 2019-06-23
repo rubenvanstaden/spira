@@ -31,10 +31,10 @@ class NetList(TypedList):
             if self._list[i] is key:
                 return list.__delitem__(self._list, i)
 
-    def flat_copy(self, level = -1):
+    def flatcopy(self, level = -1):
         el = PortList()
         for e in self._list:
-            el += e.flat_copy(level)
+            el += e.flatcopy(level)
         return el
 
     def move(self, position):
@@ -42,10 +42,10 @@ class NetList(TypedList):
             c.move(position)
         return self
 
-    def move_copy(self, position):
+    def movecopy(self, position):
         T = self.__class__()
         for c in self._list:
-            T.append(c.move_copy(position))
+            T.append(c.movecopy(position))
         return T
 
     def transform_copy(self, transformation):

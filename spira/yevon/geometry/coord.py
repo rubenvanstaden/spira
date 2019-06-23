@@ -110,7 +110,7 @@ class Coord(Transformable):
         self.y += position[1]
         return self
 
-    def move_copy(self, position):
+    def movecopy(self, position):
         """ Return a moved copy of the coordinate """
         return Coord(self.x + position[0], self.y + position[1])
 

@@ -111,10 +111,11 @@ def vector_match_transform(v1, v2):
     return T + R
 
 
-def vector_match_transform_identical(vector1, vector2):
+def vector_match_transform_identical(v1, v2):
     """ Returns transformation to realign vectort 1 to match midpoint and orientation with vector 2 """
-    T = Translation(vector2.midpoint - vector1.midpoint) 
-    R = Rotation(vector2.midpoint, vector2.angle_deg - vector1.angle_deg)  
+    angle = v2.orientation - v1.orientation
+    T = Translation(v2.midpoint - v1.midpoint) 
+    R = Rotation(rotation=angle, rotation_center=v2.midpoint)
     return T + R
 
 

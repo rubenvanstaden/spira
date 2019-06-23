@@ -43,8 +43,8 @@ class __Label__(__LayerElemental__):
         else:
             raise ValueError('Not Implemented!')
 
-    def flat_copy(self, level=-1, commit_to_gdspy=False):
-        c_label = self.modified_copy(position=self.position)
+    def flatcopy(self, level=-1, commit_to_gdspy=False):
+        c_label = self.copy(position=self.position)
         if commit_to_gdspy: self.gdspy_commit = True
         return c_label
 

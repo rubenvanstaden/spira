@@ -86,7 +86,8 @@ class __Cell__(FieldInitializer, metaclass=MetaCell):
         return self
 
 
-class CellAbstract(gdspy.Cell, __Cell__):
+# class CellAbstract(gdspy.Cell, __Cell__):
+class CellAbstract(__Cell__):
 
     def create_name(self):
         if not hasattr(self, '__name__'):
@@ -98,9 +99,9 @@ class CellAbstract(gdspy.Cell, __Cell__):
         deps += self
         return deps
 
-    def flat_copy(self, level=-1):
+    def flatcopy(self, level=-1):
         name = '{}_{}'.format(self.name, 'Flat'),
-        return Cell(name, self.elementals.flat_copy(level=level))
+        return Cell(name, self.elementals.flatcopy(level=level))
     
     def is_layer_in_cell(self, layer):
         D = deepcopy(self)
@@ -159,7 +160,7 @@ class Cell(CellAbstract):
     def __init__(self, name=None, elementals=None, ports=None, nets=None, library=None, **kwargs):
 
         __Cell__.__init__(self, **kwargs)
-        gdspy.Cell.__init__(self, self.name, exclude_from_current=True)
+        # gdspy.Cell.__init__(self, self.name, exclude_from_current=True)
 
         if name is not None:
             # s = '{}_{}'.format(name, self.__class__._ID)
@@ -195,11 +196,11 @@ class Cell(CellAbstract):
             S.expand_transform()
         return self
 
-    def expand_flat_copy(self, exclude_devices=False):
+    def expand_flatcopy(self, exclude_devices=False):
         from spira.yevon.gdsii.polygon import Polygon
         from spira.yevon.geometry.ports.port import Port
         from spira.yevon.gdsii.pcell import Device
-        
+
         # FIXME: Check this.
         # D = deepcopy(self)
         S = self.expand_transform()

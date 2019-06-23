@@ -93,7 +93,7 @@ class __RotationMixin__(object):
     def rotate(self, rotation=0, rotation_center=(0,0)):
         return self.transform(Rotation(rotation, rotation_center))
 
-    def rotate_copy(self, rotation=0, rotation_center=(0,0)):
+    def rotatecopy(self, rotation=0, rotation_center=(0,0)):
         return self.transform_copy(Rotation(rotation, rotation_center))
 
 

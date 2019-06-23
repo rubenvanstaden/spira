@@ -54,7 +54,7 @@ class __Polygon__(__LayerElemental__):
             self.transformation = IdentityTransform()
         return self
 
-    def flat_copy(self, level = -1):
+    def flatcopy(self, level = -1):
         """  """
         S = Polygon(layer=self.layer, shape=self.shape, transformation=self.transformation)
         S.expand_transform()
@@ -71,10 +71,10 @@ class __Polygon__(__LayerElemental__):
         T = spira.Stretch(stretch_factor=factor, stretch_center=center)
         return T.apply(self)
 
-    def stretch_copy(self, factor=(1,1), center=(0,0)):
+    def stretchcopy(self, factor=(1,1), center=(0,0)):
         """  """
         T = spira.Stretch(stretch_factor=factor, stretch_center=center)
-        return T.apply_copy(self)
+        return T.applycopy(self)
 
     def stretch_port(self, port, destination):
         """
@@ -118,7 +118,7 @@ class __Polygon__(__LayerElemental__):
 
 
 class Polygon(__Polygon__):
-    """ 
+    """
     Elemental that connects shapes to the GDSII file format.
     Polygon are objects that represents the shapes in a layout.
 
@@ -184,14 +184,10 @@ class Polygon(__Polygon__):
         layer = RDD.GDSII.EXPORT_LAYER_MAP[self.layer]
         T = self.transformation + transformation
         shape = deepcopy(self.shape).transform(T)
-        pts = spu([shape.points])
-        # shape = self.shape
         return gdspy.Polygon(
-            # points=shape.points,
-            points=pts,
+            points=shape.points,
             layer=layer.number,
-            datatype=layer.datatype,
-            verbose=False
+            datatype=layer.datatype
         )
 
     def is_empty(self):

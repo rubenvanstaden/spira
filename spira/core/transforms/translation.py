@@ -66,7 +66,7 @@ class __TranslationMixin__(object):
     def translate(self, translation=(0,0)):
         return self.transform(Translation(translation))
 
-    def translate_copy(self, position):
+    def translatecopy(self, position):
         return self.transform_copy(Translation(position))
 
 

@@ -84,7 +84,6 @@ def simplify_points(points, value=100):
         factor = len(points) * value * RDD.GDSII.GRID
         sp = ShapelyPolygon(points).simplify(factor)
         points = [[p[0], p[1]] for p in sp.exterior.coords]
-        simplify_points(points, value)
     return points
 
 

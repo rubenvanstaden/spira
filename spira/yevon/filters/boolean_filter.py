@@ -90,7 +90,7 @@ class ViaConnectFilter(Filter):
         v_model = virtual_connect(device=item)
         for e in v_model.connected_elementals:
             elems += e
-            
+
         for e in item.elementals.sref:
             elems += e
         for e in item.elementals.labels:
@@ -116,7 +116,7 @@ class MetalConnectFilter(Filter):
         from spira.yevon.geometry.shapes.modifiers import ShapeConnected
         from spira.yevon.geometry.shapes.shape import Shape
 
-        D = item.expand_flat_copy()
+        D = item.expand_flatcopy()
         v_model = virtual_connect(device=D)
 
         for i, e1 in enumerate(D.elementals):
@@ -137,7 +137,7 @@ class MetalConnectFilter(Filter):
         return item
         
 
-        # D = item.expand_flat_copy()
+        # D = item.expand_flatcopy()
         # v_model = virtual_connect(device=D)
         # for i, p in enumerate(D.elementals):
         #     p.shape = ShapeConnected(original_shape=p.shape, edges=v_model.connected_edges)

@@ -280,8 +280,7 @@ class RoutePointShape(__RouteSimple__):
         dy = self.width/2*np.sin((mean_angles - pi/2))/np.cos((diff_angles/2))
         left_points = self.path.T - np.array([dx,dy])
         right_points = self.path.T + np.array([dx,dy])
-        all_points = np.concatenate([left_points.T, right_points.T[::-1]])
-        points = np.array([all_points])
+        points = np.concatenate([left_points.T, right_points.T[::-1]])
         return points
 
 

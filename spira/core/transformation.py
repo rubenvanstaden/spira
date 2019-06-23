@@ -23,7 +23,7 @@ class Transform(FieldInitializer):
         else: 
             return item.transform(self)
 
-    def apply_to_copy(self, item):
+    def apply_tocopy(self, item):
         if isinstance(item, list):
             raise ValueError('Not implemented yet!')
             # from .shape import Shape
@@ -39,7 +39,7 @@ class Transform(FieldInitializer):
         if isinstance(item, Transform):
             return item + self
         else:
-            return self.apply_to_copy(item)
+            return self.apply_tocopy(item)
 
     def __add__(self, other):
         if other is None:

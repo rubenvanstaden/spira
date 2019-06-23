@@ -60,7 +60,7 @@ class __RefElemental__(__Elemental__):
 
         return self
 
-    def expand_flat_copy(self):
+    def expand_flatcopy(self):
         S = self.expand_transform()
         C = spira.Cell(name=S.ref.name + '_ExpandedCell')
         def flat_polygons(subj, cell):
@@ -140,9 +140,9 @@ class SRef(__RefElemental__):
     def flatten(self):
         return self.ref.flatten()
 
-    def flat_copy(self, level=-1):
-        if level == 0: return spira.ElementalList(self.__copy__())
-        el = self.ref.elementals.flat_copy(level-1)
+    def flatcopy(self, level=-1):
+        if level == 0: return spira.ElementalList(self._copy__())
+        el = self.ref.elementals.flatcopy(level-1)
         T = self.transformation + Translation(self.midpoint)
         el.transform(T)
         return el
@@ -218,7 +218,7 @@ class SRef(__RefElemental__):
                 "are ({})".format(port, self.ports.get_names()))
 
         if not isinstance(destination, spira.Port):
-            raise ValueError('Destination is not a terminal.')
+            raise ValueError('Destination has to be a port.')
 
         T = vector_match_transform(v1=p, v2=destination)
         self.transform(T)
@@ -245,7 +245,7 @@ class SRef(__RefElemental__):
         return self
 
     def stretch(self, factor=(1,1), center=(0,0)):
-        S = self.expand_flat_copy()
+        S = self.expand_flatcopy()
         T = spira.Stretch(stretch_factor=factor, stretch_center=center)
         for i, e in enumerate(S.ref.elementals):
             # T.apply(S.ref.elementals[i])
@@ -253,9 +253,9 @@ class SRef(__RefElemental__):
         return self
         # return S
 
-    def stretch_copy(self, factor=(1,1), center=(0,0)):
+    def stretchcopy(self, factor=(1,1), center=(0,0)):
         pass
-        # S = self.expand_flat_copy()
+        # S = self.expand_flatcopy()
         # T = spira.Stretch(stretch_factor=factor, stretch_center=center)
         # for i, e in enumerate(S.ref.elementals):
         #     T.apply(S.ref.elementals[i])

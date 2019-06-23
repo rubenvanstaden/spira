@@ -57,7 +57,7 @@ class __Group__(FieldInitializer):
         return self
 
     def flatten(self, level=-1):
-        self.elementals = self.elementals.flat_copy(level=level)
+        self.elementals = self.elementals.flatcopy(level=level)
         return self
 
     def __iter__(self):
@@ -76,9 +76,9 @@ class Group(__Group__, __Elemental__):
     def __init__(self, transformation=None, **kwargs):
         super().__init__(transformation=transformation, **kwargs)
     
-    def flat_copy(self, level=-1):
+    def flatcopy(self, level=-1):
         if not level == 0:
-            return self.elementals.flat_copy(level).transform(self.transformation)
+            return self.elementals.flatcopy(level).transform(self.transformation)
         else:
             return spira.ElementalList(self.elementals)
 

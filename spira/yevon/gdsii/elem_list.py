@@ -140,10 +140,10 @@ class ElementalList(__ElementalList__):
                 else: yield elem
         return _flatten(self._list)
 
-    def flat_copy(self, level=-1):
+    def flatcopy(self, level=-1):
         el = ElementalList()
         for e in self._list:
-            el += e.flat_copy(level)
+            el += e.flatcopy(level)
         return el
 
     def flatten(self):
@@ -153,9 +153,9 @@ class ElementalList(__ElementalList__):
             flat_list = ElementalList()
             for i in self._list:
                 if issubclass(type(i), Cell):
-                    i = i.flat_copy()
+                    i = i.flatcopy()
                 elif isinstance(i, SRef):
-                    i = i.flat_copy()
+                    i = i.flatcopy()
                 for a in i.flatten():
                     flat_list += a
             return flat_list

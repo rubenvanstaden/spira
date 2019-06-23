@@ -24,7 +24,7 @@ class PCell(Cell):
         F = RDD.PCELLS.FILTERS
         # F['boolean'] = False
         # F['simplify'] = False
-        # F['via_contact'] = False
+        F['via_contact'] = False
         F['metal_connect'] = False
 
         elems = self.create_elementals(elems)
@@ -32,7 +32,7 @@ class PCell(Cell):
         elems += self.routes
 
         if self.pcell is True:
-            D = Cell(elementals=elems).expand_flat_copy(exclude_devices=True)
+            D = Cell(elementals=elems).expand_flatcopy(exclude_devices=True)
             elems = F(D).elementals
 
         return elems
@@ -43,8 +43,9 @@ class Device(PCell):
     # lcar = NumberField(default=RDD.PCELLS.LCAR_DEVICE)
     lcar = NumberField(default=0.5)
 
-    def __init__(self, **kwargs):
+    def __init__(self, pcell=True, **kwargs):
         super().__init__(**kwargs)
+        self.pcell = pcell
 
     def __repr__(self):
         class_string = "[SPiRA: Device(\'{}\')] (elementals {}, ports {})"
@@ -66,7 +67,7 @@ class Device(PCell):
         elems += self.routes
 
         if self.pcell is True:
-            D = Cell(elementals=elems.flat_copy())
+            D = Cell(elementals=elems.flatcopy())
             elems = F(D).elementals
 
         return elems
@@ -80,6 +81,9 @@ class Device(PCell):
 
 class Circuit(PCell):
     """  """
+
+    corners = StringField(default='miter', doc='Define the type of path joins.')
+    bend_radius = NumberField(allow_none=True, default=None, doc='Bend radius of path joins.')
 
     # lcar = NumberField(default=RDD.PCELLS.LCAR_CIRCUIT)
     lcar = NumberField(default=1)

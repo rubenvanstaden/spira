@@ -88,8 +88,7 @@ class GmshGeometry(__Geometry__):
         return surfaces
 
     def create_mesh_data(self):
-        """ Generates the mesh data from the 
-        created physical surfaces. """
+        """ Generates the mesh data from the created physical surfaces. """
 
         # if len(self.physical_surfaces) > 1:
         #     self.geom.boolean_union(self.physical_surfaces)

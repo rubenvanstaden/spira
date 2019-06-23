@@ -58,8 +58,8 @@ class __PhysicalPort__(__Port__):
         dy = np.sin((self.orientation)*np.pi/180)
         return np.array([self.midpoint, self.midpoint + np.array([dx,dy])])
 
-    def flat_copy(self, level=-1):
-        E = self.modified_copy(transformation=self.transformation)
+    def flatcopy(self, level=-1):
+        E = self.copy(transformation=self.transformation)
         E.transform_copy(self.transformation)
         return E
 

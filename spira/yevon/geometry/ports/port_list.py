@@ -6,6 +6,9 @@ from spira.core.parameters.restrictions import RestrictType
 from spira.yevon.geometry.ports.base import __Port__
 
 
+__all__ = ['PortList', 'PortListField']
+
+
 class PortList(TypedList, Transformable):
     __item_type__ = __Port__
 
@@ -92,17 +95,17 @@ class PortList(TypedList, Transformable):
     def difference(self, other):
         return self.__sub__(self, other)
 
-    def update_layer_copy(self, layer):
+    def update_layercopy(self, layer):
         P = self.__class__()
         for p in self._list:
             p.edgelayer = layer
             P.append(p)
         return P
 
-    def flat_copy(self, level=-1):
+    def flatcopy(self, level=-1):
         el = PortList()
         for e in self._list:
-            el += e.flat_copy(level)
+            el += e.flatcopy(level)
         return el
 
     def move(self, position):
@@ -110,10 +113,10 @@ class PortList(TypedList, Transformable):
             c.move(position)
         return self
 
-    def move_copy(self, position):
+    def movecopy(self, position):
         T = self.__class__()
         for c in self._list:
-            T.append(c.move_copy(position))
+            T.append(c.movecopy(position))
         return T
 
     @property
@@ -137,10 +140,10 @@ class PortList(TypedList, Transformable):
             c.invert()
         return self
 
-    def invert_copy(self):
+    def invertcopy(self):
         L = self.__class__()
         for c in self._list:
-            L += c.invert_copy()
+            L += c.invertcopy()
         return L
 
     def x_sorted(self):
@@ -180,6 +183,14 @@ class PortList(TypedList, Transformable):
         for p in self._list:
             names.append(p.name)
         return names
+
+    def get_dummy_ports(self):
+        from spira.yevon.geometry.ports.port import DummyPort
+        pl = self.__class__()
+        for p in self._list:
+            if isinstance(p, DummyPort):
+                pl.append(p)
+        return pl
 
     def get_ports_within_angles(self, start_angle, end_angle):
         pl = self.__class__()

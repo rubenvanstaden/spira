@@ -19,7 +19,7 @@ from spira.yevon.process import get_rule_deck
 RDD = get_rule_deck()
 
 
-__all__ = ['Port', 'PortField', 'ContactPort']
+__all__ = ['Port', 'PortField', 'ContactPort', 'DummyPort']
 
 
 class Port(Vector, __PhysicalPort__):
@@ -63,6 +63,7 @@ class Port(Vector, __PhysicalPort__):
 
     alias = FunctionField(get_alias, set_alias, doc='Functions to generate an alias for cell name.')
 
+    # def __init__(self, midpoint, orientation, **kwargs):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
@@ -73,6 +74,8 @@ class Port(Vector, __PhysicalPort__):
                 self.__class__ = BranchPort
             elif kwargs['port_type'] == 'route':
                 self.__class__ = RoutePort
+            elif kwargs['port_type'] == 'dummy':
+                self.__class__ = DummyPort
 
         if 'locked' in kwargs:
             if kwargs['locked'] is True:
@@ -100,6 +103,11 @@ class Port(Vector, __PhysicalPort__):
 
     def id_string(self):
         return self.__repr__()
+
+    def flip(self):
+        """ Return the port rotated 180 degrees. """
+        angle = (self.orientation + 180.0) % 360.0
+        return self.__class__(midpoint=self.midpoint, orientation=angle)
 
     @property
     def unlock(self):
@@ -185,11 +193,6 @@ class Port(Vector, __PhysicalPort__):
         return self
 
 
-def PortField(local_name=None, restriction=None, **kwargs):
-    R = RestrictType(Port) & restriction
-    return RestrictedParameter(local_name, restrictions=R, **kwargs)
-
-
 from spira.yevon.process.purpose_layer import PurposeLayerField
 class ContactPort(Port):
 
@@ -234,5 +237,25 @@ class RoutePort(Port):
     def __repr__(self):
         class_string = "[SPiRA: BranchPort] (name {}, alias {}, locked {}, midpoint {} orientation {} width {})"
         return class_string.format(self.name, self.alias, self.locked, self.midpoint, self.orientation, self.width)
+
+
+class DummyPort(Port):
+
+    width = NumberField(default=0.4)
+    length = NumberField(default=0.4)
+    purpose = PurposeLayerField(default=RDD.PURPOSE.DUMMY)
+    
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+    
+    def __repr__(self):
+        class_string = "[SPiRA: DummyPort] (name {}, alias {}, locked {}, midpoint {} orientation {} width {})"
+        return class_string.format(self.name, self.alias, self.locked, self.midpoint, self.orientation, self.width)
+
+
+def PortField(local_name=None, restriction=None, **kwargs):
+    R = RestrictType(Port) & restriction
+    return RestrictedParameter(local_name, restrictions=R, **kwargs)
+
 
 

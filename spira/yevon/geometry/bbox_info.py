@@ -294,7 +294,7 @@ class BoundaryInfo(Transformable):
             self.west, self.east, self.north, self.south = None, None, None, None
         return self
 
-    def move_copy(self, coordinate):
+    def movecopy(self, coordinate):
         if self.__is_initialized__():
             west = self.__west + coordinate[0]
             east = self.__east + coordinate[0]

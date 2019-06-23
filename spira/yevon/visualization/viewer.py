@@ -28,7 +28,7 @@ class PortLayout(spira.Cell):
         layer = PLayer(process=self.port.process, purpose=self.port.purpose)
         p = spira.Box(width=dw, height=dl, layer=layer)
         T = transformation_from_vector(self.port) + spira.Rotation(-90)
-        # T += self.transformation
+        # # T = self.transformation
         p.transform(T)
         return p
 
@@ -37,7 +37,8 @@ class PortLayout(spira.Cell):
         # w = self.port.length * 3
         w = 0.05
         # l = 2
-        l = self.port.length * 5
+        # l = self.port.length * 3
+        l = 1.0
         arrow_shape = shapes.ArrowShape(width=w, length=l, head=l*0.2)
         p = spira.Polygon(shape=arrow_shape, layer=layer, enable_edges=False)
         T = transformation_from_vector(self.port)
@@ -45,7 +46,7 @@ class PortLayout(spira.Cell):
         return p
 
     def create_label(self):
-        layer = PLayer(self.port.process, RDD.PURPOSE.PORT.DIRECTION)
+        layer = PLayer(self.port.process, RDD.PURPOSE.TEXT)
         return spira.Label(
             position=self.port.midpoint,
             text=self.port.name,
