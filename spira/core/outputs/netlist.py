@@ -126,23 +126,17 @@ class PlotlyGraph(object):
 
     def _create_nodes(self, G, labeltext):
 
-        def _init_nodes(G):
-            nodes = {}
-            nodes['x_pos'] = []
-            nodes['y_pos'] = []
-            nodes['text'] = []
-            nodes['color'] = []
-            for n in G.nodes():
-                x, y = G.node[n]['position']
-                nodes['x_pos'].append(x)
-                nodes['y_pos'].append(y)
-                nodes['text'].append(n)
-                nodes['color'].append(color.COLOR_BLACK.hexcode)
-            return nodes
+        nodes = {}
+        nodes['x_pos'] = []
+        nodes['y_pos'] = []
+        nodes['text'] = []
+        nodes['color'] = []
 
-        nodes = _init_nodes(G=G)
-    
         for n in G.nodes():
+            x, y = G.node[n]['position']
+            nodes['x_pos'].append(x)
+            nodes['y_pos'].append(y)
+
             node_value = None
             if 'device_reference' in G.node[n]:
                 node_value = G.node[n]['device_reference']
@@ -152,8 +146,8 @@ class PlotlyGraph(object):
                 node_value = G.node[n]['process_polygon']
 
             if node_value is not None:
-                nodes['text'][n] = '({}) {}'.format(n, str(node_value))
-                nodes['color'][n] = G.node[n]['display'].color.hexcode
+                nodes['text'].append('({}) {}'.format(n, str(node_value)))
+                nodes['color'].append(G.node[n]['display'].color.hexcode)
 
         return nodes
 

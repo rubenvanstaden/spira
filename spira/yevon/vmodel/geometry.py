@@ -31,6 +31,8 @@ class GmshGeometry(__Geometry__):
 
     _ID = 0
 
+    _uid = 0
+
     lcar = NumberField(default=100, doc='Mesh characteristic length.')
     algorithm = IntegerField(default=1, doc='Mesh algorithm used by Gmsh.')
     scale_Factor = NumberField(default=1e-6, doc='Mesh coord dimention scaling.')
@@ -43,7 +45,8 @@ class GmshGeometry(__Geometry__):
 
     def get_filename(self):
         if not hasattr(self, '__alias__'):
-            self.__alias__ = self.process
+            self.__alias__ = '{}_{}'.format(self.process.symbol, GmshGeometry._uid)
+            GmshGeometry._uid += 1
         return self.__alias__
 
     def set_filename(self, value):
@@ -108,10 +111,10 @@ class GmshGeometry(__Geometry__):
             self.geom, verbose=False, dim=2,
             prune_vertices=False,
             remove_faces=False,
-            # geo_filename=geo_file
+            geo_filename=geo_file
         )
 
-        # meshio.write(mesh_file, mesh_data)
+        meshio.write(mesh_file, mesh_data)
         # meshio.write(vtk_file, mesh_data)
 
         return mesh_data
@@ -120,3 +123,4 @@ class GmshGeometry(__Geometry__):
 def GeometryField(local_name=None, restriction=None, **kwargs):
     R = RestrictType(__Geometry__) & restriction
     return RestrictedParameter(local_name, restriction=R, **kwargs)
+

@@ -77,9 +77,10 @@ class OutputGdsii(FieldInitializer):
             for e in c.elementals:
                 if isinstance(e, Polygon):
                     if e.enable_edges is True:
-                        # for p in e.ports:
+                        for p in e.ports:
                         # Transform ports to polygon transformation.
-                        for p in e.ports.transform(e.transformation):
+                        # Required for non-pcell layouts. FIXME!!!
+                        # for p in e.ports.transform(e.transformation):
                             if p.id_string() not in _polygon_ports:
 
                                 if self.disabled_ports['polygons'] is True:

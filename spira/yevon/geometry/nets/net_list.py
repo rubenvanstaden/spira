@@ -58,6 +58,15 @@ class NetList(TypedList):
         for c in self._list:
             c.transform(transformation)
         return self
+        
+    # def disjoint(self, connect=False):
+    #     graphs = [net.g for net in self._list]
+    #     G = nx.disjoint_union_all(graphs)
+    #     if connect is True:
+    #         graphs = list(nx.connected_component_subgraphs(G))
+    #         G = nx.disjoint_union_all(graphs)
+    #     net = Net(g=G)
+    #     return net
 
     def disjoint(self):
         graphs= [net.g for net in self._list]
@@ -65,9 +74,10 @@ class NetList(TypedList):
         return net
 
     def connect_shared_nodes(self):
-        g = self.disjoint()
-        graphs = list(nx.connected_component_subgraphs(g))
-        return nx.disjoint_union_all(graphs)
+        net = self.disjoint()
+        graphs = list(nx.connected_component_subgraphs(net.g))
+        net = Net(g=nx.disjoint_union_all(graphs))
+        return net
 
 
 class NetListField(DataFieldDescriptor):

@@ -50,10 +50,9 @@ class ShapeConnected(__ShapeModifier__):
 
     def create_points(self, points):
 
-        print('Points:')
         if len(self.overlapping_shape) == 0:
             points = self.original_shape.points
-        else:        
+        else:
             new_points = []
             for i, s in enumerate(self.original_shape.segments()):
                 s1_inter = []
@@ -63,16 +62,22 @@ class ShapeConnected(__ShapeModifier__):
                         segment_line = line_from_two_points(s[0], s[1])
                         if segment_line.is_on_line(coordinate=c):
                             s1_inter.append(c)
-    
+
                 if len(s1_inter) > 0:
                     line = np.concatenate((s, s1_inter))
                     pl = sort_points_on_line(line)
                     new_points += pl[0:-1]
                 new_points += [s[1]]
-    
+
             points = new_points
             points = [Coord(p[0], p[1]) for p in points]
             points = points_unique(points)
+            points = [c.to_list() for c in points]
+
+            print(self.overlapping_shape.points)
+            print(points)
+            print(len(self.overlapping_shape.points), len(points))
+            print('')
 
         return points
 

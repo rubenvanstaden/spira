@@ -356,7 +356,7 @@ def shape_edge_ports(shape, layer, local_pid='None'):
     n = len(xpts)
 
     xpts.append(xpts[0])
-    ypts.append(ypts[0]) 
+    ypts.append(ypts[0])
 
     clockwise = 0
     for i in range(0, n):

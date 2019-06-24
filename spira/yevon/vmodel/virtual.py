@@ -92,8 +92,8 @@ class VirtualConnect(__VirtualModel__):
             for edge in p1.edges:
                 el += edge.outside.transform(edge.transformation)
 
-        # map1 = {RDD.PLAYER.M2.EDGE_CONNECTED : RDD.PLAYER.M2.EDGE_PORT_ENABLED}
-        map1 = {RDD.PLAYER.M5.EDGE_CONNECTED : RDD.PLAYER.M5.EDGE_PORT_ENABLED}
+        map1 = {RDD.PLAYER.M2.EDGE_CONNECTED : RDD.PLAYER.M2.EDGE_PORT_ENABLED}
+        # map1 = {RDD.PLAYER.M5.EDGE_CONNECTED : RDD.PLAYER.M5.EDGE_PORT_ENABLED}
 
         pg_overlap = self.device.overlap_elementals
         edges = get_derived_elementals(el, mapping=map1, store_as_edge=True)
@@ -101,8 +101,8 @@ class VirtualConnect(__VirtualModel__):
         overlap_edges = {}
 
         # print(pg_overlap)
-        print(edges)
-    
+        # print(edges)
+
         for j, pg in enumerate(pg_overlap):
             for e in pg.elementals:
                 e = deepcopy(e)

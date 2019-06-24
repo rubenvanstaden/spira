@@ -218,18 +218,18 @@ class Cell(CellAbstract):
                     else: 
                         flat_polygons(subj=subj, cell=e.ref)
 
-            for p in cell.ports:
-                port = Port(
-                    name=p.name + "_" + cell.name,
-                    midpoint=deepcopy(p.midpoint),
-                    orientation=deepcopy(p.orientation),
-                    process=deepcopy(p.process),
-                    purpose=deepcopy(p.purpose),
-                    width=deepcopy(p.width),
-                    port_type=p.port_type,
-                    local_pid=p.local_pid
-                )
-                subj.ports += port
+            # for p in cell.ports:
+            #     port = Port(
+            #         name=p.name + "_" + cell.name,
+            #         midpoint=deepcopy(p.midpoint),
+            #         orientation=deepcopy(p.orientation),
+            #         process=deepcopy(p.process),
+            #         purpose=deepcopy(p.purpose),
+            #         width=deepcopy(p.width),
+            #         port_type=p.port_type,
+            #         local_pid=p.local_pid
+            #     )
+            #     subj.ports += port
 
             return subj
 

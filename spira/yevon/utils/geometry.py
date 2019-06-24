@@ -35,8 +35,9 @@ def distance(coord, origin=(0.0, 0.0)):
 
 def c2d(coord):
     """ Convert coordinate to 2D. """
-    pp = [(coord[i]/(RDD.GDSII.GRID)) for i in range(len(list(coord))-1)]
-    # pp = [coord[i] for i in range(len(list(coord))-1)]
+    from spira import settings
+    grids_per_unit = settings.get_grids_per_unit()
+    pp = [coord[i]*grids_per_unit for i in range(len(list(coord))-1)]
     return pp
 
 

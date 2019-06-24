@@ -126,23 +126,26 @@ class MetalConnectFilter(Filter):
                 e2 = deepcopy(e2)
                 if e1 != e2:
                     overlap_shape = e1.shape.intersections(e2.shape)
-                    print(overlap_shape)
                     if isinstance(overlap_shape, Shape):
                         if len(overlap_shape) > 2:
                             points.extend(overlap_shape.points.tolist())
-            # print('[--] Overlapping shape points:')
-            # print(points)
-        
-            D.elementals[i].shape = ShapeConnected(original_shape=e1.shape, overlapping_shape=Shape(points), edges=v_model.connected_edges)
+                            # points.extend(e1.shape.points.tolist())
+            if len(points) > 0:
+                # print('[--] Overlapping shape points:')
+                # print(points)
+                D.elementals[i].shape = ShapeConnected(
+                    original_shape=e1.shape,
+                    overlapping_shape=Shape(points),
+                    edges=v_model.connected_edges
+                )
         return item
         
-
         # D = item.expand_flatcopy()
         # v_model = virtual_connect(device=D)
         # for i, p in enumerate(D.elementals):
         #     p.shape = ShapeConnected(original_shape=p.shape, edges=v_model.connected_edges)
         # return item
-        
+
     def __repr__(self):
         return "<MetalConnectFilter: \'{}\'>".format(self.name)
 

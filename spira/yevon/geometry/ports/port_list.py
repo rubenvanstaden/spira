@@ -49,36 +49,36 @@ class PortList(TypedList, Transformable):
             if self._list[i] is key:
                 return list.__delitem__(self._list, i)
 
-    def __and__(self, other):
-        from spira.yevon.gdsii.polygon import Polygon
-        from spira.yevon.geometry.ports.port import Port
-        from spira.yevon.visualization.viewer import PortLayout
-        from copy import deepcopy
-        P = self.__class__()
-        if isinstance(other, Polygon):
-            for p in self._list:
-                if isinstance(p, Port):
-                    L = PortLayout(port=p)
-                    # if p.edge & other.elementals[0]:
-                    # print(L.edge.points)
-                    print(other.points)
-                    # print('')
-                    s = other.shape.transform_copy(other.transformation)
-                    print(s.points)
-                    print('')
-                    # s = other.shape.transform(other.transformation)
-                    # if L.edge & other:
-                    print(L.edge.shape.points)
-                    if L.edge.shape & s:
-                        print('YESSSSSSSS!!!')
-                        # p.locked = False
-                        print(p.purpose)
-                        p.unlock
-                        print(p.purpose)
-                        P.append(p)
-        else:
-            raise ValueError('Type must be either Polygon or ProcessLayer.')
-        return P
+    # def __and__(self, other):
+    #     from spira.yevon.gdsii.polygon import Polygon
+    #     from spira.yevon.geometry.ports.port import Port
+    #     from spira.yevon.visualization.viewer import PortLayout
+    #     from copy import deepcopy
+    #     P = self.__class__()
+    #     if isinstance(other, Polygon):
+    #         for p in self._list:
+    #             if isinstance(p, Port):
+    #                 L = PortLayout(port=p)
+    #                 # if p.edge & other.elementals[0]:
+    #                 # print(L.edge.points)
+    #                 print(other.points)
+    #                 # print('')
+    #                 s = other.shape.transform_copy(other.transformation)
+    #                 print(s.points)
+    #                 print('')
+    #                 # s = other.shape.transform(other.transformation)
+    #                 # if L.edge & other:
+    #                 print(L.edge.shape.points)
+    #                 if L.edge.shape & s:
+    #                     print('YESSSSSSSS!!!')
+    #                     # p.locked = False
+    #                     print(p.purpose)
+    #                     p.unlock
+    #                     print(p.purpose)
+    #                     P.append(p)
+    #     else:
+    #         raise ValueError('Type must be either Polygon or ProcessLayer.')
+    #     return P
 
     def __sub__(self, other):
         pass

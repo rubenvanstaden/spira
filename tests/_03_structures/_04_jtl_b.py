@@ -7,7 +7,7 @@ from spira.yevon.process import get_rule_deck
 RDD = get_rule_deck()
 
 
-class JtlBias(spira.PCell):
+class JtlBias(spira.Circuit):
 
     def get_transforms(self):
         t1 = spira.Translation(translation=(0, 0))
@@ -37,14 +37,10 @@ class JtlBias(spira.PCell):
 
 if __name__ == '__main__':
 
-    D = JtlBias()
+    D = JtlBias(pcell=True)
 
-    # from spira.yevon.filters.boolean_filter import MetalConnectFilter
-    # F = MetalConnectFilter()
-    # D = F(D)
-    
     D.gdsii_output()
-
-    D = spira.Circuit(name='TestElectricalConnections', elementals=D.elementals)
     D.netlist_output()
+
+
 
