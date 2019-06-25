@@ -110,7 +110,7 @@ class GmshGeometry(__Geometry__):
             os.makedirs(directory)
 
         mesh_data = pygmsh.generate_mesh(
-            self.geom, verbose=False, dim=2,
+            self.geom, verbose=True, dim=2,
             prune_vertices=False,
             remove_faces=False,
             geo_filename=geo_file

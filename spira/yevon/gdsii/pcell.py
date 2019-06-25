@@ -21,10 +21,11 @@ class PCell(Cell):
 
 
 class Device(PCell):
+    """  """
 
     # lcar = NumberField(default=RDD.PCELLS.LCAR_DEVICE)
     # lcar = NumberField(default=0.5)
-    lcar = NumberField(default=1)
+    lcar = NumberField(default=10)
 
     def __init__(self, pcell=True, **kwargs):
         super().__init__(**kwargs)
@@ -74,8 +75,8 @@ class Circuit(PCell):
     corners = StringField(default='miter', doc='Define the type of path joins.')
     bend_radius = NumberField(allow_none=True, default=None, doc='Bend radius of path joins.')
 
-    # lcar = NumberField(default=RDD.PCELLS.LCAR_CIRCUIT)
-    lcar = NumberField(default=10)
+    lcar = NumberField(default=RDD.PCELLS.LCAR_CIRCUIT)
+    # lcar = NumberField(default=10)
     # lcar = NumberField(default=1)
 
     def __repr__(self):
@@ -90,7 +91,7 @@ class Circuit(PCell):
         F = RDD.PCELLS.FILTERS
         # F['boolean'] = False
         # F['simplify'] = False
-        # F['via_contact'] = False
+        F['via_contact'] = False
         # F['metal_connect'] = False
 
         elems = self.create_elementals(elems)

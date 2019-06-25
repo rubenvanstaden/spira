@@ -141,8 +141,8 @@ class NetEdgeFilter(__NetFilter__):
                                 for n in get_triangles_containing_line(item, item.lines[i]):
                                     item.g.node[n]['process_polygon'] = e
                                     # FIXME: Change to equal the overlapping edge display.
-                                    item.g.node[n]['display'] = RDD.DISPLAY.STYLE_SET[RDD.PLAYER.I5.VIA]
-                                    # item.g.node[n]['display'] = RDD.DISPLAY.STYLE_SET[RDD.PLAYER.M1.HOLE]
+                                    # item.g.node[n]['display'] = RDD.DISPLAY.STYLE_SET[RDD.PLAYER.I5.VIA]
+                                    item.g.node[n]['display'] = RDD.DISPLAY.STYLE_SET[RDD.PLAYER.M1.HOLE]
                                 
                                 # line = item.lines[i]
                                 # for n, triangle in enumerate(item.triangles):
