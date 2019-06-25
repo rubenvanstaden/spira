@@ -49,8 +49,11 @@ class __Polygon__(__LayerElemental__):
     def expand_transform(self):
         from spira.core.transforms.identity import IdentityTransform
         if not self.transformation.is_identity():
-            # self.shape = self.shape.transform_copy(self.transformation)
-            self.shape = deepcopy(self.shape).transform(self.transformation)
+            print('(func): polygon expand transform')
+            print(self.transformation)
+            # FIXME! Which one must I use and why?
+            self.shape = self.shape.transform_copy(self.transformation)
+            # self.shape = deepcopy(self.shape).transform(self.transformation)
             self.transformation = IdentityTransform()
         return self
 
@@ -197,7 +200,7 @@ class Polygon(__Polygon__):
         from spira.yevon.geometry.edges.edges import generate_polygon_edges
         return generate_polygon_edges(shape=self.shape, layer=self.layer)
 
-    def nets(self, lcar, contacts=None):
+    def nets(self, lcar):
         from spira.yevon.geometry.nets.net import Net
         from spira.yevon.vmodel.geometry import GmshGeometry
         from spira.yevon.geometry.ports.port import ContactPort
@@ -218,7 +221,7 @@ class Polygon(__Polygon__):
             F = filters.ToggledCompoundFilter()
             F += filters.NetProcessLabelFilter(process_polygons=[deepcopy(self)])
             F += filters.NetDeviceLabelFilter(device_ports=cc)
-            # F += filters.NetEdgeFilter(process_polygons=[deepcopy(self)])
+            F += filters.NetEdgeFilter(process_polygons=[deepcopy(self)])
 
             net = Net(name=self.process, geometry=geometry)
 

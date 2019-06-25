@@ -21,9 +21,11 @@ def load_aspect():
     Cell.mixin(Outputs)
 
     SRef.mixin(SRefPortProperty)
+    SRef.mixin(NetlistAspects)
     Shape.mixin(ShapeClipperAspects)
 
     __Polygon__.mixin(PolygonAspects)
+    __Polygon__.mixin(NetlistAspects)
     __Polygon__.mixin(PolygonPortProperty)
     __Polygon__.mixin(PolygonClipperAspects)
 

@@ -179,7 +179,7 @@ class ProcessLayerDatabase(__Database__):
             if isinstance(v, ProcessLayer):
                 pl.append(v)
         return pl
-    
+
     def get_key_from_process_layer(self, layer):
         from spira.yevon.process.process_layer import ProcessLayer
         for k, v in self.__dict__.items():
@@ -208,7 +208,7 @@ class PhysicalLayerDatabase(__Database__):
             if isinstance(v, PhysicalLayer):
                 pl.append(v)
         return pl
-    
+
     def get_key_from_physical_layer(self, layer):
         from spira.yevon.process.physical_layer import PhysicalLayer
         for k, v in self.__dict__.items():

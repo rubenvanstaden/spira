@@ -39,9 +39,9 @@ class PolygonGroup(Group, __LayerElemental__):
         el = ElementalList()
         for e1 in self.elementals:
             for e2 in other.elementals:
+                e1 = deepcopy(e1)
+                e2 = deepcopy(e2)
                 if e1.shape != e2.shape:
-                    e1 = deepcopy(e1)
-                    e2 = deepcopy(e2)
                     polygons = e1.intersection(e2)
                     for p in polygons:
                         p.layer.purpose = RDD.PURPOSE.INTERSECTED
@@ -80,7 +80,8 @@ class PolygonGroup(Group, __LayerElemental__):
         el2 = deepcopy(self.elementals)
         for i, e1 in enumerate(el1):
             for j, e2 in enumerate(el2):
-                if i != j:
+                if e1.shape != e2.shape:
+                    # polygons = e1.intersection(e2)
                     polygons = e1 & e2
                     for p in polygons:
                         p.layer.purpose = RDD.PURPOSE.INTERSECTED

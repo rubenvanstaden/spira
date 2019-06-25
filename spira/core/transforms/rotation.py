@@ -83,6 +83,9 @@ class Rotation(__ConvertableTransform__):
         a += self.rotation
         return a % 360.0
 
+    def is_identity(self):
+        return (self.rotation == 0.0)
+
 
 def shape_rotate(shape, rotation=90, rotation_center=(0,0)):
     return Rotation(rotation, rotation_center)(shape)

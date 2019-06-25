@@ -69,7 +69,8 @@ class PolygonPortProperty(PortProperty):
 
     def create_edge_ports(self, edges):
         T = self.transformation
-        shape = deepcopy(self.shape).transform(T)
+        # shape = deepcopy(self.shape).transform(T)
+        shape = self.shape.transform_copy(T)
         return shapes.shape_edge_ports(shape, self.layer, self.id_string())
 
     def create_ports(self, ports):

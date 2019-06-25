@@ -77,11 +77,13 @@ class GmshGeometry(__Geometry__):
             shape = ply.shape.transform(ply.transformation)
             layer = RDD.GDSII.EXPORT_LAYER_MAP[ply.layer]
             pts = [[p[0], p[1], 0] for p in shape.points]
+            # pts = [[p[0]*1e-6, p[1]*1e-6, 0] for p in shape.points]
             surface_label = '{}_{}_{}_{}'.format(layer.number, layer.datatype, GmshGeometry._ID, i)
             gp = self.geom.add_polygon(pts, lcar=self.lcar, make_surface=True, holes=None)
 
             for j, ll in enumerate(gp.lines):
                 line_label = polygon.shape.segment_labels[j] + "_" + str(j)
+                # print(line_label)
                 self.geom.add_physical(ll, label=line_label)
             self.geom.add_physical(gp.surface, label=surface_label)
             # surfaces.append([gp.surface, gp.line_loop])
@@ -114,7 +116,7 @@ class GmshGeometry(__Geometry__):
             geo_filename=geo_file
         )
 
-        meshio.write(mesh_file, mesh_data)
+        # meshio.write(mesh_file, mesh_data)
         # meshio.write(vtk_file, mesh_data)
 
         return mesh_data

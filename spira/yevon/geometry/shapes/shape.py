@@ -140,6 +140,13 @@ class __Shape__(Transformable, FieldInitializer):
             segments = list(zip(p, np.roll(p, shift=-1, axis=0)))
         else:
             segments = list(zip(p[:-1], p[1:]))
+        # segments = [Coord(s[0], s[1]).snap_to_grid() for s in segments]
+        # ss = []
+        # for segment in segments:
+        #     seg = [Coord(s[0], s[1]).snap_to_grid() for s in segment]
+        #     ss.append(seg)
+        # segments = ss
+        # s1 = Coord(s1[0], s1[1]).snap_to_grid()
         return segments
 
     def snap_to_grid(self, grids_per_unit=None):
@@ -147,7 +154,10 @@ class __Shape__(Transformable, FieldInitializer):
         from spira.settings import get_grids_per_unit
         if grids_per_unit is None:
             grids_per_unit = get_grids_per_unit()
+        # print(self.points)
         self.points = (np.floor(self.points * grids_per_unit + 0.5)) / grids_per_unit 
+        # print(self.points)
+        # print('\n\n===========================')
         return self
 
     def move(self, pos):
@@ -217,38 +227,25 @@ class __Shape__(Transformable, FieldInitializer):
 
         s = Shape(other_shape)
         s.remove_straight_angles()
-        segments2 = s.segments() 
+        segments2 = s.segments()
         if len(segments2) < 1:
             return []
 
-        # intersections = []
-        # for s1 in segments1:
-        #     for s2 in segments2:
-        #         if lines_cross(s1[0], s1[1], s2[0], s2[1], inclusive=True):
-        #             print('cross')
-        #             intersections += [intersection(s1[0], s1[1], s2[0], s2[1])]
-        #         elif lines_coincide(s1[0], s1[1], s2[0], s2[1]):
-        #             print('coincide')
-        #             print([s1[0], s1[1], s2[0], s2[1]])
-        #             pl = sort_points_on_line([s1[0], s1[1], s2[0], s2[1]])
-        #             intersections += [pl[1], pl[2]]  # the two middlemost points 
-        
         intersections = []
         for s1 in segments1:
-            s1_inter = []
+            intersected_points = []
             for s2 in segments2:
                 if lines_cross(s1[0], s1[1], s2[0], s2[1], inclusive=True):
+                    # print(s1, s2)
                     c = [intersection(s1[0], s1[1], s2[0], s2[1])]
-                    s1_inter += c
-                # elif lines_coincide(s1[0], s1[1], s2[0], s2[1]):
-                #     print('coincide')
-                #     # print([s1[0], s1[1], s2[0], s2[1]])
-                #     pl = sort_points_on_line([s1[0], s1[1], s2[0], s2[1]])
-                #     intersections += [pl[1], pl[2]]  # the two middlemost points 
+                    # print(c)
+                    # print('wjefbwefb')
+                    intersected_points += c
 
-            if len(s1_inter) > 1:
-                il = s1_inter
-                pl = sort_points_on_line([s1[0], s1[1], il[0], il[1]])
+            # FIXME Must this be a 0 or a 1!!!
+            if len(intersected_points) > 0:
+            # if len(intersected_points) > 1:
+                pl = sort_points_on_line([*s1, *intersected_points])
                 intersections += [pl[1], pl[2]]
 
         intersections = points_unique(intersections)

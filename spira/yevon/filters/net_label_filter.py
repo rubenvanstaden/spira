@@ -108,15 +108,15 @@ class NetEdgeFilter(__NetFilter__):
 
         ELM_TYPE = {1: 'line', 2: 'triangle'}
 
-        print('Triangles:')
-        print(item.triangles)
-        print('Lines:')
-        print(item.lines)
-        print('Physical Lines:')
-        print(item.physical_lines)
-        print('Field Data:')
-        for k, v in item.mesh_data.field_data.items():
-            print(k, v)
+        # print('Triangles:')
+        # print(item.triangles)
+        # print('Lines:')
+        # print(item.lines)
+        # print('Physical Lines:')
+        # print(item.physical_lines)
+        # print('Field Data:')
+        # for k, v in item.mesh_data.field_data.items():
+        #     print(k, v)
         
         # for e in self.process_polygons:
         #     item.g.node[3]['process_polygon'] = e
@@ -141,8 +141,8 @@ class NetEdgeFilter(__NetFilter__):
                                 for n in get_triangles_containing_line(item, item.lines[i]):
                                     item.g.node[n]['process_polygon'] = e
                                     # FIXME: Change to equal the overlapping edge display.
-                                    # item.g.node[n]['display'] = RDD.DISPLAY.STYLE_SET[RDD.PLAYER.I5.VIA]
-                                    item.g.node[n]['display'] = RDD.DISPLAY.STYLE_SET[RDD.PLAYER.M1.HOLE]
+                                    item.g.node[n]['display'] = RDD.DISPLAY.STYLE_SET[RDD.PLAYER.I5.VIA]
+                                    # item.g.node[n]['display'] = RDD.DISPLAY.STYLE_SET[RDD.PLAYER.M1.HOLE]
                                 
                                 # line = item.lines[i]
                                 # for n, triangle in enumerate(item.triangles):
@@ -170,7 +170,7 @@ class NetEdgeFilter(__NetFilter__):
                         #             item.g.node[3]['process_polygon'] = e
                         #             item.g.node[3]['display'] = RDD.DISPLAY.STYLE_SET[e.layer]
 
-        return item
+        return [item]
 
     def __repr__(self):
         return "[SPiRA: NetLabelFilter] (layer count {})".format(0)

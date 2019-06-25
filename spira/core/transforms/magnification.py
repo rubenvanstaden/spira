@@ -74,7 +74,6 @@ class Magnification(__ConvertableTransform__):
         return Magnification(self.magnification_center, 1.0 / self.magnification)    
 
     def is_identity(self):
-        """ Returns True if the transformation does nothing """
         return (self.magnification == 1.0)
 
 

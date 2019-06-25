@@ -100,11 +100,11 @@ class ElementalList(__ElementalList__):
                 SI += e.bbox_info
             return SI
 
-    def nets(self, contacts=None, lcar=100):
+    def nets(self, lcar=100):
         from spira.yevon.geometry.nets.net_list import NetList
         nets = NetList()
         for e in self._list:
-            nets += e.nets(lcar=lcar, contacts=contacts)
+            nets += e.nets(lcar=lcar)
         return nets
 
     def dependencies(self):

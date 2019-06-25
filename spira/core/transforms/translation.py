@@ -53,8 +53,7 @@ class Translation(__ConvertableTransform__):
         return Translation(Coord(-self.translation.x, -self.translation.y))
 
     def is_identity(self):
-        """ Returns True if the transformation does nothing """
-        return ((self.translation.x == 0.0) and (self.translation.y == 0.0) )
+        return ((self.translation.x == 0.0) and (self.translation.y == 0.0))
 
 
 def shape_translate(shape, translation=(1,0)):

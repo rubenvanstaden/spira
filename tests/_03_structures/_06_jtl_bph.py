@@ -21,7 +21,7 @@ class VirtualBias(spira.Cell):
         return elems
 
 
-class JtlBiasPorts(spira.PCell):
+class JtlBiasPorts(spira.Circuit):
 
     def get_transforms(self):
         t1 = spira.Translation(translation=(0, 0))
@@ -68,8 +68,6 @@ if __name__ == '__main__':
     # D = F(D)
     
     D.gdsii_output()
-    
-    D = spira.Circuit(name='TestElectricalConnections', elementals=D.elementals)
     D.netlist_output()
 
 

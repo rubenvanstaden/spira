@@ -38,13 +38,30 @@ class ShapeConnected(__ShapeModifier__):
 
         for ply, edges in self.edges.items():
             for edge in edges:
-                e = deepcopy(edge).outside.transform(edge.transformation)
-                # e = edge.outside
+                # e = deepcopy(edge).outside.transform(edge.transformation)
+                e = edge.outside
+                bbox_shape = e.bbox_info.bounding_box().snap_to_grid()
+                # bbox_shape = e.bbox_info.bounding_box()
+                # print(bbox_shape.segments())
+                # print(self.segments())
                 for i, s1 in enumerate(self.segments()):
-                    bbox_shape = e.bbox_info.bounding_box().snap_to_grid()
+                    # print(s1)
+                    s1 = Shape(points=s1).snap_to_grid()
+                    s1 = s1.points[0]
+                    # print(s1)
                     for s2 in bbox_shape.segments():
-                        if (np.array(s1) == np.array(s2)).all():
+                        s1 = [tuple(c) for c in s1]
+                        s2 = [tuple(c) for c in s2]
+                        # if (np.array(s1) == np.array(s2)).all():
+                        # if (sorted(s1) == sorted(s2)).all():
+                        # print(s1)
+                        # print(s2)
+                        if set(s1) == set(s2):
                             labels[i] = e.shape.hash_string
+                #             print(labels[i])
+                #             print('YES SEGMENT')
+                #     print('----')
+                # print('')
 
         return labels
 
@@ -59,25 +76,27 @@ class ShapeConnected(__ShapeModifier__):
                 new_points += [s[0]]
                 for c in self.overlapping_shape.points:
                     if c not in self.original_shape:
+                        # print(c)
                         segment_line = line_from_two_points(s[0], s[1])
                         if segment_line.is_on_line(coordinate=c):
+                            # print('jkfbjwkebkwefb')
                             s1_inter.append(c)
 
                 if len(s1_inter) > 0:
                     line = np.concatenate((s, s1_inter))
                     pl = sort_points_on_line(line)
                     new_points += pl[0:-1]
-                new_points += [s[1]]
+                # new_points += [s[1]]
 
             points = new_points
             points = [Coord(p[0], p[1]) for p in points]
             points = points_unique(points)
             points = [c.to_list() for c in points]
 
-            print(self.overlapping_shape.points)
-            print(points)
-            print(len(self.overlapping_shape.points), len(points))
-            print('')
+            # if len(points) > 0:
+            #     print(points)
+            #     print(len(self.overlapping_shape.points), len(points))
+            #     print('')
 
         return points
 

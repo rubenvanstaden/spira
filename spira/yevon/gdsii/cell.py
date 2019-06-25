@@ -86,7 +86,6 @@ class __Cell__(FieldInitializer, metaclass=MetaCell):
         return self
 
 
-# class CellAbstract(gdspy.Cell, __Cell__):
 class CellAbstract(__Cell__):
 
     def create_name(self):
@@ -143,6 +142,7 @@ class Cell(CellAbstract):
     """ A Cell encapsulates a set of elementals that
     describes the layout being generated. """
 
+    lcar = NumberField(default=100)
     name = DataField(fdef_name='create_name', doc='Name of the cell instance.')
 
     _next_uid = 0
@@ -215,7 +215,7 @@ class Cell(CellAbstract):
                             subj += e
                         else:
                             flat_polygons(subj=subj, cell=e.ref)
-                    else: 
+                    else:
                         flat_polygons(subj=subj, cell=e.ref)
 
             # for p in cell.ports:
@@ -306,8 +306,12 @@ class Cell(CellAbstract):
                         self.elementals[i] = T(e)
         return self
 
-    def nets(self, lcar, contacts=None):
-        return self.elementals.nets(lcar=lcar, contacts=contacts)
+    def nets(self, lcar):
+        return self.elementals.nets(lcar=lcar)
+
+    def create_netlist(self):
+        net = self.nets(lcar=self.lcar).disjoint()
+        return net
 
 
 class Connector(Cell):

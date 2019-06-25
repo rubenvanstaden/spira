@@ -198,6 +198,10 @@ class GenericTransform(ReversibleTransform):
         """ Gives a hash of the transform (for naming purposes) """
         return self.__str__()
 
+    def is_identity(self):
+        """ Returns True if the transformation does nothing """
+        return ((self.rotation == 0.0) and (self.translation.x == 0.0) and (self.translation.y == 0.0) and not (self.reflection) and (self.magnification == 1.0))
+
 
 BASE = GenericTransform
 

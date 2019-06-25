@@ -18,14 +18,12 @@ class Jtl(spira.Circuit):
     def create_routes(self, elems):
         elems += spira.Rectangle(p1=(4, -4), p2=(146, 4), layer=RDD.PLAYER.M2.METAL)
         elems += spira.Rectangle(p1=(-3, -4), p2=(-30, 4), layer=RDD.PLAYER.M2.METAL)
-        elems += spira.Rectangle(p1=(153, -4), p2=(180, 4), layer=RDD.PLAYER.M2.METAL)
         return elems
 
     def create_elementals(self, elems):
         t1, t2 = self.get_transforms()
         jj = Junction()
         elems += spira.SRef(alias='S1', reference=jj, transformation=t1)
-        elems += spira.SRef(alias='S2', reference=jj, transformation=t2)
         return elems
 
 

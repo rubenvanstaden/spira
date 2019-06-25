@@ -96,7 +96,7 @@ class NetListField(DataFieldDescriptor):
 
     def call_param_function(self, obj):
         f = self.get_param_function(obj)
-        value = f(self.__type__())
+        value = f(self.__type__(), 100)
         if value is None:
             value = self.__type__()
         new_value = self.__cache_parameter_value__(obj, value)

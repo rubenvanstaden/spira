@@ -21,14 +21,12 @@ el += p2
 # c1 += spira.Rectangle(p1=(0, 0), p2=(4, 10), layer=RDD.PLAYER.M5.METAL)
 # el += spira.SRef(reference=c1)
 
-# # T0
 # el += spira.Rectangle(p1=(3, 4), p2=(8, 6), layer=RDD.PLAYER.M5.METAL)
 
-# # T6
 # el += spira.Rectangle(p1=(8, 4), p2=(-4, 6), layer=RDD.PLAYER.M5.METAL)
 
-# el += spira.Rectangle(p1=(-4, 4), p2=(1, 6), layer=RDD.PLAYER.M5.METAL)
-# el += spira.Rectangle(p1=(3, 4), p2=(8, 6), layer=RDD.PLAYER.M5.METAL)
+el += spira.Rectangle(p1=(-4, 4), p2=(1, 6), layer=RDD.PLAYER.M5.METAL)
+el += spira.Rectangle(p1=(3, 4), p2=(8, 6), layer=RDD.PLAYER.M5.METAL)
 
 # el += spira.Rectangle(p1=(-4, 8), p2=(8, 12), layer=RDD.PLAYER.M5.METAL)
 
@@ -36,7 +34,8 @@ el += p2
 
 # el += spira.Rectangle(p1=(-1, 9), p2=(5, 14), layer=RDD.PLAYER.M5.METAL)
 
-el += spira.Rectangle(p1=(0, 10), p2=(4, 14), layer=RDD.PLAYER.M5.METAL)
+# # FIXME
+# el += spira.Rectangle(p1=(0, 10), p2=(4, 14), layer=RDD.PLAYER.M5.METAL)
 
 from spira.yevon.filters.boolean_filter import MetalConnectFilter
 from spira.yevon.vmodel.virtual import virtual_connect
@@ -46,11 +45,8 @@ from copy import deepcopy
 
 device = spira.Cell(name='Device', elementals=el)
 
-D = device
-
-
-# v_model = virtual_connect(device=D)
-# # v_model.gdsii_output_virtual_connect()
+v_model = virtual_connect(device=device)
+# v_model.gdsii_output_virtual_connect()
 
 # # points = np.array)([])
 # for i, e1 in enumerate(D.elementals):
@@ -76,16 +72,13 @@ D = device
 #     #     print('---------')
 #     #     print(e1.shape.points)
 
-# # device.gdsii_output()
-
-
 F = MetalConnectFilter()
 D = F(device)
 
-D.gdsii_output()
-
 D = spira.Circuit(name='TestElectricalConnections', elementals=D.elementals)
+D.gdsii_output()
 D.netlist_output()
+
 
 
 

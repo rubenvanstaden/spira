@@ -13,8 +13,3 @@ class NetlistAspects(__Aspects__):
         net = Net()
         return net
 
-    # nets = NetListField(fdef_name='create_netlist', doc='List of nets to be added to the cell instance.')
-
-    # def create_nets(self, nets):
-    #     return nets
-

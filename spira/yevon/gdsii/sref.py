@@ -39,24 +39,26 @@ class __RefElemental__(__Elemental__):
 
     def expand_transform(self):
 
-        # C = spira.Cell(
-        C = self.ref.__class__(
-            name=self.ref.name + self.transformation.id_string(),
-            alias=self.ref.alias + self.alias,
-            elementals=deepcopy(self.ref.elementals),
-            ports=deepcopy(self.ref.ports)
-        )
-
-        T = self.transformation + spira.Translation(self.midpoint)
-        C = C.transform(T)
-
-        # NOTE: Applies expantion hierarchically.
-        # Expands all references in the cell.
-        C.expand_transform()
-
-        self.ref = C
-        self.transformation = None
-        self.midpoint = (0,0)
+        if not self.transformation.is_identity():
+            # NOTE: Use __class__ cause we want to keep the 
+            # subclass tree (spira.Device) in tacks for fitlering.
+            C = self.ref.__class__(
+                name=self.ref.name + self.transformation.id_string(),
+                alias=self.ref.alias + self.alias,
+                elementals=deepcopy(self.ref.elementals),
+                ports=deepcopy(self.ref.ports)
+            )
+    
+            T = self.transformation + spira.Translation(self.midpoint)
+            C = C.transform(T)
+    
+            # NOTE: Applies expantion hierarchically.
+            # Expands all references in the cell.
+            C.expand_transform()
+    
+            self.ref = C
+            self.transformation = None
+            self.midpoint = (0,0)
 
         return self
 
@@ -286,12 +288,25 @@ class SRef(__RefElemental__):
                         Tn.apply(self.ref.elementals[i])
         return self
 
-    def nets(self, lcar, contacts=None):
-        from spira.yevon.gdsii.pcell import Device
-        # if isinstance(self.ref, Device): lcar = 10
-        nets = self.ref.nets(lcar, contacts)
+    def nets(self, lcar):
+        """  """
+
+        from spira.yevon.geometry.nets.net_list import NetList
+        nets = NetList()
+        nets += self.ref.netlist
+
+        # from spira.yevon.gdsii.pcell import Device
+        # if isinstance(self.ref, Device):
+        #     nets = [self.ref.netlist]
+        # else:
+        #     nets = self.ref.nets(lcar)
+
+        # nets = self.ref.nets(lcar, contacts)
+
+        # FIXME: Is this transformation required?
         # T = self.transformation + Translation(self.midpoint)
         # nets.transform(T)
+
         return nets 
 
 

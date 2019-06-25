@@ -1,5 +1,6 @@
 import spira.all as spira
 
+from spira.log import SPIRA_LOG as LOG
 from spira.yevon.vmodel.derived import get_derived_elementals
 from spira.yevon.filters.layer_filter import LayerFilterAllow
 from spira.core.parameters.initializer import FieldInitializer
@@ -40,11 +41,8 @@ class VirtualConnect(__VirtualModel__):
 
     # FIXME: Add a string list restriction.
     connect_type = spira.StringField(default='contact_layer')
-    # connect_type = spira.StringField(default='metal_layer')
-    # contact_ports = spira.DataField(fdef_name='create_contact_ports')
-    connected_elementals = spira.DataField(fdef_name='create_connected_elementals')
-    # connected_elementals = spira.ElementalListField()
     connected_edges = spira.DataField(fdef_name='create_connected_edges')
+    connected_elementals = spira.DataField(fdef_name='create_connected_elementals')
 
     def __make_polygons__(self):
 
@@ -67,7 +65,7 @@ class VirtualConnect(__VirtualModel__):
             for e in el:
                 if e.purpose == 'METAL': 
                     pass
-                else: 
+                else:
                     elems += e
         else:
             pass
@@ -88,15 +86,32 @@ class VirtualConnect(__VirtualModel__):
         from spira.yevon.vmodel.derived import get_derived_elementals
         el = ElementalList()
         for p1 in deepcopy(self.device.elementals):
-            el += p1
-            for edge in p1.edges:
-                el += edge.outside.transform(edge.transformation)
+            if p1.layer.purpose == RDD.PURPOSE.METAL:
+                el += p1
+                for edge in p1.edges:
+                    el += edge.outside.transform(edge.transformation)
+                    # el += edge.outside
+                    # el += edge
+                # print('')
 
-        map1 = {RDD.PLAYER.M2.EDGE_CONNECTED : RDD.PLAYER.M2.EDGE_PORT_ENABLED}
-        # map1 = {RDD.PLAYER.M5.EDGE_CONNECTED : RDD.PLAYER.M5.EDGE_PORT_ENABLED}
+        # FIXME!!!
+        # map1 = {RDD.PLAYER.M2.EDGE_CONNECTED : RDD.PLAYER.M2.EDGE_PORT_ENABLED}
+        mapping = {}
+        for pl in RDD.get_physical_layers_by_purpose(purposes=['METAL']):
+            key = pl.process.symbol
+            if hasattr(RDD.PLAYER[key], 'EDGE_CONNECTED'):
+                derived_layer = RDD.PLAYER[key].EDGE_CONNECTED
+                ps_1 = derived_layer.layer1.process.symbol
+                ps_2 = derived_layer.layer2.process.symbol
+                if ps_1 == ps_2:
+                    mapping[derived_layer] = RDD.PLAYER[key].EDGE_PORT_ENABLED
+                else:
+                    raise ValueError('Error in RDD: Edge process \'{}\' not the same as metal process \'{}\'.'.format(ps_2, ps_1))
+            else:
+                LOG.warning('Edge detection for METAL layer {} ignored.'.format(key))
 
         pg_overlap = self.device.overlap_elementals
-        edges = get_derived_elementals(el, mapping=map1, store_as_edge=True)
+        edges = get_derived_elementals(el, mapping=mapping, store_as_edge=True)
 
         overlap_edges = {}
 
@@ -115,13 +130,27 @@ class VirtualConnect(__VirtualModel__):
                         edges[i].pid = '{}'.format(e.shape.hash_string)
                         overlap_edges[e].append(edges[i])
 
-        if (len(edges) > 0) and (len(overlap_edges) == 0):
-            e = spira.Polygon(alias='NoPG', shape=[], layer=spira.Layer(1))
-            overlap_edges[e] = []
-            for i, edge in enumerate(edges):
-                edges[i].pid = '{}'.format(e.shape.hash_string)
-                overlap_edges[e].append(edges[i])
-    
+        # # NOTE: Testing generated edges via viewer.
+        # # --------------------------------------------------------------------
+        # if (len(edges) > 0) and (len(overlap_edges) == 0):
+        # # if (len(el) > 0) and (len(overlap_edges) == 0):
+        #     e = spira.Polygon(alias='NoPG', shape=[], layer=spira.Layer(1))
+        #     overlap_edges[e] = []
+        #     for i, edge in enumerate(edges):
+        #     # for i, edge in enumerate(el):
+        #         edges[i].pid = '{}'.format(e.shape.hash_string)
+        #         overlap_edges[e].append(edges[i])
+        # # --------------------------------------------------------------------
+
+        # print('[--] Overlapping Edges:')
+        # for k, v in overlap_edges.items():
+        #     print(k)
+        #     for e in v:
+        #         print(e)
+        #         print(e.pid)
+        #     print('')
+        # print('')
+
         return overlap_edges
 
     def create_connected_elementals(self):
@@ -162,7 +191,9 @@ class VirtualConnect(__VirtualModel__):
         for o, edges in self.connected_edges.items():
             elems += o
             for e in edges:
+                # elems += e
                 elems += e.outside
+                # elems += e.outside.transform(e.transformation)
         for e in self.device.elementals:
             elems += e
 
