@@ -119,11 +119,6 @@ class PortList(TypedList, Transformable):
             T.append(c.movecopy(position))
         return T
 
-    @property
-    def unlock(self):
-        for p in self._list: p.unlock
-        return self
-
     def transform_copy(self, transformation):
         T = self.__class__()
         for c in self._list:
@@ -261,6 +256,14 @@ class PortList(TypedList, Transformable):
         start_angle = 270.0 - 0.5 * self.port_angle_decision
         end_angle = 270.0 + 0.5 * self.port_angle_decision
         return self.get_ports_within_angles(start_angle, end_angle)
+
+    @property
+    def unlock(self):
+        """ Unlock the edge and convert it to a port. """
+        for i, p in enumerate(self._list):
+            name = p.name.replace('e', 'P')
+            self._list[i] = p.copy(name=name).unlock
+        return self
 
 
 class PortListField(DataFieldDescriptor):
