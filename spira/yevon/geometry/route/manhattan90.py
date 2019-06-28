@@ -15,7 +15,7 @@ class Route90Base(__Manhattan__):
         p1, p2 = self.p1, self.p2
 
         h = (p2[1]-p1[1]) - self.radius
-        self.b1.align(port=self.b1.ports['P2'], destination=self.ports['T1'], distance=h)
+        self.b1.distance_alignment(port=self.b1.ports['P2'], destination=self.ports['T1'], distance=h)
 
         r1 = self.route_straight(self.b1.ports['P2'], self.ports['T1'])
         r2 = self.route_straight(self.b1.ports['P1'], self.ports['T2'])
@@ -38,7 +38,7 @@ class Route90Base(__Manhattan__):
         p1, p2 = self.p1, self.p2
 
         h = (p2[1]-p1[1]) - self.radius
-        self.b1.align(port=self.b1.ports['P1'], destination=self.ports['T1'], distance=h)
+        self.b1.distance_alignment(port=self.b1.ports['P1'], destination=self.ports['T1'], distance=h)
 
         r1 = self.route_straight(self.b1.ports['P1'], self.ports['T1'])
         r2 = self.route_straight(self.b1.ports['P2'], self.ports['T2'])

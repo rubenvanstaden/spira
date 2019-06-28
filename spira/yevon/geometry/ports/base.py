@@ -27,13 +27,13 @@ class __Port__(FieldInitializer):
 class __PhysicalPort__(__Port__):
 
     process = ProcessField(default=RDD.PROCESS.VIRTUAL)
-    purpose = PurposeLayerField(default=RDD.PURPOSE.PORT.EDGE_ENABLED)
+    purpose = PurposeLayerField(default=RDD.PURPOSE.PORT.OUTSIDE_EDGE_ENABLED)
     local_pid = StringField(default='none_local_pid')
     text_type = NumberField(default=RDD.GDSII.TEXT)
 
     # FIXME: Look at how this is done with elementals.
     def __add__(self, other):
-        """ 
+        """
         Allows for this type of operations:
 
         Example
@@ -42,6 +42,18 @@ class __PhysicalPort__(__Port__):
         """
         if other is None: return self
         p1 = Coord(self.midpoint[0], self.midpoint[1]) + Coord(other[0], other[1])
+        return p1
+
+    def __sub__(self, other):
+        """
+        Allows for this type of operations:
+
+        Example
+        -------
+        >>> midpoint = self.jj1.ports['P2'] + [-5, 0]
+        """
+        if other is None: return self
+        p1 = Coord(self.midpoint[0], self.midpoint[1]) - Coord(other[0], other[1])
         return p1
 
     @property

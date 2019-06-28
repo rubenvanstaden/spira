@@ -52,8 +52,14 @@ class SimplifyFilter(Filter):
         elems = ElementalList()
 
         for e in item.elementals.polygons:
-            points = clipping.simplify_points(e.points)
-            elems += e.__class__(shape=points, layer=e.layer, transformation=e.transformation)
+            e.shape = clipping.simplify_points(e.points)
+            elems += e
+
+            # points = clipping.simplify_points(e.points)
+            # elems += e.copy(shape=points)
+
+            # p = e.__class__(shape=points, layer=e.layer, transformation=e.transformation)
+            # elems += e.__class__(shape=points, layer=e.layer, transformation=e.transformation)
 
         for e in item.elementals.sref:
             elems += e
@@ -63,6 +69,7 @@ class SimplifyFilter(Filter):
             ports += p
 
         cell = Cell(elementals=elems, ports=ports)
+        # cell = item.__class__(elementals=elems, ports=ports)
         return cell
 
         # elems = ElementalList()

@@ -46,9 +46,11 @@ class PortLayout(spira.Cell):
         return p
 
     def create_label(self):
-        if self.port.purpose == RDD.PURPOSE.PORT.EDGE_ENABLED:
+        enabled_purposes = (RDD.PURPOSE.PORT.INSIDE_EDGE_ENABLED, RDD.PURPOSE.PORT.OUTSIDE_EDGE_ENABLED)
+        disabled_purposes = (RDD.PURPOSE.PORT.INSIDE_EDGE_DISABLED, RDD.PURPOSE.PORT.OUTSIDE_EDGE_DISABLED)
+        if self.port.purpose in enabled_purposes:
             layer = PLayer(self.port.process, RDD.PURPOSE.PORT.TEXT_ENABLED)
-        elif self.port.purpose == RDD.PURPOSE.PORT.EDGE_DISABLED:
+        elif self.port.purpose is disabled_purposes:
             layer = PLayer(self.port.process, RDD.PURPOSE.PORT.TEXT_DISABLED)
         else:
             layer = PLayer(self.port.process, RDD.PURPOSE.TEXT)

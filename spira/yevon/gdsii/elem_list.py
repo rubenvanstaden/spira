@@ -76,7 +76,8 @@ class ElementalList(__ElementalList__):
         from spira.yevon.gdsii.polygon import Polygon
         elems = ElementalList()
         for e in self._list:
-            if isinstance(e, Polygon):
+            # if isinstance(e, Polygon):
+            if issubclass(type(e), Polygon):
                 elems += e
         return elems
 

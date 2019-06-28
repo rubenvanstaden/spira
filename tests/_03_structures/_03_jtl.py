@@ -36,10 +36,10 @@ if __name__ == '__main__':
 
     D = Jtl(pcell=True)
 
-    # from spira.yevon.vmodel.virtual import virtual_connect
-    # v_model = virtual_connect(device=D.expand_flatcopy())
-    # v_model.gdsii_output_virtual_connect()
+    from spira.yevon.vmodel.virtual import virtual_connect
+    v_model = virtual_connect(device=D.expand_flatcopy())
+    v_model.gdsii_output_virtual_connect()
 
     # D.gdsii_output()
-    D.netlist_output()
+    # D.netlist_output()
 

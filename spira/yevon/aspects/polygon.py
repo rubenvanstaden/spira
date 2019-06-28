@@ -23,7 +23,7 @@ class PolygonAspects(__GeometryAspects__):
     @property
     def points(self):
         return self.shape.points
-
+        
     @property
     def area(self):
         return gdspy.Polygon(self.shape.points).area()
@@ -91,6 +91,7 @@ class PolygonClipperAspects(__ClipperAspects__):
 
     # NOTE: Does not require to check for layer equivalence.
     def intersection(self, other):
+        from copy import deepcopy
         s1 = self.shape.transform_copy(self.transformation)
         s2 = other.shape.transform_copy(other.transformation)
         shapes = s1.__and__(s2)

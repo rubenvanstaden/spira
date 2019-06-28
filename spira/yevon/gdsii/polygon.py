@@ -49,11 +49,7 @@ class __Polygon__(__LayerElemental__):
     def expand_transform(self):
         from spira.core.transforms.identity import IdentityTransform
         if not self.transformation.is_identity():
-            print('(func): polygon expand transform')
-            print(self.transformation)
-            # FIXME! Which one must I use and why?
             self.shape = self.shape.transform_copy(self.transformation)
-            # self.shape = deepcopy(self.shape).transform(self.transformation)
             self.transformation = IdentityTransform()
         return self
 

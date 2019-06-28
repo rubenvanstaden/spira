@@ -58,12 +58,10 @@ class Line(Transformable, FieldInitializer):
         return -self.c / -self.a
 
     def is_on_line(self, coordinate):
-        # print(self.b, self.b, self.c)
-        # print(np.abs(self.a * coordinate[0] + self.b * coordinate[1] + self.c))
         return abs(self.a * coordinate[0] + self.b * coordinate[1] + self.c) < 1E-10
 
     def distance(self, coordinate):
-        return abs(self.a * coordinate[0] + self.b * coordinate[1] + self.c) / np.sqrt(self.a ** 2 + self.b ** 2)
+        return abs(self.a*coordinate[0] + self.b*coordinate[1] + self.c) / np.sqrt(self.a**2 + self.b**2)
 
     def get_coord_from_distance(self, destination, distance):
         d = distance

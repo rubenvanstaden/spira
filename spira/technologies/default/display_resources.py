@@ -32,8 +32,8 @@ class DisplayDatabase(DelayedDatabase):
             (RDD.PLAYER.M1.PORT_CONTACT, DISPLAY_SALMON_LIGHT),
             (RDD.PLAYER.M1.PORT_BRANCH, DISPLAY_SALMON_DARK),
             (RDD.PLAYER.M1.PORT_DIRECTION, DISPLAY_SALMON),
-            (RDD.PLAYER.M1.EDGE_PORT_ENABLED, DISPLAY_GRAY),
-            (RDD.PLAYER.M1.EDGE_PORT_DISABLED, DISPLAY_WHITE),
+            (RDD.PLAYER.M1.INSIDE_EDGE_ENABLED, DISPLAY_GRAY),
+            (RDD.PLAYER.M1.INSIDE_EDGE_DISABLED, DISPLAY_WHITE),
             
             (RDD.PLAYER.M2.METAL, DISPLAY_TURQUOISE),
             # (RDD.PLAYER.M2.ROUTE, DISPLAY_TURQUOISE),
@@ -42,8 +42,8 @@ class DisplayDatabase(DelayedDatabase):
             (RDD.PLAYER.M2.PORT_CONTACT, DISPLAY_TURQUOISE_PALE),
             (RDD.PLAYER.M2.PORT_BRANCH, DISPLAY_TURQUOISE_MEDIUM),
             (RDD.PLAYER.M2.PORT_DIRECTION, DISPLAY_TURQUOISE_PALE),
-            (RDD.PLAYER.M2.EDGE_PORT_ENABLED, DISPLAY_GRAY),
-            (RDD.PLAYER.M2.EDGE_PORT_DISABLED, DISPLAY_WHITE),
+            (RDD.PLAYER.M2.INSIDE_EDGE_ENABLED, DISPLAY_GRAY),
+            (RDD.PLAYER.M2.INSIDE_EDGE_DISABLED, DISPLAY_WHITE),
             
             (RDD.PLAYER.M3.METAL, DISPLAY_CORAL),
             # (RDD.PLAYER.M3.ROUTE, DISPLAY_CORAL),
@@ -51,8 +51,8 @@ class DisplayDatabase(DelayedDatabase):
             (RDD.PLAYER.M3.BBOX, DISPLAY_LIGHT_GREEN),
             (RDD.PLAYER.M3.PORT_CONTACT, DISPLAY_CORAL_LIGHT),
             (RDD.PLAYER.M3.PORT_DIRECTION, DISPLAY_CORAL),
-            (RDD.PLAYER.M3.EDGE_PORT_ENABLED, DISPLAY_GRAY),
-            (RDD.PLAYER.M3.EDGE_PORT_DISABLED, DISPLAY_WHITE),
+            (RDD.PLAYER.M3.INSIDE_EDGE_ENABLED, DISPLAY_GRAY),
+            (RDD.PLAYER.M3.INSIDE_EDGE_DISABLED, DISPLAY_WHITE),
         ]
 
         # process_display_order = [ 
@@ -72,8 +72,8 @@ class DisplayDatabase(DelayedDatabase):
         #         (PhysicalLayer(process, RDD.PURPOSE.HOLE), DISPLAY_ALIGNMENT),
         #         (PhysicalLayer(process, RDD.PURPOSE.BBOX), DISPLAY_ALIGNMENT),
         #         (PhysicalLayer(process, RDD.PURPOSE.PORT_DIRECTION), DISPLAY_DF),
-        #         (PhysicalLayer(process, RDD.PURPOSE.EDGE_PORT_ENABLED), DISPLAY_DF),
-        #         (PhysicalLayer(process, RDD.PURPOSE.EDGE_PORT_DISABLED), DISPLAY_TEXT),
+        #         (PhysicalLayer(process, RDD.PURPOSE.INSIDE_EDGE_ENABLED), DISPLAY_DF),
+        #         (PhysicalLayer(process, RDD.PURPOSE.INSIDE_EDGE_DISABLED), DISPLAY_TEXT),
         #     ]
 
         self.STYLE_SET = style_set

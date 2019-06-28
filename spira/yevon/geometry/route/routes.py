@@ -60,17 +60,10 @@ class Route(spira.Polygon):
         return self.__repr__()
 
     def create_ports(self, ports):
-
-        from copy import deepcopy
-        port1 = deepcopy(self.p1)
-        port1.purpose = RDD.PURPOSE.ROUTE
-
-        port2 = deepcopy(self.p2)
-        port2.purpose = RDD.PURPOSE.ROUTE
-
-        ports += port1
-        ports += port2
-
+        # print(self.p1)
+        # print(self.p2)
+        ports += self.p1.copy(purpose=RDD.PURPOSE.ROUTE)
+        ports += self.p2.copy(purpose=RDD.PURPOSE.ROUTE)
         return ports
 
 
@@ -87,6 +80,7 @@ def RouteStraight(p1, p2, layer, path_type='straight', width_type='straight'):
     width_input = p1.width
     width_output = p2.width
 
+    # print(ug.angle_diff(p2.orientation, p1.orientation))
     if ug.angle_diff(p2.orientation, p1.orientation) != 180:
         raise ValueError('Ports do not face eachother.')
 
@@ -114,6 +108,9 @@ def RouteStraight(p1, p2, layer, path_type='straight', width_type='straight'):
 
     port1 = spira.Port(midpoint=(0,0), width=width_input, orientation=180)
     port2 = spira.Port(midpoint=(xf,yf), width=width_output, orientation=0)
+
+    # print(port1)
+    # print(port2)
 
     route_shape = RouteShape(path=route_path)
     R = Route(shape=route_shape, p1=port1, p2=port2, layer=layer)

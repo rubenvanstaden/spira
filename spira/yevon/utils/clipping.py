@@ -37,10 +37,8 @@ def boolean(subj, clip=None, clip_type=None, closed=True):
         print("Using default ('or')")
         clip_type = 'or'
     value = pc.Execute(ct[clip_type], pyclipper.PFT_NONZERO, pyclipper.PFT_NONZERO)
-    # value = clean_points(pts=sf(value, sc))
     value = clean_points(pts=value)
     return value
-    # return sf(value, sc)
 
 
 def offset(points, grow=1, jointype='miter'):
@@ -98,12 +96,10 @@ def clean_points(pts):
 
 
 def encloses(coord, points):
+    """  """
     sc = constants.CLIPPER_SCALE
     coord = st(coord.to_list(), sc)
     points = st(points, sc)
-    # print(coord)
-    # print(points)
-    # print('')
     return pyclipper.PointInPolygon(coord, points) != 0
 
 

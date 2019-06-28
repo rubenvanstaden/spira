@@ -195,9 +195,9 @@ class SRef(__RefElemental__):
                                 "not array-like, a port, or port name")
 
         position = np.array([d[0], d[1]]) - np.array([o[0], o[1]])
-        # self.midpoint = Coord(self.midpoint[0] + position[0], self.midpoint[1] + position[1])
-        dxdy = Coord(self.midpoint[0] + position[0], self.midpoint[1] + position[1])
-        self.translate(dxdy)
+        self.midpoint = Coord(self.midpoint[0] + position[0], self.midpoint[1] + position[1])
+        # dxdy = Coord(self.midpoint[0] + position[0], self.midpoint[1] + position[1])
+        # self.translate(dxdy)
         return self
 
     def connect(self, port, destination):
@@ -228,12 +228,12 @@ class SRef(__RefElemental__):
 
         return self
 
-    def align(self, port, destination, distance):
+    def distance_alignment(self, port, destination, distance):
         """ Align the reference using an internal port with an external port.
 
         Example:
         --------
-        >>> S.align()
+        >>> S.distance_alignment()
         """
         destination = deepcopy(destination)
         self.connect(port, destination)
@@ -244,6 +244,43 @@ class SRef(__RefElemental__):
         T = spira.Translation(translation=(dx, dy))
         self.transform(T)
 
+        return self
+
+    def center_alignment(self, p1, p2):
+        """
+        Place the reference `midpoint` at the virtual
+        intersection line of two ports.
+
+        Example
+        -------
+        >>> s.center_alignment(p1=self.p3, p2=self.via1_i5.ports['M5_P2'])
+        """
+        l1 = line_from_point_angle(point=p1.midpoint, angle=p1.orientation)
+        l2 = line_from_point_angle(point=p2.midpoint, angle=p2.orientation)
+        coord = l1.intersection(l2)
+        self.move(midpoint=self.midpoint, destination=coord)
+        return self
+
+    def port_alignment(self, ports, p1, p2):
+        """
+        Align `ports[0]` of reference with `p1` and 
+        `ports[1]` of reference with external port `p2`.
+
+        Example
+        -------
+        >>> 
+        """
+        d0 = deepcopy(p1)
+        self.connect(ports[0], d0)
+        if isinstance(ports[1], str):
+            pin1 = self.ports[ports[1]]
+        elif issubclass(type(ports[1]), __Port__):
+            pin1 = ports[1].transform(self.transformation)
+        if ports[0].orientation in (0, 180):
+            T = vector_match_axis(v1=ports[1], v2=p2, axis='x')
+        elif ports[0].orientation in (90, 270):
+            T = vector_match_axis(v1=ports[1], v2=p2, axis='y')
+        self.transform(T) 
         return self
 
     def stretch(self, factor=(1,1), center=(0,0)):

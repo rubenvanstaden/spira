@@ -79,7 +79,7 @@ class Port(Vector, __PhysicalPort__):
 
         if 'locked' in kwargs:
             if kwargs['locked'] is True:
-                self.purpose = RDD.PURPOSE.PORT.EDGE_DISABLED
+                self.purpose = RDD.PURPOSE.PORT.OUTSIDE_EDGE_DISABLED
 
     def __repr__(self):
         class_string = "[SPiRA: Port] (name {}, alias {}, locked {}, midpoint {} orientation {} width {})"
@@ -111,7 +111,7 @@ class Port(Vector, __PhysicalPort__):
 
     @property
     def unlock(self):
-        self.purpose = RDD.PURPOSE.PORT.EDGE_ENABLED
+        self.purpose = RDD.PURPOSE.PORT.OUTSIDE_EDGE_ENABLED
         return self
 
     def transform(self, transformation):
@@ -181,7 +181,7 @@ class Port(Vector, __PhysicalPort__):
         self.transform(T)
         return self
     
-    def align(self, port, destination, distance):
+    def distance_alignment(self, port, destination, distance):
         destination = deepcopy(destination)
         self = self.connect(port, destination)
     
@@ -199,10 +199,10 @@ class ContactPort(Port):
     width = NumberField(default=0.4)
     length = NumberField(default=0.4)
     purpose = PurposeLayerField(default=RDD.PURPOSE.PORT.CONTACT)
-    
+
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-    
+
     def __repr__(self):
         class_string = "[SPiRA: ContactPort] (name {}, alias {}, locked {}, midpoint {} orientation {} width {})"
         return class_string.format(self.name, self.alias, self.locked, self.midpoint, self.orientation, self.width)
@@ -216,10 +216,10 @@ class BranchPort(Port):
     width = NumberField(default=0.4)
     length = NumberField(default=0.4)
     purpose = PurposeLayerField(default=RDD.PURPOSE.PORT.BRANCH)
-    
+
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-    
+
     def __repr__(self):
         class_string = "[SPiRA: BranchPort] (name {}, alias {}, locked {}, midpoint {} orientation {} width {})"
         return class_string.format(self.name, self.alias, self.locked, self.midpoint, self.orientation, self.width)
@@ -230,10 +230,10 @@ class RoutePort(Port):
     width = NumberField(default=0.4)
     length = NumberField(default=0.4)
     purpose = PurposeLayerField(default=RDD.PURPOSE.PORT.BRANCH)
-    
+
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-    
+
     def __repr__(self):
         class_string = "[SPiRA: BranchPort] (name {}, alias {}, locked {}, midpoint {} orientation {} width {})"
         return class_string.format(self.name, self.alias, self.locked, self.midpoint, self.orientation, self.width)
@@ -244,10 +244,10 @@ class DummyPort(Port):
     width = NumberField(default=0.4)
     length = NumberField(default=0.4)
     purpose = PurposeLayerField(default=RDD.PURPOSE.DUMMY)
-    
+
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-    
+
     def __repr__(self):
         class_string = "[SPiRA: DummyPort] (name {}, alias {}, locked {}, midpoint {} orientation {} width {})"
         return class_string.format(self.name, self.alias, self.locked, self.midpoint, self.orientation, self.width)

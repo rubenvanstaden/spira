@@ -26,6 +26,7 @@ class Device(PCell):
     # lcar = NumberField(default=RDD.PCELLS.LCAR_DEVICE)
     # lcar = NumberField(default=0.5)
     lcar = NumberField(default=10)
+    # lcar = NumberField(default=100)
 
     def __init__(self, pcell=True, **kwargs):
         super().__init__(**kwargs)
@@ -43,7 +44,7 @@ class Device(PCell):
         F = RDD.PCELLS.FILTERS
         # F['boolean'] = False
         # F['simplify'] = False
-        # F['via_contact'] = False
+        F['via_contact'] = False
         # F['metal_connect'] = False
 
         elems = self.create_elementals(elems)
@@ -107,6 +108,7 @@ class Circuit(PCell):
     def create_netlist(self):
         print('Circuit netlist')
         net = super().create_netlist()
+        net = netlist.combine_net_nodes(net=net, algorithm=['d2d'])
         # net = netlist.combine_net_nodes(net=net, algorithm=['d2d', 's2s'])
         return net
 

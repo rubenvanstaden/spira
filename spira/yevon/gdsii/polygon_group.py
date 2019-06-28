@@ -26,7 +26,7 @@ class PolygonGroup(Group, __LayerElemental__):
     """
 
     def __init__(self, **kwargs):
-        super().__init__(**kwargs)       
+        super().__init__(**kwargs)
 
     def __repr__(self):
         class_string = "[SPiRA: PolygonGroup] (polygons {}, process {}, purpose {})"
@@ -39,14 +39,31 @@ class PolygonGroup(Group, __LayerElemental__):
         el = ElementalList()
         for e1 in self.elementals:
             for e2 in other.elementals:
-                e1 = deepcopy(e1)
-                e2 = deepcopy(e2)
-                if e1.shape != e2.shape:
-                    polygons = e1.intersection(e2)
-                    for p in polygons:
-                        p.layer.purpose = RDD.PURPOSE.INTERSECTED
-                    for p in polygons:
-                        el += p
+                # e1 = deepcopy(e1)
+                # e2 = deepcopy(e2)
+                # shape1 = e1.shape.transform_copy(e1.transformation)
+                # shape2 = e2.shape.transform_copy(e2.transformation)
+                shape1 = deepcopy(e1.shape).transform(e1.transformation)
+                shape2 = deepcopy(e2.shape).transform(e2.transformation)
+                # if shape1 != shape2:
+                # if e1.shape != e2.shape:
+                # if (e1.shape != e2.shape) and (e1.layer == e2.layer):
+                # if (e1.shape != e2.shape) and (e1.layer.process == e2.layer.process):
+                if (shape1 != shape2) and (e1.layer.process == e2.layer.process):
+                    shapes = shape1 & shape2
+                    print(shape1.points)
+                    print(shape2.points)
+                    print(shapes)
+                    print('')
+                    for shape in shapes:
+                        el += Polygon(shape=shape, layer=e1.layer)
+
+
+                    # polygons = e1.intersection(e2)
+                    # for p in polygons:
+                    #     p.layer.purpose = RDD.PURPOSE.INTERSECTED
+                    # for p in polygons:
+                    #     el += p
         self.elementals = el
         return self
 

@@ -16,8 +16,8 @@ class RouteBase180(__Manhattan__):
     def create_quadrant_one(self):
 
         h = (self.p2[1]-self.p1[1])/2 - self.radius
-        self.b1.align(port=self.b1.ports['P2'], destination=self.ports['T1'], distance=h)
-        self.b2.align(port=self.b2.ports['P1'], destination=self.ports['T2'], distance=-h)
+        self.b1.distance_alignment(port=self.b1.ports['P2'], destination=self.ports['T1'], distance=h)
+        self.b2.distance_alignment(port=self.b2.ports['P1'], destination=self.ports['T2'], distance=-h)
 
         r1 = self.route_straight(self.b1.ports['P2'], self.ports['T1'])
         r2 = self.route_straight(self.b2.ports['P1'], self.ports['T2'])
@@ -41,8 +41,8 @@ class RouteBase180(__Manhattan__):
     def create_quadrant_two(self):
 
         h = (self.p2[1]-self.p1[1])/2 - self.radius
-        self.b1.align(port=self.b1.ports['P1'], destination=self.ports['T1'], distance=h)
-        self.b2.align(port=self.b2.ports['P2'], destination=self.ports['T2'], distance=-h)
+        self.b1.distance_alignment(port=self.b1.ports['P1'], destination=self.ports['T1'], distance=h)
+        self.b2.distance_alignment(port=self.b2.ports['P2'], destination=self.ports['T2'], distance=-h)
 
         r1 = self.route_straight(self.b2.ports['P2'], self.ports['T2'])
         r2 = self.route_straight(self.b1.ports['P1'], self.ports['T1'])
@@ -94,7 +94,7 @@ class RouteBase180(__Manhattan__):
     def create_quadrant_four(self):
         
         h = self.p2[1] + (self.p1[1]-self.p2[1])/2 + self.radius
-        self.b1.align(port=self.b1.ports['P1'], destination=self.ports['T2'], distance=h)
+        self.b1.distance_alignment(port=self.b1.ports['P1'], destination=self.ports['T2'], distance=h)
 
         # self.b1.connect(port=self.b1.ports['P1'], destination=self.ports['T1'])
         # # h = self.p2[1] + (self.p1[1]-self.p2[1])/2 + self.radius

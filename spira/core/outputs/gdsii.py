@@ -125,6 +125,7 @@ class OutputGdsii(FieldInitializer):
                         T = e.transformation
                         # T = e.transformation + spira.Translation(e.midpoint)
                         e.midpoint = T.apply_to_coord(e.midpoint)
+                        # T = e.transformation + spira.Translation(e.midpoint)
                         ref_cell = self.__collected_cells__[e.ref]
                         S = gdspy.CellReference(
                             ref_cell=ref_cell,

@@ -8,9 +8,7 @@ from spira.yevon.gdsii.polygon import Box, Polygon
 from spira.yevon.geometry.coord import Coord
 from spira.yevon.gdsii.base import __LayerElemental__
 from spira.core.parameters.descriptor import DataField
-from spira.yevon.process.process_layer import ProcessField
 from spira.core.parameters.variables import *
-from spira.yevon.process.physical_layer import PLayer
 from spira.yevon.process import get_rule_deck
 
 
@@ -50,10 +48,7 @@ def generate_polygon_edges(shape, layer):
         layer = RDD.GDSII.IMPORT_LAYER_MAP[layer]
         inward_extend = RDD[layer.process.symbol].MIN_SIZE / 2
         outward_extend = RDD[layer.process.symbol].MIN_SIZE / 2
-        edge = Edge(width=width, 
-            inward_extend=inward_extend, 
-            outward_extend=outward_extend, 
-            process=layer.process)
+        edge = Edge(width=width, inward_extend=inward_extend, outward_extend=outward_extend, layer=layer)
 
         T = Rotation(orientation+90) + Translation(midpoint)
         edge.transform(T)
@@ -62,60 +57,56 @@ def generate_polygon_edges(shape, layer):
     return edges
 
 
-class __Edge__(Group):
+class __Edge__(Group, __LayerElemental__):
 
     width = NumberField(default=1)
     inward_extend = NumberField(default=1)
+
+    inside_edge_layer = DataField(fdef_name='create_inside_edge_layer')
     inside = DataField(fdef_name='create_inside')
-    process = ProcessField()
+
+    def create_inside_edge_layer(self):
+        layer = deepcopy(self.layer)
+        layer.purpose = RDD.PURPOSE.PORT.INSIDE
+        return layer
 
     def create_inside(self):
-        for e in self.elementals:
-            if e.layer.purpose == RDD.PURPOSE.PORT.INSIDE_EDGE_DISABLED:
-                return e
-        return None
+        c2 = Coord(0, self.inward_extend/2)
+        ply = Box(alias='InsideEdge', width=self.width, height=self.inward_extend, center=c2, layer=self.inside_edge_layer)
+        return ply
 
 
 class Edge(__Edge__):
-    """
-    
-    Example
-    -------
-    >>> edge Edge()
-    """
 
     pid = StringField(default='no_pid')
     outward_extend = NumberField(default=1)
-    outside = DataField(fdef_name='create_outside')
+
+    # outside = DataField(fdef_name='create_outside')
+    # outside_edge_layer = DataField(fdef_name='create_outside_edge_layer')
+
+    # def create_outside_edge_layer(self):
+    #     layer = deepcopy(self.layer)
+    #     layer.purpose = RDD.PURPOSE.PORT.OUTSIDE
+    #     return layer
 
     def create_outside(self):
-        for e in self.elementals:
-            purposes = [RDD.PURPOSE.PORT.OUTSIDE_EDGE_ENABLED, RDD.PURPOSE.PORT.OUTSIDE_EDGE_DISABLED]
-            if e.layer.purpose in purposes:
-                return e
-        return None
-
-    def create_elementals(self, elems):
-
-        c1 = Coord(0, self.inward_extend/2)
-        layer = PLayer(process=self.process, purpose=RDD.PURPOSE.PORT.INSIDE_EDGE_DISABLED)
-        p1 = Box(alias='InsideEdge', 
-            width=self.width, 
-            height=self.inward_extend, 
-            center=c1, layer=layer)
-
         c1 = Coord(0, -self.outward_extend/2)
-        layer = PLayer(process=self.process, purpose=RDD.PURPOSE.PORT.OUTSIDE_EDGE_DISABLED)
-        p2 = Box(alias='OutsideEdge', 
-            width=self.width, 
-            height=self.outward_extend, 
-            center=c1, layer=layer)
+        ply = Box(alias='OutsideEdge', width=self.width, height=self.outward_extend, center=c1, layer=self.outside_edge_layer)
+        return ply
 
-        elems += [p1, p2]
+    def overlaps(self, other):
+        """ Returns `True` if the edge overlaps the polygons. """
+        from spira.yevon.utils import clipping
+        pts = clipping.offset(points=self.outside.points)
+        ply = Polygon(shape=pts[0], layer=self.outside.layer)
+        if ply.intersection(other):
+            return True
+        return False
 
-        # elems += self.inside
-        # elems += self.outside
-        return elems
+    # def create_elementals(self, elems):
+    #     elems += self.inside
+    #     elems += self.outside
+    #     return elems
 
 
 class EdgeEuclidean(Edge):

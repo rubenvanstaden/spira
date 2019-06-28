@@ -2,6 +2,7 @@ import spira.all as spira
 from spira.yevon.geometry import shapes
 from spira.yevon.geometry.coord import Coord
 from spira.yevon.utils.debugging import *
+from spira.yevon.geometry.route.routes import RouteStraight
 from spira.yevon.process import get_rule_deck
 
 
@@ -24,31 +25,56 @@ class ResistorCell(spira.Cell):
 
 class PolygonCell(spira.Cell):
 
+    res = spira.DataField(fdef_name='create_res')
+    
+    def create_res(self):
+        res = ResistorCell()
+        s = spira.SRef(reference=res)
+        return s
+
     def create_elementals(self, elems):
-        elems += spira.SRef(reference=ResistorCell())
-        elems += spira.Rectangle(alias='M1', p1=(-10, -15), p2=(10, 15), layer=RDD.PLAYER.M3.METAL)
+        # elems += spira.SRef(reference=ResistorCell())
+        elems += self.res
+        elems += spira.Rectangle(alias='M3', p1=(-10, -15), p2=(10, 15), layer=RDD.PLAYER.M3.METAL)
         return elems
+
+    def create_ports(self, ports):
+        ports += self.res.ports['M2_e0'].copy(name='M2_P0').unlock
+        ports += self.res.ports['M2_e2'].copy(name='M2_P1').unlock
+        return ports
 
 
 class Junction(spira.Device):
 
+    def get_transforms(self):
+        t1 = spira.Translation((0,0))
+        t2 = spira.Translation((0, -40)) + spira.Rotation(180)
+        return (t1, t2)
+
     def create_elementals(self, elems):
+        t1, t2 = self.get_transforms()
 
         D = PolygonCell()
+        s1 = spira.SRef(reference=D, transformation=t1)
+        s2 = spira.SRef(reference=D, transformation=t2)
 
-        elems += spira.SRef(reference=D, midpoint=(0,0))
+        # print(s1.ports)
+        # print(s2.ports)
 
-        T = spira.Translation((0, -40)) + spira.Rotation(180)
-        elems += spira.SRef(reference=D, midpoint=(0,0), transformation=T)
+        # elems += RouteStraight(
+        #     p1=s1.ports['M2_P1'],
+        #     p2=s2.ports['M2_P1'],
+        #     layer=RDD.PLAYER.M2.METAL)
 
-        # R = spira.Route(
-        #     port1=s1.ports['RES_e3'],
-        #     port2=s2.ports['RES_e3'],
-        #     ps_layer=RDD.PLAYER.RES
-        # )
-        # elems += spira.SRef(R)
+        elems += [s1, s2]
 
         return elems
+
+    # def create_ports(self, ports):
+    #     t1, t2 = self.get_transforms()
+    #     # ports += self.elementals[0].ports['M2_e2'].copy(name='M2_P0').unlock
+    #     # ports += self.elementals[1].ports['M2_e0'].copy(name='M2_P1').unlock
+    #     return ports
 
 
 if __name__ == '__main__':
