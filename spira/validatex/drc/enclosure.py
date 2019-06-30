@@ -6,7 +6,7 @@ RDD = spira.get_rule_deck()
 
 
 class Enclosure(__DoubleLayerDesignRule__):
-    minimum = param.FloatField()
+    minimum = param.FloatParameter()
 
     def __repr__(self):
         return "'{}' must be enclosed by '{}' by at least {} micrometers.".format(self.layer1, self.layer2, self.minimum)
@@ -19,19 +19,19 @@ class Enclosure(__DoubleLayerDesignRule__):
 
     # def apply(self, elems):
 
-    #     pos_elems = spira.ElementalList()
-    #     neg_elems = spira.ElementalList()
+    #     pos_elems = spira.ElementList()
+    #     neg_elems = spira.ElementList()
 
     #     for C in elems.dependencies():
-    #         for S in C.elementals.sref:
+    #         for S in C.elements.sref:
     #             if S.ref.layer.number == self.layer1.number:
-    #                 pos_elems = S.ref.elementals
+    #                 pos_elems = S.ref.elements
     #                 C1 = S.ref
 
     #                 for C in elems.dependencies():
-    #                     for S in C.elementals.sref:
+    #                     for S in C.elements.sref:
     #                         if S.ref.layer.number == self.layer2.number:
-    #                             neg_elems = S.ref.elementals
+    #                             neg_elems = S.ref.elements
     #                             C2 = S.ref
 
     #                             fails = False

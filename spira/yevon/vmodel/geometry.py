@@ -4,21 +4,21 @@ import meshio
 import networkx as nx
 
 from copy import deepcopy
-from spira.yevon.gdsii.elem_list import ElementalListField
-from spira.yevon.process.process_layer import ProcessField
-from spira.core.parameters.initializer import FieldInitializer
+from spira.yevon.gdsii.elem_list import ElementListParameter
+from spira.yevon.process.process_layer import ProcessParameter
+from spira.core.parameters.initializer import ParameterInitializer
 from spira.core.parameters.variables import *
-from spira.core.parameters.descriptor import DataField, FunctionField
+from spira.core.parameters.descriptor import Parameter, FunctionParameter
 from spira.yevon.process import get_rule_deck
 
 
 RDD = get_rule_deck()
 
 
-__all__ = ['GmshGeometry', 'SalomeGeometry', 'GeometryField']
+__all__ = ['GmshGeometry', 'SalomeGeometry', 'GeometryParameter']
 
 
-class __Geometry__(FieldInitializer):
+class __Geometry__(ParameterInitializer):
     pass
 
 
@@ -33,15 +33,15 @@ class GmshGeometry(__Geometry__):
 
     _uid = 0
 
-    lcar = NumberField(default=100, doc='Mesh characteristic length.')
-    algorithm = IntegerField(default=1, doc='Mesh algorithm used by Gmsh.')
-    scale_Factor = NumberField(default=1e-6, doc='Mesh coord dimention scaling.')
-    coherence_mesh = BoolField(defualt=True, doc='Merge similar points.')
+    lcar = NumberParameter(default=100, doc='Mesh characteristic length.')
+    algorithm = IntegerParameter(default=1, doc='Mesh algorithm used by Gmsh.')
+    scale_Factor = NumberParameter(default=1e-6, doc='Mesh coord dimention scaling.')
+    coherence_mesh = BoolParameter(defualt=True, doc='Merge similar points.')
 
-    process = ProcessField()
-    process_polygons = ElementalListField()
+    process = ProcessParameter()
+    process_polygons = ElementListParameter()
 
-    mesh_data = DataField(fdef_name='create_mesh_data')
+    mesh_data = Parameter(fdef_name='create_mesh_data')
 
     def get_filename(self):
         if not hasattr(self, '__alias__'):
@@ -53,7 +53,7 @@ class GmshGeometry(__Geometry__):
         if value is not None:
             self.__alias__ = value
 
-    filename = FunctionField(get_filename, set_filename, doc='Functions to generate an alias for cell name.')
+    filename = FunctionParameter(get_filename, set_filename, doc='Functions to generate an alias for cell name.')
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -122,7 +122,7 @@ class GmshGeometry(__Geometry__):
         return mesh_data
 
 
-def GeometryField(local_name=None, restriction=None, **kwargs):
+def GeometryParameter(local_name=None, restriction=None, **kwargs):
     R = RestrictType(__Geometry__) & restriction
     return RestrictedParameter(local_name, restriction=R, **kwargs)
 

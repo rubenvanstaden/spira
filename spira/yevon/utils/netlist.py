@@ -103,8 +103,8 @@ def _combine_nodes(g, algorithm):
     return g1
 
 
-from spira.core.parameters.initializer import FieldInitializer
-class CombineNetNodes(FieldInitializer):
+from spira.core.parameters.initializer import ParameterInitializer
+class CombineNetNodes(ParameterInitializer):
     pass
 
     # net = 

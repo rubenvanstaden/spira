@@ -6,7 +6,7 @@ from spira.yevon.geometry.route.route_shaper import RouteGeneral
 from spira.yevon.utils.geometry import scale_coord_up as scu
 from spira.yevon.geometry.route.manhattan import __Manhattan__
 
-from spira.core.parameters.descriptor import DataField
+from spira.core.parameters.descriptor import Parameter
 from spira.yevon.geometry.vector import *
 from copy import deepcopy
 
@@ -125,12 +125,12 @@ class RouteBase180(__Manhattan__):
 
 class RouteParallel(__Manhattan__):
 
-    parallel = DataField(fdef_name='create_parallel_route')
-    quadrant_one_parallel = DataField(fdef_name='create_quadrant_one_parallel')
-    q1 = DataField(fdef_name='create_q1_180')
-    q2 = DataField(fdef_name='create_q2_180')
-    q3 = DataField(fdef_name='create_q3_180')
-    q4 = DataField(fdef_name='create_q4_180')
+    parallel = Parameter(fdef_name='create_parallel_route')
+    quadrant_one_parallel = Parameter(fdef_name='create_quadrant_one_parallel')
+    q1 = Parameter(fdef_name='create_q1_180')
+    q2 = Parameter(fdef_name='create_q2_180')
+    q3 = Parameter(fdef_name='create_q3_180')
+    q4 = Parameter(fdef_name='create_q4_180')
 
     def create_parallel_route(self):
 
@@ -333,7 +333,7 @@ class RouteParallel(__Manhattan__):
 class Route180(RouteBase180, RouteParallel):
     """ Route ports that has a 180 degree difference. """
 
-    def create_elementals(self, elems):
+    def create_elements(self, elems):
 
         p1, p2 = self.p1, self.p2
 

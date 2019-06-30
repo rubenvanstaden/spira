@@ -3,12 +3,12 @@ import numpy as np
 from copy import deepcopy
 from spira.yevon.gdsii.group import Group
 from spira.core.transforms import *
-from spira.yevon.gdsii.elem_list import ElementalList
+from spira.yevon.gdsii.elem_list import ElementList
 from spira.yevon.gdsii.polygon import Box, Polygon
 from spira.yevon.geometry.coord import Coord
-from spira.yevon.gdsii.base import __LayerElemental__
-from spira.core.parameters.descriptor import DataField
-from spira.yevon.process.process_layer import ProcessField
+from spira.yevon.gdsii.base import __LayerElement__
+from spira.core.parameters.descriptor import Parameter
+from spira.yevon.process.process_layer import ProcessParameter
 from spira.core.parameters.variables import *
 from spira.yevon.process.physical_layer import PLayer
 from spira.yevon.process import get_rule_deck
@@ -37,7 +37,7 @@ def generate_polygon_edges(shape, layer):
     if layer.name == 'BBOX': bbox = True
     else: bbox = False
 
-    edges = ElementalList()
+    edges = ElementList()
     for i in range(0, n):
 
         name = '{}_e{}'.format(layer.name, i)
@@ -64,13 +64,13 @@ def generate_polygon_edges(shape, layer):
 
 class __Edge__(Group):
 
-    width = NumberField(default=1)
-    inward_extend = NumberField(default=1)
-    inside = DataField(fdef_name='create_inside')
-    process = ProcessField()
+    width = NumberParameter(default=1)
+    inward_extend = NumberParameter(default=1)
+    inside = Parameter(fdef_name='create_inside')
+    process = ProcessParameter()
 
     def create_inside(self):
-        for e in self.elementals:
+        for e in self.elements:
             if e.layer.purpose == RDD.PURPOSE.PORT.INSIDE_EDGE_DISABLED:
                 return e
         return None
@@ -84,18 +84,18 @@ class Edge(__Edge__):
     >>> edge Edge()
     """
 
-    pid = StringField(default='no_pid')
-    outward_extend = NumberField(default=1)
-    outside = DataField(fdef_name='create_outside')
+    pid = StringParameter(default='no_pid')
+    outward_extend = NumberParameter(default=1)
+    outside = Parameter(fdef_name='create_outside')
 
     def create_outside(self):
-        for e in self.elementals:
+        for e in self.elements:
             purposes = [RDD.PURPOSE.PORT.OUTSIDE_EDGE_ENABLED, RDD.PURPOSE.PORT.OUTSIDE_EDGE_DISABLED]
             if e.layer.purpose in purposes:
                 return e
         return None
 
-    def create_elementals(self, elems):
+    def create_elements(self, elems):
 
         c1 = Coord(0, self.inward_extend/2)
         layer = PLayer(process=self.process, purpose=RDD.PURPOSE.PORT.INSIDE_EDGE_DISABLED)
@@ -120,12 +120,12 @@ class Edge(__Edge__):
 
 class EdgeEuclidean(Edge):
 
-    radius = NumberField(default=1)
+    radius = NumberParameter(default=1)
 
     def __init__(self, **kwargs):
         pass
 
-    def create_elementals(self, elems):
+    def create_elements(self, elems):
 
         return elems
 
@@ -135,19 +135,19 @@ class EdgeSquare(Edge):
     def __init__(self, **kwargs):
         pass
 
-    def create_elementals(self, elems):
+    def create_elements(self, elems):
 
         return elems
 
 
 class EdgeSideExtend(Edge):
 
-    side_extend = NumberField(default=1)
+    side_extend = NumberParameter(default=1)
 
     def __init__(self, **kwargs):
         pass
 
-    def create_elementals(self, elems):
+    def create_elements(self, elems):
 
         return elems
 

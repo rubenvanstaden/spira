@@ -2,10 +2,10 @@
 # from spira.yevon.process.gdsii_layer import Layer
 # from spira.yevon.process.layer import __Layer__
 # from spira.core.parameters.restrictions import RestrictType
-# from spira.core.parameters.descriptor import DataFieldDescriptor
+# from spira.core.parameters.descriptor import ParameterDescriptor
 
 
-# __all__ = ['LayerList', 'LayerListField']
+# __all__ = ['LayerList', 'LayerListParameter']
 
 
 # class LayerList(TypedList):
@@ -134,7 +134,7 @@
 #         del self._list[:]
 
 
-# class LayerListField(DataFieldDescriptor):
+# class LayerListParameter(ParameterDescriptor):
 
 #     __type__ = LayerList
 

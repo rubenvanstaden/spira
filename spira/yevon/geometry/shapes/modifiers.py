@@ -1,5 +1,5 @@
-from spira.yevon.geometry.edges.edge_list import EdgeListField
-from spira.yevon.geometry.shapes.shape import Shape, ShapeField
+from spira.yevon.geometry.edges.edge_list import EdgeListParameter
+from spira.yevon.geometry.shapes.shape import Shape, ShapeParameter
 from spira.yevon.geometry.line import line_from_two_points
 from spira.yevon.geometry.vector import vector_from_two_points
 from spira.yevon.geometry.coord import Coord
@@ -12,7 +12,7 @@ import numpy as np
 
 class __ShapeModifier__(Shape):
 
-    original_shape = ShapeField()
+    original_shape = ShapeParameter()
 
     def __init__(self, original_shape, **kwargs):
         super().__init__(original_shape=original_shape, **kwargs)
@@ -25,9 +25,9 @@ class __ShapeModifier__(Shape):
 class ShapeConnected(__ShapeModifier__):
     """  """
 
-    # edges = EdgeListField()
-    edges = DictField()
-    overlapping_shape = ShapeField(doc='Shape containing the edge coordinates of the original shape intersecting with other shapes with equal layer.')
+    # edges = EdgeListParameter()
+    edges = DictParameter()
+    overlapping_shape = ShapeParameter(doc='Shape containing the edge coordinates of the original shape intersecting with other shapes with equal layer.')
 
     def create_segment_labels(self):
 

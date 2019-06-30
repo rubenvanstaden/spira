@@ -1,10 +1,10 @@
 from copy import deepcopy
-from spira.core.parameters.descriptor import DataField
+from spira.core.parameters.descriptor import Parameter
 from spira.yevon.gdsii.polygon import Polygon
 from spira.yevon.gdsii.cell import Cell
-from spira.yevon.gdsii.elem_list import ElementalList
+from spira.yevon.gdsii.elem_list import ElementList
 from spira.yevon.gdsii.containers import __CellContainer__
-from spira.yevon.vmodel.derived import get_derived_elementals
+from spira.yevon.vmodel.derived import get_derived_elements
 from spira.yevon.geometry.shapes.modifiers import ShapeConnected
 from spira.yevon.process import get_rule_deck
 
@@ -30,12 +30,12 @@ class ElectricalConnections(__Connection__):
 
     """
 
-    edges = DataField(fdef_name='create_edges')
+    edges = Parameter(fdef_name='create_edges')
 
-    def create_elementals(self, elems):
+    def create_elements(self, elems):
         overlap_elems, edges = self.edges
-        # for p in self.cell.elementals:
-        for i, p in enumerate(self.cell.elementals):
+        # for p in self.cell.elements:
+        for i, p in enumerate(self.cell.elements):
             
             # shape = deepcopy(p.shape).transform(p.transformation).snap_to_grid()
             # cs = ShapeConnected(original_shape=shape, edges=edges)
@@ -43,7 +43,7 @@ class ElectricalConnections(__Connection__):
             
             # cs = ShapeConnected(original_shape=shape, edges=edges)
             # # p.shape = cs
-            # self.cell.elementals[i].shape = cs
+            # self.cell.elements[i].shape = cs
 
             if i == 2:
                 shape = deepcopy(p.shape).transform(p.transformation).snap_to_grid()
@@ -51,7 +51,7 @@ class ElectricalConnections(__Connection__):
                 # print(shape.points)
                 cs = ShapeConnected(original_shape=shape, edges=edges)
                 # print(cs.points)
-                # self.cell.elementals[i].shape = cs
+                # self.cell.elements[i].shape = cs
                 p.shape = cs
                 # elems += Polygon(shape=cs, layer=p.layer)
                 # elems += p
@@ -59,19 +59,19 @@ class ElectricalConnections(__Connection__):
         return elems
 
     def create_edges(self):
-        el = ElementalList()
-        for p1 in deepcopy(self.cell.elementals):
+        el = ElementList()
+        for p1 in deepcopy(self.cell.elements):
             el += p1
             for edge in p1.edges:
                 el += edge.outside.transform(edge.transformation)
 
         map1 = {RDD.PLAYER.M5.EDGE_CONNECTED : RDD.PLAYER.M5.INSIDE_EDGE_ENABLED}
 
-        pg_overlap = self.cell.overlap_elementals
-        edges = get_derived_elementals(el, mapping=map1, store_as_edge=True)
+        pg_overlap = self.cell.overlap_elements
+        edges = get_derived_elements(el, mapping=map1, store_as_edge=True)
 
         for j, pg in enumerate(pg_overlap):
-            for e in pg.elementals:
+            for e in pg.elements:
                 for i, edge in enumerate(edges):
                     if edge.overlaps(e):
                         # FIXME: Cannot use this, since Gmsh seems to crach due to the hashing string.
@@ -83,16 +83,16 @@ class ElectricalConnections(__Connection__):
 
     def gdsii_output_electrical_connection(self):
 
-        elems = ElementalList()
+        elems = ElementList()
         overlap_elems, edges = self.edges
         for e in overlap_elems:
             elems += e
         for edge in edges:
             elems += edge.outside
-        for e in self.cell.elementals:
+        for e in self.cell.elements:
             elems += e
 
-        D = Cell(name='_ELECTRICAL_CONNECT', elementals=elems)
+        D = Cell(name='_ELECTRICAL_CONNECT', elements=elems)
         D.gdsii_output()
 
 

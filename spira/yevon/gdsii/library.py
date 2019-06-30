@@ -4,9 +4,9 @@ import spira.all as spira
 
 from spira.core.parameters.variables import *
 from spira.yevon.io import import_gds
-from spira.yevon.gdsii.elem_list import ElementalList
+from spira.yevon.gdsii.elem_list import ElementList
 from spira.yevon.gdsii.cell_list import CellList
-from spira.core.parameters.descriptor import DataField
+from spira.core.parameters.descriptor import Parameter
 from spira.core.mixin import MixinBowl
 from spira.yevon.gdsii.unit_grid import UnitGridContainer
 from spira.yevon.process import get_rule_deck
@@ -22,7 +22,7 @@ class __Library__(UnitGridContainer, MixinBowl):
             self.cells.add(other)
             for d in other.dependencies():
                 self.cells.add(d)
-        elif isinstance(other, spira.ElementalList):
+        elif isinstance(other, spira.ElementList):
             for d in other.dependencies():
                 self.cells.add(d)
         return self
@@ -63,9 +63,9 @@ class Library(__Library__):
     >>> lib = spira.Library(name='LIB')
     """
 
-    name = StringField(doc='Unique name for the library.')
-    accessed = TimeField(doc='Timestamp at which the library was accessed.')
-    modified = TimeField(doc='Timestamp at which the library was modified.')
+    name = StringParameter(doc='Unique name for the library.')
+    accessed = TimeParameter(doc='Timestamp at which the library was accessed.')
+    modified = TimeParameter(doc='Timestamp at which the library was modified.')
 
     def __init__(self, name='spira_library', infile=None, **kwargs):
         # super().__init__(name=name, infile=None, **kwargs)

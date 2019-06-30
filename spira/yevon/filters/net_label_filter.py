@@ -1,8 +1,8 @@
 from spira.log import SPIRA_LOG as LOG
 from spira.yevon.filters.filter import Filter
-from spira.yevon.process.gdsii_layer import LayerList, LayerListField
-from spira.yevon.gdsii.elem_list import ElementalListField
-from spira.yevon.geometry.ports.port_list import PortListField
+from spira.yevon.process.gdsii_layer import LayerList, LayerListParameter
+from spira.yevon.gdsii.elem_list import ElementListParameter
+from spira.yevon.geometry.ports.port_list import PortListParameter
 from spira.yevon.geometry.ports import Port, ContactPort
 from spira.yevon.utils import geometry
 from spira.yevon.geometry.ports.port import BranchPort
@@ -36,7 +36,7 @@ class __NetFilter__(Filter):
 class NetProcessLabelFilter(__NetFilter__):
     """  """
 
-    process_polygons = ElementalListField()
+    process_polygons = ElementListParameter()
 
     def __filter___Net____(self, item):
         triangles = item.process_triangles()
@@ -61,7 +61,7 @@ class NetProcessLabelFilter(__NetFilter__):
 class NetDeviceLabelFilter(__NetFilter__):
     """ Add 'enabled' ports to the net. """
 
-    device_ports = PortListField()
+    device_ports = PortListParameter()
 
     def __filter___Net____(self, item):
         # triangles = item.process_triangles()
@@ -102,7 +102,7 @@ class NetDeviceLabelFilter(__NetFilter__):
 class NetEdgeFilter(__NetFilter__):
     """  """
 
-    process_polygons = ElementalListField()
+    process_polygons = ElementListParameter()
 
     def __filter___Net____(self, item):
 
@@ -114,7 +114,7 @@ class NetEdgeFilter(__NetFilter__):
         # print(item.lines)
         # print('Physical Lines:')
         # print(item.physical_lines)
-        # print('Field Data:')
+        # print('Parameter Data:')
         # for k, v in item.mesh_data.field_data.items():
         #     print(k, v)
         
@@ -181,7 +181,7 @@ class NetBlockLabelFilter(__NetFilter__):
 
     from spira.yevon.vmodel.boundary import reference_metal_blocks
 
-    references = ElementalListField()
+    references = ElementListParameter()
 
     def __filter___Net____(self, item):
         for S in self.references:

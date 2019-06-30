@@ -1,18 +1,18 @@
 from spira.log import SPIRA_LOG as LOG
 from spira.yevon.filters.filter import Filter
-# from spira.yevon.process.layer_list import LayerList, LayerListField
-from spira.yevon.process.gdsii_layer import LayerList, LayerListField
+# from spira.yevon.process.layer_list import LayerList, LayerListParameter
+from spira.yevon.process.gdsii_layer import LayerList, LayerListParameter
 
 
 __all__ = ['LayerFilterAllow', 'LayerFilterDelete']
 
 
 class __LayerFilter__(Filter):
-    layers = LayerListField()
+    layers = LayerListParameter()
 
 
 class LayerFilterAllow(__LayerFilter__):
-    def __filter___LayerElemental____(self, item):
+    def __filter___LayerElement____(self, item):
         if item.layer in self.layers:
             return [item]
         else:
@@ -24,7 +24,7 @@ class LayerFilterAllow(__LayerFilter__):
 
 
 class LayerFilterDelete(__LayerFilter__):
-    def __filter___LayerElemental____(self, item):
+    def __filter___LayerElement____(self, item):
         if item.layer in self.layers:
             LOG.debug("LayerFilterDelete is filtering out item %s" %item)
             return []

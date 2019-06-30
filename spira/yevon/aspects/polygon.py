@@ -4,7 +4,7 @@ import numpy as np
 
 from spira.yevon.utils import clipping
 from spira.yevon.gdsii.polygon import Polygon
-from spira.yevon.gdsii.elem_list import ElementalList
+from spira.yevon.gdsii.elem_list import ElementList
 from spira.yevon.aspects.clipper import __ClipperAspects__
 from spira.yevon.aspects.geometry import __GeometryAspects__
 from spira.yevon.process import get_rule_deck
@@ -69,7 +69,7 @@ class PolygonClipperAspects(__ClipperAspects__):
             shapes = s1.__and__(s2)
             elems = [Polygon(shape=s, layer=self.layer) for s in shapes]
             return elems
-        return ElementalList([])
+        return ElementList([])
 
     def __sub__(self, other):
         if self.layer == other.layer:
@@ -78,7 +78,7 @@ class PolygonClipperAspects(__ClipperAspects__):
             shapes = s1.__sub__(s2)
             elems = [Polygon(shape=s, layer=self.layer) for s in shapes]
             return elems
-        return ElementalList([self])
+        return ElementList([self])
 
     def __or__(self, other):
         if self.layer == other.layer:
@@ -87,7 +87,7 @@ class PolygonClipperAspects(__ClipperAspects__):
             shapes = s1.__or__(s2)
             elems = [Polygon(shape=s, layer=self.layer) for s in shapes]
             return elems
-        return ElementalList([self, other])
+        return ElementList([self, other])
 
     # NOTE: Does not require to check for layer equivalence.
     def intersection(self, other):

@@ -1,7 +1,7 @@
-# from spira.core.parameters.initializer import FieldInitializer
+# from spira.core.parameters.initializer import ParameterInitializer
 
 
-# class __SimulationEngine__(FieldInitializer):
+# class __SimulationEngine__(ParameterInitializer):
 #     pass
 
 

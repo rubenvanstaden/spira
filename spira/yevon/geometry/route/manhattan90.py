@@ -116,7 +116,7 @@ class Route90Base(__Manhattan__):
 
 class Route90(Route90Base):
 
-    def create_elementals(self, elems):
+    def create_elements(self, elems):
 
         p1, p2 = self.p1, self.p2
 

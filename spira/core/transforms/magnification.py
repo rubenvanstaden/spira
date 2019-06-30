@@ -1,9 +1,9 @@
 import spira.all as spira
 import numpy as np
-from spira.yevon.geometry.coord import CoordField, Coord
+from spira.yevon.geometry.coord import CoordParameter, Coord
 from spira.core.transformable import Transformable
 from spira.core.transforms.generic import GenericTransform, __ConvertableTransform__
-from spira.core.parameters.descriptor import FunctionField, SetFunctionField
+from spira.core.parameters.descriptor import FunctionParameter, SetFunctionParameter
 from spira.core.parameters.restrictions import RestrictType
 from spira.core.parameters.processors import ProcessorTypeCast
 from spira.yevon import constants
@@ -26,7 +26,7 @@ class Magnification(__ConvertableTransform__):
             self.translation = Coord((1 - self.__magnification__) * center.x, (1 - self.__magnification__) * center.y)
             
 
-    magnification = SetFunctionField('__magnification__', set_magnification, default=1.0)
+    magnification = SetFunctionParameter('__magnification__', set_magnification, default=1.0)
     
     def set_magnification_center(self, center):
         if not isinstance(center, Coord):
@@ -35,7 +35,7 @@ class Magnification(__ConvertableTransform__):
         if hasattr(self, '__magnification__'):
             self.translation = Coord((1 - self.__magnification__) * center.x, (1 - self.__magnification__) * center.y)
 
-    magnification_center = SetFunctionField(
+    magnification_center = SetFunctionParameter(
         local_name='__magnification_center__', 
         fset=set_magnification_center, 
         restriction=RestrictType(Coord), 

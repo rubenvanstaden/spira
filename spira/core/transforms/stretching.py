@@ -1,11 +1,11 @@
 import numpy as np
 
 from spira.core.transformation import ReversibleTransform
-from spira.core.parameters.descriptor import SetFunctionField
-from spira.yevon.geometry.coord import CoordField, Coord
+from spira.core.parameters.descriptor import SetFunctionParameter
+from spira.yevon.geometry.coord import CoordParameter, Coord
 
 
-__all__ = ['Stretch', 'scale_elemental', 'stretch_elemental_by_port']
+__all__ = ['Stretch', 'scale_element', 'stretch_element_by_port']
 
 
 class Stretch(ReversibleTransform):
@@ -16,7 +16,7 @@ class Stretch(ReversibleTransform):
     >>> s = Stretch()(shape)
     """
 
-    stretch_center = CoordField(default=(0,0))
+    stretch_center = CoordParameter(default=(0,0))
 
     def set_stretch_factor(self, value):
         if isinstance(value, Coord):
@@ -26,7 +26,7 @@ class Stretch(ReversibleTransform):
         if self.__stretch_factor__[0] == 0.0 or self.__stretch_factor__[1] == 0.0:
             raise ValueError("Error: Stretch factor cannot be zero in Stretch transform")
 
-    stretch_factor = SetFunctionField('__stretch_factor__', set_stretch_factor)
+    stretch_factor = SetFunctionParameter('__stretch_factor__', set_stretch_factor)
 
     def __repr__(self):
         return "[SPiRA: Stretch] (factor {}, center {})".format(self.stretch_factor, self.stretch_center)
@@ -75,7 +75,7 @@ class Stretch(ReversibleTransform):
         return self.__repr__()
 
 
-def scale_elemental(elem, scaling=(1.0, 1.0), scale_center=(0.0, 0.0)):
+def scale_element(elem, scaling=(1.0, 1.0), scale_center=(0.0, 0.0)):
     from spira.core.transforms.magnification import Magnification
     if scaling[0] == scaling[1]:
         return Magnification(scale_center, scaling[0])(elem)
@@ -83,7 +83,7 @@ def scale_elemental(elem, scaling=(1.0, 1.0), scale_center=(0.0, 0.0)):
         return Stretch(stretch_factor=scaling, stretch_center=scale_center)(elem)
 
 
-def stretch_elemental_by_port(elem, const_port, subj_port, destination):
+def stretch_element_by_port(elem, const_port, subj_port, destination):
     p1, p2 = const_port, subj_port
     d0 = p1.midpoint.distance(p2.midpoint)
     d1 = p1.midpoint.distance(destination)

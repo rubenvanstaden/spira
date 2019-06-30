@@ -3,39 +3,39 @@ Layout Parameters
 
 
 
-Constraints
------------
+.. Constraints
+.. -----------
 
 
 
-Variables
----------
+.. Variables
+.. ---------
 
-Variables are primitive parameters such as intergers and strings.
-The following variables are supported and initialized as shown.
+.. Variables are primitive parameters such as intergers and strings.
+.. The following variables are supported and initialized as shown.
 
-* Integer
-* Float
-* String
-* Dictionary
-* List
+.. * Integer
+.. * Float
+.. * String
+.. * Dictionary
+.. * List
 
-Structured
-----------
+.. Structured
+.. ----------
 
-Structured parameters are newly defined custom parameters introduced
-in the SPiRA framework. The purpose of this parameters is to structure 
-data that can be manipulated using extended futures.
+.. Structured parameters are newly defined custom parameters introduced
+.. in the SPiRA framework. The purpose of this parameters is to structure 
+.. data that can be manipulated using extended futures.
 
-ElementalList
-~~~~~~~~~~~~~
+.. ElementalList
+.. ~~~~~~~~~~~~~
 
-List that contains all the layout elementals.
+.. List that contains all the layout elementals.
 
-PortList
-~~~~~~~~
+.. PortList
+.. ~~~~~~~~
 
-List that contains all the port elementals of a layout.
+.. List that contains all the port elementals of a layout.
 
 
 

@@ -142,7 +142,7 @@ class Coord(Transformable):
 RESTRICT_COORD = RestrictType(Coord)
 
 
-def CoordField(restriction=None, preprocess=None, **kwargs):
+def CoordParameter(restriction=None, preprocess=None, **kwargs):
     if 'default' not in kwargs:
         kwargs['default'] = Coord(0,0)
     R = RESTRICT_COORD & restriction

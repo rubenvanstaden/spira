@@ -2,7 +2,7 @@ import numpy as np
 from copy import deepcopy
 from numpy.linalg import norm
 from spira.core.mixin import MixinBowl
-from spira.core.transformation import TransformationField
+from spira.core.transformation import TransformationParameter
 
 
 class __Transformable__(MixinBowl):
@@ -32,7 +32,7 @@ class Transformable(__Transformable__):
 
     __transform_type__ = Transform
 
-    transformation = TransformationField()
+    transformation = TransformationParameter()
 
     # def __init__(self, **kwargs):
     def __init__(self, transformation=None, **kwargs):

@@ -1,9 +1,9 @@
 import spira.all as spira
 import numpy as np
-from spira.yevon.geometry.coord import CoordField, Coord
+from spira.yevon.geometry.coord import CoordParameter, Coord
 from spira.core.transformable import Transformable
 from spira.core.transforms.generic import GenericTransform, __ConvertableTransform__
-from spira.core.parameters.descriptor import FunctionField, SetFunctionField
+from spira.core.parameters.descriptor import FunctionParameter, SetFunctionParameter
 from spira.core.parameters.processors import ProcessorTypeCast
 from spira.core.parameters.restrictions import RestrictType
 from spira.yevon import constants
@@ -39,7 +39,7 @@ class Rotation(__ConvertableTransform__):
                 rotation_center.y * (1 - self.__ca__) - rotation_center.x * self.__sa__
             )
 
-    rotation = SetFunctionField('__rotation__', set_rotation, default=0.0)
+    rotation = SetFunctionParameter('__rotation__', set_rotation, default=0.0)
 
     def set_rotation_center(self, rotation_center):
         if not isinstance(rotation_center, Coord):
@@ -51,7 +51,7 @@ class Rotation(__ConvertableTransform__):
                 rotation_center.y * (1 - self.__ca__) - rotation_center.x * self.__sa__
             )
 
-    rotation_center = SetFunctionField(
+    rotation_center = SetFunctionParameter(
         local_name='__rotation_center__', 
         fset=set_rotation_center, 
         restriction=RestrictType(Coord), 

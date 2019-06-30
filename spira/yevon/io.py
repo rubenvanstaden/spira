@@ -27,7 +27,7 @@ def debug_path(filename):
 
 
 # def map_references(c, c2dmap):
-#     for e in c.elementals.sref:
+#     for e in c.elements.sref:
 #         if e.ref in c2dmap.keys():
 #             e.ref = c2dmap[e.ref]
 #             e._parent_ports = e.ref.ports
@@ -138,7 +138,7 @@ def import_gds(filename, cellname=None, flatten=False, pcell=True):
                          'top-level cells, you must specify cellname' +
                          'to select of one of them')
 
-    cell_list = spira.ElementalList()
+    cell_list = spira.ElementList()
     c2dmap = {}
     for cell in gdsii_lib.cell_dict.values():
         D = spira.Cell(name=cell.name)

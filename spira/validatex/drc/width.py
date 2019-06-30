@@ -7,14 +7,14 @@ RDD = spira.get_rule_deck()
 
 
 class Width(__SingleLayerDesignRule__):
-    minimum = param.FloatField(allow_none=True, default=None)
-    maximum = param.FloatField(allow_none=True, default=None)
+    minimum = param.FloatParameter(allow_none=True, default=None)
+    maximum = param.FloatParameter(allow_none=True, default=None)
 
     def __repr__(self):
         return "'{}' must have a width between: min={} max={}".format(self.layer1, self.minimum, self.maximum)
 
     def edge_to_minimum_width(self, e1):
-        ports = spira.ElementalList()
+        ports = spira.ElementList()
         for p in e1.edge_ports:
             p.length = 2*self.minimum
             ports += p

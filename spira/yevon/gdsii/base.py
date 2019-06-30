@@ -1,17 +1,17 @@
 import spira.all as spira
 
 from spira.core.transformable import Transformable
-from spira.core.parameters.initializer import FieldInitializer
+from spira.core.parameters.initializer import ParameterInitializer
 from spira.core.parameters.initializer import MetaInitializer
-from spira.core.parameters.descriptor import FunctionField
-from spira.yevon.process.gdsii_layer import LayerField
+from spira.core.parameters.descriptor import FunctionParameter
+from spira.yevon.process.gdsii_layer import LayerParameter
 from spira.yevon.process import get_rule_deck
 
 
 RDD = get_rule_deck()
 
 
-class MetaElemental(MetaInitializer):
+class MetaElement(MetaInitializer):
     """  """
 
     def __call__(cls, *params, **keyword_params):
@@ -21,8 +21,8 @@ class MetaElemental(MetaInitializer):
         return instance
 
 
-class __Elemental__(Transformable, FieldInitializer, metaclass=MetaElemental):
-    """ Base class for all transformable elementals. """
+class __Element__(Transformable, ParameterInitializer, metaclass=MetaElement):
+    """ Base class for all transformable elements. """
 
     def get_node_id(self):
         if self.__id__:
@@ -33,30 +33,30 @@ class __Elemental__(Transformable, FieldInitializer, metaclass=MetaElemental):
     def set_node_id(self, value):
         self.__id__ = value
 
-    node_id = FunctionField(get_node_id, set_node_id)
+    node_id = FunctionParameter(get_node_id, set_node_id)
 
     def __init__(self, transformation=None, **kwargs):
         super().__init__(transformation=transformation, **kwargs)
 
     def __add__(self, other):
         if isinstance(other, list):
-            l = spira.ElementalList([self])
+            l = spira.ElementList([self])
             l.extend(other)
             return l
-        elif isinstance(other, __Elemental__):
-            return spira.ElementalList([self, other])
+        elif isinstance(other, __Element__):
+            return spira.ElementList([self, other])
         else:
-            raise TypeError("Wrong type of argument for addition in __Elemental__: " + str(type(other)))
+            raise TypeError("Wrong type of argument for addition in __Element__: " + str(type(other)))
 
     def __radd__(self, other):
         if isinstance(other, list):
-            l = spira.ElementalList(other)
+            l = spira.ElementList(other)
             l.append(self)
             return l
-        elif isinstance(other, __Elemental__):
-            return spira.ElementalList([other, self])
+        elif isinstance(other, __Element__):
+            return spira.ElementList([other, self])
         else:
-            raise TypeError("Wrong type of argument for addition in __Elemental__: " + str(type(other)))
+            raise TypeError("Wrong type of argument for addition in __Element__: " + str(type(other)))
 
     def flatten(self):
         return [self]
@@ -65,10 +65,10 @@ class __Elemental__(Transformable, FieldInitializer, metaclass=MetaElemental):
         return None
 
 
-class __LayerElemental__(__Elemental__):
+class __LayerElement__(__Element__):
     """  """
 
-    layer = LayerField()
+    layer = LayerParameter()
 
     # def __init__(self, **kwargs):
     #     super().__init__(**kwargs)
@@ -79,7 +79,7 @@ class __LayerElemental__(__Elemental__):
     def __eq__(self, other):
         if other == None:
             return False
-        if not isinstance(other, __LayerElemental__):
+        if not isinstance(other, __LayerElement__):
             return False
         if other.layer.key != self.layer.key:
             return False                

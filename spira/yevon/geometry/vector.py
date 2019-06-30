@@ -1,18 +1,18 @@
 import numpy as np
 
-from spira.core.parameters.initializer import FieldInitializer
+from spira.core.parameters.initializer import ParameterInitializer
 from spira.core.transformable import Transformable
-from spira.core.parameters.variables import NumberField
-from spira.core.parameters.descriptor import DataFieldDescriptor
-from spira.yevon.geometry.coord import Coord, CoordField
+from spira.core.parameters.variables import NumberParameter
+from spira.core.parameters.descriptor import ParameterDescriptor
+from spira.yevon.geometry.coord import Coord, CoordParameter
 from spira.core.transforms import *
-from spira.core.parameters.descriptor import FunctionField
+from spira.core.parameters.descriptor import FunctionParameter
 from spira.yevon import constants
 
 
 __all__ = [
     'Vector',
-    'VectorField',
+    'VectorParameter',
     'transformation_from_vector',
     'vector_from_two_points',
     'vector_match_transform',
@@ -21,10 +21,10 @@ __all__ = [
 ]
 
 
-class Vector(Transformable, FieldInitializer):
+class Vector(Transformable, ParameterInitializer):
     """ Vector consisting of a point and an orientation. """
 
-    midpoint = CoordField(default=(0.0, 0.0), doc='Position of the point.')
+    midpoint = CoordParameter(default=(0.0, 0.0), doc='Position of the point.')
 
     @property
     def x(self):
@@ -43,7 +43,7 @@ class Vector(Transformable, FieldInitializer):
     def set_angle_rad(self, value):
         self.__angle__ = (constants.RAD2DEG * value) % 360.0
 
-    angle_rad = FunctionField(get_angle_rad, set_angle_rad, doc="The outward facing orientation of the port in radians (stored in degrees by default, converted to radians if needed)")
+    angle_rad = FunctionParameter(get_angle_rad, set_angle_rad, doc="The outward facing orientation of the port in radians (stored in degrees by default, converted to radians if needed)")
 
     def get_angle_deg(self):
         if hasattr(self, '__angle__'):
@@ -54,7 +54,7 @@ class Vector(Transformable, FieldInitializer):
     def set_angle_deg(self, value):
         self.__angle__ = value % 360.0
 
-    orientation = FunctionField(get_angle_deg, set_angle_deg, doc = "The outward facing orientation of the port.")
+    orientation = FunctionParameter(get_angle_deg, set_angle_deg, doc = "The outward facing orientation of the port.")
 
     def cos(self):
         return cos(constants.DEG2RAD * self.__angle__)
@@ -135,7 +135,7 @@ def vector_match_transform_identical(v1, v2):
     return T + R
 
 
-def VectorField(internal_member_name=None, restriction=None, preprocess=None, **kwargs):
+def VectorParameter(internal_member_name=None, restriction=None, preprocess=None, **kwargs):
     R = RestrictType(Vector) & restriction
     return RestrictedProperty(internal_member_name, restriction=R, **kwargs)
 

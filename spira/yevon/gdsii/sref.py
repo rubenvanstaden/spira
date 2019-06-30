@@ -5,11 +5,11 @@ import numpy as np
 import spira.all as spira
 
 from spira.yevon.geometry.ports.base import __Port__
-from spira.yevon.gdsii.base import __Elemental__
-from spira.yevon.geometry.coord import CoordField, Coord
+from spira.yevon.gdsii.base import __Element__
+from spira.yevon.geometry.coord import CoordParameter, Coord
 from spira.yevon import utils
 from spira.core.transforms import *
-from spira.core.parameters.descriptor import DataFieldDescriptor, FunctionField, DataField
+from spira.core.parameters.descriptor import ParameterDescriptor, FunctionParameter, Parameter
 
 from spira.core.parameters.variables import *
 from spira.yevon.geometry.vector import *
@@ -19,7 +19,7 @@ from spira.core.transforms import stretching
 from spira.yevon.geometry import bbox_info
 
 
-class __RefElemental__(__Elemental__):
+class __RefElement__(__Element__):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -45,7 +45,7 @@ class __RefElemental__(__Elemental__):
             C = self.ref.__class__(
                 name=self.ref.name + self.transformation.id_string(),
                 alias=self.ref.alias + self.alias,
-                elementals=deepcopy(self.ref.elementals),
+                elements=deepcopy(self.ref.elements),
                 ports=deepcopy(self.ref.ports)
             )
     
@@ -66,7 +66,7 @@ class __RefElemental__(__Elemental__):
         S = self.expand_transform()
         C = spira.Cell(name=S.ref.name + '_ExpandedCell')
         def flat_polygons(subj, cell):
-            for e in cell.elementals:
+            for e in cell.elements:
                 if isinstance(e, spira.Polygon):
                     subj += e
                 elif isinstance(e, spira.SRef):
@@ -88,7 +88,7 @@ class __RefElemental__(__Elemental__):
         # return self.__class__(reference=D)
 
 
-class SRef(__RefElemental__):
+class SRef(__RefElement__):
     """
     Cell reference (SRef) is the reference to a cell layout
     to create a hierarchical layout structure. It creates copies
@@ -102,8 +102,8 @@ class SRef(__RefElemental__):
     >>> sref = spira.SRef(structure=cell)
     """
 
-    supp = IntegerField(default=1)
-    midpoint = CoordField(default=(0,0))
+    supp = IntegerParameter(default=1)
+    midpoint = CoordParameter(default=(0,0))
 
     def get_alias(self):
         if not hasattr(self, '__alias__'):
@@ -113,10 +113,10 @@ class SRef(__RefElemental__):
     def set_alias(self, value):
         self.__alias__ = '_' + value
 
-    alias = FunctionField(get_alias, set_alias, doc='Functions to generate an alias for cell name.')
+    alias = FunctionParameter(get_alias, set_alias, doc='Functions to generate an alias for cell name.')
 
     def __init__(self, reference, **kwargs):
-        __RefElemental__.__init__(self, **kwargs)
+        __RefElement__.__init__(self, **kwargs)
         self.ref = reference
 
     def __repr__(self):
@@ -143,8 +143,8 @@ class SRef(__RefElemental__):
         return self.ref.flatten()
 
     def flatcopy(self, level=-1):
-        if level == 0: return spira.ElementalList(self._copy__())
-        el = self.ref.elementals.flatcopy(level-1)
+        if level == 0: return spira.ElementList(self._copy__())
+        el = self.ref.elements.flatcopy(level-1)
         T = self.transformation + Translation(self.midpoint)
         el.transform(T)
         return el
@@ -286,9 +286,9 @@ class SRef(__RefElemental__):
     def stretch(self, factor=(1,1), center=(0,0)):
         S = self.expand_flatcopy()
         T = spira.Stretch(stretch_factor=factor, stretch_center=center)
-        for i, e in enumerate(S.ref.elementals):
-            # T.apply(S.ref.elementals[i])
-            S.ref.elementals[i].transform(T)
+        for i, e in enumerate(S.ref.elements):
+            # T.apply(S.ref.elements[i])
+            S.ref.elements[i].transform(T)
         return self
         # return S
 
@@ -296,14 +296,14 @@ class SRef(__RefElemental__):
         pass
         # S = self.expand_flatcopy()
         # T = spira.Stretch(stretch_factor=factor, stretch_center=center)
-        # for i, e in enumerate(S.ref.elementals):
-        #     T.apply(S.ref.elementals[i])
+        # for i, e in enumerate(S.ref.elements):
+        #     T.apply(S.ref.elements[i])
         # return self
 
     def stretch_port(self, port, destination):
         """
-        The elemental by moving the subject port, without
-        distorting the entire elemental. Note: The opposite port
+        The element by moving the subject port, without
+        distorting the entire element. Note: The opposite port
         position is used as the stretching center.
 
         Example
@@ -312,17 +312,17 @@ class SRef(__RefElemental__):
         """
         from spira.yevon.gdsii.polygon import Polygon
         opposite_port = bbox_info.get_opposite_boundary_port(self, port)
-        T = stretching.stretch_elemental_by_port(self, opposite_port, port, destination)
+        T = stretching.stretch_element_by_port(self, opposite_port, port, destination)
         if port.bbox is True:
-            for i, e in enumerate(self.ref.elementals):
-                T.apply(self.ref.elementals[i])
+            for i, e in enumerate(self.ref.elements):
+                T.apply(self.ref.elements[i])
         else:
-            for i, e in enumerate(self.ref.elementals):
+            for i, e in enumerate(self.ref.elements):
                 if isinstance(e, Polygon):
                     if e.id_string() == port.local_pid:
                         opposite_port = bbox_info.get_opposite_boundary_port(e, port)
-                        Tn = stretching.stretch_elemental_by_port(self, opposite_port, port, destination)
-                        Tn.apply(self.ref.elementals[i])
+                        Tn = stretching.stretch_element_by_port(self, opposite_port, port, destination)
+                        Tn.apply(self.ref.elements[i])
         return self
 
     def nets(self, lcar):
@@ -347,7 +347,7 @@ class SRef(__RefElemental__):
         return nets 
 
 
-class ARef(__RefElemental__):
+class ARef(__RefElement__):
     pass
 
 

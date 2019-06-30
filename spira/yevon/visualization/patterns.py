@@ -2,13 +2,13 @@ import numpy as np
 from spira.core.parameters.variables import *
 from spira.core.parameters.processors import ProcessorTypeCast
 from spira.core.parameters.restrictions import RestrictType
-from spira.core.parameters.initializer import FieldInitializer
+from spira.core.parameters.initializer import ParameterInitializer
 from spira.core.parameters.descriptor import RestrictedParameter
 
 
 __all__ = [
     'StipplePattern',
-    'StippleField',
+    'StippleParameter',
     'STIPPLE_NONE',
     'STIPPLE_DOTS',
     'STIPPLE_DOTS_SPARSE',
@@ -25,10 +25,10 @@ __all__ = [
 ]
 
 
-class StipplePattern(FieldInitializer):
-    name = StringField(allow_none = True)
-    pattern = NumpyArrayField()
-    matplotlib_hatch = StringField(allow_none = True)
+class StipplePattern(ParameterInitializer):
+    name = StringParameter(allow_none = True)
+    pattern = NumpyArrayParameter()
+    matplotlib_hatch = StringParameter(allow_none = True)
 
     def set(self, pattern):
         self.pattern = pattern
@@ -292,7 +292,7 @@ class ProcessorStipplePattern(ProcessorTypeCast):
         return ProcessorTypeCast.process(self, value, obj)
 
 
-def StippleField(local_name=None, restriction=None, preprocess=None,**kwargs):
+def StippleParameter(local_name=None, restriction=None, preprocess=None,**kwargs):
     R = RestrictType(StipplePattern) & restriction
     P = ProcessorStipplePattern() + preprocess
     return RestrictedParameter(local_name,  restriction=R, preprocess=P, **kwargs)

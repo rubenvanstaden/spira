@@ -10,7 +10,7 @@ __all__ = ['device_detector', 'circuit_detector']
 
 
 def map_references(c, c2dmap):
-    for e in c.elementals.sref:
+    for e in c.elements.sref:
         if e.ref in c2dmap.keys():
             e.ref = c2dmap[e.ref]
             e._parent_ports = e.ref.ports

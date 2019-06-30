@@ -1,13 +1,13 @@
 import collections
 
-from spira.yevon.gdsii.base import __Elemental__
+from spira.yevon.gdsii.base import __Element__
 from spira.core.typed_list import TypedList
 from spira.core.parameters.restrictions import RestrictType
-from spira.core.parameters.descriptor import DataFieldDescriptor
+from spira.core.parameters.descriptor import ParameterDescriptor
 from spira.core.transformable import Transformable
 
 
-class __ElementalList__(TypedList, Transformable):
+class __ElementList__(TypedList, Transformable):
 
     def __repr__(self):
         string = '\n'.join('{}'.format(k) for k in enumerate(self._list))
@@ -28,9 +28,9 @@ class __ElementalList__(TypedList, Transformable):
         elif isinstance(value, int):
             r_val = self._list[value]
         else:
-            raise ValueError('Invalid value to get elemental.')
+            raise ValueError('Invalid value to get element.')
         if r_val is None:
-            raise ValueError('Elemental not found!')
+            raise ValueError('Element not found!')
         return r_val
 
     def __delitem__(self, key):
@@ -58,14 +58,14 @@ class __ElementalList__(TypedList, Transformable):
             yield e 
 
 
-class ElementalList(__ElementalList__):
+class ElementList(__ElementList__):
 
-    __item_type__ = __Elemental__
+    __item_type__ = __Element__
 
     @property
     def labels(self):
         from spira.yevon.gdsii.label import Label
-        elems = ElementalList()
+        elems = ElementList()
         for e in self._list:
             if isinstance(e, Label):
                 elems += e
@@ -74,7 +74,7 @@ class ElementalList(__ElementalList__):
     @property
     def polygons(self):
         from spira.yevon.gdsii.polygon import Polygon
-        elems = ElementalList()
+        elems = ElementList()
         for e in self._list:
             # if isinstance(e, Polygon):
             if issubclass(type(e), Polygon):
@@ -84,7 +84,7 @@ class ElementalList(__ElementalList__):
     @property
     def sref(self):
         from spira.yevon.gdsii.sref import SRef
-        elems = ElementalList()
+        elems = ElementList()
         for e in self._list:
             if isinstance(e, SRef):
                 elems += e
@@ -136,13 +136,13 @@ class ElementalList(__ElementalList__):
     def flat_elems(self):
         def _flatten(list_to_flatten):
             for elem in list_to_flatten:
-                if isinstance(elem, (ElementalList, list, tuple)):
+                if isinstance(elem, (ElementList, list, tuple)):
                     for x in _flatten(elem): yield x
                 else: yield elem
         return _flatten(self._list)
 
     def flatcopy(self, level=-1):
-        el = ElementalList()
+        el = ElementList()
         for e in self._list:
             el += e.flatcopy(level)
         return el
@@ -151,7 +151,7 @@ class ElementalList(__ElementalList__):
         from spira.yevon.gdsii.cell import Cell
         from spira.yevon.gdsii.sref import SRef
         if isinstance(self, collections.Iterable):
-            flat_list = ElementalList()
+            flat_list = ElementList()
             for i in self._list:
                 if issubclass(type(i), Cell):
                     i = i.flatcopy()
@@ -176,8 +176,8 @@ class ElementalList(__ElementalList__):
         return True
 
 
-class ElementalListField(DataFieldDescriptor):
-    __type__ = ElementalList
+class ElementListParameter(ParameterDescriptor):
+    __type__ = ElementList
 
     def __init__(self, default=[], **kwargs):
         kwargs['default'] = self.__type__(default)

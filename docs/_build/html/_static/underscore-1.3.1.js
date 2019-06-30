@@ -23,7 +23,7 @@
   // Save bytes in the minified (but not gzipped) version:
   var ArrayProto = Array.prototype, ObjProto = Object.prototype, FuncProto = Function.prototype;
 
-  // Create quick reference variables for speed access to spira.core prototypes.
+  // Create quick reference variables for speed access to core prototypes.
   var slice            = ArrayProto.slice,
       unshift          = ArrayProto.unshift,
       toString         = ObjProto.toString,

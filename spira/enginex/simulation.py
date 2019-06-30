@@ -1,10 +1,10 @@
 # import spira.all as spira
 
 # from spira.core.parameters.variables import *
-# from spira.core.parameters.initializer import FieldInitializer
+# from spira.core.parameters.initializer import ParameterInitializer
 
 
-# class SimulationParameters(FieldInitializer):
+# class SimulationParameters(ParameterInitializer):
 
 #     def __set_parameters__(self, obj, **kwargs):
 #         pass
@@ -14,7 +14,7 @@
 
 
 # class SimulationDefinition():
-#     simul_params = DictField(doc='A set of simulation parameters.')
+#     simul_params = DictParameter(doc='A set of simulation parameters.')
 
 
 # class CellSimulationDefinition(SimulationDefinition):
@@ -25,8 +25,8 @@
 
 # class __SimulationGeometry__(SimulationParameters):
 
-#     cell = spira.CellField()
-#     geometry = spira.DataField(fdef_name='create_geometry')
+#     cell = spira.CellParameter()
+#     geometry = spira.Parameter(fdef_name='create_geometry')
 
 #     def __init__(self, **kwargs):
 #         super().__init__(**kwargs)

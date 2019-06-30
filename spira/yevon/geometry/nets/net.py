@@ -3,10 +3,10 @@ import networkx as nx
 import spira.all as spira
 
 from copy import deepcopy
-from spira.core.parameters.variables import GraphField, StringField
-from spira.core.parameters.descriptor import DataField
+from spira.core.parameters.variables import GraphParameter, StringParameter
+from spira.core.parameters.descriptor import Parameter
 from spira.yevon.geometry.coord import Coord
-from spira.yevon.vmodel.geometry import GeometryField
+from spira.yevon.vmodel.geometry import GeometryParameter
 from spira.yevon.geometry.ports.port import BranchPort
 from spira.yevon.geometry.ports.base import __Port__
 from spira.yevon.process import get_rule_deck
@@ -22,8 +22,8 @@ ELM_TYPE = {1: 'line', 2: 'triangle'}
 
 
 from spira.core.transformable import Transformable
-from spira.core.parameters.initializer import FieldInitializer
-class __Net__(Transformable, FieldInitializer):
+from spira.core.parameters.initializer import ParameterInitializer
+class __Net__(Transformable, ParameterInitializer):
     """  """
 
     @property
@@ -34,21 +34,21 @@ class __Net__(Transformable, FieldInitializer):
 class Net(__Net__):
     """
     Constructs a graph from the physical geometry
-    generated from the list of elementals.
+    generated from the list of elements.
     """
 
-    # g = GraphField()
-    g = DataField()
+    # g = GraphParameter()
+    g = Parameter()
 
-    mesh_data = DataField(fdef_name='create_mesh_data')
-    geometry = GeometryField(allow_none=True, default=None)
+    mesh_data = Parameter(fdef_name='create_mesh_data')
+    geometry = GeometryParameter(allow_none=True, default=None)
 
-    lines = DataField(fdef_name='create_lines')
-    triangles = DataField(fdef_name='create_triangles')
-    physical_triangles = DataField(fdef_name='create_physical_triangles')
-    physical_lines = DataField(fdef_name='create_physical_lines')
+    lines = Parameter(fdef_name='create_lines')
+    triangles = Parameter(fdef_name='create_triangles')
+    physical_triangles = Parameter(fdef_name='create_physical_triangles')
+    physical_lines = Parameter(fdef_name='create_physical_lines')
 
-    name = StringField(default='no_name')
+    name = StringParameter(default='no_name')
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)

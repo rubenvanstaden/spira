@@ -14,7 +14,7 @@ source_suffix = ['.rst', '.md']
 master_doc = 'index'
 
 project = u'SPiRA'
-copyright = u'2018, Ruben van Staden'
+copyright = u'2019, Ruben van Staden'
 author = u'Ruben van Staden'
 
 version = __version__ 

@@ -1,13 +1,13 @@
 from spira.core.parameters.restrictions import RestrictType
-from spira.core.parameters.variables import StringField, IntegerField
-from spira.core.parameters.initializer import FieldInitializer, MetaInitializer
-from spira.core.parameters.descriptor import RestrictedParameter, DataField
+from spira.core.parameters.variables import StringParameter, IntegerParameter
+from spira.core.parameters.initializer import ParameterInitializer, MetaInitializer
+from spira.core.parameters.descriptor import RestrictedParameter, Parameter
 
 
 DEFINED_PROCESS_LAYERS = {}
 
 
-__all__ = ['ProcessLayer', 'ProcessField']
+__all__ = ['ProcessLayer', 'ProcessParameter']
 
 
 class MetaProcessLayer(MetaInitializer):
@@ -37,11 +37,11 @@ class MetaProcessLayer(MetaInitializer):
             return L
 
 
-class ProcessLayer(FieldInitializer, metaclass=MetaProcessLayer):
+class ProcessLayer(ParameterInitializer, metaclass=MetaProcessLayer):
     """  """
 
-    name = StringField()
-    symbol = StringField()
+    name = StringParameter()
+    symbol = StringParameter()
 
     def __init__(self, name, symbol, **kwargs):
         super().__init__(name = name, symbol = symbol, **kwargs)
@@ -63,7 +63,7 @@ class ProcessLayer(FieldInitializer, metaclass=MetaProcessLayer):
         return hash(self.__str__())
 
 
-def ProcessField(local_name=None, restriction=None, **kwargs):
+def ProcessParameter(local_name=None, restriction=None, **kwargs):
     R = RestrictType(ProcessLayer) & restriction
     return RestrictedParameter(local_name, restriction=R, **kwargs)
 

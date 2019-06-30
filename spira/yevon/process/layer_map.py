@@ -1,6 +1,6 @@
-from spira.core.parameters.variables import DictField
-from spira.core.parameters.initializer import FieldInitializer
-from spira.core.parameters.descriptor import DataField
+from spira.core.parameters.variables import DictParameter
+from spira.core.parameters.initializer import ParameterInitializer
+from spira.core.parameters.descriptor import Parameter
 from spira.yevon.process.all import *
 from spira.yevon.process import get_rule_deck
 
@@ -11,11 +11,11 @@ RDD = get_rule_deck()
 __all__ = ['MapGdsiiToPhysical', 'MapPhysicalToGdsii']
 
 
-class MapGdsiiToPhysical(FieldInitializer):
+class MapGdsiiToPhysical(ParameterInitializer):
     """ Map the GDSII Layers onto ProcessLayers, and the Datatypes onto PurposeLayers. """
 
-    process_layer_map = DictField()
-    purpose_datatype_map = DictField()
+    process_layer_map = DictParameter()
+    purpose_datatype_map = DictParameter()
 
     @property
     def layer_process_map(self):
@@ -43,11 +43,11 @@ class MapGdsiiToPhysical(FieldInitializer):
             raise Exception("Key should be of type PhysicalLayer, but is of type %s." %type(key))
 
 
-class MapPhysicalToGdsii(FieldInitializer):
+class MapPhysicalToGdsii(ParameterInitializer):
     """  """
 
-    process_layer_map = DictField()
-    purpose_datatype_map = DictField() 
+    process_layer_map = DictParameter()
+    purpose_datatype_map = DictParameter() 
 
     def __getitem__(self, key, default=None):
         if isinstance(key, PhysicalLayer):

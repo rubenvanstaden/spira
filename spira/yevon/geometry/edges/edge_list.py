@@ -1,5 +1,5 @@
 from spira.core.typed_list import TypedList
-from spira.core.parameters.descriptor import DataFieldDescriptor
+from spira.core.parameters.descriptor import ParameterDescriptor
 from spira.core.parameters.restrictions import RestrictType
 from spira.yevon.geometry.edges.edges import __Edge__
 
@@ -56,7 +56,7 @@ class EdgeList(TypedList):
         return self
 
 
-class EdgeListField(DataFieldDescriptor):
+class EdgeListParameter(ParameterDescriptor):
 
     __type__ = EdgeList
 

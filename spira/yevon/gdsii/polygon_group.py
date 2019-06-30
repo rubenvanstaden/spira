@@ -4,8 +4,8 @@ from copy import deepcopy
 from spira.yevon.utils import clipping
 from spira.yevon.gdsii.group import Group
 from spira.yevon.gdsii.polygon import Polygon
-from spira.yevon.gdsii.elem_list import ElementalList
-from spira.yevon.gdsii.base import __LayerElemental__
+from spira.yevon.gdsii.elem_list import ElementList
+from spira.yevon.gdsii.base import __LayerElement__
 from spira.yevon.process import get_rule_deck
 
 
@@ -15,9 +15,9 @@ RDD = get_rule_deck()
 __all__ = ['PolygonGroup']
 
 
-class PolygonGroup(Group, __LayerElemental__):
+class PolygonGroup(Group, __LayerElement__):
     """ 
-    Collection of polygon elementals. Boolean
+    Collection of polygon elements. Boolean
     operation can be applied on these polygons.
 
     Example
@@ -36,9 +36,9 @@ class PolygonGroup(Group, __LayerElemental__):
         return self.__repr__()
 
     def __and__(self, other):
-        el = ElementalList()
-        for e1 in self.elementals:
-            for e2 in other.elementals:
+        el = ElementList()
+        for e1 in self.elements:
+            for e2 in other.elements:
                 # e1 = deepcopy(e1)
                 # e2 = deepcopy(e2)
                 # shape1 = e1.shape.transform_copy(e1.transformation)
@@ -64,15 +64,15 @@ class PolygonGroup(Group, __LayerElemental__):
                     #     p.layer.purpose = RDD.PURPOSE.INTERSECTED
                     # for p in polygons:
                     #     el += p
-        self.elementals = el
+        self.elements = el
         return self
 
     def __xor__(self, other):
         pts1, pts2 = [], []
-        for e in self.elementals:
+        for e in self.elements:
             s1 = e.shape.transform_copy(e.transformation)
             pts1.append(s1.points)
-        for e in other.elementals:
+        for e in other.elements:
             s1 = e.shape.transform_copy(e.transformation)
             pts2.append(s1.points)
 
@@ -81,10 +81,10 @@ class PolygonGroup(Group, __LayerElemental__):
             p2 = gdspy.PolygonSet(polygons=pts2)
     
             ply = gdspy.fast_boolean(p1, p2, operation='not')
-            elems = ElementalList()
+            elems = ElementList()
             for points in ply.polygons:
                 elems += Polygon(shape=points, layer=self.layer)
-            self.elementals = elems
+            self.elements = elems
         return self
 
     def __or__(self, other):
@@ -92,9 +92,9 @@ class PolygonGroup(Group, __LayerElemental__):
 
     @property
     def intersect(self):
-        elems = ElementalList()
-        el1 = deepcopy(self.elementals)
-        el2 = deepcopy(self.elementals)
+        elems = ElementList()
+        el1 = deepcopy(self.elements)
+        el2 = deepcopy(self.elements)
         for i, e1 in enumerate(el1):
             for j, e2 in enumerate(el2):
                 if e1.shape != e2.shape:
@@ -104,28 +104,28 @@ class PolygonGroup(Group, __LayerElemental__):
                         p.layer.purpose = RDD.PURPOSE.INTERSECTED
                     for p in polygons:
                         elems += p
-        self.elementals = elems
+        self.elements = elems
         return self
 
     @property
     def merge(self):
-        elems = ElementalList()
-        if len(self.elementals) > 1:
+        elems = ElementList()
+        if len(self.elements) > 1:
             points = []
-            for e in self.elementals:
+            for e in self.elements:
                 shape = e.shape.transform(e.transformation)
                 points.append(shape.points)
             merged_points = clipping.boolean(subj=points, clip_type='or')
             for uid, pts in enumerate(merged_points):
                 elems += Polygon(shape=pts, layer=self.layer)
         else:
-            elems = self.elementals
-        self.elementals = elems
+            elems = self.elements
+        self.elements = elems
         return self
 
     @property
     def count(self):
-        return len(self.elementals)
+        return len(self.elements)
 
     @property
     def process(self):

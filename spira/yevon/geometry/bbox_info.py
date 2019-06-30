@@ -9,7 +9,7 @@ RDD = get_rule_deck()
 
 __all__ = [
     'BoundaryInfo',
-    'BoundaryInfoField',
+    'BoundaryInfoParameter',
     'bbox_info_from_point_list',
     'bbox_info_from_numpy_array',
     'bbox_info_from_coord',
@@ -387,7 +387,7 @@ def bbox_info_cell(elem):
 
 
 from spira.core.parameters.restrictions import RestrictNothing
-def BoundaryInfoField(restriction=RestrictNothing(), **kwargs):
+def BoundaryInfoParameter(restriction=RestrictNothing(), **kwargs):
     R = RestrictType(BoundaryInfo) & restriction
     return RestrictedProperty(internal_member_name=internal_member_name, restriction=R, **kwargs)
 

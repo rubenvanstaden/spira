@@ -1,22 +1,22 @@
 import numpy as np
 import spira.all as spira
 
-from spira.core.parameters.variables import StringField, IntegerField
-from spira.core.parameters.initializer import FieldInitializer
-from spira.core.parameters.descriptor import DataFieldDescriptor
+from spira.core.parameters.variables import StringParameter, IntegerParameter
+from spira.core.parameters.initializer import ParameterInitializer
+from spira.core.parameters.descriptor import ParameterDescriptor
 from spira.core.parameters.restrictions import RestrictType
 
 
 # Color Map: https://www.rapidtables.com/web/color/html-color-codes.html
 
 
-class Color(FieldInitializer):
+class Color(ParameterInitializer):
     """ Defines a color in terms of a name and RGB values. """
 
-    name = StringField(default='black')
-    red = IntegerField(default=0)
-    green = IntegerField(default=0)
-    blue = IntegerField(default=0)
+    name = StringParameter(default='black')
+    red = IntegerParameter(default=0)
+    green = IntegerParameter(default=0)
+    blue = IntegerParameter(default=0)
 
     def __init__(self, red=0, green=0, blue=0, **kwargs):
         super().__init__(red=red, green=green, blue=blue, **kwargs)
@@ -94,12 +94,12 @@ COLOR_DARK_MAGENTA = Color(name='dark magenta', red=139, green=0, blue=139)
 COLOR_ROYAL_BLUE = Color(name='royal blue', red=65, green=105, blue=225)
 
 
-def ColorField(red=0, green=0, blue=0, **kwargs):
+def ColorParameter(red=0, green=0, blue=0, **kwargs):
     from spira.yevon.visualization.color import Color
     if 'default' not in kwargs:
         kwargs['default'] = Color(red=0, green=0, blue=0, **kwargs)
     R = RestrictType(Color)
-    return DataFieldDescriptor(restrictions=R, **kwargs)
+    return ParameterDescriptor(restrictions=R, **kwargs)
 
 
 

@@ -2,9 +2,9 @@ import gdspy
 import pyclipper
 import numpy as np
 from copy import copy, deepcopy
-from spira.yevon.gdsii.base import __LayerElemental__
+from spira.yevon.gdsii.base import __LayerElement__
 from spira.core.parameters.variables import *
-from spira.yevon.geometry.coord import Coord, CoordField
+from spira.yevon.geometry.coord import Coord, CoordParameter
 from spira.yevon.process import get_rule_deck
 
 
@@ -14,10 +14,10 @@ RDD = get_rule_deck()
 __all__ = ['Label']
 
 
-class __Label__(__LayerElemental__):
+class __Label__(__LayerElement__):
     """ Base class for label element. """
 
-    text = StringField(default='no_text')
+    text = StringParameter(default='no_text')
 
     def __init__(self, position, **kwargs):
         super().__init__(position=position, **kwargs)
@@ -61,8 +61,8 @@ class Label(__Label__):
     >>> [SPiRA: Label] (P1 at (0,0), texttype 0)
     """
 
-    position = CoordField(default=(0,0))
-    orientation = NumberField(default=0)
+    position = CoordParameter(default=(0,0))
+    orientation = NumberParameter(default=0)
 
     def __init__(self, position, **kwargs):
         super().__init__(position=position, **kwargs)

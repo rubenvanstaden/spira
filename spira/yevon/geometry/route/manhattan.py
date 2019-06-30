@@ -8,10 +8,10 @@ from spira.yevon.geometry.route.route_shaper import RouteArcShape
 from spira.yevon.geometry.route.route_shaper import RouteSquareShape
 from spira.yevon.process import get_rule_deck
 
-from spira.yevon.geometry.ports.port import PortField
+from spira.yevon.geometry.ports.port import PortParameter
 from spira.core.parameters.variables import *
-from spira.yevon.process.gdsii_layer import LayerField
-from spira.core.parameters.descriptor import DataField, FunctionField
+from spira.yevon.process.gdsii_layer import LayerParameter
+from spira.core.parameters.descriptor import Parameter, FunctionParameter
 from copy import deepcopy
 
 
@@ -20,27 +20,27 @@ RDD = get_rule_deck()
 
 class __Manhattan__(Cell):
 
-    port1 = PortField(default=None)
-    port2 = PortField(default=None)
+    port1 = PortParameter(default=None)
+    port2 = PortParameter(default=None)
 
-    length = NumberField(default=20)
-    layer = LayerField(number=13)
-    # gds_layer = LayerField(number=13)
-    # layer = PhysicalLayerField(default=RDD.DEF.PDEFAULT)
-    # layer = PhysicalLayerField()
-    # bend_type = StringField(default='rectangle')
-    bend_type = StringField(default='circular')
+    length = NumberParameter(default=20)
+    layer = LayerParameter(number=13)
+    # gds_layer = LayerParameter(number=13)
+    # layer = PhysicalLayerParameter(default=RDD.DEF.PDEFAULT)
+    # layer = PhysicalLayerParameter()
+    # bend_type = StringParameter(default='rectangle')
+    bend_type = StringParameter(default='circular')
 
-    b1 = DataField(fdef_name='create_arc_bend_1')
-    b2 = DataField(fdef_name='create_arc_bend_2')
+    b1 = Parameter(fdef_name='create_arc_bend_1')
+    b2 = Parameter(fdef_name='create_arc_bend_2')
 
-    p1 = DataField(fdef_name='create_port1_position')
-    p2 = DataField(fdef_name='create_port2_position')
+    p1 = Parameter(fdef_name='create_port1_position')
+    p2 = Parameter(fdef_name='create_port2_position')
 
-    quadrant_one = DataField(fdef_name='create_quadrant_one')
-    quadrant_two = DataField(fdef_name='create_quadrant_two')
-    quadrant_three = DataField(fdef_name='create_quadrant_three')
-    quadrant_four = DataField(fdef_name='create_quadrant_four')
+    quadrant_one = Parameter(fdef_name='create_quadrant_one')
+    quadrant_two = Parameter(fdef_name='create_quadrant_two')
+    quadrant_three = Parameter(fdef_name='create_quadrant_three')
+    quadrant_four = Parameter(fdef_name='create_quadrant_four')
 
     def get_radius(self):
         if self.port1 and self.port2:
@@ -62,7 +62,7 @@ class __Manhattan__(Cell):
     def set_radius(self, value):
         self.__radius__ = value
 
-    radius = FunctionField(get_radius, set_radius)
+    radius = FunctionParameter(get_radius, set_radius)
 
     def route_straight(self, p1, p2):
         route_shape = RouteSimple(

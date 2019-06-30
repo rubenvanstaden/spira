@@ -4,7 +4,7 @@ from spira import shapes
 
 
 class __ShapeContainer__(shapes.Shape):
-    original_shape = param.ShapeField()
+    original_shape = param.ShapeParameter()
 
 
 class ShapeNormal(__ShapeContainer__):
@@ -19,7 +19,7 @@ class ShapeNormal(__ShapeContainer__):
 
 class BezierCurve(__ShapeContainer__):
     """ polynomial bezier curve based on a shape with control points """
-    steps = param.FloatField(default=100)
+    steps = param.FloatParameter(default=100)
 
     def __init__(self, original_shape, **kwargs):
         super().__init__(original_shape=original_shape, **kwargs)
@@ -44,9 +44,9 @@ class BezierCurve(__ShapeContainer__):
 class BasicSpline(shapes.Shape):
     """  """
 
-    radius = param.FloatField(default=5)
-    angle = param.FloatField(default=10)
-    angle_step = param.FloatField(default=2)
+    radius = param.FloatParameter(default=5)
+    angle = param.FloatParameter(default=10)
+    angle_step = param.FloatParameter(default=2)
 
     def create_points(self,pts):
         DEG2RAD = np.pi / 180.0
@@ -76,13 +76,13 @@ class BasicSpline(shapes.Shape):
 
 
 # class AdiabaticSplineCircleSplineShape(Shape):
-#     start_point = param.CoordField()
-#     turn_point = param.CoordField()
-#     end_point = param.CoordField()
+#     start_point = param.CoordParameter()
+#     turn_point = param.CoordParameter()
+#     end_point = param.CoordParameter()
     
-#     radius = param.FloatField(required = True)
-#     angle_step = param.FloatField(default=1)
-#     adiabatic_angles = param.FloatField(default=0)
+#     radius = param.FloatParameter(required = True)
+#     angle_step = param.FloatParameter(default=1)
+#     adiabatic_angles = param.FloatParameter(default=0)
     
 #     def define_points(self,pts):
 #         alpha_in = self.adiabatic_angles[0]

@@ -4,8 +4,8 @@ from spira.core.transformation import ReversibleTransform
 from spira.yevon import utils
 from numpy.linalg import norm
 from spira.core.parameters.variables import *
-from spira.yevon.geometry.coord import CoordField, Coord
-from spira.core.parameters.descriptor import FunctionField, SetFunctionField
+from spira.yevon.geometry.coord import CoordParameter, Coord
+from spira.core.parameters.descriptor import FunctionParameter, SetFunctionParameter
 from spira.core.transformation import Transform
 from spira.yevon import constants
 
@@ -35,10 +35,10 @@ class GenericTransform(ReversibleTransform):
             self.__ca__ = np.cos(value * constants.DEG2RAD)
             self.__sa__ = np.sin(value * constants.DEG2RAD)
 
-    rotation = SetFunctionField('__rotation__', set_rotation, default=0.0)
-    magnification = NumberField(default=1)
-    reflection = BoolField(default=False)
-    translation = CoordField()
+    rotation = SetFunctionParameter('__rotation__', set_rotation, default=0.0)
+    magnification = NumberParameter(default=1)
+    reflection = BoolParameter(default=False)
+    translation = CoordParameter()
 
     def __str__(self):
         """ Gives a string representing the transform. """
@@ -205,7 +205,7 @@ class GenericTransform(ReversibleTransform):
 
 BASE = GenericTransform
 
-from spira.core.parameters.descriptor import ConvertField
+from spira.core.parameters.descriptor import ConvertParameter
 class __ConvertableTransform__(GenericTransform):
     """ Converts a transform to a GenericTransform when adding 
     or subtracting multiple transforms. """
@@ -213,10 +213,10 @@ class __ConvertableTransform__(GenericTransform):
     def __convert_transform__(self):
         self.__class__ = BASE
 
-    reflection = ConvertField(BASE, 'reflection', __convert_transform__)
-    rotation = ConvertField(BASE, 'rotation', __convert_transform__)
-    translation = ConvertField(BASE, 'translation', __convert_transform__)
-    magnification = ConvertField(BASE, 'magnification', __convert_transform__)
+    reflection = ConvertParameter(BASE, 'reflection', __convert_transform__)
+    rotation = ConvertParameter(BASE, 'rotation', __convert_transform__)
+    translation = ConvertParameter(BASE, 'translation', __convert_transform__)
+    magnification = ConvertParameter(BASE, 'magnification', __convert_transform__)
 
     def __add__(self, other):
         self.__convert_transform__()

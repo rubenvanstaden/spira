@@ -4,18 +4,18 @@ from spira.core.parameters.variables import *
 # from spira.yevon.process.derived_layers import __Layer__
 # from spira.yevon.process.derived_layers import *
 from spira.core.parameters.restrictions import RestrictType
-from spira.core.parameters.variables import StringField, IntegerField
+from spira.core.parameters.variables import StringParameter, IntegerParameter
 from spira.core.parameters.descriptor import RestrictedParameter
-from spira.core.parameters.initializer import FieldInitializer, MetaInitializer
-from spira.core.parameters.descriptor import DataFieldDescriptor
+from spira.core.parameters.initializer import ParameterInitializer, MetaInitializer
+from spira.core.parameters.descriptor import ParameterDescriptor
 from spira.core.typed_list import TypedList
 
 import inspect
 
 
-# __all__ = ['Layer', 'LayerField']
-# __all__ = ['LayerList', 'LayerListField']
-# __all__ = ['Layer', 'LayerField', 'LayerList', 'LayerListField']
+# __all__ = ['Layer', 'LayerParameter']
+# __all__ = ['LayerList', 'LayerListParameter']
+# __all__ = ['Layer', 'LayerParameter', 'LayerList', 'LayerListParameter']
 
 
 class MetaLayer(MetaInitializer):
@@ -49,10 +49,10 @@ class MetaLayer(MetaInitializer):
             return layer
 
 
-class __Layer__(FieldInitializer, metaclass=MetaLayer):
+class __Layer__(ParameterInitializer, metaclass=MetaLayer):
     """  """
 
-    doc = StringField()
+    doc = StringParameter()
 
     def __and__(self, other):
         if isinstance(other, __Layer__):
@@ -98,7 +98,7 @@ class __Layer__(FieldInitializer, metaclass=MetaLayer):
 
 
 class __DerivedLayer__(__Layer__):
-    name = StringField(allow_none=True, default=None)
+    name = StringParameter(allow_none=True, default=None)
 
     def get_layers(self, lobject):
         if isinstance(lobject, __DerivedLayer__):
@@ -301,7 +301,7 @@ class LayerList(TypedList):
         del self._list[:]
 
 
-class LayerListField(DataFieldDescriptor):
+class LayerListParameter(ParameterDescriptor):
 
     __type__ = LayerList
 
@@ -327,9 +327,9 @@ class LayerListField(DataFieldDescriptor):
 
 class Layer(__Layer__):
 
-    name = StringField()
-    number = IntegerField(default=0)
-    datatype = IntegerField(default=0)
+    name = StringParameter()
+    number = IntegerParameter(default=0)
+    datatype = IntegerParameter(default=0)
 
     # def __init__(self, **kwargs):
     #     super().__init__(**kwargs)
@@ -369,7 +369,7 @@ class Layer(__Layer__):
         return (self.number == other.number)
 
 
-def LayerField(local_name=None, restriction=None, **kwargs):
+def LayerParameter(local_name=None, restriction=None, **kwargs):
     R = RestrictType(__Layer__) & restriction
     return RestrictedParameter(local_name, restriction=R, **kwargs)
 

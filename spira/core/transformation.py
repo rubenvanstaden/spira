@@ -1,13 +1,13 @@
 import numpy as np
 from numpy.linalg import norm
 
-from spira.core.parameters.initializer import FieldInitializer
+from spira.core.parameters.initializer import ParameterInitializer
 from spira.core.parameters.restrictions import RestrictType
-from spira.core.parameters.descriptor import DataFieldDescriptor
+from spira.core.parameters.descriptor import ParameterDescriptor
 from spira.core.parameters.processors import ProcessorTypeCast
 
 
-class Transform(FieldInitializer):
+class Transform(ParameterInitializer):
     """ Abstract base class for generic transform. """
 
     _ID = 0
@@ -258,8 +258,8 @@ class ProcessoTransformation(ProcessorTypeCast):
             return ProcessorTypeCast.process(self, value, obj)
 
 
-# def TransformationField(name='noname', number=0, datatype=0, **kwargs):
-def TransformationField(restriction=None, preprocess=None, **kwargs):
+# def TransformationParameter(name='noname', number=0, datatype=0, **kwargs):
+def TransformationParameter(restriction=None, preprocess=None, **kwargs):
     from spira.core.transformation import Transform
     R = RestrictType(Transform) & restriction
     P = ProcessoTransformation() + preprocess
@@ -267,6 +267,6 @@ def TransformationField(restriction=None, preprocess=None, **kwargs):
         default = kwargs['default']
     else:
         default = None
-    # return DataFieldDescriptor(default=default, restrictions=R, **kwargs)
-    return DataFieldDescriptor(default=default, restrictions=R, preprocess=P, **kwargs)
+    # return ParameterDescriptor(default=default, restrictions=R, **kwargs)
+    return ParameterDescriptor(default=default, restrictions=R, preprocess=P, **kwargs)
 

@@ -1,9 +1,9 @@
-from spira.core.parameters.variables import StringField, IntegerField
+from spira.core.parameters.variables import StringParameter, IntegerParameter
 from spira.yevon.process.gdsii_layer import Layer
 from spira.yevon.process.technology import ProcessLayerDatabase
-from spira.yevon.process.process_layer import ProcessField
-from spira.yevon.process.purpose_layer import PurposeLayerField
-from spira.core.parameters.initializer import FieldInitializer
+from spira.yevon.process.process_layer import ProcessParameter
+from spira.yevon.process.purpose_layer import PurposeLayerParameter
+from spira.core.parameters.initializer import ParameterInitializer
 from spira.core.parameters.descriptor import RestrictedParameter
 from spira.core.parameters.restrictions import RestrictType
 from spira.yevon.process.gdsii_layer import Layer
@@ -20,8 +20,8 @@ class PhysicalLayer(Layer):
     >>> layer = PhysicalLayer()
     """
 
-    process = ProcessField()
-    purpose = PurposeLayerField()
+    process = ProcessParameter()
+    purpose = PurposeLayerParameter()
 
     def __init__(self, process, purpose, **kwargs):
         super().__init__(process=process, purpose=purpose, **kwargs)

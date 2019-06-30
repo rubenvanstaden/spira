@@ -1,7 +1,7 @@
-from spira.core.parameters.initializer import FieldInitializer
+from spira.core.parameters.initializer import ParameterInitializer
 
 
-class TypedList(FieldInitializer, list):
+class TypedList(ParameterInitializer, list):
     """
 
     """
@@ -109,7 +109,7 @@ class TypedList(FieldInitializer, list):
         return L
 
 
-class TypedListField(FieldInitializer):
+class TypedListParameter(ParameterInitializer):
     """ Parameter type for storing a typed list. """
 
     __list_type__ = TypedList
@@ -145,8 +145,8 @@ class TypedListField(FieldInitializer):
         return
 
 
-# from spira.core.parameters.descriptor import DataFieldDescriptor
-# class ListField(DataFieldDescriptor):
+# from spira.core.parameters.descriptor import ParameterDescriptor
+# class ListParameter(ParameterDescriptor):
 #     __type__ = TypedList
 
 #     def __init__(self, default=[], **kwargs):

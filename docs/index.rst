@@ -4,12 +4,14 @@ Welcome to the SPiRA documentation!
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
-   
-   installation
-   overview
-   rdd_schema
-   parameters
-   developers
+
+   Getting Started
+   Framework
+
+..    overview
+..    pdk
+..    parameters
+..    developers
 ..    pcell_examples
 ..    tutorials
 ..    gdsii

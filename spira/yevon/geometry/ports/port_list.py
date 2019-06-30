@@ -1,18 +1,18 @@
 from spira.core.typed_list import TypedList
 from spira.core.transformable import Transformable
-from spira.core.parameters.variables import FloatField
-from spira.core.parameters.descriptor import DataFieldDescriptor
+from spira.core.parameters.variables import FloatParameter
+from spira.core.parameters.descriptor import ParameterDescriptor
 from spira.core.parameters.restrictions import RestrictType
 from spira.yevon.geometry.ports.base import __Port__
 
 
-__all__ = ['PortList', 'PortListField']
+__all__ = ['PortList', 'PortListParameter']
 
 
 class PortList(TypedList, Transformable):
     __item_type__ = __Port__
 
-    port_angle_decision = FloatField(default=0.0)
+    port_angle_decision = FloatParameter(default=0.0)
 
     def __repr__(self):
         if len(self._list) == 0:
@@ -59,7 +59,7 @@ class PortList(TypedList, Transformable):
     #         for p in self._list:
     #             if isinstance(p, Port):
     #                 L = PortLayout(port=p)
-    #                 # if p.edge & other.elementals[0]:
+    #                 # if p.edge & other.elements[0]:
     #                 # print(L.edge.points)
     #                 print(other.points)
     #                 # print('')
@@ -266,7 +266,7 @@ class PortList(TypedList, Transformable):
         return self
 
 
-class PortListField(DataFieldDescriptor):
+class PortListParameter(ParameterDescriptor):
     from spira.yevon.geometry.ports.port_list import PortList
     __type__ = PortList
 

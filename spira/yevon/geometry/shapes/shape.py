@@ -12,21 +12,21 @@ from spira.yevon.geometry import bbox_info
 from spira.core.parameters.variables import *
 from spira.core.transformable import Transformable
 from spira.yevon.geometry.ports.port_list import PortList
-from spira.core.parameters.variables import ListField
-from spira.yevon.geometry.coord import CoordField, Coord
-from spira.core.parameters.initializer import FieldInitializer
+from spira.core.parameters.variables import ListParameter
+from spira.yevon.geometry.coord import CoordParameter, Coord
+from spira.core.parameters.initializer import ParameterInitializer
 from spira.core.parameters.processors import ProcessorTypeCast
-from spira.core.parameters.descriptor import DataFieldDescriptor, DataField
+from spira.core.parameters.descriptor import ParameterDescriptor, Parameter
 from spira.yevon.process import get_rule_deck
 
 
 RDD = get_rule_deck()
 
 
-__all__ = ['Shape', 'ShapeField', 'PointArrayField', 'shape_edge_ports']
+__all__ = ['Shape', 'ShapeParameter', 'PointArrayParameter', 'shape_edge_ports']
 
 
-class PointArrayField(DataFieldDescriptor):
+class PointArrayParameter(ParameterDescriptor):
     """  """
 
     def call_param_function(self, obj):
@@ -65,11 +65,11 @@ class PointArrayField(DataFieldDescriptor):
         self.__externally_set_parameter_value__(obj, points)
 
 
-class __Shape__(Transformable, FieldInitializer):
+class __Shape__(Transformable, ParameterInitializer):
 
-    center = CoordField()
-    clockwise = BoolField(default=False)
-    points = PointArrayField(fdef_name='create_points')
+    center = CoordParameter()
+    clockwise = BoolParameter(default=False)
+    points = PointArrayParameter(fdef_name='create_points')
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -283,8 +283,8 @@ class Shape(__Shape__):
     >>> shape = shapes.Shape(points=[])
     """
 
-    doc = StringField()
-    segment_labels = ListField(fdef_name='create_segment_labels')
+    doc = StringParameter()
+    segment_labels = ListParameter(fdef_name='create_segment_labels')
 
     def __init__(self, points=None, **kwargs):
         super().__init__(**kwargs)
@@ -335,10 +335,10 @@ class Shape(__Shape__):
         return self.__len__() <= 1
 
 
-def ShapeField(restriction=None, preprocess=None, **kwargs):
+def ShapeParameter(restriction=None, preprocess=None, **kwargs):
     R = RestrictType(Shape) & restriction
     P = ProcessorTypeCast(Shape) + preprocess
-    return DataFieldDescriptor(restrictions=R, preprocess=P, **kwargs)
+    return ParameterDescriptor(restrictions=R, preprocess=P, **kwargs)
 
 
 from spira.yevon.process.gdsii_layer import Layer

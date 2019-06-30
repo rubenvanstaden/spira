@@ -1,16 +1,16 @@
 import numpy as np
 
 from spira.yevon import constants
-from spira.core.parameters.initializer import FieldInitializer
+from spira.core.parameters.initializer import ParameterInitializer
 from spira.core.transformable import Transformable
-from spira.core.parameters.variables import NumberField
-from spira.core.parameters.descriptor import DataFieldDescriptor
+from spira.core.parameters.variables import NumberParameter
+from spira.core.parameters.descriptor import ParameterDescriptor
 from spira.yevon.geometry.coord import Coord
 
 
 __all__ = [
     'Line',
-    'LineField',
+    'LineParameter',
     'line_from_point_angle',
     'line_from_slope_intercept',
     'line_from_two_points',
@@ -18,12 +18,12 @@ __all__ = [
 ]
 
 
-class Line(Transformable, FieldInitializer):
+class Line(Transformable, ParameterInitializer):
     """ Creates a line ax + by + c = 0. """
 
-    a = NumberField(default=1)
-    b = NumberField(default=1)
-    c = NumberField(default=1)
+    a = NumberParameter(default=1)
+    b = NumberParameter(default=1)
+    c = NumberParameter(default=1)
 
     def __init__(self, a, b, c, **kwargs):
         super().__init__(a=a, b=b, c=c, **kwargs)
@@ -164,9 +164,9 @@ def line_from_vector(vector):
     return line_from_point_angle(vector.position, vector.angle_deg)
 
 
-def LineField(restriction=None, preprocess=None, **kwargs):
+def LineParameter(restriction=None, preprocess=None, **kwargs):
     if 'default' not in kwargs:
         kwargs['default'] = Line()
     R = RestrictType(Line) & restriction
-    return DataFieldDescriptor(restrictions=R, **kwargs)
+    return ParameterDescriptor(restrictions=R, **kwargs)
 

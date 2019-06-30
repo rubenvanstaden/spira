@@ -1,7 +1,7 @@
-from spira.core.parameters.initializer import FieldInitializer
-from spira.core.parameters.descriptor import DataFieldDescriptor
+from spira.core.parameters.initializer import ParameterInitializer
+from spira.core.parameters.descriptor import ParameterDescriptor
 from spira.yevon.visualization.color import *
-from spira.yevon.visualization.patterns import StippleField
+from spira.yevon.visualization.patterns import StippleParameter
 from spira.core.parameters.processors import ProcessorTypeCast
 from spira.core.parameters.restrictions import RestrictType
 from spira.core.parameters.variables import *
@@ -11,19 +11,19 @@ from spira.yevon.visualization.patterns import *
 __all__ = [
     'DisplayStyle',
     'DisplayStyleSet',
-    'DisplayStyleField'
+    'DisplayStyleParameter'
 ]
 
 
-class DisplayStyle(FieldInitializer):
+class DisplayStyle(ParameterInitializer):
     """  """
 
-    alpha = FloatField(default=1.0)
-    edgewidth = FloatField(default=1.0)
+    alpha = FloatParameter(default=1.0)
+    edgewidth = FloatParameter(default=1.0)
 
-    color = ColorField(default=COLOR_BLACK)
-    edgecolor = ColorField(default=COLOR_BLACK)
-    stipple = StippleField(default=STIPPLE_NONE)    
+    color = ColorParameter(default=COLOR_BLACK)
+    edgecolor = ColorParameter(default=COLOR_BLACK)
+    stipple = StippleParameter(default=STIPPLE_NONE)    
 
     def __str__(self):
         class_string = "[SPiRA: DisplayStyle] (color {}, stipple {}, alpha {}, edgewidth {})"
@@ -66,7 +66,7 @@ class ProcessorDisplayStyle(ProcessorTypeCast):
             return ProcessorTypeCast.process(self, value, obj)
 
 
-def DisplayStyleField(local_name=None, restriction=None, preprocess=None,**kwargs):
+def DisplayStyleParameter(local_name=None, restriction=None, preprocess=None,**kwargs):
     if not 'default' in kwargs:
         kwargs['default'] = None
     R = RestrictType(DisplayStyle) & restriction

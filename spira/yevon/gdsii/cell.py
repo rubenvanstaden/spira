@@ -5,13 +5,13 @@ from copy import copy, deepcopy
 from spira.yevon import utils
 
 from spira.core.parameters.restrictions import RestrictType
-from spira.core.parameters.initializer import FieldInitializer
-from spira.core.parameters.descriptor import DataFieldDescriptor, FunctionField, DataField
-from spira.yevon.gdsii.elem_list import ElementalList, ElementalListField
-from spira.yevon.geometry.coord import CoordField, Coord
-from spira.yevon.visualization.color import ColorField
+from spira.core.parameters.initializer import ParameterInitializer
+from spira.core.parameters.descriptor import ParameterDescriptor, FunctionParameter, Parameter
+from spira.yevon.gdsii.elem_list import ElementList, ElementListParameter
+from spira.yevon.geometry.coord import CoordParameter, Coord
+from spira.yevon.visualization.color import ColorParameter
 from spira.yevon.visualization import color
-from spira.core.parameters.variables import NumberField
+from spira.core.parameters.variables import NumberParameter
 from spira.core.parameters.initializer import MetaInitializer
 from spira.yevon.geometry.ports.port_list import PortList
 from spira.yevon.gdsii import *
@@ -23,20 +23,20 @@ from spira.yevon.process import get_rule_deck
 RDD = get_rule_deck()
 
 
-__all__ = ['Cell', 'Connector', 'CellField']
+__all__ = ['Cell', 'Connector', 'CellParameter']
 
 
 class MetaCell(MetaInitializer):
     """
     Called when an instance of a SPiRA class is
     created. Pareses all kwargs and passes it to
-    the FieldInitializer for storing.
+    the ParameterInitializer for storing.
 
     class Via(spira.Cell):
-        layer = param.LayerField()
+        layer = param.LayerParameter()
 
     Gets called here and passes
-    kwargs['layer': 50] to FieldInitializer.
+    kwargs['layer': 50] to ParameterInitializer.
     >>> via = Via(layer=50)
     """
 
@@ -68,7 +68,7 @@ class MetaCell(MetaInitializer):
             return retrieved_cell
 
 
-class __Cell__(FieldInitializer, metaclass=MetaCell):
+class __Cell__(ParameterInitializer, metaclass=MetaCell):
 
     __name_generator__ = RDD.ADMIN.NAME_GENERATOR
 
@@ -82,7 +82,7 @@ class __Cell__(FieldInitializer, metaclass=MetaCell):
         if issubclass(type(other), __Port__):
             self.ports += other
         else:
-            self.elementals += other
+            self.elements += other
         return self
 
 
@@ -94,13 +94,13 @@ class CellAbstract(__Cell__):
         return self.__name__
 
     def dependencies(self):
-        deps = self.elementals.dependencies()
+        deps = self.elements.dependencies()
         deps += self
         return deps
 
     def flatcopy(self, level=-1):
         name = '{}_{}'.format(self.name, 'Flat'),
-        return Cell(name, self.elementals.flatcopy(level=level))
+        return Cell(name, self.elements.flatcopy(level=level))
     
     def is_layer_in_cell(self, layer):
         D = deepcopy(self)
@@ -118,7 +118,7 @@ class CellAbstract(__Cell__):
     @property
     def alias_elems(self):
         elems = {}
-        for e in self.elementals.polygons:
+        for e in self.elements.polygons:
             elems[e.alias] = e
         return elems
 
@@ -139,11 +139,11 @@ class CellAbstract(__Cell__):
 
 
 class Cell(CellAbstract):
-    """ A Cell encapsulates a set of elementals that
+    """ A Cell encapsulates a set of elements that
     describes the layout being generated. """
 
-    lcar = NumberField(default=100)
-    name = DataField(fdef_name='create_name', doc='Name of the cell instance.')
+    lcar = NumberParameter(default=100)
+    name = Parameter(fdef_name='create_name', doc='Name of the cell instance.')
 
     _next_uid = 0
 
@@ -155,9 +155,9 @@ class Cell(CellAbstract):
     def set_alias(self, value):
         self.__alias__ = value
 
-    alias = FunctionField(get_alias, set_alias, doc='Functions to generate an alias for cell name.')
+    alias = FunctionParameter(get_alias, set_alias, doc='Functions to generate an alias for cell name.')
 
-    def __init__(self, name=None, elementals=None, ports=None, nets=None, library=None, **kwargs):
+    def __init__(self, name=None, elements=None, ports=None, nets=None, library=None, **kwargs):
 
         __Cell__.__init__(self, **kwargs)
         # gdspy.Cell.__init__(self, self.name, exclude_from_current=True)
@@ -171,8 +171,8 @@ class Cell(CellAbstract):
 
         if library is not None:
             self.library = library
-        if elementals is not None:
-            self.elementals = ElementalList(elementals)
+        if elements is not None:
+            self.elements = ElementList(elements)
         if ports is not None:
             self.ports = PortList(ports)
 
@@ -180,19 +180,19 @@ class Cell(CellAbstract):
         Cell._next_uid += 1
 
     def __repr__(self):
-        class_string = "[SPiRA: Cell(\'{}\')] (elementals {}, ports {})"
-        return class_string.format(self.name, self.elementals.__len__(), self.ports.__len__())
+        class_string = "[SPiRA: Cell(\'{}\')] (elements {}, ports {})"
+        return class_string.format(self.name, self.elements.__len__(), self.ports.__len__())
 
     def __str__(self):
         return self.__repr__()
 
     def transform(self, transformation=None):
-        self.elementals.transform(transformation)
+        self.elements.transform(transformation)
         self.ports.transform(transformation)
         return self
 
     def expand_transform(self):
-        for S in self.elementals.sref:
+        for S in self.elements.sref:
             S.expand_transform()
         return self
 
@@ -206,7 +206,7 @@ class Cell(CellAbstract):
         S = self.expand_transform()
         C = Cell(name=S.name + '_ExpandedCell')
         def flat_polygons(subj, cell):
-            for e in cell.elementals:
+            for e in cell.elements:
                 if isinstance(e, Polygon):
                     subj += e
                 elif isinstance(e, SRef):
@@ -277,7 +277,7 @@ class Cell(CellAbstract):
         d = Coord(d[0], d[1])
         o = Coord(o[0], o[1])
 
-        for e in self.elementals:
+        for e in self.elements:
             e.move(midpoint=o, destination=d)
 
         for p in self.ports:
@@ -288,26 +288,26 @@ class Cell(CellAbstract):
 
     def stretch_port(self, port, destination):
         """
-        The elemental by moving the subject port, without
-        distorting the entire elemental. Note: The opposite
+        The element by moving the subject port, without
+        distorting the entire element. Note: The opposite
         port position is used as the stretching center. 
         """
         from spira.core.transforms import stretching
         from spira.yevon.geometry import bbox_info
         from spira.yevon.gdsii.polygon import Polygon
         opposite_port = bbox_info.get_opposite_boundary_port(self, port)
-        T = stretching.stretch_elemental_by_port(self, opposite_port, port, destination)
+        T = stretching.stretch_element_by_port(self, opposite_port, port, destination)
         if port.bbox is True:
             self = T(self)
         else:
-            for i, e in enumerate(self.elementals):
+            for i, e in enumerate(self.elements):
                 if isinstance(e, Polygon):
                     if e.id_string() == port.local_pid:
-                        self.elementals[i] = T(e)
+                        self.elements[i] = T(e)
         return self
 
     def nets(self, lcar):
-        return self.elementals.nets(lcar=lcar)
+        return self.elements.nets(lcar=lcar)
 
     def create_netlist(self):
         net = self.nets(lcar=self.lcar).disjoint()
@@ -325,9 +325,9 @@ class Connector(Cell):
     >>> term = spira.Port()
     """
 
-    midpoint = CoordField()
-    orientation = NumberField(default=0.0)
-    width = NumberField(default=2)
+    midpoint = CoordParameter()
+    orientation = NumberParameter(default=0.0)
+    width = NumberParameter(default=2)
 
     def __repr__(self):
         return ("[SPiRA: Connector] (name {}, midpoint {}, " +
@@ -342,10 +342,10 @@ class Connector(Cell):
 
 
 # FIXME: Add restriction parameter.
-def CellField(name=None, elementals=None, ports=None, library=None, **kwargs):
+def CellParameter(name=None, elements=None, ports=None, library=None, **kwargs):
     from spira.yevon.gdsii.cell import Cell
     if 'default' not in kwargs:
-        kwargs['default'] = Cell(name=name, elementals=elementals, library=library)
+        kwargs['default'] = Cell(name=name, elements=elements, library=library)
     R = RestrictType(Cell)
-    return DataFieldDescriptor(restrictions=R, **kwargs)
+    return ParameterDescriptor(restrictions=R, **kwargs)
 

@@ -17,35 +17,35 @@ NUMPY_ARRAY = RestrictType(np.ndarray)
 GRAPH = RestrictType(nx.Graph)
 
 
-def NumberField(restriction=None, **kwargs):
+def NumberParameter(restriction=None, **kwargs):
     if 'default' not in kwargs:
         kwargs['default'] = 0
     R = NUMBER & restriction
     return RestrictedParameter(restriction=R, **kwargs)
 
 
-def ComplexField(restriction=None, **kwargs):
+def ComplexParameter(restriction=None, **kwargs):
     from .variables import COMPLEX
     if 'default' not in kwargs:
         kwargs['default'] = 0
     return RestrictedParameter(restriction=COMPLEX, **kwargs)
 
 
-def IntegerField(restriction=None, **kwargs):
+def IntegerParameter(restriction=None, **kwargs):
     from .variables import INTEGER
     if 'default' not in kwargs:
         kwargs['default'] = 0
     return RestrictedParameter(restriction=INTEGER, **kwargs)
 
 
-def FloatField(restriction=None, **kwargs):
+def FloatParameter(restriction=None, **kwargs):
     from .variables import FLOAT
     if 'default' not in kwargs:
         kwargs['default'] = 0.0
     return RestrictedParameter(restriction=FLOAT, **kwargs)
 
 
-def StringField(restriction=None, **kwargs):
+def StringParameter(restriction=None, **kwargs):
     from .variables import STRING
     if 'default' not in kwargs:
         kwargs['default'] = ''
@@ -53,14 +53,14 @@ def StringField(restriction=None, **kwargs):
     return RestrictedParameter(restriction=R, **kwargs)
 
 
-def BoolField(restriction=None, **kwargs):
+def BoolParameter(restriction=None, **kwargs):
     from .variables import BOOL
     if 'default' not in kwargs:
         kwargs['default'] = False
     return RestrictedParameter(restriction=BOOL, **kwargs)
 
 
-def ListField(restriction=None, **kwargs):
+def ListParameter(restriction=None, **kwargs):
     from .variables import LIST
     if 'default' not in kwargs:
         kwargs['default'] = []
@@ -68,14 +68,14 @@ def ListField(restriction=None, **kwargs):
     return RestrictedParameter(restriction=R, **kwargs)
 
 
-def TupleField(restriction=None, **kwargs):
+def TupleParameter(restriction=None, **kwargs):
     from .variables import TUPLE
     if 'default' not in kwargs:
         kwargs['default'] = []
     return RestrictedParameter(restriction=TUPLE, **kwargs)
 
 
-def DictField(local_name=None, restriction=None, **kwargs):
+def DictParameter(local_name=None, restriction=None, **kwargs):
     from .variables import DICTIONARY
     if 'default' not in kwargs:
         kwargs['default'] = {}
@@ -83,14 +83,14 @@ def DictField(local_name=None, restriction=None, **kwargs):
     return RestrictedParameter(local_name, restriction=R, **kwargs)
 
 
-def NumpyArrayField(restriction=None, **kwargs):
+def NumpyArrayParameter(restriction=None, **kwargs):
     from .variables import NUMPY_ARRAY
     if 'default' not in kwargs:
         kwargs['default'] = np.array([])
     return RestrictedParameter(restriction=NUMPY_ARRAY, **kwargs)
 
 
-def GraphField(restriction=None, **kwargs):
+def GraphParameter(restriction=None, **kwargs):
     from .variables import GRAPH
     if 'default' not in kwargs:
         kwargs['default'] = nx.Graph()
@@ -98,7 +98,7 @@ def GraphField(restriction=None, **kwargs):
     return RestrictedParameter(restriction=R, **kwargs)
 
 
-def TimeField(local_name=None, restriction=None, **kwargs):
+def TimeParameter(local_name=None, restriction=None, **kwargs):
     import time
     R = NUMBER & restriction
     if not 'default' in kwargs:

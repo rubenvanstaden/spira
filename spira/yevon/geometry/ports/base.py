@@ -5,10 +5,10 @@ import spira.all as spira
 
 from numpy.linalg import norm
 from spira.core.parameters.variables import *
-from spira.core.parameters.initializer import FieldInitializer
+from spira.core.parameters.initializer import ParameterInitializer
 from spira.yevon.geometry.coord import Coord
-from spira.yevon.process.process_layer import ProcessField
-from spira.yevon.process.purpose_layer import PurposeLayerField
+from spira.yevon.process.process_layer import ProcessParameter
+from spira.yevon.process.purpose_layer import PurposeLayerParameter
 from spira.yevon.process.physical_layer import PLayer
 from spira.yevon.process import get_rule_deck
 
@@ -16,22 +16,22 @@ from spira.yevon.process import get_rule_deck
 RDD = get_rule_deck()
 
 
-class __Port__(FieldInitializer):
+class __Port__(ParameterInitializer):
     """  """
 
-    doc = StringField()
-    name = StringField()
-    locked = BoolField(default=False)
+    doc = StringParameter()
+    name = StringParameter()
+    locked = BoolParameter(default=False)
 
 
 class __PhysicalPort__(__Port__):
 
-    process = ProcessField(default=RDD.PROCESS.VIRTUAL)
-    purpose = PurposeLayerField(default=RDD.PURPOSE.PORT.OUTSIDE_EDGE_ENABLED)
-    local_pid = StringField(default='none_local_pid')
-    text_type = NumberField(default=RDD.GDSII.TEXT)
+    process = ProcessParameter(default=RDD.PROCESS.VIRTUAL)
+    purpose = PurposeLayerParameter(default=RDD.PURPOSE.PORT.OUTSIDE_EDGE_ENABLED)
+    local_pid = StringParameter(default='none_local_pid')
+    text_type = NumberParameter(default=RDD.GDSII.TEXT)
 
-    # FIXME: Look at how this is done with elementals.
+    # FIXME: Look at how this is done with elements.
     def __add__(self, other):
         """
         Allows for this type of operations:

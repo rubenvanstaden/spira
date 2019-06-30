@@ -1,17 +1,17 @@
-from spira.core.parameters.initializer import FieldInitializer
-from spira.core.parameters.variables import StringField
+from spira.core.parameters.initializer import ParameterInitializer
+from spira.core.parameters.variables import StringParameter
 from spira.log import SPIRA_LOG as LOG
 
 
 __all__ = ['Filter', 'ToggledCompoundFilter']
 
 
-class Filter(FieldInitializer):
+class Filter(ParameterInitializer):
     """
 
     """
 
-    name = StringField(allow_none=True)
+    name = StringParameter(allow_none=True)
 
     def __call__(self, item):
         if isinstance(item, list):

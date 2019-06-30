@@ -46,47 +46,43 @@ pip install -e .
 
 ## Documentation
 
-No documentation is currently available since the framework is still in Beta.
-For examples please contact Ruben van Staden <rubenvanstaden@gmail.com> or C.J. Fourie <coenradf@gmail.com>.
-
 <!-- The complete framework [documentation](https://spira.readthedocs.io/en/latest/overview.html) explains the basics of the RDD and PCell API. Note that the DRC and LVS modules are still being developed.
 Examples of using the PCell implementation is given in [examples](https://github.com/rubenvanstaden/spira/tree/master/demo). -->
+For more examples please contact Ruben van Staden <rubenvanstaden@gmail.com>.
 
 
 ## Future Changes
-* Upgrade `Midpoint` class to Coord.
-* Create `PortList` class for special port filtering functionality.
-* Add basic DRC tests in RDD.
-* Fix auto-docs implementation.
-* Add Display class to RDD.
-* Update BoxShape to include rounded corners.
-* Implement polygon stretching.
-* Implement polygon slicing.
-* Fix issue with writing to a GDSII file.
-* Update LVS to solve multi-level circuits.
-* Add sref-to-port alignment.
-* Implement caching parameters.
-* Add auto scaling to PCell values (once caching is implemented).
-
+* Update polygon to include rounded corners.
 
 ## History of changes
 
-### Version 0.1.0 (XXX, 2019)
-* Changed the default coordinate system to improve port transformations.
-* Updates shapes and polygons to only include single polygons. Multiple 
-polygons are now moved to the PolygonGroup class.
-* Updated ports to extend from the vector class.
-* Added a custom LayerList class that compares already added layers.
+### Version 0.1.0 (July 1, 2019)
+* Introduces *derived layers* to allow for layer boolean operations.
+* Introduces *process* and *purpose* parameters.
+* Updated the edge generation algorithms to include both an outside and inside edge.
+* Updated the routing algorithms to use new ``gdspy`` features.
+* Added stretching operations.
+* Extended the RDD to include *display resources*.
+* Fix issues with writing to a GDSII file.
+* Added snap to grid functionality.
+* Implemented parameters caching.
+* Added sref-to-port alignment.
+* Upgraded `Midpoint` class to Coord.
+* Added `PortList` class for special port filtering functionality.
+* Updated ``spira.Port`` to have a ``port_type`` parameter, rather than having multiple port classes.
+* Renamed ``elemental`` to ``elements``, since ``spira.Cell`` does not inherit from ``gdspy.Cell`` anymore.
 * Created layer mappers.
-
-* Updated mixins to a single MixinBowl meta-configuration.
+* Changed the default coordinate system to improve port transformations.
+* Updates shapes and polygons to only include single polygons. Multiple polygons are now moved to the ``PolygonGroup`` class.
+* Updated ports to extend from the vector class.
+* Added a custom ``LayerList`` class that compares already added layers.
+* Updated mixins to a single ``MixinBowl`` meta-configuration.
 * Updated the datatype parameter of ports that represents primitive connects.
-* Updated parameter field to accept an extra restriction argument.
-* Added NumberField which supports 'int' and 'float' parameters.
-* Added ComplexField which supports 'int', 'float' and 'complex' parameters.
-* Implement locked parameters.
+* Updated parameters to accept an extra restriction argument.
+* Added ``NumberParameter`` which supports 'int' and 'float' parameters.
+* Added ``ComplexParameter`` which supports 'int', 'float' and 'complex' parameters.
 * Added automatic docstring generation.
-* Fix type-checking implementation. Updated parameter restrictions.
+* Fix type-checking implementation and updated parameter restrictions.
 
 ### Version 0.0.3 (March 12, 2019)
 * Added Dummy ports for crossing nodes in netlist.

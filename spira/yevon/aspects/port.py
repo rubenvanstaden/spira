@@ -1,9 +1,9 @@
 from spira.yevon.aspects.base import __Aspects__
-from spira.yevon.geometry.ports.port_list import PortListField
+from spira.yevon.geometry.ports.port_list import PortListParameter
 from spira.core.transformable import Transformable
-from spira.yevon.gdsii.elem_list import ElementalListField
-from spira.core.parameters.descriptor import DataField
-from spira.yevon.process.gdsii_layer import LayerField
+from spira.yevon.gdsii.elem_list import ElementListParameter
+from spira.core.parameters.descriptor import Parameter
+from spira.yevon.process.gdsii_layer import LayerParameter
 from spira.core.parameters.variables import *
 from spira.yevon import constants
 from copy import deepcopy
@@ -19,9 +19,9 @@ RDD = get_rule_deck()
 class PortProperty(__Aspects__):
     """ Port properties that connects to layout structures. """
 
-    disable_edge_ports = BoolField(default=False, doc='Disable the viewing of polygon edge ports.')
+    disable_edge_ports = BoolParameter(default=False, doc='Disable the viewing of polygon edge ports.')
 
-    ports = PortListField(fdef_name='__create_ports__', doc='List of ports to be added to the cell instance.')
+    ports = PortListParameter(fdef_name='__create_ports__', doc='List of ports to be added to the cell instance.')
 
     def __create_ports__(self, ports):
         return self.create_ports(ports)
@@ -33,7 +33,7 @@ class PortProperty(__Aspects__):
 class CellPortProperty(PortProperty):
     def __create_ports__(self, ports):
         from spira.yevon.gdsii.polygon import Polygon
-        for e in self.elementals:
+        for e in self.elements:
             if isinstance(e, Polygon):
                 for p in e.ports:
                     ports += p
@@ -65,7 +65,7 @@ class SRefPortProperty(TransformablePortProperty):
 # class PolygonPortProperty(TransformablePortProperty):
 class PolygonPortProperty(PortProperty):
 
-    edge_ports = ElementalListField()
+    edge_ports = ElementListParameter()
 
     def create_edge_ports(self, edges):
         T = self.transformation

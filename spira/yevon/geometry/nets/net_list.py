@@ -2,8 +2,8 @@ import networkx as nx
 
 from spira.core.typed_list import TypedList
 from spira.yevon.geometry.nets.net import __Net__, Net
-from spira.core.parameters.variables import FloatField
-from spira.core.parameters.descriptor import DataFieldDescriptor
+from spira.core.parameters.variables import FloatParameter
+from spira.core.parameters.descriptor import ParameterDescriptor
 from spira.core.parameters.restrictions import RestrictType
 
 
@@ -80,7 +80,7 @@ class NetList(TypedList):
         return net
 
 
-class NetListField(DataFieldDescriptor):
+class NetListParameter(ParameterDescriptor):
     __type__ = NetList
 
     def __init__(self, default=[], **kwargs):

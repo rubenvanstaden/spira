@@ -8,13 +8,13 @@ from spira.yevon.gdsii import *
 from spira.core.parameters.variables import *
 from spira.core.mixin import MixinBowl
 from spira.core.outputs.base import Outputs
-from spira.core.parameters.initializer import FieldInitializer
+from spira.core.parameters.initializer import ParameterInitializer
 
 
-class OutputGdsii(FieldInitializer):
-    """ Collects the transformed elementals to be send to Gdspy. """
+class OutputGdsii(ParameterInitializer):
+    """ Collects the transformed elements to be send to Gdspy. """
 
-    disabled_ports = DictField(default={}, doc='Disabled port categories for viewing.')
+    disabled_ports = DictParameter(default={}, doc='Disabled port categories for viewing.')
 
     def __init__(self, cell, **kwargs):
 
@@ -68,13 +68,13 @@ class OutputGdsii(FieldInitializer):
             if self.disabled_ports['cells'] is True:
                 for p in c.ports:
                     L = PortLayout(port=p)
-                    for e in L.elementals:
+                    for e in L.elements:
                         if isinstance(e, Polygon):
                             self.collect_polygons(e, cp)
                         elif isinstance(e, Label):
                             self.collect_labels(e, cl)
 
-            for e in c.elementals:
+            for e in c.elements:
                 if isinstance(e, Polygon):
                     if e.enable_edges is True:
                         for p in e.ports:
@@ -85,7 +85,7 @@ class OutputGdsii(FieldInitializer):
 
                                 if self.disabled_ports['polygons'] is True:
                                     L = PortLayout(port=p, transformation=e.transformation)
-                                    for e in L.elementals:
+                                    for e in L.elements:
                                         if isinstance(e, Polygon):
                                             self.collect_polygons(e, cp)
                                         elif isinstance(e, Label):
@@ -103,7 +103,7 @@ class OutputGdsii(FieldInitializer):
         for c in cell.dependencies():
             cp, cl = {}, {}
             G = self.__collected_cells__[c]
-            for e in c.elementals:
+            for e in c.elements:
                 if isinstance(e, Polygon):
                     self.collect_polygons(e, cp)
                 elif isinstance(e, Label):
@@ -116,7 +116,7 @@ class OutputGdsii(FieldInitializer):
         for c in cell.dependencies():
             G = self.__collected_cells__[c]
             cs = {}
-            for e in c.elementals:
+            for e in c.elements:
                 if isinstance(e, SRef):
                     if e.id_string() in list(self.__collected_srefs__.keys()):
                         pass
@@ -156,7 +156,7 @@ class OutputGdsii(FieldInitializer):
         self.collect_srefs(item)
 
     def gdspy_gdsii_output(self, library):
-        """ Writes the SPiRA collected elementals to a gdspy library. """
+        """ Writes the SPiRA collected elements to a gdspy library. """
         for c, G in self.__collected_cells__.items():
             if c.name not in library.cell_dict.keys():
                 library.add(G)

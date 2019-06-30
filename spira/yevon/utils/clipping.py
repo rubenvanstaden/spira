@@ -4,7 +4,7 @@ import spira.all as spira
 
 from copy import deepcopy
 from spira.yevon import constants
-from spira.yevon.gdsii.elem_list import ElementalList
+from spira.yevon.gdsii.elem_list import ElementList
 from spira.yevon.process import get_rule_deck
 
 

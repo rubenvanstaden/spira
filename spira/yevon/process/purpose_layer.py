@@ -1,13 +1,13 @@
-from spira.core.parameters.variables import StringField, IntegerField
-from spira.core.parameters.initializer import FieldInitializer, MetaInitializer
-from spira.core.parameters.descriptor import RestrictedParameter, DataField
+from spira.core.parameters.variables import StringParameter, IntegerParameter
+from spira.core.parameters.initializer import ParameterInitializer, MetaInitializer
+from spira.core.parameters.descriptor import RestrictedParameter, Parameter
 from spira.core.parameters.restrictions import RestrictType
 
 
 DEFINED_PURPOSE_LAYERS = {}
 
 
-__all__ = ['PurposeLayer', 'PurposeLayerField']
+__all__ = ['PurposeLayer', 'PurposeLayerParameter']
 
 
 class MetaPurposeLayer(MetaInitializer):
@@ -34,7 +34,7 @@ class MetaPurposeLayer(MetaInitializer):
             return L
 
 
-class PurposeLayer(FieldInitializer, metaclass=MetaPurposeLayer):
+class PurposeLayer(ParameterInitializer, metaclass=MetaPurposeLayer):
     """
 
     Examples
@@ -42,9 +42,9 @@ class PurposeLayer(FieldInitializer, metaclass=MetaPurposeLayer):
     >>> pp_layer = PurposeLayer()
     """
 
-    doc = StringField()
-    name = StringField()
-    symbol = StringField()
+    doc = StringParameter()
+    name = StringParameter()
+    symbol = StringParameter()
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -97,6 +97,6 @@ class PurposeLayer(FieldInitializer, metaclass=MetaPurposeLayer):
         return (self.name, self.symbol, 'purpose_layer_key')
 
 
-def PurposeLayerField(local_name=None, restriction=None, **kwargs):
+def PurposeLayerParameter(local_name=None, restriction=None, **kwargs):
     R = RestrictType(PurposeLayer) & restriction
     return RestrictedParameter(local_name, restrictions=R, **kwargs)

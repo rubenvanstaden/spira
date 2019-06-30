@@ -71,7 +71,7 @@ def scale_polygon_down(polygons, value=None):
 
 def cut(ply, position, axis):
     import spira.all as spira
-    plys = spira.ElementalList()
+    plys = spira.ElementList()
     gp = ply.commit_to_gdspy()
     pl = gdspy.slice(objects=[gp], position=position, axis=axis)
     for p in pl:

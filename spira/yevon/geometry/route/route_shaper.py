@@ -7,12 +7,12 @@ from numpy.linalg import norm
 from numpy import sqrt, pi, cos, sin, log, exp, sinh, mod
 
 from spira.core.parameters.variables import *
-from spira.yevon.geometry.shapes import ShapeField
-# from spira.yevon.process.physical_layer import PhysicalLayerField
-from spira.yevon.process.gdsii_layer import LayerField
-from spira.yevon.geometry.coord import CoordField, Coord
-from spira.core.parameters.descriptor import DataField, FunctionField
-from spira.yevon.geometry.ports.port import PortField
+from spira.yevon.geometry.shapes import ShapeParameter
+# from spira.yevon.process.physical_layer import PhysicalLayerParameter
+from spira.yevon.process.gdsii_layer import LayerParameter
+from spira.yevon.geometry.coord import CoordParameter, Coord
+from spira.core.parameters.descriptor import Parameter, FunctionParameter
+from spira.yevon.geometry.ports.port import PortParameter
 from spira.yevon.process import get_rule_deck
 from spira.yevon import constants
 
@@ -26,14 +26,14 @@ __all__ = ['RouteArcShape', 'RouteSquareShape', 'RouteSimple', 'RoutePointShape'
 class __RouteSimple__(shapes.Shape):
     """ Interface class for shaping route patterns. """
 
-    m1 = DataField(fdef_name='create_midpoint1')
-    m2 = DataField(fdef_name='create_midpoint2')
+    m1 = Parameter(fdef_name='create_midpoint1')
+    m2 = Parameter(fdef_name='create_midpoint2')
 
-    w1 = DataField(fdef_name='create_width1')
-    w2 = DataField(fdef_name='create_width2')
+    w1 = Parameter(fdef_name='create_width1')
+    w2 = Parameter(fdef_name='create_width2')
 
-    o1 = DataField(fdef_name='create_orientation1')
-    o2 = DataField(fdef_name='create_orientation2')
+    o1 = Parameter(fdef_name='create_orientation1')
+    o2 = Parameter(fdef_name='create_orientation2')
 
     def create_midpoint1(self):
         pass
@@ -56,13 +56,13 @@ class __RouteSimple__(shapes.Shape):
 
 class RouteArcShape(__RouteSimple__):
 
-    radius = NumberField(default=5)
-    width = NumberField(default=1)
-    theta = NumberField(default=45)
-    start_angle = NumberField(default=0)
-    angle_resolution = NumberField(default=15)
-    angle1 = DataField(fdef_name='create_angle1')
-    angle2 = DataField(fdef_name='create_angle2')
+    radius = NumberParameter(default=5)
+    width = NumberParameter(default=1)
+    theta = NumberParameter(default=45)
+    start_angle = NumberParameter(default=0)
+    angle_resolution = NumberParameter(default=15)
+    angle1 = Parameter(fdef_name='create_angle1')
+    angle2 = Parameter(fdef_name='create_angle2')
     
     def create_midpoint1(self):
         x = np.cos(self.angle1)
@@ -119,10 +119,10 @@ class RouteArcShape(__RouteSimple__):
 
 class RouteSquareShape(__RouteSimple__):
 
-    gds_layer = LayerField(name='ArcLayer', number=91)
-    radius = NumberField(default=5)
-    width = NumberField(default=1)
-    size = CoordField(default=(3,3))
+    gds_layer = LayerParameter(name='ArcLayer', number=91)
+    radius = NumberParameter(default=5)
+    width = NumberParameter(default=1)
+    size = CoordParameter(default=(3,3))
 
     def create_midpoint1(self):
         return [-self.size[0], 0]
@@ -152,18 +152,18 @@ class RouteSquareShape(__RouteSimple__):
 
 class RouteSimple(__RouteSimple__):
 
-    port1 = PortField()
-    port2 = PortField()
+    port1 = PortParameter()
+    port2 = PortParameter()
 
-    num_path_pts = IntegerField(default=99)
+    num_path_pts = IntegerParameter(default=99)
 
-    path_type = StringField(default='sine')
-    width_type = StringField(default='straight')
-    width_input = NumberField(allow_none=True, default=None)
-    width_output = NumberField(allow_none=True, default=None)
+    path_type = StringParameter(default='sine')
+    width_type = StringParameter(default='straight')
+    width_input = NumberParameter(allow_none=True, default=None)
+    width_output = NumberParameter(allow_none=True, default=None)
 
-    x_dist = FloatField()
-    y_dist = FloatField()
+    x_dist = FloatParameter()
+    y_dist = FloatParameter()
 
     def create_midpoint1(self):
         return (0,0)
@@ -233,8 +233,8 @@ class RouteSimple(__RouteSimple__):
 
 class RoutePointShape(__RouteSimple__):
 
-    width = NumberField(default=100)
-    angles = DataField(fdef_name='create_angles')
+    width = NumberParameter(default=100)
+    angles = Parameter(fdef_name='create_angles')
 
     def get_path(self):
         try:
@@ -245,7 +245,7 @@ class RoutePointShape(__RouteSimple__):
     def set_path(self, value):
         self.__path__ = np.asarray(value)
 
-    path = FunctionField(get_path, set_path)
+    path = FunctionParameter(get_path, set_path)
 
     def create_midpoint1(self):
         return self.path[0]
@@ -286,14 +286,14 @@ class RoutePointShape(__RouteSimple__):
 
 class RouteGeneral(Cell):
 
-    layer = LayerField()
+    layer = LayerParameter()
 
-    route_shape = ShapeField(doc='Shape of the routing polygon.')
+    route_shape = ShapeParameter(doc='Shape of the routing polygon.')
 
-    port_input = DataField(fdef_name='create_port_input')
-    port_output = DataField(fdef_name='create_port_output')
+    port_input = Parameter(fdef_name='create_port_input')
+    port_output = Parameter(fdef_name='create_port_output')
 
-    gds_layer = DataField(fdef_name='create_gds_layer')
+    gds_layer = Parameter(fdef_name='create_gds_layer')
 
     def create_gds_layer(self):
         ll = spira.Layer(
@@ -321,7 +321,7 @@ class RouteGeneral(Cell):
         )
         return term
 
-    def create_elementals(self, elems):
+    def create_elements(self, elems):
         poly = spira.Polygon(
             shape=self.route_shape,
             layer=self.layer,

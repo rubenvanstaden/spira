@@ -5,7 +5,7 @@ RDD = spira.get_rule_deck()
 
 
 class Density(__DoubleLayerDesignRule__):
-    minimum = param.IntegerField()
+    minimum = param.IntegerParameter()
 
     # TODO: Detect holes in die polygon
 
@@ -20,14 +20,14 @@ class Density(__DoubleLayerDesignRule__):
 
     def apply(self, elems):
 
-        pos_elems = spira.ElementalList()
-        neg_elems = spira.ElementalList()
+        pos_elems = spira.ElementList()
+        neg_elems = spira.ElementList()
 
         for C in elems.dependencies():
             if C.layer.number == self.layer1.number:
-                pos_elems = C.elementals
+                pos_elems = C.elements
             elif C.layer.number == self.layer2.number:
-                neg_elems = C.elementals
+                neg_elems = C.elements
 
         fails = False
 

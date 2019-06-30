@@ -12,7 +12,7 @@ from spira.core.parameters.restrictions import RestrictTypeList
 from spira.yevon.geometry import shapes
 from spira.yevon import constants
 from spira.yevon.utils import clipping
-from spira.core.parameters.descriptor import FunctionField
+from spira.core.parameters.descriptor import FunctionParameter
 from spira.yevon.process import get_rule_deck
 
 
@@ -24,7 +24,7 @@ __all__ = ['Route', 'RouteStraight', 'RoutePath', 'Route90', 'RouteShape', 'Rout
 
 class RouteShape(shapes.Shape):
 
-    path = spira.DataField()
+    path = spira.Parameter()
 
     def create_points(self, points):
         if isinstance(self.path, gdspy.Path):
@@ -37,10 +37,10 @@ class RouteShape(shapes.Shape):
 class Route(spira.Polygon):
     """  """
 
-    p1 = spira.PortField()
-    p2 = spira.PortField()
+    p1 = spira.PortParameter()
+    p2 = spira.PortParameter()
 
-    port_labels = spira.ListField(
+    port_labels = spira.ListParameter(
         allow_none=True,
         restriction=RestrictTypeList(str),
         doc="labels of ports to be processes. Set to None to process all ports"
@@ -234,7 +234,7 @@ def Route180(port1, port2, layer, width=None, corners='miter', bend_radius=1):
 def RouteManhattan(ports, layer, width=None, corners='miter', bend_radius=1):
     from spira.yevon.utils import geometry
 
-    elems = spira.ElementalList()
+    elems = spira.ElementList()
 
     if isinstance(ports, list):
         list1 = [p for p in ports if isinstance(p, spira.DummyPort)]

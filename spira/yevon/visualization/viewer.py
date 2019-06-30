@@ -1,7 +1,7 @@
 import spira.all as spira
 from spira.yevon.geometry import shapes
 from spira.yevon.geometry.ports.port import ContactPort
-from spira.core.parameters.descriptor import DataField
+from spira.core.parameters.descriptor import Parameter
 from spira.yevon.process.physical_layer import PLayer
 from spira.yevon.process import get_rule_deck
 from spira.yevon.geometry.vector import transformation_from_vector
@@ -16,11 +16,11 @@ __all__ = ['PortLayout']
 class PortLayout(spira.Cell):
     """  """
 
-    port = spira.PortField()
+    port = spira.PortParameter()
 
-    edge = DataField(fdef_name='create_edge')
-    arrow = DataField(fdef_name='create_arrow')
-    label = DataField(fdef_name='create_label')
+    edge = Parameter(fdef_name='create_edge')
+    arrow = Parameter(fdef_name='create_arrow')
+    label = Parameter(fdef_name='create_label')
 
     def create_edge(self):
         dw = self.port.width
@@ -63,7 +63,7 @@ class PortLayout(spira.Cell):
             layer=layer
         )
 
-    def create_elementals(self, elems):
+    def create_elements(self, elems):
         elems += self.edge
         elems += self.label
         if not isinstance(self.port, ContactPort):

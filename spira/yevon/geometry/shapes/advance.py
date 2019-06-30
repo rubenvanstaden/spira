@@ -1,30 +1,30 @@
 import spira.all as spira
 import numpy as np
 from spira.core.parameters.variables import *
-from spira.yevon.geometry.coord import CoordField
-from spira.core.parameters.descriptor import DataField
+from spira.yevon.geometry.coord import CoordParameter
+from spira.core.parameters.descriptor import Parameter
 from spira.yevon.geometry.shapes.shape import *
 
 
 class YtronShape(Shape):
     """ Shape for generating a yTron device. """
 
-    rho = NumberField(default=0.2)
-    # arm_lengths = param.CoordField(default=(5, 3))
-    arm_lengths = CoordField(default=(5, 3))
-    source_length = NumberField(default=5)
-    # arm_widths = param.CoordField(default=(2, 2))
-    arm_widths = CoordField(default=(2, 2))
-    theta = NumberField(default=2.5)
-    theta_resolution = NumberField(default=10.0)
+    rho = NumberParameter(default=0.2)
+    # arm_lengths = param.CoordParameter(default=(5, 3))
+    arm_lengths = CoordParameter(default=(5, 3))
+    source_length = NumberParameter(default=5)
+    # arm_widths = param.CoordParameter(default=(2, 2))
+    arm_widths = CoordParameter(default=(2, 2))
+    theta = NumberParameter(default=2.5)
+    theta_resolution = NumberParameter(default=10.0)
 
-    xc = DataField(fdef_name='create_xc')
-    yc = DataField(fdef_name='create_yc')
-    arm_x_left = DataField(fdef_name='create_arm_x_left')
-    arm_y_left = DataField(fdef_name='create_arm_y_left')
-    arm_x_right = DataField(fdef_name='create_arm_x_right')
-    arm_y_right = DataField(fdef_name='create_arm_y_right')
-    rad_theta = DataField(fdef_name='create_rad_theta')
+    xc = Parameter(fdef_name='create_xc')
+    yc = Parameter(fdef_name='create_yc')
+    arm_x_left = Parameter(fdef_name='create_arm_x_left')
+    arm_y_left = Parameter(fdef_name='create_arm_y_left')
+    arm_x_right = Parameter(fdef_name='create_arm_x_right')
+    arm_y_right = Parameter(fdef_name='create_arm_y_right')
+    rad_theta = Parameter(fdef_name='create_rad_theta')
     
     def create_rad_theta(self):
         return self.theta * np.pi/180

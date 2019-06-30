@@ -7,8 +7,8 @@ from copy import copy, deepcopy
 from numpy.linalg import norm
 from spira.yevon import constants
 from spira.core.parameters.variables import *
-from spira.yevon.geometry.coord import CoordField
-from spira.core.parameters.descriptor import FunctionField
+from spira.yevon.geometry.coord import CoordParameter
+from spira.core.parameters.descriptor import FunctionParameter
 from spira.yevon.geometry.ports.base import __PhysicalPort__
 from spira.yevon.geometry.coord import Coord
 from spira.yevon.geometry.vector import *
@@ -19,17 +19,17 @@ from spira.yevon.process import get_rule_deck
 RDD = get_rule_deck()
 
 
-__all__ = ['Port', 'PortField', 'ContactPort', 'DummyPort']
+__all__ = ['Port', 'PortParameter', 'ContactPort', 'DummyPort']
 
 
 class Port(Vector, __PhysicalPort__):
     """  """
 
-    bbox = BoolField(default=False)
-    width = NumberField(default=2)
-    port_type = StringField(default='terminal')
+    bbox = BoolParameter(default=False)
+    width = NumberParameter(default=2)
+    port_type = StringParameter(default='terminal')
 
-    # length = NumberField(default=2)
+    # length = NumberParameter(default=2)
 
     # def get_length(self):
     #     if not hasattr(self, '__length__'):
@@ -51,7 +51,7 @@ class Port(Vector, __PhysicalPort__):
     def set_length(self, value):
         self.__length__ = value
 
-    length = FunctionField(get_length, set_length, doc='Set the width of the terminal edge.')
+    length = FunctionParameter(get_length, set_length, doc='Set the width of the terminal edge.')
 
     def get_alias(self):
         if not hasattr(self, '__alias__'):
@@ -61,7 +61,7 @@ class Port(Vector, __PhysicalPort__):
     def set_alias(self, value):
         self.__alias__ = value
 
-    alias = FunctionField(get_alias, set_alias, doc='Functions to generate an alias for cell name.')
+    alias = FunctionParameter(get_alias, set_alias, doc='Functions to generate an alias for cell name.')
 
     # def __init__(self, midpoint, orientation, **kwargs):
     def __init__(self, **kwargs):
@@ -193,12 +193,12 @@ class Port(Vector, __PhysicalPort__):
         return self
 
 
-from spira.yevon.process.purpose_layer import PurposeLayerField
+from spira.yevon.process.purpose_layer import PurposeLayerParameter
 class ContactPort(Port):
 
-    width = NumberField(default=0.4)
-    length = NumberField(default=0.4)
-    purpose = PurposeLayerField(default=RDD.PURPOSE.PORT.CONTACT)
+    width = NumberParameter(default=0.4)
+    length = NumberParameter(default=0.4)
+    purpose = PurposeLayerParameter(default=RDD.PURPOSE.PORT.CONTACT)
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -213,9 +213,9 @@ class ContactPort(Port):
 
 class BranchPort(Port):
 
-    width = NumberField(default=0.4)
-    length = NumberField(default=0.4)
-    purpose = PurposeLayerField(default=RDD.PURPOSE.PORT.BRANCH)
+    width = NumberParameter(default=0.4)
+    length = NumberParameter(default=0.4)
+    purpose = PurposeLayerParameter(default=RDD.PURPOSE.PORT.BRANCH)
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -227,9 +227,9 @@ class BranchPort(Port):
 
 class RoutePort(Port):
 
-    width = NumberField(default=0.4)
-    length = NumberField(default=0.4)
-    purpose = PurposeLayerField(default=RDD.PURPOSE.PORT.BRANCH)
+    width = NumberParameter(default=0.4)
+    length = NumberParameter(default=0.4)
+    purpose = PurposeLayerParameter(default=RDD.PURPOSE.PORT.BRANCH)
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -241,9 +241,9 @@ class RoutePort(Port):
 
 class DummyPort(Port):
 
-    width = NumberField(default=0.4)
-    length = NumberField(default=0.4)
-    purpose = PurposeLayerField(default=RDD.PURPOSE.DUMMY)
+    width = NumberParameter(default=0.4)
+    length = NumberParameter(default=0.4)
+    purpose = PurposeLayerParameter(default=RDD.PURPOSE.DUMMY)
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -253,7 +253,7 @@ class DummyPort(Port):
         return class_string.format(self.name, self.alias, self.locked, self.midpoint, self.orientation, self.width)
 
 
-def PortField(local_name=None, restriction=None, **kwargs):
+def PortParameter(local_name=None, restriction=None, **kwargs):
     R = RestrictType(Port) & restriction
     return RestrictedParameter(local_name, restrictions=R, **kwargs)
 

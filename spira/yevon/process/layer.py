@@ -31,10 +31,10 @@
 #             return layer
 
 
-# class __Layer__(FieldInitializer, metaclass=MetaLayer):
+# class __Layer__(ParameterInitializer, metaclass=MetaLayer):
 #     """  """
 
-#     doc = StringField()
+#     doc = StringParameter()
 
 #     def __and__(self, other):
 #         if isinstance(other, __Layer__):
@@ -155,7 +155,7 @@
 
 
 
-# __all__ = ['LayerList', 'LayerListField']
+# __all__ = ['LayerList', 'LayerListParameter']
 
 
 # class LayerList(TypedList):
@@ -284,7 +284,7 @@
 #         del self._list[:]
 
 
-# class LayerListField(DataFieldDescriptor):
+# class LayerListParameter(ParameterDescriptor):
 
 #     __type__ = LayerList
 

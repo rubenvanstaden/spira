@@ -5,12 +5,12 @@ import numpy as np
 from copy import copy, deepcopy
 
 from spira.core.mixin import MetaMixinBowl, MixinBowl
-from spira.core.parameters.descriptor import BaseField
-from spira.core.parameters.descriptor import DataField
+from spira.core.parameters.descriptor import BaseParameter
+from spira.core.parameters.descriptor import Parameter
 from spira.core.parameters.descriptor import EXTERNAL_VALUE, CACHED_VALUE
 
 
-__all__ = ['FieldInitializer']
+__all__ = ['ParameterInitializer']
 
 
 SUPPRESSED = (None,)
@@ -201,7 +201,7 @@ class MetaInitializer(MetaBase):
 
 # class __ParameterInitializer__(MixinBowl, metaclass=MetaInitializer):
 class __ParameterInitializer__(metaclass=MetaInitializer):
-    """ This is the FieldConstructor """
+    """ This is the ParameterConstructor """
 
     def __init__(self, **kwargs):
         self.flag_busy_initializing = True
@@ -232,7 +232,7 @@ class __ParameterInitializer__(metaclass=MetaInitializer):
         prop = []
         for attr_name in dir(cls):
             attr = getattr(cls, attr_name)
-            if isinstance(attr, BaseField):
+            if isinstance(attr, BaseParameter):
                 prop.append([attr_name, attr])
         return prop
 
@@ -250,7 +250,7 @@ class __ParameterInitializer__(metaclass=MetaInitializer):
         ex_fields = []
         for i in self.__unlocked_field_params__():
             field = getattr(self.__class__, i)
-            if isinstance(field, DataField):
+            if isinstance(field, Parameter):
                 if field.__parameter_was_stored__(self):
                     if field.__get_parameter_status__(self) == EXTERNAL_VALUE:
                         ex_fields.append(i)
@@ -283,7 +283,7 @@ class __ParameterInitializer__(metaclass=MetaInitializer):
         return self.__class__(**kwargs)
 
 
-class FieldInitializer(__ParameterInitializer__):
+class ParameterInitializer(__ParameterInitializer__):
     """ Set the keyword arguments of the class and
     bind geometric property operations to the
     object for API usage. """

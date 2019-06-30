@@ -2,118 +2,118 @@
 
 # from .variables import *
 
-# from spira.core.parameters.descriptor import DataField
-# from spira.core.parameters.descriptor import FunctionField
-# from spira.core.parameters.descriptor import DataFieldDescriptor
+# from spira.core.parameters.descriptor import Parameter
+# from spira.core.parameters.descriptor import FunctionParameter
+# from spira.core.parameters.descriptor import ParameterDescriptor
 # from spira.core.parameters.restrictions import RestrictType
 
 
-# # def CoordField(**kwargs):
+# # def CoordParameter(**kwargs):
 # #     from spira.yevon.geometry.coord import Coord
 # #     if 'default' not in kwargs:
 # #         kwargs['default'] = Coord(0,0)
 # #     R = RestrictType(Coord)
-# #     return DataFieldDescriptor(restrictions=R, **kwargs)
+# #     return ParameterDescriptor(restrictions=R, **kwargs)
     
 
-# # def TransformationField(name='noname', number=0, datatype=0, **kwargs):
+# # def TransformationParameter(name='noname', number=0, datatype=0, **kwargs):
 # #     from spira.core.transformation import Transform
 # #     # if 'default' not in kwargs:
 # #     #     kwargs['default'] = Layer(name=name, number=number, datatype=datatype, **kwargs)
 # #     R = RestrictType(Transform)
-# #     return DataFieldDescriptor(restrictions=R, **kwargs)
+# #     return ParameterDescriptor(restrictions=R, **kwargs)
 
 
-# def LayerField(name='noname', number=0, datatype=0, **kwargs):
+# def LayerParameter(name='noname', number=0, datatype=0, **kwargs):
 #     from spira.yevon.layer import Layer
 #     if 'default' not in kwargs:
 #         kwargs['default'] = Layer(name=name, number=number, datatype=datatype, **kwargs)
 #     R = RestrictType(Layer)
-#     return DataFieldDescriptor(restrictions=R, **kwargs)
+#     return ParameterDescriptor(restrictions=R, **kwargs)
 
 
-# def ColorField(red=0, green=0, blue=0, **kwargs):
+# def ColorParameter(red=0, green=0, blue=0, **kwargs):
 #     from spira.yevon.visualization.color import Color
 #     if 'default' not in kwargs:
 #         kwargs['default'] = Color(red=0, green=0, blue=0, **kwargs)
 #     R = RestrictType(Color)
-#     return DataFieldDescriptor(restrictions=R, **kwargs)
+#     return ParameterDescriptor(restrictions=R, **kwargs)
 
 
-# def LabelField(position=[[], []], **kwargs):
+# def LabelParameter(position=[[], []], **kwargs):
 #     from spira.yevon.gdsii.label import Label
 #     if 'default' not in kwargs:
 #         kwargs['default'] = Label(position=position)
 #     R = RestrictType(Label)
-#     return DataFieldDescriptor(restrictions=R, **kwargs)
+#     return ParameterDescriptor(restrictions=R, **kwargs)
 
 
-# def PortField(midpoint=[0, 0], **kwargs):
+# def PortParameter(midpoint=[0, 0], **kwargs):
 #     # from spira.yevon.gdsii.port import Port
 #     from spira.yevon.geometry.ports.port import Port
 #     if 'default' not in kwargs:
 #         kwargs['default'] = Port(midpoint=midpoint)
 #     R = RestrictType(Port)
-#     return DataFieldDescriptor(restrictions=R, **kwargs)
+#     return ParameterDescriptor(restrictions=R, **kwargs)
 
 
-# def TermField(midpoint=[0, 0], **kwargs):
+# def TermParameter(midpoint=[0, 0], **kwargs):
 #     from spira.yevon.gdsii.term import Term
 #     if 'default' not in kwargs:
 #         kwargs['default'] = Port(midpoint=midpoint)
 #     R = RestrictType(Term)
-#     return DataFieldDescriptor(restrictions=R, **kwargs)
+#     return ParameterDescriptor(restrictions=R, **kwargs)
 
 
-# def ShapeField(points=[], doc='', **kwargs):
+# def ShapeParameter(points=[], doc='', **kwargs):
 #     from spira.yevon.geometry.shapes.shape import Shape
 #     if 'default' not in kwargs:
 #         kwargs['default'] = Shape(points, doc=doc)
 #     R = RestrictType(Shape)
-#     return DataFieldDescriptor(restrictions=R, **kwargs)
+#     return ParameterDescriptor(restrictions=R, **kwargs)
 
 
-# # def CellField(name=None, elementals=None, ports=None, library=None, **kwargs):
+# # def CellParameter(name=None, elements=None, ports=None, library=None, **kwargs):
 # #     from spira.yevon.gdsii.cell import Cell
 # #     if 'default' not in kwargs:
-# #         kwargs['default'] = Cell(name=name, elementals=elementals, library=library)
+# #         kwargs['default'] = Cell(name=name, elements=elements, library=library)
 # #     R = RestrictType(Cell)
-# #     return DataFieldDescriptor(restrictions=R, **kwargs)
+# #     return ParameterDescriptor(restrictions=R, **kwargs)
 
 
-# def PurposeLayerField(name='', datatype=0, symbol='', **kwargs):
+# def PurposeLayerParameter(name='', datatype=0, symbol='', **kwargs):
 #     from spira.yevon.process.layer import PurposeLayer
 #     if 'default' not in kwargs:
 #         kwargs['default'] = PurposeLayer(name=name, datatype=datatype, symbol='')
 #     R = RestrictType(PurposeLayer)
-#     return DataFieldDescriptor(restrictions=R, **kwargs)
+#     return ParameterDescriptor(restrictions=R, **kwargs)
 
 
-# def PhysicalLayerField(layer=None, purpose=None, **kwargs):
+# def PhysicalLayerParameter(layer=None, purpose=None, **kwargs):
 #     from spira.yevon.process.layer import PhysicalLayer
 #     if 'default' not in kwargs:
 #         kwargs['default'] = PhysicalLayer(layer=layer, purpose=purpose)
 #     R = RestrictType(PhysicalLayer)
-#     return DataFieldDescriptor(restrictions=R, **kwargs)
+#     return ParameterDescriptor(restrictions=R, **kwargs)
 
 
-# def PolygonField(shape=[[], []], **kwargs):
+# def PolygonParameter(shape=[[], []], **kwargs):
 #     from spira.yevon.gdsii.polygon import Polygon
 #     if 'default' not in kwargs:
 #         kwargs['default'] = Polygon(shape=shape)
 #     R = RestrictType(Polygon)
-#     return DataFieldDescriptor(restrictions=R, **kwargs)
+#     return ParameterDescriptor(restrictions=R, **kwargs)
     
 
-# def DesignRuleField(shape=[[], []], **kwargs):
+# def DesignRuleParameter(shape=[[], []], **kwargs):
 #     from spira.lrc.rules import __DesignRule__
 #     R = RestrictType(__DesignRule__)
-#     return DataFieldDescriptor(restrictions=R, **kwargs)
+#     return ParameterDescriptor(restrictions=R, **kwargs)
 
 
-# class ElementalListField(DataFieldDescriptor):
-#     from spira.yevon.gdsii.elem_list import ElementalList
-#     __type__ = ElementalList
+# class ElementListParameter(ParameterDescriptor):
+#     from spira.yevon.gdsii.elem_list import ElementList
+#     __type__ = ElementList
 
 #     def __init__(self, default=[], **kwargs):
 #         kwargs['default'] = self.__type__(default)
@@ -135,7 +135,7 @@
 #         return value
 
 
-# # class MidPointField(DataFieldDescriptor):
+# # class MidPointParameter(ParameterDescriptor):
 # #     from spira.yevon.geometry.coord import Coord
 # #     __type__ = Coord
 
@@ -163,7 +163,7 @@
 # #         obj.__store__[self.__name__] = [value.x, value.y]
 
 
-# class PointArrayField(DataFieldDescriptor):
+# class PointArrayParameter(ParameterDescriptor):
 #     import numpy as np
 #     __type__ = np.array([])
 
@@ -215,7 +215,7 @@
 #     #     return deepcopy(obj)
     
 
-# # class PortListField(DataFieldDescriptor):
+# # class PortListParameter(ParameterDescriptor):
 # #     from spira.yevon.geometry.ports.port_list import PortList
 # #     __type__ = PortList
 

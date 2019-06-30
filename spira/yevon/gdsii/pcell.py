@@ -1,6 +1,6 @@
 from spira.yevon.gdsii.cell import Cell
 from spira.yevon.utils import netlist
-from spira.yevon.gdsii.elem_list import ElementalListField
+from spira.yevon.gdsii.elem_list import ElementListParameter
 
 from spira.core.parameters.variables import *
 from spira.yevon.process import get_rule_deck
@@ -15,31 +15,31 @@ __all__ = ['PCell', 'Device', 'Circuit']
 class PCell(Cell):
     """  """
 
-    pcell = BoolField(default=True)
-    routes = ElementalListField(doc='List of `Route` elementals connected to the cell.')
-    structures = ElementalListField(doc='List of cell structures that coalesces the top-level cell.')
+    pcell = BoolParameter(default=True)
+    routes = ElementListParameter(doc='List of `Route` elements connected to the cell.')
+    structures = ElementListParameter(doc='List of cell structures that coalesces the top-level cell.')
 
 
 class Device(PCell):
     """  """
 
-    # lcar = NumberField(default=RDD.PCELLS.LCAR_DEVICE)
-    # lcar = NumberField(default=0.5)
-    lcar = NumberField(default=10)
-    # lcar = NumberField(default=100)
+    # lcar = NumberParameter(default=RDD.PCELLS.LCAR_DEVICE)
+    # lcar = NumberParameter(default=0.5)
+    lcar = NumberParameter(default=10)
+    # lcar = NumberParameter(default=100)
 
     def __init__(self, pcell=True, **kwargs):
         super().__init__(**kwargs)
         self.pcell = pcell
 
     def __repr__(self):
-        class_string = "[SPiRA: Device(\'{}\')] (elementals {}, ports {})"
-        return class_string.format(self.name, self.elementals.__len__(), self.ports.__len__())
+        class_string = "[SPiRA: Device(\'{}\')] (elements {}, ports {})"
+        return class_string.format(self.name, self.elements.__len__(), self.ports.__len__())
 
     def __str__(self):
         return self.__repr__()
 
-    def __create_elementals__(self, elems):
+    def __create_elements__(self, elems):
 
         F = RDD.PCELLS.FILTERS
         # F['boolean'] = False
@@ -47,13 +47,13 @@ class Device(PCell):
         F['via_contact'] = False
         # F['metal_connect'] = False
 
-        elems = self.create_elementals(elems)
+        elems = self.create_elements(elems)
         elems += self.structures
         elems += self.routes
 
         if self.pcell is True:
-            D = Cell(elementals=elems.flatcopy())
-            elems = F(D).elementals
+            D = Cell(elements=elems.flatcopy())
+            elems = F(D).elements
 
         return elems
 
@@ -73,21 +73,21 @@ class Device(PCell):
 class Circuit(PCell):
     """  """
 
-    corners = StringField(default='miter', doc='Define the type of path joins.')
-    bend_radius = NumberField(allow_none=True, default=None, doc='Bend radius of path joins.')
+    corners = StringParameter(default='miter', doc='Define the type of path joins.')
+    bend_radius = NumberParameter(allow_none=True, default=None, doc='Bend radius of path joins.')
 
-    lcar = NumberField(default=RDD.PCELLS.LCAR_CIRCUIT)
-    # lcar = NumberField(default=10)
-    # lcar = NumberField(default=1)
+    lcar = NumberParameter(default=RDD.PCELLS.LCAR_CIRCUIT)
+    # lcar = NumberParameter(default=10)
+    # lcar = NumberParameter(default=1)
 
     def __repr__(self):
-        class_string = "[SPiRA: Circuit(\'{}\')] (elementals {}, ports {})"
-        return class_string.format(self.name, self.elementals.__len__(), self.ports.__len__())
+        class_string = "[SPiRA: Circuit(\'{}\')] (elements {}, ports {})"
+        return class_string.format(self.name, self.elements.__len__(), self.ports.__len__())
 
     def __str__(self):
         return self.__repr__()
 
-    def __create_elementals__(self, elems):
+    def __create_elements__(self, elems):
 
         F = RDD.PCELLS.FILTERS
         # F['boolean'] = False
@@ -95,13 +95,13 @@ class Circuit(PCell):
         F['via_contact'] = False
         # F['metal_connect'] = False
 
-        elems = self.create_elementals(elems)
+        elems = self.create_elements(elems)
         elems += self.structures
         elems += self.routes
 
         if self.pcell is True:
-            D = Cell(elementals=elems).expand_flatcopy(exclude_devices=True)
-            elems = F(D).elementals
+            D = Cell(elements=elems).expand_flatcopy(exclude_devices=True)
+            elems = F(D).elements
 
         return elems
 

@@ -6,14 +6,14 @@ from copy import deepcopy
 from spira.core.transforms import stretching
 from spira.yevon.geometry import bbox_info
 from spira.yevon.utils import clipping
-from spira.yevon.gdsii.base import __LayerElemental__
-from spira.yevon.geometry.coord import CoordField, Coord
-from spira.core.parameters.descriptor import DataFieldDescriptor, FunctionField, DataField
+from spira.yevon.gdsii.base import __LayerElement__
+from spira.yevon.geometry.coord import CoordParameter, Coord
+from spira.core.parameters.descriptor import ParameterDescriptor, FunctionParameter, Parameter
 from spira.yevon.geometry.ports.base import __Port__
 from spira.core.parameters.variables import *
 from spira.core.transforms.stretching import *
 from spira.yevon.geometry import shapes
-from spira.yevon.geometry.shapes import ShapeField
+from spira.yevon.geometry.shapes import ShapeParameter
 from spira.yevon.process.gdsii_layer import Layer
 from spira.yevon.process import get_rule_deck
 
@@ -33,10 +33,10 @@ __all__ = [
 ]
 
 
-class __Polygon__(__LayerElemental__):
+class __Polygon__(__LayerElement__):
 
-    shape = ShapeField()
-    enable_edges = BoolField(default=True)
+    shape = ShapeParameter()
+    enable_edges = BoolParameter(default=True)
 
     def __hash__(self):
         return hash(self.__repr__())
@@ -77,12 +77,12 @@ class __Polygon__(__LayerElemental__):
 
     def stretch_port(self, port, destination):
         """
-        The elemental by moving the subject port, without 
-        distorting the entire elemental. Note: The opposite 
+        The element by moving the subject port, without 
+        distorting the entire element. Note: The opposite 
         port position is used as the stretching center.
         """
         opposite_port = bbox_info.get_opposite_boundary_port(self, port)
-        T = stretching.stretch_elemental_by_port(self, opposite_port, port, destination)
+        T = stretching.stretch_element_by_port(self, opposite_port, port, destination)
         T.apply(self)
         return self
 
@@ -118,7 +118,7 @@ class __Polygon__(__LayerElemental__):
 
 class Polygon(__Polygon__):
     """
-    Elemental that connects shapes to the GDSII file format.
+    Element that connects shapes to the GDSII file format.
     Polygon are objects that represents the shapes in a layout.
 
     Examples
@@ -128,7 +128,7 @@ class Polygon(__Polygon__):
     >>> ply = spira.Polygon(shape=rect_shape, layer=layer)
     """
 
-    edges = DataField(fdef_name='create_edges')
+    edges = Parameter(fdef_name='create_edges')
 
     def get_alias(self):
         if not hasattr(self, '__alias__'):
@@ -139,7 +139,7 @@ class Polygon(__Polygon__):
         if value is not None:
             self.__alias__ = value
 
-    alias = FunctionField(get_alias, set_alias, doc='Functions to generate an alias for cell name.')
+    alias = FunctionParameter(get_alias, set_alias, doc='Functions to generate an alias for cell name.')
 
     _next_uid = 0
 

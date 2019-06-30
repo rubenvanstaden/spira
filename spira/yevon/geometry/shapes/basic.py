@@ -3,7 +3,7 @@ import gdspy
 import numpy as np
 
 from spira.yevon import constants
-from spira.yevon.geometry.coord import CoordField
+from spira.yevon.geometry.coord import CoordParameter
 from spira.yevon.geometry.shapes.shape import *
 from spira.core.parameters.variables import *
 from spira.yevon.utils import geometry as geom
@@ -13,8 +13,8 @@ from spira.core.transforms.reflection import shape_reflect
 class RectangleShape(Shape):
     """ Creates a rectangular shape. """
 
-    p1 = CoordField(default=(0,0), doc='Bottom left corner coordinate.')
-    p2 = CoordField(default=(2,2), doc='Top right corner coodinate.')
+    p1 = CoordParameter(default=(0,0), doc='Bottom left corner coordinate.')
+    p2 = CoordParameter(default=(2,2), doc='Top right corner coodinate.')
 
     def create_points(self, points):
         points = [[self.p1[0], self.p1[1]],
@@ -27,8 +27,8 @@ class RectangleShape(Shape):
 class BoxShape(Shape):
     """ Creates a box shape. """
 
-    width = NumberField(default=1, doc='Width of the box shape.')
-    height = NumberField(default=1, doc='Height of the box shape.')
+    width = NumberParameter(default=1, doc='Width of the box shape.')
+    height = NumberParameter(default=1, doc='Height of the box shape.')
 
     def create_points(self, points):
         cx = self.center[0]
@@ -45,10 +45,10 @@ class BoxShape(Shape):
 class CircleShape(Shape):
     """ Creates a circle shape. """
 
-    box_size = CoordField(default=(2.0, 2.0), doc='The width and height of the circle as a coordinate.')
-    start_angle = FloatField(default=0.0, doc='Starting angle of the circle shape.')
-    end_angle = FloatField(default=360.0, doc='Degree to which the circle must be completed.')
-    angle_step = IntegerField(default=3, doc='The smoothness of the circle.')
+    box_size = CoordParameter(default=(2.0, 2.0), doc='The width and height of the circle as a coordinate.')
+    start_angle = FloatParameter(default=0.0, doc='Starting angle of the circle shape.')
+    end_angle = FloatParameter(default=360.0, doc='Degree to which the circle must be completed.')
+    angle_step = IntegerParameter(default=3, doc='The smoothness of the circle.')
 
     def create_points(self, points):
         sa = self.start_angle * constants.DEG2RAD
@@ -87,8 +87,8 @@ class CircleShape(Shape):
 
 class ConvexShape(Shape):
 
-    radius = FloatField(default=1.0)
-    num_sides = IntegerField(default=6)
+    radius = FloatParameter(default=1.0)
+    num_sides = IntegerParameter(default=6)
 
     def create_points(self, pts):
         if self.radius == 0.0:
@@ -106,8 +106,8 @@ class ConvexShape(Shape):
 class CrossShape(Shape):
     """ Thickness sets the width of the arms. """
 
-    box_size = NumberField(default=20)
-    thickness = NumberField(default=5)
+    box_size = NumberParameter(default=20)
+    thickness = NumberParameter(default=5)
 
     def create_points(self, points):
         points += [(self.center[0]  - self.box_size / 2.0, self.center[1] - self.thickness / 2.0),
@@ -129,10 +129,10 @@ class CrossShape(Shape):
 class WedgeShape(Shape):
     """ wedge, or symmetric trapezium. specified by the center of baselines and the length of the baselines """
 
-    begin_coord = CoordField(default=(0,0))
-    end_coord = CoordField(default=(10,0))
-    begin_width = NumberField(default=3)
-    end_width = NumberField(default=1)
+    begin_coord = CoordParameter(default=(0,0))
+    end_coord = CoordParameter(default=(10,0))
+    begin_width = NumberParameter(default=3)
+    end_width = NumberParameter(default=1)
 
     def create_points(self, points):
         dist = geom.distance(self.end_coord, self.begin_coord)
@@ -148,10 +148,10 @@ class WedgeShape(Shape):
 class ParabolicShape(Shape):
     """ parabolic wedge (taper) """
 
-    begin_coord = CoordField(default=(0,0))
-    end_coord = CoordField(default=(0,0))
-    begin_width = NumberField(default=3)
-    end_width = NumberField(default=1)
+    begin_coord = CoordParameter(default=(0,0))
+    end_coord = CoordParameter(default=(0,0))
+    begin_width = NumberParameter(default=3)
+    end_width = NumberParameter(default=1)
 
     def create_points(self, pts):
         if (self.begin_width > self.end_width):
@@ -214,9 +214,9 @@ class ParabolicShape(Shape):
 
 class BasicTriangle(Shape):
 
-    a = FloatField(default=2)
-    b = FloatField(default=0.5)
-    c = FloatField(default=1)
+    a = FloatParameter(default=2)
+    b = FloatParameter(default=0.5)
+    c = FloatParameter(default=1)
 
     def create_points(self, points):
         p1 = [0, 0]
@@ -252,9 +252,9 @@ class TriangleShape(BasicTriangle):
 
 class ArrowShape(Shape):
 
-    width = FloatField(default=1)
-    length = FloatField(default=10)
-    head = FloatField(default=3)
+    width = FloatParameter(default=1)
+    length = FloatParameter(default=10)
+    head = FloatParameter(default=3)
 
     def create_points(self, points):
         w = self.width

@@ -3,24 +3,24 @@ from spira.core.parameters.restrictions import RestrictNothing
 from spira.core.parameters.processors import ParameterProcessor
 
 
-__all__ = ['DataFieldDescriptor', 'FunctionField', 'DataField']
+__all__ = ['ParameterDescriptor', 'FunctionParameter', 'Parameter']
 
 
 EXTERNAL_VALUE = 0
 CACHED_VALUE = 1
 
 
-class BaseField(object):
+class BaseParameter(object):
     """
-    Sets the values of the Field when initialized.
-    Binds a Field object with a class parameter.
+    Sets the values of the Parameter when initialized.
+    Binds a Parameter object with a class parameter.
 
     class Via(spira.Cell):
-        layer = param.LayerField()
+        layer = param.LayerParameter()
 
     >>> via = Via()
     >>> via.layer
-    <spira.yevon.gdsii.DataFieldDescriptor>
+    <spira.yevon.gdsii.ParameterDescriptor>
     >>> via.layer.default
     [SPiRA: Layer] (name '', number 0, datatype 0)
     """
@@ -43,7 +43,7 @@ class BaseField(object):
         return True
 
 
-class DataFieldDescriptor(BaseField):
+class ParameterDescriptor(BaseParameter):
     __keywords__ = ['default', 'fdef_name', 'restriction', 'locked', 'preprocess']
 
     def __init__(self, local_name=None, **kwargs):
@@ -108,15 +108,15 @@ class DataFieldDescriptor(BaseField):
         """
         Store the value of the object keyword argument
         in the __store__ variable of the instance. This
-        setter is calle from the FieldInitializer class.
+        setter is calle from the ParameterInitializer class.
         This is called when creating a class instance:
 
-        self -> The Field being set.
+        self -> The Parameter being set.
         obj -> Class to which value are set.
 
         -------------------------------------------------
         class Via(spira.Cell):
-            layer = param.LayerField()
+            layer = param.LayerParameter()
 
         via = Via(layer=50)
         -------------------------------------------------
@@ -203,7 +203,7 @@ class DataFieldDescriptor(BaseField):
         return value
 
 
-class FunctionField(BaseField):
+class FunctionParameter(BaseParameter):
     """ Property which calls a get and set method to set the variables.
     the get and set method are specified by name, so it supports override,
     but is slower than FunctionProperty. If set method is not specified,
@@ -220,7 +220,7 @@ class FunctionField(BaseField):
         else:
             self.fset = fset
             self.locked = False
-        BaseField.__init__(self, **kwargs)
+        BaseParameter.__init__(self, **kwargs)
 
     def __get__(self, obj, type=None):
         if obj is None:
@@ -234,7 +234,7 @@ class FunctionField(BaseField):
             raise ValueError('Cannot assign parameter.')
 
 
-class SetFunctionField(BaseField):
+class SetFunctionParameter(BaseParameter):
     """
     Parameter which calls a set method to set the variables,
     but it is stored in a known attribute, so a get method
@@ -308,14 +308,14 @@ def is_call_internal(obj, level=1):
     return (f["self"] is obj)
 
 
-class ConvertField(BaseField):
+class ConvertParameter(BaseParameter):
 
     def __init__(self, parent_class, parent_property_name, convert_method):
         self.convert_method = convert_method
         self.parent_class = parent_class
         self.parent_property_name = parent_property_name
         self.locked = True
-        BaseField.__init__(self)
+        BaseParameter.__init__(self)
 
     def __get__(self, obj, type=None):
         if obj is None:
@@ -348,10 +348,10 @@ class ConvertField(BaseField):
         self.parent_property = object.__getattribute__(self.parent_class, self.parent_property_name)
 
 
-class DataField(DataFieldDescriptor):
+class Parameter(ParameterDescriptor):
     pass
 
 
-class RestrictedParameter(DataFieldDescriptor):
+class RestrictedParameter(ParameterDescriptor):
     pass
 

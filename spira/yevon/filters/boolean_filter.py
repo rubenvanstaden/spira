@@ -1,8 +1,8 @@
 from spira.log import SPIRA_LOG as LOG
 from spira.yevon.filters.filter import Filter
-from spira.yevon.gdsii.elem_list import ElementalList
+from spira.yevon.gdsii.elem_list import ElementList
 from spira.yevon.geometry.ports.port_list import PortList
-# from spira.yevon.geometry.edges.edge_list import EdgeListField
+# from spira.yevon.geometry.edges.edge_list import EdgeListParameter
 
 
 __all__ = [
@@ -20,20 +20,20 @@ class ProcessBooleanFilter(Filter):
         from spira.yevon.gdsii.cell import Cell
 
         ports = PortList()
-        elems = ElementalList()
+        elems = ElementList()
 
-        for pg in item.process_elementals:
-            for e in pg.elementals:
+        for pg in item.process_elements:
+            for e in pg.elements:
                 elems += e
 
-        for e in item.elementals.sref:
+        for e in item.elements.sref:
             elems += e
-        for e in item.elementals.labels:
+        for e in item.elements.labels:
             elems += e
         for p in item.ports:
             ports += p
 
-        cell = Cell(elementals=elems, ports=ports)
+        cell = Cell(elements=elems, ports=ports)
         return cell
         # return [cell] # FIXME: I think I have to return a list?
 
@@ -49,9 +49,9 @@ class SimplifyFilter(Filter):
         from spira.yevon.gdsii.cell import Cell
 
         ports = PortList()
-        elems = ElementalList()
+        elems = ElementList()
 
-        for e in item.elementals.polygons:
+        for e in item.elements.polygons:
             e.shape = clipping.simplify_points(e.points)
             elems += e
 
@@ -61,22 +61,22 @@ class SimplifyFilter(Filter):
             # p = e.__class__(shape=points, layer=e.layer, transformation=e.transformation)
             # elems += e.__class__(shape=points, layer=e.layer, transformation=e.transformation)
 
-        for e in item.elementals.sref:
+        for e in item.elements.sref:
             elems += e
-        for e in item.elementals.labels:
+        for e in item.elements.labels:
             elems += e
         for p in item.ports:
             ports += p
 
-        cell = Cell(elementals=elems, ports=ports)
-        # cell = item.__class__(elementals=elems, ports=ports)
+        cell = Cell(elements=elems, ports=ports)
+        # cell = item.__class__(elements=elems, ports=ports)
         return cell
 
-        # elems = ElementalList()
-        # for e in item.elementals.polygons:
+        # elems = ElementList()
+        # for e in item.elements.polygons:
         #     points = clipping.simplify_points(e.points)
         #     elems += e.__class__(shape=points, layer=e.layer, transformation=e.transformation)
-        # return item.__class__(elementals=elems)
+        # return item.__class__(elements=elems)
 
     def __repr__(self):
         return "<SimplifyFilter: \'{}\'>".format(self.name)
@@ -92,22 +92,22 @@ class ViaConnectFilter(Filter):
         from shapely.geometry import Polygon as ShapelyPolygon
 
         ports = PortList()
-        elems = ElementalList()
+        elems = ElementList()
 
         v_model = virtual_connect(device=item)
-        for e in v_model.connected_elementals:
+        for e in v_model.connected_elements:
             elems += e
 
-        for e in item.elementals.sref:
+        for e in item.elements.sref:
             elems += e
-        for e in item.elementals.labels:
+        for e in item.elements.labels:
             elems += e
         for p in item.ports:
             ports += p
 
-        cell = Cell(elementals=elems, ports=ports)
+        cell = Cell(elements=elems, ports=ports)
         return cell
-        # return item.__class__(elementals=elems)
+        # return item.__class__(elements=elems)
         # return [cell]
 
     def __repr__(self):
@@ -126,10 +126,10 @@ class MetalConnectFilter(Filter):
         D = item.expand_flatcopy()
         v_model = virtual_connect(device=D)
 
-        for i, e1 in enumerate(D.elementals):
+        for i, e1 in enumerate(D.elements):
             points = []
             # print('E1: {}'.format(e1))
-            for e2 in D.elementals:
+            for e2 in D.elements:
                 shape1 = deepcopy(e1).shape.transform(e1.transformation)
                 shape2 = deepcopy(e2).shape.transform(e2.transformation)
                 if (shape1 != shape2) and (e1.layer == e2.layer):
@@ -144,7 +144,7 @@ class MetalConnectFilter(Filter):
             if len(points) > 0:
                 # print('[--] Overlapping shape points:')
                 # print(points)
-                D.elementals[i].shape = ShapeConnected(
+                D.elements[i].shape = ShapeConnected(
                     original_shape=e1.shape,
                     overlapping_shape=Shape(points),
                     edges=v_model.connected_edges

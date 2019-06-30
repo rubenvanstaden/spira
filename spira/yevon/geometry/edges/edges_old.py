@@ -3,11 +3,11 @@ import numpy as np
 from copy import deepcopy
 from spira.yevon.gdsii.group import Group
 from spira.core.transforms import *
-from spira.yevon.gdsii.elem_list import ElementalList
+from spira.yevon.gdsii.elem_list import ElementList
 from spira.yevon.gdsii.polygon import Box, Polygon
 from spira.yevon.geometry.coord import Coord
-from spira.yevon.gdsii.base import __LayerElemental__
-from spira.core.parameters.descriptor import DataField
+from spira.yevon.gdsii.base import __LayerElement__
+from spira.core.parameters.descriptor import Parameter
 from spira.core.parameters.variables import *
 from spira.yevon.process import get_rule_deck
 
@@ -35,7 +35,7 @@ def generate_polygon_edges(shape, layer):
     if layer.name == 'BBOX': bbox = True
     else: bbox = False
 
-    edges = ElementalList()
+    edges = ElementList()
     for i in range(0, n):
 
         name = '{}_e{}'.format(layer.name, i)
@@ -57,13 +57,13 @@ def generate_polygon_edges(shape, layer):
     return edges
 
 
-class __Edge__(Group, __LayerElemental__):
+class __Edge__(Group, __LayerElement__):
 
-    width = NumberField(default=1)
-    inward_extend = NumberField(default=1)
+    width = NumberParameter(default=1)
+    inward_extend = NumberParameter(default=1)
 
-    inside_edge_layer = DataField(fdef_name='create_inside_edge_layer')
-    inside = DataField(fdef_name='create_inside')
+    inside_edge_layer = Parameter(fdef_name='create_inside_edge_layer')
+    inside = Parameter(fdef_name='create_inside')
 
     def create_inside_edge_layer(self):
         layer = deepcopy(self.layer)
@@ -78,11 +78,11 @@ class __Edge__(Group, __LayerElemental__):
 
 class Edge(__Edge__):
 
-    pid = StringField(default='no_pid')
-    outward_extend = NumberField(default=1)
+    pid = StringParameter(default='no_pid')
+    outward_extend = NumberParameter(default=1)
 
-    # outside = DataField(fdef_name='create_outside')
-    # outside_edge_layer = DataField(fdef_name='create_outside_edge_layer')
+    # outside = Parameter(fdef_name='create_outside')
+    # outside_edge_layer = Parameter(fdef_name='create_outside_edge_layer')
 
     # def create_outside_edge_layer(self):
     #     layer = deepcopy(self.layer)
@@ -103,7 +103,7 @@ class Edge(__Edge__):
             return True
         return False
 
-    # def create_elementals(self, elems):
+    # def create_elements(self, elems):
     #     elems += self.inside
     #     elems += self.outside
     #     return elems
@@ -111,12 +111,12 @@ class Edge(__Edge__):
 
 class EdgeEuclidean(Edge):
 
-    radius = NumberField(default=1)
+    radius = NumberParameter(default=1)
 
     def __init__(self, **kwargs):
         pass
 
-    def create_elementals(self, elems):
+    def create_elements(self, elems):
 
         return elems
 
@@ -126,19 +126,19 @@ class EdgeSquare(Edge):
     def __init__(self, **kwargs):
         pass
 
-    def create_elementals(self, elems):
+    def create_elements(self, elems):
 
         return elems
 
 
 class EdgeSideExtend(Edge):
 
-    side_extend = NumberField(default=1)
+    side_extend = NumberParameter(default=1)
 
     def __init__(self, **kwargs):
         pass
 
-    def create_elementals(self, elems):
+    def create_elements(self, elems):
 
         return elems
 
