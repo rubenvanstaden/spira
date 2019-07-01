@@ -36,13 +36,18 @@ class CellPortProperty(PortProperty):
         for e in self.elements:
             if isinstance(e, Polygon):
                 for p in e.ports:
-                    ports += p
+                    # FIXME: Improve this.
+                    if p.locked is False:
+                        ports += p
         return self.create_ports(ports)
 
 
 class TransformablePortProperty(PortProperty, Transformable):
     def __create_ports__(self, ports):
+        print(self.create_ports(ports))
+        print(self.transformation)
         ports = self.create_ports(ports).transform_copy(self.transformation)
+        print(ports)
         # ports = self.create_ports(ports)
         return ports
 
@@ -62,8 +67,8 @@ class SRefPortProperty(TransformablePortProperty):
         return ports
 
 
-# class PolygonPortProperty(TransformablePortProperty):
-class PolygonPortProperty(PortProperty):
+class PolygonPortProperty(TransformablePortProperty):
+# class PolygonPortProperty(PortProperty):
 
     edge_ports = ElementListParameter()
 
@@ -78,6 +83,9 @@ class PolygonPortProperty(PortProperty):
         if layer.purpose.symbol == 'METAL':
             for edge in self.edge_ports:
                 ports += edge
+        # elif layer.purpose.symbol == 'ROUTE':
+        #     ports = self.create_ports
+            
         # ports.transform(-self.transformation)
         return ports
 

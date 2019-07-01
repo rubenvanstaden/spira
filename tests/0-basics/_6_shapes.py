@@ -4,7 +4,7 @@ from spira.yevon.geometry import shapes
 from spira.technologies.mit.process import RDD
 
 
-el = spira.ElementalList()
+el = spira.ElementList()
 p1 = spira.Rectangle(p1=(0, 0), p2=(4, 10), layer=RDD.PLAYER.M5.METAL)
 # p2 = spira.Rectangle(p1=(3, 4), p2=(8, 6), layer=RDD.PLAYER.M5.METAL)
 pts = [(3,4), (3,6), (8,6), (8,15), (10,15), (10,6), (14,6), (14,4)]
@@ -49,5 +49,5 @@ print('----------------------------------------')
 print(S.points)
 
 
-D = spira.Cell(name='Device', elementals=el)
+D = spira.Cell(name='Device', elements=el)
 D.gdsii_output()

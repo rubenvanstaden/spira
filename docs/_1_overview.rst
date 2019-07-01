@@ -1,6 +1,6 @@
-#########
-Framework
-#########
+########
+Overview
+########
 
 
 
@@ -44,7 +44,7 @@ description. Second, the GDSII related variables are defined.
 Process Data
 ============
 
-.. ---------- Define Processes ----------
+
 
 Define Processes
 ----------------
@@ -136,32 +136,28 @@ process **M5** and purpose metal overlaps the outside edges of a all
 process **M5** layers.
 
 
-.. ---------------------------------------------------------------
+.. ---------------------------------------------------------------------------------------------------
 
 
+**********
 Parameters
-----------
+**********
 
-When we’re designing PCells we need to model its parameters. An important characteristic
-of a parameter is that it often only accepts a select range of values. When the parameter
-corresponds to something physical the value often makes no sense when it’s zero or negative.
-To avoid that users create designs which have no meaning, we want to inhibit that the user
-assigns an invalid value to the parameter. This is exactly what we use properties for:
-restricting the range and type of values you can assign to a parameter
+Designing a generated layout requires modeling its parameters. To create an effective design
+environment it becomes paramount to place restrictions of received parameter values.
+SPiRA uses a meta-configuration to define object parameters, which enables the following features:
 
-In addition IPKISS’ properties help you as well with the following tasks:
+* Default values can be set to each parameter.
+* Documentation for each parameter can be added.
+* Parameters can be cached to ensure they aren't calculated multiple times.
 
-* providing defaults for your parameters
-* adding documentation for your parameters
-* implement caching to ensure that calculations don’t need to be run twice ( when not required )
+Introduction
+============
 
-Define Parameters
-~~~~~~~~~~~~~~~~~
-
-Parameters are derived from the ``Parameter`` class. The
+Parameters are derived from the ``spira.Parameter`` class. The
 ``ParameterInitializer`` is responsible for storing the parameters of an
 instance. To define parameters the class has to inherit from the ``ParameterInitializer``
-class. The following code creates a layer object with a number as a parameter.
+class. The following code creates a layer object with a number parameter.
 
 .. code-block:: python
 
@@ -173,7 +169,7 @@ class. The following code creates a layer object with a number as a parameter.
     >>> layer.number
     9
 
-At first glance this may not seem to add any value that default Python already adds.
+At first glance this may not seem to add any value that Python by default does not already adds.
 The same example can be generated using native Python:
 
 .. code-block:: python
@@ -182,10 +178,8 @@ The same example can be generated using native Python:
         def __init__(self, number=0):
             self.number = number
 
-The true value of the parameterized framework comes into play when adding
-parameter attributes, such as the **default** value, **restrictions**,
-**preprocess** and **doc**. With these attributes parameters can be
-type-checked and documented using customized values.
+The true value of the parameterized framework becomes clear when adding attributes to the parameter, such as the **default** value, **restrictions**, **preprocess** and **doc**.
+These attributes allow a parameter to be type-checked and documented.
 
 .. code-block:: python
 
@@ -201,27 +195,34 @@ a more powerful design framework:
 
 .. code-block:: python
 
+    # The default value of the parameter is 0.
     >>> layer = Layer()
     >>> layer.number
     0
+
+    # The parameter can be updated with an integer.
     >>> layer.number = 9
     >>> layer.number
     9
+
+    # The string can be preprocessed to an interger.
     >>> layer.number = '8'
     >>> layer.number
     8
+
+    # The string cannot be preprocessed and throws an error.
     >>> layer.number = 'Hi'
-    ValueError:
+    ValueError: invalid literal for int() with base 10: 'Hi'
 
 
 Default
-~~~~~~~
+=======
 
-When defining a parameter the default value can be explicitly set using
-the ``default`` attribute. This is a simple method of declaring your parameter.
-For more complex functionality the default function attribute, ``fdef_name``,
-can be used. This attribute defines the name of a class method that is used To
-derive the default value of the parameter. Advantages of this technique is:
+When defining a parameter the default value can be explicitly set using the ``default`` attribute.
+This is a simple method of declaring your parameter.
+For more complex functionality the default function attribute, ``fdef_name``, can be used.
+This attribute defines the name of a class method that will be used to derive the default value of the parameter.
+Advantages of this implementation is:
 
 * **Logic operations:** The default value can be derived from other defined parameters.
 * **Inheritance:** The default value can be overwritten using class inheritance.
@@ -235,29 +236,27 @@ derive the default value of the parameter. Advantages of this technique is:
         datatype = spira.Parameter(fdef_name='create_datatype')
 
         def create_datatype(self):
-            return 1
+            return 2 + 3
 
     >>> layer = Layer()
     >>> (layer.number, layer.datatype)
-    (0, 1)
+    (0, 5)
 
 
 Restrictions
-~~~~~~~~~~~~
+============
 
-**Restrictions** are Python objects that validates the received value of a parameter.
-In certain cases we want to restrict a parameter value to a certain type or range
-of values, for example:
+The validity of a parameter value is calculated by the *restriction* attribute.
+In certain cases we want to restrict a parameter value to a certain type or range of values, for example:
 
-* Validate that the value is of specific object.
-* Validate that the value falls between then minimum and maximum.
+* Validate that the value has a specific type, such as a via PCell.
+* Validate that the value falls between a specified minimum and maximum.
 
 .. code-block:: python
 
     import spira.all as spira
     class Layer(spira.ParameterInitializer):
-        number = spira.Parameter(default=0,
-                                 restrictions=spira.RestrictRange(2,5))
+        number = spira.Parameter(default=0, restrictions=spira.RestrictRange(2,5))
 
 The example above restricts the number parameter of the layer to be between 2 and 5:
 
@@ -267,38 +266,65 @@ The example above restricts the number parameter of the layer to be between 2 an
     >>> layer.number = 3
     3
     >>> layer.number = 1
-    ValueError:
+    ValueError: Invalid parameter assignment 'number' of cell 'Layer' with value '1', which is not compatible with 'Range Restriction: [2, 5)'.
 
 Preprocessors
-~~~~~~~~~~~~~
+=============
 
-**Preprocessors** converts a received value before assigning it to the parameter.
-Preprocessors are typically used to convert a value of invalid type to one of
-a valid type, such as converting a float to an integer.
+The reprocess attribute converts a received value before assigning it to the parameter.
+Preprocessors are typically used to convert a value of invalid type to one of a valid type, such as converting a float to an integer.
+
+.. code-block:: python
+
+    import spira.all as spira
+    class Layer(spira.ParameterInitializer):
+        number = spira.Parameter(default=0, preprocess=spira.ProcessorInt())
+
+    >>> layer = Layer()
+    >>> layer.number = 1
+    1
+    >>> layer.number = 2.1
+    2
+    >>> layer.number = 'Hi'
+    ValueError: invalid literal for int() with base 10: 'Hi'
+
+Documentation
+=============
+
+Documentation can be added to the parameter using the ``doc`` attribute.
+The created class can also be documented using triple qoutation marks.
+
+.. code-block:: python
+
+    import spira.all as spira
+    class Layer(spira.ParameterInitializer):
+        """ This is a layer class. """
+        number = spira.Parameter(default=0, doc='Parameter documentation.')
+
+    >>> layer = Layer()
+    >>> layer.number
+    0
+    >>> layer.__doc__
+    This is a layer class.
+    >>> layer.number.__doc__
+    Parameter documentation.
 
 Cache
-~~~~~
+=====
 
 SPiRA automatically caches parameters once they have been initialized.
-When using class methods to define default parameters using the ``fdef_name``
-attribute, the value is stored when called for the first time. Calling this
-value for the second time will not lead to a re-calculation, but rather the
-value will be retrieved from the cached dictionary.
-
-The cache is automatically cleared when **any** parameter in the class is
-updated, since other parameters might be dependent on the changed parameters.
+When using class methods to define default parameters using the ``fdef_name`` attribute, the value is stored when called for the first time.
+Calling this value for the second time will not lead to a re-calculation, but rather the value will be retrieved from the cached dictionary.
+The cache is automatically cleared when **any** parameter in the instance is updated, since other parameters might be dependent on the changed parameters.
 
 .. ---------------------------------------------------------------
 
+*******************
 Parameterized Cells
--------------------
+*******************
 
-The SPiRA definition of a Parameterized Cell (PCell) in general terms:
-
-    A PCell is a cell that defines how layout elementals must be generated.
-    When instantiated it constructs itself according to the defined parameters.
-
-GDSII layouts encapsulate elemental design in the visual domain. Parameterized cells encapsulates elementals in the programming domain, and utilizes this domain to map external data to elementals.
+GDSII layouts encapsulate element design in the visual domain.
+Parameterized cells encapsulates elements in the programming domain, and utilizes this domain to map external data to elements.
 This external data can be data from the PDK or values extracted from an already designed layout using simulation software, such as InductEx.
 The SPiRA framework uses a scripting framework approach to connect the visual domain with a programming domain.
 The implemented architecture of SPiRA mimics the physical layout patterns implicit in hand-designed layouts.
@@ -312,37 +338,40 @@ The SPiRA framework was built from the following concepts:
 
 1. **Defining Element Shapes** This step defines the geometrical shapes from which an element polygon is generated.
 The supported shapes are rectangles, triangles, circles, as well as regular and irregular polygons.
-Each of these shapes has a set of parameters that control the pattern dimensions, e.g. the parameterized rectangle has two parameters, width and length , that defines its length and width, respectively.
+Each of these shapes has a set of parameters that control the pattern dimensions, e.g. the parameterized rectangle has two parameters, ``width`` and ``length``, that defines its length and width, respectively.
 
 2. **Element Shape Transformations** This step describes the relation between the elements through a set of operations, that includes transformations of a shape in the x-y plane.
 Transforming an element involves: movement with a specific offset relative to its original location, rotation of a shape around its center with a specific angle,
 reflection of a shape around a idefined line, and aligning a shape to another shape with a specific offset and angle.
 
-3. **PDK Binding** The final step is binding data from the PDK to each created pattern. In SPiRA data from the PDK is parsed into the RDD.
-From this database the required process data can be linked to any specific pattern, such as the layer type of the defined rectangle, by defining
-parameters and placing design restrictions on them.
+3. **PDK Binding** The final step is binding data from the PDK to each created pattern. In SPiRA, process related data is defined in the RDD.
+From this database the required data can be linked to any specific pattern by defining parameters and their design restrictions.
 
 Shapes
-~~~~~~
+======
 
+A shape is a basic 2-dimentional geometric pattern that consists of a list of points.
+These points can be manipulated and transformed as required by the designer, before commiting it to a layout cell.
 
 .. code-block:: python
 
     class ShapeExample(spira.Cell):
 
-        def create_elementals(self, elems):
+        def create_elements(self, elems):
             pts = [[0, 0], [2, 2], [2, 6], [-6, 6], [-6, -6], [-4, -4], [-4, 4], [0, 4]]
             shape = spira.Shape(points=pts)
             elems += spira.Polygon(shape=shape, layer=spira.Layer(1))
             return elems
 
 
+
+
 Elements
-~~~~~~~~
+========
 
 In the aboth example the ``spira.Polygon`` class was used to connect the shape with GDSII-related data, such as a layer number.
-This is the purpose of elementals; to wrap geometry data with GDSII layout data.
-In SPiRA the following elementals are defined:
+This is the purpose of elements; to wrap geometry data with GDSII layout data.
+In SPiRA the following elements are defined:
 
 * **Polygon**: Connects a shape object with layout data (layer number, datatype).
 * **Label**: Generates text data in a GDSII layout.
@@ -351,15 +380,54 @@ In SPiRA the following elementals are defined:
 There are other special shapes that can be used in the pattern creation.
 These shapes are mainly a combination polygons and relations between polygons.
 These special shapes are referenced as if they represent a single shape and its outline is determined by its bounding box dimensions.
-The following elemental groups are defined in the SPiRA framework:
+The following element groups are defined in the SPiRA framework:
 
-* **Cells**: Is the most generic group that binds different parameterized elementals or clusters, while conserving the geometrical relations between these polygons or clusters.
-* **Group**: A set of elementals can be grouped in a logical container, called ``Group``.
-* **Ports**: A port is simply a polygon with a label on a dedicated process layer. Typically, port elementals are placed on conducting metal layers.
-* **Routes**: A route is defined as a cell that consists of a polygon elemental and a set of edge ports, that resembles a path-like structure.
+* **Cells**: Is the most generic group that binds different parameterized elements or clusters, while conserving the geometrical relations between these polygons or clusters.
+* **Group**: A set of elements can be grouped in a logical container, called ``Group``.
+* **Ports**: A port is simply a polygon with a label on a dedicated process layer. Typically, port elements are placed on conducting metal layers.
+* **Routes**: A route is defined as a cell that consists of a polygon element and a set of edge ports, that resembles a path-like structure.
+
+The SPiRA design environment for creating a PCEll is broken down into the following basic templated steps:
+
+.. code-block:: python
+
+    class PCell(spira.Cell):
+        """ My first parameterized cell. """
+
+        # Define parameters here.
+        number = spira.IntegerParameter(default=0, doc=’Parameter example number.’)
+
+        def create_elements(self, elems):
+            # Define elements here.
+            return elems
+
+        def create_ports(self, ports):
+            # Define ports here.
+            return ports
+
+The most basic SPiRA template to generate a PCell is shown above, and consists of three parts:
+
+1. Create a new cell by inheriting from ``spira.Cell``. This connects the class to the SPiRA framework when constructed.
+2. Define the PCell parameters as class attributes.
+3. Elements and ports are defined in the ``create_elements`` and ``create_ports`` class methods, which is automatically added to the cell instance.
+   The create methods are special SPiRA class methods that specify how the parameters are used to create the cell.
+
+.. code-block:: python
+
+    class ShapeExample(spira.Cell):
+
+        def create_elements(self, elems):
+            pts = [[0, 0], [2, 2], [2, 6], [-6, 6], [-6, -6], [-4, -4], [-4, 4], [0, 4]]
+            shape = spira.Shape(points=pts)
+            elems += spira.Polygon(shape=shape, layer=spira.Layer(1))
+            return elems
+
+The code above illustrates the creation of a polygon object, using the already defined shape.
+Once the polygon has been created it can be added to the cell instance using the ``+`` operator
+to increment the ``elems`` list.
 
 Group
-~~~~~
+=====
 
 Groups are used to apply an operation on a set of polygons, such a retrieving their combined bounding box.
 The following example illistrated the use of ``Group`` to generate a metal bounding box around a set of polygons:
@@ -368,7 +436,7 @@ The following example illistrated the use of ``Group`` to generate a metal bound
 
     class GroupExample(spira.Cell):
 
-        def create_elementals(self, elems):
+        def create_elements(self, elems):
 
             group = spira.Group()
             group += spira.Rectangle(p1=(0,0), p2=(10,10), layer=spira.Layer(1))
@@ -384,7 +452,7 @@ The following example illistrated the use of ``Group`` to generate a metal bound
             return elems
 
 Ports
-~~~~~
+=====
 
 Port objects are unique to the SPiRA framework and are mainly used for connection purposes.
 
@@ -392,7 +460,7 @@ Port objects are unique to the SPiRA framework and are mainly used for connectio
 
     class PortExample(spira.Cell):
 
-        def create_elementals(self, elems):
+        def create_elements(self, elems):
             elems += spira.Rectangle(p1=(0,0), p2=(20,5), layer=spira.Layer(1))
             return elems
 
@@ -402,59 +470,31 @@ Port objects are unique to the SPiRA framework and are mainly used for connectio
             return ports
 
 Routes
-~~~~~~
+======
 
-Routes are used to generate polygon paths between two port ports.
-SPiRA offers a variety of different routes that can be generated depending on the
-relative port positionSPiRA offers a variety of different routes that can be generated depending on the
-relative port positions and the user requirements.
+Most of the times in designing digital electronic circuit layouts it is required to define metal polygon connections between different *devices*.
+Defining the exact points connecting different devices can become a tedious task. **Routes** are polygon classes that automatically generates
+a polygon path between different devices. As previously explained, ports are used to define connection points to a cell instance.
+Therefore, routes can be defined as a **polygon** that connects to two **ports** through a path-dependent algorithm.
+SPiRA offers a variety of different route algorithms that can be generated depending on the relative port positions and the user requirements.
 
 .. code-block:: python
 
     class RouteExample(spira.Cell):
 
         def create_elements(self, elems):
-            elems += spira.RouteStraight()
-            return elems
-
-
-PCell creation is broken down into the following basic steps:
-
-.. code-block:: python
-
-    class PCell(spira.Cell):
-        """ My first parameterized cell. """
-
-        # Define parameters here.
-        number = spira.IntegerParameter(default=0, doc=’Parameter example number.’)
-
-        def create_elementals(self, elems):
-            # Define elementals here.
+            elems += spira.RouteManhattan(ports=self.ports, layer=spira.Layer(1))
             return elems
 
         def create_ports(self, ports):
-            # Define ports here.
+            ports += spira.Port(name='P1', midpoint=(0,0), orientation=180)
+            ports += spira.Port(name='P2', midpoint=(20,10), orientation=0)
             return ports
 
-.. code-block:: python
 
-    >>> pcell = PCell()
-    [SPiRA: Cell] (name ’PCell’, elementals 0, ports 0)
-    >>> pcell.number
-    0
-    >>> pcell.__doc__
-    My first parameterized cell.
-    >>> pcell.number.__doc__
-    Parameter example number.
 
-The most basic SPiRA template to generate a PCell is shown above, and consists of three parts:
 
-1. Create a new cell by inheriting from ``spira.Cell``. This connects the class to the SPiRA framework when constructed.
 
-2. Define the PCell parameters as class attributes.
-
-3. Elementals and ports are defined in the ``create_elementals`` and ``create_ports`` class methods, which is automatically added to the cell instance.
-   The create methods are special SPiRA class methods that specify how the parameters are used to create the cell.
 
 
 .. code-block:: python
@@ -465,7 +505,7 @@ The most basic SPiRA template to generate a PCell is shown above, and consists o
         height = param. NumberField(default=1)
         gds_layer = param. LayerField(number=0, datatype=0)
 
-        def create_elementals(self, elems):
+        def create_elements(self, elems):
             shape = shapes.BoxShape(width=self.width, height=self.height)
             elems += spira.Polygon(shape=shape, gds_layer=self.gds_layer)
             return elems
@@ -491,13 +531,14 @@ The above example illustrates constructing a parameterized box using the propose
 First, defining the parameters that the user would want to change when creating a box instance.
 Here, three parameter are given namely, the width, the height and the layer properties for GDSII construction.
 Second, a shape is generated from the defined parameters using the shape module.
-Third, this box shape is added as a polygon elemental to the cell instance.
-This polygon takes the shape and connects it to a set of methods responsible for converting it to a GDSII elemental.
+Third, this box shape is added as a polygon element to the cell instance.
+This polygon takes the shape and connects it to a set of methods responsible for converting it to a GDSII element.
 Fourth, two terminal ports are added to the left and right edges of the box, with their directions pointing away from the polygon interior.
 
 
+******************
 Validate-by-Design
-------------------
+******************
 
 
 

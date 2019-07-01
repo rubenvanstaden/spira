@@ -1,9 +1,13 @@
 import gdspy
 import numpy as np
-import spira.all as spira
+# import spira.all as spira
 
 from numpy.linalg import norm
 from spira.yevon.geometry.vector import *
+from spira.yevon.geometry.ports.port import *
+from spira.yevon.gdsii.cell import Cell
+from spira.yevon.process.gdsii_layer import Layer
+from spira.yevon.gdsii.elem_list import ElementList
 from spira.yevon.geometry.ports.port_list import PortList
 from spira.yevon.utils.geometry import distance
 from spira.yevon.utils import geometry as ug
@@ -13,6 +17,8 @@ from spira.yevon.geometry import shapes
 from spira.yevon import constants
 from spira.yevon.utils import clipping
 from spira.core.parameters.descriptor import FunctionParameter
+from spira.core.parameters.descriptor import Parameter
+from spira.yevon.gdsii.polygon import Polygon
 from spira.yevon.process import get_rule_deck
 
 
@@ -24,7 +30,7 @@ __all__ = ['Route', 'RouteStraight', 'RoutePath', 'Route90', 'RouteShape', 'Rout
 
 class RouteShape(shapes.Shape):
 
-    path = spira.Parameter()
+    path = Parameter()
 
     def create_points(self, points):
         if isinstance(self.path, gdspy.Path):
@@ -34,17 +40,17 @@ class RouteShape(shapes.Shape):
         return points
 
 
-class Route(spira.Polygon):
+class Route(Polygon):
     """  """
 
-    p1 = spira.PortParameter()
-    p2 = spira.PortParameter()
+    p1 = PortParameter()
+    p2 = PortParameter()
 
-    port_labels = spira.ListParameter(
-        allow_none=True,
-        restriction=RestrictTypeList(str),
-        doc="labels of ports to be processes. Set to None to process all ports"
-    )
+    # port_labels = spira.ListParameter(
+    #     allow_none=True,
+    #     restriction=RestrictTypeList(str),
+    #     doc="labels of ports to be processes. Set to None to process all ports"
+    # )
 
     def __init__(self, shape, layer, **kwargs):
         super().__init__(shape=shape, layer=layer, **kwargs)
@@ -60,8 +66,6 @@ class Route(spira.Polygon):
         return self.__repr__()
 
     def create_ports(self, ports):
-        # print(self.p1)
-        # print(self.p2)
         ports += self.p1.copy(purpose=RDD.PURPOSE.ROUTE)
         ports += self.p2.copy(purpose=RDD.PURPOSE.ROUTE)
         return ports
@@ -106,8 +110,8 @@ def RouteStraight(p1, p2, layer, path_type='straight', width_type='straight'):
     route_path = gdspy.Path(width=width_input, initial_point=(0,0))
     route_path.parametric(curve_fun, curve_deriv_fun, final_width=width_fun)
 
-    port1 = spira.Port(midpoint=(0,0), width=width_input, orientation=180)
-    port2 = spira.Port(midpoint=(xf,yf), width=width_output, orientation=0)
+    port1 = Port(midpoint=(0,0), width=width_input, orientation=180)
+    port2 = Port(midpoint=(xf,yf), width=width_output, orientation=0)
 
     # print(port1)
     # print(port2)
@@ -173,8 +177,8 @@ def Route90(port1, port2, layer, width=None, corners='miter', bend_radius=1):
     path.segment(end_point=p3)
 
     pl = PortList()
-    pl += spira.Port(name='T1', midpoint=(0,0), width=port1.width, orientation=180)
-    pl += spira.Port(name='T2', midpoint=list(np.subtract(p2, p1)), width=port2.width, orientation=90)
+    pl += Port(name='T1', midpoint=(0,0), width=port1.width, orientation=180)
+    pl += Port(name='T2', midpoint=list(np.subtract(p2, p1)), width=port2.width, orientation=90)
 
     shape = RouteShape(path=path)
     # points = path.get_polygons()[0]
@@ -218,8 +222,8 @@ def Route180(port1, port2, layer, width=None, corners='miter', bend_radius=1):
         raise ValueError("Route error: Ports do not face each other (orientations must be 180 apart)")
     else:
         pl = PortList()
-        pl += spira.Port(name='T1', midpoint=(0,0), width=port1.width, orientation=180)
-        pl += spira.Port(name='T2', midpoint=list(np.subtract(p2, p1)), width=port2.width, orientation=0)
+        pl += Port(name='T1', midpoint=(0,0), width=port1.width, orientation=180)
+        pl += Port(name='T2', midpoint=list(np.subtract(p2, p1)), width=port2.width, orientation=0)
 
     shape = RouteShape(path=path)
     # points = path.get_polygons()[0]
@@ -234,10 +238,10 @@ def Route180(port1, port2, layer, width=None, corners='miter', bend_radius=1):
 def RouteManhattan(ports, layer, width=None, corners='miter', bend_radius=1):
     from spira.yevon.utils import geometry
 
-    elems = spira.ElementList()
+    elems = ElementList()
 
     if isinstance(ports, list):
-        list1 = [p for p in ports if isinstance(p, spira.DummyPort)]
+        list1 = [p for p in ports if isinstance(p, DummyPort)]
     else:
         list1 = ports.get_dummy_ports()
     list2 = [p.flip() for p in list1]
@@ -326,11 +330,11 @@ if __name__ == '__main__':
     # # Q4
     # port1 = spira.Port(name='P1', midpoint=(0,0), orientation=0)
     # port2 = spira.Port(name='P2', midpoint=(20,-10), orientation=180)
-    port1 = spira.Port(name='P1', midpoint=(0,0), orientation=270)
-    port2 = spira.Port(name='P2', midpoint=(20,-10), orientation=90)
+    port1 = Port(name='P1', midpoint=(0,0), orientation=270)
+    port2 = Port(name='P2', midpoint=(20,-10), orientation=90)
 
-    D = spira.Cell(name='Route')
-    D += Route180(port1, port2, width=1, layer=spira.Layer(1))
+    D = Cell(name='Route')
+    D += Route180(port1, port2, width=1, layer=Layer(1))
 
     D.gdsii_output()
 

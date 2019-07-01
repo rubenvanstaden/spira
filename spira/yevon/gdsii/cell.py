@@ -23,7 +23,7 @@ from spira.yevon.process import get_rule_deck
 RDD = get_rule_deck()
 
 
-__all__ = ['Cell', 'Connector', 'CellParameter']
+__all__ = ['Cell', 'CellParameter']
 
 
 class MetaCell(MetaInitializer):
@@ -312,33 +312,6 @@ class Cell(CellAbstract):
     def create_netlist(self):
         net = self.nets(lcar=self.lcar).disjoint()
         return net
-
-
-class Connector(Cell):
-    """
-    Ports are horizontal ports that connect SRef instances
-    in the horizontal plane. They typcially represents the
-    i/o ports of a components.
-
-    Examples
-    --------
-    >>> term = spira.Port()
-    """
-
-    midpoint = CoordParameter()
-    orientation = NumberParameter(default=0.0)
-    width = NumberParameter(default=2)
-
-    def __repr__(self):
-        return ("[SPiRA: Connector] (name {}, midpoint {}, " +
-            "width {}, orientation {})").format(self.name,
-            self.midpoint, self.width, self.orientation
-        )
-
-    def create_ports(self, ports):
-        ports += Port(name='P1', midpoint=self.midpoint, width=self.width, orientation=self.orientation)
-        ports += Port(name='P2', midpoint=self.midpoint, width=self.width, orientation=self.orientation-180)
-        return ports
 
 
 # FIXME: Add restriction parameter.

@@ -10,7 +10,7 @@ RDD = get_rule_deck()
 
 def test_polygon():
     p = spira.Cross(layer=RDD.PLAYER.M1.METAL)
-    p.stretch_port(port=p.ports['M1_e3'], destination=(0*1e6, 20*1e6))
+    p.stretch_port(port=p.ports['M1_e3'], destination=(0, 20))
     cell = spira.Cell(name='StretchPolygon', elementals=p)
     cell.output()
 
@@ -24,8 +24,8 @@ def test_cell():
 
     F= D.flat_expand_transform_copy()
 
-    E = F.stretch_port(port=F.ports['COU_e6_Device_0'], destination=(50*1e6, 0))
-    # E = F.stretch_port(port=D.bbox_info.ports['BBOX_e1'], destination=(50*1e6, 0))
+    E = F.stretch_port(port=F.ports['COU_e6_Device_0'], destination=(50, 0))
+    # E = F.stretch_port(port=D.bbox_info.ports['BBOX_e1'], destination=(50, 0))
 
     cell = spira.Cell(name='StretchCell')
     cell += spira.SRef(reference=E)
@@ -43,7 +43,7 @@ def test_reference():
 
     F = S.flat_expand_transform_copy()
 
-    E = F.stretch_port(port=F.ports['M1_e2'], destination=(50*1e6, 0))
+    E = F.stretch_port(port=F.ports['M1_e2'], destination=(50, 0))
 
     cell = spira.Cell(name='StretchCell', elementals=E)
     cell.output()
@@ -70,13 +70,13 @@ def test_reference_manual():
 
     # # NOTE: Stretch a specific polygon.
     # F = S.flat_expand_transform_copy()
-    # E = F.stretch_port(port=F.ports['M1_e2'], destination=(50*1e6, 0))
+    # E = F.stretch_port(port=F.ports['M1_e2'], destination=(50, 0))
 
     # # NOTE: Stretch the entire reference using the bounding box ports.
     # F = S.flat_expand_transform_copy()
     # print(D1.bbox_info.ports)
-    # E = F.stretch_port(port=D1.bbox_info.ports['layer0_e1'], destination=(50*1e6, 0))
-    # # E = F.stretch_port(port=D1.bbox_info.ports['BBOX_e1'], destination=(50*1e6, 0))
+    # E = F.stretch_port(port=D1.bbox_info.ports['layer0_e1'], destination=(50, 0))
+    # # E = F.stretch_port(port=D1.bbox_info.ports['BBOX_e1'], destination=(50, 0))
 
     cell = spira.Cell(name='StretchCell')
     # cell += E

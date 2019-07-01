@@ -1,6 +1,14 @@
 
 
-__all__ = ['ParameterProcessor', 'ProcessorTypeCast']
+__all__ = [
+    'ParameterProcessor',
+    'ProcessorTypeCast',
+    'ProcessorInt',
+    'ProcessorFloat',
+    'ProcessorString',
+    'ProcessorIntRound',
+    'ProcessorRange'
+]
 
 
 class ParameterProcessor(object):
@@ -44,7 +52,7 @@ class __CompoundPropertyProcessor__(ParameterProcessor):
         elif isinstance(other, PropertyProcessor):
             return __CompoundPropertyProcessor__(self.__sub_processors + [other])
         else:
-            raise ProcessorException("Cannot add %s to PropertyProcessor" % type(other))
+            raise ValueError("Cannot add %s to PropertyProcessor" % type(other))
 
     def __iadd__(self, other):
         if isinstance(other, __CompoundPropertyProcessor__):
@@ -54,7 +62,7 @@ class __CompoundPropertyProcessor__(ParameterProcessor):
             self.__sub_processors += [other]
             return self
         else:
-            raise ProcessorException("Cannot add %s to PropertyProcessor" % type(other))
+            raise ValueError("Cannot add %s to PropertyProcessor" % type(other))
 
     def process(self, value, obj=None):
         v = value
@@ -86,3 +94,55 @@ class ProcessorTypeCast(ParameterProcessor):
 
     def __repr__(self):
         S = "<Type Cast Processor: %s >" % self.cast_type.__name__
+
+
+def ProcessorInt():
+    return ProcessorTypeCast(int)
+
+
+def ProcessorFloat():
+    return ProcessorTypeCast(float)
+
+
+def ProcessorString():
+    return ProcessorTypeCast(str)
+
+
+class ProcessorIntRound(ParameterProcessor):
+    """ rounds a number to the nearest integer"""
+
+    def process(self, value, obj=None):
+        return int(round(value))
+
+    def __repr__(self):
+        S = "<Int Round Processor >"
+
+
+class ProcessorRange(ParameterProcessor):
+    """ Brings a number to within a certain range. """
+
+    def __init__(self, lower=None, upper=None):
+
+        if lower is None and upper is None:
+            raise ValueError("Range Processor should have an upper or lower limit")
+
+        if (not upper is None) and (not lower is None):
+            if lower > upper:
+                raise ValueError("lower limit should be smaller than upper limit in Range Processor")
+
+        self.lower = lower
+        self.upper = upper
+
+    def process(self, value, obj=None):
+        if not self.lower is None:
+            if value < self.lower:
+                return self.lower
+        if not self.upper is None:
+            if value > self.upper:
+                return self.upper
+        return value
+
+    def __repr__(self):
+        S = "<Range Processor: [%s, %s] >" % (str(self.lower), str(upper))
+
+

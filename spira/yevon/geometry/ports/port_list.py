@@ -286,5 +286,27 @@ class PortListParameter(ParameterDescriptor):
         value = f(self.__type__())
         if value is None:
             value = self.__type__()
-        new_value = self.__cache_parameter_value__(obj, value)
+        # new_value = self.__cache_parameter_value__(obj, value)
+        self.__cache_parameter_value__(obj, value)
+        new_value = self.__get_parameter_value__(obj)
         return new_value
+        # return value
+
+    def __cache_parameter_value__(self, obj, ports):
+        if isinstance(ports, self.__type__):
+            super().__cache_parameter_value__(obj, ports)
+        elif isinstance(ports, list):
+            super().__cache_parameter_value__(obj, self.__type__(ports))           
+        else:
+            raise TypeError("Invalid type in setting value of PortListProperty (expected PortList), but generated : " + str(type(ports)))
+
+    def __set__(self, obj, ports):
+        if isinstance(ports, self.__type__):
+            self.__externally_set_parameter_value__(obj, ports)
+        elif isinstance(ports, list):
+            self.__externally_set_parameter_value__(obj, self.__type__(ports))            
+        else:
+            raise TypeError("Invalid type in setting value of PortListProperty (expected PortList): " + str(type(ports)))
+        return
+
+

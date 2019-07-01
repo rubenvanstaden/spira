@@ -111,7 +111,7 @@ class __Polygon__(__LayerElement__):
         else:
             raise ValueError('Destination error')
 
-        dxdy = d - m 
+        dxdy = d - m
         self.translate(dxdy)
         return self
 

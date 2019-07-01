@@ -16,6 +16,11 @@ RDD.M2.MIN_SIZE = 0.35
 RDD.M3 = ParameterDatabase()
 RDD.M3.MIN_SIZE = 0.35
 
+RDD.R1 = ParameterDatabase()
+RDD.R1.MIN_WIDTH = 0.3
+RDD.R1.MIN_LENGTH = 1.0
+RDD.R1.MIN_SURROUND_OF_C1 = 0.3
+
 # --------------------------------- Vias ----------------------------------------
 
 RDD.C1 = ParameterDatabase()
@@ -40,10 +45,13 @@ RDD.PLAYER.M4 = PhysicalLayerDatabase()
 RDD.PLAYER.M5 = PhysicalLayerDatabase()
 RDD.PLAYER.M6 = PhysicalLayerDatabase()
 RDD.PLAYER.M7 = PhysicalLayerDatabase()
+RDD.PLAYER.R1 = PhysicalLayerDatabase()
 
 RDD.PLAYER.METAL = PhysicalLayer(process=RDD.PROCESS.VIRTUAL, purpose=RDD.PURPOSE.METAL)
 RDD.PLAYER.BBOX = PhysicalLayer(process=RDD.PROCESS.VIRTUAL, purpose=RDD.PURPOSE.BOUNDARY_BOX)
 RDD.PLAYER.PORT = PhysicalLayer(process=RDD.PROCESS.VIRTUAL, purpose=RDD.PURPOSE.PORT.OUTSIDE_EDGE_DISABLED)
+
+RDD.PLAYER.R1.METAL = PhysicalLayer(process=RDD.PROCESS.R1, purpose=RDD.PURPOSE.METAL)
 
 RDD.PLAYER.M0.GND = PhysicalLayer(process=RDD.PROCESS.GND, purpose=RDD.PURPOSE.GROUND)
 
@@ -155,6 +163,7 @@ RDD.GDSII.PROCESS_LAYER_MAP = {
     RDD.PROCESS.M5 : 5,
     RDD.PROCESS.M6 : 6,
     RDD.PROCESS.M7 : 7,
+    RDD.PROCESS.R1 : 8,
     RDD.PROCESS.C1 : 10,
     RDD.PROCESS.C2 : 20,
     RDD.PROCESS.C3 : 30,

@@ -104,7 +104,8 @@ class GenericTransform(ReversibleTransform):
         return pts
 
     def __translate_array__(self, coords):
-        # coords += np.array([int(self.translation.x), int(self.translation.y)])
+        # FIXME: Why should I convert to float!
+        coords = [[float(c[0]), float(c[1])] for c in coords]
         coords += np.array([self.translation.x, self.translation.y])
         return coords
 
@@ -181,10 +182,26 @@ class GenericTransform(ReversibleTransform):
         return self.__iadd__(-other)
 
     def __eq__(self, other):
-        pass
+        if other is None: return self.is_identity()
+        if not isinstance(other, GenericTransform): return False
+        return (
+            (self.rotation == other.rotation) and
+            (self.translation == other.translation) and
+            (self.reflection == other.reflection) and
+            (self.magnification == other.magnification)
+        )
 
     def __ne__(self, other):
-        pass
+        """ checks if the transforms do different things """
+
+        if other is None: return not self.is_identity()
+        if not isinstance(other, GenericTransform): return False
+        return (
+            (self.rotation != other.rotation) or
+            (self.translation != other.translation) or
+            (self.reflection != other.reflection) or
+            (self.magnification != other.magnification)
+        )
 
     def __neg__(self):
         from spira.core.transforms.translation import Translation
@@ -200,7 +217,13 @@ class GenericTransform(ReversibleTransform):
 
     def is_identity(self):
         """ Returns True if the transformation does nothing """
-        return ((self.rotation == 0.0) and (self.translation.x == 0.0) and (self.translation.y == 0.0) and not (self.reflection) and (self.magnification == 1.0))
+        return (
+            (self.rotation == 0.0) and 
+            (self.translation.x == 0.0) and 
+            (self.translation.y == 0.0) and 
+            (not self.reflection) and 
+            (self.magnification == 1.0)
+        )
 
 
 BASE = GenericTransform

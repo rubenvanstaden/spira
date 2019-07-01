@@ -10,10 +10,8 @@ class YtronShape(Shape):
     """ Shape for generating a yTron device. """
 
     rho = NumberParameter(default=0.2)
-    # arm_lengths = param.CoordParameter(default=(5, 3))
-    arm_lengths = CoordParameter(default=(5, 3))
+    arm_lengths = CoordParameter(default=(5,3))
     source_length = NumberParameter(default=5)
-    # arm_widths = param.CoordParameter(default=(2, 2))
     arm_widths = CoordParameter(default=(2, 2))
     theta = NumberParameter(default=2.5)
     theta_resolution = NumberParameter(default=10.0)
@@ -77,7 +75,7 @@ class YtronShape(Shape):
             self.yc + self.arm_y_left
         ]
 
-        points = np.array([list(zip(xpts, ypts))])
+        points = np.array(list(zip(xpts, ypts)))
 
         return points
 

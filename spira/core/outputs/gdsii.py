@@ -69,29 +69,30 @@ class OutputGdsii(ParameterInitializer):
                 for p in c.ports:
                     L = PortLayout(port=p)
                     for e in L.elements:
-                        if isinstance(e, Polygon):
+                        # if isinstance(e, Polygon):
+                        if issubclass(type(e), Polygon):
                             self.collect_polygons(e, cp)
                         elif isinstance(e, Label):
                             self.collect_labels(e, cl)
 
-            for e in c.elements:
-                if isinstance(e, Polygon):
-                    if e.enable_edges is True:
-                        for p in e.ports:
-                        # Transform ports to polygon transformation.
-                        # Required for non-pcell layouts. FIXME!!!
-                        # for p in e.ports.transform(e.transformation):
-                            if p.id_string() not in _polygon_ports:
-
-                                if self.disabled_ports['polygons'] is True:
+            if self.disabled_ports['polygons'] is True:
+                for e in c.elements:
+                    if isinstance(e, Polygon):
+                        if e.enable_edges is True:
+                            for p in e.ports:
+                            # Transform ports to polygon transformation.
+                            # Required for non-pcell layouts. FIXME!!!
+                            # for p in e.ports.transform(e.transformation):
+                                if p.id_string() not in _polygon_ports:
+    
                                     L = PortLayout(port=p, transformation=e.transformation)
                                     for e in L.elements:
                                         if isinstance(e, Polygon):
                                             self.collect_polygons(e, cp)
                                         elif isinstance(e, Label):
                                             self.collect_labels(e, cl)
-
-                                _polygon_ports.append(p.id_string())
+    
+                                    _polygon_ports.append(p.id_string())
 
             for e in cp.values():
                 G.add(e)
@@ -163,13 +164,15 @@ class OutputGdsii(ParameterInitializer):
 
 
 class GdsiiLayout(object):
-    """ Class that generates output formates
-    for a layout or library containing layouts. """
+    """ 
+    Class that generates output formates for a layout or library containing layouts.
+    If a name is given, the layout is written to a GDSII file.
+    """
 
-    def gdsii_output(self, name=None, units=None, grid=None, layer_map=None, disabled_ports=None):
-        """ If a name is given, the layout is written to a GDSII file. """
+    def gdsii_output(self, name=None, units=None, grid=None, layer_map=None, disabled_ports=None, view=True):
 
-        _default = {'cells': True, 'polygons': True, 'arrows': True, 'labels': True}
+        # _default = {'cells': True, 'polygons': True, 'arrows': True, 'labels': True}
+        _default = {'cells': True, 'polygons': False, 'arrows': False, 'labels': False}
 
         if disabled_ports is not None:
             _default.update(disabled_ports)
@@ -179,14 +182,15 @@ class GdsiiLayout(object):
         gdspy_library = gdspy.GdsLibrary(name=self.name)
         G.gdspy_gdsii_output(gdspy_library)
 
-        gdspy.LayoutViewer(library=gdspy_library)
-
         if name is not None:
             writer = gdspy.GdsWriter('{}.gds'.format(name), unit=1.0e-6, precision=1.0e-12)
             for name, cell in gdspy_library.cell_dict.items():
                 writer.write_cell(cell)
                 del cell
             writer.close()
+
+        if view is True:
+            gdspy.LayoutViewer(library=gdspy_library)
 
 
 Outputs.mixin(GdsiiLayout)

@@ -26,5 +26,5 @@ if __name__ == '__main__':
     # file_name = '/home/therealtyler/code/phd/spira/spira/technologies/aist/layouts/stable/jj_hierarchy_lvl4_reflection.gds'
 
     D = io.import_gds(filename=file_name)
-    D.output()
+    D.gdsii_output()
 

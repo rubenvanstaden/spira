@@ -327,7 +327,7 @@ class BoundaryInfo(Transformable):
 
 def bbox_info_from_point_list(point_list):
     """ Generate bounding box info from a point list. """
-    if len(point_list) == 0: 
+    if len(point_list) == 0:
         return BoundaryInfo()
     x = [c[0] for c in point_list]
     y = [c[1] for c in point_list]
@@ -336,7 +336,7 @@ def bbox_info_from_point_list(point_list):
 
 def bbox_info_from_numpy_array(points):
     """ Generate bounding box info from a np array. """
-    if len(points) == 0: 
+    if len(points) == 0:
         return BoundaryInfo()
     LB = np.min(points, 0)
     TR = np.max(points, 0)

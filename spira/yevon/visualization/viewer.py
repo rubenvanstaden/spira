@@ -24,7 +24,7 @@ class PortLayout(spira.Cell):
 
     def create_edge(self):
         dw = self.port.width
-        dl = self.port.length
+        dl = self.port.length/10
         layer = PLayer(process=self.port.process, purpose=self.port.purpose)
         p = spira.Box(width=dw, height=dl, layer=layer)
         T = transformation_from_vector(self.port) + spira.Rotation(-90)
@@ -35,10 +35,10 @@ class PortLayout(spira.Cell):
     def create_arrow(self):
         layer = PLayer(self.port.process, RDD.PURPOSE.PORT.DIRECTION)
         # w = self.port.length * 3
-        w = 0.05
+        w = 0.02
         # l = 2
         # l = self.port.length * 3
-        l = 1.0
+        l = 0.2
         arrow_shape = shapes.ArrowShape(width=w, length=l, head=l*0.2)
         p = spira.Polygon(shape=arrow_shape, layer=layer, enable_edges=False)
         T = transformation_from_vector(self.port)

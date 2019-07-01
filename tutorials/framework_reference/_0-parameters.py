@@ -4,47 +4,47 @@ import spira.all as spira
 
 class TestDefault(spira.Cell):
 
-    _integer = spira.IntegerField(doc='Integer docstring.')
-    _float = spira.FloatField(doc='Float docstring.')
-    _string = spira.StringField(doc='String docstring.')
-    _bool = spira.BoolField(doc='Boolean docstring.')
-    _list = spira.ListField(doc='List docstring.')
-    _dict = spira.DictField(doc='Dictionary docstring.')
-    _numpy = spira.NumpyArrayField(doc='Numpy Array docstring.')
+    _integer = spira.IntegerParameter(doc='Integer docstring.')
+    _float = spira.FloatParameter(doc='Float docstring.')
+    _string = spira.StringParameter(doc='String docstring.')
+    _bool = spira.BoolParameter(doc='Boolean docstring.')
+    _list = spira.ListParameter(doc='List docstring.')
+    _dict = spira.DictParameter(doc='Dictionary docstring.')
+    _numpy = spira.NumpyArrayParameter(doc='Numpy Array docstring.')
 
 
 class TestDefaultSet(spira.Cell):
 
-    _integer = spira.IntegerField(default=1)
-    _float = spira.FloatField(default=1.0)
-    _string = spira.StringField(default='Yes')
-    _bool = spira.BoolField(default=True)
-    _list = spira.ListField(default=[1, 0, 3])
-    _dict = spira.DictField(default={'number': 1, 'datatype': 0})
-    _numpy = spira.NumpyArrayField(default=np.array([1, 2, 3]))
+    _integer = spira.IntegerParameter(default=1)
+    _float = spira.FloatParameter(default=1.0)
+    _string = spira.StringParameter(default='Yes')
+    _bool = spira.BoolParameter(default=True)
+    _list = spira.ListParameter(default=[1, 0, 3])
+    _dict = spira.DictParameter(default={'number': 1, 'datatype': 0})
+    _numpy = spira.NumpyArrayParameter(default=np.array([1, 2, 3]))
 
 
 class TestErrors(spira.Cell):
 
-    _integer = spira.IntegerField(default=1.0)
-    _float = spira.FloatField(default=1)
-    _string = spira.StringField(default=2)
-    _bool = spira.BoolField(default='True')
-    _list = spira.ListField(default=np.array([1, 0, 3]))
-    _dict = spira.DictField(default=1)
-    _numpy = spira.NumpyArrayField(default=[1, 2, 3])
+    _integer = spira.IntegerParameter(default=1.0)
+    _float = spira.FloatParameter(default=1)
+    _string = spira.StringParameter(default=2)
+    _bool = spira.BoolParameter(default='True')
+    _list = spira.ListParameter(default=np.array([1, 0, 3]))
+    _dict = spira.DictParameter(default=1)
+    _numpy = spira.NumpyArrayParameter(default=[1, 2, 3])
 
 
-class TestFields(spira.Cell):
+class TestParameters(spira.Cell):
 
-    layer = spira.LayerField(doc='Layer docstring.')
-    color = spira.ColorField(doc='Color docstring.')
-    shape = spira.ShapeField(doc='Shape docstring.')
-    cell = spira.CellField(doc='Cell docstring.')
-    ps_layer = spira.PhysicalLayerField(doc='Player docstring.')
-    # label = spira.LabelField(doc='Label docsring.')
-    # port = spira.PortField(doc='Port docstring.')
-    # polygon = spira.PolygonField(doc='Polygon docstring.')
+    layer = spira.LayerParameter(doc='Layer docstring.')
+    color = spira.ColorParameter(doc='Color docstring.')
+    shape = spira.ShapeParameter(doc='Shape docstring.')
+    cell = spira.CellParameter(doc='Cell docstring.')
+    # ps_layer = spira.PhysicalLayerParameter(doc='Player docstring.')
+    # label = spira.LabelParameter(doc='Label docsring.')
+    # port = spira.PortParameter(doc='Port docstring.')
+    # polygon = spira.PolygonParameter(doc='Polygon docstring.')
     print(layer.__doc__)
 
 
@@ -52,18 +52,18 @@ if __name__ == '__main__':
 
     # --------------------------------------------
 
-    cell = TestFields()
+    cell = TestParameters()
 
-    print(TestFields.__doc__)
+    print(TestParameters.__doc__)
     
-    print(TestFields.layer.__doc__)
-    print(TestFields.color.__doc__)
-    print(TestFields.shape.__doc__)
-    print(TestFields.cell.__doc__)
-    print(TestFields.ps_layer.__doc__)
-    # print(TestFields.label.__doc__)
-    # print(TestFields.port.__doc__)
-    # print(TestFields.polygon.__doc__)
+    print(TestParameters.layer.__doc__)
+    print(TestParameters.color.__doc__)
+    print(TestParameters.shape.__doc__)
+    print(TestParameters.cell.__doc__)
+    # print(TestParameters.ps_layer.__doc__)
+    # print(TestParameters.label.__doc__)
+    # print(TestParameters.port.__doc__)
+    # print(TestParameters.polygon.__doc__)
 
     # print(cell.layer.__doc__)
     # print(cell.color.__doc__)
