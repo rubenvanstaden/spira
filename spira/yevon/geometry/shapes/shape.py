@@ -344,7 +344,7 @@ def ShapeParameter(restriction=None, preprocess=None, **kwargs):
 from spira.yevon.process.gdsii_layer import Layer
 from spira.yevon.geometry.ports.port import Port
 def shape_edge_ports(shape, layer, local_pid='None'):
-    
+
     edges = PortList()
 
     xpts = list(shape.x_coords)
@@ -361,19 +361,20 @@ def shape_edge_ports(shape, layer, local_pid='None'):
 
     if layer.name == 'BBOX': bbox = True
     else: bbox = False
+        
+    layer = RDD.GDSII.IMPORT_LAYER_MAP[layer]
 
     for i in range(0, n):
-        name = '{}_e{}'.format(layer.name, i)
+        name = 'E{}_{}'.format(i, layer.process.symbol)
         x = np.sign(clockwise) * (xpts[i+1] - xpts[i])
         y = np.sign(clockwise) * (ypts[i] - ypts[i+1])
         orientation = (np.arctan2(x, y) * constants.RAD2DEG)
         midpoint = [(xpts[i+1] + xpts[i])/2, (ypts[i+1] + ypts[i])/2]
         width = np.abs(np.sqrt((xpts[i+1] - xpts[i])**2 + (ypts[i+1]-ypts[i])**2))
-        layer = RDD.GDSII.IMPORT_LAYER_MAP[layer]
         P = Port(
             name=name,
-            bbox=bbox,
-            locked=True,
+            # bbox=bbox,
+            # locked=True,
             process=layer.process,
             purpose=RDD.PURPOSE.PORT.OUTSIDE_EDGE_DISABLED,
             midpoint=midpoint,
@@ -382,5 +383,8 @@ def shape_edge_ports(shape, layer, local_pid='None'):
             length=0.2,
             local_pid=local_pid
         )
+        # print(name)
+        # print(P)
+        # print('')
         edges += P
     return edges

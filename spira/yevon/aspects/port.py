@@ -36,19 +36,13 @@ class CellPortProperty(PortProperty):
         for e in self.elements:
             if isinstance(e, Polygon):
                 for p in e.ports:
-                    # FIXME: Improve this.
-                    if p.locked is False:
-                        ports += p
+                    ports += p
         return self.create_ports(ports)
 
 
 class TransformablePortProperty(PortProperty, Transformable):
     def __create_ports__(self, ports):
-        print(self.create_ports(ports))
-        print(self.transformation)
         ports = self.create_ports(ports).transform_copy(self.transformation)
-        print(ports)
-        # ports = self.create_ports(ports)
         return ports
 
 
@@ -73,9 +67,7 @@ class PolygonPortProperty(TransformablePortProperty):
     edge_ports = ElementListParameter()
 
     def create_edge_ports(self, edges):
-        T = self.transformation
-        # shape = deepcopy(self.shape).transform(T)
-        shape = self.shape.transform_copy(T)
+        shape = self.shape.transform_copy(self.transformation)
         return shapes.shape_edge_ports(shape, self.layer, self.id_string())
 
     def create_ports(self, ports):
@@ -83,9 +75,7 @@ class PolygonPortProperty(TransformablePortProperty):
         if layer.purpose.symbol == 'METAL':
             for edge in self.edge_ports:
                 ports += edge
-        # elif layer.purpose.symbol == 'ROUTE':
-        #     ports = self.create_ports
-            
+        # FIXME: This fails with CompoundTransforms, i.e. when stretching.
         # ports.transform(-self.transformation)
         return ports
 

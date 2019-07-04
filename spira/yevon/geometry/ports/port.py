@@ -9,81 +9,38 @@ from spira.yevon import constants
 from spira.core.parameters.variables import *
 from spira.yevon.geometry.coord import CoordParameter
 from spira.core.parameters.descriptor import FunctionParameter
-from spira.yevon.geometry.ports.base import __PhysicalPort__
+from spira.yevon.geometry.ports.base import __Port__
 from spira.yevon.geometry.coord import Coord
 from spira.yevon.geometry.vector import *
 from spira.yevon.geometry.line import *
+from spira.yevon.gdsii.generators import PortGenerator
 from spira.yevon.process import get_rule_deck
 
 
 RDD = get_rule_deck()
 
 
-__all__ = ['Port', 'PortParameter', 'ContactPort', 'DummyPort']
+__all__ = ['Port', 'PortParameter']
 
 
-class Port(Vector, __PhysicalPort__):
+class Port(Vector, __Port__):
     """  """
-
-    bbox = BoolParameter(default=False)
+    
+    name = StringParameter()
     width = NumberParameter(default=2)
-    port_type = StringParameter(default='terminal')
+    length = NumberParameter(default=0.5)
 
-    # length = NumberParameter(default=2)
-
-    # def get_length(self):
-    #     if not hasattr(self, '__length__'):
-    #         # key = self.layer.name
-    #         if key in RDD.keys:
-    #             if RDD.name == 'MiTLL':
-    #                 self.__length__ = RDD[key].MIN_SIZE * 1e6
-    #             elif RDD.name == 'AiST':
-    #                 self.__length__ = RDD[key].WIDTH * 1e6
-    #         else:
-    #             self.__length__ = RDD.GDSII.TERM_WIDTH
-    #     return self.__length__
-
-    def get_length(self):
-        if not hasattr(self, '__length__'):
-            self.__length__ = 0.5
-        return self.__length__
-
-    def set_length(self, value):
-        self.__length__ = value
-
-    length = FunctionParameter(get_length, set_length, doc='Set the width of the terminal edge.')
-
-    def get_alias(self):
-        if not hasattr(self, '__alias__'):
-            self.__alias__ = self.name
-        return self.__alias__
-
-    def set_alias(self, value):
-        self.__alias__ = value
-
-    alias = FunctionParameter(get_alias, set_alias, doc='Functions to generate an alias for cell name.')
-
-    # def __init__(self, midpoint, orientation, **kwargs):
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-
-        if 'port_type' in kwargs:
-            if kwargs['port_type'] == 'contact':
-                self.__class__ = ContactPort
-            elif kwargs['port_type'] == 'branch':
-                self.__class__ = BranchPort
-            elif kwargs['port_type'] == 'route':
-                self.__class__ = RoutePort
-            elif kwargs['port_type'] == 'dummy':
-                self.__class__ = DummyPort
-
-        if 'locked' in kwargs:
-            if kwargs['locked'] is True:
-                self.purpose = RDD.PURPOSE.PORT.OUTSIDE_EDGE_DISABLED
-
+    def __init__(self, name=None, **kwargs):
+        super().__init__(name=name, **kwargs)
+        
     def __repr__(self):
-        class_string = "[SPiRA: Port] (name {}, alias {}, locked {}, midpoint {} orientation {} width {})"
-        return class_string.format(self.name, self.alias, self.locked, self.midpoint, self.orientation, self.width)
+        class_string = "[SPiRA: Port] (name {}, midpoint {} orientation {} width {}, process {}, purpose {})"
+        return class_string.format(self.name, self.midpoint, self.orientation, self.width, self.process.symbol, self.purpose.name)
+
+        # # class_string = "[SPiRA: Port] (name {}, midpoint {} orientation {} width {}, process {}, locked {})"
+        # # return class_string.format(self.name, self.midpoint, self.orientation, self.width, self.process.symbol, self.locked)
+        # class_string = "[SPiRA: Port] (name {}, midpoint {} orientation {} width {}, process {}, purpose {}, locked {})"
+        # return class_string.format(self.name, self.midpoint, self.orientation, self.width, self.process.symbol, self.purpose.name, self.locked)
 
     def __str__(self):
         return self.__repr__()
@@ -96,7 +53,11 @@ class Port(Vector, __PhysicalPort__):
                 self.midpoint = Coord(self.midpoint[0], self.midpoint[1])
             if not isinstance(other.midpoint, Coord):
                 other.midpoint = Coord(other.midpoint[0], other.midpoint[1])
-            return ((self.name == other.name) and (self.midpoint == other.midpoint) and (self.orientation == other.orientation))
+            return (
+                (self.name == other.name) and
+                (self.midpoint == other.midpoint) and
+                (self.orientation == other.orientation)
+            )
 
     def __ne__(self, other):
         return (self.midpoint != other.midpoint or (self.orientation != other.orientation)) 
@@ -109,20 +70,24 @@ class Port(Vector, __PhysicalPort__):
         angle = (self.orientation + 180.0) % 360.0
         return self.__class__(midpoint=self.midpoint, orientation=angle)
 
-    @property
-    def unlock(self):
-        self.purpose = RDD.PURPOSE.PORT.OUTSIDE_EDGE_ENABLED
-        return self
-
     def transform(self, transformation):
         self.midpoint = transformation.apply_to_coord(self.midpoint)
         self.orientation = transformation.apply_to_angle(self.orientation)
         return self
 
     def transform_copy(self, transformation):
+        # port = self.copy(
+        #     midpoint=transformation.apply_to_coord(self.midpoint),
+        #     orientation=transformation.apply_to_angle(self.orientation),
+        # )
+        
+        # port = self.__class__(
+        #     midpoint=transformation.apply_to_coord(self.midpoint),
+        #     orientation=transformation.apply_to_angle(self.orientation),
+        # )
+
         port = Port(
             name=self.name,
-            # alias = self.name + transformation.id_string(),
             midpoint=transformation.apply_to_coord(self.midpoint),
             orientation=transformation.apply_to_angle(self.orientation),
             process=self.process,
@@ -131,6 +96,7 @@ class Port(Vector, __PhysicalPort__):
             length=self.length,
             local_pid=self.local_pid
         )
+
         return port
 
     def encloses_endpoints(self, points):
@@ -192,70 +158,13 @@ class Port(Vector, __PhysicalPort__):
         self.transform(T)
         return self
 
-
-from spira.yevon.process.purpose_layer import PurposeLayerParameter
-class ContactPort(Port):
-
-    width = NumberParameter(default=0.4)
-    length = NumberParameter(default=0.4)
-    purpose = PurposeLayerParameter(default=RDD.PURPOSE.PORT.CONTACT)
-
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-
-    def __repr__(self):
-        class_string = "[SPiRA: ContactPort] (name {}, alias {}, locked {}, midpoint {} orientation {} width {})"
-        return class_string.format(self.name, self.alias, self.locked, self.midpoint, self.orientation, self.width)
-
-    def id_string(self):
-        return self.__repr__()
-
-
-class BranchPort(Port):
-
-    width = NumberParameter(default=0.4)
-    length = NumberParameter(default=0.4)
-    purpose = PurposeLayerParameter(default=RDD.PURPOSE.PORT.BRANCH)
-
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-
-    def __repr__(self):
-        class_string = "[SPiRA: BranchPort] (name {}, alias {}, locked {}, midpoint {} orientation {} width {})"
-        return class_string.format(self.name, self.alias, self.locked, self.midpoint, self.orientation, self.width)
-
-
-class RoutePort(Port):
-
-    width = NumberParameter(default=0.4)
-    length = NumberParameter(default=0.4)
-    purpose = PurposeLayerParameter(default=RDD.PURPOSE.PORT.BRANCH)
-
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-
-    def __repr__(self):
-        class_string = "[SPiRA: BranchPort] (name {}, alias {}, locked {}, midpoint {} orientation {} width {})"
-        return class_string.format(self.name, self.alias, self.locked, self.midpoint, self.orientation, self.width)
-
-
-class DummyPort(Port):
-
-    width = NumberParameter(default=0.4)
-    length = NumberParameter(default=0.4)
-    purpose = PurposeLayerParameter(default=RDD.PURPOSE.DUMMY)
-
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-
-    def __repr__(self):
-        class_string = "[SPiRA: DummyPort] (name {}, alias {}, locked {}, midpoint {} orientation {} width {})"
-        return class_string.format(self.name, self.alias, self.locked, self.midpoint, self.orientation, self.width)
+    @property
+    def key(self):
+        return (self.name, self.layer, self.midpoint[0], self.midpoint[1])
 
 
 def PortParameter(local_name=None, restriction=None, **kwargs):
     R = RestrictType(Port) & restriction
     return RestrictedParameter(local_name, restrictions=R, **kwargs)
-
 
 

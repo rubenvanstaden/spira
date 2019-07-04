@@ -11,7 +11,7 @@ class Jj(spira.Cell):
 
     def create_elementals(self, elems):
 
-        shape_hexagon = shapes.ConvexShape(radius=7*1e6)
+        shape_hexagon = shapes.ConvexShape(radius=7)
         ply = spira.Polygon(alias='J5', shape=shape_hexagon, gds_layer=spira.Layer(number=11))
         ply.center = (0,0)
         elems += ply
@@ -23,12 +23,12 @@ class ResVia(spira.Cell):
 
     def create_elementals(self, elems):
 
-        shape_rectangle = shapes.RectangleShape(p1=(-7.5*1e6, -13.2*1e6), p2=(7.5*1e6, -8.2*1e6))
+        shape_rectangle = shapes.RectangleShape(p1=(-7.5, -13.2), p2=(7.5, -8.2))
         ply = spira.Polygon(shape=shape_rectangle, gds_layer=spira.Layer(number=11))
         ply.center = (0,0)
         elems += ply
 
-        shape_rectangle = shapes.RectangleShape(p1=(-4*1e6, -12*1e6), p2=(4.1*1e6, -10*1e6))
+        shape_rectangle = shapes.RectangleShape(p1=(-4, -12), p2=(4.1, -10))
         ply = spira.Polygon(shape=shape_rectangle, gds_layer=spira.Layer(number=10))
         ply.center = (0,0)
         elems += ply
@@ -39,8 +39,8 @@ class ResVia(spira.Cell):
 class Top(spira.Cell):
 
     def get_transforms(self):
-        t1 = spira.Translation((0*1e6, 0*1e6))
-        t2 = spira.Translation((0*1e6, -8*1e6))
+        t1 = spira.Translation((0, 0))
+        t2 = spira.Translation((0, -8))
         return [t1, t2]
 
     def create_elementals(self, elems):
@@ -49,7 +49,7 @@ class Top(spira.Cell):
         s_jj = spira.SRef(Jj(), transformation=t1)
         s_res = spira.SRef(ResVia(), transformation=t2)
 
-        shape_rectangle = shapes.RectangleShape(p1=(-10*1e6, -23*1e6), p2=(10*1e6, 10*1e6))
+        shape_rectangle = shapes.RectangleShape(p1=(-10, -23), p2=(10, 10))
         ply = spira.Polygon(shape=shape_rectangle, gds_layer=spira.Layer(number=7))
         elems += ply
 
@@ -62,8 +62,8 @@ class Top(spira.Cell):
 class Bot(spira.Cell):
 
     def get_transforms(self):
-        t1 = spira.Translation((0*1e6, 0*1e6))
-        t2 = spira.Translation((0*1e6, -30*1e6))
+        t1 = spira.Translation((0, 0))
+        t2 = spira.Translation((0, -30))
         return [t1, t2]
 
     def create_elementals(self, elems):
@@ -71,7 +71,7 @@ class Bot(spira.Cell):
 
         s_res = spira.SRef(ResVia(), transformation=t2)
 
-        shape_rectangle = shapes.RectangleShape(p1=(-10*1e6, -55*1e6), p2=(10*1e6, -35*1e6))
+        shape_rectangle = shapes.RectangleShape(p1=(-10, -55), p2=(10, -35))
         ply = spira.Polygon(shape=shape_rectangle, gds_layer=spira.Layer(number=7))
         elems += ply
 
@@ -84,14 +84,14 @@ class Junction(spira.Cell):
     """ Hypres Josephson junction. """
 
     def get_transforms(self):
-        t1 = spira.Translation((0*1e6, 0*1e6))
-        t2 = spira.Translation((0*1e6, -5*1e6))
+        t1 = spira.Translation((0, 0))
+        t2 = spira.Translation((0, -5))
         return [t1, t2]
 
     def create_elementals(self, elems):
         t1, t2 = self.get_transforms()
 
-        shape_rectangle = shapes.RectangleShape(p1=(-13*1e6, -60*1e6), p2=(13*1e6, 12*1e6))
+        shape_rectangle = shapes.RectangleShape(p1=(-13, -60), p2=(13, 12))
         ply = spira.Polygon(alias='M4', shape=shape_rectangle, gds_layer=spira.Layer(number=5))
         elems += ply
 
@@ -179,7 +179,7 @@ if __name__ == '__main__':
     
     # ply = junction['Jj_S0']['J5']
     
-    # ply.stretch(sx=1, sy=2, center=(0, 6*1e6))
+    # ply.stretch(sx=1, sy=2, center=(0, 6))
     
     # junction.output()
     # cell.output()

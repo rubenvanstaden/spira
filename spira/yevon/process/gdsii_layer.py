@@ -337,7 +337,7 @@ class Layer(__Layer__):
     def __init__(self, number=0, datatype=0, layerlist=None, name=None, **kwargs):
         if name is None:
             name = 'layer' + str(number)
-        super().__init__(number=number, datatype=datatype, name=name,**kwargs)
+        super().__init__(number=number, datatype=datatype, name=name, **kwargs)
 
     def __repr__(self):
         string = '[SPiRA: Layer] (\'{}\', layer {}, datatype {})'
@@ -361,12 +361,12 @@ class Layer(__Layer__):
         else:
             raise ValueError('Not Implemented!')
 
+    def is_equal_number(self, other):
+        return (self.number == other.number)
+
     @property
     def key(self):
         return (self.number, self.datatype)
-
-    def is_equal_number(self, other):
-        return (self.number == other.number)
 
 
 def LayerParameter(local_name=None, restriction=None, **kwargs):

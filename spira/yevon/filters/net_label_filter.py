@@ -3,9 +3,8 @@ from spira.yevon.filters.filter import Filter
 from spira.yevon.process.gdsii_layer import LayerList, LayerListParameter
 from spira.yevon.gdsii.elem_list import ElementListParameter
 from spira.yevon.geometry.ports.port_list import PortListParameter
-from spira.yevon.geometry.ports import Port, ContactPort
+from spira.yevon.geometry.ports import Port
 from spira.yevon.utils import geometry
-from spira.yevon.geometry.ports.port import BranchPort
 from copy import deepcopy
 from spira.yevon.process import get_rule_deck
 

@@ -20,6 +20,7 @@ class __ElementList__(TypedList, Transformable):
         from spira.yevon.gdsii.cell import Cell
         from spira.yevon.gdsii.polygon import Polygon
         r_val = None
+        # print(value)
         if isinstance(value, str):
             for e in self._list:
                 if issubclass(type(e), (Cell, Polygon)):
@@ -141,10 +142,10 @@ class ElementList(__ElementList__):
                 else: yield elem
         return _flatten(self._list)
 
-    def flatcopy(self, level=-1):
+    def flat_copy(self, level=-1):
         el = ElementList()
         for e in self._list:
-            el += e.flatcopy(level)
+            el += e.flat_copy(level)
         return el
 
     def flatten(self):
@@ -154,9 +155,9 @@ class ElementList(__ElementList__):
             flat_list = ElementList()
             for i in self._list:
                 if issubclass(type(i), Cell):
-                    i = i.flatcopy()
+                    i = i.flat_copy()
                 elif isinstance(i, SRef):
-                    i = i.flatcopy()
+                    i = i.flat_copy()
                 for a in i.flatten():
                     flat_list += a
             return flat_list
@@ -174,6 +175,18 @@ class ElementList(__ElementList__):
             if not e.is_empty():
                 return False
         return True
+
+    def append(self, item):
+        from spira.yevon.gdsii.group import Group
+        if isinstance(item, Group):
+            self._list.extend(item.elements)
+        elif isinstance(item, self.__item_type__):
+            self._list.append(item)
+        elif isinstance(item, list):
+            self._list.extend(item)
+        else:
+            error_message = "You are trying to add an element of type {} to {}. You can only add elements of type {}."
+            raise ValueError(error_message.format(str(type(item)), str(self.__class__), str(self.__item_type__)))
 
 
 class ElementListParameter(ParameterDescriptor):

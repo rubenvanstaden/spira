@@ -33,11 +33,6 @@ def derived_elements(elems, derived_layer):
         p2 = derived_elements(elems, derived_layer.layer2)
         if isinstance(derived_layer, __DerivedLayerAnd__):
             pg = p1 & p2
-            print(p1.elements)
-            # print(p1)
-            # print(p2)
-            # print(pg.elements)
-            print('')
         elif isinstance(derived_layer, __DerivedLayerXor__):
             pg = p1 ^ p2
         return pg

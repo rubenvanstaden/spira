@@ -88,19 +88,14 @@ class __Cell__(ParameterInitializer, metaclass=MetaCell):
 
 class CellAbstract(__Cell__):
 
-    def create_name(self):
-        if not hasattr(self, '__name__'):
-            self.__name__ = self.__name_generator__(self)
-        return self.__name__
-
     def dependencies(self):
         deps = self.elements.dependencies()
         deps += self
         return deps
 
-    def flatcopy(self, level=-1):
+    def flat_copy(self, level=-1):
         name = '{}_{}'.format(self.name, 'Flat'),
-        return Cell(name, self.elements.flatcopy(level=level))
+        return Cell(name, self.elements.flat_copy(level=level))
     
     def is_layer_in_cell(self, layer):
         D = deepcopy(self)
@@ -158,16 +153,12 @@ class Cell(CellAbstract):
     alias = FunctionParameter(get_alias, set_alias, doc='Functions to generate an alias for cell name.')
 
     def __init__(self, name=None, elements=None, ports=None, nets=None, library=None, **kwargs):
-
         __Cell__.__init__(self, **kwargs)
-        # gdspy.Cell.__init__(self, self.name, exclude_from_current=True)
 
         if name is not None:
-            # s = '{}_{}'.format(name, self.__class__._ID)
             s = '{}_{}'.format(name, Cell._next_uid)
             self.__dict__['__name__'] = s
             Cell.name.__set__(self, s)
-            # self.__class__._ID += 1
 
         if library is not None:
             self.library = library
@@ -186,6 +177,11 @@ class Cell(CellAbstract):
     def __str__(self):
         return self.__repr__()
 
+    def create_name(self):
+        if not hasattr(self, '__name__'):
+            self.__name__ = self.__name_generator__(self)
+        return self.__name__
+
     def transform(self, transformation=None):
         self.elements.transform(transformation)
         self.ports.transform(transformation)
@@ -196,7 +192,7 @@ class Cell(CellAbstract):
             S.expand_transform()
         return self
 
-    def expand_flatcopy(self, exclude_devices=False):
+    def expand_flat_copy(self, exclude_devices=False):
         from spira.yevon.gdsii.polygon import Polygon
         from spira.yevon.geometry.ports.port import Port
         from spira.yevon.gdsii.pcell import Device

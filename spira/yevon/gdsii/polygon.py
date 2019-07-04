@@ -53,7 +53,7 @@ class __Polygon__(__LayerElement__):
             self.transformation = IdentityTransform()
         return self
 
-    def flatcopy(self, level = -1):
+    def flat_copy(self, level = -1):
         """  """
         S = Polygon(layer=self.layer, shape=self.shape, transformation=self.transformation)
         S.expand_transform()
@@ -237,7 +237,7 @@ class Polygon(__Polygon__):
         return []
 
 
-def Rectangle(layer, p1=(0,0), p2=(2,2), center=(0,0), alias=None):
+def Rectangle(layer, p1=(0,0), p2=(2,2), center=(0,0), alias=None, transformation=None):
     """ Creates a rectangular shape that can be used in 
     GDSII format as a polygon object.
 
@@ -247,10 +247,10 @@ def Rectangle(layer, p1=(0,0), p2=(2,2), center=(0,0), alias=None):
     >>> [SPiRA: Rectangle] ()
     """
     shape = shapes.RectangleShape(p1=p1, p2=p2)
-    return Polygon(alias=alias, shape=shape, layer=layer)
+    return Polygon(alias=alias, shape=shape, layer=layer, transformation=transformation)
 
 
-def Box(layer, width=1, height=1, center=(0,0), alias=None, enable_edges=False):
+def Box(layer, width=1, height=1, center=(0,0), alias=None, transformation=None):
     """ Creates a box shape that can be used in 
     GDSII format as a polygon object.
 
@@ -260,10 +260,10 @@ def Box(layer, width=1, height=1, center=(0,0), alias=None, enable_edges=False):
     >>> [SPiRA: Rectangle] ()
     """
     shape = shapes.BoxShape(width=width, height=height, center=center)
-    return Polygon(alias=alias, shape=shape, layer=layer, enable_edges=enable_edges)
+    return Polygon(alias=alias, shape=shape, layer=layer, transformation=transformation)
 
 
-def Circle(layer, box_size=(1,1), angle_step=1, center=(0,0), alias=None):
+def Circle(layer, box_size=(1,1), angle_step=1, center=(0,0), alias=None, transformation=None):
     """ Creates a circle shape that can be used in 
     GDSII format as a polygon object.
 
@@ -273,10 +273,10 @@ def Circle(layer, box_size=(1,1), angle_step=1, center=(0,0), alias=None):
     >>> [SPiRA: Rectangle] ()
     """
     shape = shapes.CircleShape(box_size=box_size, angle_step=angle_step)
-    return Polygon(alias=alias, shape=shape, layer=layer)
+    return Polygon(alias=alias, shape=shape, layer=layer, transformation=transformation)
 
 
-def Convex(layer, radius=1.0, num_sides=6, center=(0,0), alias=None):
+def Convex(layer, radius=1.0, num_sides=6, center=(0,0), alias=None, transformation=None):
     """ Creates a circle shape that can be used in 
     GDSII format as a polygon object.
 
@@ -286,10 +286,10 @@ def Convex(layer, radius=1.0, num_sides=6, center=(0,0), alias=None):
     >>> [SPiRA: Rectangle] ()
     """
     shape = shapes.ConvexShape(radius=radius, num_sides=num_sides)
-    return Polygon(alias=alias, shape=shape, layer=layer)
+    return Polygon(alias=alias, shape=shape, layer=layer, transformation=transformation)
 
 
-def Cross(layer, box_size=20, thickness=5, center=(0,0), alias=None):
+def Cross(layer, box_size=20, thickness=5, center=(0,0), alias=None, transformation=None):
     """ Creates a circle shape that can be used in 
     GDSII format as a polygon object.
 
@@ -299,10 +299,10 @@ def Cross(layer, box_size=20, thickness=5, center=(0,0), alias=None):
     >>> [SPiRA: Rectangle] ()
     """
     shape = shapes.CrossShape(box_size=box_size, thickness=thickness)
-    return Polygon(alias=alias, shape=shape, layer=layer)
+    return Polygon(alias=alias, shape=shape, layer=layer, transformation=transformation)
 
 
-def Wedge(layer, begin_coord=(0,0), end_coord=(10,0), begin_width=3, end_width=1, center=(0,0), alias=None):
+def Wedge(layer, begin_coord=(0,0), end_coord=(10,0), begin_width=3, end_width=1, center=(0,0), alias=None, transformation=None):
     """ Creates a circle shape that can be used in 
     GDSII format as a polygon object.
 
@@ -317,10 +317,10 @@ def Wedge(layer, begin_coord=(0,0), end_coord=(10,0), begin_width=3, end_width=1
         begin_width=begin_width, 
         end_width=end_width
     )
-    return Polygon(alias=alias, shape=shape, layer=layer)
+    return Polygon(alias=alias, shape=shape, layer=layer, transformation=transformation)
 
 
-def Parabolic(layer, begin_coord=(0,0), end_coord=(10,0), begin_width=3, end_width=1, center=(0,0), alias=None):
+def Parabolic(layer, begin_coord=(0,0), end_coord=(10,0), begin_width=3, end_width=1, center=(0,0), alias=None, transformation=None):
     """ Creates a circle shape that can be used in 
     GDSII format as a polygon object.
 
@@ -335,5 +335,5 @@ def Parabolic(layer, begin_coord=(0,0), end_coord=(10,0), begin_width=3, end_wid
         begin_width=begin_width, 
         end_width=end_width
     )
-    return Polygon(alias=alias, shape=shape, layer=layer)
+    return Polygon(alias=alias, shape=shape, layer=layer, transformation=transformation)
 

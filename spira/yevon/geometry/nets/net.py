@@ -7,7 +7,6 @@ from spira.core.parameters.variables import GraphParameter, StringParameter
 from spira.core.parameters.descriptor import Parameter
 from spira.yevon.geometry.coord import Coord
 from spira.yevon.vmodel.geometry import GeometryParameter
-from spira.yevon.geometry.ports.port import BranchPort
 from spira.yevon.geometry.ports.base import __Port__
 from spira.yevon.process import get_rule_deck
 

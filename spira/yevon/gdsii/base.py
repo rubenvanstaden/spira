@@ -16,9 +16,9 @@ class MetaElement(MetaInitializer):
 
     def __call__(cls, *params, **keyword_params):
         kwargs = cls.__map_parameters__(*params, **keyword_params)
-        instance = super().__call__(**kwargs)
-        instance.__keywords__ = kwargs
-        return instance
+        cls = super().__call__(**kwargs)
+        cls.__keywords__ = kwargs
+        return cls
 
 
 class __Element__(Transformable, ParameterInitializer, metaclass=MetaElement):
@@ -69,9 +69,6 @@ class __LayerElement__(__Element__):
     """  """
 
     layer = LayerParameter()
-
-    # def __init__(self, **kwargs):
-    #     super().__init__(**kwargs)
 
     def __init__(self, layer=0, transformation=None, **kwargs):
         super().__init__(layer=layer, transformation=transformation, **kwargs)

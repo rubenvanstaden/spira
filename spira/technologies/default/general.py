@@ -53,24 +53,35 @@ RDD.PURPOSE.JUNCTION = PurposeLayer(name='Junction layer', symbol='JJ')
 RDD.PURPOSE.NTRON = PurposeLayer(name='nTron layer', symbol='NTRON')
 RDD.PURPOSE.HOLE = PurposeLayer(name='Polygon holes', symbol='HOLE')
 RDD.PURPOSE.DUMMY = PurposeLayer(name='Sky plane polygons', symbol='DUM')
-RDD.PURPOSE.TEXT = PurposeLayer(name='Sky plane polygons', symbol='TXT')
 RDD.PURPOSE.BOUNDARY_BOX = PurposeLayer(name='Bounding Box', symbol='BBOX', doc='')
 RDD.PURPOSE.INTERSECTED = PurposeLayer(name='Bounding Box', symbol='AND', doc='')
 RDD.PURPOSE.UNION = PurposeLayer(name='Bounding Box', symbol='OR', doc='')
 RDD.PURPOSE.DIFFERENCE = PurposeLayer(name='Bounding Box', symbol='NOR', doc='')
 
+# ---------------------------------- Text Purposes ------------------------------------
+
+RDD.PURPOSE.TEXT = PurposeLayerDatabase()
+RDD.PURPOSE.TEXT.PIN = PurposeLayer(name='PinText', symbol='PT')
+RDD.PURPOSE.TEXT.EDGE = PurposeLayer(name='EdgeText', symbol='ET')
+RDD.PURPOSE.TEXT.CONTACT = PurposeLayer(name='ContactText', symbol='CT')
+RDD.PURPOSE.TEXT.ROUTE = PurposeLayer(name='RouteText', symbol='IT')
+
 # ---------------------------------- Port Purposes ------------------------------------
 
-RDD.PURPOSE.PORT = ProcessLayerDatabase()
-RDD.PURPOSE.PORT.CONTACT = PurposeLayer(name='Port ports specified by the designer', symbol='TERM')
-RDD.PURPOSE.PORT.BRANCH = PurposeLayer(name='Port ports specified by the designer', symbol='BRANCH')
+RDD.PURPOSE.PORT = PurposeLayerDatabase()
+RDD.PURPOSE.PORT.PIN = PurposeLayer(name='PinPort', symbol='P')
+RDD.PURPOSE.PORT.EDGE = PurposeLayer(name='EdgePort', symbol='E')
+RDD.PURPOSE.PORT.CONTACT = PurposeLayer(name='ContactPort', symbol='C')
+RDD.PURPOSE.PORT.ROUTE = PurposeLayer(name='RoutePort', symbol='I')
+RDD.PURPOSE.PORT.BRANCH = PurposeLayer(name='BranchPort', symbol='B')
+RDD.PURPOSE.PORT.DUMMY = PurposeLayer(name='DummyPort', symbol='D')
 RDD.PURPOSE.PORT.INSIDE_EDGE_ENABLED = PurposeLayer(name='Enabled edge', symbol='EDGE_IE', doc='Layer that represents a polygon edge.')
 RDD.PURPOSE.PORT.INSIDE_EDGE_DISABLED = PurposeLayer(name='Disabled edge', symbol='EDGE_ID', doc='Layer that represents a polygon edge.')
 RDD.PURPOSE.PORT.OUTSIDE_EDGE_ENABLED = PurposeLayer(name='Enabled edge', symbol='EDGE_OE', doc='Layer that represents a polygon edge.')
 RDD.PURPOSE.PORT.OUTSIDE_EDGE_DISABLED = PurposeLayer(name='Disabled edge', symbol='EDGE_OD', doc='Layer that represents a polygon edge.')
 RDD.PURPOSE.PORT.DIRECTION = PurposeLayer(name='Arrow', symbol='DIR', doc='Layer that represents the direction of a edge terminal.')
-RDD.PURPOSE.PORT.TEXT_ENABLED = PurposeLayer(name='Enabled text', symbol='TEXT_E', doc='Layer that represents a polygon edge.')
-RDD.PURPOSE.PORT.TEXT_DISABLED = PurposeLayer(name='Disabled text', symbol='TEXT_D', doc='Layer that represents a polygon edge.')
+# RDD.PURPOSE.PORT.TEXT_ENABLED = PurposeLayer(name='Enabled text', symbol='TEXT_E', doc='Layer that represents a polygon edge.')
+# RDD.PURPOSE.PORT.TEXT_DISABLED = PurposeLayer(name='Disabled text', symbol='TEXT_D', doc='Layer that represents a polygon edge.')
 # RDD.PURPOSE.PORT.INSIDE = PurposeLayer(name='Inside', symbol='IE', doc='The inside edge of the shape.')
 # RDD.PURPOSE.PORT.OUTSIDE = PurposeLayer(name='Outside', symbol='OE', doc='The outside edge of the shape.')
 
@@ -100,7 +111,7 @@ class AdminDatabase(DelayedDatabase):
         from spira.yevon.gdsii.generators import NameGenerator
         self.NAME_GENERATOR = NameGenerator(
             prefix_attribute='__name_prefix__',
-            counter_zero=0,
+            counter=0,
             process_name=''
         )
 
@@ -109,13 +120,13 @@ RDD.ADMIN = AdminDatabase()
 # ---------------------------- Parameterized Cell Data --------------------------------
 
 class PCellDatabase(DelayedDatabase):
-    
+
     def initialize(self):
         from spira.yevon import filters
 
         self.LCAR_DEVICE = 1
         self.LCAR_CIRCUIT = 100
-        
+
         f = filters.ToggledCompoundFilter()
         f += filters.ProcessBooleanFilter(name='boolean')
         f += filters.SimplifyFilter(name='simplify')

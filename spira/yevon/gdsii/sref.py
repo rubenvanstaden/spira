@@ -24,20 +24,8 @@ class __RefElement__(__Element__):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-    def __deepcopy__(self, memo):
-        return SRef(
-            reference=deepcopy(self.ref),
-            # reference=self.ref,
-            midpoint=deepcopy(self.midpoint),
-            transformation=deepcopy(self.transformation),
-            node_id=deepcopy(self.node_id)
-        )
-
-    def __eq__(self, other):
-        if not isinstance(other, SRef): return False
-        return (self.ref == other.ref) and (self.midpoint == other.position) and (self.transformation == other.transformation)
-
     def expand_transform(self):
+        """  """
 
         if not self.transformation.is_identity():
             # NOTE: Use __class__ cause we want to keep the 
@@ -46,23 +34,21 @@ class __RefElement__(__Element__):
                 name=self.ref.name + self.transformation.id_string(),
                 alias=self.ref.alias + self.alias,
                 elements=deepcopy(self.ref.elements),
-                ports=deepcopy(self.ref.ports)
-            )
+                ports=deepcopy(self.ref.ports))
     
             T = self.transformation + spira.Translation(self.midpoint)
             C = C.transform(T)
-    
-            # NOTE: Applies expantion hierarchically.
-            # Expands all references in the cell.
             C.expand_transform()
-    
+
             self.ref = C
             self.transformation = None
             self.midpoint = (0,0)
 
         return self
 
-    def expand_flatcopy(self):
+    def expand_flat_copy(self):
+        """  """
+
         S = self.expand_transform()
         C = spira.Cell(name=S.ref.name + '_ExpandedCell')
         def flat_polygons(subj, cell):
@@ -102,7 +88,6 @@ class SRef(__RefElement__):
     >>> sref = spira.SRef(structure=cell)
     """
 
-    supp = IntegerParameter(default=1)
     midpoint = CoordParameter(default=(0,0))
 
     def get_alias(self):
@@ -129,6 +114,22 @@ class SRef(__RefElement__):
     def __hash__(self):
         return hash(self.__repr__())
 
+    def __deepcopy__(self, memo):
+        return SRef(
+            reference=deepcopy(self.ref),
+            midpoint=deepcopy(self.midpoint),
+            transformation=deepcopy(self.transformation)
+        )
+
+    def __eq__(self, other):
+        if not isinstance(other, SRef):
+            return False
+        return (
+            (self.ref == other.ref) and
+            (self.midpoint == other.position) and
+            (self.transformation == other.transformation)
+        )
+
     def id_string(self):
         return self.__repr__()
 
@@ -142,9 +143,9 @@ class SRef(__RefElement__):
     def flatten(self):
         return self.ref.flatten()
 
-    def flatcopy(self, level=-1):
+    def flat_copy(self, level=-1):
         if level == 0: return spira.ElementList(self._copy__())
-        el = self.ref.elements.flatcopy(level-1)
+        el = self.ref.elements.flat_copy(level-1)
         T = self.transformation + Translation(self.midpoint)
         el.transform(T)
         return el
@@ -200,7 +201,7 @@ class SRef(__RefElement__):
         # self.translate(dxdy)
         return self
 
-    def connect(self, port, destination):
+    def connect(self, port, destination, ignore_process=False):
         """ Connect the reference internal port with an external port.
 
         Example:
@@ -222,9 +223,11 @@ class SRef(__RefElement__):
         if not isinstance(destination, spira.Port):
             raise ValueError('Destination has to be a port.')
 
+        if (ignore_process is False) and (port.process != destination.process):
+            raise ValueError('Cannot connect ports from different processes.')
+
         T = vector_match_transform(v1=p, v2=destination)
         self.transform(T)
-        self.supp = 2
 
         return self
 
@@ -284,7 +287,7 @@ class SRef(__RefElement__):
         return self
 
     def stretch(self, factor=(1,1), center=(0,0)):
-        S = self.expand_flatcopy()
+        S = self.expand_flat_copy()
         T = spira.Stretch(stretch_factor=factor, stretch_center=center)
         for i, e in enumerate(S.ref.elements):
             # T.apply(S.ref.elements[i])
@@ -294,7 +297,7 @@ class SRef(__RefElement__):
 
     def stretchcopy(self, factor=(1,1), center=(0,0)):
         pass
-        # S = self.expand_flatcopy()
+        # S = self.expand_flat_copy()
         # T = spira.Stretch(stretch_factor=factor, stretch_center=center)
         # for i, e in enumerate(S.ref.elements):
         #     T.apply(S.ref.elements[i])

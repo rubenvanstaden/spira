@@ -1,7 +1,7 @@
 import spira.all as spira
 
 
-class Junction(spira.PCell):
+class Resistor(spira.PCell):
 
     width = spira.NumberParameter(default=spira.RDD.R1.MIN_WIDTH, doc='Width of the shunt resistance.')
     length = spira.NumberParameter(default=spira.RDD.R1.MIN_LENGTH, doc='Length of the shunt resistance.')
@@ -12,15 +12,19 @@ class Junction(spira.PCell):
         return True
 
     def create_elements(self, elems):
-        w, l = self.width, self.length
-        shape = spira.Shape(points=[[0,0], [l,0], [l,w], [0,w]])
-        elems += spira.Polygon(shape=shape, layer=spira.RDD.PLAYER.R1.METAL)
+        elems += spira.Box(alias='ply1', width=self.length, height=self.width, center=(0,0), layer=spira.RDD.PLAYER.R1.METAL)
         return elems
+
+    def create_ports(self, ports):
+        # Process symbol will automatically be added to the port name.
+        ports += self.elements['ply1'].ports['E1_R1'].copy(name='P1')
+        ports += self.elements['ply1'].ports['E3_R1'].copy(name='P2')
+        return ports
 
 
 if __name__ == '__main__':
 
-    D = Junction()
-    D.gdsii_output()
+    D = Resistor()
+    D.gdsii_output(name='Resistor')
 
 

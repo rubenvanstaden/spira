@@ -22,10 +22,12 @@ class ProcessBooleanFilter(Filter):
         ports = PortList()
         elems = ElementList()
 
-        for pg in item.process_elements:
-            for e in pg.elements:
-                elems += e
+        # for pg in item.process_elements:
+            # for e in pg.elements:
+                # elems += e
 
+        for e in item.process_elements:
+            elems += e
         for e in item.elements.sref:
             elems += e
         for e in item.elements.labels:
@@ -123,7 +125,7 @@ class MetalConnectFilter(Filter):
         from spira.yevon.geometry.shapes.modifiers import ShapeConnected
         from spira.yevon.geometry.shapes.shape import Shape
 
-        D = item.expand_flatcopy()
+        D = item.expand_flat_copy()
         v_model = virtual_connect(device=D)
 
         for i, e1 in enumerate(D.elements):

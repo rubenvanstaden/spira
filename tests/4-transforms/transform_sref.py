@@ -11,24 +11,24 @@ class TranslateReference(spira.Cell):
     t3 = spira.DataField(fdef_name='create_t3')
 
     def create_ref_point(self):
-        shape = shapes.RectangleShape(p1=(-2.5*1e6, -2.5*1e6), p2=(2.5*1e6, 2.5*1e6))
+        shape = shapes.RectangleShape(p1=(-2.5, -2.5), p2=(2.5, 2.5))
         ply = spira.Polygon(shape=shape, gds_layer=spira.Layer(number=1))
         return ply
 
     def create_t1(self):
         cell = spira.Cell()
-        shape = shapes.RectangleShape(p1=(0,0), p2=(10*1e6, 50*1e6))
+        shape = shapes.RectangleShape(p1=(0,0), p2=(10, 50))
         ply = spira.Polygon(shape=shape, gds_layer=spira.Layer(number=10))
         cell += ply
-        tf = spira.Translation(Coord(10*1e6, 0))
+        tf = spira.Translation(Coord(10, 0))
         S = spira.SRef(cell, midpoint=(0,0), transformation=tf)
-        # S._translate((10*1e6, 0))
+        # S._translate((10, 0))
         return S
 
     def create_t2(self):
         cell = spira.Cell()
-        tf = spira.GenericTransform(translation=Coord(-20*1e6, 0))
-        shape = shapes.RectangleShape(p1=(0,0), p2=(10*1e6, 50*1e6))
+        tf = spira.GenericTransform(translation=Coord(-20, 0))
+        shape = shapes.RectangleShape(p1=(0,0), p2=(10, 50))
         ply = spira.Polygon(shape=shape, gds_layer=spira.Layer(number=10))
         cell += ply
         S = spira.SRef(cell, transformation=tf)
@@ -36,8 +36,8 @@ class TranslateReference(spira.Cell):
 
     def create_t3(self):
         cell = spira.Cell()
-        tf = spira.Translation((10*1e6, 0))
-        shape = shapes.RectangleShape(p1=(0,0), p2=(10*1e6, 50*1e6))
+        tf = spira.Translation((10, 0))
+        shape = shapes.RectangleShape(p1=(0,0), p2=(10, 50))
         ply = spira.Polygon(shape=shape, gds_layer=spira.Layer(number=10))
         cell += ply
         S = spira.SRef(cell, transformation=tf)
@@ -61,13 +61,13 @@ class RotationReference(spira.Cell):
     t3 = spira.DataField(fdef_name='create_t3')
 
     def create_ref_point(self):
-        shape = shapes.RectangleShape(p1=(-2.5*1e6, -2.5*1e6), p2=(2.5*1e6, 2.5*1e6))
+        shape = shapes.RectangleShape(p1=(-2.5, -2.5), p2=(2.5, 2.5))
         ply = spira.Polygon(shape=shape, gds_layer=spira.Layer(number=1))
         return ply
 
     def create_t1(self):
         cell = spira.Cell()
-        shape = shapes.RectangleShape(p1=(0,0), p2=(10*1e6, 50*1e6))
+        shape = shapes.RectangleShape(p1=(0,0), p2=(10, 50))
         ply = spira.Polygon(shape=shape, gds_layer=spira.Layer(number=10))
         cell += ply
         S = spira.SRef(cell)
@@ -77,7 +77,7 @@ class RotationReference(spira.Cell):
     def create_t2(self):
         cell = spira.Cell()
         tf = spira.GenericTransform(rotation=60)
-        shape = shapes.RectangleShape(p1=(0,0), p2=(10*1e6, 50*1e6))
+        shape = shapes.RectangleShape(p1=(0,0), p2=(10, 50))
         ply = spira.Polygon(shape=shape, gds_layer=spira.Layer(number=11))
         cell += ply
         S = spira.SRef(cell, transformation=tf)
@@ -86,7 +86,7 @@ class RotationReference(spira.Cell):
     def create_t3(self):
         cell = spira.Cell()
         tf = spira.Rotation(rotation=30)
-        shape = shapes.RectangleShape(p1=(0,0), p2=(10*1e6, 50*1e6))
+        shape = shapes.RectangleShape(p1=(0,0), p2=(10, 50))
         ply = spira.Polygon(shape=shape, gds_layer=spira.Layer(number=12))
         cell += ply
         S = spira.SRef(cell, transformation=tf)
@@ -110,13 +110,13 @@ class ReflectReference(spira.Cell):
     t3 = spira.DataField(fdef_name='create_t3')
 
     def create_ref_point(self):
-        shape = shapes.RectangleShape(p1=(-2.5*1e6, -2.5*1e6), p2=(2.5*1e6, 2.5*1e6))
+        shape = shapes.RectangleShape(p1=(-2.5, -2.5), p2=(2.5, 2.5))
         ply = spira.Polygon(shape=shape, gds_layer=spira.Layer(number=1))
         return ply
 
     def create_t1(self):
         cell = spira.Cell()
-        shape = shapes.RectangleShape(p1=(0,0), p2=(10*1e6, 50*1e6))
+        shape = shapes.RectangleShape(p1=(0,0), p2=(10, 50))
         ply = spira.Polygon(shape=shape, gds_layer=spira.Layer(number=10))
         cell += ply
         S = spira.SRef(cell)
@@ -126,7 +126,7 @@ class ReflectReference(spira.Cell):
     def create_t2(self):
         cell = spira.Cell()
         tf = spira.GenericTransform(reflection=True)
-        shape = shapes.RectangleShape(p1=(0,0), p2=(10*1e6, 50*1e6))
+        shape = shapes.RectangleShape(p1=(0,0), p2=(10, 50))
         ply = spira.Polygon(shape=shape, gds_layer=spira.Layer(number=11))
         cell += ply
         S = spira.SRef(cell, transformation=tf)
@@ -135,7 +135,7 @@ class ReflectReference(spira.Cell):
     def create_t3(self):
         cell = spira.Cell()
         tf = spira.Reflection(True)
-        shape = shapes.RectangleShape(p1=(0,0), p2=(10*1e6, 50*1e6))
+        shape = shapes.RectangleShape(p1=(0,0), p2=(10, 50))
         ply = spira.Polygon(shape=shape, gds_layer=spira.Layer(number=12))
         cell += ply
         S = spira.SRef(cell, transformation=tf)
@@ -159,31 +159,31 @@ class TransformReference(spira.Cell):
     t3 = spira.DataField(fdef_name='create_t3')
 
     def create_ref_point(self):
-        shape = shapes.RectangleShape(p1=(-2.5*1e6, -2.5*1e6), p2=(2.5*1e6, 2.5*1e6))
+        shape = shapes.RectangleShape(p1=(-2.5, -2.5), p2=(2.5, 2.5))
         ply = spira.Polygon(shape=shape, gds_layer=spira.Layer(number=1))
         return ply
 
     def create_t1(self):
         cell = spira.Cell()
-        shape = shapes.RectangleShape(p1=(0,0), p2=(10*1e6, 50*1e6))
+        shape = shapes.RectangleShape(p1=(0,0), p2=(10, 50))
         ply = spira.Polygon(shape=shape, gds_layer=spira.Layer(number=10))
         cell += ply
 
         S1 = spira.SRef(cell)
         S1._rotate(rotation=45)
-        S1._translate(Coord(15*1e6, 15*1e6))
+        S1._translate(Coord(15, 15))
 
         S = spira.SRef(cell)
         S._rotate(rotation=45)
-        S._translate(Coord(15*1e6, 15*1e6))
+        S._translate(Coord(15, 15))
         S._reflect(True)
         return [S1, S]
 
     def create_t2(self):
         cell = spira.Cell()
-        tf_1 = spira.GenericTransform(translation=(10*1e6, 10*1e6), rotation=45)
-        tf_2 = spira.GenericTransform(translation=Coord(10*1e6, 10*1e6), rotation=45, reflection=True)
-        shape = shapes.RectangleShape(p1=(0,0), p2=(10*1e6, 50*1e6))
+        tf_1 = spira.GenericTransform(translation=(10, 10), rotation=45)
+        tf_2 = spira.GenericTransform(translation=Coord(10, 10), rotation=45, reflection=True)
+        shape = shapes.RectangleShape(p1=(0,0), p2=(10, 50))
         ply = spira.Polygon(shape=shape, gds_layer=spira.Layer(number=11))
         cell += ply
         S1 = spira.SRef(cell, transformation=tf_1)
@@ -192,9 +192,9 @@ class TransformReference(spira.Cell):
 
     def create_t3(self):
         cell = spira.Cell()
-        tf_1 = spira.Translation(Coord(12.5*1e6, 2.5*1e6)) + spira.Rotation(60)
-        # tf_2 = spira.Translation(Coord(12.5*1e6, 2.5*1e6)) + spira.Rotation(60) + spira.Reflection(True)
-        shape = shapes.RectangleShape(p1=(0,0), p2=(10*1e6, 50*1e6))
+        tf_1 = spira.Translation(Coord(12.5, 2.5)) + spira.Rotation(60)
+        # tf_2 = spira.Translation(Coord(12.5, 2.5)) + spira.Rotation(60) + spira.Reflection(True)
+        shape = shapes.RectangleShape(p1=(0,0), p2=(10, 50))
         ply = spira.Polygon(shape=shape, gds_layer=spira.Layer(number=12))
         cell += ply
         S1 = spira.SRef(cell, transformation=tf_1)
@@ -230,9 +230,9 @@ t4 = TransformReference()
 t4.output()
 
 # cell += spira.SRef(t1, midpoint=(0, 0))
-# cell += spira.SRef(t2, midpoint=(50*1e6, 0))
-# cell += spira.SRef(t3, midpoint=(0*1e6, -100*1e6))
-# cell += spira.SRef(t4, midpoint=(50*1e6, -100*1e6))
+# cell += spira.SRef(t2, midpoint=(50, 0))
+# cell += spira.SRef(t3, midpoint=(0, -100))
+# cell += spira.SRef(t4, midpoint=(50, -100))
 
 # cell.output()
 

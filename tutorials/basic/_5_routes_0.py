@@ -1,7 +1,7 @@
 import spira.all as spira
 
 
-class Junction(spira.PCell):
+class Resistor(spira.PCell):
 
     width = spira.NumberParameter(default=spira.RDD.R1.MIN_WIDTH, doc='Width of the shunt resistance.')
     length = spira.NumberParameter(default=spira.RDD.R1.MIN_LENGTH, doc='Length of the shunt resistance.')
@@ -21,7 +21,6 @@ class Junction(spira.PCell):
         return spira.Port(name='P2', midpoint=(self.length/2,0), orientation=0, width=self.width, process=spira.RDD.PROCESS.R1)
 
     def create_elements(self, elems):
-        # elems += spira.RouteManhattan(ports=[self.p1, self.p2], layer=spira.RDD.PLAYER.R1.METAL)
         elems += spira.RouteStraight(p1=self.p1, p2=self.p2, layer=spira.RDD.PLAYER.R1.METAL)
         return elems
 
@@ -32,8 +31,8 @@ class Junction(spira.PCell):
 
 if __name__ == '__main__':
 
-    D = Junction()
-    D.gdsii_output()
+    D = Resistor()
+    D.gdsii_output(name='Resistor')
 
 
 

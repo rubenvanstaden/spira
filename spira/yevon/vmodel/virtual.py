@@ -69,7 +69,7 @@ class VirtualConnect(__VirtualModel__):
                     elems += e
         else:
             pass
-            # # D = self.device.expand_flatcopy()
+            # # D = self.device.expand_flat_copy()
             # D = self.device.expand_flat_no_jjcopy()
 
             # elems = spira.ElementList()

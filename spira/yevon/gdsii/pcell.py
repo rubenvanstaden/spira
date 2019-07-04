@@ -52,7 +52,7 @@ class Device(PCell):
         elems += self.routes
 
         if self.pcell is True:
-            D = Cell(elements=elems.flatcopy())
+            D = Cell(elements=elems.flat_copy())
             elems = F(D).elements
 
         return elems
@@ -100,7 +100,7 @@ class Circuit(PCell):
         elems += self.routes
 
         if self.pcell is True:
-            D = Cell(elements=elems).expand_flatcopy(exclude_devices=True)
+            D = Cell(elements=elems).expand_flat_copy(exclude_devices=True)
             elems = F(D).elements
 
         return elems

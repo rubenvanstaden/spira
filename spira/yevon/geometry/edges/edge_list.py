@@ -27,10 +27,10 @@ class EdgeList(TypedList):
             if self._list[i] is key:
                 return list.__delitem__(self._list, i)
 
-    def flatcopy(self, level = -1):
+    def flat_copy(self, level = -1):
         el = EdgeList()
         for e in self._list:
-            el += e.flatcopy(level)
+            el += e.flat_copy(level)
         return el
 
     def move(self, position):

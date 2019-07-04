@@ -34,7 +34,6 @@ class PhysicalLayer(Layer):
         return 'PLayer {}-{}'.format(self.process.symbol, self.purpose.symbol)
 
     def __hash__(self):
-        # return hash(self.node_id)
         return hash(self.__str__())
 
     def __eq__(self, other):

@@ -13,19 +13,34 @@ __all__ = ['Group']
 
 class __Group__(ParameterInitializer):
 
-    elements = ElementListParameter(fdef_name='__create_elements__', doc='List of ports to be added to the cell instance.')
+    elements = ElementListParameter(
+        fdef_name='__create_elements__',
+        doc='List of ports to be added to the cell instance.')
 
     def __create_elements__(self, elems):
-        el = self.create_elements(elems)
-        if hasattr(self, 'disable_edge_ports'):
-            if self.disable_edge_ports:
-                for e in el:
-                    if isinstance(e, spira.Polygon):
-                        e.disable_edge_ports = True
-        return el
+        return self.create_elements(elems)
 
     def create_elements(self, elems):
         return elems
+
+    def __iter__(self):
+        return self.elements.__iter__()
+
+    def __iadd__(self, element):
+        from spira.yevon.geometry.ports.base import __Port__
+        """ Add element and reduce the class to a simple compound elements. """
+        if isinstance(element, (list, Group, spira.ElementList)):
+            self.extend(element)
+        # elif isinstance(element, __Element__):
+        elif issubclass(type(element), __Element__):
+            self.append(element)
+        elif element is None:
+            return self
+        # elif issubclass(type(element), __Port__):
+        #     self.ports += element
+        else:
+            raise TypeError("Invalid type " + str(type(element)) + " in __Group__.__iadd__().")
+        return self
 
     def append(self, element):
         el = self.elements
@@ -41,27 +56,9 @@ class __Group__(ParameterInitializer):
             el.extend(elems)
         self.elements = el  
 
-    def __iadd__(self, element):
-        from spira.yevon.geometry.ports.base import __Port__
-        """ Add element and reduce the class to a simple compound elements. """
-        if isinstance(element, (list, spira.ElementList)):
-            self.extend(element)
-        elif isinstance(element, __Element__):
-            self.append(element)
-        elif element is None:
-            return self
-        elif issubclass(type(element), __Port__):
-            self.ports += element
-        else:
-            raise TypeError("Invalid type " + str(type(element)) + " in __Group__.__iadd__().")
-        return self
-
     def flatten(self, level=-1):
-        self.elements = self.elements.flatcopy(level=level)
+        self.elements = self.elements.flat_copy(level=level)
         return self
-
-    def __iter__(self):
-        return self.elements.__iter__()
 
     def is_empty(self):
         return self.elements.is_empty()
@@ -69,16 +66,19 @@ class __Group__(ParameterInitializer):
     @property
     def bbox_info(self):
         return self.elements.bbox_info
-    
+
 
 class Group(__Group__, __Element__):
 
     def __init__(self, transformation=None, **kwargs):
         super().__init__(transformation=transformation, **kwargs)
-    
-    def flatcopy(self, level=-1):
+
+    def __eq__(self, other):
+            return (self.elements == other.elements) and (self.transformation == other.transformation)
+
+    def flat_copy(self, level=-1):
         if not level == 0:
-            return self.elements.flatcopy(level).transform(self.transformation)
+            return self.elements.flat_copy(level).transform(self.transformation)
         else:
             return spira.ElementList(self.elements)
 
@@ -87,8 +87,9 @@ class Group(__Group__, __Element__):
             self.elements.transform(self.transformation)
             self.transformation = None  
 
-    def __eq__(self, other):
-            return (self.elements == other.elements) and (self.transformation == other.transformation)
-
+    @property
+    def bbox_info(self):
+        return self.elements.bbox_info.transform(self.transformation)
+    
 
            

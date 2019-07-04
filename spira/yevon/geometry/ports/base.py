@@ -5,7 +5,8 @@ import spira.all as spira
 
 from numpy.linalg import norm
 from spira.core.parameters.variables import *
-from spira.core.parameters.initializer import ParameterInitializer
+from spira.core.parameters.initializer import ParameterInitializer, MetaInitializer
+from spira.core.parameters.descriptor import Parameter
 from spira.yevon.geometry.coord import Coord
 from spira.yevon.process.process_layer import ProcessParameter
 from spira.yevon.process.purpose_layer import PurposeLayerParameter
@@ -16,83 +17,178 @@ from spira.yevon.process import get_rule_deck
 RDD = get_rule_deck()
 
 
-class __Port__(ParameterInitializer):
+class MetaPort(MetaInitializer):
+    """ Called when an instance of a SPiRA Port is created. """
+
+    def get_port_data(self, kwargs):
+        if 'name' in kwargs:
+            if (kwargs['name'] is None) or (kwargs['name'] == ''):
+                raise ValueError('Port name cannot be generated.')
+            nl = kwargs['name'].split('_')
+        port_data = {}
+        port_data['name'] = nl[0]
+        port_data['purpose_symbol'] = nl[0][0]
+        if len(nl) == 1:
+            port_data['process_symbol'] = None
+        elif len(nl) == 2:
+            port_data['process_symbol'] = nl[1]
+        else: 
+            error_message = "Port name format must be: \'port_data_Process\' or \'port_data\'"
+            raise ValueError(error_message)
+        return port_data
+
+    def _bind_purpose(self, kwargs):
+        """
+        The purpose of a port is automatically extracted from the name.
+
+        Examples
+        --------
+        >>> port = spira.Port(name='E1', process=RDD.PROCESS.R1)
+        >>> port.purpose
+        EdgePort
+
+        >>> port = spira.Port(name='P1', process=RDD.PROCESS.R1)
+        >>> port.purpose
+        PinPort
+        """
+        port_data = self.get_port_data(kwargs)
+        pr = port_data['purpose_symbol']
+        if pr not in RDD.PURPOSE.PORT.symbols:
+            error_message = "Port name, \'{}\', not supported. Has to start with {}"
+            raise ValueError(error_message.format(pr, RDD.PURPOSE.PORT.symbols))
+        purpose = RDD.PURPOSE.PORT[pr]
+        return purpose
+
+    def _bind_process_to_name(self, kwargs):
+        """ 
+        Add process symbol to port name. If no process
+        parameter is given, throw an error. 
+
+        Example
+        -------
+        >>> port = spira.Port(name='P1')
+        Value Error: Process not defined.
+        >>> port = spira.Port(name='P1', process=RDD.PROCESS.R1)
+        >>> (port.name, port.process)
+        (P1_R1, R1)
+        """
+        port_data = self.get_port_data(kwargs)
+        if 'process' not in kwargs:
+            error_message = "Cannot connect port \'{}\' to a process."
+            raise ValueError(error_message.format(port_data['name']))
+        process = kwargs['process']
+        name = '{}_{}'.format(port_data['name'], process.symbol)
+        return name, process
+
+    def _bind_name_to_process(self, kwargs):
+        """
+        Automatically extract the process from the port name.
+
+        Example
+        -------
+        >>> port = spira.Port(name='P1_M1')
+        >>> (port.name, port.process)
+        (P1_M1, M1)
+        """
+
+        port_data = self.get_port_data(kwargs)
+        pc = port_data['process_symbol']
+        if 'process' in kwargs:
+            if pc != kwargs['process'].symbol:
+                error_message = "Port name \'{}\' does not connect to the correct process \'{}\'."
+                raise ValueError(error_message.format(pc, kwargs['process'].symbol))
+            process = kwargs['process']
+        else:
+            if pc not in RDD.PROCESS.keys:
+                error_message = "Process not found in database \'{}\'."
+                raise ValueError(error_message.format(RDD.name))
+            process = RDD.PROCESS[pc]
+        name = kwargs['name']
+        return name, process
+
+    def __call__(cls, *params, **keyword_params):
+
+        kwargs = cls.__map_parameters__(*params, **keyword_params)
+
+        port_data = cls.get_port_data(kwargs)
+
+        purpose = cls._bind_purpose(kwargs)
+
+        if port_data['process_symbol'] is None:
+            name, process = cls._bind_process_to_name(kwargs)
+        else:
+            name, process = cls._bind_name_to_process(kwargs)
+
+        if name is not None:
+            kwargs['name'] = name
+        if process is not None:
+            kwargs['process'] = process
+        if purpose is not None:
+            kwargs['purpose'] = purpose
+
+        cls = super().__call__(**kwargs)
+        cls.__keywords__ = kwargs
+
+        return cls
+
+
+class __Port__(ParameterInitializer, metaclass=MetaPort):
     """  """
 
     doc = StringParameter()
-    name = StringParameter()
-    locked = BoolParameter(default=False)
-
-
-class __PhysicalPort__(__Port__):
-
-    process = ProcessParameter(default=RDD.PROCESS.VIRTUAL)
-    purpose = PurposeLayerParameter(default=RDD.PURPOSE.PORT.OUTSIDE_EDGE_ENABLED)
-    local_pid = StringParameter(default='none_local_pid')
+    process = ProcessParameter(allow_none=True, default=None)
+    purpose = PurposeLayerParameter(allow_none=True, default=None)
     text_type = NumberParameter(default=RDD.GDSII.TEXT)
+    local_pid = StringParameter(default='none_local_pid')
 
-    # FIXME: Look at how this is done with elements.
-    def __add__(self, other):
-        """
-        Allows for this type of operations:
+    # # FIXME: Look at how this is done with elements.
+    # def __add__(self, other):
+    #     """
+    #     Returns a coordinate 
 
-        Example
-        -------
-        >>> midpoint = self.jj1.ports['P2'] + [-5, 0]
-        """
-        if other is None: return self
-        p1 = Coord(self.midpoint[0], self.midpoint[1]) + Coord(other[0], other[1])
-        return p1
+    #     Example
+    #     -------
+    #     >>> midpoint = self.jj1.ports['P2'] + [-5, 0]
+    #     """
+    #     if other is None: return self
+    #     p1 = Coord(self.midpoint[0], self.midpoint[1]) + Coord(other[0], other[1])
+    #     return p1
 
-    def __sub__(self, other):
-        """
-        Allows for this type of operations:
+    # def __sub__(self, other):
+    #     """
+    #     Allows for this type of operations:
 
-        Example
-        -------
-        >>> midpoint = self.jj1.ports['P2'] + [-5, 0]
-        """
-        if other is None: return self
-        p1 = Coord(self.midpoint[0], self.midpoint[1]) - Coord(other[0], other[1])
-        return p1
+    #     Example
+    #     -------
+    #     >>> midpoint = self.jj1.ports['P2'] - [-5, 0]
+    #     """
+    #     if other is None: return self
+    #     p1 = Coord(self.midpoint[0], self.midpoint[1]) - Coord(other[0], other[1])
+    #     return p1
 
-    @property
-    def layer(self):
-        return PLayer(self.process, self.purpose)
-
-    @property
-    def key(self):
-        return (self.name, self.layer, self.midpoint[0], self.midpoint[1])
-
-    @property
-    def normal(self):
-        dx = np.cos((self.orientation)*np.pi/180)
-        dy = np.sin((self.orientation)*np.pi/180)
-        return np.array([self.midpoint, self.midpoint + np.array([dx,dy])])
-
-    def flatcopy(self, level=-1):
-        E = self.copy(transformation=self.transformation)
-        E.transform_copy(self.transformation)
-        return E
+    def flat_copy(self, level=-1):
+        """ Return a flattened copy of the port. """
+        port = self.copy(transformation=self.transformation)
+        port.transform_copy(self.transformation)
+        return port
 
     def encloses(self, points):
+        """ Return `True` if the port is inside the shape. """
         from spira.yevon.utils import clipping
         return clipping.encloses(coord=self.midpoint, points=points)
 
-    def transform(self, transformation):
-        self.midpoint = transformation.apply_to_coord(self.midpoint)
-        return self
-
-    def transform_copy(self, transformation):
-        m = transformation.apply_to_coord(self.midpoint)
-        return self.__class__(midpoint=m)
-
     def move(self, coordinate):
+        """ Move the port midpoint to coordinate. """
         self.midpoint.move(coordinate)
         return self
 
     def distance(self, other):
+        """ Get the absolute distance between two ports. """
         return norm(np.array(self.midpoint) - np.array(other.midpoint))
+
+    @property
+    def layer(self):
+        return PLayer(self.process, self.purpose)
 
 
 

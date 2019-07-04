@@ -12,18 +12,18 @@ class ProcessLayer(spira.Cell):
     length = spira.NumberField(default=50)
 
     def get_transforms(self):
-        # T = spira.Translation(Coord(10*1e6, 0)) + spira.Rotation(rotation=60)
-        T = spira.Translation(Coord(10*1e6, 0))
+        # T = spira.Translation(Coord(10, 0)) + spira.Rotation(rotation=60)
+        T = spira.Translation(Coord(10, 0))
         T += spira.Rotation(rotation=0)
         return T
 
     def create_ref_point(self):
-        shape = shapes.RectangleShape(p1=(-2.5*1e6, -2.5*1e6), p2=(2.5*1e6, 2.5*1e6))
+        shape = shapes.RectangleShape(p1=(-2.5, -2.5), p2=(2.5, 2.5))
         ply = spira.Polygon(shape=shape, gds_layer=spira.Layer(number=1))
         return ply
 
     def create_t1(self):
-        shape = shapes.RectangleShape(p1=(0,0), p2=(self.width*1e6, self.length*1e6))
+        shape = shapes.RectangleShape(p1=(0,0), p2=(self.width, self.length))
         ply = spira.Polygon(shape=shape, gds_layer=spira.Layer(number=10))
         T = self.get_transforms()
         ply.transform(transformation=T)
@@ -40,8 +40,8 @@ class ProcessLayer(spira.Cell):
 
         T = self.get_transforms()
 
-        p1 = spira.Terminal(midpoint=(self.width/2*1e6, 0), orientation=-90, width=self.width*1e6)
-        p2 = spira.Terminal(midpoint=(self.width/2*1e6, self.length*1e6), orientation=90, width=self.width*1e6)
+        p1 = spira.Terminal(midpoint=(self.width/2, 0), orientation=-90, width=self.width)
+        p2 = spira.Terminal(midpoint=(self.width/2, self.length), orientation=90, width=self.width)
 
         # ports += [p1, p2]
 
@@ -56,7 +56,7 @@ class HorizontalConnections(spira.Cell):
     ref_point = spira.DataField(fdef_name='create_ref_point')
 
     def create_ref_point(self):
-        shape = shapes.RectangleShape(p1=(-2.5*1e6, -2.5*1e6), p2=(2.5*1e6, 2.5*1e6))
+        shape = shapes.RectangleShape(p1=(-2.5, -2.5), p2=(2.5, 2.5))
         ply = spira.Polygon(shape=shape, gds_layer=spira.Layer(number=1))
         return ply
 
@@ -67,7 +67,7 @@ class HorizontalConnections(spira.Cell):
 
         T = spira.Rotation(0)
         # T += spira.vector_match_transform(v1=pc.ports[0], v2=self.ports[0])
-        S = spira.SRef(pc, midpoint=(10*1e6,0), transformation=T)
+        S = spira.SRef(pc, midpoint=(10,0), transformation=T)
 
         # print(S.ports)
         S.ports
@@ -83,7 +83,7 @@ class HorizontalConnections(spira.Cell):
 
     def create_ports(self, ports):
 
-        p1 = spira.Terminal(midpoint=(50*1e6, 0), orientation=135, width=10*1e6)
+        p1 = spira.Terminal(midpoint=(50, 0), orientation=135, width=10)
 
         ports += p1
 
@@ -98,7 +98,7 @@ class HorizontalAlignment(spira.Cell):
 
         S = spira.SRef(pc, midpoint=(0,0))
 
-        S.align(port=pc.ports[0], destination=self.ports[0], distance=20*1e6)
+        S.align(port=pc.ports[0], destination=self.ports[0], distance=20)
 
         elems += S
 
@@ -106,7 +106,7 @@ class HorizontalAlignment(spira.Cell):
 
     def create_ports(self, ports):
 
-        p1 = spira.Terminal(midpoint=(50*1e6, 0), orientation=330, width=10*1e6)
+        p1 = spira.Terminal(midpoint=(50, 0), orientation=330, width=10)
 
         ports += p1
 

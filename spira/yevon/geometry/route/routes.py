@@ -1,6 +1,5 @@
 import gdspy
 import numpy as np
-# import spira.all as spira
 
 from numpy.linalg import norm
 from spira.yevon.geometry.vector import *
@@ -46,12 +45,6 @@ class Route(Polygon):
     p1 = PortParameter()
     p2 = PortParameter()
 
-    # port_labels = spira.ListParameter(
-    #     allow_none=True,
-    #     restriction=RestrictTypeList(str),
-    #     doc="labels of ports to be processes. Set to None to process all ports"
-    # )
-
     def __init__(self, shape, layer, **kwargs):
         super().__init__(shape=shape, layer=layer, **kwargs)
 
@@ -66,8 +59,7 @@ class Route(Polygon):
         return self.__repr__()
 
     def create_ports(self, ports):
-        ports += self.p1.copy(purpose=RDD.PURPOSE.ROUTE)
-        ports += self.p2.copy(purpose=RDD.PURPOSE.ROUTE)
+        ports += [self.p1, self.p2]
         return ports
 
 
@@ -84,7 +76,6 @@ def RouteStraight(p1, p2, layer, path_type='straight', width_type='straight'):
     width_input = p1.width
     width_output = p2.width
 
-    # print(ug.angle_diff(p2.orientation, p1.orientation))
     if ug.angle_diff(p2.orientation, p1.orientation) != 180:
         raise ValueError('Ports do not face eachother.')
 
@@ -110,11 +101,8 @@ def RouteStraight(p1, p2, layer, path_type='straight', width_type='straight'):
     route_path = gdspy.Path(width=width_input, initial_point=(0,0))
     route_path.parametric(curve_fun, curve_deriv_fun, final_width=width_fun)
 
-    port1 = Port(midpoint=(0,0), width=width_input, orientation=180)
-    port2 = Port(midpoint=(xf,yf), width=width_output, orientation=0)
-
-    # print(port1)
-    # print(port2)
+    port1 = Port(name='I1', midpoint=(0,0), width=width_input, orientation=180, process=layer.process)
+    port2 = Port(name='I2', midpoint=(xf,yf), width=width_output, orientation=0, process=layer.process)
 
     route_shape = RouteShape(path=route_path)
     R = Route(shape=route_shape, p1=port1, p2=port2, layer=layer)
@@ -124,6 +112,7 @@ def RouteStraight(p1, p2, layer, path_type='straight', width_type='straight'):
 
 
 def RoutePath(port1, port2, start_straight, end_straight, path, width, layer):
+    """  """
 
     pts = []
 
@@ -141,11 +130,9 @@ def RoutePath(port1, port2, start_straight, end_straight, path, width, layer):
     pts.append(c2)
     pts.append(p2)
 
-    # path = gdspy.FlexPath(points=pts, width=1, corners='circular bend', bend_radius=1)
     path = gdspy.FlexPath(points=pts, width=1, corners='miter')
     route_shape = RouteShape(path=path)
     R = Route(shape=route_shape, p1=port1, p2=port2, layer=RDD.PLAYER.M6.METAL)
-
     return R
 
 
@@ -177,16 +164,13 @@ def Route90(port1, port2, layer, width=None, corners='miter', bend_radius=1):
     path.segment(end_point=p3)
 
     pl = PortList()
-    pl += Port(name='T1', midpoint=(0,0), width=port1.width, orientation=180)
-    pl += Port(name='T2', midpoint=list(np.subtract(p2, p1)), width=port2.width, orientation=90)
+    pl += Port(name='I1', midpoint=(0,0), width=port1.width, orientation=180, process=layer.process)
+    pl += Port(name='I2', midpoint=list(np.subtract(p2, p1)), width=port2.width, orientation=90, process=layer.process)
 
-    shape = RouteShape(path=path)
-    # points = path.get_polygons()[0]
-    # R = Route(shape=points, ports=pl, layer=layer)
-    R = Route(shape=shape, ports=pl, layer=layer)
+    route_shape = RouteShape(path=path)
+    R = Route(shape=route_shape, p1=pl[0], p2=pl[1], layer=layer)
     T = vector_match_transform(v1=R.ports[0], v2=port1)
     R.transform(T)
-
     return R
 
 
@@ -210,7 +194,7 @@ def Route180(port1, port2, layer, width=None, corners='miter', bend_radius=1):
         width = port1.width
 
     dx = (p2[0] - p1[0])/2
-    
+
     p3 = np.array(p2) - np.array(p1) - np.array([dx,0])
     p4 = np.array(p2) - np.array(p1)
 
@@ -222,16 +206,13 @@ def Route180(port1, port2, layer, width=None, corners='miter', bend_radius=1):
         raise ValueError("Route error: Ports do not face each other (orientations must be 180 apart)")
     else:
         pl = PortList()
-        pl += Port(name='T1', midpoint=(0,0), width=port1.width, orientation=180)
-        pl += Port(name='T2', midpoint=list(np.subtract(p2, p1)), width=port2.width, orientation=0)
+        pl += Port(name='I1', midpoint=(0,0), width=port1.width, orientation=180, process=layer.process)
+        pl += Port(name='I2', midpoint=list(np.subtract(p2, p1)), width=port2.width, orientation=0, process=layer.process)
 
-    shape = RouteShape(path=path)
-    # points = path.get_polygons()[0]
-    # R = Route(shape=points, ports=pl, layer=layer)
-    R = Route(shape=shape, ports=pl, layer=layer)
+    route_shape = RouteShape(path=path)
+    R = Route(shape=route_shape, p1=pl[0], p2=pl[1], layer=layer)
     T = vector_match_transform(v1=R.ports[0], v2=port1)
     R.transform(T)
-
     return R
 
 
@@ -241,9 +222,9 @@ def RouteManhattan(ports, layer, width=None, corners='miter', bend_radius=1):
     elems = ElementList()
 
     if isinstance(ports, list):
-        list1 = [p for p in ports if isinstance(p, DummyPort)]
+        list1 = [p for p in ports if (p.name[0] == 'D')]
     else:
-        list1 = ports.get_dummy_ports()
+        list1 = ports.get_ports_by_type('D')
     list2 = [p.flip() for p in list1]
 
     n = 2

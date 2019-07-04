@@ -1,6 +1,5 @@
 import spira.all as spira
 from spira.yevon.geometry import shapes
-from spira.yevon.geometry.ports.port import ContactPort
 from spira.core.parameters.descriptor import Parameter
 from spira.yevon.process.physical_layer import PLayer
 from spira.yevon.process import get_rule_deck
@@ -28,14 +27,13 @@ class PortLayout(spira.Cell):
         layer = PLayer(process=self.port.process, purpose=self.port.purpose)
         p = spira.Box(width=dw, height=dl, layer=layer)
         T = transformation_from_vector(self.port) + spira.Rotation(-90)
-        # # T = self.transformation
         p.transform(T)
         return p
 
     def create_arrow(self):
         layer = PLayer(self.port.process, RDD.PURPOSE.PORT.DIRECTION)
         # w = self.port.length * 3
-        w = 0.02
+        w = 0.01
         # l = 2
         # l = self.port.length * 3
         l = 0.2
@@ -46,16 +44,16 @@ class PortLayout(spira.Cell):
         return p
 
     def create_label(self):
-        enabled_purposes = (RDD.PURPOSE.PORT.INSIDE_EDGE_ENABLED, RDD.PURPOSE.PORT.OUTSIDE_EDGE_ENABLED)
-        disabled_purposes = (RDD.PURPOSE.PORT.INSIDE_EDGE_DISABLED, RDD.PURPOSE.PORT.OUTSIDE_EDGE_DISABLED)
-        if self.port.purpose in enabled_purposes:
-            layer = PLayer(self.port.process, RDD.PURPOSE.PORT.TEXT_ENABLED)
-        elif self.port.purpose is disabled_purposes:
-            layer = PLayer(self.port.process, RDD.PURPOSE.PORT.TEXT_DISABLED)
-        else:
-            layer = PLayer(self.port.process, RDD.PURPOSE.TEXT)
+        # enabled_purposes = (RDD.PURPOSE.PORT.INSIDE_EDGE_ENABLED, RDD.PURPOSE.PORT.OUTSIDE_EDGE_ENABLED)
+        # disabled_purposes = (RDD.PURPOSE.PORT.INSIDE_EDGE_DISABLED, RDD.PURPOSE.PORT.OUTSIDE_EDGE_DISABLED)
+        # if self.port.purpose in enabled_purposes:
+        #     layer = PLayer(self.port.process, RDD.PURPOSE.PORT.TEXT_ENABLED)
+        # elif self.port.purpose is disabled_purposes:
+        #     layer = PLayer(self.port.process, RDD.PURPOSE.PORT.TEXT_DISABLED)
         # else:
-        #     raise ValueError('Port is neither enabled nor disabled. Check port purpose.')
+        #     layer = PLayer(self.port.process, RDD.PURPOSE.TEXT)
+        purpose = RDD.PURPOSE.TEXT[self.port.purpose.symbol+'T']
+        layer = PLayer(self.port.process, purpose)
         return spira.Label(
             position=self.port.midpoint,
             text=self.port.name,
@@ -66,7 +64,8 @@ class PortLayout(spira.Cell):
     def create_elements(self, elems):
         elems += self.edge
         elems += self.label
-        if not isinstance(self.port, ContactPort):
+        # if not isinstance(self.port, ContactPort):
+        if self.port.purpose.name != 'ContactPort':
             elems += self.arrow
         return elems
 

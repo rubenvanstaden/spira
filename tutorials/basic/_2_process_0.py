@@ -1,10 +1,10 @@
 import spira.all as spira
 
 
-class Junction(spira.PCell):
+class Resistor(spira.PCell):
 
-    width = spira.NumberParameter(default=0.3, doc='Width of the shunt resistance.')
-    length = spira.NumberParameter(default=1, doc='Length of the shunt resistance.')
+    width = spira.NumberParameter(default=spira.RDD.R1.MIN_WIDTH, doc='Width of the shunt resistance.')
+    length = spira.NumberParameter(default=spira.RDD.R1.MIN_LENGTH, doc='Length of the shunt resistance.')
 
     def validate_parameters(self):
         if self.width > self.length:
@@ -14,7 +14,7 @@ class Junction(spira.PCell):
 
 if __name__ == '__main__':
 
-    D = Junction()
+    D = Resistor()
 
     print(D.width, D.length)
 

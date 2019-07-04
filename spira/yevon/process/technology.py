@@ -18,8 +18,17 @@ class __Database__(object):
     def __init__(self, overwrite_allowed=[], **kwargs):
         self.__dict__['__config_tree_keys__'] = []
 
+    # def __getitem__(self, key):
+    #     value = self.__dict__[key]
+    #     return value
+        
     def __getitem__(self, key):
-        value = self.__dict__[key]
+        if key in self.__dict__:
+            value = self.__dict__[key]
+        else:
+            for v in self.values:
+                if v.symbol == key:
+                    value = v
         return value
 
     def __setattr__(self, key, value):
@@ -193,6 +202,22 @@ class PurposeLayerDatabase(__Database__):
 
     def __repr__(self):
         return '[PurposeLayerDatabase] ({} keys)'.format(len(self.keys))
+        
+    # def __getitem__(self, key):
+    #     if key in self.__dict__:
+    #         value = self.__dict__[key]
+    #     else:
+    #         for v in self.values:
+    #             if v.symbol == key:
+    #                 value = v
+    #     return value
+
+    @property
+    def symbols(self):
+        symbols = []
+        for v in self.values:
+            symbols.append(v.symbol)
+        return symbols
 
 
 class PhysicalLayerDatabase(__Database__):

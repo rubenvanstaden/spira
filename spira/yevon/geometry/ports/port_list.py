@@ -49,37 +49,6 @@ class PortList(TypedList, Transformable):
             if self._list[i] is key:
                 return list.__delitem__(self._list, i)
 
-    # def __and__(self, other):
-    #     from spira.yevon.gdsii.polygon import Polygon
-    #     from spira.yevon.geometry.ports.port import Port
-    #     from spira.yevon.visualization.viewer import PortLayout
-    #     from copy import deepcopy
-    #     P = self.__class__()
-    #     if isinstance(other, Polygon):
-    #         for p in self._list:
-    #             if isinstance(p, Port):
-    #                 L = PortLayout(port=p)
-    #                 # if p.edge & other.elements[0]:
-    #                 # print(L.edge.points)
-    #                 print(other.points)
-    #                 # print('')
-    #                 s = other.shape.transform_copy(other.transformation)
-    #                 print(s.points)
-    #                 print('')
-    #                 # s = other.shape.transform(other.transformation)
-    #                 # if L.edge & other:
-    #                 print(L.edge.shape.points)
-    #                 if L.edge.shape & s:
-    #                     print('YESSSSSSSS!!!')
-    #                     # p.locked = False
-    #                     print(p.purpose)
-    #                     p.unlock
-    #                     print(p.purpose)
-    #                     P.append(p)
-    #     else:
-    #         raise ValueError('Type must be either Polygon or ProcessLayer.')
-    #     return P
-
     def __sub__(self, other):
         pass
 
@@ -102,10 +71,10 @@ class PortList(TypedList, Transformable):
             P.append(p)
         return P
 
-    def flatcopy(self, level=-1):
+    def flat_copy(self, level=-1):
         el = PortList()
         for e in self._list:
-            el += e.flatcopy(level)
+            el += e.flat_copy(level)
         return el
 
     def move(self, position):
@@ -179,14 +148,6 @@ class PortList(TypedList, Transformable):
             names.append(p.name)
         return names
 
-    def get_dummy_ports(self):
-        from spira.yevon.geometry.ports.port import DummyPort
-        pl = self.__class__()
-        for p in self._list:
-            if isinstance(p, DummyPort):
-                pl.append(p)
-        return pl
-
     def get_ports_within_angles(self, start_angle, end_angle):
         pl = self.__class__()
         aspread = (end_angle - start_angle) % 360.0
@@ -203,35 +164,21 @@ class PortList(TypedList, Transformable):
             if p.process == process: 
                 pl.append(p)
         return pl
-
-    def get_ports_from_labels(self, labels):
-        P = self.__class__()
-        for i in labels:
-            P += self.get_port_from_label(i)
-        return P
-
-    def get_port_from_label(self, label):
-        D = label[0]
-        if D == "I":
-            portl = self.in_ports
-        elif D == "O":
-            portl = self.out_ports
-        elif D == "N":
-            portl = self.north_ports.x_sorted()
-        elif D == "S":
-            portl = self.south_ports.x_sorted()
-        elif D == "W":
-            portl = self.west_ports.y_sorted()
-        elif D == "E":
-            portl = self.east_ports.y_sorted()
-        else:
-            raise AttributeError("Invalid Port label: %s" % label)
-        if label[1:] == "*":
-            port = portl
-        else:
-            N = int(label[1:])
-            port = portl[N] 
-        return port
+        
+    def get_ports_by_purpose(self, purpose):
+        pl = self.__class__()
+        for p in self._list:
+            if p.purpose == purpose: 
+                pl.append(p)
+        return pl
+        
+    def get_ports_by_type(self, port_type):
+        pl = self.__class__()
+        if port_type == 'D':
+            for p in self._list:
+                if p.name[0] == 'D':
+                    pl.append()
+        return pl
 
     @property
     def west_ports(self):
@@ -261,8 +208,8 @@ class PortList(TypedList, Transformable):
     def unlock(self):
         """ Unlock the edge and convert it to a port. """
         for i, p in enumerate(self._list):
-            name = p.name.replace('e', 'P')
-            self._list[i] = p.copy(name=name).unlock
+            name = p.name.replace('E', 'P')
+            self._list[i] = p.copy(name=name)
         return self
 
 
@@ -286,11 +233,9 @@ class PortListParameter(ParameterDescriptor):
         value = f(self.__type__())
         if value is None:
             value = self.__type__()
-        # new_value = self.__cache_parameter_value__(obj, value)
         self.__cache_parameter_value__(obj, value)
         new_value = self.__get_parameter_value__(obj)
         return new_value
-        # return value
 
     def __cache_parameter_value__(self, obj, ports):
         if isinstance(ports, self.__type__):
@@ -298,7 +243,7 @@ class PortListParameter(ParameterDescriptor):
         elif isinstance(ports, list):
             super().__cache_parameter_value__(obj, self.__type__(ports))           
         else:
-            raise TypeError("Invalid type in setting value of PortListProperty (expected PortList), but generated : " + str(type(ports)))
+            raise TypeError("Invalid type in setting value of PortListParameter: " + str(type(ports)))
 
     def __set__(self, obj, ports):
         if isinstance(ports, self.__type__):
@@ -306,7 +251,7 @@ class PortListParameter(ParameterDescriptor):
         elif isinstance(ports, list):
             self.__externally_set_parameter_value__(obj, self.__type__(ports))            
         else:
-            raise TypeError("Invalid type in setting value of PortListProperty (expected PortList): " + str(type(ports)))
+            raise TypeError("Invalid type in setting value of PortListParameter: " + str(type(ports)))
         return
 
 

@@ -42,7 +42,7 @@ class GenericTransform(ReversibleTransform):
 
     def __str__(self):
         """ Gives a string representing the transform. """
-        return "_(T {}, R {}, RF {}, M {})".format(
+        return "<T {}, R {}, RF {}, M {}>".format(
             str(self.translation),
             str(self.rotation),
             str(self.reflection),
@@ -183,7 +183,8 @@ class GenericTransform(ReversibleTransform):
 
     def __eq__(self, other):
         if other is None: return self.is_identity()
-        if not isinstance(other, GenericTransform): return False
+        if not isinstance(other, GenericTransform):
+            return False
         return (
             (self.rotation == other.rotation) and
             (self.translation == other.translation) and
@@ -195,7 +196,8 @@ class GenericTransform(ReversibleTransform):
         """ checks if the transforms do different things """
 
         if other is None: return not self.is_identity()
-        if not isinstance(other, GenericTransform): return False
+        if not isinstance(other, GenericTransform):
+            return False
         return (
             (self.rotation != other.rotation) or
             (self.translation != other.translation) or

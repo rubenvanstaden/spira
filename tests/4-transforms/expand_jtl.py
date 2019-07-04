@@ -11,12 +11,12 @@ RDD = get_rule_deck()
 class Jtl(spira.Cell):
 
     def get_transforms(self):
-        t1 = spira.Translation(Coord(0*1e6, 0*1e6))
-        t2 = spira.Translation(Coord(150*1e6, 0*1e6))
+        t1 = spira.Translation(Coord(0, 0))
+        t2 = spira.Translation(Coord(150, 0))
         return [t1, t2]
 
     def get_routes(self):
-        shape_rectangle = shapes.RectangleShape(p1=(-13*1e6, -60*1e6), p2=(13*1e6, 12*1e6))
+        shape_rectangle = shapes.RectangleShape(p1=(-13, -60), p2=(13, 12))
         ply = spira.Polygon(alias='M4', shape=shape_rectangle, gds_layer=spira.Layer(number=5))
         return ply
 

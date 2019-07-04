@@ -1,7 +1,7 @@
 import spira.all as spira
 
 
-class Junction(spira.PCell):
+class Resistor(spira.PCell):
 
     width = spira.NumberParameter(default=spira.RDD.R1.MIN_WIDTH, doc='Width of the shunt resistance.')
     length = spira.NumberParameter(default=spira.RDD.R1.MIN_LENGTH, doc='Length of the shunt resistance.')
@@ -11,18 +11,16 @@ class Junction(spira.PCell):
             raise ValueError('`Width` cannot be larger than `length`.')
         return True
 
+    def create_elements(self, elems):
+        w, l = self.width, self.length
+        shape = spira.Shape(points=[[0,0], [l,0], [l,w], [0,w]])
+        elems += spira.Polygon(shape=shape, layer=spira.RDD.PLAYER.R1.METAL)
+        return elems
+
 
 if __name__ == '__main__':
 
-    D = Junction()
+    D = Resistor()
+    D.gdsii_output()
 
-    print(D.width, D.length)
-
-    # Width parameter is valid.
-    D.width = 0.5
-    print(D.width, D.length)
-
-    # Throws a parameter invalid error.
-    D.width = 1.1
-    print(D.width, D.length)
 

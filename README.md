@@ -1,14 +1,28 @@
 # SPiRA
 
-**SPiRA** is a parameterized design framework using Python in conjunction with metaprogramming
-techniques to allow designers to create *superconducting* and *quantum* parameterized circuits,
+**SPiRA** is the next-generation object-oriented script-based PCell design environment.
+The framework leverages the Python programming language to effectively generate circuit layouts,
 while simultaneously checking for design violations, through a novel methodology called *validate-by-design*. 
 Creating PCells and extracting a model from a layout requires data from the fabrication process. 
-A new PDK scheme is introduced, called the Rule Deck Database (RDD), which effectively connects
-process data to the SPiRA framework. The aim of the SPiRA framework is to:
+A new PDK scheme is introduced, called the Rule Deck Database (RDD), that effectively connects
+process data to the SPiRA framework. The design of the **RDD** revolves around the principle that
+a PDK cannot be created, but rather that it evolves as our understanding of physical layout design evolves.
 
-* Create a PCell framework that is easy to use by designers with the focus falling on Superconducting Digital Electronics (SDE).
-* The framework must be able to effectively connect process data to layout elements. Data parsing must be generic to be adaptable to future technology changes.
+**Benefits of using SPiRA:**
+
+* Create a PCell framework that is easy to use by designers with the focus falling on Superconducting and Quantum Integrated Circuits.
+* Effectively connect process data to layout elements in a generic process-independent fashion.
+* No specific programming knowledge is required.
+* Easily share designs between different colleagues.
+* Created PCells can easily be included in a hand-designed layout.
+
+**Features:**
+
+* Define layout elements in a templated environment.
+* Ability to leverage object-oriented inheritance to simply complex designs.
+* Comprehensive set of commands for shape generation.
+* Use port objects to connect different layout elements.
+* Use routing algorithms to connect polygon layer between devices.
 
 ## Depenencies
 
@@ -56,7 +70,8 @@ For more examples please contact Ruben van Staden <rubenvanstaden@gmail.com>.
 ## History of changes
 
 ### Version 0.1.0 (July 1, 2019)
-* Added the documentation.
+* Added first version of documentation.
+* Depricated locked ports with defining different port purposes.
 * Introduces *derived layers* to allow for layer boolean operations.
 * Introduces *process* and *purpose* parameters.
 * Updated the edge generation algorithms to include both an outside and inside edge.

@@ -171,8 +171,8 @@ class GdsiiLayout(object):
 
     def gdsii_output(self, name=None, units=None, grid=None, layer_map=None, disabled_ports=None, view=True):
 
-        # _default = {'cells': True, 'polygons': True, 'arrows': True, 'labels': True}
-        _default = {'cells': True, 'polygons': False, 'arrows': False, 'labels': False}
+        _default = {'cells': True, 'polygons': True, 'arrows': True, 'labels': True}
+        # _default = {'cells': True, 'polygons': False, 'arrows': False, 'labels': False}
 
         if disabled_ports is not None:
             _default.update(disabled_ports)
