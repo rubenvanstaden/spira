@@ -13,7 +13,7 @@ __all__ = [
     'bbox_info_from_point_list',
     'bbox_info_from_numpy_array',
     'bbox_info_from_coord',
-    'get_opposite_boundary_port',
+    'bbox_info_opposite_boundary_port',
     'bbox_info_cell'
 ]
 
@@ -246,33 +246,6 @@ class BoundaryInfo(Transformable):
     def ports(self):
         return shape_edge_ports(self.bounding_box(), RDD.PLAYER.BBOX, self.id_string())
 
-    def encloses(self, other, inclusive=False):
-        """ Checks whether point is in bounding box """
-        from . import shape
-        if not self.__is_initialized__(): return False
-        if inclusive:
-            if isinstance(other, (tuple, Coord)):
-                return (other[0] <= self.__east) and (other[0] >= self.__west) and (other[1] <= self.__north) and (other[1] >= self.__south)
-            elif isinstance(other, shape.Shape):
-                for c in other:
-                    if not self.encloses(c, inclusive): return False
-                return True
-            elif isinstance(other, BoundaryInfo):
-                return (other.__east <= self.__east) and (other.__west >= self.__west) and (other.__north <= self.__north) and (other.__south >= self.__south)
-            else:
-                raise TypeError("Unsupported type " + str(type(other)) + " in BoundaryInfo.encloses()")
-        else:
-            if isinstance(other, (tuple, Coord)):
-                return (other[0] < self.__east) and (other[0] > self.__west) and (other[1] < self.__north) and (other[1] > self.__south)
-            elif isinstance(other, shape.Shape):
-                for c in other:
-                    if not self.encloses(c, inclusive): return False
-                return True
-            elif isinstance(other, BoundaryInfo):
-                return (other.__east < self.__east) and (other.__west > self.__west) and (other.__north < self.__north) and (other.__south > self.__south)
-            else:
-                raise TypeError("Unsupported type " + str(type(other)) + " in BoundaryInfo.encloses()")
-
     def snap_to_grid(self, grids_per_unit=None):
         """ Snaps the boundary box to a given grid or the current grid. """
         from spira import settings
@@ -363,7 +336,7 @@ def bbox_info(shape):
         raise TypeError("Invalid type for size_info(): " + str(type(shape)))
 
 
-def get_opposite_boundary_port(elem, subj_port):
+def bbox_info_opposite_boundary_port(elem, subj_port):
     """ 
     Get the bounding box port that has the 
     opposite direction of the subject port. 
@@ -372,7 +345,8 @@ def get_opposite_boundary_port(elem, subj_port):
     from spira.yevon.geometry.shapes import shape_edge_ports
     bbox_shape = elem.bbox_info.bounding_box()
     for p in shape_edge_ports(shape=bbox_shape, layer=RDD.PLAYER.BBOX):
-        if geom.angle_diff(p.orientation, subj_port.orientation) == 180: return p
+        if geom.angle_diff(p.orientation, subj_port.orientation) == 180:
+            return p
     return None
 
 

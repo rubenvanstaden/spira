@@ -85,12 +85,12 @@ class OutputGdsii(ParameterInitializer):
                             # for p in e.ports.transform(e.transformation):
                                 if p.id_string() not in _polygon_ports:
     
-                                    L = PortLayout(port=p, transformation=e.transformation)
-                                    for e in L.elements:
-                                        if isinstance(e, Polygon):
-                                            self.collect_polygons(e, cp)
-                                        elif isinstance(e, Label):
-                                            self.collect_labels(e, cl)
+                                    # L = PortLayout(port=p, transformation=e.transformation)
+                                    # for e in L.elements:
+                                    #     if isinstance(e, Polygon):
+                                    #         self.collect_polygons(e, cp)
+                                    #     elif isinstance(e, Label):
+                                    #         self.collect_labels(e, cl)
     
                                     _polygon_ports.append(p.id_string())
 
@@ -114,6 +114,10 @@ class OutputGdsii(ParameterInitializer):
             for e in cl.values(): G.add(e)
 
     def collect_srefs(self, cell):
+
+        from spira.core.transformation import CompoundTransform
+        from spira.core.transforms.generic import GenericTransform
+
         for c in cell.dependencies():
             G = self.__collected_cells__[c]
             cs = {}
@@ -123,21 +127,37 @@ class OutputGdsii(ParameterInitializer):
                         pass
                     else:
                         # FIXME: Has to be removed for layout transformations.
+                        # T = e.transformation + spira.Translation(e.midpoint)
+
                         T = e.transformation
-                        # T = e.transformation + spira.Translation(e.midpoint)
                         e.midpoint = T.apply_to_coord(e.midpoint)
-                        # T = e.transformation + spira.Translation(e.midpoint)
+                        origin = e.midpoint.to_numpy_array()
+
+                        rotation = 0
+                        magnification = 1.0
+                        reflection = False
+
+                        if isinstance(T, CompoundTransform):
+                            for t in T.__subtransforms__:
+                                if isinstance(t, GenericTransform):
+                                    rotation = t.rotation
+                                    magnification = t.magnification
+                                    reflection = t.reflection
+                        else:
+                            rotation = T.rotation
+                            magnification = T.magnification
+                            reflection = T.reflection
+
                         ref_cell = self.__collected_cells__[e.ref]
+
                         S = gdspy.CellReference(
                             ref_cell=ref_cell,
-                            origin=e.midpoint.to_numpy_array(),
-                            rotation=T.rotation,
-                            # rotation=T.orientation,
-                            magnification=T.magnification,
-                            x_reflection=T.reflection)
-                        # self.__collected_srefs__.update({e.id_string():S})
+                            origin=origin,
+                            rotation=rotation,
+                            magnification=magnification,
+                            x_reflection=reflection)
+
                         cs[e.id_string()] = S
-        # for e in self.__collected_srefs__.values():
             for e in cs.values():
                 G.add(e)
 
@@ -164,10 +184,16 @@ class OutputGdsii(ParameterInitializer):
 
 
 class GdsiiLayout(object):
-    """ 
+    """
     Class that generates output formates for a layout or library containing layouts.
     If a name is given, the layout is written to a GDSII file.
     """
+
+    def gdsii_expanded_output(self):
+        D = self.expand_flat_copy()
+        # print(D.ports)
+        # D = self.flat_copy()
+        D.gdsii_output()
 
     def gdsii_output(self, name=None, units=None, grid=None, layer_map=None, disabled_ports=None, view=True):
 

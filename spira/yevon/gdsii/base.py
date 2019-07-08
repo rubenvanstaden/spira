@@ -1,10 +1,9 @@
-import spira.all as spira
-
 from spira.core.transformable import Transformable
 from spira.core.parameters.initializer import ParameterInitializer
 from spira.core.parameters.initializer import MetaInitializer
 from spira.core.parameters.descriptor import FunctionParameter
 from spira.yevon.process.gdsii_layer import LayerParameter
+from spira.core.parameters.variables import *
 from spira.yevon.process import get_rule_deck
 
 
@@ -34,6 +33,8 @@ class __Element__(Transformable, ParameterInitializer, metaclass=MetaElement):
         self.__id__ = value
 
     node_id = FunctionParameter(get_node_id, set_node_id)
+
+    location_name = StringParameter(default='')
 
     def __init__(self, transformation=None, **kwargs):
         super().__init__(transformation=transformation, **kwargs)

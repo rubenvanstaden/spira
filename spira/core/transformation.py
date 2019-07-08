@@ -23,7 +23,7 @@ class Transform(ParameterInitializer):
         else: 
             return item.transform(self)
 
-    def apply_tocopy(self, item):
+    def apply_to_copy(self, item):
         if isinstance(item, list):
             raise ValueError('Not implemented yet!')
             # from .shape import Shape
@@ -39,7 +39,7 @@ class Transform(ParameterInitializer):
         if isinstance(item, Transform):
             return item + self
         else:
-            return self.apply_tocopy(item)
+            return self.apply_to_copy(item)
 
     def __add__(self, other):
         if other is None:
@@ -113,12 +113,6 @@ class CompoundTransform(Transform):
     def __getitem__(self, key):
         return self.__subtransforms__[key]
 
-    # def __iter__(self):
-    #     return self
-
-    def id_string(self):
-        return self.__repr__()
-
     def __add__(self, other):
         T = CompoundTransform(self)
         T.add(other)
@@ -129,7 +123,7 @@ class CompoundTransform(Transform):
         return self
 
     def apply(self, item):
-        """ apply the transform to the transformable item """
+        """ Apply the transform to the transformable item. """
         if isinstance(item, list):
             pass
             # from .shape import Shape
@@ -153,7 +147,6 @@ class CompoundTransform(Transform):
             for c in other.__subtransforms__:
                 self.add(other)
         elif isinstance(other, Transform):
-            # self.elements.append(other)
             self.__subtransforms__.append(other)
         else:
             raise TypeError("Cannot add object of type " + str(type(other)) + " to transform")
@@ -173,6 +166,9 @@ class CompoundTransform(Transform):
             if not c.is_identity(): 
                 return False
         return True
+
+    def id_string(self):
+        return self.__repr__()
 
 
 class ReversibleCompoundTransform(CompoundTransform, ReversibleTransform):

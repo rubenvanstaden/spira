@@ -18,14 +18,13 @@ class __ElementList__(TypedList, Transformable):
 
     def __getitem__(self, value):
         from spira.yevon.gdsii.cell import Cell
+        from spira.yevon.gdsii.sref import SRef
         from spira.yevon.gdsii.polygon import Polygon
         r_val = None
-        # print(value)
         if isinstance(value, str):
             for e in self._list:
-                if issubclass(type(e), (Cell, Polygon)):
-                    if e.alias == value:
-                        r_val = e
+                if issubclass(type(e), (Cell, SRef, Polygon)):
+                    if e.alias == value: r_val = e
         elif isinstance(value, int):
             r_val = self._list[value]
         else:

@@ -53,9 +53,9 @@ class __Polygon__(__LayerElement__):
             self.transformation = IdentityTransform()
         return self
 
-    def flat_copy(self, level = -1):
+    def flat_copy(self, level=-1):
         """  """
-        S = Polygon(layer=self.layer, shape=self.shape, transformation=self.transformation)
+        S = Polygon(shape=self.shape, layer=self.layer, transformation=self.transformation)
         S.expand_transform()
         return S
 
@@ -73,7 +73,7 @@ class __Polygon__(__LayerElement__):
     def stretchcopy(self, factor=(1,1), center=(0,0)):
         """  """
         T = spira.Stretch(stretch_factor=factor, stretch_center=center)
-        return T.applycopy(self)
+        return T.apply_copy(self)
 
     def stretch_port(self, port, destination):
         """
@@ -81,7 +81,7 @@ class __Polygon__(__LayerElement__):
         distorting the entire element. Note: The opposite 
         port position is used as the stretching center.
         """
-        opposite_port = bbox_info.get_opposite_boundary_port(self, port)
+        opposite_port = bbox_info.bbox_info_opposite_boundary_port(self, port)
         T = stretching.stretch_element_by_port(self, opposite_port, port, destination)
         T.apply(self)
         return self
@@ -166,7 +166,6 @@ class Polygon(__Polygon__):
     # NOTE: We are not copying the ports, so they
     # can be re-calculated for the transformed shape.
     def __deepcopy__(self, memo):
-        # return Polygon(
         return self.__class__(
             shape=deepcopy(self.shape),
             layer=deepcopy(self.layer),
@@ -179,15 +178,11 @@ class Polygon(__Polygon__):
         The extra transformation parameter is the
         polygon edge ports.
         """
-        from spira.yevon.utils.geometry import scale_polygon_up as spu
         layer = RDD.GDSII.EXPORT_LAYER_MAP[self.layer]
         T = self.transformation + transformation
-        shape = deepcopy(self.shape).transform(T)
-        return gdspy.Polygon(
-            points=shape.points,
-            layer=layer.number,
-            datatype=layer.datatype
-        )
+        # shape = deepcopy(self.shape).transform(T)
+        shape = self.shape.transform_copy(T)
+        return gdspy.Polygon(points=shape.points, layer=layer.number, datatype=layer.datatype)
 
     def is_empty(self):
         return self.shape.is_empty()

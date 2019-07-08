@@ -16,7 +16,6 @@ from spira.yevon.geometry.vector import *
 from spira.yevon.geometry.line import *
 from copy import copy, deepcopy
 from spira.core.transforms import stretching
-from spira.yevon.geometry import bbox_info
 
 
 class __RefElement__(__Element__):
@@ -24,54 +23,15 @@ class __RefElement__(__Element__):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-    def expand_transform(self):
-        """  """
+    def flatten(self):
+        return self.ref.flatten()
 
-        if not self.transformation.is_identity():
-            # NOTE: Use __class__ cause we want to keep the 
-            # subclass tree (spira.Device) in tacks for fitlering.
-            C = self.ref.__class__(
-                name=self.ref.name + self.transformation.id_string(),
-                alias=self.ref.alias + self.alias,
-                elements=deepcopy(self.ref.elements),
-                ports=deepcopy(self.ref.ports))
-    
-            T = self.transformation + spira.Translation(self.midpoint)
-            C = C.transform(T)
-            C.expand_transform()
-
-            self.ref = C
-            self.transformation = None
-            self.midpoint = (0,0)
-
-        return self
-
-    def expand_flat_copy(self):
-        """  """
-
-        S = self.expand_transform()
-        C = spira.Cell(name=S.ref.name + '_ExpandedCell')
-        def flat_polygons(subj, cell):
-            for e in cell.elements:
-                if isinstance(e, spira.Polygon):
-                    subj += e
-                elif isinstance(e, spira.SRef):
-                    flat_polygons(subj=subj, cell=e.ref)
-            # for p in cell.ports:
-            #     port = spira.Port(
-            #         # name=p.name + "_" + cell.name,
-            #         name=p.name,
-            #         locked=False,
-            #         midpoint=deepcopy(p.midpoint),
-            #         orientation=deepcopy(p.orientation),
-            #         width=deepcopy(p.width),
-            #         local_pid=p.local_pid
-            #     )
-            #     subj.ports += port
-            return subj
-        D = flat_polygons(C, S.ref)
-        return SRef(reference=D)
-        # return self.__class__(reference=D)
+    def flat_copy(self, level=-1):
+        if level == 0: return spira.ElementList(self._copy__())
+        el = self.ref.elements.flat_copy(level-1)
+        T = self.transformation + Translation(self.midpoint)
+        el.transform(T)
+        return el
 
 
 class SRef(__RefElement__):
@@ -89,24 +49,16 @@ class SRef(__RefElement__):
     """
 
     midpoint = CoordParameter(default=(0,0))
+    alias = StringParameter(allow_none=True, default=None)
 
-    def get_alias(self):
-        if not hasattr(self, '__alias__'):
-            self.__alias__ = '_S0'
-        return self.__alias__
-
-    def set_alias(self, value):
-        self.__alias__ = '_' + value
-
-    alias = FunctionParameter(get_alias, set_alias, doc='Functions to generate an alias for cell name.')
-
-    def __init__(self, reference, **kwargs):
-        __RefElement__.__init__(self, **kwargs)
+    def __init__(self, reference, alias=None, **kwargs):
+        __RefElement__.__init__(self, alias=alias, **kwargs)
         self.ref = reference
 
     def __repr__(self):
         name = self.ref.name
-        return ("[SPiRA: SRef] (\"{}\", midpoint {}, transforms {})".format(name, self.midpoint, self.transformation))
+        ps = "[SPiRA: SRef] (\"{}\", alias {}, midpoint {}, transforms {})"
+        return (ps.format(name, self.alias, self.midpoint, self.transformation))
 
     def __str__(self):
         return self.__repr__()
@@ -116,6 +68,8 @@ class SRef(__RefElement__):
 
     def __deepcopy__(self, memo):
         return SRef(
+        # return self.__class__(
+            alias=self.alias,
             reference=deepcopy(self.ref),
             midpoint=deepcopy(self.midpoint),
             transformation=deepcopy(self.transformation)
@@ -130,6 +84,11 @@ class SRef(__RefElement__):
             (self.transformation == other.transformation)
         )
 
+    @property
+    def bbox_info(self):
+        T = self.transformation + Translation(self.midpoint)
+        return self.ref.bbox_info.transform(T)
+
     def id_string(self):
         return self.__repr__()
 
@@ -139,21 +98,6 @@ class SRef(__RefElement__):
         d.add(self.ref)
         d.add(self.ref.dependencies())
         return d
-
-    def flatten(self):
-        return self.ref.flatten()
-
-    def flat_copy(self, level=-1):
-        if level == 0: return spira.ElementList(self._copy__())
-        el = self.ref.elements.flat_copy(level-1)
-        T = self.transformation + Translation(self.midpoint)
-        el.transform(T)
-        return el
-
-    @property
-    def bbox_info(self):
-        T = self.transformation + Translation(self.midpoint)
-        return self.ref.bbox_info.transform(T)
 
     def move(self, midpoint=(0,0), destination=None, axis=None):
         """ Move the reference internal port to the destination.
@@ -286,47 +230,118 @@ class SRef(__RefElement__):
         self.transform(T) 
         return self
 
-    def stretch(self, factor=(1,1), center=(0,0)):
-        S = self.expand_flat_copy()
-        T = spira.Stretch(stretch_factor=factor, stretch_center=center)
-        for i, e in enumerate(S.ref.elements):
-            # T.apply(S.ref.elements[i])
-            S.ref.elements[i].transform(T)
-        return self
-        # return S
-
-    def stretchcopy(self, factor=(1,1), center=(0,0)):
-        pass
-        # S = self.expand_flat_copy()
-        # T = spira.Stretch(stretch_factor=factor, stretch_center=center)
-        # for i, e in enumerate(S.ref.elements):
-        #     T.apply(S.ref.elements[i])
-        # return self
-
-    def stretch_port(self, port, destination):
+    def stretch_by_factor(self, factor=(1,1), center=(0,0)):
         """
-        The element by moving the subject port, without
-        distorting the entire element. Note: The opposite port
-        position is used as the stretching center.
+        Strecth the entire instance by a factor and around a specified center.
 
         Example
         -------
-        >>> S_s = S.stretch_port()
+        >>> S.stretch_by_factor(factor=(2,1))
+        """
+        S = self.expand_flat_copy()
+        T = spira.Stretch(stretch_factor=factor, stretch_center=center)
+        for i, e in enumerate(S.ref.elements):
+            S.ref.elements[i].transform(T)
+        return self
+
+    def stretch_p2c(self, port_name, destination_coord):
+        """
+        Stretch port to port. Stretch the polygon by moving
+        the polygon edge port to the destination port location.
+
+        Note
+        ----
+        The opposite port position is used as the stretching center.
+        This overcomes the issue of distorting the entiry structure.
+
+        Example
+        -------
+        >>> S.stretch_p2p(port_name='S1:Sr1:E3_R1', destination_coord=(10,0))
         """
         from spira.yevon.gdsii.polygon import Polygon
-        opposite_port = bbox_info.get_opposite_boundary_port(self, port)
-        T = stretching.stretch_element_by_port(self, opposite_port, port, destination)
-        if port.bbox is True:
-            for i, e in enumerate(self.ref.elements):
-                T.apply(self.ref.elements[i])
-        else:
-            for i, e in enumerate(self.ref.elements):
-                if isinstance(e, Polygon):
-                    if e.id_string() == port.local_pid:
-                        opposite_port = bbox_info.get_opposite_boundary_port(e, port)
-                        Tn = stretching.stretch_element_by_port(self, opposite_port, port, destination)
-                        Tn.apply(self.ref.elements[i])
-        return self
+        from spira.yevon.geometry.bbox_info import bbox_info_opposite_boundary_port
+        D = self.expand_flat_copy()
+        
+        port = D.ports[port_name]
+        destination = D.ports[destination_name]
+    
+        for i, e in enumerate(D.ref.elements.polygons):
+            if e.id_string() == port.local_pid:
+                opposite_port = bbox_info_opposite_boundary_port(e, port)
+                T = stretching.stretch_element_by_port(self, opposite_port, port, destination)
+                T.apply(D.ref.elements[i])
+
+    def stretch_p2p(self, port_name, destination_name):
+        """
+        Stretch port to port. Stretch the polygon by moving
+        the polygon edge port to the destination port location.
+
+        Note
+        ----
+        The opposite port position is used as the stretching center.
+        This overcomes the issue of distorting the entiry structure.
+
+        Example
+        -------
+        >>> S.stretch_p2p(port_name='S1:Sr1:E3_R1', destination_name='S2:Sr2:E1_R1')
+        """
+        from spira.yevon.gdsii.polygon import Polygon
+        from spira.yevon.geometry.bbox_info import bbox_info_opposite_boundary_port
+        D = self.expand_flat_copy()
+
+        print(D.ports)
+
+        port = D.ports[port_name]
+        destination = D.ports[destination_name]
+    
+        for i, e in enumerate(D.ref.elements.polygons):
+            if e.id_string() == port.local_pid:
+                opposite_port = bbox_info_opposite_boundary_port(e, port)
+                T = stretching.stretch_element_by_port(self, opposite_port, port, destination)
+                T.apply(D.ref.elements[i])
+
+
+
+
+    # # FIXME: Choose which one to use: expand of flat_copy?
+    # def stretch(self, factor=(1,1), center=(0,0)):
+    #     S = self.expand_flat_copy()
+    #     T = spira.Stretch(stretch_factor=factor, stretch_center=center)
+    #     for i, e in enumerate(S.ref.elements):
+    #         # T.apply(S.ref.elements[i])
+    #         S.ref.elements[i].transform(T)
+    #     return self
+    #     # return S
+        
+    # # def stretch(self, factor=(1,1), center=(0,0)):
+    # #     el = self.flat_copy()
+    # #     T = spira.Stretch(stretch_factor=factor, stretch_center=center)
+    # #     for i, e in enumerate(el):
+    # #         el[i].transform(T)
+    # #     self.ref.elements = el
+    # #     return self
+
+
+
+    # def stretch_p2p(self, port_name, destination_name):
+        # for i, e in enumerate(self.ref.elements):
+        #     if isinstance(e, Polygon):
+        #         if e.id_string() == port.local_pid:
+        #             opposite_port = bbox_info.bbox_info_opposite_boundary_port(e, port)
+        #             Tn = stretching.stretch_element_by_port(self, opposite_port, port, destination)
+        #             Tn.apply(self.ref.elements[i])
+
+        # if port.bbox is True:
+        #     for i, e in enumerate(self.ref.elements):
+        #         T.apply(self.ref.elements[i])
+        # else:
+        #     for i, e in enumerate(self.ref.elements):
+        #         if isinstance(e, Polygon):
+        #             if e.id_string() == port.local_pid:
+        #                 opposite_port = bbox_info.bbox_info_opposite_boundary_port(e, port)
+        #                 Tn = stretching.stretch_element_by_port(self, opposite_port, port, destination)
+        #                 Tn.apply(self.ref.elements[i])
+        # return self
 
     def nets(self, lcar):
         """  """
@@ -348,6 +363,98 @@ class SRef(__RefElement__):
         # nets.transform(T)
 
         return nets 
+
+    # def expand_transform(self):
+    #     """
+
+    #     Note
+    #     ----
+    #     Use __class__ cause we want to keep the 
+    #     subclass tree (spira.Device) in tacks for fitlering.
+    #     """
+
+    #     if not self.transformation.is_identity():
+
+    #         if self.alias is None:
+    #             name = '{}_{}'.format(self.ref.name, self.transformation.id_string()),
+    #         else:
+    #             name = '{}_{}'.format(self.ref.name, self.alias),
+
+    #         C = self.ref.__class__(name=name,
+    #             alias=self.ref.alias + self.alias,
+    #             elements=deepcopy(self.ref.elements),
+    #             ports=deepcopy(self.ref.ports))
+
+    #         T = self.transformation + spira.Translation(self.midpoint)
+    #         C = C.transform(T)
+    #         C.expand_transform()
+
+    #         self.ref = C
+    #         self.transformation = None
+    #         self.midpoint = (0,0)
+
+    #     return self
+
+    def expand_transform(self):
+        """
+
+        Note
+        ----
+        Use __class__ cause we want to keep the 
+        subclass tree (spira.Device) in tacks for fitlering.
+        """
+
+        if self.alias is None:
+            name = '{}_{}'.format(self.ref.name, self.transformation.id_string()),
+        else:
+            name = '{}_{}'.format(self.ref.name, self.alias),
+
+        C = self.ref.__class__(name=name,
+            elements=deepcopy(self.ref.elements),
+            ports=deepcopy(self.ref.ports))
+
+        T = self.transformation + spira.Translation(self.midpoint)
+        C = C.transform(T)
+        C.expand_transform()
+
+        self.ref = C
+        self.transformation = None
+        self.midpoint = (0,0)
+
+        return self
+
+    def expand_flat_copy(self):
+        """  """
+        D = self.ref.expand_flat_copy()
+        return SRef(reference=D)
+        # return self.__class__(reference=D)
+
+    # def expand_flat_copy(self):
+    #     """  """
+
+    #     S = self.expand_transform()
+    #     C = spira.Cell(name=S.ref.name + '_ExpandedCell')
+    #     def flat_polygons(subj, cell):
+    #         for e in cell.elements:
+    #             if isinstance(e, spira.Polygon):
+    #                 subj += e
+    #             elif isinstance(e, spira.SRef):
+    #                 flat_polygons(subj=subj, cell=e.ref)
+    #         # for p in cell.ports:
+    #         #     port = spira.Port(
+    #         #         # name=p.name + "_" + cell.name,
+    #         #         name=p.name,
+    #         #         locked=False,
+    #         #         midpoint=deepcopy(p.midpoint),
+    #         #         orientation=deepcopy(p.orientation),
+    #         #         width=deepcopy(p.width),
+    #         #         local_pid=p.local_pid
+    #         #     )
+    #         #     subj.ports += port
+    #         return subj
+    #     D = flat_polygons(C, S.ref)
+    #     # return SRef(reference=D, alias=self.alias)
+    #     return self.__class__(reference=D, alias=self.alias)
 
 
 class ARef(__RefElement__):

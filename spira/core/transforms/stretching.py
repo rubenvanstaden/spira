@@ -84,6 +84,7 @@ def scale_element(elem, scaling=(1.0, 1.0), scale_center=(0.0, 0.0)):
 
 
 def stretch_element_by_port(elem, const_port, subj_port, destination):
+    """  """
     p1, p2 = const_port, subj_port
     d0 = p1.midpoint.distance(p2.midpoint)
     d1 = p1.midpoint.distance(destination)

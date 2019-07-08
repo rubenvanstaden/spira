@@ -75,48 +75,6 @@ class __Cell__(ParameterInitializer, metaclass=MetaCell):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-    def __add__(self, other):
-        from spira.yevon.geometry.ports.port import __Port__
-        if other is None:
-            return self
-        if issubclass(type(other), __Port__):
-            self.ports += other
-        else:
-            self.elements += other
-        return self
-
-
-class CellAbstract(__Cell__):
-
-    def dependencies(self):
-        deps = self.elements.dependencies()
-        deps += self
-        return deps
-
-    def flat_copy(self, level=-1):
-        name = '{}_{}'.format(self.name, 'Flat'),
-        return Cell(name, self.elements.flat_copy(level=level))
-    
-    def is_layer_in_cell(self, layer):
-        D = deepcopy(self)
-        for e in D.flatten():
-            return (e.layer == layer)
-        return False
-
-    @property
-    def alias_cells(self):
-        childs = {}
-        for c in self.dependencies():
-            childs[c.alias] = c
-        return childs
-
-    @property
-    def alias_elems(self):
-        elems = {}
-        for e in self.elements.polygons:
-            elems[e.alias] = e
-        return elems
-
     def __getitem__(self, key):
         from spira.yevon.gdsii.sref import SRef
         from spira.yevon.gdsii.polygon import Polygon
@@ -132,15 +90,54 @@ class CellAbstract(__Cell__):
 
         return item
 
+    def __add__(self, other):
+        from spira.yevon.geometry.ports.port import __Port__
+        if other is None:
+            return self
+        if issubclass(type(other), __Port__):
+            self.ports += other
+        else:
+            self.elements += other
+        return self
 
-class Cell(CellAbstract):
+    @property
+    def alias_cells(self):
+        childs = {}
+        for c in self.dependencies():
+            childs[c.alias] = c
+        return childs
+
+    @property
+    def alias_elems(self):
+        elems = {}
+        for e in self.elements.polygons:
+            elems[e.alias] = e
+        return elems
+
+    def dependencies(self):
+        deps = self.elements.dependencies()
+        deps += self
+        return deps
+
+    def flat_copy(self, level=-1):
+        name = '{}_{}'.format(self.name, 'Flat'),
+        return Cell(name, self.elements.flat_copy(level=level))
+
+    def is_layer_in_cell(self, layer):
+        D = deepcopy(self)
+        for e in D.flatten():
+            return (e.layer == layer)
+        return False
+
+
+class Cell(__Cell__):
     """ A Cell encapsulates a set of elements that
     describes the layout being generated. """
 
+    _next_uid = 0
+
     lcar = NumberParameter(default=100)
     name = Parameter(fdef_name='create_name', doc='Name of the cell instance.')
-
-    _next_uid = 0
 
     def get_alias(self):
         if not hasattr(self, '__alias__'):
@@ -160,15 +157,15 @@ class Cell(CellAbstract):
             self.__dict__['__name__'] = s
             Cell.name.__set__(self, s)
 
+        self.uid = Cell._next_uid
+        Cell._next_uid += 1
+
         if library is not None:
             self.library = library
         if elements is not None:
             self.elements = ElementList(elements)
         if ports is not None:
             self.ports = PortList(ports)
-
-        self.uid = Cell._next_uid
-        Cell._next_uid += 1
 
     def __repr__(self):
         class_string = "[SPiRA: Cell(\'{}\')] (elements {}, ports {})"
@@ -193,43 +190,25 @@ class Cell(CellAbstract):
         return self
 
     def expand_flat_copy(self, exclude_devices=False):
-        from spira.yevon.gdsii.polygon import Polygon
-        from spira.yevon.geometry.ports.port import Port
         from spira.yevon.gdsii.pcell import Device
+        from spira.yevon.gdsii.polygon import Polygon
 
-        # FIXME: Check this.
-        # D = deepcopy(self)
+        name = ''
         S = self.expand_transform()
         C = Cell(name=S.name + '_ExpandedCell')
-        def flat_polygons(subj, cell):
+        def _traverse_polygons(subj, cell, name):
+            c_name = deepcopy(name)
             for e in cell.elements:
-                if isinstance(e, Polygon):
+                if isinstance(e, SRef):
+                    c_name += e.alias + ':'
+                    subj = _traverse_polygons(subj=subj, cell=e.ref, name=c_name)
+                elif isinstance(e, Polygon):
+                    e.location_name = c_name
                     subj += e
-                elif isinstance(e, SRef):
-                    if exclude_devices is True:
-                        if isinstance(e.ref, Device):
-                            subj += e
-                        else:
-                            flat_polygons(subj=subj, cell=e.ref)
-                    else:
-                        flat_polygons(subj=subj, cell=e.ref)
-
-            # for p in cell.ports:
-            #     port = Port(
-            #         name=p.name + "_" + cell.name,
-            #         midpoint=deepcopy(p.midpoint),
-            #         orientation=deepcopy(p.orientation),
-            #         process=deepcopy(p.process),
-            #         purpose=deepcopy(p.purpose),
-            #         width=deepcopy(p.width),
-            #         port_type=p.port_type,
-            #         local_pid=p.local_pid
-            #     )
-            #     subj.ports += port
-
+                c_name = name
             return subj
 
-        D = flat_polygons(C, S)
+        D = _traverse_polygons(C, S, name)
 
         return D
 
@@ -240,7 +219,7 @@ class Cell(CellAbstract):
         if destination is None:
             destination = midpoint
             midpoint = [0,0]
-    
+
         if issubclass(type(midpoint), __Port__):
             o = midpoint.midpoint
         elif isinstance(midpoint, Coord):
@@ -252,7 +231,7 @@ class Cell(CellAbstract):
         else:
             raise ValueError("[PHIDL] [DeviceReference.move()] ``midpoint`` " +
                                 "not array-like, a port, or port name")
-    
+
         if issubclass(type(destination), __Port__):
             d = destination.midpoint
         elif isinstance(destination, Coord):
@@ -264,7 +243,7 @@ class Cell(CellAbstract):
         else:
             raise ValueError("[PHIDL] [DeviceReference.move()] ``destination`` " +
                                 "not array-like, a port, or port name")
-    
+
         if axis == 'x':
             d = (d[0], o[1])
         if axis == 'y':
@@ -282,16 +261,16 @@ class Cell(CellAbstract):
 
         return self
 
-    def stretch_port(self, port, destination):
+    def stretch_p2p(self, port, destination):
         """
         The element by moving the subject port, without
         distorting the entire element. Note: The opposite
-        port position is used as the stretching center. 
+        port position is used as the stretching center.
         """
         from spira.core.transforms import stretching
         from spira.yevon.geometry import bbox_info
         from spira.yevon.gdsii.polygon import Polygon
-        opposite_port = bbox_info.get_opposite_boundary_port(self, port)
+        opposite_port = bbox_info.bbox_info_opposite_boundary_port(self, port)
         T = stretching.stretch_element_by_port(self, opposite_port, port, destination)
         if port.bbox is True:
             self = T(self)
@@ -310,11 +289,8 @@ class Cell(CellAbstract):
         return net
 
 
-# FIXME: Add restriction parameter.
-def CellParameter(name=None, elements=None, ports=None, library=None, **kwargs):
-    from spira.yevon.gdsii.cell import Cell
-    if 'default' not in kwargs:
-        kwargs['default'] = Cell(name=name, elements=elements, library=library)
-    R = RestrictType(Cell)
-    return ParameterDescriptor(restrictions=R, **kwargs)
+def CellParameter(local_name=None, restriction=None, **kwargs):
+    R = RestrictType(Cell) & restriction
+    return ParameterDescriptor(local_name, restriction=R, **kwargs)
+
 

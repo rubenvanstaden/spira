@@ -31,6 +31,7 @@ class PortProperty(__Aspects__):
 
 
 class CellPortProperty(PortProperty):
+
     def __create_ports__(self, ports):
         from spira.yevon.gdsii.polygon import Polygon
         for e in self.elements:
@@ -67,8 +68,11 @@ class PolygonPortProperty(TransformablePortProperty):
     edge_ports = ElementListParameter()
 
     def create_edge_ports(self, edges):
-        shape = self.shape.transform_copy(self.transformation)
-        return shapes.shape_edge_ports(shape, self.layer, self.id_string())
+        shape = self.shape
+        # FIXME: Cannot apply transforms when stretching.
+        # shape = self.shape.transform_copy(self.transformation)
+        s = deepcopy(self.shape).transform_copy(self.transformation)
+        return shapes.shape_edge_ports(shape, self.layer, self.id_string(), center=s.bbox_info.center, loc_name=self.location_name)
 
     def create_ports(self, ports):
         layer = RDD.GDSII.IMPORT_LAYER_MAP[self.layer]

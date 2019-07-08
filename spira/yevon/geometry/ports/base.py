@@ -24,17 +24,24 @@ class MetaPort(MetaInitializer):
         if 'name' in kwargs:
             if (kwargs['name'] is None) or (kwargs['name'] == ''):
                 raise ValueError('Port name cannot be generated.')
-            nl = kwargs['name'].split('_')
+            full_name = kwargs['name'].split(':')
+            # print(full_name)
+            nl = full_name[-1].split('_')
         port_data = {}
         port_data['name'] = nl[0]
         port_data['purpose_symbol'] = nl[0][0]
+
         if len(nl) == 1:
             port_data['process_symbol'] = None
-        elif len(nl) == 2:
+        # elif len(nl) == 2:
+        elif len(nl) > 1:
             port_data['process_symbol'] = nl[1]
-        else: 
-            error_message = "Port name format must be: \'port_data_Process\' or \'port_data\'"
-            raise ValueError(error_message)
+
+        if len(nl) == 3:
+            port_data['sref_name'] = nl[2]
+        # else: 
+        #     error_message = "Port name format must be: \'port_data_Process\' or \'port_data\'"
+        #     raise ValueError(error_message)
         return port_data
 
     def _bind_purpose(self, kwargs):
@@ -60,7 +67,7 @@ class MetaPort(MetaInitializer):
         return purpose
 
     def _bind_process_to_name(self, kwargs):
-        """ 
+        """
         Add process symbol to port name. If no process
         parameter is given, throw an error. 
 
