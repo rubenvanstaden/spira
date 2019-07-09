@@ -42,10 +42,17 @@ class RouteShape(shapes.Shape):
 class Route(Polygon):
     """  """
 
-    p1 = PortParameter()
-    p2 = PortParameter()
+    p1 = PortParameter(allow_none=None, default=None)
+    p2 = PortParameter(allow_none=None, default=None)
 
     def __init__(self, shape, layer, **kwargs):
+        # sh = RouteShape(points=shape)
+        
+        if isinstance(shape, gdspy.Path):
+            shape = clipping.boolean(subj=shape.polygons, clip_type='or')[0]
+        elif isinstance(shape, gdspy.FlexPath):
+            shape = shape.get_polygons()[0]
+
         super().__init__(shape=shape, layer=layer, **kwargs)
 
     def __repr__(self):
@@ -59,7 +66,8 @@ class Route(Polygon):
         return self.__repr__()
 
     def create_ports(self, ports):
-        ports += [self.p1, self.p2]
+        if (self.p1 is not None) and (self.p2 is not None):
+            ports += [self.p1, self.p2]
         return ports
 
 

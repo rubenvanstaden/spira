@@ -535,10 +535,113 @@ Third, this box shape is added as a polygon element to the cell instance.
 This polygon takes the shape and connects it to a set of methods responsible for converting it to a GDSII element.
 Fourth, two terminal ports are added to the left and right edges of the box, with their directions pointing away from the polygon interior.
 
+.. --------------------------------------------------------------------------------------
 
-******************
-Validate-by-Design
-******************
+******
+PCells
+******
+
+In SPiRA PCells can be divided into two categorises, :py:class:`spira.Device` and :py:class:`spira.Circuit`.
+Each of these classes contains a set of different back-end algorithms that are automatically executed when
+the layout class is constructed. Typically, these algorithms consists of boolean operations and filtering algorithms.
+Also, inheriting from these classes defines the purpose of the layout, either a *device* or a *circuit*.
+
+Devices
+=======
+
+Similar to creating a PCell, constructing a device cell required inheriting from :py:class:`spira.Device`
+instead of :py:class:`spira.PCell`. In superconducting circuits a device layout is usually a **Via** or
+a **Junction**.
+
+.. code-block:: python
+
+    class Junction(spira.Device):
+        pass
+
+Circuits
+========
+
+A circuit PCell is designed similar to that of a device. By definition a circuit layout contains polygon
+routes that connects different device and ports instances. Therefore, a :py:class:`spira.Circuit` contains
+two extra, but optional, create methods to simplify the code structure:
+
+* :py:data:`create_structures`: Defines the device instances.
+* :py:data:`create_routes`: Defines the routing paths between different structures and ports.
+
+.. code-block:: python
+
+    class Jtl(spira.Circuit):
+
+        def create_structures(self, elems):
+            return elems
+
+        def create_routes(self, elems):
+            return elems
+
+Note, it is not required to use these methods, but designing large circuits can cause the
+:py:data:`create_elements` method to become cumbersome.
+
+
+.. .. --------------------------------------------------------------------------------------
+
+.. ******************
+.. Validate-by-Design
+.. ******************
+
+
+.. .. --------------------------------------------------------------------------------------
+
+.. *******
+.. Filters
+.. *******
+
+
+
+.. Boolean
+.. =======
+
+
+
+.. Layer
+.. =====
+
+
+
+.. Netlist
+.. =======
+
+
+
+.. .. --------------------------------------------------------------------------------------
+
+.. ******************
+.. Virtual Modeelling
+.. ******************
+
+
+
+.. Derived Layers
+.. ==============
+
+
+
+.. Derived Edges
+.. =============
+
+
+
+.. .. --------------------------------------------------------------------------------------
+
+.. ************
+.. RDD Advanced
+.. ************
+
+
+
+.. .. --------------------------------------------------------------------------------------
+
+
+
 
 
 

@@ -189,11 +189,10 @@ class GdsiiLayout(object):
     If a name is given, the layout is written to a GDSII file.
     """
 
-    def gdsii_expanded_output(self):
+    def gdsii_expanded_output(self, name=None):
         D = self.expand_flat_copy()
-        # print(D.ports)
         # D = self.flat_copy()
-        D.gdsii_output()
+        D.gdsii_output(name=name)
 
     def gdsii_output(self, name=None, units=None, grid=None, layer_map=None, disabled_ports=None, view=True):
 

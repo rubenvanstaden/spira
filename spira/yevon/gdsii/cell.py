@@ -190,6 +190,9 @@ class Cell(__Cell__):
         return self
 
     def expand_flat_copy(self, exclude_devices=False):
+        """
+
+        """
         from spira.yevon.gdsii.pcell import Device
         from spira.yevon.gdsii.polygon import Polygon
 

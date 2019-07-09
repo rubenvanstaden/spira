@@ -139,7 +139,7 @@ class RestrictContains(__ParameterRestriction__):
 
 
 class RestrictValueList(__ParameterRestriction__):
-    """ restrict the argument to a list of allowed values """
+    """ Restrict the argument to a list of allowed values """
     def __init__(self, allowed_values):
         self.allowed_values = allowed_values
 
@@ -169,7 +169,7 @@ class RestrictList(__ParameterRestriction__):
 
 
 class RestrictTypeList(RestrictList):
-    """ restrict the argument to a list which contains a given type or types. Pass a type or tuple of types """
+    """ Restrict the argument to a list which contains a given type or types. Pass a type or tuple of types """
     def __init__(self, allowed_types):
         super().__init__(restriction=RestrictType(allowed_types))
 

@@ -41,10 +41,10 @@ class MetaBase(MetaMixinBowl):
         cls.__params__ = {}
         cls.__props__ = ['__name_prefix__']
 
-        locked_fields = []
-        unlocked_fields = []
+        locked_parameters = []
+        unlocked_parameters = []
 
-        for k, v in cls.__get_fields__():
+        for k, v in cls.__get_parameters__():
             if not k in cls.__props__:
 
                 if hasattr(v, 'bind_parameter'):
@@ -52,15 +52,15 @@ class MetaBase(MetaMixinBowl):
                 v.validate_binding(cls, k)
 
                 if v.locked:
-                    locked_fields.append(k)
+                    locked_parameters.append(k)
                 else:
-                    unlocked_fields.append(k)
+                    unlocked_parameters.append(k)
 
                 cls.__params__[k] = v
                 cls.__props__.append(k)
 
-        cls.__locked_fields__ = locked_fields
-        cls.__unlocked_fields__ = unlocked_fields
+        cls.__locked_parameters__ = locked_parameters
+        cls.__unlocked_parameters__ = unlocked_parameters
         cls.__generate_docs__()
 
     def mixin(cls, mixin_class):
@@ -130,7 +130,7 @@ class MetaInitializer(MetaBase):
                 if key == 'Desc':
                     docparam += '\n'.join(value)
                 elif key == 'Parameters':
-                    params = cls.__fields__()
+                    params = cls.__parameters__()
                     if len(params) > 0:
                         docparam += '\nParameters\n'
                         docparam += '---------\n'
@@ -216,19 +216,19 @@ class __ParameterInitializer__(metaclass=MetaInitializer):
         self.flag_busy_initializing = False
 
     @classmethod
-    def __unlocked_field_params__(cls):
-        return cls.__unlocked_fields__
+    def __unlocked_parameter_params__(cls):
+        return cls.__unlocked_parameters__
 
     @classmethod
-    def __locked_fields_params__(cls):
-        return cls.__locked_fields__
+    def __locked_parameters_params__(cls):
+        return cls.__locked_parameters__
 
     @classmethod
-    def __fields__(cls):
+    def __parameters__(cls):
         return cls.__props__
 
     @classmethod
-    def __get_fields__(cls):
+    def __get_parameters__(cls):
         prop = []
         for attr_name in dir(cls):
             attr = getattr(cls, attr_name)
@@ -246,28 +246,28 @@ class __ParameterInitializer__(metaclass=MetaInitializer):
             if hasattr(self, '__SPIRA_CACHE__'):
                 self.__SPIRA_CACHE__.clear()
 
-    def __external_fields__(self):
-        ex_fields = []
-        for i in self.__unlocked_field_params__():
-            field = getattr(self.__class__, i)
-            if isinstance(field, Parameter):
-                if field.__parameter_was_stored__(self):
-                    if field.__get_parameter_status__(self) == EXTERNAL_VALUE:
-                        ex_fields.append(i)
+    def __external_parameters__(self):
+        ex_parameters = []
+        for i in self.__unlocked_parameter_params__():
+            parameter = getattr(self.__class__, i)
+            if isinstance(parameter, Parameter):
+                if parameter.__parameter_was_stored__(self):
+                    if parameter.__get_parameter_status__(self) == EXTERNAL_VALUE:
+                        ex_parameters.append(i)
             else:
-                ex_fields.append(i)
-        return ex_fields
+                ex_parameters.append(i)
+        return ex_parameters
 
     def _copy__(self):
         kwargs = {}
-        for p in self.__external_fields__():
+        for p in self.__external_parameters__():
             kwargs[p] = getattr(self, p)
         return self.__class__(**kwargs)
 
     def __deepcopy__(self, memo):
         from copy import deepcopy
         kwargs = {}
-        for p in self.__external_fields__():
+        for p in self.__external_parameters__():
             kwargs[p] = deepcopy(getattr(self, p), memo)
         return self.__class__(**kwargs)
 
@@ -275,7 +275,7 @@ class __ParameterInitializer__(metaclass=MetaInitializer):
         """ Returns a copy, but where the user can
         override properties using. """
         kwargs = {}
-        for p in self.__external_fields__():
+        for p in self.__external_parameters__():
             kwargs[p] = getattr(self, p)
             # kwargs[p] = deepcopy(getattr(self, p))
             # kwargs[p] = copy(getattr(self, p))
@@ -317,7 +317,7 @@ class ParameterInitializer(__ParameterInitializer__):
         return class_string
 
     def __store_parameters__(self, kwargs):
-        props = self.__fields__()
+        props = self.__parameters__()
         for key, value in kwargs.items():
             if key == 'doc':
                 self.__doc__ = value
@@ -340,5 +340,20 @@ class ParameterInitializer(__ParameterInitializer__):
 
     def validate_parameters(self):
         return True
+
+    def set(self, **override_kwargs):
+        """
+        Used to update the value of a parameter inline.
+
+        Example
+        -------
+        >>> ports += p1.set(width=2.0)
+        """
+        for key, value in override_kwargs.items():
+            if key not in self.__parameters__():
+                v = "Keyword argument \'{}\' does not match any parameters of type {}."
+                raise ValueError(v.format(key, type(self)))
+            setattr(self, key, value)
+        return self
 
 

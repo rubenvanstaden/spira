@@ -338,7 +338,7 @@ class Shape(__Shape__):
 def ShapeParameter(restriction=None, preprocess=None, **kwargs):
     R = RestrictType(Shape) & restriction
     P = ProcessorTypeCast(Shape) + preprocess
-    return ParameterDescriptor(restrictions=R, preprocess=P, **kwargs)
+    return ParameterDescriptor(restriction=R, preprocess=P, **kwargs)
 
 
 from spira.yevon.geometry.ports.port import Port

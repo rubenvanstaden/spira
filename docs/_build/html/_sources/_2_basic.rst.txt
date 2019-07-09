@@ -546,12 +546,252 @@ is connect to :py:data:`P2` of instance :py:class:`ResistorManhattan` using the 
 Transformations
 ***************
 
-
+Transformations is SPiRA are not directly applied to layout elements. Instead, they are
+abstraction build as a layer on top of the SPiRA core, and are connected to Elements
+as parameters. Doing so enable us to transform elements without losing hierarchical
+data implicit in the layout structure.
 
 Demonstrates
 ============
 
-*
+* Understand why transformations are parameterized in SPiRA.
+* How to apply transformations to layout elements.
+* How to keep the hierarchical structure of a flatened layout.
+
+There are multiple different ways to apply a transformation to a layout element:
+
+* The first method creates a transform object and then applies it to an object.
+* The second directly uses a element method to apply the transform.
+
+.. code-block:: python
+
+    class TranslatePolygon(spira.Cell):
+
+        ref_point = spira.Parameter(fdef_name='create_ref_point')
+        t1 = spira.Parameter(fdef_name='create_t1')
+        t2 = spira.Parameter(fdef_name='create_t2')
+        t3 = spira.Parameter(fdef_name='create_t3')
+
+        def create_ref_point(self):
+            return spira.Rectangle(p1=(-2.5, -2.5), p2=(2.5, 2.5), layer=spira.Layer(number=1))
+
+        def create_t1(self):
+            """ Apply transformation by first creating a transform object. """
+            T = spira.Translation(Coord(-10, 0))
+            ply = spira.Rectangle(p1=(0,0), p2=(10, 50), layer=spira.Layer(number=2))
+            ply.transform(T)
+            return ply
+
+        def create_t2(self):
+            """ Apply transformation by creating a generic transform.
+            Instead of using the `.ttransform` method, the transform
+            is directly added as a parameter."""
+            tf = spira.GenericTransform(translation=Coord(-22, 0))
+            ply = spira.Rectangle(p1=(0,0), p2=(10, 50), layer=spira.Layer(number=3), transformation=tf)
+            return ply
+
+        def create_t3(self):
+            """ Directly transform the element using the corresponding transform method. """
+            ply = spira.Rectangle(p1=(0,0), p2=(10, 50), layer=spira.Layer(number=4))
+            ply.translate((-34, 0))
+            return ply
+
+        def create_elements(self, elems):
+            elems += self.ref_point
+            elems += self.t1
+            elems += self.t2
+            elems += self.t3
+            return elems
+
+.. image:: _figures/_9_translate.png
+    :align: center
+
+The code snippet above illustrates the different ways to connect a transform to an element.
+The first method in :py:data:`create_t1` is typically used when we want to create a set of
+predefined transforms and later connect them to multiple elements.
+
+The second method in :py:data:`create_t2` is very similar to that of the first, but instead
+manually creates a generic transformation object and connect it to the element as a parameter.
+This method is just shown for illustration purposes and rarely used in practice, since a generic
+transform is automatically created by the framework when multiple transform objects are added.
+
+The thrid method in :py:data:`create_t3` uses the class method to automatically create the
+transform object and emidiately apply the transform to the subject element.
+
+.. code-block:: python
+
+    class TransformPolygon(spira.Cell):
+
+        ref_point = spira.Parameter(fdef_name='create_ref_point')
+        t1 = spira.Parameter(fdef_name='create_t1')
+        t2 = spira.Parameter(fdef_name='create_t2')
+        t3 = spira.Parameter(fdef_name='create_t3')
+
+        def create_ref_point(self):
+            return spira.Rectangle(p1=(-2.5, -2.5), p2=(2.5, 2.5), layer=spira.Layer(number=1))
+
+        def create_t1(self):
+            T = spira.Rotation(30) + spira.Translation(Coord(10, 0))
+            ply = spira.Rectangle(p1=(0,0), p2=(10, 50), layer=spira.Layer(number=2))
+            ply.transform(transformation=T)
+            return ply
+
+        def create_t2(self):
+            T = spira.GenericTransform(translation=(20, 0), rotation=60)
+            ply = spira.Rectangle(p1=(0,0), p2=(10, 50), layer=spira.Layer(number=3), transformation=T)
+            return ply
+
+        def create_t3(self):
+            ply = spira.Rectangle(p1=(0,0), p2=(10, 50), layer=spira.Layer(number=4))
+            ply.translate((30, 0))
+            ply.rotate(90)
+            return ply
+
+        def create_elements(self, elems):
+            elems += self.ref_point
+            elems += self.t1
+            elems += self.t2
+            elems += self.t3
+            return elems
+
+Transformations can be compounded using the plus operator as shown in :py:data:`create_t1`.
+The result is a generic transformation that can be added to any element. A generic transform
+can also be explicitly defined as in :py:data:`create_t2`, or multiple transforms can be
+adding using the corresponding methods as shown in :py:data:`create_t3`.
+
+.. image:: _figures/_9_transform.png
+    :align: center
+
+
+**********
+Stretching
+**********
+
+This tutorial builds from the previous tutorial of transformations.
+Here, we will look at how to stretch a cell reference and specific polygons using ports.
+
+Demonstrates
+============
+
+* How to stretch layout elements.
+* How to use expanded transformations to view flattened ports.
+* How to stretch a specific polygon while maintaining the layout hierarchy.
+
+.. First, we will start by stretching basic flattened layout structures.
+
+In this example we are stretching an entire cell reference by some factor.
+We have created a basic Josephson Junction to demonstrate the stretching of different polygons
+inside the PCell, while maintaining the hierarchical structure.
+
+.. code-block:: python
+
+    class Jj(spira.Cell):
+
+        def create_elements(self, elems):
+            elems += spira.Convex(radius=7.0, layer=RDD.PLAYER.C2.VIA)
+            return elems
+
+
+    class ResVia(spira.Cell):
+
+        def create_elements(self, elems):
+            elems += spira.Rectangle(p1=(-7.5, -13.2), p2=(7.5, -8.2), layer=RDD.PLAYER.R1.METAL)
+            elems += spira.Rectangle(p1=(-4, -12), p2=(4.1, -10), layer=RDD.PLAYER.C1.VIA)
+            return elems
+
+
+    class Top(spira.Cell):
+
+        def get_transforms(self):
+            t1 = spira.Translation((0, 0))
+            t2 = spira.Translation((0, -8))
+            return [t1, t2]
+
+        def create_elements(self, elems):
+            t1, t2 = self.get_transforms()
+            elems += spira.SRef(alias='Sj1', reference=Jj(), transformation=t1)
+            elems += spira.SRef(alias='Sr1', reference=ResVia(), transformation=t2)
+            elems += spira.Rectangle(p1=(-10, -23), p2=(10, 10), layer=RDD.PLAYER.M2.METAL)
+            return elems
+
+
+    class Bot(spira.Cell):
+
+        def get_transforms(self):
+            t1 = spira.Translation((0, 0))
+            t2 = spira.Translation((0, -30))
+            return [t1, t2]
+
+        def create_elements(self, elems):
+            t1, t2 = self.get_transforms()
+            elems += spira.SRef(alias='Sr2', reference=ResVia(), transformation=t2)
+            elems += spira.Rectangle(p1=(-10, -55), p2=(10, -35), layer=RDD.PLAYER.M2.METAL)
+            return elems
+
+
+    class Junction(spira.Cell):
+        """ Josephson junction. """
+
+        def get_transforms(self):
+            t1 = spira.Translation((0, 0))
+            t2 = spira.Translation((0, -5))
+            return [t1, t2]
+
+        def create_elements(self, elems):
+            t1, t2 = self.get_transforms()
+            elems += spira.Rectangle(p1=(-13, -60), p2=(13, 12), layer=RDD.PLAYER.M1.METAL)
+            elems += spira.SRef(alias='S1', reference=Top(), transformation=t1)
+            elems += spira.SRef(alias='S2', reference=Bot(), transformation=t2)
+            return elems
+
+An instance of the :py:class:`Junction` cell can be created and added as a reference, which
+can be stretched using the :py:meth:`stretch_by_factor` method:
+
+.. code-block:: python
+
+    junction = Junction()
+
+    C = spira.Cell(name='TestingCell')
+    S = spira.SRef(alias='Jj', reference=junction)
+
+    # Stretch the reference and add it to the cell.
+    C += S.stretch_by_factor(factor=(2,1))
+
+    # Generate an output using the build-in viewer.
+    C.gdsii_output()
+
+The expanded flattened view of the junction cell is shown below.
+
+.. image:: _figures/_9_expanded.png
+    :align: center
+
+All polygon elements that coalesces this cell is stretched by a factor of two in the horizontal direction (x-axis).
+
+.. image:: _figures/_9_factor.png
+    :align: center
+
+.. code-block:: python
+
+    junction = Junction()
+
+    C = spira.Cell(name='TestingCell')
+    S = spira.SRef(alias='Jj', reference=junction)
+
+    # Stretch the reference and add it to the cell.
+    S.stretch_p2p(port_name='S1:Sr1:E3_R1', destination_name='S2:Sr2:E1_R1')
+
+    # Generate an output using the build-in viewer.
+    C.gdsii_output()
+
+The expanded view is used to access flattened ports using their hierarchically derived names.
+The port names used in the code above are shown in the expanded view of the cell.
+In this example we want to stretch the two shunt resistor polygons so form a single resistor connection polygon.
+
+.. image:: _figures/_9_ports.png
+    :align: center
+
+
+
 
 
 

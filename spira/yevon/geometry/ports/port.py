@@ -68,7 +68,7 @@ class Port(Vector, __Port__):
     def flip(self):
         """ Return the port rotated 180 degrees. """
         angle = (self.orientation + 180.0) % 360.0
-        return self.__class__(midpoint=self.midpoint, orientation=angle)
+        return self.__class__(name=self.name, midpoint=self.midpoint, orientation=angle)
 
     def transform(self, transformation):
         self.midpoint = transformation.apply_to_coord(self.midpoint)
