@@ -9,9 +9,9 @@ pytest
 pyclipper
 pygmsh
 matplotlib
-termcolor
 shapely
 lxml
+termcolor
 colorama
-sphinxcontrib-napoleon
-halo
+# sphinxcontrib-napoleon
+# halo

@@ -69,7 +69,7 @@ For more examples please contact Ruben van Staden <rubenvanstaden@gmail.com>.
 
 ## History of changes
 
-### Version 0.1.0 (July 1, 2019)
+### Version 0.1.0 (July 10, 2019)
 * Added first version of documentation.
 * Depricated locked ports with defining different port purposes.
 * Introduces *derived layers* to allow for layer boolean operations.

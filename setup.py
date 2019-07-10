@@ -21,25 +21,23 @@ setup(
     url="https://github.com/rubenvanstaden/spira",
 
     install_requires=[
+        # # Developer packages
+        # 'sphinxcontrib-napoleon',
+        # 'halo',
+        # 'pytest',
+
         # Visual packages
         'matplotlib',
         'plotly',
         'pyqt5',
         'lxml',
 
-        # Developer packages
-        'sphinxcontrib-napoleon',
-        'halo',
-        'pytest',
-
-        # Basic packages
+        # Core packages
         'termcolor',
         'colorama',
         'pandoc',
         'scipy',
         'numpy',
-
-        # Core packages
         'gdspy',
         'shapely',
         'pyclipper',
