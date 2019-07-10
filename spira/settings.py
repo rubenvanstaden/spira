@@ -4,7 +4,7 @@ import numpy as np
 from math import floor
 
 
-# ------------------------------ SPiRA Information -----------------------------
+# ----------------------------- SPiRA Information -----------------------------
 
 
 __version__ = '0.1.0'

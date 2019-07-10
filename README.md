@@ -62,7 +62,7 @@ Examples of using the PCell implementation is given in [examples](https://github
 For more examples please contact Ruben van Staden <rubenvanstaden@gmail.com>.
 
 ## Known Issues
-* There are some issues with Reflection Transformation.
+* There are some issues with reflection transformations.
 
 ## Future Changes
 * Update polygon to include rounded corners.
