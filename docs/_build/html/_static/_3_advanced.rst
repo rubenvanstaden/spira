@@ -3,16 +3,16 @@ Advanced Tutorial
 #################
 
 This set of tutorials focuses on explaining more advanced features that the SPiRA framework
-has to over. We go into more details on how to create **device** and **circuit** PCells,
-how to structure a design, and how to manipulate layout elements to create complex circuits.
+has to offer. We go into more details on how to create **device** and **circuit** PCells,
+how to structure a design, and how to manipulate layout elements.
 
 *****
 YTron
 *****
 
-In this example we will start from the beginning. First, we will create a *yTron* shape,
-followed by using this shape to create a device that contains ports, and then using this
-device to create a circuit that connect to input/output ports.
+In this example we will start from the beginning. First, we will create a *yTron* shape
+and then using this shape we will create a device containing input/output ports.
+This device will then be used to create a full circuit layout.
 
 Demonstrates
 ============
@@ -157,17 +157,15 @@ Once we have the desired shape we can use it to create a device cell, containing
 .. image:: _figures/_adv_0_ytron.png
     :align: center
 
-The shape parameter defined in the :py:class:`YtronDevice` class restricts the PCell to only receive
+The :py:data:`shape` parameter defined in the :py:class:`YtronDevice` class restricts the instance to only receive
 a shape of type :py:class:`YtronShape`. Using the shape parameters the port instances for each arms
-can be defined and added to the PCell instance.
-
-The created yTron device can now be used in a circuit:
+can be defined and added to the PCell instance. The created yTron device can now be used in a circuit:
 
 .. code-block:: python
 
     class YtronCircuit(spira.Circuit):
 
-        ytron = spira.Parameter(fdef_name='create_ytron')
+        ytron = spira.Parameter(fdef_name='create_ytron', doc='Places an instance of the ytron device.')
 
         @spira.cache()
         def get_io_ports(self):
@@ -208,19 +206,19 @@ The created yTron device can now be used in a circuit:
             ports += self.get_io_ports()
             return ports
 
-The figure below shows the output of the yTron PCell is the class was constructed as a :py:class:`spira.PCell` layout.
-The metal layers are separated and the connection ports are still visible.
+The figure below shows the output of the yTron PCell if the class was constructed inheriting from
+:py:class:`spira.PCell`. The metal layers are separated and the connection ports are still visible.
 
 .. image:: _figures/_adv_0_ytron_pcell.png
     :align: center
 
-This figure is the final result when create a :py:class:`spira.Circuit` class rather than a PCell class.
-The contacting metal layers are merged and the redundant ports are filtered.
+The following figure is the final result when inheriting from :py:class:`spira.Circuit`
+rather than :py:class:`spira.PCell`. The contacting metal layers are merged and the redundant ports are filtered.
 
 .. image:: _figures/_adv_0_ytron_circuit.png
     :align: center
 
-From the code above that generates this yTron circuit, we can see that three routes are defined.
+From the code above we can see that three routes are defined.
 The first, connects the left arm with the first port using a basic manhattan structure.
 The second and third, connects the right arm to the second port and the source arm to the third port,
 but uses a ``sine`` path type to generate the routing polygons.
@@ -229,6 +227,11 @@ but uses a ``sine`` path type to generate the routing polygons.
 **********
 Via Device
 **********
+
+Via devices generally following the same design patterns, but still require explicit construction
+to describe how PDK data should be handled on instance creation. This example illustrated the
+creation of the *alternative resistor via contact* that is responsible to connecting resistive
+layer ``R5`` to inductive layer ``M6``.
 
 Demonstrates
 ============
@@ -278,7 +281,7 @@ specific fabrication technology.
             p1 = self.elements['R5'].ports.unlock
             return ports
 
-Simply put, The code for the via PCell defined above is responsible for describing how the top and bottom metal layers
+Thus, the code for the via PCell defined above is responsible for describing how the top and bottom metal layers
 must be constructed in relation to the contact layer without violating any design rules. The PCell defines the specific
 design rules applicable to the creation of this via device.
 
@@ -287,7 +290,7 @@ design rules applicable to the creation of this via device.
 Resistor
 ********
 
-In Single Flux Quantum (SFQ) logic circuits we typically use a shunt resistance for the biasing section
+In Single Flux Quantum (SFQ) logic circuits, we typically use a shunt resistance for the biasing section
 of the circuit. Therefore, we would want to create a single resistor PCell that can be used as a template
 in more complex circuit PCells. Here, we design a resistor that parameterized its width, length, and
 type of via connection to other metal layers. 
@@ -351,7 +354,6 @@ the *alternative* version of the *standard* version.
 
         def create_ports(self, ports):
 
-            # FIXME: We do not want to connect to RES< but rather to M6.
             ports += self.via_left.ports['E1_M6'].copy(name='P1_M6')
             ports += self.via_left.ports['E2_M6'].copy(name='P2_M6')
             ports += self.via_left.ports['E3_M6'].copy(name='P3_M6')
@@ -369,7 +371,7 @@ which implicitly mean the length is also restricted to this size value. The :py:
 has to be a PCell class and has to be of type :py:class:`dev.ViaC5RA` or :py:class:`dev.ViaC5RS`.
 
 We only want to connect to the connection vias of the instance, and therefore we only activate the ports
-of the two via instance, instead of activating all possible edge ports.
+of the two via instance, instead of activating all possible edge ports, as shown in the :py:data:`create_ports` method.
 
 ******************
 Josephson Junction
@@ -389,7 +391,7 @@ Demonstrates
 * How to design a fully parameterized Josephson junction.
 * How to add a bounding box around a set of polygon objects.
 
-The design of the junction is broken down into 3 section; a top section, a bottom section, and the shunt
+The design of the junction is broken down into three sections; a top section, a bottom section, and the shunt
 resistor that connects the top and bottom sections. The top and bottom section each are wrapped with a
 bounding box polygon of metal layer ``M6``.
 
@@ -490,15 +492,15 @@ bounding box polygon of metal layer ``M6``.
 The :py:class:`J5Contacts` and :py:class:`I5Contacts` classes are the top and bottom sections, respectively.
 The :py:class:`__Junction__` class is a base class that contains parameters common to both of these classes.
 As shown in the :py:data:`create_elements` methods for both classes a metal bounding box is added around
-all the instances already defined.
+all defined elements.
 
-The results for :py:class:`J5Contacts` is shown below and consists of a ``C5R`` via that connects this
+The results for :py:class:`J5Contacts` is shown below and consists of a ``C5R`` via that connects
 layer ``R5`` and a junction via that contains the actually junction layer.
 
 .. image:: _figures/_adv_junction_top.png
     :align: center
 
-The results for :py:class:`I5Contacts` is shown below and consists of a ``C5R`` via that connects this
+The result for :py:class:`I5Contacts` is shown below and consists of a ``C5R`` via that connects
 layer ``R5`` and a ``I5`` via that connects layer ``M5`` to layer ``M6``. The skyplane via that connects
 ``M6`` to ``M7`` is optional depending on the boolean value of the :py:data:`sky_via` parameter.
 
@@ -526,7 +528,6 @@ layer ``R5`` and a ``I5`` via that connects layer ``M5`` to layer ``M6``. The sk
         i5 = spira.Parameter(fdef_name='create_i5_cell')
         j5 = spira.Parameter(fdef_name='create_j5_cell')
 
-        # FIXME: This implementation can be upgraded.
         gnd_via = spira.BoolParameter(default=False)
         sky_via = spira.BoolParameter(default=False)
 
@@ -579,8 +580,7 @@ displays the individual layers of each instance.
 .. image:: _figures/_adv_junction_false.png
     :align: center
 
-By enabling PCell operations again we can see that the overlapping metal layers are merged into an single polygon,
-as shown in the figure below.
+By enabling PCell operations again we can see that the overlapping metal layers are merged by similar process polygon, as shown in the figure below.
 
 .. image:: _figures/_adv_junction_true.png
     :align: center
