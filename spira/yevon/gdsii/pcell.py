@@ -1,6 +1,7 @@
 from spira.yevon.gdsii.cell import Cell
 from spira.yevon.utils import netlist
 from spira.yevon.gdsii.elem_list import ElementListParameter
+from copy import deepcopy
 
 from spira.core.parameters.variables import *
 from spira.yevon.process import get_rule_deck
@@ -42,10 +43,10 @@ class Device(PCell):
     def __create_elements__(self, elems):
 
         F = RDD.PCELLS.FILTERS
-        # F['boolean'] = False
-        # F['simplify'] = False
+        F['boolean'] = False
+        F['simplify'] = False
         F['via_contact'] = False
-        # F['metal_connect'] = False
+        F['metal_connect'] = False
 
         elems = self.create_elements(elems)
         elems += self.structures
@@ -90,18 +91,23 @@ class Circuit(PCell):
     def __create_elements__(self, elems):
 
         F = RDD.PCELLS.FILTERS
-        # F['boolean'] = False
-        # F['simplify'] = False
+        F['boolean'] = False
+        F['simplify'] = False
         F['via_contact'] = False
-        # F['metal_connect'] = False
+        F['metal_connect'] = False
 
         elems = self.create_elements(elems)
         elems += self.structures
         elems += self.routes
 
         if self.pcell is True:
-            D = Cell(elements=elems).expand_flat_copy(exclude_devices=True)
-            elems = F(D).elements
+            elems = elems.expand_transform()
+
+            # # D = Cell(elements=elems).expand_flat_copy(exclude_devices=True)
+            # D = Cell(elements=deepcopy(elems)).expand_transform()
+            # # D = Cell(elements=elems)
+            # # elems = F(D).elements
+            # elems = D.elements
 
         return elems
 

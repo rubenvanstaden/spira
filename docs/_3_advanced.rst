@@ -287,7 +287,10 @@ design rules applicable to the creation of this via device.
 Resistor
 ********
 
-
+In Single Flux Quantum (SFQ) logic circuits we typically use a shunt resistance for the biasing section
+of the circuit. Therefore, we would want to create a single resistor PCell that can be used as a template
+in more complex circuit PCells. Here, we design a resistor that parameterized its width, length, and
+type of via connection to other metal layers. 
 
 Demonstrates
 ============
@@ -296,7 +299,8 @@ Demonstrates
 * How to restrict the circuit to only accept vias of a certain type.
 * How to activate specific port edges that can be used for external connetions.
 
-
+This PCell can iterate between two different vias connections that connect metal layer ``R5`` and ``M6``;
+the *alternative* version of the *standard* version.
 
 .. code-block:: python
 
@@ -358,23 +362,339 @@ Demonstrates
 
             return ports
 
+The :py:data:`length` parameter can be any value as long as it is larger than the width. Therefore, the
+length parameter has no restrictions, but are validated once all parameters have been defined using the
+:py:data:`validate_parameters` method. The :py:data:`width` parameter is restricted to a minimum size,
+which implicitly mean the length is also restricted to this size value. The :py:data:`via` parameter
+has to be a PCell class and has to be of type :py:class:`dev.ViaC5RA` or :py:class:`dev.ViaC5RS`.
 
+We only want to connect to the connection vias of the instance, and therefore we only activate the ports
+of the two via instance, instead of activating all possible edge ports.
 
 ******************
 Josephson Junction
 ******************
 
+The Josephson junction is the most important device in any SDE circuit. We want to create a junction PCell
+that parameterizes the following device attributes:
 
-
-Demonstrates
-============
-
-
-**************************
-Junction Transmission Line
-**************************
-
-
+* The shunt resistor width.
+* The shunt resistor length.
+* The junction layer radius.
+* Boolean parameters to include/exclude via connections to ground and skyplane.
 
 Demonstrates
 ============
+
+* How to design a fully parameterized Josephson junction.
+* How to add a bounding box around a set of polygon objects.
+
+The design of the junction is broken down into 3 section; a top section, a bottom section, and the shunt
+resistor that connects the top and bottom sections. The top and bottom section each are wrapped with a
+bounding box polygon of metal layer ``M6``.
+
+.. code-block:: python
+
+    class __Junction__(spira.Cell):
+        """ Base class for Junction PCell. """
+
+        radius = spira.NumberParameter()
+        width = spira.NumberParameter(doc='Shunt resistance width')
+        c5r = spira.Parameter(fdef_name='create_c5r')
+
+
+    class I5Contacts(__Junction__):
+        """ Cell that contains all the vias of the bottom halve of the Junction. """
+
+        i5 = spira.Parameter(fdef_name='create_i5')
+        i6 = spira.Parameter(fdef_name='create_i6')
+
+        sky_via = spira.BoolParameter(default=False)
+
+        def create_i5(self):
+            via = dev.ViaI5()
+            V = spira.SRef(via, midpoint=(0,0))
+            return V
+
+        def create_i6(self):
+            c = self.i5.midpoint
+            w = (self.i5.ref.width + 4*RDD.I6.I5_MIN_SURROUND)
+            via = dev.ViaI6(width=w, height=w)
+            V = spira.SRef(via, midpoint=c)
+            return V
+
+        def create_c5r(self):
+            # via = dev.ViaC5RA(width=self.width)
+            via = dev.ViaC5RS()
+            V = spira.SRef(via)
+            if self.sky_via is True:
+                V.connect(port=V.ports['E0_R5'], destination=self.i6.ports['E2_M6'], ignore_process=True)
+            else:
+                V.connect(port=V.ports['E0_R5'], destination=self.i5.ports['E2_M5'], ignore_process=True)
+            return V
+
+        def create_elements(self, elems):
+
+            # Add the two via instances.
+            elems += [self.i5, self.c5r]
+
+            # Add the skyplane via instance if required.
+            if self.sky_via is True:
+                elems += self.i6
+
+            # Add bounding box around all elements.
+            box_shape = elems.bbox_info.bounding_box(margin=0.1)
+            elems += spira.Polygon(shape=box_shape, layer=RDD.PLAYER.M6.METAL)
+
+            return elems
+
+        def create_ports(self, ports):
+            ports += self.i5.ports['E2_M5'].copy(name='P2_M5')
+            ports += self.c5r.ports['E2_R5'].copy(name='P2_R5')
+            return ports
+
+
+    class J5Contacts(__Junction__):
+        """ Cell that contains all the vias of the top halve of the Junction. """
+
+        j5 = spira.Parameter(fdef_name='create_j5')
+
+        def create_j5(self):
+            jj = dev.JJ(width=2*self.radius)
+            D = spira.SRef(jj, midpoint=(0,0))
+            return D
+
+        def create_c5r(self):
+            # via = dev.ViaC5RA(width=self.width)
+            via = dev.ViaC5RS()
+            V = spira.SRef(via)
+            V.connect(port=V.ports['E0_R5'], destination=self.j5.ports['E0_M5'], ignore_process=True)
+            return V
+
+        def create_elements(self, elems):
+
+            # Add the two via instances.
+            elems += [self.j5, self.c5r]
+
+            # Add bounding box around all elements.
+            box_shape = elems.bbox_info.bounding_box(margin=0.1)
+            elems += spira.Polygon(shape=box_shape, layer=RDD.PLAYER.M6.METAL)
+
+            return elems
+
+        def create_ports(self, ports):
+            ports += self.j5.ports['E0_M5'].copy(name='P0_M5')
+            ports += self.c5r.ports['E2_R5'].copy(name='P2_R5')
+            return ports
+
+The :py:class:`J5Contacts` and :py:class:`I5Contacts` classes are the top and bottom sections, respectively.
+The :py:class:`__Junction__` class is a base class that contains parameters common to both of these classes.
+As shown in the :py:data:`create_elements` methods for both classes a metal bounding box is added around
+all the instances already defined.
+
+The results for :py:class:`J5Contacts` is shown below and consists of a ``C5R`` via that connects this
+layer ``R5`` and a junction via that contains the actually junction layer.
+
+.. image:: _figures/_adv_junction_top.png
+    :align: center
+
+The results for :py:class:`I5Contacts` is shown below and consists of a ``C5R`` via that connects this
+layer ``R5`` and a ``I5`` via that connects layer ``M5`` to layer ``M6``. The skyplane via that connects
+``M6`` to ``M7`` is optional depending on the boolean value of the :py:data:`sky_via` parameter.
+
+.. image:: _figures/_adv_junction_bot.png
+    :align: center
+
+.. code-block:: python
+
+    class Junction(spira.Device):
+
+        text_type = spira.NumberParameter(default=91)
+
+        length = spira.NumberParameter(default=1.5, doc='Length of the shunt resistance.')
+
+        width = spira.NumberParameter(
+            default=RDD.R5.MIN_SIZE,
+            restriction=spira.RestrictRange(lower=RDD.R5.MIN_SIZE, upper=RDD.R5.MAX_WIDTH),
+            doc='Width of the shunt resistance.')
+
+        radius = spira.NumberParameter(
+            default=RDD.J5.MIN_SIZE,
+            restriction=spira.RestrictRange(lower=RDD.J5.MIN_SIZE, upper=RDD.J5.MAX_SIZE),
+            doc='Radius of the circular junction layer.')
+
+        i5 = spira.Parameter(fdef_name='create_i5_cell')
+        j5 = spira.Parameter(fdef_name='create_j5_cell')
+
+        # FIXME: This implementation can be upgraded.
+        gnd_via = spira.BoolParameter(default=False)
+        sky_via = spira.BoolParameter(default=False)
+
+        def create_i5_cell(self):
+            D = I5Contacts(width=self.width, radius=self.radius, sky_via=self.sky_via)
+            S = spira.SRef(D)
+            S.move(midpoint=S.ports['P2_R5'], destination=(0, self.length))
+            return S
+
+        def create_j5_cell(self):
+            D = J5Contacts(width=self.width, radius=self.radius)
+            S = spira.SRef(D)
+            S.move(midpoint=S.ports['P2_R5'], destination=(0,0))
+            return S
+
+        def create_elements(self, elems):
+
+            elems += self.i5
+            elems += self.j5
+
+            elems += RouteStraight(
+                p1=self.i5.ports['P2_R5'].copy(width=self.width),
+                p2=self.j5.ports['P2_R5'].copy(width=self.width),
+                layer=RDD.PLAYER.R5.METAL)
+
+            if self.gnd_via is True:
+                i4 = dev.ViaI4()
+                elems += spira.SRef(i4, midpoint=m5_block.center)
+
+            box_shape = elems.bbox_info.bounding_box(margin=0.1)
+            elems += spira.Polygon(shape=box_shape, layer=RDD.PLAYER.M5.METAL)
+
+            return elems
+
+        def create_ports(self, ports):
+            ports += self.j5.ports['E0_M6'].copy(name='P0_M6')
+            ports += self.j5.ports['E1_M6'].copy(name='P1_M6')
+            ports += self.j5.ports['E3_M6'].copy(name='P3_M6')
+            ports += self.i5.ports['E1_M6'].copy(name='P4_M6')
+            ports += self.i5.ports['E2_M6'].copy(name='P5_M6')
+            ports += self.i5.ports['E3_M6'].copy(name='P6_M6')
+            return ports
+
+The :py:class:`Junction` class is created and instances of the :py:class:`J5Contacts` and :py:class:`I5Contacts`
+cells are added and moved relative to eachother with a separation distance equal to the length of the shunt resistor.
+The instances of of these two cells are then connection via a resistive route. For debugging purposes we can disable
+the operations preformed by the :py:class:`spira.Device` class by setting ``pcell=False``. The output is shown below
+displays the individual layers of each instance.
+
+.. image:: _figures/_adv_junction_false.png
+    :align: center
+
+By enabling PCell operations again we can see that the overlapping metal layers are merged into an single polygon,
+as shown in the figure below.
+
+.. image:: _figures/_adv_junction_true.png
+    :align: center
+
+
+
+.. **************************
+.. Junction Transmission Line
+.. **************************
+
+
+
+.. Demonstrates
+.. ============
+
+
+
+.. .. code-block:: python
+
+..     class Jtl(spira.PCell):
+
+..         w1 = spira.NumberParameter(
+..             default=RDD.M6.MIN_SIZE,
+..             restriction=RestrictRange(lower=RDD.M6.MIN_SIZE, upper=RDD.M6.MAX_WIDTH),
+..             doc='Width of left inductor.'
+..         )
+..         w2 = spira.NumberParameter(
+..             default=RDD.M6.MIN_SIZE,
+..             restriction=RestrictRange(lower=RDD.M6.MIN_SIZE, upper=RDD.M6.MAX_WIDTH),
+..             doc='Width of middle inductor.'
+..         )
+..         w3 = spira.NumberParameter(
+..             default=RDD.M6.MIN_SIZE,
+..             restriction=RestrictRange(lower=RDD.M6.MIN_SIZE, upper=RDD.M6.MAX_WIDTH),
+..             doc='Width of rigth inductor.'
+..         )
+
+..         p1 = spira.Parameter(fdef_name='create_p1')
+..         p2 = spira.Parameter(fdef_name='create_p2')
+..         p3 = spira.Parameter(fdef_name='create_p3')
+..         p4 = spira.Parameter(fdef_name='create_p4')
+
+..         jj1 = spira.Parameter(fdef_name='create_jj_left')
+..         jj2 = spira.Parameter(fdef_name='create_jj_right')
+
+..         shunt = spira.Parameter(fdef_name='create_shunt')
+
+..         bias_res = spira.Parameter(fdef_name='create_bias_res')
+..         via1 = spira.Parameter(fdef_name='create_via1')
+
+..         def create_p1(self):
+..             p1 = spira.Port(name='P1_M6', width=self.w1)
+..             return p1.distance_alignment(port=p1, destination=self.jj1.ports['P1_M6'], distance=-10)
+
+..         def create_p2(self):
+..             p2 = spira.Port(name='P2_M6', width=self.w1)
+..             return p2.distance_alignment(port=p2, destination=self.jj2.ports['P3_M6'], distance=10)
+
+..         def create_p3(self):
+..             return spira.Port(name='P3_M6', midpoint=(0, 15), orientation=270, width=self.w1)
+
+..         def create_p4(self):
+..             return spira.Port(name='P4_M6', midpoint=(0, 1.5), orientation=90, width=self.w1)
+
+..         def create_jj_left(self):
+..             jj = dev.Junction(length=1.9, width=1, radius=0.91)
+..             T = spira.Rotation(rotation=180, rotation_center=(-10,0))
+..             S = spira.SRef(jj, midpoint=(-10,0), transformation=T)
+..             return S
+
+..         def create_jj_right(self):
+..             jj = dev.Junction(length=1.9, width=1, radius=0.91)
+..             T = spira.Rotation(rotation=180, rotation_center=(10,0))
+..             S = spira.SRef(jj, midpoint=(10,0), transformation=T)
+..             return S
+
+..         def create_shunt(self):
+..             D = Resistor(width=1, length=3.7)
+..             S = spira.SRef(reference=D, midpoint=(0,0))
+..             S.distance_alignment(port='P2_M6', destination=self.p3, distance=-2.5)
+..             return S
+
+..         def create_elements(self, elems):
+
+..             elems += self.jj1
+..             elems += self.jj2
+..             elems += self.shunt
+
+..             elems += RouteStraight(p1=self.p1,
+..                 p2=self.jj1.ports['P1_M6'].copy(width=self.p1.width),
+..                 layer=RDD.PLAYER.M6.ROUTE)
+
+..             elems += RouteStraight(p1=self.p2,
+..                 p2=self.jj2.ports['P3_M6'].copy(width=self.p2.width),
+..                 layer=RDD.PLAYER.M6.ROUTE)
+
+..             elems += RouteStraight(
+..                 p1=self.jj1.ports['P3_M6'].copy(width=self.w2),
+..                 p2=self.jj2.ports['P1_M6'].copy(width=self.w2),
+..                 layer=RDD.PLAYER.M6.ROUTE)
+
+..             elems += RouteStraight(p1=self.shunt.ports['P2_M6'], p2=self.p3, layer=RDD.PLAYER.M6.ROUTE)
+..             elems += RouteStraight(p1=self.shunt.ports['P4_M6'], p2=self.p4, layer=RDD.PLAYER.M6.ROUTE)
+
+..             return elems
+
+..         def create_ports(self, ports):
+..             ports += self.p1
+..             ports += self.p2
+..             ports += self.p3
+..             ports += self.p4
+..             return ports
+
+
+
+.. .. image:: _figures/_adv_jtl_false.png
+..     :align: center

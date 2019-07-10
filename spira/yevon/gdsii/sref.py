@@ -27,11 +27,12 @@ class __RefElement__(__Element__):
         return self.ref.flatten()
 
     def flat_copy(self, level=-1):
-        if level == 0: return spira.ElementList(self._copy__())
-        el = self.ref.elements.flat_copy(level-1)
+        if level == 0: return spira.ElementList(self.__copy__())
+        elems = self.ref.elements.flat_copy(level-1)
         T = self.transformation + Translation(self.midpoint)
-        el.transform(T)
-        return el
+        # T = self.transformation
+        elems.transform(T)
+        return elems
 
 
 class SRef(__RefElement__):
@@ -67,8 +68,8 @@ class SRef(__RefElement__):
         return hash(self.__repr__())
 
     def __deepcopy__(self, memo):
-        return SRef(
-        # return self.__class__(
+        # return SRef(
+        return self.__class__(
             alias=self.alias,
             reference=deepcopy(self.ref),
             midpoint=deepcopy(self.midpoint),
@@ -115,8 +116,6 @@ class SRef(__RefElement__):
             o = midpoint
         elif np.array(midpoint).size == 2:
             o = midpoint
-        # elif midpoint in self.ports:
-            # o = self.ports[midpoint].midpoint
         elif midpoint in self.ports.get_names():
             o = self.ports[midpoint.name].midpoint
         elif issubclass(type(midpoint), __Port__):
@@ -131,8 +130,6 @@ class SRef(__RefElement__):
             d = destination
         elif np.array(destination).size == 2:
             d = destination
-        # elif destination in self.ports:
-        #     d = self.ports[destination].midpoint
         elif destination in self.ports.get_names():
             d = self.ports[destination.name].midpoint
         else:
@@ -141,8 +138,6 @@ class SRef(__RefElement__):
 
         position = np.array([d[0], d[1]]) - np.array([o[0], o[1]])
         self.midpoint = Coord(self.midpoint[0] + position[0], self.midpoint[1] + position[1])
-        # dxdy = Coord(self.midpoint[0] + position[0], self.midpoint[1] + position[1])
-        # self.translate(dxdy)
         return self
 
     def connect(self, port, destination, ignore_process=False):
@@ -167,7 +162,7 @@ class SRef(__RefElement__):
         if not isinstance(destination, spira.Port):
             raise ValueError('Destination has to be a port.')
 
-        if (ignore_process is False) and (port.process != destination.process):
+        if (ignore_process is False) and (p.process != destination.process):
             raise ValueError('Cannot connect ports from different processes.')
 
         T = vector_match_transform(v1=p, v2=destination)
@@ -289,8 +284,6 @@ class SRef(__RefElement__):
         from spira.yevon.geometry.bbox_info import bbox_info_opposite_boundary_port
         D = self.expand_flat_copy()
 
-        print(D.ports)
-
         port = D.ports[port_name]
         destination = D.ports[destination_name]
     
@@ -299,49 +292,6 @@ class SRef(__RefElement__):
                 opposite_port = bbox_info_opposite_boundary_port(e, port)
                 T = stretching.stretch_element_by_port(self, opposite_port, port, destination)
                 T.apply(D.ref.elements[i])
-
-
-
-
-    # # FIXME: Choose which one to use: expand of flat_copy?
-    # def stretch(self, factor=(1,1), center=(0,0)):
-    #     S = self.expand_flat_copy()
-    #     T = spira.Stretch(stretch_factor=factor, stretch_center=center)
-    #     for i, e in enumerate(S.ref.elements):
-    #         # T.apply(S.ref.elements[i])
-    #         S.ref.elements[i].transform(T)
-    #     return self
-    #     # return S
-        
-    # # def stretch(self, factor=(1,1), center=(0,0)):
-    # #     el = self.flat_copy()
-    # #     T = spira.Stretch(stretch_factor=factor, stretch_center=center)
-    # #     for i, e in enumerate(el):
-    # #         el[i].transform(T)
-    # #     self.ref.elements = el
-    # #     return self
-
-
-
-    # def stretch_p2p(self, port_name, destination_name):
-        # for i, e in enumerate(self.ref.elements):
-        #     if isinstance(e, Polygon):
-        #         if e.id_string() == port.local_pid:
-        #             opposite_port = bbox_info.bbox_info_opposite_boundary_port(e, port)
-        #             Tn = stretching.stretch_element_by_port(self, opposite_port, port, destination)
-        #             Tn.apply(self.ref.elements[i])
-
-        # if port.bbox is True:
-        #     for i, e in enumerate(self.ref.elements):
-        #         T.apply(self.ref.elements[i])
-        # else:
-        #     for i, e in enumerate(self.ref.elements):
-        #         if isinstance(e, Polygon):
-        #             if e.id_string() == port.local_pid:
-        #                 opposite_port = bbox_info.bbox_info_opposite_boundary_port(e, port)
-        #                 Tn = stretching.stretch_element_by_port(self, opposite_port, port, destination)
-        #                 Tn.apply(self.ref.elements[i])
-        # return self
 
     def nets(self, lcar):
         """  """
@@ -364,37 +314,6 @@ class SRef(__RefElement__):
 
         return nets 
 
-    # def expand_transform(self):
-    #     """
-
-    #     Note
-    #     ----
-    #     Use __class__ cause we want to keep the 
-    #     subclass tree (spira.Device) in tacks for fitlering.
-    #     """
-
-    #     if not self.transformation.is_identity():
-
-    #         if self.alias is None:
-    #             name = '{}_{}'.format(self.ref.name, self.transformation.id_string()),
-    #         else:
-    #             name = '{}_{}'.format(self.ref.name, self.alias),
-
-    #         C = self.ref.__class__(name=name,
-    #             alias=self.ref.alias + self.alias,
-    #             elements=deepcopy(self.ref.elements),
-    #             ports=deepcopy(self.ref.ports))
-
-    #         T = self.transformation + spira.Translation(self.midpoint)
-    #         C = C.transform(T)
-    #         C.expand_transform()
-
-    #         self.ref = C
-    #         self.transformation = None
-    #         self.midpoint = (0,0)
-
-    #     return self
-
     def expand_transform(self):
         """
 
@@ -414,7 +333,8 @@ class SRef(__RefElement__):
             ports=deepcopy(self.ref.ports))
 
         T = self.transformation + spira.Translation(self.midpoint)
-        C = C.transform(T)
+        # T = self.transformation
+        C.transform(T)
         C.expand_transform()
 
         self.ref = C
@@ -428,33 +348,6 @@ class SRef(__RefElement__):
         D = self.ref.expand_flat_copy()
         return SRef(reference=D)
         # return self.__class__(reference=D)
-
-    # def expand_flat_copy(self):
-    #     """  """
-
-    #     S = self.expand_transform()
-    #     C = spira.Cell(name=S.ref.name + '_ExpandedCell')
-    #     def flat_polygons(subj, cell):
-    #         for e in cell.elements:
-    #             if isinstance(e, spira.Polygon):
-    #                 subj += e
-    #             elif isinstance(e, spira.SRef):
-    #                 flat_polygons(subj=subj, cell=e.ref)
-    #         # for p in cell.ports:
-    #         #     port = spira.Port(
-    #         #         # name=p.name + "_" + cell.name,
-    #         #         name=p.name,
-    #         #         locked=False,
-    #         #         midpoint=deepcopy(p.midpoint),
-    #         #         orientation=deepcopy(p.orientation),
-    #         #         width=deepcopy(p.width),
-    #         #         local_pid=p.local_pid
-    #         #     )
-    #         #     subj.ports += port
-    #         return subj
-    #     D = flat_polygons(C, S.ref)
-    #     # return SRef(reference=D, alias=self.alias)
-    #     return self.__class__(reference=D, alias=self.alias)
 
 
 class ARef(__RefElement__):

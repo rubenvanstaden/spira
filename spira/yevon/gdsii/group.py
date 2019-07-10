@@ -13,9 +13,7 @@ __all__ = ['Group']
 
 class __Group__(ParameterInitializer):
 
-    elements = ElementListParameter(
-        fdef_name='__create_elements__',
-        doc='List of ports to be added to the cell instance.')
+    elements = ElementListParameter(fdef_name='__create_elements__', doc='List of elements added to cell instance.')
 
     def __create_elements__(self, elems):
         return self.create_elements(elems)

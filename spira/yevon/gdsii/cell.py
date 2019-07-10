@@ -203,8 +203,19 @@ class Cell(__Cell__):
             c_name = deepcopy(name)
             for e in cell.elements:
                 if isinstance(e, SRef):
-                    c_name += e.alias + ':'
-                    subj = _traverse_polygons(subj=subj, cell=e.ref, name=c_name)
+                    if e.alias is not None:
+                        c_name += e.alias + ':'
+                    else:
+                        c_name += ':'
+                    if exclude_devices is True:
+                        if isinstance(e.ref, Device):
+                            subj += e
+                        else:
+                            # flat_polygons(subj=subj, cell=e.ref)
+                            subj = _traverse_polygons(subj=subj, cell=e.ref, name=c_name)
+                    else:
+                        # flat_polygons(subj=subj, cell=e.ref)
+                        subj = _traverse_polygons(subj=subj, cell=e.ref, name=c_name)
                 elif isinstance(e, Polygon):
                     e.location_name = c_name
                     subj += e

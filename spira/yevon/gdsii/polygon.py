@@ -42,11 +42,13 @@ class __Polygon__(__LayerElement__):
         return hash(self.__repr__())
 
     def encloses(self, point):
+        """  """
         from spira.yevon.utils import clipping
         shape = self.shape.transform_copy(self.transformation)
         return clipping.encloses(coord=point, points=shape.points)
 
     def expand_transform(self):
+        """  """
         from spira.core.transforms.identity import IdentityTransform
         if not self.transformation.is_identity():
             self.shape = self.shape.transform_copy(self.transformation)
@@ -70,7 +72,7 @@ class __Polygon__(__LayerElement__):
         T = spira.Stretch(stretch_factor=factor, stretch_center=center)
         return T.apply(self)
 
-    def stretchcopy(self, factor=(1,1), center=(0,0)):
+    def stretch_copy(self, factor=(1,1), center=(0,0)):
         """  """
         T = spira.Stretch(stretch_factor=factor, stretch_center=center)
         return T.apply_copy(self)
@@ -180,7 +182,6 @@ class Polygon(__Polygon__):
         """
         layer = RDD.GDSII.EXPORT_LAYER_MAP[self.layer]
         T = self.transformation + transformation
-        # shape = deepcopy(self.shape).transform(T)
         shape = self.shape.transform_copy(T)
         return gdspy.Polygon(points=shape.points, layer=layer.number, datatype=layer.datatype)
 
