@@ -2,7 +2,10 @@
 Overview
 ########
 
-
+This overview discusses the basic constituents of the **SPiRA** framework.
+This includes how data from the fabrication process is connected to the design environment,
+the basic design template for creating parameterized cells, and how different layout
+elements are defined.
 
 ******************
 Process Design Kit
@@ -31,7 +34,7 @@ Initialization
 All caps are used to represent the *RDD* syntax. The reason being to make the
 script structure clearly distinguishable from the rest of the framework source
 code. First, the RDD object is initialized, followed by the process name and
-description. Second, the GDSII related variables are defined.
+description, and then the GDSII related variables are defined.
 
 .. code-block:: python
 
@@ -44,15 +47,15 @@ description. Second, the GDSII related variables are defined.
 Process Data
 ============
 
+Process data relates to data provided by a specific fabrication technology.
 
-
-Define Processes
-----------------
+Process Layer
+-------------
 
 The first step in creating a layer is to define the process step that
-it represents in mask fabrication. The layer process defines a specific
+it represents in mask fabrication. The layer **process** defines a specific
 fabrciation function, for examples **metalization**. There can be multiple
-different drawing layers for a single process. A *Process* database object
+different drawing layers for a single process. A process database object
 is created that contains all the different process steps in a specific
 fabrication process:
 
@@ -60,48 +63,47 @@ fabrication process:
 
     RDD.PROCESS = ProcessLayerDatabase()
 
-    RDD.PROCESS.GND = ProcessLayer(name='Ground Plane', symbol='GND')
-    RDD.PROCESS.SKY = ProcessLayer(name='Sky Plane', symbol='SKY')
-    RDD.PROCESS.R5 = ProcessLayer(name='Resistor 1', symbol='R5')
+    RDD.PROCESS.R1 = ProcessLayer(name='Resistor 1', symbol='R1')
     RDD.PROCESS.M1 = ProcessLayer(name='Metal 1', symbol='M1')
+    RDD.PROCESS.C1 = ProcessLayer(name='Contact 1', symbol='C1')
 
 Each process has a name that describes the process function, and
 a *symbol* that is used to identify the process.
 
-.. ---------- Define Purposes ----------
+Purpose Layer
+-------------
 
-The purpose indicates the use of the layer. Multiple layers with
-the same process but different purposes can be created. Purposes are defined
-using a *Purpose* database object:
+The **purpose** indicates the use of the layer. Multiple layers with
+the same process but different purposes can be created.
+Similar to a process value each purpose contains a name and a unique symbol.
+Purposes are defined using a purpose database object:
 
 .. code-block:: python
 
     RDD.PURPOSE = PurposeLayerDatabase()
 
-    RDD.PURPOSE.GROUND = PurposeLayer(name='Ground plane polygons', symbol='GND')
     RDD.PURPOSE.METAL = PurposeLayer(name='Polygon metals', symbol='METAL')
-    RDD.PURPOSE.ROUTE = PurposeLayer(name='Metal routes', symbol='ROUTE')
-    RDD.PURPOSE.RESISTOR = PurposeLayer(name='Polygon resistor', symbol='RES')
+    RDD.PURPOSE.VIA = PurposeLayer(name='Contact', symbol='VIA')
 
-Similar to a **process** value each purpose contains a name and a unique symbol.
-
-.. ---------- Process Parameters ----------
+Process Parameters
+------------------
 
 Parameters are added to a process by creating a *parameter* database object
 that has a key value equal to the symbol of a pre-defined process:
 
 .. code-block:: python
 
-    RDD.M5 = ParameterDatabase()
-    RDD.M5.MIN_SIZE = 0.7
-    RDD.M5.MAX_WIDTH = 20.0
-    RDD.M5.J5_MIN_SURROUND = 0.5
-    RDD.M5.MIN_SURROUND_OF_I5 = 0.5
+    RDD.M1 = ParameterDatabase()
+    RDD.M1.MIN_SIZE = 0.7
+    RDD.M1.MAX_WIDTH = 20.0
+    RDD.M1.J5_MIN_SURROUND = 0.5
+    RDD.M1.MIN_SURROUND_OF_I5 = 0.5
 
-Any number of variables can be added to the tree using the dot operator.
-The code above defines a set of design parameters for the *M5* process.
+Any number of variables can be added to the database using the dot operator.
+The code above defines a set of design parameters for the **M1 process**.
 
-.. ---------- Physical Layers ----------
+Physical Layers
+---------------
 
 *Physical Layers* are unique to SPiRA and is defined as a layer that has a
 defined process and purpose. A physical layer (PLayer) defines the different
@@ -109,15 +111,14 @@ purposes that a single process can be used for in a layout design.
 
 .. code-block:: python
 
-    RDD.PLAYER.M6 = PhysicalLayerDatabase()
+    RDD.PLAYER.M1 = PhysicalLayerDatabase()
+    RDD.PLAYER.C1 = PhysicalLayerDatabase()
 
-    RDD.PLAYER.I5.VIA = PhysicalLayer(process=RDD.PROCESS.I5, purpose=RDD.PURPOSE.VIA)
+    RDD.PLAYER.C1.VIA = PhysicalLayer(process=RDD.PROCESS.C1, purpose=RDD.PURPOSE.VIA)
+    RDD.PLAYER.M1.METAL = PhysicalLayer(process=RDD.PROCESS.M1, purpose=RDD.PURPOSE.METAL)
 
-    RDD.PLAYER.M6.METAL = PhysicalLayer(process=RDD.PROCESS.M6, purpose=RDD.PURPOSE.METAL)
-    RDD.PLAYER.M6.HOLE = PhysicalLayer(process=RDD.PROCESS.M6, purpose=RDD.PURPOSE.HOLE)
-
-The code above illustrated the different purposes that process layer
-**M6** can have in a layout design.
+The code above illustrates that the layer ``M1`` is a metal layer on process ``M1``,
+and layer ``C1`` is a contact via on process ``C1``.
 
 Virtual Modelling
 ~~~~~~~~~~~~~~~~~
@@ -128,12 +129,10 @@ such as merged polygons or polygon holes.
 
 .. code-block:: python
 
-    RDD.PLAYER.M5.EDGE_CONNECTED = RDD.PLAYER.M5.METAL & RDD.PLAYER.M5.OUTSIDE_EDGE_DISABLED
-    RDD.PLAYER.M6.EDGE_CONNECTED = RDD.PLAYER.M6.METAL & RDD.PLAYER.M6.OUTSIDE_EDGE_DISABLED
+    RDD.PLAYER.M1.EDGE_CONNECTED = RDD.PLAYER.M1.METAL & RDD.PLAYER.M1.OUTSIDE_EDGE_DISABLED
 
-The code above defines a derived layer that is generated when a layer with
-process **M5** and purpose metal overlaps the outside edges of a all
-process **M5** layers.
+The code above defines a derived layer that is generated when a layer with process ``M1`` and
+purpose ``metal`` overlaps the outside edges of a ``M1`` layer.
 
 
 .. ---------------------------------------------------------------------------------------------------
@@ -144,7 +143,7 @@ Parameters
 **********
 
 Designing a generated layout requires modeling its parameters. To create an effective design
-environment it becomes paramount to place restrictions of received parameter values.
+environment it becomes paramount to define parameter restrictions.
 SPiRA uses a meta-configuration to define object parameters, which enables the following features:
 
 * Default values can be set to each parameter.
@@ -154,9 +153,9 @@ SPiRA uses a meta-configuration to define object parameters, which enables the f
 Introduction
 ============
 
-Parameters are derived from the ``spira.Parameter`` class. The
-``ParameterInitializer`` is responsible for storing the parameters of an
-instance. To define parameters the class has to inherit from the ``ParameterInitializer``
+Parameters are derived from the :py:class:`spira.Parameter` class. The
+:py:class:`ParameterInitializer` is responsible for storing the parameters of an
+instance. To define parameters the class has to inherit from the :py:class:`ParameterInitializer`
 class. The following code creates a layer object with a number parameter.
 
 .. code-block:: python
@@ -218,15 +217,14 @@ a more powerful design framework:
 Default
 =======
 
-When defining a parameter the default value can be explicitly set using the ``default`` attribute.
+When defining a parameter the default value can be explicitly set using the :py:data:`default` attribute.
 This is a simple method of declaring your parameter.
-For more complex functionality the default function attribute, ``fdef_name``, can be used.
+For more complex functionality the default function attribute, :py:data:`fdef_name`, can be used.
 This attribute defines the name of a class method that will be used to derive the default value of the parameter.
 Advantages of this implementation is:
 
 * **Logic operations:** The default value can be derived from other defined parameters.
 * **Inheritance:** The default value can be overwritten using class inheritance.
-
 
 .. code-block:: python
 
@@ -271,7 +269,7 @@ The example above restricts the number parameter of the layer to be between 2 an
 Preprocessors
 =============
 
-The reprocess attribute converts a received value before assigning it to the parameter.
+The preprocess attribute converts a received value before assigning it to the parameter.
 Preprocessors are typically used to convert a value of invalid type to one of a valid type, such as converting a float to an integer.
 
 .. code-block:: python
@@ -291,7 +289,7 @@ Preprocessors are typically used to convert a value of invalid type to one of a 
 Documentation
 =============
 
-Documentation can be added to the parameter using the ``doc`` attribute.
+Documentation can be added to the parameter using the :py:data:`doc` attribute.
 The created class can also be documented using triple qoutation marks.
 
 .. code-block:: python
@@ -313,7 +311,7 @@ Cache
 =====
 
 SPiRA automatically caches parameters once they have been initialized.
-When using class methods to define default parameters using the ``fdef_name`` attribute, the value is stored when called for the first time.
+When using class methods to define default parameters using the :py:data:`fdef_name` attribute, the value is stored when called for the first time.
 Calling this value for the second time will not lead to a re-calculation, but rather the value will be retrieved from the cached dictionary.
 The cache is automatically cleared when **any** parameter in the instance is updated, since other parameters might be dependent on the changed parameters.
 
@@ -357,33 +355,43 @@ These points can be manipulated and transformed as required by the designer, bef
 
     class ShapeExample(spira.Cell):
 
-        def create_elements(self, elems):
-            pts = [[0, 0], [2, 2], [2, 6], [-6, 6], [-6, -6], [-4, -4], [-4, 4], [0, 4]]
-            shape = spira.Shape(points=pts)
-            elems += spira.Polygon(shape=shape, layer=spira.Layer(1))
-            return elems
+        def create_points(self, points):
+            points = [[0, 0], [2, 2], [2, 6], [-6, 6], [-6, -6], [-4, -4], [-4, 4], [0, 4]]
+            return points
 
+You can create your own shape by creating a class that inherits from :py:class:`spira.Shape`.
+The shape coordinates are calculated by the :py:data:`create_points` class method that is innate to any :py:class:`spira.Shape` derived instance.
+The :py:class:`spira.Shape` class offers a rich set of methods for basic and advanced shape manipulation:
 
+.. code-block:: python
 
+    >>> shape = ShapeExample()
+    >>> shape.points
+    [[0, 0], [2, 2], [2, 6], [-6, 6], [-6, -6], [-4, -4], [-4, 4], [0, 4]]
+    >>> shape.area
+    88
+    >>> shape.move((10, 0))
+    [[10, 0], [12, 2], [12, 6], [4, 6], [4, -6], [6, -4], [6, 4], [10, 4]]
+    >>> shape.x_coords
+    [10 12 12  4  4  6  6 10]
 
 Elements
 ========
 
-In the aboth example the ``spira.Polygon`` class was used to connect the shape with GDSII-related data, such as a layer number.
-This is the purpose of elements; to wrap geometry data with GDSII layout data.
+The purpose of elements are to wrap geometry data with GDSII layout data.
 In SPiRA the following elements are defined:
 
 * **Polygon**: Connects a shape object with layout data (layer number, datatype).
 * **Label**: Generates text data in a GDSII layout.
 * **SRef**: A structure references, or sometimes called a cell reference, refers to another cell object, but with difference transformations.
 
-There are other special shapes that can be used in the pattern creation.
-These shapes are mainly a combination polygons and relations between polygons.
-These special shapes are referenced as if they represent a single shape and its outline is determined by its bounding box dimensions.
+There are other special objects, called *element groups* that can be used in the design environment.
+These objects are mainly a combination of polygons and relations between polygons.
+These special objects are referenced as if they represent a single shape, and its outline is determined by its bounding box dimensions.
 The following element groups are defined in the SPiRA framework:
 
 * **Cells**: Is the most generic group that binds different parameterized elements or clusters, while conserving the geometrical relations between these polygons or clusters.
-* **Group**: A set of elements can be grouped in a logical container, called ``Group``.
+* **Group**: A set of elements can be grouped in a logical container.
 * **Ports**: A port is simply a polygon with a label on a dedicated process layer. Typically, port elements are placed on conducting metal layers.
 * **Routes**: A route is defined as a cell that consists of a polygon element and a set of edge ports, that resembles a path-like structure.
 
@@ -394,8 +402,8 @@ The SPiRA design environment for creating a PCEll is broken down into the follow
     class PCell(spira.Cell):
         """ My first parameterized cell. """
 
-        # Define parameters here.
-        number = spira.IntegerParameter(default=0, doc=’Parameter example number.’)
+        # Define parameters here
+        number = spira.IntegerParameter(default=0, doc='Parameter example number.')
 
         def create_elements(self, elems):
             # Define elements here.
@@ -407,30 +415,38 @@ The SPiRA design environment for creating a PCEll is broken down into the follow
 
 The most basic SPiRA template to generate a PCell is shown above, and consists of three parts:
 
-1. Create a new cell by inheriting from ``spira.Cell``. This connects the class to the SPiRA framework when constructed.
+1. Create a new cell by inheriting from :py:class:`spira.Cell`. This connects the class to the SPiRA framework when constructed.
 2. Define the PCell parameters as class attributes.
-3. Elements and ports are defined in the ``create_elements`` and ``create_ports`` class methods, which is automatically added to the cell instance.
+3. Elements and ports are defined in the :py:data:`create_elements` and :py:data:`create_ports` class methods, which is automatically added to the cell instance.
    The create methods are special SPiRA class methods that specify how the parameters are used to create the cell.
 
 .. code-block:: python
 
-    class ShapeExample(spira.Cell):
+    class PolygonExample(spira.Cell):
 
         def create_elements(self, elems):
             pts = [[0, 0], [2, 2], [2, 6], [-6, 6], [-6, -6], [-4, -4], [-4, 4], [0, 4]]
             shape = spira.Shape(points=pts)
             elems += spira.Polygon(shape=shape, layer=spira.Layer(1))
             return elems
+    
+    >>> D = PolygonExample()
+    >>> D.gdsii_output()
+
+.. image:: _figures/_elements.png
+    :align: center
 
 The code above illustrates the creation of a polygon object, using the already defined shape.
+The polygon object connects the shape to a GDSII library with a GDSII layer number equal to :math:`1`.
 Once the polygon has been created it can be added to the cell instance using the ``+`` operator
-to increment the ``elems`` list.
+to increment the :py:data:`elems` list.
 
 Group
 =====
 
 Groups are used to apply an operation on a set of polygons, such a retrieving their combined bounding box.
-The following example illistrated the use of ``Group`` to generate a metal bounding box around a set of polygons:
+The following example illistrated the use of :py:class:`spira.Group` to generate a metal bounding box
+around a set of polygons:
 
 .. code-block:: python
 
@@ -442,14 +458,17 @@ The following example illistrated the use of ``Group`` to generate a metal bound
             group += spira.Rectangle(p1=(0,0), p2=(10,10), layer=spira.Layer(1))
             group += spira.Rectangle(p1=(0,15), p2=(10,30), layer=spira.Layer(1))
 
-            group.transform(spira.Rotation(45))
-
             elems += group
 
             bbox_shape = group.bbox_info.bounding_box(margin=1)
             elems += spira.Polygon(shape=bbox_shape, layer=spira.Layer(2))
 
             return elems
+            
+.. image:: _figures/_group.png
+    :align: center
+
+A group polygon is created around the two defined polygons with a marginal offset of 1 micrometer.
 
 Ports
 =====
@@ -458,16 +477,44 @@ Port objects are unique to the SPiRA framework and are mainly used for connectio
 
 .. code-block:: python
 
-    class PortExample(spira.Cell):
-
+    class Box(spira.Cell):
+    
+        width = spira.NumberParameter(default=1)
+        height = spira.NumberParameter(default=1)
+        layer = spira.LayerParameter(default=spira.Layer(1))
+    
         def create_elements(self, elems):
-            elems += spira.Rectangle(p1=(0,0), p2=(20,5), layer=spira.Layer(1))
+            shape = shapes.BoxShape(width=self.width, height=self.height)
+            elems += spira.Polygon(shape=shape, layer=self.layer)
             return elems
-
+    
         def create_ports(self, ports):
-            ports += spira.Port(name='P1', midpoint=(0,2.5), orientation=180)
-            ports += spira.Port(name='P2', midpoint=(20,2.5), orientation=0)
+            ports += spira.Port(name='P1_M1', midpoint=(-0.5,0), orientation=180, width=1)
+            ports += spira.Port(name='P2_M1', midpoint=(0.5,0), orientation=0, width=1)
             return ports
+    
+.. code-block:: python
+
+    >>> box = Box()
+    [SPiRA: Cell] (name ’Box ’, width 1, height 1, number 0, datatype 0)
+    >>> box.width
+    1
+    >>> box. height
+    1
+    >>> box. gds_layer
+    [SPiRA Layer] (name ’’, number 0, datatype 0)
+    >>> box.gdsii_output(name='Ports')
+    
+.. image:: _figures/_ports.png
+    :align: center
+
+The above example illustrates constructing a parameterized box using the proposed framework:
+First, defining the parameters that the user would want to change when creating a box instance.
+Here, three parameter are given namely, the :py:data:`width`, the :py:data:`height` and the layer
+properties for GDSII construction. Second, a shape is generated from the defined parameters using the shape module.
+Third, this box shape is added as a polygon element to the cell instance. This polygon takes the shape and connects
+it to a set of methods responsible for converting it to a GDSII element. Fourth, two terminal ports are added to
+the left and right edges of the box, with their directions pointing away from the polygon interior.
 
 Routes
 ======
@@ -491,96 +538,10 @@ SPiRA offers a variety of different route algorithms that can be generated depen
             ports += spira.Port(name='P2', midpoint=(20,10), orientation=0)
             return ports
 
-
-
-
-
-
-
-.. code-block:: python
-
-    class Box(spira.Cell):
-
-        width = param. NumberField(default=1)
-        height = param. NumberField(default=1)
-        gds_layer = param. LayerField(number=0, datatype=0)
-
-        def create_elements(self, elems):
-            shape = shapes.BoxShape(width=self.width, height=self.height)
-            elems += spira.Polygon(shape=shape, gds_layer=self.gds_layer)
-            return elems
-
-        def create_ports(self, ports):
-            ports += spira.Port(name='Input', midpoint=(-0.5,0), orientation=90)
-            ports += spira.Port(name='Output', midpoint=(0.5,0), orientation=270)
-            return ports
-
-.. code-block:: python
-
-    >>> box = Box()
-    [SPiRA: Cell] (name ’Box ’, width 1, height 1, number 0, datatype 0)
-    >>> box.width
-    1
-    >>> box. height
-    1
-    >>> box. gds_layer
-    [SPiRA Layer] (name ’’, number 0, datatype 0)
-
-
-The above example illustrates constructing a parameterized box using the proposed framework:
-First, defining the parameters that the user would want to change when creating a box instance.
-Here, three parameter are given namely, the width, the height and the layer properties for GDSII construction.
-Second, a shape is generated from the defined parameters using the shape module.
-Third, this box shape is added as a polygon element to the cell instance.
-This polygon takes the shape and connects it to a set of methods responsible for converting it to a GDSII element.
-Fourth, two terminal ports are added to the left and right edges of the box, with their directions pointing away from the polygon interior.
+.. image:: _figures/_routes.png
+    :align: center
 
 .. --------------------------------------------------------------------------------------
-
-******
-PCells
-******
-
-In SPiRA PCells can be divided into two categorises, :py:class:`spira.Device` and :py:class:`spira.Circuit`.
-Each of these classes contains a set of different back-end algorithms that are automatically executed when
-the layout class is constructed. Typically, these algorithms consists of boolean operations and filtering algorithms.
-Also, inheriting from these classes defines the purpose of the layout, either a *device* or a *circuit*.
-
-Devices
-=======
-
-Similar to creating a PCell, constructing a device cell required inheriting from :py:class:`spira.Device`
-instead of :py:class:`spira.PCell`. In superconducting circuits a device layout is usually a **Via** or
-a **Junction**.
-
-.. code-block:: python
-
-    class Junction(spira.Device):
-        pass
-
-Circuits
-========
-
-A circuit PCell is designed similar to that of a device. By definition a circuit layout contains polygon
-routes that connects different device and ports instances. Therefore, a :py:class:`spira.Circuit` contains
-two extra, but optional, create methods to simplify the code structure:
-
-* :py:data:`create_structures`: Defines the device instances.
-* :py:data:`create_routes`: Defines the routing paths between different structures and ports.
-
-.. code-block:: python
-
-    class Jtl(spira.Circuit):
-
-        def create_structures(self, elems):
-            return elems
-
-        def create_routes(self, elems):
-            return elems
-
-Note, it is not required to use these methods, but designing large circuits can cause the
-:py:data:`create_elements` method to become cumbersome.
-
 
 .. .. --------------------------------------------------------------------------------------
 

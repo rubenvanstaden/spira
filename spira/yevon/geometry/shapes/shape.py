@@ -109,7 +109,7 @@ class __Shape__(Transformable, ParameterInitializer):
     @property
     def area(self):
         """ Returns the area of the shape. """
-        pts = self.points[0]
+        pts = self.points
         T = np.roll(np.roll(pts, 1, 1), 1, 0)
         return sum(abs(np.diff(pts * T, 1, 1))) * 0.5
 

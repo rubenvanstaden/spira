@@ -6,6 +6,46 @@ This set of tutorials focuses on explaining more advanced features that the SPiR
 has to offer. We go into more details on how to create **device** and **circuit** PCells,
 how to structure a design, and how to manipulate layout elements.
 
+In SPiRA PCells can be divided into two categorises, :py:class:`spira.Device` and :py:class:`spira.Circuit`.
+Each of these classes contains a set of different back-end algorithms that are automatically executed when
+the layout class is constructed. Typically, these algorithms consists of boolean operations and filtering algorithms.
+Also, inheriting from these classes defines the purpose of the layout, either a *device* or a *circuit*.
+
+**Devices:**
+
+Similar to creating a PCell, constructing a device cell required inheriting from :py:class:`spira.Device`
+instead of :py:class:`spira.PCell`. In superconducting circuits a device layout is usually a **Via** or
+a **Junction**.
+
+.. code-block:: python
+
+    class Junction(spira.Device):
+        pass
+
+**Circuits:**
+
+A circuit PCell is designed similar to that of a device. By definition a circuit layout contains polygon
+routes that connects different device and ports instances. Therefore, a :py:class:`spira.Circuit` contains
+two extra, but optional, create methods to simplify the code structure:
+
+* :py:data:`create_structures`: Defines the device instances.
+* :py:data:`create_routes`: Defines the routing paths between different structures and ports.
+
+.. code-block:: python
+
+    class Jtl(spira.Circuit):
+
+        def create_structures(self, elems):
+            return elems
+
+        def create_routes(self, elems):
+            return elems
+
+Note, it is not required to use these methods, but designing large circuits can cause the
+:py:data:`create_elements` method to become cumbersome.
+
+
+
 *****
 YTron
 *****

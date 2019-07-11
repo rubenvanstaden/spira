@@ -1,5 +1,5 @@
-Welcome to the SPiRA documentation!
-===================================
+Welcome to the SPiRA Framework!
+===============================
 
 Parameterized Cells (PCells) are key components used to increase flexibility and productivity during layout design.
 Creating a parameterized cell integrates all design information into one place.
