@@ -26,7 +26,8 @@ class PortLayout(spira.Cell):
         dl = self.port.length/10
         layer = PLayer(process=self.port.process, purpose=self.port.purpose)
         p = spira.Box(width=dw, height=dl, layer=layer)
-        T = transformation_from_vector(self.port) + spira.Rotation(-90)
+        # T = transformation_from_vector(self.port) + spira.Rotation(-90)
+        T = transformation_from_vector(self.port) + spira.Rotation(rotation=-90, rotation_center=self.port.midpoint)
         p.transform(T)
         return p
 

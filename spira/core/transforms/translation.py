@@ -31,9 +31,10 @@ class Translation(__ConvertableTransform__):
             return deepcopy(self)
         if isinstance(other, Translation):
             x = self.translation.x + other.translation.x
-            y = self.translation[1] + other.translation[1]
+            y = self.translation.y + other.translation.y
             return Translation(Coord(x, y))
         else:
+            # return GenericTransform.__add__(self, other)
             return __ConvertableTransform__.__add__(self, other)
 
     def __iadd__(self, other):
@@ -46,7 +47,8 @@ class Translation(__ConvertableTransform__):
             self.translation = Coord(x, y)
             return self
         else:
-            return GenericTransform.__iadd__(self, other)
+            # return GenericTransform.__iadd__(self, other)
+            return __ConvertableTransform__.__iadd__(self, other)
 
     def __neg__(self):
         """ Helper methods which returns the reverse transformation """
@@ -65,7 +67,7 @@ class __TranslationMixin__(object):
     def translate(self, translation=(0,0)):
         return self.transform(Translation(translation))
 
-    def translatecopy(self, position):
+    def translate_copy(self, position):
         return self.transform_copy(Translation(position))
 
 

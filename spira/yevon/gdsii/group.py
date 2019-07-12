@@ -29,13 +29,10 @@ class __Group__(ParameterInitializer):
         """ Add element and reduce the class to a simple compound elements. """
         if isinstance(element, (list, Group, spira.ElementList)):
             self.extend(element)
-        # elif isinstance(element, __Element__):
         elif issubclass(type(element), __Element__):
             self.append(element)
         elif element is None:
             return self
-        # elif issubclass(type(element), __Port__):
-        #     self.ports += element
         else:
             raise TypeError("Invalid type " + str(type(element)) + " in __Group__.__iadd__().")
         return self
@@ -52,7 +49,7 @@ class __Group__(ParameterInitializer):
             el.extend(elems.elemetals)
         else:
             el.extend(elems)
-        self.elements = el  
+        self.elements = el
 
     def flatten(self, level=-1):
         self.elements = self.elements.flat_copy(level=level)
@@ -79,6 +76,10 @@ class Group(__Group__, __Element__):
             return self.elements.flat_copy(level).transform(self.transformation)
         else:
             return spira.ElementList(self.elements)
+
+    def transform(self, transformation=None):
+        self.elements.transform(transformation)
+        return self
 
     def expand_transform(self):
         if not self.transformation.is_identity():

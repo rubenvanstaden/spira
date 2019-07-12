@@ -3,6 +3,7 @@ from spira.core.transformation import ReversibleTransform
 
 from spira.yevon import utils
 from numpy.linalg import norm
+from copy import deepcopy
 from spira.core.parameters.variables import *
 from spira.yevon.geometry.coord import CoordParameter, Coord
 from spira.core.parameters.descriptor import FunctionParameter, SetFunctionParameter
@@ -13,8 +14,8 @@ from spira.yevon import constants
 class GenericTransform(ReversibleTransform):
     """  """
 
-    def __init__(self, translation=(0,0), rotation=0, **kwargs):
-        super().__init__(translation=translation, rotation=rotation, **kwargs)
+    def __init__(self, translation=(0,0), rotation=0, absolute_rotation=False, **kwargs):
+        super().__init__(translation=translation, rotation=rotation, absolute_rotation=absolute_rotation, **kwargs)
 
     def set_rotation(self, value):
         self.__rotation__ = value % 360.0
@@ -35,10 +36,11 @@ class GenericTransform(ReversibleTransform):
             self.__ca__ = np.cos(value * constants.DEG2RAD)
             self.__sa__ = np.sin(value * constants.DEG2RAD)
 
-    rotation = SetFunctionParameter('__rotation__', set_rotation, default=0.0)
+    rotation = SetFunctionParameter(local_name='__rotation__', fset=set_rotation, default=0.0)
     magnification = NumberParameter(default=1)
     reflection = BoolParameter(default=False)
-    translation = CoordParameter()
+    translation = CoordParameter(local_name='__translation__')
+    absolute_rotation = BoolParameter(local_name='__absolute_rotation__', default=False)
 
     def __str__(self):
         """ Gives a string representing the transform. """
@@ -48,12 +50,6 @@ class GenericTransform(ReversibleTransform):
             str(self.reflection),
             str(self.magnification)
         )
-        # return "_M=%s-R=%s-RF=%s-MN=%s" % (
-        #     str(self.translation),
-        #     str(self.rotation),
-        #     str(self.reflection),
-        #     str(self.magnification)
-        # )
 
     def __translate__(self, coord):
         C = Coord(coord[0] + self.translation.x, coord[1] + self.translation.y)
@@ -141,39 +137,86 @@ class GenericTransform(ReversibleTransform):
         return a % 360.0
 
     def __add__(self, other):
-        if issubclass(type(other), GenericTransform):
+        if other is None:
+            return deepcopy(self)
+
+        # if issubclass(type(other), GenericTransform):
+        if isinstance(other, GenericTransform):
             T = GenericTransform()
 
-            if other.reflection is True: S_1 = -1
-            else: S_1 = 1
+            if other.reflection is True: s_1 = -1
+            else: s_1 = 1
 
             T.reflection = (not self.reflection == other.reflection)
-            T.rotation = S_1 * (self.rotation + other.rotation)
-            T.translation = Coord(self.translation) + other.translation
+            M1 = 1.0
+
+            if not self.absolute_rotation:
+                T.rotation = s_1 * self.rotation + other.rotation
+                ca = other.__ca__
+                sa = other.__sa__
+                # print('A')
+            else:
+                # print('B')
+                T.rotation = s_1 * self.rotation
+                ca = 1.0
+                sa = 0.0
+
+            # Counterclockwise rotation
+            # cx = self.translation.x + ca * other.translation.x * M1 - s_1 * sa * other.translation.y * M1
+            # cy = self.translation.y + sa * other.translation.x * M1 + s_1 * ca * other.translation.y * M1
+            cx = other.translation.x + ca * self.translation.x * M1 - s_1 * sa * self.translation.y * M1
+            cy = other.translation.y + sa * self.translation.x * M1 + s_1 * ca * self.translation.y * M1
+            # cx = other.translation.x + ca * self.translation.x * M1 + s_1 * sa * self.translation.y * M1
+            # cy = -other.translation.y + sa * self.translation.x * M1 + s_1 * ca * self.translation.y * M1
+            T.translation = Coord(cx, cy)
+
+            T.absolute_rotation = self.absolute_rotation or other.absolute_rotation
+
         else:
             T = Transform.__add__(self, other)
         return T
 
     def __iadd__(self, other):
-        return self.__add__(other)
 
-        # if other is None:
-        #     return self
-        # # if issubclass(type(other), GenericTransform):
-        # print('\n\n')
-        # print(self)
-        # print(type(self))
-        # print(type(other))
-        # if isinstance(other, GenericTransform):
-        #     self.reflection = (not self.reflection and other.reflection)
-        #     self.rotation = self.rotation + other.rotation
-        #     self.translation = Coord(self.translation) + other.translation
-        # else:
-        #     raise ValueError('Not implemented!')
-        # print(self)
-        # print(type(self))
-        # print('\n\n')
-        # return self
+        # return self.__add__(other)
+
+        if other is None:
+            return self
+
+        # if issubclass(type(other), GenericTransform):
+        if isinstance(other, GenericTransform):
+            T = GenericTransform()
+
+            if other.reflection is True: s_1 = -1
+            else: s_1 = 1
+
+            self.reflection = (not self.reflection == other.reflection)
+            M1 = 1.0
+
+            if not self.absolute_rotation:
+                self.rotation = s_1 * self.rotation + other.rotation
+                ca = other.__ca__
+                sa = other.__sa__
+            else:
+                self.rotation = s_1 * self.rotation
+                ca = 1
+                sa = 0
+
+            # Counterclockwise rotation
+            # cx = self.translation.x + ca * other.translation.x * M1 - s_1 * sa * other.translation.y * M1
+            # cy = self.translation.y + sa * other.translation.x * M1 + s_1 * ca * other.translation.y * M1
+            cx = other.translation.x + ca * self.translation.x * M1 - s_1 * sa * self.translation.y * M1
+            cy = other.translation.y + sa * self.translation.x * M1 + s_1 * ca * self.translation.y * M1
+            # cx = other.translation.x + ca * self.translation.x * M1 + s_1 * sa * self.translation.y * M1
+            # cy = -other.translation.y + sa * self.translation.x * M1 + s_1 * ca * self.translation.y * M1
+            self.translation = Coord(cx, cy)
+
+            self.absolute_rotation = self.absolute_rotation or other.absolute_rotation
+
+        else:
+            raise ValueError('Cannot add transforms')
+
+        return self
 
     def __sub__(self, other):
         return self.__add__(-other)
@@ -208,9 +251,9 @@ class GenericTransform(ReversibleTransform):
     def __neg__(self):
         from spira.core.transforms.translation import Translation
         from spira.core.transforms.rotation import Rotation
-        
-        T = Translation(translation=-self.translation)
-        T += Rotation(rotation=-self.rotation, rotation_center=(0,0))
+        T = Translation(translation=-self.translation) + Rotation(rotation=-self.rotation, rotation_center=(0,0))
+        # T = Translation(translation=-self.translation)
+        # T += Rotation(rotation=-self.rotation, rotation_center=(0,0))
         return T
 
     def id_string(self):
@@ -242,6 +285,7 @@ class __ConvertableTransform__(GenericTransform):
     rotation = ConvertParameter(BASE, 'rotation', __convert_transform__)
     translation = ConvertParameter(BASE, 'translation', __convert_transform__)
     magnification = ConvertParameter(BASE, 'magnification', __convert_transform__)
+    absolute_rotation = ConvertParameter(BASE, 'absolute_rotation', __convert_transform__)
 
     def __add__(self, other):
         self.__convert_transform__()

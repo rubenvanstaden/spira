@@ -148,30 +148,21 @@ class __Port__(ParameterInitializer, metaclass=MetaPort):
     text_type = NumberParameter(default=RDD.GDSII.TEXT)
     local_pid = StringParameter(default='none_local_pid')
 
-    # # FIXME: Look at how this is done with elements.
-    # def __add__(self, other):
-    #     """
-    #     Returns a coordinate 
+    def __add__(self, other):
+        """
+        >>> midpoint = self.jj1.ports['P2'] + [-5, 0]
+        """
+        if other is None: return self
+        p1 = Coord(self.midpoint[0], self.midpoint[1]) + Coord(other[0], other[1])
+        return p1
 
-    #     Example
-    #     -------
-    #     >>> midpoint = self.jj1.ports['P2'] + [-5, 0]
-    #     """
-    #     if other is None: return self
-    #     p1 = Coord(self.midpoint[0], self.midpoint[1]) + Coord(other[0], other[1])
-    #     return p1
-
-    # def __sub__(self, other):
-    #     """
-    #     Allows for this type of operations:
-
-    #     Example
-    #     -------
-    #     >>> midpoint = self.jj1.ports['P2'] - [-5, 0]
-    #     """
-    #     if other is None: return self
-    #     p1 = Coord(self.midpoint[0], self.midpoint[1]) - Coord(other[0], other[1])
-    #     return p1
+    def __sub__(self, other):
+        """
+        >>> midpoint = self.jj1.ports['P2'] - [-5, 0]
+        """
+        if other is None: return self
+        p1 = Coord(self.midpoint[0], self.midpoint[1]) - Coord(other[0], other[1])
+        return p1
 
     def flat_copy(self, level=-1):
         """ Return a flattened copy of the port. """

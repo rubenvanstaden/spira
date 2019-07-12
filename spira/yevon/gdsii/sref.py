@@ -20,19 +20,8 @@ from spira.core.transforms import stretching
 
 class __RefElement__(__Element__):
 
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-
-    def flatten(self):
-        return self.ref.flatten()
-
-    def flat_copy(self, level=-1):
-        if level == 0: return spira.ElementList(self.__copy__())
-        elems = self.ref.elements.flat_copy(level-1)
-        T = self.transformation + Translation(self.midpoint)
-        # T = self.transformation
-        elems.transform(T)
-        return elems
+    def __init__(self, transformation=None, **kwargs):
+        super().__init__(transformation=transformation, **kwargs)
 
 
 class SRef(__RefElement__):
@@ -52,8 +41,8 @@ class SRef(__RefElement__):
     midpoint = CoordParameter(default=(0,0))
     alias = StringParameter(allow_none=True, default=None)
 
-    def __init__(self, reference, alias=None, **kwargs):
-        __RefElement__.__init__(self, alias=alias, **kwargs)
+    def __init__(self, reference, alias=None, transformation=None, **kwargs):
+        __RefElement__.__init__(self, alias=alias, transformation=transformation, **kwargs)
         self.ref = reference
 
     def __repr__(self):
@@ -68,12 +57,14 @@ class SRef(__RefElement__):
         return hash(self.__repr__())
 
     def __deepcopy__(self, memo):
-        # return SRef(
-        return self.__class__(
+        return SRef(
+        # return self.__class__(
             alias=self.alias,
             reference=deepcopy(self.ref),
+            # reference=self.ref,
             midpoint=deepcopy(self.midpoint),
             transformation=deepcopy(self.transformation)
+            # transformation=self.transformation
         )
 
     def __eq__(self, other):
@@ -138,6 +129,8 @@ class SRef(__RefElement__):
 
         position = np.array([d[0], d[1]]) - np.array([o[0], o[1]])
         self.midpoint = Coord(self.midpoint[0] + position[0], self.midpoint[1] + position[1])
+        # dxdy = Coord(self.midpoint[0] + position[0], self.midpoint[1] + position[1])
+        # self.translate(dxdy)
         return self
 
     def connect(self, port, destination, ignore_process=False):
@@ -319,35 +312,80 @@ class SRef(__RefElement__):
 
         Note
         ----
-        Use __class__ cause we want to keep the 
+        Use __class__ cause we want to keep the
         subclass tree (spira.Device) in tacks for fitlering.
         """
+        from spira.yevon.gdsii.sref import SRef
+        from spira.yevon.gdsii.polygon import Polygon
+        from spira.core.transforms.identity import IdentityTransform
+        
+        self.ref.expand_transform()
 
-        if self.alias is None:
-            name = '{}_{}'.format(self.ref.name, self.transformation.id_string()),
-        else:
-            name = '{}_{}'.format(self.ref.name, self.alias),
-
-        C = self.ref.__class__(name=name,
+        C = spira.Cell(
+            name='{}_{}'.format(self.ref.name, self.transformation.id_string()),
             elements=deepcopy(self.ref.elements),
             ports=deepcopy(self.ref.ports))
 
-        T = self.transformation + spira.Translation(self.midpoint)
-        # T = self.transformation
-        C.transform(T)
-        C.expand_transform()
+        # T = self.transformation + spira.Translation(self.midpoint)
+        T = self.transformation
+
+        C.elements.transform(T)
+        C.ports.transform(T)
 
         self.ref = C
         self.transformation = None
-        self.midpoint = (0,0)
+        # self.midpoint = (0,0)
+        
+        # if not self.transformation.is_identity():
+
+        #     # if self.alias is None:
+        #     #     name = '{}_{}'.format(self.ref.name, self.transformation.id_string())
+        #     # else:
+        #     #     name = '{}_{}'.format(self.ref.name, self.alias)
+
+        #     # C = self.ref.__class__(name=name,
+        #     #     elements=deepcopy(self.ref.elements),
+        #     #     ports=deepcopy(self.ref.ports))
+
+        #     # C = self.ref.__class__(
+        #     C = spira.Cell(
+        #         name='{}_{}'.format(self.ref.name, self.transformation.id_string()),
+        #         elements=deepcopy(self.ref.elements),
+        #         ports=deepcopy(self.ref.ports))
+
+        #     T = self.transformation + spira.Translation(self.midpoint)
+        #     # T = self.transformation
+
+        #     print(C.name)
+
+        #     # C.transform(T)
+        #     C.elements.transform(T)
+        #     # C.expand_transform()
+
+        #     # # C.elements.transform(T)
+        #     # # C.ports.transform(T)
+
+        #     self.ref = C
+        #     # self.transformation = IdentityTransform()
+        #     # self.midpoint = (0,0)
 
         return self
 
-    def expand_flat_copy(self):
-        """  """
-        D = self.ref.expand_flat_copy()
-        return SRef(reference=D)
-        # return self.__class__(reference=D)
+    def flat_copy(self, level=-1):
+        if level == 0: return spira.ElementList(self.__copy__())
+        elems = self.ref.elements.flat_copy(level-1)
+        T = self.transformation + Translation(self.midpoint)
+        elems = elems.transform(T)
+        return elems
+
+    def flatten(self):
+        return self.ref.flatten()
+
+    # def expand_flat_copy(self):
+    #     """  """
+    #     D = self.ref.expand_flat_copy()
+    #     return SRef(reference=D)
+    #     # return self.__class__(reference=D)
 
 
 class ARef(__RefElement__):

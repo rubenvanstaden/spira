@@ -63,7 +63,7 @@ class ReversibleTransform(Transform):
 
     def reverse(self, item):
         if isinstance(item, list):
-            print('FAIL!')
+            raise TypeError("Cannot add object of type " + str(type(other)) + " to transform")
             # from .shape import Shape
             # L = Shape(item)
             # L.reverse_transform(self)
@@ -109,7 +109,7 @@ class CompoundTransform(Transform):
 
     def __str__(self):
         return self.__repr__()
-        
+
     def __getitem__(self, key):
         return self.__subtransforms__[key]
 
@@ -125,7 +125,7 @@ class CompoundTransform(Transform):
     def apply(self, item):
         """ Apply the transform to the transformable item. """
         if isinstance(item, list):
-            pass
+            raise TypeError("Cannot add object of type " + str(type(other)) + " to transform")
             # from .shape import Shape
             # L = Shape(item)
             # for c in self.__subtransforms__:
@@ -179,7 +179,7 @@ class ReversibleCompoundTransform(CompoundTransform, ReversibleTransform):
 
     def reverse(self, item):
         if isinstance(item, list):
-            print('FAIL!!!')
+            raise TypeError("Cannot add object of type " + str(type(other)) + " to transform")
             # from .shape import Shape
             # L = Shape(item)
             # for c in reversed(self.__subtransforms__):
@@ -223,11 +223,9 @@ class ReversibleCompoundTransform(CompoundTransform, ReversibleTransform):
             for c in other.__subtransforms__:
                 self.add(other)
         if isinstance(other, ReversibleTransform):
-            # self.elements.append(other)
             self.__subtransforms__.append(other)
         elif isinstance(other, Transform):
             self.__make_irreversible__()
-            # self.elements.append(other)
             self.__subtransforms__.append(other)
         else:
             raise TypeError("Cannot add object of type " + str(type(other)) + " to transform")
@@ -241,9 +239,9 @@ class ReversibleCompoundTransform(CompoundTransform, ReversibleTransform):
 
 class ProcessoTransformation(ProcessorTypeCast):
     def __init__(self):
-        ProcessorTypeCast.__init__(self, Transform)
+        # ProcessorTypeCast.__init__(self, Transform)
         # ProcessorTypeCast.__init__(self, CompoundTransform)
-        # ProcessorTypeCast.__init__(self, ReversibleTransform)
+        ProcessorTypeCast.__init__(self, ReversibleTransform)
         # super().__init__(ReversibleTransform)
 
     def process(self, value, obj=None):
@@ -254,15 +252,13 @@ class ProcessoTransformation(ProcessorTypeCast):
             return ProcessorTypeCast.process(self, value, obj)
 
 
-# def TransformationParameter(name='noname', number=0, datatype=0, **kwargs):
 def TransformationParameter(restriction=None, preprocess=None, **kwargs):
     from spira.core.transformation import Transform
-    R = RestrictType(Transform) & restriction
-    P = ProcessoTransformation() + preprocess
     if 'default' in kwargs:
         default = kwargs['default']
     else:
         default = None
-    # return ParameterDescriptor(default=default, restrictions=R, **kwargs)
+    R = RestrictType(Transform) & restriction
+    P = ProcessoTransformation() + preprocess
     return ParameterDescriptor(default=default, restrictions=R, preprocess=P, **kwargs)
 

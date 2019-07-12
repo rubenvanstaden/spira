@@ -121,7 +121,8 @@ class __Cell__(ParameterInitializer, metaclass=MetaCell):
 
     def flat_copy(self, level=-1):
         name = '{}_{}'.format(self.name, 'Flat'),
-        return Cell(name, self.elements.flat_copy(level=level))
+        # return self.__class__(name, self.elements.flat_copy(level=level))
+        return Cell(name, elements=self.elements.flat_copy(level=level))
 
     def is_layer_in_cell(self, layer):
         D = deepcopy(self)
@@ -179,10 +180,10 @@ class Cell(__Cell__):
             self.__name__ = self.__name_generator__(self)
         return self.__name__
 
-    def transform(self, transformation=None):
-        self.elements.transform(transformation)
-        self.ports.transform(transformation)
-        return self
+    # def transform(self, transformation=None):
+    #     self.elements.transform(transformation)
+    #     self.ports.transform(transformation)
+    #     return self
 
     def expand_transform(self):
         for S in self.elements.sref:

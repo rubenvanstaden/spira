@@ -48,8 +48,8 @@ class ParameterDescriptor(BaseParameter):
 
     def __init__(self, local_name=None, **kwargs):
 
-        # self.__name__ = local_name
-        # self.name = local_name
+        self.__name__ = local_name
+        self.name = local_name
 
         super().__init__(**kwargs)
 
@@ -180,7 +180,7 @@ class ParameterDescriptor(BaseParameter):
 
     def bind_parameter(self, cls, name):
         self.name = name
-        if not hasattr(self, '__name__'):
+        if (self.__name__ is None) or (not hasattr(self, '__name__')):
             self.__name__ = '__param_{}__'.format(name)
 
     def validate_binding(self, host_cls, name):
@@ -293,7 +293,7 @@ class SetFunctionParameter(BaseParameter):
 
     def bind_parameter(self, cls, name):
         self.name = name
-        if self.__name__ is None:
+        if (self.__name__ is None) or (not hasattr(self, '__name__')):
             self.__name__ = '__prop_{}__'.format(name)
 
 
@@ -331,9 +331,9 @@ class ConvertParameter(BaseParameter):
     def bind_parameter(self, cls, name):
         import inspect
         self.name = name
-        if None == self.parent_property_name:
+        if self.parent_property_name is None:
             self.parent_property_name = name
-        # if None == self.parent_class:
+        # if self.parent_class is None:
         #     mro = inspect.getmro(cls)
         #     found = False
         #     for C in mro[1:]:

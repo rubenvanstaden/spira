@@ -44,18 +44,20 @@ class CellPortProperty(PortProperty):
 class TransformablePortProperty(PortProperty, Transformable):
     def __create_ports__(self, ports):
         ports = self.create_ports(ports).transform_copy(self.transformation)
+        # ports = self.create_ports(ports)
         return ports
 
 
 class SRefPortProperty(TransformablePortProperty):
     def create_ports(self, ports):
         pp = deepcopy(self.ref.ports)
-        ports = pp.move(self.midpoint)
+        # pp = self.ref.ports
+        # ports = pp.move(self.midpoint)
+        ports = pp.transform_copy(self.transformation).move(self.midpoint).transform(-self.transformation)
         # ports = pp.transform_copy(self.transformation)
         # ports = pp.transform_copy(self.transformation).move(self.midpoint)
         # ports = pp.move(self.midpoint).transform(-self.transformation)
         # ports = pp.move(self.midpoint).transform_copy(self.transformation)
-        # ports = pp.transform_copy(self.transformation).move(self.midpoint).transform(-self.transformation)
         # ports = pp.transform_copy(self.transformation).move(self.midpoint)
         return ports
 

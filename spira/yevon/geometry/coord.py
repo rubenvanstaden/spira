@@ -142,11 +142,11 @@ class Coord(Transformable):
 RESTRICT_COORD = RestrictType(Coord)
 
 
-def CoordParameter(restriction=None, preprocess=None, **kwargs):
+def CoordParameter(local_name=None, restriction=None, preprocess=None, **kwargs):
     if 'default' not in kwargs:
         kwargs['default'] = Coord(0,0)
     R = RESTRICT_COORD & restriction
     P = ProcessorTypeCast(Coord) + preprocess
-    return RestrictedParameter(restriction=R, preprocess=P, **kwargs)
+    return RestrictedParameter(local_name, restriction=R, preprocess=P, **kwargs)
 
 

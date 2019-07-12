@@ -6,13 +6,22 @@ from spira.core.transforms.generic import GenericTransform, __ConvertableTransfo
 from spira.core.parameters.descriptor import FunctionParameter, SetFunctionParameter
 from spira.core.parameters.processors import ProcessorTypeCast
 from spira.core.parameters.restrictions import RestrictType
+from spira.core.parameters.initializer import SUPPRESSED
 from spira.yevon import constants
 
 
 class Rotation(__ConvertableTransform__):
 
-    def __init__(self, rotation=0, rotation_center=(0,0), **kwargs):
-        super().__init__(rotation=rotation, rotation_center=rotation_center, **kwargs)
+    def __init__(self, rotation=0, rotation_center=(0,0), absolute_rotation=False, **kwargs):
+        if not 'translation' in kwargs:
+            kwargs['translation'] = SUPPRESSED
+        super().__init__(
+            rotation=rotation,
+            rotation_center=rotation_center,
+            absolute_rotation=absolute_rotation,
+            **kwargs)
+
+    absolute_rotation = getattr(GenericTransform, 'absolute_rotation')
 
     def set_rotation(self, value):
         self.__rotation__ = value % 360.0
@@ -28,7 +37,7 @@ class Rotation(__ConvertableTransform__):
                 self.__sa__ = 0.0
             elif self.__rotation__ == 270.0:
                 self.__ca__ = 0.0
-                self.__sa__ = -1.0
+                self.__sa__ = -1.
         else:
             self.__ca__ = np.cos(value * constants.DEG2RAD)
             self.__sa__ = np.sin(value * constants.DEG2RAD)
@@ -36,8 +45,7 @@ class Rotation(__ConvertableTransform__):
             rotation_center = self.__rotation_center__
             self.translation = Coord(
                 rotation_center.x * (1 - self.__ca__) + rotation_center.y * self.__sa__,
-                rotation_center.y * (1 - self.__ca__) - rotation_center.x * self.__sa__
-            )
+                rotation_center.y * (1 - self.__ca__) - rotation_center.x * self.__sa__)
 
     rotation = SetFunctionParameter('__rotation__', set_rotation, default=0.0)
 
@@ -46,15 +54,28 @@ class Rotation(__ConvertableTransform__):
             rotation_center = Coord(rotation_center[0], rotation_center[1])
         self.__rotation_center__ = rotation_center
         if hasattr(self, '__ca__'):
+            
+            # self.translation = Coord(
+            #     rotation_center.x * (1 - self.__ca__) + rotation_center.y * self.__sa__,
+            #     # rotation_center.y * (1 - self.__ca__) - rotation_center.x * self.__sa__)
+
             self.translation = Coord(
-                rotation_center.x * (1 - self.__ca__) + rotation_center.y * self.__sa__,
-                rotation_center.y * (1 - self.__ca__) - rotation_center.x * self.__sa__
-            )
+                  rotation_center.x * (1 - self.__ca__) + rotation_center.y * self.__sa__,
+                - rotation_center.x * self.__sa__       + rotation_center.y * (1 - self.__ca__))
+
+            # self.translation = Coord(
+            #       rotation_center.x * self.__ca__ + rotation_center.y * self.__sa__,
+            #     - rotation_center.x * self.__sa__ + rotation_center.y * self.__ca__)
+
+            # if self.translation.x != 0.0:
+            #     print(self.__ca__)
+            #     print(rotation_center)
+            #     print(self.translation)
 
     rotation_center = SetFunctionParameter(
-        local_name='__rotation_center__', 
-        fset=set_rotation_center, 
-        restriction=RestrictType(Coord), 
+        local_name='__rotation_center__',
+        fset=set_rotation_center,
+        restriction=RestrictType(Coord),
         preprocess=ProcessorTypeCast(Coord), 
         default=(0.0, 0.0)
     )

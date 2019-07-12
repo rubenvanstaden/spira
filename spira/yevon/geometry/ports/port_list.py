@@ -12,7 +12,8 @@ __all__ = ['PortList', 'PortListParameter']
 class PortList(TypedList, Transformable):
     __item_type__ = __Port__
 
-    port_angle_decision = FloatParameter(default=0.0)
+    # port_angle_decision = FloatParameter(default=0.0)
+    port_angle_decision = FloatParameter(default=90.0)
 
     def __repr__(self):
         if len(self._list) == 0:

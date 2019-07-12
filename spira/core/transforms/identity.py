@@ -18,7 +18,7 @@ class IdentityTransform(Translation, Rotation, Magnification, __ConvertableTrans
 
     def apply(self, item):
         if isinstance(item, list):
-            pass
+            raise TypeError("Cannot add object of type " + str(type(other)) + " to transform")
             # return shape.Shape(item)
         else:
             return item

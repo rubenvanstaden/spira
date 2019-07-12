@@ -126,27 +126,53 @@ class OutputGdsii(ParameterInitializer):
                     if e.id_string() in list(self.__collected_srefs__.keys()):
                         pass
                     else:
-                        # FIXME: Has to be removed for layout transformations.
+                        
+                        # T = e.transformation
+                        # c = Coord(0,0).transform_copy(T)
+                        # origin = c.to_numpy_array()
+
+                        # T = e.transformation
+                        # c = Coord(0,0).move(e.midpoint)
+                        # origin = c.to_numpy_array()
+                        
+                        # T = e.transformation
+                        # c = Coord(0,0).transform_copy(T).move(e.midpoint)
+                        # origin = c.to_numpy_array()
+
+                        # # NOTE: Working with flat_copy()
                         # T = e.transformation + spira.Translation(e.midpoint)
-
+                        # c = Coord(0,0).transform_copy(T)
+                        # origin = c.to_numpy_array()
+                        
                         T = e.transformation
-                        e.midpoint = T.apply_to_coord(e.midpoint)
-                        origin = e.midpoint.to_numpy_array()
+                        # T = e.transformation + spira.Translation(e.midpoint)
+                        # c = Coord(0,0).transform_copy(T).move(e.midpoint).transform(-T).transform_copy(T)
+                        # c = Coord(0,0).transform_copy(T).move(e.midpoint)
+                        # c = Coord(0,0).transform_copy(T)
+                        c = Coord(0,0).move(e.midpoint).transform_copy(T)
+                        origin = c.to_numpy_array()
 
-                        rotation = 0
-                        magnification = 1.0
-                        reflection = False
+                        # e.midpoint = T.apply_to_coord(e.midpoint)
+                        # origin = e.midpoint.to_numpy_array()
+                        
+                        rotation = T.rotation
+                        magnification = T.magnification
+                        reflection = T.reflection
 
-                        if isinstance(T, CompoundTransform):
-                            for t in T.__subtransforms__:
-                                if isinstance(t, GenericTransform):
-                                    rotation = t.rotation
-                                    magnification = t.magnification
-                                    reflection = t.reflection
-                        else:
-                            rotation = T.rotation
-                            magnification = T.magnification
-                            reflection = T.reflection
+                        # rotation = 0
+                        # magnification = 1.0
+                        # reflection = False
+
+                        # if isinstance(T, CompoundTransform):
+                        #     for t in T.__subtransforms__:
+                        #         if isinstance(t, GenericTransform):
+                        #             rotation = t.rotation
+                        #             magnification = t.magnification
+                        #             reflection = t.reflection
+                        # else:
+                        #     rotation = T.rotation
+                        #     magnification = T.magnification
+                        #     reflection = T.reflection
 
                         ref_cell = self.__collected_cells__[e.ref]
 
@@ -190,8 +216,10 @@ class GdsiiLayout(object):
     """
 
     def gdsii_expanded_output(self, name=None):
-        D = self.expand_flat_copy()
-        # D = self.flat_copy()
+        # D = self.expand_flat_copy()
+        # D = self.expand_transform()
+        D = self.flat_copy()
+        # D = self.flatten()
         D.gdsii_output(name=name)
 
     def gdsii_output(self, name=None, units=None, grid=None, layer_map=None, disabled_ports=None, view=True):

@@ -38,28 +38,11 @@ class __Polygon__(__LayerElement__):
     shape = ShapeParameter()
     enable_edges = BoolParameter(default=True)
 
-    def __hash__(self):
-        return hash(self.__repr__())
-
     def encloses(self, point):
         """  """
         from spira.yevon.utils import clipping
         shape = self.shape.transform_copy(self.transformation)
         return clipping.encloses(coord=point, points=shape.points)
-
-    def expand_transform(self):
-        """  """
-        from spira.core.transforms.identity import IdentityTransform
-        if not self.transformation.is_identity():
-            self.shape = self.shape.transform_copy(self.transformation)
-            self.transformation = IdentityTransform()
-        return self
-
-    def flat_copy(self, level=-1):
-        """  """
-        S = Polygon(shape=self.shape, layer=self.layer, transformation=self.transformation)
-        S.expand_transform()
-        return S
 
     def fillet(self, radius, angle_resolution=128, precision=0.001):
         """  """
@@ -145,8 +128,8 @@ class Polygon(__Polygon__):
 
     _next_uid = 0
 
-    def __init__(self, shape, layer, **kwargs):
-        super().__init__(shape=shape, layer=layer, **kwargs)
+    def __init__(self, shape, layer, transformation=None, **kwargs):
+        super().__init__(shape=shape, layer=layer, transformation=transformation, **kwargs)
         
         self.uid = Polygon._next_uid
         Polygon._next_uid += 1
@@ -161,18 +144,40 @@ class Polygon(__Polygon__):
     def __str__(self):
         return self.__repr__()
 
-    def id_string(self):
-        sid = '{} - hash {}'.format(self.__repr__(), self.shape.hash_string)
-        return sid
+    def __hash__(self):
+        return hash(self.__repr__())
 
     # NOTE: We are not copying the ports, so they
     # can be re-calculated for the transformed shape.
     def __deepcopy__(self, memo):
+        # return Polygon(
         return self.__class__(
             shape=deepcopy(self.shape),
             layer=deepcopy(self.layer),
             transformation=deepcopy(self.transformation)
         )
+
+    def id_string(self):
+        sid = '{} - hash {}'.format(self.__repr__(), self.shape.hash_string)
+        return sid
+
+    def expand_transform(self):
+        """ Expand the transform by applying it to the shape. """
+        from spira.core.transforms.identity import IdentityTransform
+        if not self.transformation.is_identity():
+            self.shape = self.shape.transform_copy(self.transformation)
+            self.transformation = IdentityTransform()
+        return self
+
+    def flat_copy(self, level=-1):
+        """ Flatten a copy of the polygon. """
+        S = Polygon(shape=self.shape, layer=self.layer, transformation=self.transformation)
+        S.expand_transform()
+        return S
+
+    def flatten(self, level=-1):
+        """ Flatten the polygon without creating a copy. """
+        return self.expand_transform()
 
     def convert_to_gdspy(self, transformation=None):
         """
@@ -182,6 +187,7 @@ class Polygon(__Polygon__):
         """
         layer = RDD.GDSII.EXPORT_LAYER_MAP[self.layer]
         T = self.transformation + transformation
+        # shape = self.shape
         shape = self.shape.transform_copy(T)
         return gdspy.Polygon(points=shape.points, layer=layer.number, datatype=layer.datatype)
 
