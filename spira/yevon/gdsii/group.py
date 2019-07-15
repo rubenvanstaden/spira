@@ -51,8 +51,12 @@ class __Group__(ParameterInitializer):
             el.extend(elems)
         self.elements = el
 
+    # def flatten(self, level=-1):
+    #     self.elements = self.elements.flat_copy(level=level)
+    #     return self
+    
     def flatten(self, level=-1):
-        self.elements = self.elements.flat_copy(level=level)
+        self.elements = self.elements.flatten(level=level)
         return self
 
     def is_empty(self):

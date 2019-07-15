@@ -30,6 +30,9 @@ class __ReflectionMixin__(object):
     def reflect(self, reflection=False):
         return self.transform(Reflection(reflection))
 
+    def reflect_copy(self, reflection=False):
+        return self.transform_copy(Reflection(reflection))
+
 
 Transformable.mixin(__ReflectionMixin__)
 

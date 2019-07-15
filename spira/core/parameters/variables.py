@@ -31,11 +31,12 @@ def ComplexParameter(restriction=None, **kwargs):
     return RestrictedParameter(restriction=COMPLEX, **kwargs)
 
 
-def IntegerParameter(restriction=None, **kwargs):
+def IntegerParameter(restriction=None, preprocess=None, **kwargs):
     from .variables import INTEGER
     if 'default' not in kwargs:
         kwargs['default'] = 0
-    return RestrictedParameter(restriction=INTEGER, **kwargs)
+    P = preprocess
+    return RestrictedParameter(restriction=INTEGER, preprocess=P, **kwargs)
 
 
 def FloatParameter(restriction=None, **kwargs):

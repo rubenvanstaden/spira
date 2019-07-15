@@ -6,6 +6,7 @@ from spira import settings
 from spira import log as LOG
 from spira.yevon.gdsii import *
 from spira.core.parameters.variables import *
+from spira.core.parameters.restrictions import RestrictValueList
 from spira.core.mixin import MixinBowl
 from spira.core.outputs.base import Outputs
 from spira.core.parameters.initializer import ParameterInitializer
@@ -15,6 +16,7 @@ class OutputGdsii(ParameterInitializer):
     """ Collects the transformed elements to be send to Gdspy. """
 
     disabled_ports = DictParameter(default={}, doc='Disabled port categories for viewing.')
+    view_type = StringParameter(default='hierarchical', restriction=RestrictValueList(['hierarchical', 'flatten', 'expanded']))
 
     def __init__(self, cell, **kwargs):
 
@@ -139,40 +141,69 @@ class OutputGdsii(ParameterInitializer):
                         # c = Coord(0,0).transform_copy(T).move(e.midpoint)
                         # origin = c.to_numpy_array()
 
-                        # # NOTE: Working with flat_copy()
-                        # T = e.transformation + spira.Translation(e.midpoint)
-                        # c = Coord(0,0).transform_copy(T)
+                        # T = e.transformation
+                        # # T = e.transformation + spira.Translation(e.midpoint)
+                        # # c = Coord(0,0).transform_copy(T).move(e.midpoint).transform(-T).transform_copy(T)
+                        # # c = Coord(0,0).transform_copy(T).move(e.midpoint)
+                        # # c = Coord(0,0).transform_copy(T)
+                        # c = Coord(0,0).move(e.midpoint).transform_copy(T)
                         # origin = c.to_numpy_array()
-                        
-                        T = e.transformation
-                        # T = e.transformation + spira.Translation(e.midpoint)
-                        # c = Coord(0,0).transform_copy(T).move(e.midpoint).transform(-T).transform_copy(T)
-                        # c = Coord(0,0).transform_copy(T).move(e.midpoint)
-                        # c = Coord(0,0).transform_copy(T)
-                        c = Coord(0,0).move(e.midpoint).transform_copy(T)
-                        origin = c.to_numpy_array()
 
                         # e.midpoint = T.apply_to_coord(e.midpoint)
                         # origin = e.midpoint.to_numpy_array()
                         
-                        rotation = T.rotation
-                        magnification = T.magnification
-                        reflection = T.reflection
+                        # ----------------------------------------------------
 
-                        # rotation = 0
-                        # magnification = 1.0
-                        # reflection = False
+                        # # T = e.transformation + spira.Translation(e.midpoint)
+                        # T = e.transformation
+                        # c = Coord(0,0).transform_copy(T)
+                        # origin = c.to_numpy_array()
 
-                        # if isinstance(T, CompoundTransform):
-                        #     for t in T.__subtransforms__:
-                        #         if isinstance(t, GenericTransform):
-                        #             rotation = t.rotation
-                        #             magnification = t.magnification
-                        #             reflection = t.reflection
+                        # # NOTE: When expanding
+                        # T = e.transformation
+                        # c = Coord(0,0).move(e.midpoint).transform_copy(T)
+                        # origin = c.to_numpy_array()
+                        
+                        # T = e.transformation - spira.Translation(e.midpoint)
+                        # c = Coord(0,0).transform_copy(T)
+                        # origin = c.to_numpy_array()
+
+                        # ----------------------------------------------------
+
+                        # if self.view_type == 'expanded':
+                        #     # FIXME: Only works with expanded transform.
+                        #     # We dont have to translate midpoint, since it is
+                        #     # already translated when expanded.
+                        #     # e.midpoint.transform(e.transformation)
+                        #     # T = e.transformation
+                        #     T = e.transformation + spira.Translation(e.midpoint)
                         # else:
-                        #     rotation = T.rotation
-                        #     magnification = T.magnification
-                        #     reflection = T.reflection
+                        #     T = e.transformation + spira.Translation(e.midpoint)
+
+                        print('\nGDSII.py\n')
+
+                        print(e)
+
+                        T = e.transformation + spira.Translation(e.midpoint)
+                        c = Coord(0,0).transform(T)
+                        origin = c.to_numpy_array()
+
+                        # origin = e.midpoint.to_numpy_array()
+
+                        rotation = 0
+                        reflection = False
+                        magnification = 1.0
+
+                        if isinstance(T, CompoundTransform):
+                            for t in T.__subtransforms__:
+                                if isinstance(t, GenericTransform):
+                                    rotation = t.rotation
+                                    reflection = t.reflection
+                                    magnification = t.magnification
+                        else:
+                            rotation = T.rotation
+                            reflection = T.reflection
+                            magnification = T.magnification
 
                         ref_cell = self.__collected_cells__[e.ref]
 
@@ -182,6 +213,10 @@ class OutputGdsii(ParameterInitializer):
                             rotation=rotation,
                             magnification=magnification,
                             x_reflection=reflection)
+
+                        # print('\n--- Final References ---')
+                        # print(S)
+                        # print(origin)
 
                         cs[e.id_string()] = S
             for e in cs.values():
@@ -209,20 +244,21 @@ class OutputGdsii(ParameterInitializer):
                 library.add(G)
 
 
-class GdsiiLayout(object):
+class GdsiiLayout(ParameterInitializer):
     """
     Class that generates output formates for a layout or library containing layouts.
     If a name is given, the layout is written to a GDSII file.
     """
 
-    def gdsii_expanded_output(self, name=None):
-        # D = self.expand_flat_copy()
-        # D = self.expand_transform()
+    def gdsii_output_flat(self, name=None):
         D = self.flat_copy()
-        # D = self.flatten()
-        D.gdsii_output(name=name)
+        D.gdsii_output(name=name, view_type='flatten')
+        
+    def gdsii_output_expanded(self, name=None):
+        D = self.expand_transform()
+        D.gdsii_output(name=name, view_type='expanded')
 
-    def gdsii_output(self, name=None, units=None, grid=None, layer_map=None, disabled_ports=None, view=True):
+    def gdsii_output(self, name=None, view_type='hierarchical', disabled_ports=None, view=True):
 
         _default = {'cells': True, 'polygons': True, 'arrows': True, 'labels': True}
         # _default = {'cells': True, 'polygons': False, 'arrows': False, 'labels': False}
@@ -230,7 +266,7 @@ class GdsiiLayout(object):
         if disabled_ports is not None:
             _default.update(disabled_ports)
 
-        G = OutputGdsii(cell=self, disabled_ports=_default)
+        G = OutputGdsii(cell=self, view_type=view_type, disabled_ports=_default)
 
         gdspy_library = gdspy.GdsLibrary(name=self.name)
         G.gdspy_gdsii_output(gdspy_library)
@@ -250,3 +286,51 @@ Outputs.mixin(GdsiiLayout)
 
 
 
+
+
+# class GdsiiLayout(ParameterInitializer):
+#     """
+#     Class that generates output formates for a layout or library containing layouts.
+#     If a name is given, the layout is written to a GDSII file.
+#     """
+
+#     name = StringParameter(allow_none=True, default=None, doc='If not None write to gds file.')
+#     view = BoolParameter(default=True, doc='If true the output the layout in gdspy viewer.')
+#     disabled_ports = DictParameter(default={}, doc='Disabled port categories for viewing.')
+#     view_type = StringParameter(default='hierarchical', restriction=RestrictValueList(['hierarchical', 'flatten', 'expanded']))
+
+#     def output(self):
+
+#         _default = {'cells': True, 'polygons': True, 'arrows': True, 'labels': True}
+#         # _default = {'cells': True, 'polygons': False, 'arrows': False, 'labels': False}
+
+#         if disabled_ports is not None:
+#             _default.update(disabled_ports)
+
+#         if self.view_type == 'hierarchical':
+#             D = self
+#         elif self.view_type == 'flatten':
+#             D = self.flat_copy()
+#         elif self.view_type == 'expanded':
+#             D = self.expanded_transform()
+
+#         G = OutputGdsii(cell=D, view_type=self.view_type, disabled_ports=_default)
+
+#         gdspy_library = gdspy.GdsLibrary(name=D.name)
+#         G.gdspy_gdsii_output(gdspy_library)
+
+#         if name is not None:
+#             writer = gdspy.GdsWriter('{}.gds'.format(name), unit=1.0e-6, precision=1.0e-12)
+#             for name, cell in gdspy_library.cell_dict.items():
+#                 writer.write_cell(cell)
+#                 del cell
+#             writer.close()
+
+#         if view is True:
+#             gdspy.LayoutViewer(library=gdspy_library)
+
+
+# def gdsii_output(self, name=None, view_type='hierarchical', disabled_ports=None, view=True):
+
+#     G = GdsiiLayout(name=name, view_type=view_type, disabled_ports=disabled_ports, view=view)
+#     G.output()

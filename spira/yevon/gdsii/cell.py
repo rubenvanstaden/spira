@@ -180,47 +180,45 @@ class Cell(__Cell__):
             self.__name__ = self.__name_generator__(self)
         return self.__name__
 
-    # def transform(self, transformation=None):
-    #     self.elements.transform(transformation)
-    #     self.ports.transform(transformation)
-    #     return self
-
     def expand_transform(self):
         for S in self.elements.sref:
             S.expand_transform()
+            S.ref.expand_transform()
         return self
 
     def expand_flat_copy(self, exclude_devices=False):
-        """
-
-        """
         from spira.yevon.gdsii.pcell import Device
         from spira.yevon.gdsii.polygon import Polygon
+        from spira.core.transforms.translation import Translation
 
         name = ''
         S = self.expand_transform()
         C = Cell(name=S.name + '_ExpandedCell')
         def _traverse_polygons(subj, cell, name):
             c_name = deepcopy(name)
+            # print(cell)
             for e in cell.elements:
                 if isinstance(e, SRef):
-                    if e.alias is not None:
-                        c_name += e.alias + ':'
-                    else:
-                        c_name += ':'
-                    if exclude_devices is True:
-                        if isinstance(e.ref, Device):
-                            subj += e
-                        else:
-                            # flat_polygons(subj=subj, cell=e.ref)
-                            subj = _traverse_polygons(subj=subj, cell=e.ref, name=c_name)
-                    else:
-                        # flat_polygons(subj=subj, cell=e.ref)
-                        subj = _traverse_polygons(subj=subj, cell=e.ref, name=c_name)
+                    subj = _traverse_polygons(subj=subj, cell=e.ref, name=c_name)
+                    # if e.alias is not None:
+                    #     c_name += e.alias + ':'
+                    # else:
+                    #     c_name += ':'
+                    # if exclude_devices is True:
+                    #     if isinstance(e.ref, Device):
+                    #         subj += e
+                    #     else:
+                    #         subj = _traverse_polygons(subj=subj, cell=e.ref, name=c_name)
+                    # else:
+                    #     subj = _traverse_polygons(subj=subj, cell=e.ref, name=c_name)
                 elif isinstance(e, Polygon):
                     e.location_name = c_name
+                    # e.transform(expand_transform)
+                    # e.shape.move(expand_transform)
                     subj += e
+                    # print(e.transformation)
                 c_name = name
+            # print('')
             return subj
 
         D = _traverse_polygons(C, S, name)

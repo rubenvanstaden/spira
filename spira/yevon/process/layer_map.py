@@ -29,6 +29,8 @@ class MapGdsiiToPhysical(ParameterInitializer):
         if isinstance(key, PhysicalLayer):
             return key
         elif isinstance(key, Layer):
+            # print(key)
+            # FIXME: Implement error checking for if layer number is not found in RDD.
             if key.number in self.layer_process_map:
                 pc = self.layer_process_map[key.number]
                 pp = self.datatype_purpose_map[key.datatype]

@@ -147,7 +147,6 @@ class GenericTransform(ReversibleTransform):
             if other.reflection is True: s_1 = -1
             else: s_1 = 1
 
-            T.reflection = (not self.reflection == other.reflection)
             M1 = 1.0
 
             if not self.absolute_rotation:
@@ -171,6 +170,7 @@ class GenericTransform(ReversibleTransform):
             T.translation = Coord(cx, cy)
 
             T.absolute_rotation = self.absolute_rotation or other.absolute_rotation
+            T.reflection = (not self.reflection == other.reflection)
 
         else:
             T = Transform.__add__(self, other)
@@ -190,7 +190,6 @@ class GenericTransform(ReversibleTransform):
             if other.reflection is True: s_1 = -1
             else: s_1 = 1
 
-            self.reflection = (not self.reflection == other.reflection)
             M1 = 1.0
 
             if not self.absolute_rotation:
@@ -212,6 +211,7 @@ class GenericTransform(ReversibleTransform):
             self.translation = Coord(cx, cy)
 
             self.absolute_rotation = self.absolute_rotation or other.absolute_rotation
+            self.reflection = (not self.reflection == other.reflection)
 
         else:
             raise ValueError('Cannot add transforms')
@@ -219,10 +219,18 @@ class GenericTransform(ReversibleTransform):
         return self
 
     def __sub__(self, other):
+        """ returns the concatenation of this transform and the reverse of other """
+        if other is None: return copy.deepcopy(self)
+        if not isinstance(other, ReversibleTransform):
+            raise TypeError("Cannot subtract an irreversible transform")
         return self.__add__(-other)
 
     def __isub__(self, other):
-        return self.__iadd__(-other)
+        """ concatenates the reverse of other to this transform """
+        if other is None: return self
+        if not isinstance(other, ReversibleTransform):
+            raise TypeError("Cannot subtract an irreversible transform")
+        return self.__iadd__(self, -other)
 
     def __eq__(self, other):
         if other is None: return self.is_identity()

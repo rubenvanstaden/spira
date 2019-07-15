@@ -4,6 +4,7 @@ from spira.core.parameters.variables import *
 # from spira.yevon.process.derived_layers import __Layer__
 # from spira.yevon.process.derived_layers import *
 from spira.core.parameters.restrictions import RestrictType
+from spira.core.parameters.processors import ProcessorInt
 from spira.core.parameters.variables import StringParameter, IntegerParameter
 from spira.core.parameters.descriptor import RestrictedParameter
 from spira.core.parameters.initializer import ParameterInitializer, MetaInitializer
@@ -328,11 +329,8 @@ class LayerListParameter(ParameterDescriptor):
 class Layer(__Layer__):
 
     name = StringParameter()
-    number = IntegerParameter(default=0)
-    datatype = IntegerParameter(default=0)
-
-    # def __init__(self, **kwargs):
-    #     super().__init__(**kwargs)
+    number = IntegerParameter(default=0, preprocess=ProcessorInt())
+    datatype = IntegerParameter(default=0, preprocess=ProcessorInt())
 
     def __init__(self, number=0, datatype=0, layerlist=None, name=None, **kwargs):
         if name is None:

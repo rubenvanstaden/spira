@@ -142,26 +142,32 @@ class ElementList(__ElementList__):
         return _flatten(self._list)
 
     def flat_copy(self, level=-1):
-        el = ElementList()
+        elems = ElementList()
         for e in self._list:
-            el += e.flat_copy(level)
-        return el
+            elems += e.flat_copy(level)
+        return elems
 
-    def flatten(self):
-        from spira.yevon.gdsii.cell import Cell
-        from spira.yevon.gdsii.sref import SRef
-        if isinstance(self, collections.Iterable):
-            flat_list = ElementList()
-            for i in self._list:
-                if issubclass(type(i), Cell):
-                    i = i.flat_copy()
-                elif isinstance(i, SRef):
-                    i = i.flat_copy()
-                for a in i.flatten():
-                    flat_list += a
-            return flat_list
-        else:
-            return [self._list]
+    def flatten(self, level=-1):
+        elems = ElementList()
+        for e in self._list:
+            elems += e.flatten(level)
+        return elems
+
+    # def flatten(self):
+    #     from spira.yevon.gdsii.cell import Cell
+    #     from spira.yevon.gdsii.sref import SRef
+    #     if isinstance(self, collections.Iterable):
+    #         flat_list = ElementList()
+    #         for i in self._list:
+    #             if issubclass(type(i), Cell):
+    #                 i = i.flat_copy()
+    #             elif isinstance(i, SRef):
+    #                 i = i.flat_copy()
+    #             for a in i.flatten():
+    #                 flat_list += a
+    #         return flat_list
+    #     else:
+    #         return [self._list]
 
     def isstored(self, pp):
         for e in self._list:
