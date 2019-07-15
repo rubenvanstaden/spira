@@ -50,8 +50,8 @@ class TransformablePortProperty(PortProperty, Transformable):
 
 class SRefPortProperty(TransformablePortProperty):
     def create_ports(self, ports):
-        pp = deepcopy(self.ref.ports)
-        # pp = self.ref.ports
+        pp = deepcopy(self.reference.ports)
+        # pp = self.reference.ports
         # ports = pp.move(self.midpoint)
         ports = pp.transform_copy(self.transformation).move(self.midpoint).transform(-self.transformation)
         # ports = pp.transform_copy(self.transformation)

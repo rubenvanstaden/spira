@@ -30,33 +30,12 @@ class OutputGdsii(ParameterInitializer):
         self.gdspy_cell = self.collector(cell)
 
     def collect_labels(self, item, cl, extra_transform=None):
-        if item.node_id in list(cl.keys()):
-            # L = self.__collected_labels__[item.node_id]
-            pass
-        else:
+        if item.node_id not in list(cl.keys()):
             L = item.convert_to_gdspy(extra_transform)
             cl[item.id_string()] = L
-            # self.__collected_labels__.update({item.node_id:L})
-
-    # def collect_polygons(self, item):
-    #     """  """
-    #     if item.id_string() in list(self.__collected_polygons__.keys()):
-    #         # P = self.__collected_polygons__[item.id_string()]
-    #         # P = item.convert_to_gdspy()
-    #         # self.__collected_polygons__[item.id_string()] = P
-    #         pass
-    #     else:
-    #         P = item.convert_to_gdspy()
-    #         self.__collected_polygons__[item.id_string()] = P
-    #         # self.__collected_polygons__.update({item.id_string():P})
-    #     print(self.__collected_polygons__)
 
     def collect_polygons(self, item, cp, extra_transform=None):
-        """  """
-        if item.id_string() in list(cp.keys()):
-            pass
-        else:
-            # P = item.convert_to_gdspy(extra_transform)
+        if item.id_string() not in list(cp.keys()):
             P = item.convert_to_gdspy()
             cp[item.id_string()] = P
 
@@ -125,70 +104,11 @@ class OutputGdsii(ParameterInitializer):
             cs = {}
             for e in c.elements:
                 if isinstance(e, SRef):
-                    if e.id_string() in list(self.__collected_srefs__.keys()):
-                        pass
-                    else:
-                        
-                        # T = e.transformation
-                        # c = Coord(0,0).transform_copy(T)
-                        # origin = c.to_numpy_array()
-
-                        # T = e.transformation
-                        # c = Coord(0,0).move(e.midpoint)
-                        # origin = c.to_numpy_array()
-                        
-                        # T = e.transformation
-                        # c = Coord(0,0).transform_copy(T).move(e.midpoint)
-                        # origin = c.to_numpy_array()
-
-                        # T = e.transformation
-                        # # T = e.transformation + spira.Translation(e.midpoint)
-                        # # c = Coord(0,0).transform_copy(T).move(e.midpoint).transform(-T).transform_copy(T)
-                        # # c = Coord(0,0).transform_copy(T).move(e.midpoint)
-                        # # c = Coord(0,0).transform_copy(T)
-                        # c = Coord(0,0).move(e.midpoint).transform_copy(T)
-                        # origin = c.to_numpy_array()
-
-                        # e.midpoint = T.apply_to_coord(e.midpoint)
-                        # origin = e.midpoint.to_numpy_array()
-                        
-                        # ----------------------------------------------------
-
-                        # # T = e.transformation + spira.Translation(e.midpoint)
-                        # T = e.transformation
-                        # c = Coord(0,0).transform_copy(T)
-                        # origin = c.to_numpy_array()
-
-                        # # NOTE: When expanding
-                        # T = e.transformation
-                        # c = Coord(0,0).move(e.midpoint).transform_copy(T)
-                        # origin = c.to_numpy_array()
-                        
-                        # T = e.transformation - spira.Translation(e.midpoint)
-                        # c = Coord(0,0).transform_copy(T)
-                        # origin = c.to_numpy_array()
-
-                        # ----------------------------------------------------
-
-                        # if self.view_type == 'expanded':
-                        #     # FIXME: Only works with expanded transform.
-                        #     # We dont have to translate midpoint, since it is
-                        #     # already translated when expanded.
-                        #     # e.midpoint.transform(e.transformation)
-                        #     # T = e.transformation
-                        #     T = e.transformation + spira.Translation(e.midpoint)
-                        # else:
-                        #     T = e.transformation + spira.Translation(e.midpoint)
-
-                        print('\nGDSII.py\n')
-
-                        print(e)
+                    if e.id_string() not in list(self.__collected_srefs__.keys()):
 
                         T = e.transformation + spira.Translation(e.midpoint)
                         c = Coord(0,0).transform(T)
                         origin = c.to_numpy_array()
-
-                        # origin = e.midpoint.to_numpy_array()
 
                         rotation = 0
                         reflection = False
@@ -205,7 +125,7 @@ class OutputGdsii(ParameterInitializer):
                             reflection = T.reflection
                             magnification = T.magnification
 
-                        ref_cell = self.__collected_cells__[e.ref]
+                        ref_cell = self.__collected_cells__[e.reference]
 
                         S = gdspy.CellReference(
                             ref_cell=ref_cell,
@@ -213,10 +133,6 @@ class OutputGdsii(ParameterInitializer):
                             rotation=rotation,
                             magnification=magnification,
                             x_reflection=reflection)
-
-                        # print('\n--- Final References ---')
-                        # print(S)
-                        # print(origin)
 
                         cs[e.id_string()] = S
             for e in cs.values():

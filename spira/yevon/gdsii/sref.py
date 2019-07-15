@@ -2,7 +2,6 @@ import gdspy
 import numpy
 import inspect
 import numpy as np
-import spira.all as spira
 
 from spira.yevon.geometry.ports.base import __Port__
 from spira.yevon.gdsii.base import __Element__
@@ -17,17 +16,21 @@ from spira.yevon.geometry.vector import *
 from spira.yevon.geometry.line import *
 from copy import copy, deepcopy
 from spira.core.transforms import stretching
+from spira.yevon.gdsii.cell import CellParameter
 
 
 class __RefElement__(__Element__):
 
+    reference = CellParameter()
+    alias = StringParameter(allow_none=True, default=None)
+    
     def __init__(self, transformation=None, **kwargs):
         super().__init__(transformation=transformation, **kwargs)
 
     @property
     def bbox_info(self):
         T = self.transformation + Translation(self.midpoint)
-        return self.ref.bbox_info.transform(T)
+        return self.reference.bbox_info.transform(T)
 
 
 class SRef(__RefElement__):
@@ -45,18 +48,12 @@ class SRef(__RefElement__):
     """
 
     midpoint = CoordParameter(default=(0,0))
-    alias = StringParameter(allow_none=True, default=None)
     
-    # def __init__(self, reference, midpoint=(0,0), alias=None, transformation=None, **kwargs):
-    #     super().__init__(midpoint=midpoint, alias=alias, transformation=transformation, **kwargs)
-    #     self.ref = reference
+    def __init__(self, reference, midpoint=(0,0), alias=None, transformation=None, **kwargs):
+        super().__init__(reference=reference, midpoint=midpoint, alias=alias, transformation=transformation, **kwargs)
         
-    def __init__(self, reference, alias=None, transformation=None, **kwargs):
-        super().__init__(alias=alias, transformation=transformation, **kwargs)
-        self.ref = reference
-
     def __repr__(self):
-        name = self.ref.name
+        name = self.reference.name
         ps = "[SPiRA: SRef] (\"{}\", alias {}, midpoint {}, transforms {})"
         return (ps.format(name, self.alias, self.midpoint, self.transformation))
 
@@ -70,7 +67,7 @@ class SRef(__RefElement__):
         return SRef(
         # return self.__class__(
             alias=self.alias,
-            reference=deepcopy(self.ref),
+            reference=deepcopy(self.reference),
             midpoint=deepcopy(self.midpoint),
             # midpoint=self.midpoint,
             transformation=deepcopy(self.transformation)
@@ -80,7 +77,7 @@ class SRef(__RefElement__):
         if not isinstance(other, SRef):
             return False
         return (
-            (self.ref == other.ref) and
+            (self.reference == other.ref) and
             (self.midpoint == other.position) and
             (self.transformation == other.transformation)
         )
@@ -91,81 +88,25 @@ class SRef(__RefElement__):
     def dependencies(self):
         from spira.yevon.gdsii.cell_list import CellList
         d = CellList()
-        d.add(self.ref)
-        d.add(self.ref.dependencies())
+        d.add(self.reference)
+        d.add(self.reference.dependencies())
         return d
-
-    # def expand_transform(self):
-    #     from spira.yevon.gdsii.sref import SRef
-    #     from spira.yevon.gdsii.polygon import Polygon
-    #     from spira.core.transforms.identity import IdentityTransform
-
-    #     C = self.ref.__class__(
-    #         name='{}_{}'.format(self.ref.name, self.transformation.id_string()),
-    #         elements=deepcopy(self.ref.elements),
-    #         ports=deepcopy(self.ref.ports))
-
-    #     T = self.transformation + spira.Translation(self.midpoint)
-    #     # T = self.transformation
-
-    #     # C.elements.transform(T)
-    #     C.ports.transform(T)
-    #     # # C.expand_transform()
-
-    #     # C.ports.move(self.midpoint).transform(T)
-
-    #     # print('--- Expanded Reference ---')
-
-    #     for i, e in enumerate(C.elements):
-    #         print(e)
-    #         if isinstance(e, SRef):
- 
-    #             e.transform(T)
-    #             # e.midpoint = T.apply_to_coord(e.midpoint)
-    #             e.midpoint = self.transformation.apply_to_coord(e.midpoint)
-    #             # e.translate(e.transformation.apply_to_coord(e.midpoint))
-
-    #             # c = deepcopy(e.midpoint)
-    #             # e.midpoint = (0,0)
-
-    #             # print(e)
-    #             # print(self.midpoint)
-    #             # print('')
-
-    #             # c = e.transformation.apply_to_coord(c)
-
-    #             # e.transform(T)
-    #             # e.translate(c)
-
-    #         elif isinstance(e, Polygon):
-    #             e.transform(T)
-
-    #     self.ref = C
-    #     self.transformation = None
-    #     self.midpoint = (0,0)
-
-    #     return self
 
     def expand_transform(self):
         from spira.yevon.gdsii.sref import SRef
         from spira.yevon.gdsii.polygon import Polygon
         from spira.core.transforms.identity import IdentityTransform
 
-        C = self.ref.__class__(
-            name='{}_{}'.format(self.ref.name, self.transformation.id_string()),
-            elements=deepcopy(self.ref.elements),
-            ports=deepcopy(self.ref.ports))
+        C = self.reference.__class__(
+            name='{}_{}'.format(self.reference.name, self.transformation.id_string()),
+            elements=deepcopy(self.reference.elements),
+            ports=deepcopy(self.reference.ports))
 
         T = self.transformation + spira.Translation(self.midpoint)
-        # t1 = self.transformation + spira.Translation(self.midpoint)
-        # T = self.transformation
-
-        print('--- Expanded Reference ---')
 
         C.ports.transform(T)
 
         for i, e in enumerate(C.elements):
-            
             if isinstance(e, SRef):
 
                 midpoint = self.transformation.apply_to_coord(self.midpoint)
@@ -175,48 +116,10 @@ class SRef(__RefElement__):
                 e.transform(self.transformation)
                 e.translate(center-midpoint)
 
-            # if isinstance(e, SRef):
-            #     print(e)
-            #     print(T)
-            #     print(self.transformation)
-            #     print('---------')
-            #     # m1 = e.transformation.apply_to_coord(e.midpoint)
-            #     # print(m1)
-            #     m2 = self.transformation.apply_to_coord(e.midpoint)
-            #     # midpoint = self.midpoint + m2
-            #     # print(midpoint)
-            #     print(m2)
-            #     t2 = self.transformation - Translation(m2)
-            #     print(t2)
-            #     print(self.transformation)
-            #     t3 = self.transformation - Translation(t2.translation)
-            #     # t3 = self.transformation - Translation(e.midpoint)
-            #     print(t3)
-            #     # e.transform(T)
-            #     # e.transform(self.transformation - Translation(m2))
-            #     # e.transform(self.transformation)
-            #     e.transform(t3)
-            #     print(e.transformation)
-            #     # e.midpoint = (0,0)
-            #     # e.midpoint = e.transformation.apply_to_coord(e.midpoint)
-            #     # e.translate(e.midpoint)
-            #     # e.midpont = (100,0)
-            #     # e.translate(c)
-
-            #     # c = T.apply_to_coord(e.midpoint)
-            #     # c = self.transformation.apply_to_coord(Coord(0,0))
-            #     # print(c)
-            #     # e.midpoint = c
-            #     # e.midpoint += c
-            #     # e.translate(c)
-
-            #     # e.midpoint = T.apply_to_coord(Coord(0,0))
-            #     # e.midpoint = self.transformation.apply_to_coord(e.midpoint)
-            #     # e.translate(e.transformation.apply_to_coord(e.midpoint))
             elif isinstance(e, Polygon):
                 e.transform(T)
 
-        self.ref = C
+        self.reference = C
         self.transformation = None
         self.midpoint = (0, 0)
 
@@ -224,14 +127,14 @@ class SRef(__RefElement__):
 
     def flat_copy(self, level=-1):
         if level == 0: return spira.ElementList(self.__copy__())
-        elems = self.ref.elements.flat_copy(level-1)
+        elems = self.reference.elements.flat_copy(level-1)
         T = self.transformation + Translation(self.midpoint)
         elems = elems.transform(T)
         return elems
 
     def flatten(self, level=-1):
-        # if level == 0: return self.ref
-        D = self.ref.flatten(level)
+        # if level == 0: return self.reference
+        D = self.reference.flatten(level)
         return D.elements
 
     def move(self, midpoint=(0,0), destination=None, axis=None):
@@ -303,7 +206,6 @@ class SRef(__RefElement__):
 
         T = vector_match_transform(v1=p, v2=destination)
         self.transform(T)
-        # self.midpoint = T.apply_to_coord(self.midpoint)
 
         return self
 
@@ -372,8 +274,8 @@ class SRef(__RefElement__):
         """
         S = self.expand_flat_copy()
         T = spira.Stretch(stretch_factor=factor, stretch_center=center)
-        for i, e in enumerate(S.ref.elements):
-            S.ref.elements[i].transform(T)
+        for i, e in enumerate(S.reference.elements):
+            S.reference.elements[i].transform(T)
         return self
 
     def stretch_p2c(self, port_name, destination_coord):
@@ -397,11 +299,11 @@ class SRef(__RefElement__):
         port = D.ports[port_name]
         destination = D.ports[destination_name]
     
-        for i, e in enumerate(D.ref.elements.polygons):
+        for i, e in enumerate(D.reference.elements.polygons):
             if e.id_string() == port.local_pid:
                 opposite_port = bbox_info_opposite_boundary_port(e, port)
                 T = stretching.stretch_element_by_port(self, opposite_port, port, destination)
-                T.apply(D.ref.elements[i])
+                T.apply(D.reference.elements[i])
 
     def stretch_p2p(self, port_name, destination_name):
         """
@@ -424,26 +326,26 @@ class SRef(__RefElement__):
         port = D.ports[port_name]
         destination = D.ports[destination_name]
     
-        for i, e in enumerate(D.ref.elements.polygons):
+        for i, e in enumerate(D.reference.elements.polygons):
             if e.id_string() == port.local_pid:
                 opposite_port = bbox_info_opposite_boundary_port(e, port)
                 T = stretching.stretch_element_by_port(self, opposite_port, port, destination)
-                T.apply(D.ref.elements[i])
+                T.apply(D.reference.elements[i])
 
     def nets(self, lcar):
         """  """
 
         from spira.yevon.geometry.nets.net_list import NetList
         nets = NetList()
-        nets += self.ref.netlist
+        nets += self.reference.netlist
 
         # from spira.yevon.gdsii.pcell import Device
-        # if isinstance(self.ref, Device):
-        #     nets = [self.ref.netlist]
+        # if isinstance(self.reference, Device):
+        #     nets = [self.reference.netlist]
         # else:
-        #     nets = self.ref.nets(lcar)
+        #     nets = self.reference.nets(lcar)
 
-        # nets = self.ref.nets(lcar, contacts)
+        # nets = self.reference.nets(lcar, contacts)
 
         # FIXME: Is this transformation required?
         # T = self.transformation + Translation(self.midpoint)
@@ -465,17 +367,17 @@ class SRef(__RefElement__):
 
     #     if not self.transformation.is_identity():
 
-    #         self.ref.expand_transform()
+    #         self.reference.expand_transform()
 
     #         # if self.alias is None:
-    #         #     name = '{}_{}'.format(self.ref.name, self.transformation.id_string())
+    #         #     name = '{}_{}'.format(self.reference.name, self.transformation.id_string())
     #         # else:
-    #         #     name = '{}_{}'.format(self.ref.name, self.alias)
+    #         #     name = '{}_{}'.format(self.reference.name, self.alias)
 
-    #         C = self.ref.__class__(
-    #             name='{}_{}'.format(self.ref.name, self.transformation.id_string()),
-    #             elements=deepcopy(self.ref.elements),
-    #             ports=deepcopy(self.ref.ports))
+    #         C = self.reference.__class__(
+    #             name='{}_{}'.format(self.reference.name, self.transformation.id_string()),
+    #             elements=deepcopy(self.reference.elements),
+    #             ports=deepcopy(self.reference.ports))
 
     #         T = self.transformation + spira.Translation(self.midpoint)
     #         # T = self.transformation
@@ -484,11 +386,11 @@ class SRef(__RefElement__):
     #         C.ports.transform(T)
     #         # C.expand_transform()
             
-    #         self.ref = C
+    #         self.reference = C
     #         self.transformation = None
     #         self.midpoint = (0,0)
 
-    #         # self.ref.expand_transform()
+    #         # self.reference.expand_transform()
 
     #     return self
 

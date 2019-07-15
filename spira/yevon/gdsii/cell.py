@@ -16,7 +16,6 @@ from spira.core.parameters.initializer import MetaInitializer
 from spira.yevon.geometry.ports.port_list import PortList
 from spira.yevon.gdsii import *
 from spira.core.mixin import MixinBowl
-from spira.yevon.gdsii.sref import SRef
 from spira.yevon.process import get_rule_deck
 
 
@@ -183,12 +182,13 @@ class Cell(__Cell__):
     def expand_transform(self):
         for S in self.elements.sref:
             S.expand_transform()
-            S.ref.expand_transform()
+            S.reference.expand_transform()
         return self
 
     def expand_flat_copy(self, exclude_devices=False):
         from spira.yevon.gdsii.pcell import Device
         from spira.yevon.gdsii.polygon import Polygon
+        from spira.yevon.gdsii.sref import SRef
         from spira.core.transforms.translation import Translation
 
         name = ''
@@ -199,18 +199,18 @@ class Cell(__Cell__):
             # print(cell)
             for e in cell.elements:
                 if isinstance(e, SRef):
-                    subj = _traverse_polygons(subj=subj, cell=e.ref, name=c_name)
+                    subj = _traverse_polygons(subj=subj, cell=e.reference, name=c_name)
                     # if e.alias is not None:
                     #     c_name += e.alias + ':'
                     # else:
                     #     c_name += ':'
                     # if exclude_devices is True:
-                    #     if isinstance(e.ref, Device):
+                    #     if isinstance(e.reference, Device):
                     #         subj += e
                     #     else:
-                    #         subj = _traverse_polygons(subj=subj, cell=e.ref, name=c_name)
+                    #         subj = _traverse_polygons(subj=subj, cell=e.reference, name=c_name)
                     # else:
-                    #     subj = _traverse_polygons(subj=subj, cell=e.ref, name=c_name)
+                    #     subj = _traverse_polygons(subj=subj, cell=e.reference, name=c_name)
                 elif isinstance(e, Polygon):
                     e.location_name = c_name
                     # e.transform(expand_transform)

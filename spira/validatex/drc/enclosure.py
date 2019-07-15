@@ -24,14 +24,14 @@ class Enclosure(__DoubleLayerDesignRule__):
 
     #     for C in elems.dependencies():
     #         for S in C.elements.sref:
-    #             if S.ref.layer.number == self.layer1.number:
-    #                 pos_elems = S.ref.elements
+    #             if S.reference.layer.number == self.layer1.number:
+    #                 pos_elems = S.reference.elements
     #                 C1 = S.ref
 
     #                 for C in elems.dependencies():
     #                     for S in C.elements.sref:
-    #                         if S.ref.layer.number == self.layer2.number:
-    #                             neg_elems = S.ref.elements
+    #                         if S.reference.layer.number == self.layer2.number:
+    #                             neg_elems = S.reference.elements
     #                             C2 = S.ref
 
     #                             fails = False

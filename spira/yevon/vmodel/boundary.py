@@ -13,7 +13,7 @@ def reference_metal_blocks(S):
     elems = ElementList()
     for layer in RDD.get_physical_layers_by_purpose(purposes=['METAL', 'GND']):
         layer = deepcopy(layer)
-        if S.ref.is_layer_in_cell(layer):
+        if S.reference.is_layer_in_cell(layer):
             bbox_shape = S.bbox_info.bounding_box()
             layer.purpose = RDD.PURPOSE.BOUNDARY_BOX
             elems += Polygon(shape=bbox_shape, layer=layer)
@@ -29,7 +29,7 @@ class ReferenceBlocks(__Aspects__):
     def create_block_elements(self, elems):
         for e in self.elements.sref:
             for layer in RDD.get_physical_layers_by_purpose(purposes=['METAL', 'GND']):
-                if e.ref.is_layer_in_cell(layer):
+                if e.reference.is_layer_in_cell(layer):
                     bbox_shape = e.bbox_info.bounding_box()
                     elems += Polygon(shape=bbox_shape, layer=layer)
         return elems

@@ -323,25 +323,25 @@ class CellNet(__Net__):
         Dt = self.g.node[t]['device_reference']
 
         if issubclass(type(Ds), spira.SRef):
-            source = 'source: {}'.format(Ds.ref.name)
+            source = 'source: {}'.format(Ds.reference.name)
         # elif isinstance(Ds, spira.Port):
         elif isinstance(Ds, (spira.ContactPort, spira.Port)):
             source = 'source: {}'.format(Ds.name)
 
         if issubclass(type(Dt), spira.SRef):
-            target = 'target: {}'.format(Dt.ref.name)
+            target = 'target: {}'.format(Dt.reference.name)
         # elif isinstance(Dt, spira.spira.Port):
         elif isinstance(Ds, (spira.ContactPort, spira.Port)):
             target = 'target: {}'.format(Dt.name)
 
         # if issubclass(type(Ds), spira.SRef):
-        #     source = 'source: {}'.format(Ds.ref.name)
+        #     source = 'source: {}'.format(Ds.reference.name)
         # elif issubclass(type(Ds), __Port__):
         #     if isinstance(Ds, spira.Port):
         #         source = 'source: {}'.format(Ds.name)
 
         # if issubclass(type(Dt), spira.SRef):
-        #     target = 'target: {}'.format(Dt.ref.name)
+        #     target = 'target: {}'.format(Dt.reference.name)
         # elif issubclass(type(Dt), __Port__):
         #     if not isinstance(Dt, spira.spira.Port):
         #         target = 'target: {}'.format(Dt.name)

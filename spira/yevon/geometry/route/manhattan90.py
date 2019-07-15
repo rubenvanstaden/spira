@@ -137,7 +137,7 @@ class Route90(Route90Base):
             R = self.quadrant_four
 
         # points = []
-        # for e in R.ref.flatten():
+        # for e in R.reference.flatten():
         #     if isinstance(e, spira.Polygon):
         #         for p in e.points:
         #             points.append(p)

@@ -21,7 +21,7 @@ if __name__ == '__main__':
 
     # for e in D.elements.sref:
     #     print(e)
-    #     for i in e.ref.elements:
+    #     for i in e.reference.elements:
     #         print(i)
     #     print('')
 

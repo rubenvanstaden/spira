@@ -371,7 +371,7 @@ class Route180(RouteBase180, RouteParallel):
         elems += R
 
         # points = []
-        # for e in R.ref.flatten():
+        # for e in R.reference.flatten():
         #     if isinstance(e, spira.Polygon):
         #         for p in e.points:
         #             points.append(p)

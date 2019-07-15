@@ -67,14 +67,14 @@ def wrap_references(cell, c2dmap):
         # # S.midpoint = center + midpoint
         # print(center)
         # print(S.transformation)
-        # print(S.ref.elements)
-        # # # S.ref.elements.transform(-Translation(center))
+        # print(S.reference.elements)
+        # # # S.reference.elements.transform(-Translation(center))
         # # t3 = -Translation(center)
-        # # for e in S.ref.elements.sref:
+        # # for e in S.reference.elements.sref:
         # #     e.midpoint += [-center[0], center[0]]
         # #     # e.midpoint = t3.apply_to_coord(e.midpoint)
         # #     # e.transform(t3)
-        # print(S.ref.elements)
+        # print(S.reference.elements)
         # print('')
 
         # # S.midpoint.transform(t2)

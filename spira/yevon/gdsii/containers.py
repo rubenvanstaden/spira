@@ -16,7 +16,7 @@ class __CellContainer__(Cell):
 #     def __cell_swapper__(self, new_cell, c, c2dmap):
 #         for e in c.elements.sref:
 #             S = deepcopy(e)
-#             if e.ref in c2dmap.keys():
-#                 S.ref = c2dmap[e.ref]
+#             if e.reference in c2dmap.keys():
+#                 S.ref = c2dmap[e.reference]
 #                 new_cell += S
 
