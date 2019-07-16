@@ -199,11 +199,11 @@ class Cell(__Cell__):
             # print(cell)
             for e in cell.elements:
                 if isinstance(e, SRef):
+                    if e.alias is not None:
+                        c_name += e.alias + ':'
+                    else:
+                        c_name += ':'
                     subj = _traverse_polygons(subj=subj, cell=e.reference, name=c_name)
-                    # if e.alias is not None:
-                    #     c_name += e.alias + ':'
-                    # else:
-                    #     c_name += ':'
                     # if exclude_devices is True:
                     #     if isinstance(e.reference, Device):
                     #         subj += e

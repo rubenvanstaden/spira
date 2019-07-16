@@ -125,6 +125,12 @@ class SRef(__RefElement__):
 
         return self
 
+    def expand_flat_copy(self):
+        """  """
+        D = self.reference.expand_flat_copy()
+        return SRef(reference=D)
+        # return self.__class__(reference=D)
+
     def flat_copy(self, level=-1):
         if level == 0: return spira.ElementList(self.__copy__())
         elems = self.reference.elements.flat_copy(level-1)
@@ -321,11 +327,12 @@ class SRef(__RefElement__):
         """
         from spira.yevon.gdsii.polygon import Polygon
         from spira.yevon.geometry.bbox_info import bbox_info_opposite_boundary_port
+
         D = self.expand_flat_copy()
 
         port = D.ports[port_name]
         destination = D.ports[destination_name]
-    
+
         for i, e in enumerate(D.reference.elements.polygons):
             if e.id_string() == port.local_pid:
                 opposite_port = bbox_info_opposite_boundary_port(e, port)

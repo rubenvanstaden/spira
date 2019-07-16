@@ -70,8 +70,8 @@ The *scripts* folder largly encapsulates layout generators, while the *tutorials
 contains extra data.
 
 Each workspace is linked to a single fabrication process, but using mutliple
-fabs is also possible due to the simplicity of the workspace tree. In essence, 
-the workspace can have any structure given that the user compensates for 
+fabs is also possible due to the simplicity of the workspace tree. 
+Technically, the workspace can have any structure given that the user compensates for 
 the necessary import changes. But it is highly adviced to use this structure.
 
 

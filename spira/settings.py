@@ -7,7 +7,7 @@ from math import floor
 # ----------------------------- SPiRA Information -----------------------------
 
 
-__version__ = '0.1.0'
+__version__ = '0.1.1'
 __release__ = 'Auron [Beta]'
 
 LIB_NAME = 'SPiRA'

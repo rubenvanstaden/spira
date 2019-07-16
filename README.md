@@ -23,6 +23,7 @@ a PDK cannot be created, but rather that it evolves as our understanding of phys
 * Comprehensive set of commands for shape generation.
 * Use port objects to connect different layout elements.
 * Use routing algorithms to generate polygonal paths between devices.
+* Meticulously define a technology process using Python.
 
 ## Depenencies
 
@@ -59,6 +60,22 @@ pip install -e .
 The framework [documentation](https://spira.readthedocs.io/en/latest/) will get you started.
 For more examples please contact <rubenvanstaden@gmail.com>.
 
+## Running Examples
+
+All examples can be ran from the environment directory, which is the home directory of your ``spira`` folder.
+For the basic tutorial samples:
+
+```python
+python tutorials/basic/_9_stretch_1.py
+```
+
+For the more advanced example with their own defined Rule Deck Database, as
+explained [here](https://spira.readthedocs.io/en/latest/).
+
+```python
+python spira/technologies/default/circuits/ytron_circuit.py
+```
+
 ## Known Issues
 * Documentation for *Advanced Tutorials* are not completely finished.
 * Documentation for *Reference* have not been implemented.
@@ -70,6 +87,13 @@ For more examples please contact <rubenvanstaden@gmail.com>.
 * Integrate with JoSIM and InductEx for parameter extraction.
 
 ## History of changes
+
+### Version 0.1.1 (July 16, 2019)
+* Updated the advanced tutorial documentation.
+* Added developers documentations.
+* Updated the expand transform algorithms, which fixes a lot of known issues.
+* Updated the GDSII input parser to use new transformation parameters.
+* Changed the ``ref`` parameter to ``reference`` in ``SRef``.
 
 ### Version 0.1.0 (July 10, 2019)
 * Added first version of documentation.

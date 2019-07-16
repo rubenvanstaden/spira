@@ -239,9 +239,9 @@ class ReversibleCompoundTransform(CompoundTransform, ReversibleTransform):
 
 class ProcessoTransformation(ProcessorTypeCast):
     def __init__(self):
-        # ProcessorTypeCast.__init__(self, Transform)
+        ProcessorTypeCast.__init__(self, Transform)
         # ProcessorTypeCast.__init__(self, CompoundTransform)
-        ProcessorTypeCast.__init__(self, ReversibleTransform)
+        # ProcessorTypeCast.__init__(self, ReversibleTransform)
         # super().__init__(ReversibleTransform)
 
     def process(self, value, obj=None):

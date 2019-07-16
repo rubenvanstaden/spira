@@ -59,68 +59,6 @@ def wrap_references(cell, c2dmap):
 
         c2dmap[cell] += S
 
-        # # T = Translation(midpoint)
-
-        # # # T = t1 + t2
-        # # # # T = S.transformation + Translation(translation=origin)
-
-        # # S.midpoint = center + midpoint
-        # print(center)
-        # print(S.transformation)
-        # print(S.reference.elements)
-        # # # S.reference.elements.transform(-Translation(center))
-        # # t3 = -Translation(center)
-        # # for e in S.reference.elements.sref:
-        # #     e.midpoint += [-center[0], center[0]]
-        # #     # e.midpoint = t3.apply_to_coord(e.midpoint)
-        # #     # e.transform(t3)
-        # print(S.reference.elements)
-        # print('')
-
-        # # S.midpoint.transform(t2)
-        # # S.transform(T)
-
-        # c2dmap[cell] += S
-
-
-# def wrap_references(cell, c2dmap):
-#     """ Move all cell centers to the origin. """
-#     for e in cell.references:
-#         ref_device = deepcopy(c2dmap[e.ref_cell])
-#         center = Coord(ref_device.center[0], ref_device.center[1])
-#         # ref_device.center = (0,0)
-#         D = ref_device.move(midpoint=center, destination=(0,0))
-
-#         point = scu(e.origin)
-#         midpoint = Coord(point[0], point[1])
-#         S = spira.SRef(reference=D, midpoint=(0,0))
-
-#         if e.x_reflection == True:
-#             T = Reflection(reflection=True)
-#             center = T.apply_to_coord(center)
-#             S.transform(T)
-
-#         if e.rotation is not None:
-#             T = Rotation(rotation=e.rotation)
-#             center = T.apply_to_coord(center)
-#             S.transform(T)
-
-#         m = midpoint + center
-#         origin = Coord(m[0], m[1])
-        
-#         T = Translation(translation=origin)
-#         # S.transform(T)
-#         S.midpoint = Coord(S.midpoint[0], S.midpoint[1])
-#         S.midpoint.transform(T)
-
-#         # if e.rotation is not None:
-#         #     # T = Rotation(rotation=e.rotation, center=origin)
-#         #     T = Rotation(rotation=e.rotation)
-#         #     S.transform(T)
-#         #     # S.midpoint.transform(T)
-
-#         c2dmap[cell] += S
-
 
 def import_gds(filename, cellname=None, flatten=False, pcell=True):
     """  """
@@ -156,29 +94,12 @@ def import_gds(filename, cellname=None, flatten=False, pcell=True):
                 layer = spira.Layer(number=n, datatype=0)
                 D += spira.Polygon(shape=p, layer=layer)
 
-            # if isinstance(e, gdspy.PolygonSet):
-            #     for points in e.polygons:
-            #         layer = spira.Layer(number=int(e.layers[0]), datatype=int(e.datatypes[0]))
-            #         # D += spira.Polygon(shape=spu([points]), layer=layer)
-            #         D += spira.Polygon(shape=spu([points]), layer=layer)
-            # elif isinstance(e, gdspy.Polygon):
-            #     layer = spira.Layer(number=int(e.layers), datatype=int(e.datatype))
-            #     # D += spira.Polygon(shape=spu([e.points]), layer=layer)
-            #     D += spira.Polygon(shape=spu([e.points]), layer=layer)
-
         c2dmap.update({cell:D})
         cell_list.append(cell)
 
     for cell in cell_list:
         wrap_references(cell, c2dmap)
         # wrap_labels(cell, c2dmap)
-
-    # top_spira_cell = c2dmap[topcell]
-    # if flatten == True:
-    #     D = spira.Cell(name='import_gds')
-    #     return D
-    # else:
-    #     return top_spira_cell
 
     top_spira_cell = c2dmap[topcell]
     if flatten == True:

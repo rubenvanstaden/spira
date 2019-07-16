@@ -14,8 +14,7 @@ Also, inheriting from these classes defines the purpose of the layout, either a 
 **Devices:**
 
 Similar to creating a PCell, constructing a device cell required inheriting from :py:class:`spira.Device`
-instead of :py:class:`spira.PCell`. In superconducting circuits a device layout is usually a **Via** or
-a **Junction**.
+instead of :py:class:`spira.PCell`. In superconducting circuits a device layout is usually a *Via* or a *Junction*.
 
 .. code-block:: python
 
@@ -44,6 +43,49 @@ two extra, but optional, create methods to simplify the code structure:
 Note, it is not required to use these methods, but designing large circuits can cause the
 :py:data:`create_elements` method to become cumbersome.
 
+
+*****************
+Library Structure
+*****************
+
+Every design environment connects to a specific fabrication process, also known as the PDK.
+In SPiPA, the PDK data is encapsulated in Python scripts and are collectively called the RDD.
+RDD script names start with ``db_`` as illustrated below.
+
+This section discusses how to organize your design project in SPiRA as a systematized library.
+Technically, your library can have any structure given that you compensates for the necessary
+importing changes. But it is highly adviced to use the proposed structure.
+
+.. code-block:: bash
+
+    technologies
+    |__ mitll
+        |__ devices
+            |__ junction.py
+            |__ vias.py
+        |__ circuits
+            |__ jtl.py
+            |__ dcsfq.py
+        |__ db_init.py
+        |__ db_process.py
+        |__ db_lvs.py
+
+The technology library is broken down into 3 parts:
+
+1. **Devices**: Contains defined device PCells for the specific technology.
+2. **Circuits**: Contains PCell circuits created using the specific technology.
+3. **Database**: Contains a set database files that make up the RDD.
+
+The :py:data:`technologies` folder is the base folder inside the SPiRA design environment that
+contains all the different technology processes and PCell designs in a single place. The library structure
+above contains the ``mitll`` library, which consists of defined junction and via devices, a long
+with a JTL and DCSFQ circuit. 
+
+The ``db_init`` script is the first file to be executed when the RDD database is constructed.
+The ``db_process`` script contains most of the information required to design a PCell.
+This file contains the process layers, layer purposes, process parameters, etc.
+The ``db_lvs`` script defines the created device PCells to be used in the device detection
+algorithms when doing LVS extraction.
 
 
 *****
@@ -627,114 +669,130 @@ By enabling PCell operations again we can see that the overlapping metal layers 
 
 
 
-.. **************************
-.. Junction Transmission Line
-.. **************************
+***************************
+Josephson Transmission Line
+***************************
 
+The Josephson Transmission Line (JTL) is the most basic SFQ circuit and consist of two junctions, an
+input and output port, and a biasing port.
 
+Demonstrates
+============
 
-.. Demonstrates
-.. ============
+* How to define routes between different ports and devices.
+* How to parameterize the route widths.
+* How to include a device PCell into higher hierarchical designs.
 
+We define three width parameters to control the polygon routing width between:
 
+1. The input port and first junction.
+2. The ouput port and second junction.
+3. The first junction and second junction.
 
-.. .. code-block:: python
+Next, we create a set of *create methods* to define device and port instances.
 
-..     class Jtl(spira.PCell):
+.. code-block:: python
 
-..         w1 = spira.NumberParameter(
-..             default=RDD.M6.MIN_SIZE,
-..             restriction=RestrictRange(lower=RDD.M6.MIN_SIZE, upper=RDD.M6.MAX_WIDTH),
-..             doc='Width of left inductor.'
-..         )
-..         w2 = spira.NumberParameter(
-..             default=RDD.M6.MIN_SIZE,
-..             restriction=RestrictRange(lower=RDD.M6.MIN_SIZE, upper=RDD.M6.MAX_WIDTH),
-..             doc='Width of middle inductor.'
-..         )
-..         w3 = spira.NumberParameter(
-..             default=RDD.M6.MIN_SIZE,
-..             restriction=RestrictRange(lower=RDD.M6.MIN_SIZE, upper=RDD.M6.MAX_WIDTH),
-..             doc='Width of rigth inductor.'
-..         )
+    class Jtl(spira.PCell):
 
-..         p1 = spira.Parameter(fdef_name='create_p1')
-..         p2 = spira.Parameter(fdef_name='create_p2')
-..         p3 = spira.Parameter(fdef_name='create_p3')
-..         p4 = spira.Parameter(fdef_name='create_p4')
+        w1 = spira.NumberParameter(
+            default=RDD.M6.MIN_SIZE,
+            restriction=RestrictRange(lower=RDD.M6.MIN_SIZE, upper=RDD.M6.MAX_WIDTH),
+            doc='Width of left inductor.'
+        )
+        w2 = spira.NumberParameter(
+            default=RDD.M6.MIN_SIZE,
+            restriction=RestrictRange(lower=RDD.M6.MIN_SIZE, upper=RDD.M6.MAX_WIDTH),
+            doc='Width of middle inductor.'
+        )
+        w3 = spira.NumberParameter(
+            default=RDD.M6.MIN_SIZE,
+            restriction=RestrictRange(lower=RDD.M6.MIN_SIZE, upper=RDD.M6.MAX_WIDTH),
+            doc='Width of rigth inductor.'
+        )
 
-..         jj1 = spira.Parameter(fdef_name='create_jj_left')
-..         jj2 = spira.Parameter(fdef_name='create_jj_right')
+        p1 = spira.Parameter(fdef_name='create_p1')
+        p2 = spira.Parameter(fdef_name='create_p2')
+        p3 = spira.Parameter(fdef_name='create_p3')
+        p4 = spira.Parameter(fdef_name='create_p4')
 
-..         shunt = spira.Parameter(fdef_name='create_shunt')
+        jj1 = spira.Parameter(fdef_name='create_jj_left')
+        jj2 = spira.Parameter(fdef_name='create_jj_right')
 
-..         bias_res = spira.Parameter(fdef_name='create_bias_res')
-..         via1 = spira.Parameter(fdef_name='create_via1')
+        shunt = spira.Parameter(fdef_name='create_shunt')
 
-..         def create_p1(self):
-..             p1 = spira.Port(name='P1_M6', width=self.w1)
-..             return p1.distance_alignment(port=p1, destination=self.jj1.ports['P1_M6'], distance=-10)
+        bias_res = spira.Parameter(fdef_name='create_bias_res')
+        via1 = spira.Parameter(fdef_name='create_via1')
 
-..         def create_p2(self):
-..             p2 = spira.Port(name='P2_M6', width=self.w1)
-..             return p2.distance_alignment(port=p2, destination=self.jj2.ports['P3_M6'], distance=10)
+        def create_p1(self):
+            p1 = spira.Port(name='P1_M6', width=self.w1)
+            return p1.distance_alignment(port=p1, destination=self.jj1.ports['P1_M6'], distance=-10)
 
-..         def create_p3(self):
-..             return spira.Port(name='P3_M6', midpoint=(0, 15), orientation=270, width=self.w1)
+        def create_p2(self):
+            p2 = spira.Port(name='P2_M6', width=self.w1)
+            return p2.distance_alignment(port=p2, destination=self.jj2.ports['P3_M6'], distance=10)
 
-..         def create_p4(self):
-..             return spira.Port(name='P4_M6', midpoint=(0, 1.5), orientation=90, width=self.w1)
+        def create_p3(self):
+            return spira.Port(name='P3_M6', midpoint=(0, 15), orientation=270, width=self.w1)
 
-..         def create_jj_left(self):
-..             jj = dev.Junction(length=1.9, width=1, radius=0.91)
-..             T = spira.Rotation(rotation=180, rotation_center=(-10,0))
-..             S = spira.SRef(jj, midpoint=(-10,0), transformation=T)
-..             return S
+        def create_p4(self):
+            return spira.Port(name='P4_M6', midpoint=(0, 1.5), orientation=90, width=self.w1)
 
-..         def create_jj_right(self):
-..             jj = dev.Junction(length=1.9, width=1, radius=0.91)
-..             T = spira.Rotation(rotation=180, rotation_center=(10,0))
-..             S = spira.SRef(jj, midpoint=(10,0), transformation=T)
-..             return S
+        def create_jj_left(self):
+            jj = dev.Junction(length=1.9, width=1, radius=0.91)
+            T = spira.Rotation(rotation=180, rotation_center=(-10,0))
+            S = spira.SRef(jj, midpoint=(-10,0), transformation=T)
+            return S
 
-..         def create_shunt(self):
-..             D = Resistor(width=1, length=3.7)
-..             S = spira.SRef(reference=D, midpoint=(0,0))
-..             S.distance_alignment(port='P2_M6', destination=self.p3, distance=-2.5)
-..             return S
+        def create_jj_right(self):
+            jj = dev.Junction(length=1.9, width=1, radius=0.91)
+            T = spira.Rotation(rotation=180, rotation_center=(10,0))
+            S = spira.SRef(jj, midpoint=(10,0), transformation=T)
+            return S
 
-..         def create_elements(self, elems):
+        def create_shunt(self):
+            D = Resistor(width=1, length=3.7)
+            S = spira.SRef(reference=D, midpoint=(0,0))
+            S.distance_alignment(port='P2_M6', destination=self.p3, distance=-2.5)
+            return S
 
-..             elems += self.jj1
-..             elems += self.jj2
-..             elems += self.shunt
+        def create_elements(self, elems):
 
-..             elems += RouteStraight(p1=self.p1,
-..                 p2=self.jj1.ports['P1_M6'].copy(width=self.p1.width),
-..                 layer=RDD.PLAYER.M6.ROUTE)
+            elems += self.jj1
+            elems += self.jj2
+            elems += self.shunt
 
-..             elems += RouteStraight(p1=self.p2,
-..                 p2=self.jj2.ports['P3_M6'].copy(width=self.p2.width),
-..                 layer=RDD.PLAYER.M6.ROUTE)
+            elems += RouteStraight(p1=self.p1,
+                p2=self.jj1.ports['P1_M6'].copy(width=self.p1.width),
+                layer=RDD.PLAYER.M6.ROUTE)
 
-..             elems += RouteStraight(
-..                 p1=self.jj1.ports['P3_M6'].copy(width=self.w2),
-..                 p2=self.jj2.ports['P1_M6'].copy(width=self.w2),
-..                 layer=RDD.PLAYER.M6.ROUTE)
+            elems += RouteStraight(p1=self.p2,
+                p2=self.jj2.ports['P3_M6'].copy(width=self.p2.width),
+                layer=RDD.PLAYER.M6.ROUTE)
 
-..             elems += RouteStraight(p1=self.shunt.ports['P2_M6'], p2=self.p3, layer=RDD.PLAYER.M6.ROUTE)
-..             elems += RouteStraight(p1=self.shunt.ports['P4_M6'], p2=self.p4, layer=RDD.PLAYER.M6.ROUTE)
+            elems += RouteStraight(
+                p1=self.jj1.ports['P3_M6'].copy(width=self.w2),
+                p2=self.jj2.ports['P1_M6'].copy(width=self.w2),
+                layer=RDD.PLAYER.M6.ROUTE)
 
-..             return elems
+            elems += RouteStraight(p1=self.shunt.ports['P2_M6'], p2=self.p3, layer=RDD.PLAYER.M6.ROUTE)
+            elems += RouteStraight(p1=self.shunt.ports['P4_M6'], p2=self.p4, layer=RDD.PLAYER.M6.ROUTE)
 
-..         def create_ports(self, ports):
-..             ports += self.p1
-..             ports += self.p2
-..             ports += self.p3
-..             ports += self.p4
-..             return ports
+            return elems
 
+        def create_ports(self, ports):
+            ports += self.p1
+            ports += self.p2
+            ports += self.p3
+            ports += self.p4
+            return ports
 
+This examples place two junctions, :py:data:`jj_left` and :py:data:`jj_right`, at positions (-10,0) and
+(10,0). The input port is placed a ditance of -10 to the left of :py:data:`jj_left`, and the ouput port
+a distance of 10 to the right of :py:data:`jj_right`.
 
-.. .. image:: _figures/_adv_jtl_false.png
-..     :align: center
+The biasing port, :py:data:`p3` is place at position (0,15) and port ``P2_M6`` of the biasing resistor PCell
+is place a distance of 2.5 to the bottom of :py:data:`p3`.
+
+.. image:: _figures/_adv_jtl_false.png
+    :align: center

@@ -82,12 +82,11 @@ if __name__ == '__main__':
 
     C += S
 
-    # C.gdsii_expanded_output(name='JunctionExpanded')
-    # C.gdsii_output(name='JunctionUnstretched')
-    # C.gdsii_output(name='JunctionStretchFactor')
-    C.gdsii_output(name='JunctionStretchPorts')
+    # D = C.expand_flat_copy()
+
     # D.gdsii_output()
-    # D.ref.gdsii_output()
+    C.gdsii_output()
+    # C.gdsii_output_expanded()
 
 
 
