@@ -12,7 +12,6 @@ packages=find_packages(exclude=["*.tests", "*.tests.*", "tests.*", "tests"]),
 setup(
     name="spira",
     version='{}-{}'.format(__version__, __release__),
-    # version='{}-{}'.format('0.1.0', 'Auron [Beta]'),
     description="Superconducting Circuit Modeling and Verification",
     author="Ruben van Staden",
     author_email="rubenvanstaden@gmail.com",
