@@ -154,10 +154,7 @@ class __Shape__(Transformable, ParameterInitializer):
         from spira.settings import get_grids_per_unit
         if grids_per_unit is None:
             grids_per_unit = get_grids_per_unit()
-        # print(self.points)
         self.points = (np.floor(self.points * grids_per_unit + 0.5)) / grids_per_unit 
-        # print(self.points)
-        # print('\n\n===========================')
         return self
 
     def move(self, pos):
@@ -268,8 +265,12 @@ class __Shape__(Transformable, ParameterInitializer):
             raise TypeError("Wrong type " + str(type(item)) + " to extend Shape with")
         return self
 
+    # def id_string(self):
+    #     return self.__str__()
+        
     def id_string(self):
-        return self.__str__()
+        sid = '{} - hash {}'.format(self.__repr__(), self.hash_string)
+        return sid
 
 
 class Shape(__Shape__):

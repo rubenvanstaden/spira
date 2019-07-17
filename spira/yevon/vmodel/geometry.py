@@ -84,7 +84,7 @@ class GmshGeometry(__Geometry__):
 
             for j, ll in enumerate(gp.lines):
                 line_label = polygon.shape.segment_labels[j] + "_" + str(j)
-                # print(line_label)
+                print(line_label)
                 self.geom.add_physical(ll, label=line_label)
             self.geom.add_physical(gp.surface, label=surface_label)
             # surfaces.append([gp.surface, gp.line_loop])

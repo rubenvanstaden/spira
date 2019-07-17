@@ -5,7 +5,7 @@ from spira.yevon.gdsii.cell import Cell
 from spira.yevon.gdsii.elem_list import ElementList
 from spira.yevon.gdsii.containers import __CellContainer__
 from spira.yevon.vmodel.derived import get_derived_elements
-from spira.yevon.geometry.shapes.modifiers import ShapeConnected
+from spira.yevon.geometry.shapes.adapters import ShapeConnected
 from spira.yevon.process import get_rule_deck
 
 

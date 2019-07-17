@@ -217,7 +217,7 @@ class Polygon(__Polygon__):
         """ Generate default edges for this polygon.
         These edges can be transformed using adapters. """
         from spira.yevon.geometry.edges.edges import generate_edges
-        return generate_edges(shape=self.shape, layer=self.layer)
+        return generate_edges(shape=self.shape, layer=self.layer, internal_pid=self.id_string())
 
     def flat_copy(self, level=-1):
         """ Flatten a copy of the polygon. """
@@ -232,7 +232,7 @@ class Polygon(__Polygon__):
     def nets(self, lcar):
         from spira.yevon.geometry.nets.net import Net
         from spira.yevon.vmodel.geometry import GmshGeometry
-        from spira.yevon.geometry.ports.port import ContactPort
+        # from spira.yevon.geometry.ports.port import ContactPort
         from spira.yevon import filters
 
         if self.purpose == 'METAL':
@@ -244,7 +244,8 @@ class Polygon(__Polygon__):
 
             cc = []
             for p in self.ports:
-                if isinstance(p, ContactPort):
+                # if isinstance(p, ContactPort):
+                if p.purpose == RDD.PURPOSE.PORT.CONTACT:
                     cc.append(p)
 
             F = filters.ToggledCompoundFilter()

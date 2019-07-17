@@ -16,6 +16,7 @@ from spira.yevon.process.process_layer import ProcessParameter
 from spira.core.parameters.variables import *
 from spira.core.transforms import Stretch
 from spira.yevon.process.physical_layer import PLayer
+from spira.core.parameters.descriptor import FunctionParameter
 from spira.yevon.process import get_rule_deck
 
 
@@ -37,9 +38,21 @@ class Edge(__ShapeElement__):
     >>> edge Edge()
     """
 
+    def get_alias(self):
+        if not hasattr(self, '__alias__'):
+            self.__alias__ = self.layer.purpose.symbol
+        return self.__alias__
+
+    def set_alias(self, value):
+        if value is not None:
+            self.__alias__ = value
+
+    alias = FunctionParameter(get_alias, set_alias, doc='Functions to generate an alias for cell name.')
+
     width = NumberParameter(default=1, doc='The width of the edge.')
     extend = NumberParameter(default=1, doc='The distance the edge extends from the shape.')
-    pid = StringParameter(default='no_pid', doc='A unique polygon ID to which the edge connects.')
+    internal_pid = StringParameter(default='no_pid', doc='A unique polygon ID to which the edge connects.')
+    external_pid = StringParameter(default='no_pid', doc='A unique polygon ID to which the edge connects.')
     edge_type = IntegerParameter(default=constants.EDGE_TYPE_NORMAL)
 
     def __init__(self, shape, layer, transformation=None, **kwargs):
@@ -50,11 +63,14 @@ class Edge(__ShapeElement__):
             return 'Edge is None!'
         layer = RDD.GDSII.IMPORT_LAYER_MAP[self.layer]
         class_string = "[SPiRA: Edge \'{}\'] (center {}, width {}, extend {}, process {}, purpose {})"
-        return class_string.format(self.edge_type, self.center, self.width,
+        return class_string.format(self.alias, self.center, self.width,
             self.extend, self.layer.process.symbol, self.layer.purpose.symbol)
 
     def __str__(self):
         return self.__repr__()
+
+    def __hash__(self):
+        return hash(self.__repr__())
 
 
 def EdgeAdapter(original_edge, edge_type, **kwargs):
@@ -91,6 +107,7 @@ class EdgeGenerator(Group, __LayerElement__):
     """ Generates edge objects for each shape segment. """
 
     shape = ShapeParameter()
+    internal_pid = StringParameter(default='no_pid', doc='A unique polygon ID to which the edge connects.')
 
     def create_elements(self, elems):
 
@@ -123,57 +140,14 @@ class EdgeGenerator(Group, __LayerElement__):
             T = Rotation(orientation) + Translation(midpoint)
             layer = PLayer(process=layer.process, purpose=RDD.PURPOSE.PORT.OUTSIDE_EDGE_DISABLED)
             shape = shapes.BoxShape(width=width, height=extend)
-            elems += Edge(shape=shape, layer=layer, width=width, extend=extend, transformation=T)
+            elems += Edge(alias=name, shape=shape, layer=layer, internal_pid=self.internal_pid, width=width, extend=extend, transformation=T)
 
         return elems
 
 
-def generate_edges(shape, layer):
+def generate_edges(shape, layer, internal_pid):
     """ Method call for edge generator. """
-    edge_gen = EdgeGenerator(shape=shape, layer=layer)
+    edge_gen = EdgeGenerator(shape=shape, layer=layer, internal_pid=internal_pid)
     return edge_gen.elements
 
-
-# def shape_edge_ports(shape, layer, local_pid='None', center=(0,0), loc_name=''):
-
-#     edges = PortList()
-
-#     xpts = list(shape.x_coords)
-#     ypts = list(shape.y_coords)
-
-#     n = len(xpts)
-
-#     xpts.append(xpts[0])
-#     ypts.append(ypts[0])
-
-#     clockwise = 0
-#     for i in range(0, n):
-#         clockwise += ((xpts[i+1] - xpts[i]) * (ypts[i+1] + ypts[i]))
-
-#     if layer.name == 'BBOX': bbox = True
-#     else: bbox = False
-
-#     layer = RDD.GDSII.IMPORT_LAYER_MAP[layer]
-
-#     for i in range(0, n):
-#         # name = 'E{}_{}'.format(i, layer.process.symbol)
-#         # name = 'E{}_{}_{}'.format(i, layer.process.symbol, shape.bbox_info.center)
-#         name = '{}E{}_{}'.format(loc_name, i, layer.process.symbol)
-#         x = np.sign(clockwise) * (xpts[i+1] - xpts[i])
-#         y = np.sign(clockwise) * (ypts[i] - ypts[i+1])
-#         orientation = (np.arctan2(x, y) * constants.RAD2DEG)
-#         midpoint = [(xpts[i+1] + xpts[i])/2, (ypts[i+1] + ypts[i])/2]
-#         width = np.abs(np.sqrt((xpts[i+1] - xpts[i])**2 + (ypts[i+1]-ypts[i])**2))
-#         P = Port(
-#             name=name,
-#             process=layer.process,
-#             purpose=RDD.PURPOSE.PORT.OUTSIDE_EDGE_DISABLED,
-#             midpoint=midpoint,
-#             orientation=orientation,
-#             width=width,
-#             length=0.2,
-#             local_pid=local_pid
-#         )
-#         edges += P
-#     return edges
 

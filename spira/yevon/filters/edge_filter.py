@@ -30,10 +30,7 @@ class EdgeFilter(__EdgeFilter__):
         for p1 in deepcopy(item.elements):
             if p1.layer.purpose == RDD.PURPOSE.METAL:
                 for edge in p1.edges:
-                    e = EdgeAdapter(original_edge=edge, edge_type=self.edge_type)
-                    # print(e)
-                    elems += e
-                    # elems += edge.outside.transform(edge.transformation)
+                    elems += EdgeAdapter(original_edge=edge, edge_type=self.edge_type)
                 elems += p1
 
         cell = Cell(elements=elems)

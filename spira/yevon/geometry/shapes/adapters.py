@@ -1,13 +1,13 @@
-from spira.yevon.geometry.edges.edge_list import EdgeListParameter
+import numpy as np
+from copy import deepcopy
+
+# from spira.yevon.geometry.edges.edge_list import EdgeListParameter
 from spira.yevon.geometry.shapes.shape import Shape, ShapeParameter
 from spira.yevon.geometry.line import line_from_two_points
 from spira.yevon.geometry.vector import vector_from_two_points
 from spira.yevon.geometry.coord import Coord
 from spira.yevon.utils.geometry import intersection, lines_cross, lines_coincide, sort_points_on_line, points_unique
 from spira.core.parameters.variables import *
-
-from copy import deepcopy
-import numpy as np
 
 
 class __ShapeAdapter__(Shape):
@@ -21,7 +21,7 @@ class __ShapeAdapter__(Shape):
         self.original_shape = self.original_shape.movecopy(position)
         return self
 
-    
+
 class ShapeConnected(__ShapeAdapter__):
     """  """
 
@@ -38,9 +38,7 @@ class ShapeConnected(__ShapeAdapter__):
 
         for ply, edges in self.edges.items():
             for edge in edges:
-                # e = deepcopy(edge).outside.transform(edge.transformation)
-                e = edge.outside
-                bbox_shape = e.bbox_info.bounding_box().snap_to_grid()
+                bbox_shape = edge.bbox_info.bounding_box().snap_to_grid()
                 # bbox_shape = e.bbox_info.bounding_box()
                 # print(bbox_shape.segments())
                 # print(self.segments())
@@ -57,8 +55,8 @@ class ShapeConnected(__ShapeAdapter__):
                         # print(s1)
                         # print(s2)
                         if set(s1) == set(s2):
-                            labels[i] = e.shape.hash_string
-                #             print(labels[i])
+                            labels[i] = edge.shape.hash_string
+                            # print(labels[i])
                 #             print('YES SEGMENT')
                 #     print('----')
                 # print('')

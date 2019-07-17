@@ -122,7 +122,7 @@ class MetalConnectFilter(Filter):
     def __filter___Cell____(self, item):
         from copy import deepcopy
         from spira.yevon.vmodel.virtual import virtual_connect
-        from spira.yevon.geometry.shapes.modifiers import ShapeConnected
+        from spira.yevon.geometry.shapes.adapters import ShapeConnected
         from spira.yevon.geometry.shapes.shape import Shape
 
         D = item.expand_flat_copy()

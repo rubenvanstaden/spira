@@ -138,10 +138,11 @@ class NetEdgeFilter(__NetFilter__):
                         for i, pl in enumerate(item.physical_lines):
                             if pl == value[0]:
                                 for n in get_triangles_containing_line(item, item.lines[i]):
+                                    print(value)
                                     item.g.node[n]['process_polygon'] = e
                                     # FIXME: Change to equal the overlapping edge display.
-                                    # item.g.node[n]['display'] = RDD.DISPLAY.STYLE_SET[RDD.PLAYER.I5.VIA]
-                                    item.g.node[n]['display'] = RDD.DISPLAY.STYLE_SET[RDD.PLAYER.M1.HOLE]
+                                    item.g.node[n]['display'] = RDD.DISPLAY.STYLE_SET[RDD.PLAYER.I5.VIA]
+                                    # item.g.node[n]['display'] = RDD.DISPLAY.STYLE_SET[RDD.PLAYER.M1.HOLE]
 
                                 # line = item.lines[i]
                                 # for n, triangle in enumerate(item.triangles):
@@ -150,12 +151,13 @@ class NetEdgeFilter(__NetFilter__):
                                 #         item.g.node[n]['display'] = RDD.DISPLAY.STYLE_SET[e.layer]
 
                         # i = item.physical_lines.index(value[0])
-                        # # i = item.physical_lines[value[0]]
+                        # # # i = item.physical_lines[value[0]]
                         # line = item.lines[i]
-                        # for n, triangle in enumerate(item.triangles):
-                        #     if (line[0] in triangle) and (line[1] in triangle):
-                        #         item.g.node[n]['process_polygon'] = e
-                        #         item.g.node[n]['display'] = RDD.DISPLAY.STYLE_SET[e.layer]
+                        # print(line)
+                        # # for n, triangle in enumerate(item.triangles):
+                        # #     if (line[0] in triangle) and (line[1] in triangle):
+                        # #         item.g.node[n]['process_polygon'] = e
+                        # #         item.g.node[n]['display'] = RDD.DISPLAY.STYLE_SET[e.layer]
 
                         # triangles = item.process_triangles()
                         # for key, nodes in triangles.items():
