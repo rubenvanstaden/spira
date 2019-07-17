@@ -73,11 +73,12 @@ class ElementList(__ElementList__):
 
     @property
     def polygons(self):
-        from spira.yevon.gdsii.polygon import Polygon
+        # from spira.yevon.gdsii.polygon import Polygon
+        from spira.yevon.gdsii.polygon import __ShapeElement__
         elems = ElementList()
         for e in self._list:
             # if isinstance(e, Polygon):
-            if issubclass(type(e), Polygon):
+            if isinstance(e, __ShapeElement__):
                 elems += e
         return elems
 

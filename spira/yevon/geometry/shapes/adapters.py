@@ -10,7 +10,7 @@ from copy import deepcopy
 import numpy as np
 
 
-class __ShapeModifier__(Shape):
+class __ShapeAdapter__(Shape):
 
     original_shape = ShapeParameter()
 
@@ -21,8 +21,8 @@ class __ShapeModifier__(Shape):
         self.original_shape = self.original_shape.movecopy(position)
         return self
 
-
-class ShapeConnected(__ShapeModifier__):
+    
+class ShapeConnected(__ShapeAdapter__):
     """  """
 
     # edges = EdgeListParameter()

@@ -5,6 +5,7 @@ from spira.core.all import *
 import spira.yevon.aspects
 
 from spira.yevon.geometry.coord import *
+from spira.yevon.geometry.edges import *
 from spira.yevon.geometry.shapes import *
 from spira.yevon.geometry.ports import *
 from spira.yevon.geometry.nets import *

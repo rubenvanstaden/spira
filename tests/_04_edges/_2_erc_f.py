@@ -40,12 +40,13 @@ device = spira.Cell(name='Device', elements=el)
 v_model = virtual_connect(device=device)
 v_model.gdsii_output_virtual_connect()
 
-F = MetalConnectFilter()
-D = F(device)
+# # F = MetalConnectFilter()
+# # D = F(device)
+# D = device
 
-D = spira.Circuit(name='TestElectricalConnections', elements=D.elementals)
-# D.gdsii_output()
-D.netlist_output()
+# D = spira.Circuit(name='TestElectricalConnections', elements=D.elements)
+# # D.gdsii_output()
+# D.netlist_output()
 
 
 

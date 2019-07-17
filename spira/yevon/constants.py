@@ -1,4 +1,5 @@
 import numpy as np
+from spira.yevon.geometry.coord import Coord
 
 
 DEG2RAD = np.pi / 180.0
@@ -13,14 +14,15 @@ PATH_TYPE_ROUNDED = 1
 PATH_TYPE_EXTENDED = 2
 PATH_TYPES = [PATH_TYPE_NORMAL, PATH_TYPE_ROUNDED, PATH_TYPE_EXTENDED]
 
-# NORTH = [0.0, 1.0]
-# SOUTH = (0.0, -1.0)
-# EAST = (1.0, 0.0)
-# WEST = (-1.0, 0.0)
+EDGE_TYPE_NORMAL = 0
+EDGE_TYPE_INSIDE = 1
+EDGE_TYPE_OUTSIDE = 2
+EDGE_TYPE_EUCLIDEAN = 3
+EDGE_TYPE_SQUARE = 4
+EDGE_TYPE_SIDE_EXTEND = 5
 
 CLIPPER_SCALE = 2**30
 
-from spira.yevon.geometry.coord import Coord
 NORTH = Coord(0.0, 1.0)
 SOUTH = Coord(0.0, -1.0)
 EAST = Coord(1.0, 0.0)

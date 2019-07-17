@@ -1,5 +1,8 @@
 import spira.all as spira
 
+from copy import deepcopy
+from spira.yevon import filters
+from spira.yevon import constants
 from spira.log import SPIRA_LOG as LOG
 from spira.yevon.vmodel.derived import get_derived_elements
 from spira.yevon.filters.layer_filter import LayerFilterAllow
@@ -96,19 +99,7 @@ class VirtualConnect(__VirtualModel__):
                                 port_type='contact')
         return self.device.elements
 
-    def create_connected_edges(self):
-        from copy import deepcopy
-        from spira.yevon.gdsii.elem_list import ElementList
-        from spira.yevon.vmodel.derived import get_derived_elements
-        el = ElementList()
-        for p1 in deepcopy(self.device.elements):
-            if p1.layer.purpose == RDD.PURPOSE.METAL:
-                el += p1
-                for edge in p1.edges:
-                    el += edge.outside.transform(edge.transformation)
-
-        # FIXME !!!
-        # map1 = {RDD.PLAYER.M2.EDGE_CONNECTED : RDD.PLAYER.M2.INSIDE_EDGE_ENABLED}
+    def _map_derived_edges(self):
         mapping = {}
         for pl in RDD.get_physical_layers_by_purpose(purposes=['METAL']):
             key = pl.process.symbol
@@ -123,42 +114,44 @@ class VirtualConnect(__VirtualModel__):
                     raise ValueError(es.format(ps_2, ps_1))
             else:
                 LOG.warning('Edge detection for METAL layer {} ignored.'.format(key))
+        return mapping
 
-        pg_overlap = self.device.overlap_elements
-        edges = get_derived_elements(el, mapping=mapping, store_as_edge=True)
+    def _connect_overlap_edges(self, D, edges, overlap_edges):
+        """ Connect edges to the overlapping polygon. """
+        for j, e in enumerate(D.overlap_elements):
+            overlap_edges[e] = []
+            for i, edge in enumerate(edges):
+                if len(edge.shape.intersections(e.shape)) != 0:
+                    edge.pid = '{}'.format(e.shape.hash_string)
+                    edge.layer.purpose = RDD.PURPOSE.PORT.OUTSIDE_EDGE_ENABLED
+                    overlap_edges[e].append(edge)
+        return overlap_edges
 
-        overlap_edges = {}
-
-        # print(pg_overlap)
-        # print(edges)
-        # print('----------------')
-
-        for j, pg in enumerate(pg_overlap):
-            for e in pg.elements:
-                overlap_edges[e] = []
-                for i, edge in enumerate(edges):
-                    if len(edge.outside.shape.intersections(e.shape)) != 0:
-                        edges[i].pid = '{}'.format(e.shape.hash_string)
-                        edges[i].outside.layer.purpose = RDD.PURPOSE.PORT.OUTSIDE_EDGE_ENABLED
-                        overlap_edges[e].append(edges[i])
-
-                        # edge.pid = '{}'.format(e.shape.hash_string)
-                        # edge.elements[0].layer.purpose = RDD.PURPOSE.PORT.OUTSIDE_EDGE_ENABLED
-                        # overlap_edges[e].append(edge)
-
-        # print('----------------')
-        # print(edges)
-
-        # NOTE: To detect single edges that 
-        # falls on shape boundary edges.
+    def _connect_boundary_edges(self, edges, overlap_edges):
+        """ Connect the edges that falls on a shape boudnary,
+        since there is no overlapping polygon in this case."""
         if len(edges) > 0:
             e = spira.Polygon(alias='Dummy', shape=[], layer=RDD.PLAYER.METAL)
             overlap_edges[e] = []
             for i, edge in enumerate(edges):
-                if edge.outside.layer.purpose == RDD.PURPOSE.PORT.OUTSIDE_EDGE_DISABLED:
+                if edge.layer.purpose == RDD.PURPOSE.PORT.OUTSIDE_EDGE_DISABLED:
                     edge.pid = '{}'.format(e.shape.hash_string)
-                    edge.outside.layer.purpose = RDD.PURPOSE.PORT.OUTSIDE_EDGE_ENABLED
+                    edge.layer.purpose = RDD.PURPOSE.PORT.OUTSIDE_EDGE_ENABLED
                     overlap_edges[e].append(edge)
+
+    def create_connected_edges(self):
+        from spira.yevon.gdsii.elem_list import ElementList
+        from spira.yevon.vmodel.derived import get_derived_elements
+
+        EF = filters.EdgeFilter(edge_type=constants.EDGE_TYPE_OUTSIDE)
+        el = EF(self.device).elements
+
+        mapping = self._map_derived_edges()
+        edges = get_derived_elements(el, mapping=mapping, store_as_edge=True)
+        
+        overlap_edges = {}
+        self._connect_overlap_edges(self.device, edges, overlap_edges)
+        self._connect_boundary_edges(edges, overlap_edges)
 
         return overlap_edges
 
@@ -172,9 +165,7 @@ class VirtualConnect(__VirtualModel__):
         for ply_overlap, edges in self.connected_edges.items():
             if len(ply_overlap.points) > 0:
                 elems += ply_overlap
-            for e in edges:
-                # elems += e.outside
-                elems += e.elements[0]
+            elems += edges
 
         for e in self.device.elements:
             elems += e

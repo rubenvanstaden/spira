@@ -1,5 +1,7 @@
 import numpy as np
 
+from copy import deepcopy
+
 from spira.yevon.process.gdsii_layer import Layer
 from spira.yevon.process.gdsii_layer import __DerivedDoubleLayer__
 from spira.yevon.process.gdsii_layer import __DerivedLayerAnd__
@@ -21,16 +23,18 @@ __all__ = [
 ]
 
 
-def derived_elements(elems, derived_layer):
-    """  """
+def _derived_elements(elems, derived_layer):
+    """ Derived elements are generated from derived layers using
+    layer operations as specified in the RDD. """
+
     if isinstance(derived_layer, Layer):
         LF = LayerFilterAllow(layers=[derived_layer])
         el = LF(elems.polygons)
         pg = PolygonGroup(elements=el, layer=derived_layer)
         return pg
     elif isinstance(derived_layer, __DerivedDoubleLayer__):
-        p1 = derived_elements(elems, derived_layer.layer1)
-        p2 = derived_elements(elems, derived_layer.layer2)
+        p1 = _derived_elements(elems, derived_layer.layer1)
+        p2 = _derived_elements(elems, derived_layer.layer2)
         if isinstance(derived_layer, __DerivedLayerAnd__):
             pg = p1 & p2
         elif isinstance(derived_layer, __DerivedLayerXor__):
@@ -41,27 +45,25 @@ def derived_elements(elems, derived_layer):
 
 
 def get_derived_elements(elements, mapping, store_as_edge=False):
-    """
-    Given a list of elements and a list of tuples (DerivedLayer, PPLayer),
-    create new elements according to the boolean operations of the
-    DerivedLayer and place these elements on the specified PPLayer.
-    """
-    from copy import deepcopy
+    """ Given a list of elements and a list of tuples (DerivedLayer, PPLayer),
+    create new elements according to the boolean operations of the DerivedLayer
+    and place these elements on the specified PPLayer. """
+
     derived_layers = mapping.keys()
     export_layers = mapping.values()
     elems = ElementList()
     for derived_layer, export_layer in zip(derived_layers, export_layers):
-        pg = derived_elements(elems=elements, derived_layer=derived_layer)
+        layer = deepcopy(export_layer)
+        pg = _derived_elements(elems=elements, derived_layer=derived_layer)
         for p in pg.elements:
             if store_as_edge is True:
-                plys = Polygon(shape=p.shape, layer=deepcopy(export_layer))
-                edge = Edge(process=export_layer.process, elements=[plys])
-                elems += edge
+                elems += Edge(shape=p.shape, layer=layer)
             else:
-                elems += Polygon(shape=p.shape, layer=export_layer)
+                elems += Polygon(shape=p.shape, layer=layer)
     return elems
 
 
+# TODO: Implement this using an adapter?
 def get_derived_edge_ports():
     """ Generate ports from the derived edge polygons. """
     pass

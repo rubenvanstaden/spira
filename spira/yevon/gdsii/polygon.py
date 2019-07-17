@@ -33,46 +33,99 @@ __all__ = [
 ]
 
 
-class __Polygon__(__LayerElement__):
+class __ShapeElement__(__LayerElement__):
+    """ Base class for an edge element. """
 
     shape = ShapeParameter()
-    enable_edges = BoolParameter(default=True)
+
+    @property
+    def points(self):
+        return self.shape.points
+        
+    @property
+    def area(self):
+        return gdspy.Polygon(self.shape.points).area()
+
+    @property
+    def count(self):
+        return np.size(self.shape.points, 0)
+
+    @property
+    def center(self):
+        return self.bbox_info.center
+
+    @center.setter
+    def center(self, destination):
+        self.move(midpoint=self.center, destination=destination)
+
+    @property
+    def bbox_info(self):
+        return self.shape.bbox_info.transform_copy(self.transformation)
+
+    def id_string(self):
+        sid = '{} - hash {}'.format(self.__repr__(), self.shape.hash_string)
+        return sid
+
+    def is_empty(self):
+        """ Returns `False` is the polygon shape has no points. """
+        return self.shape.is_empty()
 
     def encloses(self, point):
-        """  """
+        """ Returns `True` if the polygon encloses the point. """
         from spira.yevon.utils import clipping
         shape = self.shape.transform_copy(self.transformation)
         return clipping.encloses(coord=point, points=shape.points)
 
+    def expand_transform(self):
+        """ Expand the transform by applying it to the shape. """
+        from spira.core.transforms.identity import IdentityTransform
+        if not self.transformation.is_identity():
+            self.shape = self.shape.transform_copy(self.transformation)
+            self.transformation = IdentityTransform()
+        return self
+
+    # FIXME: Move this to an output generator.
+    def convert_to_gdspy(self, transformation=None):
+        """ Converts a SPiRA polygon to a Gdspy polygon.
+        The extra transformation parameter is the
+        polygon edge ports. """
+        layer = RDD.GDSII.EXPORT_LAYER_MAP[self.layer]
+        T = self.transformation + transformation
+        shape = self.shape.transform_copy(T)
+        return gdspy.Polygon(points=shape.points, layer=layer.number, datatype=layer.datatype)
+
+
+class __Polygon__(__ShapeElement__):
+
+    enable_edges = BoolParameter(default=True)
+
     def fillet(self, radius, angle_resolution=128, precision=0.001):
-        """  """
+        """ Applies fillet rounding algorithm to polygon corners. """
         super().fillet(radius=radius, points_per_2pi=angle_resolution, precision=precision)
         self.shape.points = self.polygons
         return self
 
     def stretch(self, factor=(1,1), center=(0,0)):
-        """  """
+        """ Stretches the polygon by a factor. """
         T = spira.Stretch(stretch_factor=factor, stretch_center=center)
         return T.apply(self)
 
     def stretch_copy(self, factor=(1,1), center=(0,0)):
-        """  """
+        """ Stretches a copy of the polygon by a factor. """
         T = spira.Stretch(stretch_factor=factor, stretch_center=center)
         return T.apply_copy(self)
 
     def stretch_port(self, port, destination):
-        """
-        The element by moving the subject port, without 
+        """ The element by moving the subject port, without 
         distorting the entire element. Note: The opposite 
-        port position is used as the stretching center.
-        """
+        port position is used as the stretching center. """
         opposite_port = bbox_info.bbox_info_opposite_boundary_port(self, port)
         T = stretching.stretch_element_by_port(self, opposite_port, port, destination)
         T.apply(self)
         return self
 
     def move(self, midpoint=(0,0), destination=None, axis=None):
-        """  """
+        """ Moves the polygon from `midpoint` to a `destination`. """
 
         if destination is None:
             destination = midpoint
@@ -113,6 +166,8 @@ class Polygon(__Polygon__):
     >>> ply = spira.Polygon(shape=rect_shape, layer=layer)
     """
 
+    _next_uid = 0
+
     edges = Parameter(fdef_name='create_edges')
 
     def get_alias(self):
@@ -125,8 +180,6 @@ class Polygon(__Polygon__):
             self.__alias__ = value
 
     alias = FunctionParameter(get_alias, set_alias, doc='Functions to generate an alias for cell name.')
-
-    _next_uid = 0
 
     def __init__(self, shape, layer, transformation=None, **kwargs):
         super().__init__(shape=shape, layer=layer, transformation=transformation, **kwargs)
@@ -150,7 +203,6 @@ class Polygon(__Polygon__):
     # NOTE: We are not copying the ports, so they
     # can be re-calculated for the transformed shape.
     def __deepcopy__(self, memo):
-        # return Polygon(
         return self.__class__(
             shape=deepcopy(self.shape),
             layer=deepcopy(self.layer),
@@ -161,13 +213,11 @@ class Polygon(__Polygon__):
         sid = '{} - hash {}'.format(self.__repr__(), self.shape.hash_string)
         return sid
 
-    def expand_transform(self):
-        """ Expand the transform by applying it to the shape. """
-        from spira.core.transforms.identity import IdentityTransform
-        if not self.transformation.is_identity():
-            self.shape = self.shape.transform_copy(self.transformation)
-            self.transformation = IdentityTransform()
-        return self
+    def create_edges(self):
+        """ Generate default edges for this polygon.
+        These edges can be transformed using adapters. """
+        from spira.yevon.geometry.edges.edges import generate_edges
+        return generate_edges(shape=self.shape, layer=self.layer)
 
     def flat_copy(self, level=-1):
         """ Flatten a copy of the polygon. """
@@ -178,25 +228,6 @@ class Polygon(__Polygon__):
     def flatten(self, level=-1):
         """ Flatten the polygon without creating a copy. """
         return self.expand_transform()
-
-    def convert_to_gdspy(self, transformation=None):
-        """
-        Converts a SPiRA polygon to a Gdspy polygon.
-        The extra transformation parameter is the
-        polygon edge ports.
-        """
-        layer = RDD.GDSII.EXPORT_LAYER_MAP[self.layer]
-        T = self.transformation + transformation
-        # shape = self.shape
-        shape = self.shape.transform_copy(T)
-        return gdspy.Polygon(points=shape.points, layer=layer.number, datatype=layer.datatype)
-
-    def is_empty(self):
-        return self.shape.is_empty()
-
-    def create_edges(self):
-        from spira.yevon.geometry.edges.edges import generate_polygon_edges
-        return generate_polygon_edges(shape=self.shape, layer=self.layer)
 
     def nets(self, lcar):
         from spira.yevon.geometry.nets.net import Net

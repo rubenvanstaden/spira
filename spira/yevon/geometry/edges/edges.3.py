@@ -30,7 +30,8 @@ RDD = get_rule_deck()
 
 
 class Edge(__ShapeElement__):
-    """ Edge elements are object that represents the edge of a polygonal shape.
+    """ Edge elements are object that represents the edge
+    of a polygonal shape.
 
     Example
     -------
@@ -65,9 +66,9 @@ def EdgeAdapter(original_edge, edge_type, **kwargs):
     width = original_edge.width
 
     if edge_type == constants.EDGE_TYPE_INSIDE:
-        shp = shape.move((0, extend/2.0))
+        shp = shape.move((0,extend/2.0))
     elif edge_type == constants.EDGE_TYPE_OUTSIDE:
-        shp = shape.move((0, -extend/2.0))
+        shp = shape.move((0,-extend/2.0))
     elif edge_type == constants.EDGE_TYPE_SQUARE:
         sf = 1 + 2*extend/width
         shp = Stretch(stretch_factor=(sf,1), stretch_center=shape.center_of_mass)(shape)
@@ -85,6 +86,13 @@ def EdgeAdapter(original_edge, edge_type, **kwargs):
     original_edge = original_edge.copy(shape=shp, edge_type=edge_type)
 
     return original_edge
+
+
+def EdgeSymmetric(width=1, extend=1, process=None, transformation=None):
+    """  """
+    layer = PLayer(process=process, purpose=RDD.PURPOSE.PORT.OUTSIDE_EDGE_DISABLED)
+    shape = shapes.BoxShape(width=width, height=2*extend)
+    return Edge(shape=shape, layer=layer, width=width, extend=2*extend, transformation=transformation)
 
 
 class EdgeGenerator(Group, __LayerElement__):
@@ -123,6 +131,7 @@ class EdgeGenerator(Group, __LayerElement__):
             T = Rotation(orientation) + Translation(midpoint)
             layer = PLayer(process=layer.process, purpose=RDD.PURPOSE.PORT.OUTSIDE_EDGE_DISABLED)
             shape = shapes.BoxShape(width=width, height=extend)
+            # elems += EdgeSymmetric(width=width, extend=extend, process=layer.process, transformation=T)
             elems += Edge(shape=shape, layer=layer, width=width, extend=extend, transformation=T)
 
         return elems

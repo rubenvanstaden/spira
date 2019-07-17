@@ -5,6 +5,7 @@ import gdspy
 from spira import settings
 from spira import log as LOG
 from spira.yevon.gdsii import *
+from spira.yevon.gdsii.polygon import __ShapeElement__
 from spira.core.parameters.variables import *
 from spira.core.parameters.restrictions import RestrictValueList
 from spira.core.mixin import MixinBowl
@@ -59,6 +60,7 @@ class OutputGdsii(ParameterInitializer):
             if self.disabled_ports['polygons'] is True:
                 for e in c.elements:
                     if isinstance(e, Polygon):
+                    # if isinstance(e, __ShapeElement__):
                         if e.enable_edges is True:
                             for p in e.ports:
                             # Transform ports to polygon transformation.
@@ -86,7 +88,7 @@ class OutputGdsii(ParameterInitializer):
             cp, cl = {}, {}
             G = self.__collected_cells__[c]
             for e in c.elements:
-                if isinstance(e, Polygon):
+                if isinstance(e, __ShapeElement__):
                     self.collect_polygons(e, cp)
                 elif isinstance(e, Label):
                     self.collect_labels(e, cl)

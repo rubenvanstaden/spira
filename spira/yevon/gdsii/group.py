@@ -37,6 +37,10 @@ class __Group__(ParameterInitializer):
             raise TypeError("Invalid type " + str(type(element)) + " in __Group__.__iadd__().")
         return self
 
+    @property
+    def bbox_info(self):
+        return self.elements.bbox_info
+
     def append(self, element):
         el = self.elements
         el.append(element)
@@ -51,20 +55,12 @@ class __Group__(ParameterInitializer):
             el.extend(elems)
         self.elements = el
 
-    # def flatten(self, level=-1):
-    #     self.elements = self.elements.flat_copy(level=level)
-    #     return self
-    
     def flatten(self, level=-1):
         self.elements = self.elements.flatten(level=level)
         return self
 
     def is_empty(self):
         return self.elements.is_empty()
-
-    @property
-    def bbox_info(self):
-        return self.elements.bbox_info
 
 
 class Group(__Group__, __Element__):

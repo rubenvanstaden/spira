@@ -23,11 +23,12 @@ class __Geometry__(ParameterInitializer):
 
 
 class SalomeGeometry(__Geometry__):
+    """ Generate a geometry using the Salome library. """
     pass
 
 
 class GmshGeometry(__Geometry__):
-    """  """
+    """ Generate a geometry using the Gmsh library. """
 
     _ID = 0
 

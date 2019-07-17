@@ -47,7 +47,7 @@ class Route(Polygon):
 
     def __init__(self, shape, layer, **kwargs):
         # sh = RouteShape(points=shape)
-        
+
         if isinstance(shape, gdspy.Path):
             shape = clipping.boolean(subj=shape.polygons, clip_type='or')[0]
         elif isinstance(shape, gdspy.FlexPath):

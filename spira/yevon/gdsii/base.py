@@ -38,7 +38,6 @@ class __Element__(Transformable, ParameterInitializer, metaclass=MetaElement):
 
     def __init__(self, transformation=None, **kwargs):
         super().__init__(transformation=transformation, **kwargs)
-        # super().__init__(**kwargs)
 
     def __add__(self, other):
         if isinstance(other, list):

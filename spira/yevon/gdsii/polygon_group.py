@@ -51,10 +51,10 @@ class PolygonGroup(Group, __LayerElement__):
                 # if (e1.shape != e2.shape) and (e1.layer.process == e2.layer.process):
                 if (shape1 != shape2) and (e1.layer.process == e2.layer.process):
                     shapes = shape1 & shape2
-                    print(shape1.points)
-                    print(shape2.points)
-                    print(shapes)
-                    print('')
+                    # print(shape1.points)
+                    # print(shape2.points)
+                    # print(shapes)
+                    # print('')
                     for shape in shapes:
                         el += Polygon(shape=shape, layer=e1.layer)
 

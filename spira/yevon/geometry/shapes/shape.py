@@ -314,7 +314,6 @@ class Shape(__Shape__):
 
     def __contains__(self, point):
         """ Checks if point is in the shape. """
-        # return np.prod(sum(self.points == np.array([point[0], point[1]]), 0))
         return any((self.points[:] == np.array([point[0], point[1]])).all(1))
 
     def __eq__(self, other):
@@ -375,8 +374,6 @@ def shape_edge_ports(shape, layer, local_pid='None', center=(0,0), loc_name=''):
         width = np.abs(np.sqrt((xpts[i+1] - xpts[i])**2 + (ypts[i+1]-ypts[i])**2))
         P = Port(
             name=name,
-            # bbox=bbox,
-            # locked=True,
             process=layer.process,
             purpose=RDD.PURPOSE.PORT.OUTSIDE_EDGE_DISABLED,
             midpoint=midpoint,
@@ -385,8 +382,5 @@ def shape_edge_ports(shape, layer, local_pid='None', center=(0,0), loc_name=''):
             length=0.2,
             local_pid=local_pid
         )
-        # print(name)
-        # print(P)
-        # print('')
         edges += P
     return edges
