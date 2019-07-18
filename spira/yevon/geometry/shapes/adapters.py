@@ -18,14 +18,13 @@ class __ShapeAdapter__(Shape):
         super().__init__(original_shape=original_shape, **kwargs)
 
     def move(self, position):
-        self.original_shape = self.original_shape.movecopy(position)
+        self.original_shape = self.original_shape.move_copy(position)
         return self
 
 
 class ShapeConnected(__ShapeAdapter__):
     """  """
 
-    # edges = EdgeListParameter()
     edges = DictParameter()
     overlapping_shape = ShapeParameter(doc='Shape containing the edge coordinates of the original shape intersecting with other shapes with equal layer.')
 
@@ -55,8 +54,9 @@ class ShapeConnected(__ShapeAdapter__):
                         # print(s1)
                         # print(s2)
                         if set(s1) == set(s2):
-                            labels[i] = edge.shape.hash_string
-                            # print(labels[i])
+                            # labels[i] = edge.shape.hash_string
+                            labels[i] = edge.external_pid
+                #             print(labels[i])
                 #             print('YES SEGMENT')
                 #     print('----')
                 # print('')
@@ -66,6 +66,7 @@ class ShapeConnected(__ShapeAdapter__):
     def create_points(self, points):
 
         if len(self.overlapping_shape) == 0:
+            print('jewfjkwbefwejkfbkfjewbfkjwbkbwkef\n\n')
             points = self.original_shape.points
         else:
             new_points = []
@@ -84,17 +85,10 @@ class ShapeConnected(__ShapeAdapter__):
                     line = np.concatenate((s, s1_inter))
                     pl = sort_points_on_line(line)
                     new_points += pl[0:-1]
-                # new_points += [s[1]]
 
-            points = new_points
-            points = [Coord(p[0], p[1]) for p in points]
+            points = [Coord(p[0], p[1]) for p in new_points]
             points = points_unique(points)
             points = [c.to_list() for c in points]
-
-            # if len(points) > 0:
-            #     print(points)
-            #     print(len(self.overlapping_shape.points), len(points))
-            #     print('')
 
         return points
 

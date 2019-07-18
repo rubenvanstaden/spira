@@ -71,6 +71,7 @@ class GmshGeometry(__Geometry__):
     def __physical_surfaces__(self):
         """ Creates physical surfaces that is compatible
         with the GMSH library for mesh generation. """
+        import re
 
         surfaces = []
         for i, polygon in enumerate(self.process_polygons):
@@ -83,8 +84,11 @@ class GmshGeometry(__Geometry__):
             gp = self.geom.add_polygon(pts, lcar=self.lcar, make_surface=True, holes=None)
 
             for j, ll in enumerate(gp.lines):
-                line_label = polygon.shape.segment_labels[j] + "_" + str(j)
-                print(line_label)
+                pid = polygon.shape.segment_labels[j].split(' - hash ')
+                if len(pid) > 1:
+                    line_label = "{}*{}*{}".format(pid[0], pid[1], j)
+                else:
+                    line_label = "{}*{}*{}".format(pid[0], None, j)
                 self.geom.add_physical(ll, label=line_label)
             self.geom.add_physical(gp.surface, label=surface_label)
             # surfaces.append([gp.surface, gp.line_loop])

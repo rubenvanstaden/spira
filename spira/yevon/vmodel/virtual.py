@@ -123,7 +123,6 @@ class VirtualConnect(__VirtualModel__):
             overlap_edges[e] = []
             for i, edge in enumerate(edges):
                 if len(edge.shape.intersections(e.shape)) != 0:
-                    # edge.external_pid = '{}'.format(e.shape.hash_string)
                     edge.external_pid = e.id_string()
                     edge.layer.purpose = RDD.PURPOSE.PORT.OUTSIDE_EDGE_ENABLED
                     overlap_edges[e].append(edge)
@@ -131,39 +130,13 @@ class VirtualConnect(__VirtualModel__):
 
     def _connect_boundary_edges(self, D, edges, overlap_edges):
         """ Connect the edges that falls on a shape boudnary,
-        since there is no overlapping polygon in this case."""
-        for j, e in enumerate(D.elements):
-            for i, edge in enumerate(edges):
-                if len(edge.shape.intersections(e.shape)) != 0:
-                    
-                    _edge = deepcopy(edge)
-                    overlap_edges[_edge] = []
-                    # edge.external_pid = '{}'.format(e.shape.hash_string)
-                    edge.external_pid = e.id_string()
-                    edge.layer.purpose = RDD.PURPOSE.PORT.OUTSIDE_EDGE_ENABLED
-                    overlap_edges[_edge].append(edge)
-
-                    # if edge.layer.purpose == RDD.PURPOSE.PORT.OUTSIDE_EDGE_DISABLED:
-                    #     print(edge)
-                    #     _edge = deepcopy(edge)
-                    #     overlap_edges[_edge] = []
-                    #     # edge.external_pid = '{}'.format(e.shape.hash_string)
-                    #     edge.external_pid = e.id_string()
-                    #     edge.layer.purpose = RDD.PURPOSE.PORT.OUTSIDE_EDGE_ENABLED
-                    #     overlap_edges[_edge].append(edge)
-
-    # def _connect_boundary_edges(self, edges, overlap_edges):
-    #     """ Connect the edges that falls on a shape boudnary,
-    #     since there is no overlapping polygon in this case."""
-    #     if len(edges) > 0:
-    #         e = spira.Polygon(alias='Dummy', shape=[], layer=RDD.PLAYER.METAL)
-    #         overlap_edges[e] = []
-    #         for i, edge in enumerate(edges):
-    #             # print(edge)
-    #             if edge.layer.purpose == RDD.PURPOSE.PORT.OUTSIDE_EDGE_DISABLED:
-    #                 edge.pid = '{}'.format(e.shape.hash_string)
-    #                 edge.layer.purpose = RDD.PURPOSE.PORT.OUTSIDE_EDGE_ENABLED
-    #                 overlap_edges[e].append(edge)
+        since there is no overlapping polygon in this case. """
+        for i, edge in enumerate(edges):
+            if edge.layer.purpose == RDD.PURPOSE.PORT.OUTSIDE_EDGE_DISABLED:
+                c_edge = deepcopy(edge)
+                edge.external_pid = edge.id_string()
+                edge.layer.purpose = RDD.PURPOSE.PORT.OUTSIDE_EDGE_ENABLED
+                overlap_edges[c_edge] = [edge]
 
     def create_connected_edges(self):
         """  """
@@ -174,10 +147,10 @@ class VirtualConnect(__VirtualModel__):
         el = EF(self.device).elements
 
         mapping = self._map_derived_edges()
-        edges = get_derived_elements(el, mapping=mapping, store_as_edge=True)
+        edges = get_derived_elements(elements=el, mapping=mapping, store_as_edge=True)
 
         overlap_edges = {}
-        # self._connect_overlap_edges(self.device, edges, overlap_edges)
+        self._connect_overlap_edges(self.device, edges, overlap_edges)
         self._connect_boundary_edges(self.device, edges, overlap_edges)
 
         return overlap_edges

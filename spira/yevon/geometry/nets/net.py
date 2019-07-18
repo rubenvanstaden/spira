@@ -174,7 +174,7 @@ class Net(__Net__):
 
         lines = {}
         for name, value in self.mesh_data.field_data.items():
-            # print(name, value)
+            print(name, value)
             # print(self.physical_lines)
             for n in self.physical_lines:
                 line_id = value[0]
@@ -182,9 +182,10 @@ class Net(__Net__):
                     # print(name)
                     # print(value)
                     # print('')
-                    polygon_string = name.split('_')[0]
-                    polygon_uid = int(name.split('_')[1])
-                    key = (polygon_string, polygon_uid)
+                    polygon_string = name.split('*')[0]
+                    polygon_hash = name.split('*')[1]
+                    polygon_uid = int(name.split('*')[2])
+                    key = (polygon_string, polygon_hash, polygon_uid)
                     if key in lines:
                         lines[key].append(n)
                     else:

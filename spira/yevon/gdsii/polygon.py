@@ -62,8 +62,12 @@ class __ShapeElement__(__LayerElement__):
     def bbox_info(self):
         return self.shape.bbox_info.transform_copy(self.transformation)
 
+    # def id_string(self):
+    #     sid = '{} - hash {}'.format(self.__repr__(), self.shape.hash_string)
+    #     return sid
+
     def id_string(self):
-        sid = '{} - hash {}'.format(self.__repr__(), self.shape.hash_string)
+        sid = '{} - hash {}'.format(self.short_string(), self.shape.hash_string)
         return sid
 
     def is_empty(self):
@@ -209,15 +213,18 @@ class Polygon(__Polygon__):
             transformation=deepcopy(self.transformation)
         )
 
-    def id_string(self):
-        sid = '{} - hash {}'.format(self.__repr__(), self.shape.hash_string)
-        return sid
+    # def id_string(self):
+    #     sid = '{} - hash {}'.format(self.__repr__(), self.shape.hash_string)
+    #     return sid
+        
+    def short_string(self):
+        return "Polygon: ({}, {}, {})".format(self.center, self.process, self.purpose)
 
     def create_edges(self):
         """ Generate default edges for this polygon.
         These edges can be transformed using adapters. """
         from spira.yevon.geometry.edges.edges import generate_edges
-        return generate_edges(shape=self.shape, layer=self.layer, internal_pid=self.id_string())
+        return generate_edges(shape=self.shape, layer=self.layer, internal_pid=self.id_string(), transformation=self.transformation)
 
     def flat_copy(self, level=-1):
         """ Flatten a copy of the polygon. """
@@ -238,6 +245,7 @@ class Polygon(__Polygon__):
         if self.purpose == 'METAL':
 
             if RDD.ENGINE.GEOMETRY == 'GMSH_ENGINE':
+                # geometry = GmshGeometry(lcar=1,
                 geometry = GmshGeometry(lcar=lcar,
                     process=self.layer.process,
                     process_polygons=[deepcopy(self)])

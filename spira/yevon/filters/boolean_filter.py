@@ -129,11 +129,11 @@ class MetalConnectFilter(Filter):
         v_model = virtual_connect(device=D)
 
         for i, e1 in enumerate(D.elements):
-            points = []
+            shp = Shape()
             # print('E1: {}'.format(e1))
             for e2 in D.elements:
-                shape1 = deepcopy(e1).shape.transform(e1.transformation)
-                shape2 = deepcopy(e2).shape.transform(e2.transformation)
+                shape1 = e1.shape.transform_copy(e1.transformation)
+                shape2 = e2.shape.transform_copy(e2.transformation)
                 if (shape1 != shape2) and (e1.layer == e2.layer):
                     # print('E2: {}'.format(e2))
                     overlap_shape = shape1.intersections(shape2)
@@ -141,14 +141,15 @@ class MetalConnectFilter(Filter):
                     if isinstance(overlap_shape, Shape):
                         if len(overlap_shape) > 0:
                             # print('YESSSS')
-                            points.extend(overlap_shape.points.tolist())
+                            shp.extend(overlap_shape.points.tolist())
 
-            if len(points) > 0:
+            if shp.is_empty() is False:
                 # print('[--] Overlapping shape points:')
                 # print(points)
                 D.elements[i].shape = ShapeConnected(
-                    original_shape=e1.shape,
-                    overlapping_shape=Shape(points),
+                    # original_shape=e1.shape,
+                    original_shape=e1.shape.transform_copy(e1.transformation),
+                    overlapping_shape=shp,
                     edges=v_model.connected_edges
                 )
             # print('')

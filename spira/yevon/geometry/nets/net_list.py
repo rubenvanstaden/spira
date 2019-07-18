@@ -42,10 +42,10 @@ class NetList(TypedList):
             c.move(position)
         return self
 
-    def movecopy(self, position):
+    def move_copy(self, position):
         T = self.__class__()
         for c in self._list:
-            T.append(c.movecopy(position))
+            T.append(c.move_copy(position))
         return T
 
     def transform_copy(self, transformation):

@@ -20,14 +20,6 @@ __all__ = [
 ]
 
 
-def get_triangles_containing_line(item, line):
-    nodes = []
-    for n, triangle in enumerate(item.triangles):
-        if (line[0] in triangle) and (line[1] in triangle):
-            nodes.append(n)
-    return nodes
-
-
 class __NetFilter__(Filter):
     pass
 
@@ -42,15 +34,9 @@ class NetProcessLabelFilter(__NetFilter__):
         for key, nodes in triangles.items():
             for n in nodes:
                 for e in self.process_polygons:
-
-                    # print(e.points)
-                    # print(item.g.node[n]['position'])
-                    # print('')
-
                     if e.encloses(item.g.node[n]['position']):
                         item.g.node[n]['process_polygon'] = e
                         item.g.node[n]['display'] = RDD.DISPLAY.STYLE_SET[e.layer]
-
         return [item]
 
     def __repr__(self):
@@ -63,27 +49,11 @@ class NetDeviceLabelFilter(__NetFilter__):
     device_ports = PortListParameter()
 
     def __filter___Net____(self, item):
-        # triangles = item.process_triangles()
-        # for key, nodes in triangles.items():
-        #     for n in nodes:
-        #         for D in self.device_ports:
-        #             if isinstance(D, ContactPort):
-        #                 print(item.g.node[n]['position'])
-        #                 if D.encloses(item.g.node[n]['position']):
-        #                     print(D)
-        #                     print(points)
-        #                     print('')
-        #                     item.g.node[n]['device_reference'] = D
-        #                     item.g.node[n]['display'] = RDD.DISPLAY.STYLE_SET[D.layer]
-                
         for n, triangle in item.triangle_nodes().items():
             points = [geometry.c2d(item.mesh_data.points[i]) for i in triangle]
             for D in self.device_ports:
                 if isinstance(D, ContactPort):
                     if D.encloses(points):
-                        # print(D)
-                        # print(points)
-                        # print('')
                         item.g.node[n]['device_reference'] = D
                         item.g.node[n]['display'] = RDD.DISPLAY.STYLE_SET[D.layer]
                 elif isinstance(D, Port):
@@ -91,7 +61,6 @@ class NetDeviceLabelFilter(__NetFilter__):
                         if D.encloses(points):
                             item.g.node[n]['device_reference'] = D
                             item.g.node[n]['display'] = RDD.DISPLAY.STYLE_SET[D.layer]
-
         return [item]
 
     def __repr__(self):
@@ -102,75 +71,63 @@ class NetEdgeFilter(__NetFilter__):
     """  """
 
     process_polygons = ElementListParameter()
+    
+    def _triangles_containing_line(self, item, line):
+        nodes = []
+        for n, triangle in enumerate(item.triangles):
+            if (line[0] in triangle) and (line[1] in triangle):
+                nodes.append(n)
+        return nodes
 
     def __filter___Net____(self, item):
 
         ELM_TYPE = {1: 'line', 2: 'triangle'}
 
+        # print('\n---------------------------------\n')
+            
         # print('Triangles:')
         # print(item.triangles)
         # print('Lines:')
         # print(item.lines)
         # print('Physical Lines:')
         # print(item.physical_lines)
+        
+        # print('\n---------------------------------\n')
+
         # print('Parameter Data:')
         # for k, v in item.mesh_data.field_data.items():
         #     print(k, v)
-        
-        # for e in self.process_polygons:
-        #     item.g.node[3]['process_polygon'] = e
-        #     item.g.node[3]['display'] = RDD.DISPLAY.STYLE_SET[e.layer]
+
+        # print('\n---------------------------------\n')
+
+        # print('Process Lines')
+        # print(item.process_lines())
+        # print('Process Triangles')
+        # print(item.process_triangles())
+
+        # print('\n---------------------------------\n')
 
         for key, value in item.mesh_data.field_data.items():
 
-            # line_id = key.split('_')[0]
-            # line_id = key[:-2]
-            line_id = key[0]
-            
-            elm_type = ELM_TYPE[value[1]]
-            if elm_type == 'line':
+            line_keys = key.split('*')
 
-                for e in self.process_polygons:
-                    pid = e.shape.hash_string
-                    
-                    # if line_id == pid:
-                    if line_id == '[':
-                        for i, pl in enumerate(item.physical_lines):
-                            if pl == value[0]:
-                                for n in get_triangles_containing_line(item, item.lines[i]):
-                                    print(value)
-                                    item.g.node[n]['process_polygon'] = e
-                                    # FIXME: Change to equal the overlapping edge display.
-                                    item.g.node[n]['display'] = RDD.DISPLAY.STYLE_SET[RDD.PLAYER.I5.VIA]
-                                    # item.g.node[n]['display'] = RDD.DISPLAY.STYLE_SET[RDD.PLAYER.M1.HOLE]
-
-                                # line = item.lines[i]
-                                # for n, triangle in enumerate(item.triangles):
-                                #     if (line[0] in triangle) and (line[1] in triangle):
-                                #         item.g.node[n]['process_polygon'] = e
-                                #         item.g.node[n]['display'] = RDD.DISPLAY.STYLE_SET[e.layer]
-
-                        # i = item.physical_lines.index(value[0])
-                        # # # i = item.physical_lines[value[0]]
-                        # line = item.lines[i]
-                        # print(line)
-                        # # for n, triangle in enumerate(item.triangles):
-                        # #     if (line[0] in triangle) and (line[1] in triangle):
-                        # #         item.g.node[n]['process_polygon'] = e
-                        # #         item.g.node[n]['display'] = RDD.DISPLAY.STYLE_SET[e.layer]
-
-                        # triangles = item.process_triangles()
-                        # for key, nodes in triangles.items():
-                        #     for n in nodes:
-                        #         if (line[0] in triangle) and (line[1] in triangle):
-                        #         # if (n == line[0] or (n == line[1])):
-                        #             print('YESSSSSSS')
-                        #             # print(triangle)
-                        #             print(n)
-                                    
-                        #             item.g.node[3]['process_polygon'] = e
-                        #             item.g.node[3]['display'] = RDD.DISPLAY.STYLE_SET[e.layer]
-
+            if len(line_keys) > 1:
+                if line_keys[1] != 'None':
+    
+                    ply_string = key.split('*')[0]
+                    ply_hash = key.split('*')[1]
+        
+                    elm_type = ELM_TYPE[value[1]]
+                    if elm_type == 'line':
+        
+                        for e in self.process_polygons:
+                            for i, physical_line_id in enumerate(item.physical_lines):
+                                if physical_line_id == value[0]:
+                                    for n in self._triangles_containing_line(item, item.lines[i]):
+                                        item.g.node[n]['process_polygon'] = ply_string
+                                        # FIXME: Change to equal the overlapping edge display.
+                                        item.g.node[n]['display'] = RDD.DISPLAY.STYLE_SET[RDD.PLAYER.I5.VIA]
+                                        # item.g.node[n]['display'] = RDD.DISPLAY.STYLE_SET[RDD.PLAYER.M1.HOLE]
         return [item]
 
     def __repr__(self):

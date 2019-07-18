@@ -61,14 +61,15 @@ class PhysicalLayer(Layer):
         else:
             raise ValueError('Not Implemented')
         return self
-        
+
     # def __deepcopy__(self, memo):
+    #     from copy import deepcopy
     #     return self.__class__(
     #         name=self.name,
     #         number=deepcopy(self.number),
     #         datatype=deepcopy(self.datatype),
-    #         process=self.process,
-    #         purpose=self.purpose
+    #         process=deepcopy(self.process),
+    #         purpose=deepcopy(self.purpose)
     #     )
 
     @property

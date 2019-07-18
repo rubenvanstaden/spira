@@ -1,7 +1,4 @@
-import numpy as np
-
 from copy import deepcopy
-
 from spira.yevon.process.gdsii_layer import Layer
 from spira.yevon.process.gdsii_layer import __DerivedDoubleLayer__
 from spira.yevon.process.gdsii_layer import __DerivedLayerAnd__
@@ -53,26 +50,13 @@ def get_derived_elements(elements, mapping, store_as_edge=False):
     export_layers = mapping.values()
     elems = ElementList()
     for derived_layer, export_layer in zip(derived_layers, export_layers):
-        layer = deepcopy(export_layer)
-        # print(export_layer)
-        # print(layer)
-        # print('')
         pg = _derived_elements(elems=elements, derived_layer=derived_layer)
         for p in pg.elements:
             if store_as_edge is True:
-                e = Edge(shape=p.shape, layer=layer)
-                # print(e)
-                elems += e
+                elems += Edge(shape=p.shape, layer=deepcopy(export_layer))
             else:
-                elems += Polygon(shape=p.shape, layer=layer)
+                elems += Polygon(shape=p.shape, layer=deepcopy(export_layer))
     return elems
-
-
-# TODO: Implement this using an adapter?
-def get_derived_edge_ports():
-    """ Generate ports from the derived edge polygons. """
-    pass
-
 
 
 

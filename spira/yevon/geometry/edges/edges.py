@@ -72,6 +72,9 @@ class Edge(__ShapeElement__):
     def __hash__(self):
         return hash(self.__repr__())
 
+    def short_string(self):
+        return "Edge: ({}, {}, {})".format(self.center, self.layer.process.symbol, self.layer.purpose.symbol)
+
 
 def EdgeAdapter(original_edge, edge_type, **kwargs):
     """ Adapter class to modify the edge shape. """
@@ -127,7 +130,6 @@ class EdgeGenerator(Group, __LayerElement__):
 
         for i in range(0, n):
 
-            name = '{}_e{}'.format(self.layer.name, i)
             x = np.sign(clockwise) * (xpts[i+1] - xpts[i])
             y = np.sign(clockwise) * (ypts[i] - ypts[i+1])
             orientation = (np.arctan2(x, y) * constants.RAD2DEG) + 90
@@ -137,17 +139,22 @@ class EdgeGenerator(Group, __LayerElement__):
             layer = RDD.GDSII.IMPORT_LAYER_MAP[self.layer]
             extend = RDD[layer.process.symbol].MIN_SIZE
 
-            T = Rotation(orientation) + Translation(midpoint)
-            layer = PLayer(process=layer.process, purpose=RDD.PURPOSE.PORT.OUTSIDE_EDGE_DISABLED)
-            shape = shapes.BoxShape(width=width, height=extend)
-            elems += Edge(alias=name, shape=shape, layer=layer, internal_pid=self.internal_pid, width=width, extend=extend, transformation=T)
+            elems += Edge(
+                alias='{}_e{}'.format(self.layer.name, i),
+                shape=shapes.BoxShape(width=width, height=extend),
+                layer=PLayer(process=layer.process, purpose=RDD.PURPOSE.PORT.OUTSIDE_EDGE_DISABLED),
+                internal_pid=self.internal_pid,
+                width=width,
+                extend=extend,
+                transformation=Rotation(orientation) + Translation(midpoint) + self.transformation
+            )
 
         return elems
 
 
-def generate_edges(shape, layer, internal_pid):
+def generate_edges(shape, layer, internal_pid, transformation):
     """ Method call for edge generator. """
-    edge_gen = EdgeGenerator(shape=shape, layer=layer, internal_pid=internal_pid)
+    edge_gen = EdgeGenerator(shape=shape, layer=layer, internal_pid=internal_pid, transformation=transformation)
     return edge_gen.elements
 
 

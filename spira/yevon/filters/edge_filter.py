@@ -15,6 +15,7 @@ __all__ = ['EdgeFilter']
 
 
 class __EdgeFilter__(Filter):
+    """ Base class for edge filters. """
     purpose = PurposeLayerParameter()
     edge_type = IntegerParameter(default=constants.EDGE_TYPE_NORMAL)
 

@@ -118,7 +118,7 @@ class __Shape__(Transformable, ParameterInitializer):
         import hashlib
         pts = np.array([self.points])
         hash_key = np.sort([hashlib.sha1(p).hexdigest() for p in pts])
-        return str(hash_key)
+        return str(hash_key[0])
 
     @property
     def count(self):
@@ -330,6 +330,29 @@ class Shape(__Shape__):
     def __len__(self):
         """ Number of points in the shape """
         return np.size(self.points, 0)
+
+    def append(self, point):
+        if isinstance(point, (Coord, tuple)):
+            point_arr = [(point[0], point[1])]
+            if len(self.points) > 0:
+                self.points = np.vstack((self.points, point_arr))
+            else:
+                self.points = np.array(point_arr)
+        else:
+            raise TypeError("Wrong type " + str(type(point)) + " to append to Shape")
+        return self
+
+    def extend(self, points):
+        if (len(self.points) == 0):
+            self.points = points
+        else:
+            if isinstance(points, Shape):            
+                self.points = np.vstack((self.points, points.points))
+            elif isinstance(points, (list, np.ndarray)):
+                self.points = np.vstack((self.points, points))
+            else:
+                raise TypeError("Wrong type " + str(type(points)) + " to extend Shape with")
+        return self
 
     def is_empty(self):
         return self.__len__() <= 1

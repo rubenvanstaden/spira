@@ -21,11 +21,11 @@ setup(
 
     install_requires=[
         # # Developer packages
-        # 'sphinxcontrib-napoleon',
         # 'halo',
         # 'pytest',
 
         # Visual packages
+        'sphinxcontrib-napoleon',
         'matplotlib',
         'plotly',
         'pyqt5',

@@ -39,31 +39,12 @@ class PolygonGroup(Group, __LayerElement__):
         el = ElementList()
         for e1 in self.elements:
             for e2 in other.elements:
-                # e1 = deepcopy(e1)
-                # e2 = deepcopy(e2)
-                # shape1 = e1.shape.transform_copy(e1.transformation)
-                # shape2 = e2.shape.transform_copy(e2.transformation)
-                shape1 = deepcopy(e1.shape).transform(e1.transformation)
-                shape2 = deepcopy(e2.shape).transform(e2.transformation)
-                # if shape1 != shape2:
-                # if e1.shape != e2.shape:
-                # if (e1.shape != e2.shape) and (e1.layer == e2.layer):
-                # if (e1.shape != e2.shape) and (e1.layer.process == e2.layer.process):
+                shape1 = e1.shape.transform_copy(e1.transformation)
+                shape2 = e2.shape.transform_copy(e2.transformation)
                 if (shape1 != shape2) and (e1.layer.process == e2.layer.process):
                     shapes = shape1 & shape2
-                    # print(shape1.points)
-                    # print(shape2.points)
-                    # print(shapes)
-                    # print('')
                     for shape in shapes:
                         el += Polygon(shape=shape, layer=e1.layer)
-
-
-                    # polygons = e1.intersection(e2)
-                    # for p in polygons:
-                    #     p.layer.purpose = RDD.PURPOSE.INTERSECTED
-                    # for p in polygons:
-                    #     el += p
         self.elements = el
         return self
 
@@ -98,7 +79,6 @@ class PolygonGroup(Group, __LayerElement__):
         for i, e1 in enumerate(el1):
             for j, e2 in enumerate(el2):
                 if e1.shape != e2.shape:
-                    # polygons = e1.intersection(e2)
                     polygons = e1 & e2
                     for p in polygons:
                         p.layer.purpose = RDD.PURPOSE.INTERSECTED
