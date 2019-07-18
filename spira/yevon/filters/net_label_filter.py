@@ -71,7 +71,7 @@ class NetEdgeFilter(__NetFilter__):
     """  """
 
     process_polygons = ElementListParameter()
-    
+
     def _triangles_containing_line(self, item, line):
         nodes = []
         for n, triangle in enumerate(item.triangles):

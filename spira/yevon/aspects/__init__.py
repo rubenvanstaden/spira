@@ -1,6 +1,6 @@
 from spira.yevon.gdsii.cell import Cell
 from spira.yevon.gdsii.sref import SRef
-from spira.yevon.gdsii.polygon import __Polygon__
+from spira.yevon.gdsii.polygon import Polygon
 from spira.yevon.aspects.cell import CellAspects
 from spira.yevon.aspects.polygon import PolygonAspects, PolygonClipperAspects
 from spira.yevon.aspects.port import PortProperty, SRefPortProperty, PolygonPortProperty, CellPortProperty
@@ -24,10 +24,10 @@ def load_aspect():
     SRef.mixin(NetlistAspects)
     Shape.mixin(ShapeClipperAspects)
 
-    __Polygon__.mixin(PolygonAspects)
-    __Polygon__.mixin(NetlistAspects)
-    __Polygon__.mixin(PolygonPortProperty)
-    __Polygon__.mixin(PolygonClipperAspects)
+    Polygon.mixin(PolygonAspects)
+    Polygon.mixin(NetlistAspects)
+    Polygon.mixin(PolygonPortProperty)
+    Polygon.mixin(PolygonClipperAspects)
 
 
 load_aspect()

@@ -39,7 +39,8 @@ class PortLayout(spira.Cell):
         # l = self.port.length * 3
         l = 0.2
         arrow_shape = shapes.ArrowShape(width=w, length=l, head=l*0.2)
-        p = spira.Polygon(shape=arrow_shape, layer=layer, enable_edges=False)
+        # p = spira.Polygon(shape=arrow_shape, layer=layer, enable_edges=False)
+        p = spira.Polygon(shape=arrow_shape, layer=layer)
         T = transformation_from_vector(self.port)
         p.transform(T)
         return p

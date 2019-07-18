@@ -22,10 +22,6 @@ class ProcessBooleanFilter(Filter):
         ports = PortList()
         elems = ElementList()
 
-        # for pg in item.process_elements:
-            # for e in pg.elements:
-                # elems += e
-
         for e in item.process_elements:
             elems += e
         for e in item.elements.sref:
@@ -57,12 +53,6 @@ class SimplifyFilter(Filter):
             e.shape = clipping.simplify_points(e.points)
             elems += e
 
-            # points = clipping.simplify_points(e.points)
-            # elems += e.copy(shape=points)
-
-            # p = e.__class__(shape=points, layer=e.layer, transformation=e.transformation)
-            # elems += e.__class__(shape=points, layer=e.layer, transformation=e.transformation)
-
         for e in item.elements.sref:
             elems += e
         for e in item.elements.labels:
@@ -73,12 +63,6 @@ class SimplifyFilter(Filter):
         cell = Cell(elements=elems, ports=ports)
         # cell = item.__class__(elements=elems, ports=ports)
         return cell
-
-        # elems = ElementList()
-        # for e in item.elements.polygons:
-        #     points = clipping.simplify_points(e.points)
-        #     elems += e.__class__(shape=points, layer=e.layer, transformation=e.transformation)
-        # return item.__class__(elements=elems)
 
     def __repr__(self):
         return "<SimplifyFilter: \'{}\'>".format(self.name)
@@ -129,30 +113,23 @@ class MetalConnectFilter(Filter):
         v_model = virtual_connect(device=D)
 
         for i, e1 in enumerate(D.elements):
-            shp = Shape()
-            # print('E1: {}'.format(e1))
+            clip_shape = Shape()
             for e2 in D.elements:
                 shape1 = e1.shape.transform_copy(e1.transformation)
                 shape2 = e2.shape.transform_copy(e2.transformation)
                 if (shape1 != shape2) and (e1.layer == e2.layer):
-                    # print('E2: {}'.format(e2))
                     overlap_shape = shape1.intersections(shape2)
-                    # print(overlap_shape.points)
                     if isinstance(overlap_shape, Shape):
                         if len(overlap_shape) > 0:
-                            # print('YESSSS')
-                            shp.extend(overlap_shape.points.tolist())
+                            clip_shape.extend(overlap_shape.points.tolist())
 
-            if shp.is_empty() is False:
-                # print('[--] Overlapping shape points:')
-                # print(points)
+            if clip_shape.is_empty() is False:
+                original_shape = e1.shape.transform_copy(e1.transformation)
                 D.elements[i].shape = ShapeConnected(
-                    # original_shape=e1.shape,
-                    original_shape=e1.shape.transform_copy(e1.transformation),
-                    overlapping_shape=shp,
-                    edges=v_model.connected_edges
-                )
-            # print('')
+                    original_shape=original_shape,
+                    clip_shape=clip_shape,
+                    edges=v_model.connected_edges)
+                D.elements[i].transformation = None
 
         return item
 

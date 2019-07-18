@@ -61,21 +61,20 @@ class OutputGdsii(ParameterInitializer):
                 for e in c.elements:
                     if isinstance(e, Polygon):
                     # if isinstance(e, __ShapeElement__):
-                        if e.enable_edges is True:
-                            for p in e.ports:
-                            # Transform ports to polygon transformation.
-                            # Required for non-pcell layouts. FIXME!!!
-                            # for p in e.ports.transform(e.transformation):
-                                if p.id_string() not in _polygon_ports:
-    
-                                    # L = PortLayout(port=p, transformation=e.transformation)
-                                    # for e in L.elements:
-                                    #     if isinstance(e, Polygon):
-                                    #         self.collect_polygons(e, cp)
-                                    #     elif isinstance(e, Label):
-                                    #         self.collect_labels(e, cl)
-    
-                                    _polygon_ports.append(p.id_string())
+                        for p in e.ports:
+                        # Transform ports to polygon transformation.
+                        # Required for non-pcell layouts. FIXME!!!
+                        # for p in e.ports.transform(e.transformation):
+                            if p.id_string() not in _polygon_ports:
+
+                                # L = PortLayout(port=p, transformation=e.transformation)
+                                # for e in L.elements:
+                                #     if isinstance(e, Polygon):
+                                #         self.collect_polygons(e, cp)
+                                #     elif isinstance(e, Label):
+                                #         self.collect_labels(e, cl)
+
+                                _polygon_ports.append(p.id_string())
 
             for e in cp.values():
                 G.add(e)

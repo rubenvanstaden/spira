@@ -4,10 +4,10 @@ import pathlib
 import numpy as np
 import spira.all as spira
 
-from spira.yevon.utils.geometry import scale_coord_down as scd
-from spira.yevon.utils.geometry import scale_coord_up as scu
-from spira.yevon.utils.geometry import scale_polygon_down as spd
-from spira.yevon.utils.geometry import scale_polygon_up as spu
+# from spira.yevon.utils.geometry import scale_coord_down as scd
+# from spira.yevon.utils.geometry import scale_coord_up as scu
+# from spira.yevon.utils.geometry import scale_polygon_down as spd
+# from spira.yevon.utils.geometry import scale_polygon_up as spu
 from copy import copy, deepcopy
 from spira.core.transforms import *
 

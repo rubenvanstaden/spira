@@ -75,6 +75,11 @@ class Edge(__ShapeElement__):
     def short_string(self):
         return "Edge: ({}, {}, {})".format(self.center, self.layer.process.symbol, self.layer.purpose.symbol)
 
+    def flat_copy(self, level=-1):
+        """ Flatten a copy of the polygon. """
+        S = Edge(shape=self.shape, layer=self.layer, transformation=self.transformation)
+        S.expand_transform()
+        return S
 
 def EdgeAdapter(original_edge, edge_type, **kwargs):
     """ Adapter class to modify the edge shape. """

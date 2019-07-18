@@ -129,7 +129,6 @@ class __Shape__(Transformable, ParameterInitializer):
     def bbox_info(self):
         return bbox_info.bbox_info_from_numpy_array(self.points)
 
-    # @property
     def segments(self):
         """ Returns a list of point pairs 
         with the segments of the shape. """
@@ -140,13 +139,6 @@ class __Shape__(Transformable, ParameterInitializer):
             segments = list(zip(p, np.roll(p, shift=-1, axis=0)))
         else:
             segments = list(zip(p[:-1], p[1:]))
-        # segments = [Coord(s[0], s[1]).snap_to_grid() for s in segments]
-        # ss = []
-        # for segment in segments:
-        #     seg = [Coord(s[0], s[1]).snap_to_grid() for s in segment]
-        #     ss.append(seg)
-        # segments = ss
-        # s1 = Coord(s1[0], s1[1]).snap_to_grid()
         return segments
 
     def snap_to_grid(self, grids_per_unit=None):
@@ -177,8 +169,6 @@ class __Shape__(Transformable, ParameterInitializer):
 
     def remove_identicals(self):
         """ Removes consecutive identical points """
-        # FIXME: in some cases a series of many points close together 
-        # is removed, even if they form together a valid shape.
         from spira import settings
         pts = self.points
         if len(pts) > 1:
@@ -193,7 +183,7 @@ class __Shape__(Transformable, ParameterInitializer):
         Shape.remove_identicals(self)
         pts = self.points
         if len(pts) > 1:
-            straight = (abs(abs((self.turns_rad() + (0.5 * np.pi)) % np.pi) - 0.5 * np.pi) < 0.00001)  # (self.turns_rad()%np.pi == 0.0)
+            straight = (abs(abs((self.turns_rad() + (0.5 * np.pi)) % np.pi) - 0.5 * np.pi) < 0.00001)
             if not self.is_closed:
                 straight[0] = False
                 straight[-1] = False
@@ -214,7 +204,7 @@ class __Shape__(Transformable, ParameterInitializer):
 
     def intersections(self, other_shape):
         """ the intersections with this shape and the other shape """
-        from spira.yevon.utils.geometry import intersection, lines_cross, lines_coincide, sort_points_on_line, points_unique
+        from spira.yevon.utils import geometry as gm
 
         s = Shape(self.points)
         s.remove_straight_angles()
@@ -232,45 +222,15 @@ class __Shape__(Transformable, ParameterInitializer):
         for s1 in segments1:
             intersected_points = []
             for s2 in segments2:
-                if lines_cross(s1[0], s1[1], s2[0], s2[1], inclusive=True):
-                    # print(s1, s2)
-                    c = [intersection(s1[0], s1[1], s2[0], s2[1])]
-                    # print(c)
-                    # print('wjefbwefb')
+                if gm.lines_cross(s1[0], s1[1], s2[0], s2[1], inclusive=True):
+                    c = [gm.intersection(s1[0], s1[1], s2[0], s2[1])]
                     intersected_points += c
-
-            # FIXME Must this be a 0 or a 1!!!
             if len(intersected_points) > 0:
-            # if len(intersected_points) > 1:
-                pl = sort_points_on_line([*s1, *intersected_points])
+                pl = gm.sort_points_on_line([*s1, *intersected_points])
                 intersections += [pl[1], pl[2]]
 
-        intersections = points_unique(intersections)
+        intersections = gm.points_unique(intersections)
         return Shape(intersections)
-
-    def insert(self, i, item):
-        """ Inserts a list of points. """
-        if isinstance(item, Shape):
-            self.points = np.insert(self.points, i, item.points, axis=0)
-        elif isinstance(item, (list, np.ndarray)):
-            if isinstance(item[0], Coord):
-                item[0] = item[0].to_numpy_array()
-            if len(item) > 1:
-                if isinstance(item[1], Coord):
-                    item[1] = item[1].to_numpy_array()
-            self.points = np.insert(self.points, i, item, axis=0)
-        elif isinstance(item, (Coord, tuple)):
-            self.points = np.insert(self.points, i, [(item[0], item[1])], axis=0)
-        else:
-            raise TypeError("Wrong type " + str(type(item)) + " to extend Shape with")
-        return self
-
-    # def id_string(self):
-    #     return self.__str__()
-        
-    def id_string(self):
-        sid = '{} - hash {}'.format(self.__repr__(), self.hash_string)
-        return sid
 
 
 class Shape(__Shape__):
@@ -302,12 +262,6 @@ class Shape(__Shape__):
     # def __deepcopy__(self, memo):
     #     return Shape(points=deepcopy(self.points), transformation=deepcopy(self.transformation))
 
-    def create_segment_labels(self):
-        labels = []
-        for i, s1 in enumerate(self.segments()):
-            labels.append(str(i))
-        return labels
-
     def __getitem__(self, index):
         """ Access a point. """
         p = self.points[index]
@@ -323,7 +277,7 @@ class Shape(__Shape__):
         if np.array([p1 == p2 for p1, p2 in zip(self.points, other.points)]).all():
             return True
         return False
-    
+
     def __ne__(self, other):
         return not self.__eq__(other)
 
@@ -354,8 +308,34 @@ class Shape(__Shape__):
                 raise TypeError("Wrong type " + str(type(points)) + " to extend Shape with")
         return self
 
+    def insert(self, i, item):
+        """ Inserts a list of points. """
+        if isinstance(item, Shape):
+            self.points = np.insert(self.points, i, item.points, axis=0)
+        elif isinstance(item, (list, np.ndarray)):
+            if isinstance(item[0], Coord):
+                item[0] = item[0].to_numpy_array()
+            if len(item) > 1:
+                if isinstance(item[1], Coord):
+                    item[1] = item[1].to_numpy_array()
+            self.points = np.insert(self.points, i, item, axis=0)
+        elif isinstance(item, (Coord, tuple)):
+            self.points = np.insert(self.points, i, [(item[0], item[1])], axis=0)
+        else:
+            raise TypeError("Wrong type " + str(type(item)) + " to extend Shape with")
+        return self
+
     def is_empty(self):
         return self.__len__() <= 1
+
+    def id_string(self):
+        return '{} - hash {}'.format(self.__repr__(), self.hash_string)
+
+    def create_segment_labels(self):
+        labels = []
+        for i, s1 in enumerate(self.segments()):
+            labels.append(str(i))
+        return labels
 
 
 def ShapeParameter(restriction=None, preprocess=None, **kwargs):
@@ -364,6 +344,7 @@ def ShapeParameter(restriction=None, preprocess=None, **kwargs):
     return ParameterDescriptor(restriction=R, preprocess=P, **kwargs)
 
 
+# FIXME: Integrate with edges.
 from spira.yevon.geometry.ports.port import Port
 from spira.yevon.process.gdsii_layer import Layer
 def shape_edge_ports(shape, layer, local_pid='None', center=(0,0), loc_name=''):

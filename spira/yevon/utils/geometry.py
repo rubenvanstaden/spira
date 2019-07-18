@@ -49,35 +49,24 @@ def scale_coord_down(coord):
     return [c*constants.SCALE_DOWN for c in coord]
 
 
-def scale_polygon_up(polygons, value=None):
-    if value is None:
-        value = constants.SCALE_UP
-    new_poly = []
-    for points in polygons:
-        pp = np.array([np.array([np.floor(float(p[0]*value)), np.floor(float(p[1]*value))]) for p in points])
-        new_poly.append(pp)
-    return new_poly
+# def scale_polygon_up(polygons, value=None):
+#     if value is None:
+#         value = constants.SCALE_UP
+#     new_poly = []
+#     for points in polygons:
+#         pp = np.array([np.array([np.floor(float(p[0]*value)), np.floor(float(p[1]*value))]) for p in points])
+#         new_poly.append(pp)
+#     return new_poly
 
 
-def scale_polygon_down(polygons, value=None):
-    if value is None:
-        value = constants.SCALE_DOWN
-    new_poly = []
-    for points in polygons:
-        pp = np.array([np.array([np.floor(np.int32(p[0]*value)), np.floor(np.int32(p[1]*value))]) for p in points])
-        new_poly.append(pp)
-    return new_poly
-
-
-def cut(ply, position, axis):
-    import spira.all as spira
-    plys = spira.ElementList()
-    gp = ply.commit_to_gdspy()
-    pl = gdspy.slice(objects=[gp], position=position, axis=axis)
-    for p in pl:
-        if len(p.polygons) > 0:
-            plys += spira.Polygon(shape=p.polygons[0])
-    return plys
+# def scale_polygon_down(polygons, value=None):
+#     if value is None:
+#         value = constants.SCALE_DOWN
+#     new_poly = []
+#     for points in polygons:
+#         pp = np.array([np.array([np.floor(np.int32(p[0]*value)), np.floor(np.int32(p[1]*value))]) for p in points])
+#         new_poly.append(pp)
+#     return new_poly
 
 
 def lines_cross(begin1, end1, begin2, end2, inclusive=False):
@@ -128,7 +117,8 @@ def intersection(begin1, end1, begin2, end2):
 
 
 def sort_points_on_line(point_list):
-    """ Sorts points on a line, taking the two first points as the reference direction """
+    """ Sorts points by distance on a line, taking the
+    two first points as the reference direction. """
     point_list = [Coord(p[0], p[1]) for p in point_list]
     p0 = point_list[0]
     dx = point_list[1][0] - point_list[0][0]
@@ -138,6 +128,7 @@ def sort_points_on_line(point_list):
 
 
 def points_unique(coordinates):
+    """ Remove duplicate points from point list. """
     unique_coordinates = []
     for c in coordinates:
         already_in_list = False
@@ -150,7 +141,7 @@ def points_unique(coordinates):
 
                                 
 def distance(coord, origin=(0,0)):
-    """ Distance of coordinate to origin """
+    """ Distance of coordinate to origin. """
     return np.sqrt((coord[0] - origin[0])**2 + (coord[1] - origin[1])**2)
 
 

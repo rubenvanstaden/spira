@@ -41,7 +41,7 @@ class __ShapeElement__(__LayerElement__):
     @property
     def points(self):
         return self.shape.points
-        
+
     @property
     def area(self):
         return gdspy.Polygon(self.shape.points).area()
@@ -62,13 +62,8 @@ class __ShapeElement__(__LayerElement__):
     def bbox_info(self):
         return self.shape.bbox_info.transform_copy(self.transformation)
 
-    # def id_string(self):
-    #     sid = '{} - hash {}'.format(self.__repr__(), self.shape.hash_string)
-    #     return sid
-
     def id_string(self):
-        sid = '{} - hash {}'.format(self.short_string(), self.shape.hash_string)
-        return sid
+        return '{} - hash {}'.format(self.short_string(), self.shape.hash_string)
 
     def is_empty(self):
         """ Returns `False` is the polygon shape has no points. """
@@ -88,6 +83,10 @@ class __ShapeElement__(__LayerElement__):
             self.transformation = IdentityTransform()
         return self
 
+    def flatten(self, level=-1):
+        """ Flatten the polygon without creating a copy. """
+        return self.expand_transform()
+
     # FIXME: Move this to an output generator.
     def convert_to_gdspy(self, transformation=None):
         """ Converts a SPiRA polygon to a Gdspy polygon.
@@ -97,11 +96,6 @@ class __ShapeElement__(__LayerElement__):
         T = self.transformation + transformation
         shape = self.shape.transform_copy(T)
         return gdspy.Polygon(points=shape.points, layer=layer.number, datatype=layer.datatype)
-
-
-class __Polygon__(__ShapeElement__):
-
-    enable_edges = BoolParameter(default=True)
 
     def fillet(self, radius, angle_resolution=128, precision=0.001):
         """ Applies fillet rounding algorithm to polygon corners. """
@@ -158,7 +152,7 @@ class __Polygon__(__ShapeElement__):
         return self
 
 
-class Polygon(__Polygon__):
+class Polygon(__ShapeElement__):
     """
     Element that connects shapes to the GDSII file format.
     Polygon are objects that represents the shapes in a layout.
@@ -213,10 +207,6 @@ class Polygon(__Polygon__):
             transformation=deepcopy(self.transformation)
         )
 
-    # def id_string(self):
-    #     sid = '{} - hash {}'.format(self.__repr__(), self.shape.hash_string)
-    #     return sid
-        
     def short_string(self):
         return "Polygon: ({}, {}, {})".format(self.center, self.process, self.purpose)
 
@@ -224,7 +214,11 @@ class Polygon(__Polygon__):
         """ Generate default edges for this polygon.
         These edges can be transformed using adapters. """
         from spira.yevon.geometry.edges.edges import generate_edges
-        return generate_edges(shape=self.shape, layer=self.layer, internal_pid=self.id_string(), transformation=self.transformation)
+        return generate_edges(
+            shape=self.shape, layer=self.layer,
+            internal_pid=self.id_string(),
+            transformation=self.transformation
+        )
 
     def flat_copy(self, level=-1):
         """ Flatten a copy of the polygon. """
@@ -232,27 +226,20 @@ class Polygon(__Polygon__):
         S.expand_transform()
         return S
 
-    def flatten(self, level=-1):
-        """ Flatten the polygon without creating a copy. """
-        return self.expand_transform()
-
     def nets(self, lcar):
         from spira.yevon.geometry.nets.net import Net
         from spira.yevon.vmodel.geometry import GmshGeometry
-        # from spira.yevon.geometry.ports.port import ContactPort
         from spira.yevon import filters
 
         if self.purpose == 'METAL':
 
             if RDD.ENGINE.GEOMETRY == 'GMSH_ENGINE':
-                # geometry = GmshGeometry(lcar=1,
                 geometry = GmshGeometry(lcar=lcar,
                     process=self.layer.process,
                     process_polygons=[deepcopy(self)])
 
             cc = []
             for p in self.ports:
-                # if isinstance(p, ContactPort):
                 if p.purpose == RDD.PURPOSE.PORT.CONTACT:
                     cc.append(p)
 
