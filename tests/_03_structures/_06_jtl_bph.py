@@ -29,7 +29,6 @@ class JtlBiasPorts(spira.Circuit):
         return [t1, t2]
 
     def create_routes(self, elems):
-        elems = spira.ElementalList()
         elems += spira.Rectangle(p1=(4, -4), p2=(146, 4), layer=RDD.PLAYER.M2.METAL)
         elems += spira.Rectangle(p1=(-3, -4), p2=(-30, 4), layer=RDD.PLAYER.M2.METAL)
         elems += spira.Rectangle(p1=(153, -4), p2=(180, 4), layer=RDD.PLAYER.M2.METAL)
@@ -49,10 +48,10 @@ class JtlBiasPorts(spira.Circuit):
         return elems
 
     def create_ports(self, ports):
-        ports += spira.Port(process=RDD.PROCESS.M2, midpoint=(-28, 0), orientation=180, width=8)
-        ports += spira.Port(process=RDD.PROCESS.M2, midpoint=(180, 0), orientation=0, width=8)
-        ports += spira.Port(process=RDD.PROCESS.M2, midpoint=(100, 65), orientation=0, width=20)
-        ports += spira.Port(process=RDD.PROCESS.M2, midpoint=(70, 100), orientation=90, width=20)
+        ports += spira.Port(name='P1', process=RDD.PROCESS.M2, midpoint=(-28, 0), orientation=180, width=8)
+        ports += spira.Port(name='P2', process=RDD.PROCESS.M2, midpoint=(180, 0), orientation=0, width=8)
+        ports += spira.Port(name='P3', process=RDD.PROCESS.M2, midpoint=(100, 65), orientation=0, width=20)
+        ports += spira.Port(name='P4', process=RDD.PROCESS.M2, midpoint=(70, 100), orientation=90, width=20)
         return ports
 
 
@@ -61,7 +60,7 @@ class JtlBiasPorts(spira.Circuit):
 
 if __name__ == '__main__':
 
-    D = JtlBiasPorts()
+    D = JtlBiasPorts(pcell=False)
 
     # from spira.yevon.filters.boolean_filter import MetalConnectFilter
     # F = MetalConnectFilter()

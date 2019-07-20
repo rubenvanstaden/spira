@@ -93,7 +93,7 @@ class PolygonGroup(Group, __LayerElement__):
         if len(self.elements) > 1:
             points = []
             for e in self.elements:
-                shape = e.shape.transform(e.transformation)
+                shape = e.shape.transform(e.transformation).snap_to_grid()
                 points.append(shape.points)
             merged_points = clipping.boolean(subj=points, clip_type='or')
             for uid, pts in enumerate(merged_points):

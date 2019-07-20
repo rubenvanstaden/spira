@@ -203,14 +203,14 @@ class Cell(__Cell__):
                         c_name += e.alias + ':'
                     else:
                         c_name += ':'
-                    subj = _traverse_polygons(subj=subj, cell=e.reference, name=c_name)
-                    # if exclude_devices is True:
-                    #     if isinstance(e.reference, Device):
-                    #         subj += e
-                    #     else:
-                    #         subj = _traverse_polygons(subj=subj, cell=e.reference, name=c_name)
-                    # else:
-                    #     subj = _traverse_polygons(subj=subj, cell=e.reference, name=c_name)
+                    # subj = _traverse_polygons(subj=subj, cell=e.reference, name=c_name)
+                    if exclude_devices is True:
+                        if isinstance(e.reference, Device):
+                            subj += e
+                        else:
+                            subj = _traverse_polygons(subj=subj, cell=e.reference, name=c_name)
+                    else:
+                        subj = _traverse_polygons(subj=subj, cell=e.reference, name=c_name)
                 elif isinstance(e, Polygon):
                     e.location_name = c_name
                     # e.transform(expand_transform)

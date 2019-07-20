@@ -35,7 +35,6 @@ p2.shape.move(pos=(7,0))
 
 # el += spira.Rectangle(p1=(4, 4), p2=(7, 6), layer=RDD.PLAYER.M5.METAL)
 
-# 
 # el += spira.Rectangle(p1=(3, 10), p2=(7, 11), layer=RDD.PLAYER.M5.METAL)
 
 # --------------- NOTE: Both cases.

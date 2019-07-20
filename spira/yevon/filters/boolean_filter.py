@@ -109,14 +109,14 @@ class MetalConnectFilter(Filter):
         from spira.yevon.geometry.shapes.adapters import ShapeConnected
         from spira.yevon.geometry.shapes.shape import Shape
 
-        D = item.expand_flat_copy()
-        v_model = virtual_connect(device=D)
+        v_model = virtual_connect(device=item)
 
+        D = item.expand_flat_copy()
         for i, e1 in enumerate(D.elements):
             clip_shape = Shape()
-            for e2 in D.elements:
-                shape1 = e1.shape.transform_copy(e1.transformation)
-                shape2 = e2.shape.transform_copy(e2.transformation)
+            for e2 in D.elements    :
+                shape1 = e1.shape.transform_copy(e1.transformation).snap_to_grid()
+                shape2 = e2.shape.transform_copy(e2.transformation).snap_to_grid()
                 if (shape1 != shape2) and (e1.layer == e2.layer):
                     overlap_shape = shape1.intersections(shape2)
                     if isinstance(overlap_shape, Shape):
@@ -124,7 +124,7 @@ class MetalConnectFilter(Filter):
                             clip_shape.extend(overlap_shape.points.tolist())
 
             if clip_shape.is_empty() is False:
-                original_shape = e1.shape.transform_copy(e1.transformation)
+                original_shape = e1.shape.transform_copy(e1.transformation).snap_to_grid()
                 D.elements[i].shape = ShapeConnected(
                     original_shape=original_shape,
                     clip_shape=clip_shape,

@@ -28,7 +28,7 @@ class EdgeFilter(__EdgeFilter__):
         from spira.yevon.gdsii.cell import Cell
 
         elems = ElementList()
-        for p1 in deepcopy(item.elements):
+        for p1 in deepcopy(item.elements.polygons):
             if p1.layer.purpose == RDD.PURPOSE.METAL:
                 for edge in p1.edges:
                     elems += EdgeAdapter(original_edge=edge, edge_type=self.edge_type)

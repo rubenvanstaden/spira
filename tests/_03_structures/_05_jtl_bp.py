@@ -7,7 +7,7 @@ from spira.yevon.process import get_rule_deck
 RDD = get_rule_deck()
 
 
-class JtlBiasPorts(spira.PCell):
+class JtlBiasPorts(spira.Circuit):
 
     def get_transforms(self):
         t1 = spira.Translation(translation=(0, 0))
@@ -21,7 +21,7 @@ class JtlBiasPorts(spira.PCell):
         elems += spira.Rectangle(p1=(60, 0), p2=(80, 50), layer=RDD.PLAYER.M2.METAL)
         return elems
 
-    def create_elementals(self, elems):
+    def create_elements(self, elems):
         t1, t2 = self.get_transforms()
 
         jj = Junction()
@@ -44,4 +44,15 @@ class JtlBiasPorts(spira.PCell):
 if __name__ == '__main__':
 
     D = JtlBiasPorts(pcell=False)
-    D.gdsii_output()
+    
+    D = D.expand_flat_copy()
+
+    from spira.yevon.vmodel.virtual import virtual_connect
+    v_model = virtual_connect(device=D)
+    v_model.gdsii_output_virtual_connect()
+
+    from spira.yevon.filters.boolean_filter import MetalConnectFilter
+    D = MetalConnectFilter()(D)
+
+    # D.gdsii_output()
+    D.netlist_output()

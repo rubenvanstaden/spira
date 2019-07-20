@@ -180,5 +180,6 @@ def virtual_process_model(device, process_flow):
 
 
 def virtual_connect(device):
-    return VirtualConnect(device=device)
+    D = device.expand_flat_copy()
+    return VirtualConnect(device=D)
 

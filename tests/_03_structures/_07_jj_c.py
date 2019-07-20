@@ -9,7 +9,7 @@ RDD = get_rule_deck()
 
 class ResistorCell(spira.Cell):
 
-    def create_elementals(self, elems):
+    def create_elements(self, elems):
         elems += spira.Rectangle(alias='RES', p1=(-5*1e6, -10*1e6), p2=(5*1e6, 10*1e6), layer=RDD.PLAYER.M3.METAL)
         return elems
 
@@ -18,16 +18,14 @@ class ResistorCell(spira.Cell):
         ply = self.elementals['RES']
         print(ply.ports)
 
-        ply.ports['M3_e3'].locked = False
-
-        ports += ply.ports['M3_e3']
+        ports += ply.ports['E3_M3'].copy(name='P3_M3')
 
         return ports
 
 
 class PolygonCell(spira.Cell):
 
-    def create_elementals(self, elems):
+    def create_elements(self, elems):
 
         c1 = ResistorCell()
         s1 = spira.SRef(c1)
@@ -40,7 +38,7 @@ class PolygonCell(spira.Cell):
 
 class Junction(spira.Cell):
 
-    def create_elementals(self, elems):
+    def create_elements(self, elems):
 
         c1 = PolygonCell()
 

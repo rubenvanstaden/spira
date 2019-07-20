@@ -43,7 +43,7 @@ class Device(PCell):
     def __create_elements__(self, elems):
 
         F = RDD.PCELLS.FILTERS
-        F['boolean'] = False
+        # F['boolean'] = False
         F['simplify'] = False
         F['via_contact'] = False
         F['metal_connect'] = False
@@ -53,9 +53,8 @@ class Device(PCell):
         elems += self.routes
 
         if self.pcell is True:
-            pass
-            # D = Cell(elements=elems.flat_copy())
-            # elems = F(D).elements
+            D = Cell(elements=elems.flat_copy())
+            elems = F(D).elements
 
         return elems
 
@@ -92,7 +91,7 @@ class Circuit(PCell):
     def __create_elements__(self, elems):
 
         F = RDD.PCELLS.FILTERS
-        F['boolean'] = False
+        # F['boolean'] = False
         F['simplify'] = False
         F['via_contact'] = False
         F['metal_connect'] = False
@@ -102,11 +101,7 @@ class Circuit(PCell):
         elems += self.routes
 
         if self.pcell is True:
-            # elems = elems.expand_transform()
-
-            # D = Cell(elements=elems).expand_flat_copy(exclude_devices=True)
-            D = Cell(elements=elems).expand_transform()
-            # D = Cell(elements=elems)
+            D = Cell(elements=elems).expand_flat_copy(exclude_devices=True)
             elems = F(D).elements
 
         return elems
