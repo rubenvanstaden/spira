@@ -32,9 +32,9 @@ class JtlBiasPorts(spira.Circuit):
         return elems
 
     def create_ports(self, ports):
-        ports += spira.Port(process=RDD.PROCESS.M2, midpoint=(-28, 0), orientation=180, width=8)
-        ports += spira.Port(process=RDD.PROCESS.M2, midpoint=(180, 0), orientation=0, width=8)
-        ports += spira.Port(process=RDD.PROCESS.M2, midpoint=(70, 50), orientation=90, width=20)
+        ports += spira.Port(name='P1_M2', process=RDD.PROCESS.M2, midpoint=(-28, 0), orientation=180, width=8)
+        ports += spira.Port(name='P2_M2', process=RDD.PROCESS.M2, midpoint=(180, 0), orientation=0, width=8)
+        ports += spira.Port(name='P3_M2', process=RDD.PROCESS.M2, midpoint=(70, 50), orientation=90, width=20)
         return ports
 
 
@@ -43,13 +43,11 @@ class JtlBiasPorts(spira.Circuit):
 
 if __name__ == '__main__':
 
-    D = JtlBiasPorts(pcell=False)
+    D = JtlBiasPorts(pcell=True)
     
-    D = D.expand_flat_copy()
-
-    from spira.yevon.vmodel.virtual import virtual_connect
-    v_model = virtual_connect(device=D)
-    v_model.gdsii_output_virtual_connect()
+    # from spira.yevon.vmodel.virtual import virtual_connect
+    # v_model = virtual_connect(device=D)
+    # v_model.gdsii_output_virtual_connect()
 
     from spira.yevon.filters.boolean_filter import MetalConnectFilter
     D = MetalConnectFilter()(D)

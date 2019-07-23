@@ -40,22 +40,24 @@ class __Element__(Transformable, ParameterInitializer, metaclass=MetaElement):
         super().__init__(transformation=transformation, **kwargs)
 
     def __add__(self, other):
+        from spira.yevon.gdsii.elem_list import ElementList
         if isinstance(other, list):
-            l = spira.ElementList([self])
+            l = ElementList([self])
             l.extend(other)
             return l
         elif isinstance(other, __Element__):
-            return spira.ElementList([self, other])
+            return ElementList([self, other])
         else:
             raise TypeError("Wrong type of argument for addition in __Element__: " + str(type(other)))
 
     def __radd__(self, other):
+        from spira.yevon.gdsii.elem_list import ElementList
         if isinstance(other, list):
-            l = spira.ElementList(other)
+            l = ElementList(other)
             l.append(self)
             return l
         elif isinstance(other, __Element__):
-            return spira.ElementList([other, self])
+            return ElementList([other, self])
         else:
             raise TypeError("Wrong type of argument for addition in __Element__: " + str(type(other)))
 

@@ -25,15 +25,12 @@ class ShapeConnected(__ShapeAdapter__):
     """  """
 
     edges = DictParameter()
-    clip_shape = ShapeParameter(doc='Shape containing the edge coordinates of the original shape intersecting with other shapes with equal layer.')
+    clip_shape = ShapeParameter(doc='Edge shape that clipes the original shape for electrical connection.')
 
     def create_segment_labels(self):
-
         labels = []
-
         for i, s1 in enumerate(self.segments()):
             labels.append(str(i))
-
         for ply, edges in self.edges.items():
             for edge in edges:
                 bbox_shape = edge.shape.transform(edge.transformation).snap_to_grid()

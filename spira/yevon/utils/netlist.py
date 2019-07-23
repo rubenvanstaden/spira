@@ -28,7 +28,6 @@ def _combine_nodes(g, algorithm):
         center = nx.get_node_attributes(S, 'position')
         branch_node = nx.get_node_attributes(S, 'branch_node')
         display = nx.get_node_attributes(S, 'display')
-        # route = nx.get_node_attributes(S, 'route')
 
         sub_pos = list()
         for value in center.values():
@@ -58,7 +57,6 @@ def _combine_nodes(g, algorithm):
     Polygon = nx.get_node_attributes(Q, 'process_polygon')
     Branches = nx.get_node_attributes(Q, 'branch_node')
     Display = nx.get_node_attributes(Q, 'display')
-    # Route = nx.get_node_attributes(Q, 'route')
 
     Edges = nx.get_edge_attributes(Q, 'weight')
 
@@ -87,16 +85,11 @@ def _combine_nodes(g, algorithm):
             if n == list(key)[0]:
                 if n in value:
                     g1.node[n]['process_polygon'] = value[n]
-                
+
         for key, value in Display.items():
             if n == list(key)[0]:
                 if n in value:
                     g1.node[n]['display'] = value[n]
-
-        # for key, value in Route.items():
-        #     if n == list(key)[0]:
-        #         if n in value:
-        #             g1.node[n]['route'] = value[n]
 
     g = g1
 
@@ -106,8 +99,6 @@ def _combine_nodes(g, algorithm):
 from spira.core.parameters.initializer import ParameterInitializer
 class CombineNetNodes(ParameterInitializer):
     pass
-
-    # net = 
 
 
 def combine_net_nodes(net, algorithm=[]):

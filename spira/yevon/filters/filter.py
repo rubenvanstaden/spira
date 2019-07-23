@@ -120,11 +120,12 @@ class ToggledCompoundFilter(__CompoundFilter__):
 
     def __setitem__(self, key, item):
         """ dict behaviour: enable or disable a filter based on it's name """
-        if not isinstance(key,str):
+        if not isinstance(key, str):
             raise KeyError("__ToggledCompoundFilter__: key must be of type str, is type %s"%(type(key)))
         if not isinstance(item, bool):
             raise KeyError("__ToggledCompoundFilter__: item must be of type bool, is type %s"%(type(item)))
-        self._filter_status[key]=item
+        # print(key, item)
+        self._filter_status[key] = item
 
     def __getitem__(self, key):
         if not isinstance(key, str):

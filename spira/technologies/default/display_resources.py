@@ -18,7 +18,14 @@ class DisplayDatabase(DelayedDatabase):
         DISPLAY_CORAL_LIGHT = DisplayStyle(color=color.COLOR_CORAL_LIGHT, alpha=0.5, edgewidth=1.0)
         DISPLAY_WHITE = DisplayStyle(color=color.COLOR_WHITE, alpha=0.5, edgewidth=1.0)
         DISPLAY_LIGHT_GREEN = DisplayStyle(color=color.COLOR_LIGHT_GREEN, edgewidth=1.0)
+        DISPLAY_SEA_GREEN_DARK = DisplayStyle(color=color.COLOR_SEA_GREEN_DARK, edgewidth=1.0)
+        DISPLAY_SEA_GREEN_MEDIUM = DisplayStyle(color=color.COLOR_SEA_GREEN_MEDIUM, edgewidth=1.0)
+        DISPLAY_SEA_GREEN_PALE = DisplayStyle(color=color.COLOR_SEA_GREEN_PALE, edgewidth=1.0)
         DISPLAY_GRAY = DisplayStyle(color=color.COLOR_GRAY, edgewidth=1.0)
+        DISPLAY_BLACK = DisplayStyle(color=color.COLOR_BLACK, edgewidth=1.0)
+        DISPLAY_AZURE = DisplayStyle(color=color.COLOR_AZURE, edgewidth=1.0)
+        DISPLAY_DARK_MAGENTA = DisplayStyle(color=color.COLOR_DARK_MAGENTA, edgewidth=1.0)
+        DISPLAY_YELLOW = DisplayStyle(color=color.COLOR_YELLOW, edgewidth=1.0)
 
         style_set = DisplayStyleSet()
         style_set.background = DISPLAY_WHITE
@@ -31,6 +38,8 @@ class DisplayDatabase(DelayedDatabase):
             (RDD.PLAYER.M1.BBOX, DISPLAY_LIGHT_GREEN),
             (RDD.PLAYER.M1.PORT_CONTACT, DISPLAY_SALMON_LIGHT),
             (RDD.PLAYER.M1.PORT_BRANCH, DISPLAY_SALMON_DARK),
+            (RDD.PLAYER.M1.PORT_PIN, DISPLAY_GRAY),
+            (RDD.PLAYER.M1.PORT_DUMMY, DISPLAY_SEA_GREEN_PALE),
             (RDD.PLAYER.M1.PORT_DIRECTION, DISPLAY_SALMON),
             (RDD.PLAYER.M1.INSIDE_EDGE_ENABLED, DISPLAY_GRAY),
             (RDD.PLAYER.M1.INSIDE_EDGE_DISABLED, DISPLAY_WHITE),
@@ -40,7 +49,9 @@ class DisplayDatabase(DelayedDatabase):
             (RDD.PLAYER.M2.HOLE, DISPLAY_TURQUOISE),
             (RDD.PLAYER.M2.BBOX, DISPLAY_LIGHT_GREEN),
             (RDD.PLAYER.M2.PORT_CONTACT, DISPLAY_TURQUOISE_PALE),
-            (RDD.PLAYER.M2.PORT_BRANCH, DISPLAY_TURQUOISE_MEDIUM),
+            (RDD.PLAYER.M2.PORT_BRANCH, DISPLAY_SEA_GREEN_DARK),
+            (RDD.PLAYER.M2.PORT_PIN, DISPLAY_GRAY),
+            (RDD.PLAYER.M2.PORT_DUMMY, DISPLAY_SEA_GREEN_PALE),
             (RDD.PLAYER.M2.PORT_DIRECTION, DISPLAY_TURQUOISE_PALE),
             (RDD.PLAYER.M2.INSIDE_EDGE_ENABLED, DISPLAY_GRAY),
             (RDD.PLAYER.M2.INSIDE_EDGE_DISABLED, DISPLAY_WHITE),
@@ -50,6 +61,8 @@ class DisplayDatabase(DelayedDatabase):
             (RDD.PLAYER.M3.HOLE, DISPLAY_CORAL),
             (RDD.PLAYER.M3.BBOX, DISPLAY_LIGHT_GREEN),
             (RDD.PLAYER.M3.PORT_CONTACT, DISPLAY_CORAL_LIGHT),
+            (RDD.PLAYER.M3.PORT_PIN, DISPLAY_GRAY),
+            (RDD.PLAYER.M3.PORT_DUMMY, DISPLAY_SEA_GREEN_PALE),
             (RDD.PLAYER.M3.PORT_DIRECTION, DISPLAY_CORAL),
             (RDD.PLAYER.M3.INSIDE_EDGE_ENABLED, DISPLAY_GRAY),
             (RDD.PLAYER.M3.INSIDE_EDGE_DISABLED, DISPLAY_WHITE),

@@ -23,7 +23,7 @@ class __RefElement__(__Element__):
 
     reference = CellParameter()
     alias = StringParameter(allow_none=True, default=None)
-    
+
     def __init__(self, transformation=None, **kwargs):
         super().__init__(transformation=transformation, **kwargs)
 
@@ -51,7 +51,7 @@ class SRef(__RefElement__):
     
     def __init__(self, reference, midpoint=(0,0), alias=None, transformation=None, **kwargs):
         super().__init__(reference=reference, midpoint=midpoint, alias=alias, transformation=transformation, **kwargs)
-        
+
     def __repr__(self):
         name = self.reference.name
         ps = "[SPiRA: SRef] (\"{}\", alias {}, midpoint {}, transforms {})"
@@ -77,7 +77,7 @@ class SRef(__RefElement__):
         if not isinstance(other, SRef):
             return False
         return (
-            (self.reference == other.ref) and
+            (self.reference == other.reference) and
             (self.midpoint == other.position) and
             (self.transformation == other.transformation)
         )
@@ -104,20 +104,13 @@ class SRef(__RefElement__):
 
         T = self.transformation + spira.Translation(self.midpoint)
 
-        C.ports.transform(T)
-
         for i, e in enumerate(C.elements):
             if isinstance(e, SRef):
-
-                midpoint = self.transformation.apply_to_coord(self.midpoint)
-                center = self.transformation.apply_to_coord(e.midpoint)
-
-                e.midpoint = (0,0)
+                e.midpoint = self.transformation.apply_to_coord(e.midpoint).move(self.midpoint)
                 e.transform(self.transformation)
-                e.translate(center-midpoint)
-
             elif isinstance(e, Polygon):
                 e.transform(T)
+        C.ports.transform(T)
 
         self.reference = C
         self.transformation = None
@@ -139,7 +132,7 @@ class SRef(__RefElement__):
         return elems
 
     def flatten(self, level=-1):
-        # if level == 0: return self.reference
+        if level == 0: return self.reference
         D = self.reference.flatten(level)
         return D.elements
 
@@ -211,7 +204,8 @@ class SRef(__RefElement__):
             raise ValueError('Cannot connect ports from different processes.')
 
         T = vector_match_transform(v1=p, v2=destination)
-        self.transform(T)
+        self.midpoint = T.apply_to_coord(self.midpoint)
+        self.transform(T - spira.Translation(self.midpoint))
 
         return self
 
@@ -228,8 +222,11 @@ class SRef(__RefElement__):
         L = line_from_point_angle(point=destination.midpoint, angle=destination.orientation)
         dx, dy = L.get_coord_from_distance(destination, distance)
 
+        # self.move(midpoint=self.midpoint, destination=(dx,dy))
         T = spira.Translation(translation=(dx, dy))
-        self.transform(T)
+        self.midpoint = T.apply_to_coord(self.midpoint)
+        # self.transform(T - spira.Translation(self.midpoint))
+        # self.transform(T)
 
         return self
 
@@ -248,6 +245,8 @@ class SRef(__RefElement__):
         self.move(midpoint=self.midpoint, destination=coord)
         return self
 
+
+    # FIXME~~~~ Look at lieze_dcsfq.py
     def port_alignment(self, ports, p1, p2):
         """
         Align `ports[0]` of reference with `p1` and 
@@ -257,17 +256,23 @@ class SRef(__RefElement__):
         -------
         >>> 
         """
-        d0 = deepcopy(p1)
-        self.connect(ports[0], d0)
+        self.connect(ports[0], deepcopy(p1))
+
         if isinstance(ports[1], str):
             pin1 = self.ports[ports[1]]
         elif issubclass(type(ports[1]), __Port__):
             pin1 = ports[1].transform(self.transformation)
+
         if ports[0].orientation in (0, 180):
-            T = vector_match_axis(v1=ports[1], v2=p2, axis='x')
+            T = vector_match_axis(v1=pin1, v2=p2, axis='x')
         elif ports[0].orientation in (90, 270):
-            T = vector_match_axis(v1=ports[1], v2=p2, axis='y')
-        self.transform(T) 
+            T = vector_match_axis(v1=pin1, v2=p2, axis='y')
+        T = T + self.transformation
+        # self.transform(T) 
+        self.midpoint = T.apply_to_coord(Coord(0,0))
+        # self.transformation = T - spira.Translation(self.midpoint)
+        # self.midpoint = T.apply_to_coord(self.midpoint)
+        self.transform(T - spira.Translation(self.midpoint))
         return self
 
     def stretch_by_factor(self, factor=(1,1), center=(0,0)):

@@ -21,21 +21,6 @@ class Color(ParameterInitializer):
     def __init__(self, red=0, green=0, blue=0, **kwargs):
         super().__init__(red=red, green=green, blue=blue, **kwargs)
 
-    def rgb_tuple(self):
-        return (self.red, self.green, self.blue)
-
-    def numpy_array(self):
-        return np.array([self.red, self.green, self.blue])
-
-    def set(self, red, green, blue):
-        self.red = red
-        self.green = green
-        self.blue = blue
-
-    @property
-    def hexcode(self):
-        return '#{:02x}{:02x}{:02x}'.format(int(self.red), int(self.green), int(self.blue))
-
     def __eq__(self, other):
         return other.red == self.red and other.green == self.green and other.blue == self.blue
 
@@ -47,6 +32,21 @@ class Color(ParameterInitializer):
 
     def __str__(self):
         return self.__repr__()
+
+    @property
+    def hexcode(self):
+        return '#{:02x}{:02x}{:02x}'.format(int(self.red), int(self.green), int(self.blue))
+
+    def rgb_tuple(self):
+        return (self.red, self.green, self.blue)
+
+    def numpy_array(self):
+        return np.array([self.red, self.green, self.blue])
+
+    def set(self, red, green, blue):
+        self.red = red
+        self.green = green
+        self.blue = blue
 
 
 COLOR_BLACK = Color(name='black', red=0, green=0, blue=0)

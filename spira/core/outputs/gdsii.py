@@ -170,7 +170,7 @@ class GdsiiLayout(ParameterInitializer):
     def gdsii_output_flat(self, name=None):
         D = self.flat_copy()
         D.gdsii_output(name=name, view_type='flatten')
-        
+
     def gdsii_output_expanded(self, name=None):
         D = self.expand_transform()
         D.gdsii_output(name=name, view_type='expanded')

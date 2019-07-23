@@ -146,6 +146,7 @@ class PlotlyGraph(object):
                 node_value = G.node[n]['process_polygon']
 
             if node_value is not None:
+                # print(G.node[n])
                 nodes['text'].append('({}) {}'.format(n, str(node_value)))
                 nodes['color'].append(G.node[n]['display'].color.hexcode)
 
@@ -160,4 +161,6 @@ class BokehGraph(object):
 
 Outputs.mixin(PlotlyGraph)
 Outputs.mixin(BokehGraph)
+
+
 

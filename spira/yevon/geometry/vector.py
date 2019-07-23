@@ -43,7 +43,7 @@ class Vector(Transformable, ParameterInitializer):
     def set_angle_rad(self, value):
         self.__angle__ = (constants.RAD2DEG * value) % 360.0
 
-    angle_rad = FunctionParameter(get_angle_rad, set_angle_rad, doc="The outward facing orientation of the port in radians (stored in degrees by default, converted to radians if needed)")
+    angle_rad = FunctionParameter(get_angle_rad, set_angle_rad, doc="The orientation of the port in radians (stored in degrees by default")
 
     def get_angle_deg(self):
         if hasattr(self, '__angle__'):
@@ -54,19 +54,7 @@ class Vector(Transformable, ParameterInitializer):
     def set_angle_deg(self, value):
         self.__angle__ = value % 360.0
 
-    orientation = FunctionParameter(get_angle_deg, set_angle_deg, doc = "The outward facing orientation of the port.")
-
-    def cos(self):
-        return cos(constants.DEG2RAD * self.__angle__)
-
-    def sin(self):
-        return sin(constants.DEG2RAD * self.__angle__)
-
-    def tan(self):
-        return tan(constants.DEG2RAD * self.__angle__)
-
-    def flip(self):
-        return Vector(midpoint=self.midpoint, orientation=(self.__angle__ + 180.0) % 360.0)
+    orientation = FunctionParameter(get_angle_deg, set_angle_deg, doc = "The orientation of the port.")
 
     def __getitem__(self, key):
         if key == 0:
@@ -86,6 +74,18 @@ class Vector(Transformable, ParameterInitializer):
 
     def __repr__(self):
         return "<Vector (%f, %f), a=%f>" % (self.x, self.y, self.angle_deg)
+
+    def cos(self):
+        return cos(constants.DEG2RAD * self.__angle__)
+
+    def sin(self):
+        return sin(constants.DEG2RAD * self.__angle__)
+
+    def tan(self):
+        return tan(constants.DEG2RAD * self.__angle__)
+
+    def flip(self):
+        return Vector(midpoint=self.midpoint, orientation=(self.__angle__ + 180.0) % 360.0)
 
     def transform(self, transformation):
         self.midpoint = transformation.apply_to_coord(self.midpoint)

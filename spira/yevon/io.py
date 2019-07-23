@@ -3,11 +3,6 @@ import gdspy
 import pathlib
 import numpy as np
 import spira.all as spira
-
-# from spira.yevon.utils.geometry import scale_coord_down as scd
-# from spira.yevon.utils.geometry import scale_coord_up as scu
-# from spira.yevon.utils.geometry import scale_polygon_down as spd
-# from spira.yevon.utils.geometry import scale_polygon_up as spu
 from copy import copy, deepcopy
 from spira.core.transforms import *
 
@@ -34,7 +29,9 @@ def wrap_labels(cell, c2dmap):
 
 
 def wrap_references(cell, c2dmap):
-    """ Move all cell centers to the origin. """
+    """ Move all cell centers to the origin.
+    `cell` is of type gdspy.Cell.
+    """
 
     for e in cell.references:
         ref_device = deepcopy(c2dmap[e.ref_cell])
@@ -91,7 +88,7 @@ def import_gds(filename, cellname=None, flatten=False, pcell=True):
 
             # FIXME: Maybe check the datatype.
             for n, p in zip(e.layers, e.polygons):
-                layer = spira.Layer(number=n, datatype=0)
+                layer = spira.Layer(number=int(n), datatype=0)
                 D += spira.Polygon(shape=p, layer=layer)
 
         c2dmap.update({cell:D})

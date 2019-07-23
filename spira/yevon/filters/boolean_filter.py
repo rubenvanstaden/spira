@@ -2,7 +2,6 @@ from spira.log import SPIRA_LOG as LOG
 from spira.yevon.filters.filter import Filter
 from spira.yevon.gdsii.elem_list import ElementList
 from spira.yevon.geometry.ports.port_list import PortList
-# from spira.yevon.geometry.edges.edge_list import EdgeListParameter
 
 
 __all__ = [
@@ -68,38 +67,6 @@ class SimplifyFilter(Filter):
         return "<SimplifyFilter: \'{}\'>".format(self.name)
 
 
-class ViaConnectFilter(Filter):
-    """  """
-
-    def __filter___Cell____(self, item):
-        from spira.yevon.gdsii.cell import Cell
-        from spira.yevon.utils import clipping
-        from spira.yevon.vmodel.virtual import virtual_connect
-        from shapely.geometry import Polygon as ShapelyPolygon
-
-        ports = PortList()
-        elems = ElementList()
-
-        v_model = virtual_connect(device=item)
-        for e in v_model.connected_elements:
-            elems += e
-
-        for e in item.elements.sref:
-            elems += e
-        for e in item.elements.labels:
-            elems += e
-        for p in item.ports:
-            ports += p
-
-        cell = Cell(elements=elems, ports=ports)
-        return cell
-        # return item.__class__(elements=elems)
-        # return [cell]
-
-    def __repr__(self):
-        return "<ViaConnectFilter: \'{}\'>".format(self.name)
-
-
 class MetalConnectFilter(Filter):
     """  """
 
@@ -114,7 +81,7 @@ class MetalConnectFilter(Filter):
         D = item.expand_flat_copy()
         for i, e1 in enumerate(D.elements):
             clip_shape = Shape()
-            for e2 in D.elements    :
+            for e2 in D.elements:
                 shape1 = e1.shape.transform_copy(e1.transformation).snap_to_grid()
                 shape2 = e2.shape.transform_copy(e2.transformation).snap_to_grid()
                 if (shape1 != shape2) and (e1.layer == e2.layer):
@@ -135,5 +102,41 @@ class MetalConnectFilter(Filter):
 
     def __repr__(self):
         return "<MetalConnectFilter: \'{}\'>".format(self.name)
+
+
+class ViaConnectFilter(Filter):
+    """  """
+
+    def __filter___Cell____(self, item):
+        from spira.yevon.gdsii.cell import Cell
+        from spira.yevon.utils import clipping
+        from spira.yevon.vmodel.virtual import virtual_connect
+        from shapely.geometry import Polygon as ShapelyPolygon
+
+        ports = PortList()
+        elems = ElementList()
+
+        v_model = virtual_connect(device=item)
+        for e in v_model.connected_elements:
+            elems += e
+
+        for e in item.elements.sref:
+            elems += e
+        for e in item.elements.labels:
+            elems += e
+
+        for p in item.ports:
+            ports += p
+
+        # item.elements = elems
+        # item.ports = ports
+        # return item
+        cell = Cell(elements=elems, ports=ports)
+        return cell
+        # return item.__class__(elements=elems)
+        # return [cell]
+
+    def __repr__(self):
+        return "<ViaConnectFilter: \'{}\'>".format(self.name)
 
 

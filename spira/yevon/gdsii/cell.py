@@ -174,15 +174,23 @@ class Cell(__Cell__):
     def __str__(self):
         return self.__repr__()
 
+    def __deepcopy__(self, memo):
+        # return Cell(
+        return self.__class__(
+            # name=self.name,
+            # alias=self.alias,
+            elements=deepcopy(self.elements),
+            ports=deepcopy(self.ports),
+            transformation=deepcopy(self.transformation)
+        )
+
     def create_name(self):
         if not hasattr(self, '__name__'):
             self.__name__ = self.__name_generator__(self)
         return self.__name__
 
     def expand_transform(self):
-        for S in self.elements.sref:
-            S.expand_transform()
-            S.reference.expand_transform()
+        self.elements.expand_transform()
         return self
 
     def expand_flat_copy(self, exclude_devices=False):
@@ -213,12 +221,16 @@ class Cell(__Cell__):
                         subj = _traverse_polygons(subj=subj, cell=e.reference, name=c_name)
                 elif isinstance(e, Polygon):
                     e.location_name = c_name
-                    # e.transform(expand_transform)
-                    # e.shape.move(expand_transform)
+                    # e.ports = cell.ports
+                    # print(e.ports)
+                    # print('')
                     subj += e
-                    # print(e.transformation)
                 c_name = name
             # print('')
+
+            # for p in cell.ports:
+            #     subj.ports += p
+
             return subj
 
         D = _traverse_polygons(C, S, name)

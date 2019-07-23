@@ -134,7 +134,7 @@ class Coord(Transformable):
 
     def to_numpy_array(self):
         return np.array([self.x, self.y])
-        
+
     def to_list(self):
         return [self.x, self.y]
 

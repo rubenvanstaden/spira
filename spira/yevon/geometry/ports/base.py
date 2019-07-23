@@ -164,6 +164,10 @@ class __Port__(ParameterInitializer, metaclass=MetaPort):
         p1 = Coord(self.midpoint[0], self.midpoint[1]) - Coord(other[0], other[1])
         return p1
 
+    @property
+    def layer(self):
+        return PLayer(self.process, self.purpose)
+
     def flat_copy(self, level=-1):
         """ Return a flattened copy of the port. """
         port = self.copy(transformation=self.transformation)
@@ -173,7 +177,7 @@ class __Port__(ParameterInitializer, metaclass=MetaPort):
     def encloses(self, points):
         """ Return `True` if the port is inside the shape. """
         from spira.yevon.utils import clipping
-        return clipping.encloses(coord=self.midpoint, points=points)
+        return clipping.encloses(coord=self.midpoint.snap_to_grid(), points=points)
 
     def move(self, coordinate):
         """ Move the port midpoint to coordinate. """
@@ -183,10 +187,6 @@ class __Port__(ParameterInitializer, metaclass=MetaPort):
     def distance(self, other):
         """ Get the absolute distance between two ports. """
         return norm(np.array(self.midpoint) - np.array(other.midpoint))
-
-    @property
-    def layer(self):
-        return PLayer(self.process, self.purpose)
 
 
 

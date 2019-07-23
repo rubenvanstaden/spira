@@ -117,8 +117,9 @@ class ElementList(__ElementList__):
         return cells
 
     def expand_transform(self):
-        for c in self._list:
-            c.expand_transform()
+        for S in self.sref:
+            S.expand_transform()
+            S.reference.expand_transform()
         return self
 
     def transform(self, transformation=None):

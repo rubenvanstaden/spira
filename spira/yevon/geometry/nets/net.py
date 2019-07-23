@@ -174,7 +174,7 @@ class Net(__Net__):
 
         lines = {}
         for name, value in self.mesh_data.field_data.items():
-            print(name, value)
+            # print(name, value)
             # print(self.physical_lines)
             for n in self.physical_lines:
                 line_id = value[0]
@@ -239,12 +239,17 @@ class CellNet(__Net__):
     """  """
 
     _ID = 0
+    g = Parameter()
 
     __stored_paths__ = []
     __branch_nodes__ = None
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+        if 'g' in kwargs:
+            self.g = kwargs['g']
+        else:
+            self.g = nx.Graph()
 
     def __remove_nodes__(self):
         """
@@ -325,27 +330,13 @@ class CellNet(__Net__):
 
         if issubclass(type(Ds), spira.SRef):
             source = 'source: {}'.format(Ds.reference.name)
-        # elif isinstance(Ds, spira.Port):
-        elif isinstance(Ds, (spira.ContactPort, spira.Port)):
+        elif isinstance(Ds, spira.Port):
             source = 'source: {}'.format(Ds.name)
 
         if issubclass(type(Dt), spira.SRef):
             target = 'target: {}'.format(Dt.reference.name)
-        # elif isinstance(Dt, spira.spira.Port):
-        elif isinstance(Ds, (spira.ContactPort, spira.Port)):
+        elif isinstance(Ds, spira.Port):
             target = 'target: {}'.format(Dt.name)
-
-        # if issubclass(type(Ds), spira.SRef):
-        #     source = 'source: {}'.format(Ds.reference.name)
-        # elif issubclass(type(Ds), __Port__):
-        #     if isinstance(Ds, spira.Port):
-        #         source = 'source: {}'.format(Ds.name)
-
-        # if issubclass(type(Dt), spira.SRef):
-        #     target = 'target: {}'.format(Dt.reference.name)
-        # elif issubclass(type(Dt), __Port__):
-        #     if not isinstance(Dt, spira.spira.Port):
-        #         target = 'target: {}'.format(Dt.name)
 
         return "\n".join([ntype, number, source, target])
 
@@ -356,13 +347,10 @@ class CellNet(__Net__):
         for n in self.g.nodes():
             if 'device_reference' in self.g.node[n]:
                 D = self.g.node[n]['device_reference']
+                print(D)
                 if isinstance(D, spira.SRef):
                     branch_nodes.append(n)
                 if isinstance(D, spira.Port):
-                    branch_nodes.append(n)
-                if isinstance(D, spira.ContactPort):
-                    branch_nodes.append(n)
-                if isinstance(D, spira.BranchPort):
                     branch_nodes.append(n)
         return branch_nodes
 
@@ -375,7 +363,7 @@ class CellNet(__Net__):
             if 'device_reference' in self.g.node[n]:
                 D = self.g.node[n]['device_reference']
                 if issubclass(type(D), spira.SRef):
-                    if issubclass(type(D.ref), Via):
+                    if issubclass(type(D.reference), Via):
                         if len([i for i in self.g[n]]) > 2:
                             branch_nodes.append(n)
                     else:
@@ -397,44 +385,51 @@ class CellNet(__Net__):
         return branch_nodes
 
     def detect_dummy_nodes(self):
+        
+        self.__branch_nodes__ = self.branch_nodes
+        
+        # print(self.__branch_nodes__)
 
-        for sg in nx.connected_component_subgraphs(self.g, copy=True):
-            s = self.__branch_nodes__[0]
-
-            paths = []
-            for t in filter(lambda x: x not in [s], self.__branch_nodes__):
-                # if nx.has_path(self.g, s, t):
-                #     p = nx.shortest_path(self.g, source=s, target=t)
-                #     paths.append(p)
-                if nx.has_path(self.g, s, t):
-                    for p in nx.all_simple_paths(self.g, source=s, target=t):
-                        paths.append(p)
-
-            new_paths = []
-            for p1 in paths:
-                for p2 in filter(lambda x: x not in [p1], paths):
-                    set_2 = frozenset(p2)
-                    intersecting_paths = [x for x in p1 if x in set_2]
-                    new_paths.append(intersecting_paths)
-
-            dummies = set()
-            for path in new_paths:
-                p = list(path)
-                dummies.add(p[-1])
-
-            for i, n in enumerate(dummies):
-                if 'branch_node' in self.g.node[n]:
-                    N = self.g.node[n]['branch_node']
-                    port = BranchPort(
-                        name='D{}'.format(i), 
-                        midpoint=N.position, 
-                        process=RDD.PROCESS.M2, 
-                        purpose=RDD.PURPOSE.PORT.BRANCH
-                    )
-                    self.g.node[n]['device_reference'] = port
-                    self.g.node[n]['display'] = RDD.DISPLAY.STYLE_SET[port.layer]
-                    del self.g.node[n]['branch_node']
-
+        if len(self.__branch_nodes__) > 0:
+            for sg in nx.connected_component_subgraphs(self.g, copy=True):
+    
+                s = self.__branch_nodes__[0]
+    
+                paths = []
+                for t in filter(lambda x: x not in [s], self.__branch_nodes__):
+                    # if nx.has_path(self.g, s, t):
+                    #     p = nx.shortest_path(self.g, source=s, target=t)
+                    #     paths.append(p)
+                    if nx.has_path(self.g, s, t):
+                        for p in nx.all_simple_paths(self.g, source=s, target=t):
+                            paths.append(p)
+    
+                new_paths = []
+                for p1 in paths:
+                    for p2 in filter(lambda x: x not in [p1], paths):
+                        set_2 = frozenset(p2)
+                        intersecting_paths = [x for x in p1 if x in set_2]
+                        new_paths.append(intersecting_paths)
+    
+                dummies = set()
+                for path in new_paths:
+                    p = list(path)
+                    dummies.add(p[-1])
+    
+                for i, n in enumerate(dummies):
+                    if 'branch_node' in self.g.node[n]:
+                        N = self.g.node[n]['branch_node']
+                        ply = self.g.node[n]['process_polygon']
+                        port = spira.Port(
+                            name='B{}'.format(i),
+                            midpoint=N.position,
+                            process=ply.layer.process,
+                            # purpose=RDD.PURPOSE.PORT.BRANCH
+                        )
+                        self.g.node[n]['device_reference'] = port
+                        self.g.node[n]['display'] = RDD.DISPLAY.STYLE_SET[port.layer]
+                        del self.g.node[n]['branch_node']
+    
     def generate_branches(self):
         """  """
 
@@ -443,7 +438,10 @@ class CellNet(__Net__):
 
         self.__branch_nodes__ = self.branch_nodes
 
+        # print(self.__branch_nodes__)
+
         for sg in nx.connected_component_subgraphs(self.g, copy=True):
+
             for s in self.__branch_nodes__:
                 # targets = filter(lambda x: x not in [s], self.master_nodes)
                 targets = filter(lambda x: x not in [s], self.__branch_nodes__)
@@ -453,19 +451,20 @@ class CellNet(__Net__):
             for i, path in enumerate(self.__stored_paths__):
                 text = self.__get_called_id__()
                 node_id = self.__branch_id__(i, path[0], path[-1])
+                # print(path, text)
+                # print(node_id)
+                # print('')
                 for n in path[1:-1]:
                     ply = self.g.node[n]['process_polygon']
                     label = spira.Label(position=ply.center, text=text, layer=ply.layer)
+                    # label = spira.Label(position=ply.center, text=node_id, layer=ply.layer)
                     self.g.node[n]['branch_node'] = label
 
-        self.__remove_nodes__()
+        # self.__remove_nodes__()
 
         return self.g
 
 
-# TODO!!!
-# Create a T-shape and a L-shape.
-# Create cross-over connector.
 
 
 

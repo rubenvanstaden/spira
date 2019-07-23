@@ -65,6 +65,7 @@ RDD.PURPOSE.TEXT.PIN = PurposeLayer(name='PinText', symbol='PT')
 RDD.PURPOSE.TEXT.EDGE = PurposeLayer(name='EdgeText', symbol='ET')
 RDD.PURPOSE.TEXT.CONTACT = PurposeLayer(name='ContactText', symbol='CT')
 RDD.PURPOSE.TEXT.ROUTE = PurposeLayer(name='RouteText', symbol='IT')
+RDD.PURPOSE.TEXT.DUMMY = PurposeLayer(name='DummyText', symbol='DT')
 
 # ---------------------------------- Port Purposes ------------------------------------
 

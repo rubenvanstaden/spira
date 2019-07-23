@@ -85,7 +85,13 @@ class __ShapeElement__(__LayerElement__):
 
     def flatten(self, level=-1):
         """ Flatten the polygon without creating a copy. """
-        return self.expand_transform()
+        # return self.expand_transform()
+        # print(self.ports)
+        # print('--------------------------')
+        ply = self.expand_transform()
+        # print(ply.ports)
+        # print('')
+        return ply
 
     # FIXME: Move this to an output generator.
     def convert_to_gdspy(self, transformation=None):
@@ -181,7 +187,7 @@ class Polygon(__ShapeElement__):
 
     def __init__(self, shape, layer, transformation=None, **kwargs):
         super().__init__(shape=shape, layer=layer, transformation=transformation, **kwargs)
-        
+
         self.uid = Polygon._next_uid
         Polygon._next_uid += 1
 
@@ -201,14 +207,18 @@ class Polygon(__ShapeElement__):
     # NOTE: We are not copying the ports, so they
     # can be re-calculated for the transformed shape.
     def __deepcopy__(self, memo):
-        return self.__class__(
+        # ports = self.ports.transform_copy(self.transformation)
+        # return self.__class__(
+        return Polygon(
             shape=deepcopy(self.shape),
             layer=deepcopy(self.layer),
+            # ports=ports,
+            ports=deepcopy(self.ports),
             transformation=deepcopy(self.transformation)
         )
 
     def short_string(self):
-        return "Polygon: ({}, {}, {})".format(self.center, self.process, self.purpose)
+        return "Polygon [{}, {}, {}]".format(self.center, self.process, self.purpose)
 
     def create_edges(self):
         """ Generate default edges for this polygon.
@@ -240,28 +250,33 @@ class Polygon(__ShapeElement__):
 
             cc = []
             for p in self.ports:
-                if p.purpose == RDD.PURPOSE.PORT.CONTACT:
+                p = p.transform(self.transformation)
+                if p.purpose == RDD.PURPOSE.PORT.PIN:
+                    cc.append(p)
+                elif p.purpose == RDD.PURPOSE.PORT.CONTACT:
                     cc.append(p)
 
             F = filters.ToggledCompoundFilter()
             F += filters.NetProcessLabelFilter(process_polygons=[deepcopy(self)])
             F += filters.NetDeviceLabelFilter(device_ports=cc)
-            F += filters.NetEdgeFilter(process_polygons=[deepcopy(self)])
+            F += filters.NetEdgeFilter(process_polygons=deepcopy(self))
 
             net = Net(name=self.process, geometry=geometry)
 
-            return F(net)
+            net = F(net)[0]
 
-            # # from spira.yevon.utils.netlist import combine_net_nodes
-            # # net.g = combine_net_nodes(g=net.g, algorithm='d2d')
-            # # net.g = combine_net_nodes(g=net.g, algorithm='s2s')
+            from spira.yevon.utils.netlist import combine_net_nodes
+            net = combine_net_nodes(net=net, algorithm=['d2d'])
 
             # from spira.yevon.geometry.nets.net import CellNet
             # cn = CellNet()
             # cn.g = net.g
-            # # cn.generate_branches()
-            # # cn.detect_dummy_nodes()
+            # cn.generate_branches()
+            # cn.detect_dummy_nodes()
+
             # return cn
+
+            return net
 
         return []
 

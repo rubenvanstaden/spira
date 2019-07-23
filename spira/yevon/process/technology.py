@@ -23,6 +23,7 @@ class __Database__(object):
     #     return value
         
     def __getitem__(self, key):
+        value = None
         if key in self.__dict__:
             value = self.__dict__[key]
         else:

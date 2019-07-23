@@ -27,7 +27,7 @@ class YtronCircuit(spira.Circuit):
         # R = spira.RouteManhattan(
         elems += spira.RouteManhattan(
             ports=[self.ytron.ports['Pl_M1'], p1],
-            width=self.ytron.ref.shape.arm_widths[0],
+            width=self.ytron.reference.shape.arm_widths[0],
             layer=RDD.PLAYER.M1.METAL,
             corners=self.corners)
 

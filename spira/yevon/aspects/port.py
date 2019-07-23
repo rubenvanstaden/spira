@@ -19,8 +19,6 @@ RDD = get_rule_deck()
 class PortProperty(__Aspects__):
     """ Port properties that connects to layout structures. """
 
-    disable_edge_ports = BoolParameter(default=False, doc='Disable the viewing of polygon edge ports.')
-
     ports = PortListParameter(fdef_name='__create_ports__', doc='List of ports to be added to the cell instance.')
 
     def __create_ports__(self, ports):
@@ -31,34 +29,28 @@ class PortProperty(__Aspects__):
 
 
 class CellPortProperty(PortProperty):
-
     def __create_ports__(self, ports):
         from spira.yevon.gdsii.polygon import Polygon
         for e in self.elements:
             if isinstance(e, Polygon):
                 for p in e.ports:
-                    ports += p
+                    ports += p.transform(e.transformation)
         return self.create_ports(ports)
 
 
 class TransformablePortProperty(PortProperty, Transformable):
     def __create_ports__(self, ports):
-        ports = self.create_ports(ports).transform_copy(self.transformation)
-        # ports = self.create_ports(ports)
+        ports = self.create_ports(ports)
+        ports = ports.transform_copy(self.transformation)
         return ports
 
 
 class SRefPortProperty(TransformablePortProperty):
     def create_ports(self, ports):
-        pp = deepcopy(self.reference.ports)
-        # pp = self.reference.ports
-        # ports = pp.move(self.midpoint)
-        ports = pp.transform_copy(self.transformation).move(self.midpoint).transform(-self.transformation)
-        # ports = pp.transform_copy(self.transformation)
-        # ports = pp.transform_copy(self.transformation).move(self.midpoint)
-        # ports = pp.move(self.midpoint).transform(-self.transformation)
-        # ports = pp.move(self.midpoint).transform_copy(self.transformation)
-        # ports = pp.transform_copy(self.transformation).move(self.midpoint)
+        ports = self.reference.ports
+        ports = ports.transform_copy(self.transformation)
+        ports = ports.move(self.midpoint)
+        ports = ports.transform(-self.transformation)
         return ports
 
 
@@ -71,7 +63,8 @@ class PolygonPortProperty(TransformablePortProperty):
         shape = self.shape
         # FIXME: Cannot apply transforms when stretching.
         # shape = self.shape.transform_copy(self.transformation)
-        s = deepcopy(self.shape).transform_copy(self.transformation)
+        # s = deepcopy(self.shape).transform_copy(self.transformation)
+        s = self.shape.transform_copy(self.transformation)
         return shapes.shape_edge_ports(shape, self.layer, self.id_string(), center=s.bbox_info.center, loc_name=self.location_name)
 
     def create_ports(self, ports):

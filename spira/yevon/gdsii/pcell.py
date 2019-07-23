@@ -1,6 +1,7 @@
 from spira.yevon.gdsii.cell import Cell
 from spira.yevon.utils import netlist
-from spira.yevon.gdsii.elem_list import ElementListParameter
+from spira.yevon.gdsii.elem_list import ElementListParameter, ElementList
+from spira.yevon.geometry.ports import PortList
 from copy import deepcopy
 
 from spira.core.parameters.variables import *
@@ -25,9 +26,7 @@ class Device(PCell):
     """  """
 
     # lcar = NumberParameter(default=RDD.PCELLS.LCAR_DEVICE)
-    # lcar = NumberParameter(default=0.5)
-    lcar = NumberParameter(default=10)
-    # lcar = NumberParameter(default=100)
+    lcar = NumberParameter(default=1)
 
     def __init__(self, pcell=True, **kwargs):
         super().__init__(**kwargs)
@@ -42,32 +41,40 @@ class Device(PCell):
 
     def __create_elements__(self, elems):
 
-        F = RDD.PCELLS.FILTERS
-        # F['boolean'] = False
-        F['simplify'] = False
-        F['via_contact'] = False
-        F['metal_connect'] = False
-
         elems = self.create_elements(elems)
         elems += self.structures
         elems += self.routes
 
         if self.pcell is True:
             D = Cell(elements=elems.flat_copy())
+            # D = Cell(elements=elems)
+
+            F = RDD.PCELLS.FILTERS
+            F['boolean'] = True
+            F['simplify'] = True
+            F['via_contact'] = True
+            F['metal_connect'] = False
+
             elems = F(D).elements
+            # elems = D.elements
 
         return elems
 
     def create_netlist(self):
+
         print('Device netlist')
+
         net = super().create_netlist()
+        net = netlist.combine_net_nodes(net=net, algorithm=['d2d'])
+        net = netlist.combine_net_nodes(net=net, algorithm=['s2s'])
         # net = netlist.combine_net_nodes(net=net, algorithm=['d2d', 's2s'])
 
-        # net = self.nets(lcar=self.lcar).disjoint(connect=True)
         # import networkx as nx
         # from spira.yevon.geometry.nets.net import Net
+        # net = self.nets(lcar=self.lcar).disjoint(connect=True)
         # graphs = list(nx.connected_component_subgraphs(net.g))
         # net = Net(g=nx.disjoint_union_all(graphs))
+
         return net
 
 
@@ -78,8 +85,6 @@ class Circuit(PCell):
     bend_radius = NumberParameter(allow_none=True, default=None, doc='Bend radius of path joins.')
 
     lcar = NumberParameter(default=RDD.PCELLS.LCAR_CIRCUIT)
-    # lcar = NumberParameter(default=10)
-    # lcar = NumberParameter(default=1)
 
     def __repr__(self):
         class_string = "[SPiRA: Circuit(\'{}\')] (elements {}, ports {})"
@@ -89,28 +94,74 @@ class Circuit(PCell):
         return self.__repr__()
 
     def __create_elements__(self, elems):
+        from spira.yevon.gdsii.sref import SRef
 
-        F = RDD.PCELLS.FILTERS
-        # F['boolean'] = False
-        F['simplify'] = False
-        F['via_contact'] = False
-        F['metal_connect'] = False
+        # print('\n[*] Circuit elements\n')
 
         elems = self.create_elements(elems)
         elems += self.structures
         elems += self.routes
 
+        def wrap_references(cell, c2dmap, devices):
+            for e in cell.elements.sref:
+                if isinstance(e.reference, Device):
+                    D = deepcopy(e.reference)
+                    devices[D] = D.elements
+                    D.elements = ElementList()
+                    S = deepcopy(e)
+                    S.reference = D
+                    c2dmap[cell] += S
+                else:
+                    S = deepcopy(e)
+                    S.reference = c2dmap[e.reference]
+                    c2dmap[cell] += S
+
         if self.pcell is True:
-            D = Cell(elements=elems).expand_flat_copy(exclude_devices=True)
-            elems = F(D).elements
+
+            c2dmap = {}
+            ex_elems = elems.expand_transform()
+
+            C = Cell(elements=ex_elems)
+
+            devices = {}
+
+            for cell in C.dependencies():
+                D = Cell(name=cell.name)
+                for e in cell.elements.polygons:
+                    D += e
+
+                c2dmap.update({cell:D})
+
+            for cell in C.dependencies():
+                wrap_references(cell, c2dmap, devices)
+
+            D = c2dmap[C]
+
+            F = RDD.PCELLS.FILTERS
+            F['boolean'] = True
+            F['simplify'] = True
+            F['via_contact'] = False
+            F['metal_connect'] = False
+
+            Df = F(D)
+
+            # print(Df.dependencies())
+            for d in Df.dependencies():
+                if d in devices.keys():
+                    d.elements = devices[d]
+
+            elems = Df.elements
 
         return elems
 
     def create_netlist(self):
+
         print('Circuit netlist')
+
         net = super().create_netlist()
         net = netlist.combine_net_nodes(net=net, algorithm=['d2d'])
         # net = netlist.combine_net_nodes(net=net, algorithm=['d2d', 's2s'])
+
         return net
 
 

@@ -41,6 +41,7 @@ class VirtualProcessModel(__VirtualModel__):
 
 
 class VirtualConnect(__VirtualModel__):
+    """  """
 
     # FIXME: Add a string list restriction.
     connect_type = spira.StringParameter(default='contact_layer')
@@ -55,8 +56,8 @@ class VirtualConnect(__VirtualModel__):
             mapping = {}
             for k in RDD.VIAS.keys:
                 mapping[RDD.PLAYER[k].CLAYER_CONTACT] = RDD.VIAS[k].LAYER_STACK['VIA_LAYER']
-                mapping[RDD.PLAYER[k].CLAYER_M1] = RDD.VIAS[k].LAYER_STACK['BOT_LAYER']
-                mapping[RDD.PLAYER[k].CLAYER_M2] = RDD.VIAS[k].LAYER_STACK['TOP_LAYER']
+                # mapping[RDD.PLAYER[k].CLAYER_M1] = RDD.VIAS[k].LAYER_STACK['BOT_LAYER']
+                # mapping[RDD.PLAYER[k].CLAYER_M2] = RDD.VIAS[k].LAYER_STACK['TOP_LAYER']
 
             # print('\nMapping:')
             # for k, v in mapping.items():
@@ -64,39 +65,31 @@ class VirtualConnect(__VirtualModel__):
             # print('')
             # print(self.device.elements)
 
-            el = get_derived_elements(elements=self.device.elements, mapping=mapping)
+            # print(deepcopy(self.device).elements)
+
+            el = get_derived_elements(elements=deepcopy(self.device).elements, mapping=mapping)
+            # el = get_derived_elements(elements=self.device.elements, mapping=mapping)
             for e in el:
-                if e.purpose == 'METAL':
-                    pass
-                else:
+                if e.purpose in ['JJ', 'VIA']:
                     elems += e
         else:
             pass
-            # # D = self.device.expand_flat_copy()
-            # D = self.device.expand_flat_no_jjcopy()
-
-            # elems = spira.ElementList()
-            # for process in RDD.VMODEL.PROCESS_FLOW.active_processes:
-            #     for layer in RDD.get_physical_layers_by_process(processes=process):
-            #         LF = LayerFilterAllow(layers=[layer])
-            #         el = LF(D.elements.polygons)
-            #         elems += spira.PolygonGroup(elements=el, layer=layer).intersect
         return elems
 
     def create_connected_elements(self):
-        """ Adds contact ports to each metal polygon connected by a 
+        """ Adds contact ports to each metal polygon connected by a
         contact layer and return a list of the updated elements. """
+        index = 0
         for e1 in self.__make_polygons__():
             for e2 in self.device.elements:
                 for m in ['BOT_LAYER', 'TOP_LAYER']:
                     if e2.layer == RDD.VIAS[e1.process].LAYER_STACK[m]:
                         if e2.encloses(e1.center):
                             e2.ports += spira.Port(
-                                name=e1.process,
+                                name='Cv_{}'.format(e1.process),
                                 midpoint=e1.center,
-                                process=e1.layer.process,
-                                purpose=e1.layer.purpose,
-                                port_type='contact')
+                                process=e1.layer.process)
+                            index += 1
         return self.device.elements
 
     def _map_derived_edges(self):
@@ -159,17 +152,17 @@ class VirtualConnect(__VirtualModel__):
 
         elems = spira.ElementList()
 
+        elems += self.device.elements
+
         # for e in self.__make_polygons__():
         #     elems += e
 
         for ply_overlap, edges in self.connected_edges.items():
-            # NOTE: Use is_empty check rather.
-            if len(ply_overlap.points) > 0:
+            if ply_overlap.is_empty() is False:
                 elems += ply_overlap
-            elems += edges
 
-        for e in self.device.elements:
-            elems += e
+        # for e in self.device.elements:
+        #     elems += e
 
         D = spira.Cell(name='_VIRTUAL_CONNECT', elements=elems)
         D.gdsii_output()
@@ -181,5 +174,5 @@ def virtual_process_model(device, process_flow):
 
 def virtual_connect(device):
     D = device.expand_flat_copy()
-    return VirtualConnect(device=D)
+    return VirtualConnect(device=deepcopy(D))
 

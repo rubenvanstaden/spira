@@ -69,7 +69,7 @@ class Group(__Group__, __Element__):
         super().__init__(transformation=transformation, **kwargs)
 
     def __eq__(self, other):
-            return (self.elements == other.elements) and (self.transformation == other.transformation)
+        return (self.elements == other.elements) and (self.transformation == other.transformation)
 
     def flat_copy(self, level=-1):
         if not level == 0:
@@ -89,6 +89,6 @@ class Group(__Group__, __Element__):
     @property
     def bbox_info(self):
         return self.elements.bbox_info.transform(self.transformation)
-    
+
 
            
