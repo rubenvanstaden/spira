@@ -79,6 +79,7 @@ class MetalConnectFilter(Filter):
         v_model = virtual_connect(device=item)
 
         D = item.expand_flat_copy()
+
         for i, e1 in enumerate(D.elements):
             clip_shape = Shape()
             for e2 in D.elements:
@@ -87,7 +88,8 @@ class MetalConnectFilter(Filter):
                 if (shape1 != shape2) and (e1.layer == e2.layer):
                     overlap_shape = shape1.intersections(shape2)
                     if isinstance(overlap_shape, Shape):
-                        if len(overlap_shape) > 0:
+                        # if len(overlap_shape) > 0:
+                        if overlap_shape.is_empty() is False:
                             clip_shape.extend(overlap_shape.points.tolist())
 
             if clip_shape.is_empty() is False:

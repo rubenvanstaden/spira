@@ -174,15 +174,15 @@ class Cell(__Cell__):
     def __str__(self):
         return self.__repr__()
 
-    def __deepcopy__(self, memo):
-        # return Cell(
-        return self.__class__(
-            # name=self.name,
-            # alias=self.alias,
-            elements=deepcopy(self.elements),
-            ports=deepcopy(self.ports),
-            transformation=deepcopy(self.transformation)
-        )
+    # def __deepcopy__(self, memo):
+    #     return Cell(
+    #     # return self.__class__(
+    #         name=self.name + '_copy',
+    #         alias=self.alias,
+    #         elements=deepcopy(self.elements),
+    #         ports=deepcopy(self.ports),
+    #         transformation=deepcopy(self.transformation)
+    #     )
 
     def create_name(self):
         if not hasattr(self, '__name__'):
@@ -199,19 +199,19 @@ class Cell(__Cell__):
         from spira.yevon.gdsii.sref import SRef
         from spira.core.transforms.translation import Translation
 
-        name = ''
         S = self.expand_transform()
+
         C = Cell(name=S.name + '_ExpandedCell')
         def _traverse_polygons(subj, cell, name):
             c_name = deepcopy(name)
-            # print(cell)
             for e in cell.elements:
                 if isinstance(e, SRef):
+                    # subj = _traverse_polygons(subj=subj, cell=e.reference, name='')
+
                     if e.alias is not None:
                         c_name += e.alias + ':'
                     else:
                         c_name += ':'
-                    # subj = _traverse_polygons(subj=subj, cell=e.reference, name=c_name)
                     if exclude_devices is True:
                         if isinstance(e.reference, Device):
                             subj += e
@@ -219,21 +219,14 @@ class Cell(__Cell__):
                             subj = _traverse_polygons(subj=subj, cell=e.reference, name=c_name)
                     else:
                         subj = _traverse_polygons(subj=subj, cell=e.reference, name=c_name)
+
                 elif isinstance(e, Polygon):
                     e.location_name = c_name
-                    # e.ports = cell.ports
-                    # print(e.ports)
-                    # print('')
                     subj += e
                 c_name = name
-            # print('')
-
-            # for p in cell.ports:
-            #     subj.ports += p
-
             return subj
 
-        D = _traverse_polygons(C, S, name)
+        D = _traverse_polygons(C, S, '')
 
         return D
 

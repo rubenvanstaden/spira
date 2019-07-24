@@ -160,6 +160,7 @@ class Circuit(PCell):
 
         net = super().create_netlist()
         net = netlist.combine_net_nodes(net=net, algorithm=['d2d'])
+        # net = netlist.combine_net_nodes(net=net, algorithm=['s2s'])
         # net = netlist.combine_net_nodes(net=net, algorithm=['d2d', 's2s'])
 
         return net

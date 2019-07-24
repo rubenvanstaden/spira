@@ -74,17 +74,15 @@ class GmshGeometry(__Geometry__):
         import re
 
         surfaces = []
-        for i, polygon in enumerate(self.process_polygons):
-            ply = deepcopy(polygon)
-            shape = ply.shape.transform(ply.transformation)
+        for i, ply in enumerate(self.process_polygons):
+            shape = ply.shape.transform_copy(ply.transformation)
             layer = RDD.GDSII.EXPORT_LAYER_MAP[ply.layer]
             pts = [[p[0], p[1], 0] for p in shape.points]
-            # pts = [[p[0]*1e-6, p[1]*1e-6, 0] for p in shape.points]
             surface_label = '{}_{}_{}_{}'.format(layer.number, layer.datatype, GmshGeometry._ID, i)
             gp = self.geom.add_polygon(pts, lcar=self.lcar, make_surface=True, holes=None)
 
             for j, ll in enumerate(gp.lines):
-                pid = polygon.shape.segment_labels[j].split(' - hash ')
+                pid = ply.shape.segment_labels[j].split(' - hash ')
                 if len(pid) > 1:
                     line_label = "{}*{}*{}".format(pid[0], pid[1], j)
                 else:

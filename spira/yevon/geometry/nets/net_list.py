@@ -58,7 +58,7 @@ class NetList(TypedList):
         for c in self._list:
             c.transform(transformation)
         return self
-        
+
     def disjoint(self):
         graphs = [net.g for net in self._list]
         net = Net(g=nx.disjoint_union_all(graphs))
