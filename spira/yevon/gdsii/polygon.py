@@ -85,13 +85,7 @@ class __ShapeElement__(__LayerElement__):
 
     def flatten(self, level=-1):
         """ Flatten the polygon without creating a copy. """
-        # return self.expand_transform()
-        # print(self.ports)
-        # print('--------------------------')
-        ply = self.expand_transform()
-        # print(ply.ports)
-        # print('')
-        return ply
+        return self.expand_transform()
 
     # FIXME: Move this to an output generator.
     def convert_to_gdspy(self, transformation=None):
@@ -214,6 +208,7 @@ class Polygon(__ShapeElement__):
             layer=deepcopy(self.layer),
             # ports=ports,
             ports=deepcopy(self.ports),
+            # ports=self.ports.transform_copy(self.transformation),
             transformation=deepcopy(self.transformation)
         )
 
@@ -265,8 +260,8 @@ class Polygon(__ShapeElement__):
 
             net = F(net)[0]
 
-            from spira.yevon.utils.netlist import combine_net_nodes
-            net = combine_net_nodes(net=net, algorithm=['d2d'])
+            # from spira.yevon.utils.netlist import combine_net_nodes
+            # net = combine_net_nodes(net=net, algorithm=['d2d'])
 
             # from spira.yevon.geometry.nets.net import CellNet
             # cn = CellNet()

@@ -64,8 +64,8 @@ class SRef(__RefElement__):
         return hash(self.__repr__())
 
     def __deepcopy__(self, memo):
-        return SRef(
-        # return self.__class__(
+        # return SRef(
+        return self.__class__(
             alias=self.alias,
             reference=deepcopy(self.reference),
             midpoint=deepcopy(self.midpoint),

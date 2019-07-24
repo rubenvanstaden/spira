@@ -88,7 +88,6 @@ class MetalConnectFilter(Filter):
                 if (shape1 != shape2) and (e1.layer == e2.layer):
                     overlap_shape = shape1.intersections(shape2)
                     if isinstance(overlap_shape, Shape):
-                        # if len(overlap_shape) > 0:
                         if overlap_shape.is_empty() is False:
                             clip_shape.extend(overlap_shape.points.tolist())
 
@@ -98,6 +97,7 @@ class MetalConnectFilter(Filter):
                     original_shape=original_shape,
                     clip_shape=clip_shape,
                     edges=v_model.connected_edges)
+                D.elements[i].ports = D.elements[i].ports.transform_copy(e1.transformation)
                 D.elements[i].transformation = None
 
         return item

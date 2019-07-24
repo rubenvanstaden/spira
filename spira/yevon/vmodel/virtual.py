@@ -152,7 +152,7 @@ class VirtualConnect(__VirtualModel__):
 
         elems = spira.ElementList()
 
-        elems += self.device.elements
+        # elems += self.device.elements
 
         # for e in self.__make_polygons__():
         #     elems += e
@@ -160,6 +160,8 @@ class VirtualConnect(__VirtualModel__):
         for ply_overlap, edges in self.connected_edges.items():
             if ply_overlap.is_empty() is False:
                 elems += ply_overlap
+
+        elems += self.device.elements
 
         # for e in self.device.elements:
         #     elems += e
@@ -173,6 +175,9 @@ def virtual_process_model(device, process_flow):
 
 
 def virtual_connect(device):
-    D = device.expand_flat_copy()
-    return VirtualConnect(device=deepcopy(D))
+    # D = deepcopy(device)
+    D = deepcopy(device).expand_flat_copy()
+    # D = device
+    # D = device.expand_flat_copy()
+    return VirtualConnect(device=D)
 

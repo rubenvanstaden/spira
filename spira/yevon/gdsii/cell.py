@@ -174,15 +174,16 @@ class Cell(__Cell__):
     def __str__(self):
         return self.__repr__()
 
-    # def __deepcopy__(self, memo):
-    #     return Cell(
-    #     # return self.__class__(
-    #         name=self.name + '_copy',
-    #         alias=self.alias,
-    #         elements=deepcopy(self.elements),
-    #         ports=deepcopy(self.ports),
-    #         transformation=deepcopy(self.transformation)
-    #     )
+    def __deepcopy__(self, memo):
+        # return Cell(
+        return self.__class__(
+            name=self.name + '_copy',
+            alias=self.alias,
+            elements=deepcopy(self.elements),
+            # ports=self.ports,
+            ports=deepcopy(self.ports),
+            # transformations=deepcopy(self.transformations)
+        )
 
     def create_name(self):
         if not hasattr(self, '__name__'):

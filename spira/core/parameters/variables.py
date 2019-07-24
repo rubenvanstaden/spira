@@ -35,7 +35,10 @@ def IntegerParameter(restriction=None, preprocess=None, **kwargs):
     from .variables import INTEGER
     if 'default' not in kwargs:
         kwargs['default'] = 0
-    return RestrictedParameter(restriction=INTEGER, **kwargs)
+    R = INTEGER & restriction
+    # P = preprocess
+    # return RestrictedParameter(restriction=R, preprocess=P, **kwargs)
+    return RestrictedParameter(restriction=R, **kwargs)
 
 
 def FloatParameter(restriction=None, **kwargs):

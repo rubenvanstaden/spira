@@ -55,6 +55,12 @@ class Device(PCell):
             F['via_contact'] = True
             F['metal_connect'] = False
 
+            # for e in D.elements:
+            #     print(e.shape.points)
+            #     e.shape = e.shape.snap_to_grid()
+            #     print(e.shape.points)
+            #     print('')
+
             elems = F(D).elements
             # elems = D.elements
 
@@ -106,6 +112,8 @@ class Circuit(PCell):
             for e in cell.elements.sref:
                 if isinstance(e.reference, Device):
                     D = deepcopy(e.reference)
+                    D.elements.transform(e.transformation)
+                    D.ports.transform(e.transformation)
                     devices[D] = D.elements
                     D.elements = ElementList()
                     S = deepcopy(e)
@@ -113,6 +121,7 @@ class Circuit(PCell):
                     c2dmap[cell] += S
                 else:
                     S = deepcopy(e)
+                    # print(S)
                     S.reference = c2dmap[e.reference]
                     c2dmap[cell] += S
 
@@ -126,10 +135,12 @@ class Circuit(PCell):
             devices = {}
 
             for cell in C.dependencies():
-                D = Cell(name=cell.name)
-                for e in cell.elements.polygons:
-                    D += e
-
+                # D = Cell(name=cell.name)
+                D = Cell(name=cell.name, elements=deepcopy(cell.elements.polygons))
+                # for e in cell.elements.polygons:
+                #     D += e
+                # for p in cell.ports:
+                #     D += e
                 c2dmap.update({cell:D})
 
             for cell in C.dependencies():
