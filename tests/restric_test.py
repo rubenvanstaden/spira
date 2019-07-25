@@ -5,12 +5,23 @@ from spira.core.parameters.processors import ProcessorInt
 
 
 class Layer(spira.ParameterInitializer):
-    range_int = spira.IntegerParameter(restriction=spira.RestrictRange(lower=1, upper=5))
+    range_int = spira.IntegerParameter(restriction=spira.RestrictRange(lower=1, upper=5),preprocess=ProcessorInt())
 
 layer = Layer()
 
-def test_restric_range_correct():
-    layer.range_int = 1
-    assert 1 == layer.range_int
+def test_range_correct():
+    layer.range_int = 3
+    assert 3 == layer.range_int
 
-layer.range_int = 13
+def test_range_incorrect_bound():
+    with pytest.raises(ValueError) as e:
+        layer.range_int = 10
+
+
+def test_range_string_correct():
+    layer.range_int = "3"
+    assert 3 == layer.range_int
+#redundant
+def test_int_param_correct():
+    layer.range_int = 3.2
+    assert 3 == layer.range_int    
