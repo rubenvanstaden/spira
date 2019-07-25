@@ -3,7 +3,6 @@ import networkx as nx
 from spira.core.parameters.restrictions import RestrictType, RestrictRange
 from spira.core.parameters.descriptor import RestrictedParameter
 
-
 NUMBER = RestrictType((int, float, np.int32, np.int64, np.float))
 FLOAT = RestrictType(float)
 INTEGER = RestrictType(int)
@@ -16,12 +15,12 @@ TUPLE = RestrictType(tuple)
 NUMPY_ARRAY = RestrictType(np.ndarray)
 GRAPH = RestrictType(nx.Graph)
 
-
-def NumberParameter(restriction=None, **kwargs):
+def NumberParameter(restriction=None, preprocess = None,**kwargs):
     if 'default' not in kwargs:
         kwargs['default'] = 0
     R = NUMBER & restriction
-    return RestrictedParameter(restriction=R, **kwargs)
+    P = preprocess
+    return RestrictedParameter(restriction=R,preprocess = P, **kwargs)
 
 
 def ComplexParameter(restriction=None, **kwargs):
@@ -35,22 +34,27 @@ def IntegerParameter(restriction=None, preprocess=None, **kwargs):
     from .variables import INTEGER
     if 'default' not in kwargs:
         kwargs['default'] = 0
-    return RestrictedParameter(restriction=INTEGER, **kwargs)
+    R = INTEGER & restriction
+    P = preprocess
+    return RestrictedParameter(restriction=R, preprocess = P,**kwargs)
 
 
-def FloatParameter(restriction=None, **kwargs):
+def FloatParameter(restriction=None,preprocess=None,**kwargs):
     from .variables import FLOAT
     if 'default' not in kwargs:
         kwargs['default'] = 0.0
-    return RestrictedParameter(restriction=FLOAT, **kwargs)
+    R = FLOAT & restriction
+    P = preprocess
+    return RestrictedParameter(restriction=R,preprocess = P,**kwargs)
 
 
-def StringParameter(restriction=None, **kwargs):
+def StringParameter(restriction=None, preprocess = None, **kwargs):
     from .variables import STRING
     if 'default' not in kwargs:
         kwargs['default'] = ''
     R = STRING & restriction
-    return RestrictedParameter(restriction=R, **kwargs)
+    P = preprocess
+    return RestrictedParameter(restriction=R,preprocess = P, **kwargs)
 
 
 def BoolParameter(restriction=None, **kwargs):
