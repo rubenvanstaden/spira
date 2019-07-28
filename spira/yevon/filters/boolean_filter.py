@@ -15,7 +15,7 @@ __all__ = [
 class ProcessBooleanFilter(Filter):
     """  """
 
-    def __filter___Cell____(self, item):
+    def filter___Cell__(self, item):
         from spira.yevon.gdsii.cell import Cell
 
         ports = PortList()
@@ -41,7 +41,7 @@ class ProcessBooleanFilter(Filter):
 class SimplifyFilter(Filter):
     """  """
 
-    def __filter___Cell____(self, item):
+    def filter___Cell__(self, item):
         from spira.yevon.utils import clipping
         from spira.yevon.gdsii.cell import Cell
 
@@ -70,7 +70,7 @@ class SimplifyFilter(Filter):
 class MetalConnectFilter(Filter):
     """  """
 
-    def __filter___Cell____(self, item):
+    def filter___Cell__(self, item):
         from copy import deepcopy
         from spira.yevon.vmodel.virtual import virtual_connect
         from spira.yevon.geometry.shapes.adapters import ShapeConnected
@@ -109,7 +109,7 @@ class MetalConnectFilter(Filter):
 class ViaConnectFilter(Filter):
     """  """
 
-    def __filter___Cell____(self, item):
+    def filter___Cell__(self, item):
         from spira.yevon.gdsii.cell import Cell
         from spira.yevon.utils import clipping
         from spira.yevon.vmodel.virtual import virtual_connect

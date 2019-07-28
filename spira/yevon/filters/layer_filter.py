@@ -12,7 +12,7 @@ class __LayerFilter__(Filter):
 
 
 class LayerFilterAllow(__LayerFilter__):
-    def __filter___LayerElement____(self, item):
+    def filter___LayerElement__(self, item):
         if item.layer in self.layers:
             return [item]
         else:
@@ -24,7 +24,7 @@ class LayerFilterAllow(__LayerFilter__):
 
 
 class LayerFilterDelete(__LayerFilter__):
-    def __filter___LayerElement____(self, item):
+    def filter___LayerElement__(self, item):
         if item.layer in self.layers:
             LOG.debug("LayerFilterDelete is filtering out item %s" %item)
             return []

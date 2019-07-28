@@ -22,28 +22,6 @@ class Filter(ParameterInitializer):
         else:
             return self._filter(item)
 
-    def _filter(self, item):
-        import inspect
-        T = type(item)
-        if inspect.isclass(T):
-            for M in inspect.getmro(T):
-                N = '__filter_{}__'.format(M.__name__)
-                if hasattr(self, N):
-                    LOG.debug("Applying method %s of %s to %s" %(N,self,item))
-                    return getattr(self, N)(item)
-            return self.__filter_default__(item)
-        else:
-            N = '__filter_{}'.format(T.__name__)
-            if hasattr(self, N):
-                expr = 'self.{}(item)'.format(N)
-                LOG.debug('Executing {}'.format(expr))
-                return eval(expr)
-            else:
-                return self.__filter_default__(item)
-
-    def __filter_default__(self, item):
-        return [item]
-
     def __add__(self, other):
         if isinstance(other, Filter):
             return __CompoundFilter__(filters = [self, other])
@@ -60,13 +38,35 @@ class Filter(ParameterInitializer):
     def __repr__(self):
         return "<GDS Primitive Filter>"
 
+    def _filter(self, item):
+        import inspect
+        T = type(item)
+        if inspect.isclass(T):
+            for M in inspect.getmro(T):
+                N = 'filter_{}'.format(M.__name__)
+                if hasattr(self, N):
+                    LOG.debug("Applying method %s of %s to %s" %(N,self,item))
+                    return getattr(self, N)(item)
+            return self.filter_default(item)
+        else:
+            N = 'filter_{}'.format(T.__name__)
+            if hasattr(self, N):
+                expr = 'self.{}(item)'.format(N)
+                LOG.debug('Executing {}'.format(expr))
+                return eval(expr)
+            else:
+                return self.filter_default(item)
+
+    def filter_default(self, item):
+        return [item]
+
 
 class __CompoundFilter__(Filter):
     """
 
     """
 
-    def __init__(self, filters = [], **kwargs):
+    def __init__(self, filters=[], **kwargs):
         super(__CompoundFilter__,self).__init__(**kwargs)
         self._sub_filters = filters
 
@@ -81,14 +81,6 @@ class __CompoundFilter__(Filter):
     def __iadd__(self, other):
         self.add(other)
         return self
-
-    def add(self, other):
-        if isinstance(other, __CompoundFilter__):
-            self._sub_filters += other._sub_filter
-        elif isinstance(other, Filter):
-            self._sub_filters += [other]
-        else:
-            raise TypeError("Cannot add %s to Filter" % type(other))
 
     def __call__(self, item):
         LOG.debug("Applying all subfilters. Item = %s" % item)
@@ -107,6 +99,14 @@ class __CompoundFilter__(Filter):
         S += ">"
         return S
 
+    def add(self, other):
+        if isinstance(other, __CompoundFilter__):
+            self._sub_filters += other._sub_filter
+        elif isinstance(other, Filter):
+            self._sub_filters += [other]
+        else:
+            raise TypeError("Cannot add %s to Filter" % type(other))
+
 
 class ToggledCompoundFilter(__CompoundFilter__):
     """
@@ -124,7 +124,6 @@ class ToggledCompoundFilter(__CompoundFilter__):
             raise KeyError("__ToggledCompoundFilter__: key must be of type str, is type %s"%(type(key)))
         if not isinstance(item, bool):
             raise KeyError("__ToggledCompoundFilter__: item must be of type bool, is type %s"%(type(item)))
-        # print(key, item)
         self._filter_status[key] = item
 
     def __getitem__(self, key):

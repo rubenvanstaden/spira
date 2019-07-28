@@ -48,6 +48,10 @@ class CellList(TypedList):
             return False
         else:
             return list.__contains__(self._list, item)
+            
+    def __iter__(self):
+        for i in self._list:
+            yield i
 
     def __fast_contains__(self, name):
         for i in self._list:

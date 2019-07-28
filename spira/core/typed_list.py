@@ -82,6 +82,9 @@ class TypedList(ParameterInitializer, list):
     #     self._list.append(val)
     #     print(self._list)
 
+    def remove(self, item):
+        self._list.remove(item)
+
     def append(self, item):
         if isinstance(item, self.__item_type__):
             # list.append(self, item)

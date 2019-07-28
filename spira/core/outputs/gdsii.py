@@ -17,7 +17,9 @@ class OutputGdsii(ParameterInitializer):
     """ Collects the transformed elements to be send to Gdspy. """
 
     disabled_ports = DictParameter(default={}, doc='Disabled port categories for viewing.')
-    view_type = StringParameter(default='hierarchical', restriction=RestrictValueList(['hierarchical', 'flatten', 'expanded']))
+    view_type = StringParameter(
+        default='hierarchical',
+        restriction=RestrictValueList(['hierarchical', 'flatten', 'expanded']))
 
     def __init__(self, cell, **kwargs):
 
@@ -145,13 +147,8 @@ class OutputGdsii(ParameterInitializer):
             G = gdspy.Cell(c.name, exclude_from_current=True)
             self.__collected_cells__.update({c:G})
 
-        # NOTE: First collect all port polygons and labels,
-        # before commiting them to a cell instance.
         self.collect_ports(item)
         self.collect_cells(item)
-
-        # NOTE: Gdspy cells must first be constructed, 
-        # before adding them as references.
         self.collect_srefs(item)
 
     def gdspy_gdsii_output(self, library):
@@ -201,53 +198,3 @@ class GdsiiLayout(ParameterInitializer):
 
 Outputs.mixin(GdsiiLayout)
 
-
-
-
-
-# class GdsiiLayout(ParameterInitializer):
-#     """
-#     Class that generates output formates for a layout or library containing layouts.
-#     If a name is given, the layout is written to a GDSII file.
-#     """
-
-#     name = StringParameter(allow_none=True, default=None, doc='If not None write to gds file.')
-#     view = BoolParameter(default=True, doc='If true the output the layout in gdspy viewer.')
-#     disabled_ports = DictParameter(default={}, doc='Disabled port categories for viewing.')
-#     view_type = StringParameter(default='hierarchical', restriction=RestrictValueList(['hierarchical', 'flatten', 'expanded']))
-
-#     def output(self):
-
-#         _default = {'cells': True, 'polygons': True, 'arrows': True, 'labels': True}
-#         # _default = {'cells': True, 'polygons': False, 'arrows': False, 'labels': False}
-
-#         if disabled_ports is not None:
-#             _default.update(disabled_ports)
-
-#         if self.view_type == 'hierarchical':
-#             D = self
-#         elif self.view_type == 'flatten':
-#             D = self.flat_copy()
-#         elif self.view_type == 'expanded':
-#             D = self.expanded_transform()
-
-#         G = OutputGdsii(cell=D, view_type=self.view_type, disabled_ports=_default)
-
-#         gdspy_library = gdspy.GdsLibrary(name=D.name)
-#         G.gdspy_gdsii_output(gdspy_library)
-
-#         if name is not None:
-#             writer = gdspy.GdsWriter('{}.gds'.format(name), unit=1.0e-6, precision=1.0e-12)
-#             for name, cell in gdspy_library.cell_dict.items():
-#                 writer.write_cell(cell)
-#                 del cell
-#             writer.close()
-
-#         if view is True:
-#             gdspy.LayoutViewer(library=gdspy_library)
-
-
-# def gdsii_output(self, name=None, view_type='hierarchical', disabled_ports=None, view=True):
-
-#     G = GdsiiLayout(name=name, view_type=view_type, disabled_ports=disabled_ports, view=view)
-#     G.output()

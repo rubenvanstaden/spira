@@ -10,6 +10,10 @@ from numpy.linalg import norm
 from spira.validatex.lvs.detection import *
 
 
+class InputGdsii():
+    pass
+
+
 def current_path(filename):
     return '{}/{}.gds'.format(os.getcwd(), filename)
 
@@ -86,7 +90,7 @@ def import_gds(filename, cellname=None, flatten=False, pcell=True):
         D = spira.Cell(name=cell.name)
         for e in cell.polygons:
 
-            # FIXME: Maybe check the datatype.
+            # FIXME: Maybe check the datatype and add layer mapping.
             for n, p in zip(e.layers, e.polygons):
                 layer = spira.Layer(number=int(n), datatype=0)
                 D += spira.Polygon(shape=p, layer=layer)

@@ -23,7 +23,7 @@ class __EdgeFilter__(Filter):
 class EdgeFilter(__EdgeFilter__):
     """ Filter only passes edges with the specified purpose. """
 
-    def __filter___Cell____(self, item):
+    def filter___Cell__(self, item):
         from copy import deepcopy
         from spira.yevon.gdsii.cell import Cell
 

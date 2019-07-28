@@ -87,15 +87,15 @@ class __ShapeElement__(__LayerElement__):
         """ Flatten the polygon without creating a copy. """
         return self.expand_transform()
 
-    # FIXME: Move this to an output generator.
-    def convert_to_gdspy(self, transformation=None):
-        """ Converts a SPiRA polygon to a Gdspy polygon.
-        The extra transformation parameter is the
-        polygon edge ports. """
-        layer = RDD.GDSII.EXPORT_LAYER_MAP[self.layer]
-        T = self.transformation + transformation
-        shape = self.shape.transform_copy(T)
-        return gdspy.Polygon(points=shape.points, layer=layer.number, datatype=layer.datatype)
+    # # FIXME: Move this to an output generator.
+    # def convert_to_gdspy(self, transformation=None):
+    #     """ Converts a SPiRA polygon to a Gdspy polygon.
+    #     The extra transformation parameter is the
+    #     polygon edge ports. """
+    #     layer = RDD.GDSII.EXPORT_LAYER_MAP[self.layer]
+    #     T = self.transformation + transformation
+    #     shape = self.shape.transform_copy(T)
+    #     return gdspy.Polygon(points=shape.points, layer=layer.number, datatype=layer.datatype)
 
     def fillet(self, radius, angle_resolution=128, precision=0.001):
         """ Applies fillet rounding algorithm to polygon corners. """
@@ -206,7 +206,6 @@ class Polygon(__ShapeElement__):
         return Polygon(
             shape=deepcopy(self.shape),
             layer=deepcopy(self.layer),
-            # ports=ports,
             ports=deepcopy(self.ports),
             # ports=self.ports.transform_copy(self.transformation),
             transformation=deepcopy(self.transformation)
@@ -341,7 +340,8 @@ def Cross(layer, box_size=20, thickness=5, center=(0,0), alias=None, transformat
     return Polygon(alias=alias, shape=shape, layer=layer, transformation=transformation)
 
 
-def Wedge(layer, begin_coord=(0,0), end_coord=(10,0), begin_width=3, end_width=1, center=(0,0), alias=None, transformation=None):
+def Wedge(layer, begin_coord=(0,0), end_coord=(10,0), begin_width=3, end_width=1,
+          center=(0,0), alias=None, transformation=None):
     """ Creates a circle shape that can be used in 
     GDSII format as a polygon object.
 
@@ -359,7 +359,8 @@ def Wedge(layer, begin_coord=(0,0), end_coord=(10,0), begin_width=3, end_width=1
     return Polygon(alias=alias, shape=shape, layer=layer, transformation=transformation)
 
 
-def Parabolic(layer, begin_coord=(0,0), end_coord=(10,0), begin_width=3, end_width=1, center=(0,0), alias=None, transformation=None):
+def Parabolic(layer, begin_coord=(0,0), end_coord=(10,0), begin_width=3, end_width=1,
+              center=(0,0), alias=None, transformation=None):
     """ Creates a circle shape that can be used in 
     GDSII format as a polygon object.
 

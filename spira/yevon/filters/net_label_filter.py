@@ -30,7 +30,7 @@ class NetProcessLabelFilter(__NetFilter__):
 
     process_polygons = ElementListParameter()
 
-    def __filter___Net____(self, item):
+    def filter___Net__(self, item):
         triangles = item.process_triangles()
         for key, nodes in triangles.items():
             for n in nodes:
@@ -49,7 +49,7 @@ class NetDeviceLabelFilter(__NetFilter__):
 
     device_ports = PortListParameter()
 
-    def __filter___Net____(self, item):
+    def filter___Net__(self, item):
         for n, triangle in item.triangle_nodes().items():
 
             points = [geometry.c2d(item.mesh_data.points[i]) for i in triangle]
@@ -84,7 +84,7 @@ class NetEdgeFilter(__NetFilter__):
                 nodes.append(n)
         return nodes
 
-    def __filter___Net____(self, item):
+    def filter___Net__(self, item):
 
         ELM_TYPE = {1: 'line', 2: 'triangle'}
 
@@ -220,7 +220,7 @@ class NetBlockLabelFilter(__NetFilter__):
 
     references = ElementListParameter()
 
-    def __filter___Net____(self, item):
+    def filter___Net__(self, item):
         for S in self.references:
             for e in reference_metal_blocks(S):
                 for n in item.g.nodes():

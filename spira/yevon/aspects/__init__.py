@@ -6,7 +6,8 @@ from spira.yevon.aspects.polygon import PolygonAspects, PolygonClipperAspects
 from spira.yevon.aspects.port import PortProperty, SRefPortProperty, PolygonPortProperty, CellPortProperty
 from spira.yevon.aspects.netlist import NetlistAspects
 from spira.core.transformable import Transformable
-from spira.core.outputs.base import Outputs
+# from spira.core.outputs.base import Outputs
+from spira.yevon.aspects.output import OutputGdsiiAspect
 from spira.yevon.aspects.shape import ShapeClipperAspects
 from spira.yevon.geometry.shapes import Shape
 
@@ -18,7 +19,7 @@ def load_aspect():
     Cell.mixin(CellPortProperty)
     Cell.mixin(NetlistAspects)
     Cell.mixin(Transformable)
-    Cell.mixin(Outputs)
+    Cell.mixin(OutputGdsiiAspect)
 
     SRef.mixin(SRefPortProperty)
     SRef.mixin(NetlistAspects)

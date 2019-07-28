@@ -39,6 +39,9 @@ class MapGdsiiToPhysical(ParameterInitializer):
         else:
             raise Exception("Key should be of type PhysicalLayer, but is of type %s." %type(key))
 
+    def get(self, key, default):
+        return self.__getitem__(key, default)
+
 
 class MapPhysicalToGdsii(ParameterInitializer):
     """  """
@@ -56,3 +59,5 @@ class MapPhysicalToGdsii(ParameterInitializer):
         else:
             raise Exception("Key should be of type PhysicalLayer, but is of type %s." %type(key))
 
+    def get(self, key, default):
+        return self.__getitem__(key, default)

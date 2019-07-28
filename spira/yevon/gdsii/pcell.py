@@ -135,12 +135,7 @@ class Circuit(PCell):
             devices = {}
 
             for cell in C.dependencies():
-                # D = Cell(name=cell.name)
                 D = Cell(name=cell.name, elements=deepcopy(cell.elements.polygons))
-                # for e in cell.elements.polygons:
-                #     D += e
-                # for p in cell.ports:
-                #     D += e
                 c2dmap.update({cell:D})
 
             for cell in C.dependencies():
@@ -156,7 +151,6 @@ class Circuit(PCell):
 
             Df = F(D)
 
-            # print(Df.dependencies())
             for d in Df.dependencies():
                 if d in devices.keys():
                     d.elements = devices[d]

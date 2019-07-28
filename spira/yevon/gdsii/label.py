@@ -22,18 +22,18 @@ class __Label__(__LayerElement__):
     def __init__(self, position, **kwargs):
         super().__init__(position=position, **kwargs)
 
-    def convert_to_gdspy(self, transformation=None):
-        T = self.transformation + transformation
-        self.position = T.apply_to_coord(self.position)
-        self.orientation = T.apply_to_angle(self.orientation)
-        layer = RDD.GDSII.EXPORT_LAYER_MAP[self.layer]
-        return gdspy.Label(self.text,
-            position=self.position.to_numpy_array(),
-            anchor='o',
-            rotation=self.orientation,
-            layer=layer.number,
-            texttype=layer.datatype
-        )
+    # def convert_to_gdspy(self, transformation=None):
+    #     T = self.transformation + transformation
+    #     self.position = T.apply_to_coord(self.position)
+    #     self.orientation = T.apply_to_angle(self.orientation)
+    #     layer = RDD.GDSII.EXPORT_LAYER_MAP[self.layer]
+    #     return gdspy.Label(self.text,
+    #         position=self.position.to_numpy_array(),
+    #         anchor='o',
+    #         rotation=self.orientation,
+    #         layer=layer.number,
+    #         texttype=layer.datatype
+    #     )
 
     def encloses(self, ply):
         if isinstance(ply, spira.Polygon):

@@ -8,7 +8,7 @@ __all__ = ['EmptyFilter']
 class EmptyFilter(Filter):
     """ Empty filter used for concatenation. """
 
-    def __filter_default__(self, item):
+    def filter_default(self, item):
         if hasattr(item, 'is_empty'):
             if item.is_empty():
                 LOG.debug('Emptyfilter is filtering out : {}'.format(item))
