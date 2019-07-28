@@ -4,6 +4,9 @@ from spira.core.parameters.initializer import ParameterInitializer
 from spira.core.parameters.descriptor import RestrictedParameter
 from spira.core.parameters.restrictions import RestrictType
 from spira.core.parameters.variables import StringParameter
+from spira.core.transforms import Translation
+from spira.core.transformation import CompoundTransform
+from spira.yevon.geometry.coord import Coord
 from spira.yevon.filters import Filter
 from spira.yevon.io.collector import ListCollector
 from spira.yevon.process import get_rule_deck
@@ -22,18 +25,13 @@ class __OutputBasic__(ParameterInitializer):
         # restriction=RestrictType(Filter),
         doc="filter class which is applied to all output items")
 
-    # name_filter = RestrictedProperty(
-    #     default=Filter(),
-    #     restriction=RestrictType(Filter),
-    #     doc="filter class which is applied to all names")
-
     def __init__(self, file_name=None, **kwargs):
         super().__init__(file_name=file_name, **kwargs)
         self.__init_collector__()
         self.__collect_method_dict__ = {}
 
     def __init_collector__(self):
-        self.collector = ListCollector()
+        self.collector = {}
 
     def write(self, item):
         raise NotImplementedError('Must provide implementation in subclass.')
@@ -84,9 +82,9 @@ class OutputBasic(__OutputBasic__):
 
     def set_current_cell(self, item):
         if item.name not in gdspy.current_library.cell_dict.keys():
-            # print(item)
-            cell = gdspy.Cell(name=item.name)
-            self._current_cell = cell
+            c = gdspy.Cell(item.name, exclude_from_current=True)
+            self.collector.update({item: c})
+            self._current_cell = item
 
     def do_collect(self, item, **kwargs):
         from spira.yevon.gdsii.library import Library
@@ -101,13 +99,13 @@ class OutputBasic(__OutputBasic__):
 
     def collect_list(self, item, **kwargs):
         for i in item:
-            self.collect(i,  **kwargs)   
+            self.collect(i, **kwargs)
         return self
 
-    # def collect_Library(self, library, usecache = False, **kwargs):
-    #     referenced_cells = self.library.referenced_cells(usecache = usecache)
-    #     self.collect(referenced_cells, **kwargs)
-    #     return self
+    def collect_Library(self, library, usecache = False, **kwargs):
+        referenced_cells = self.library.referenced_cells()
+        self.collect(referenced_cells, **kwargs)
+        return self
 
     def collect_CellList(self, item, **kwargs):
         for s in item:
@@ -117,7 +115,6 @@ class OutputBasic(__OutputBasic__):
     def collect_Cell(self, item, **kwargs):
         self.set_current_cell(item)
         self.collect(item.elements, **kwargs)
-        self.collector += self._current_cell
         return self
 
     def collect_ElementList(self, item, additional_transform=None, **kwargs):
@@ -128,6 +125,29 @@ class OutputBasic(__OutputBasic__):
     def collect_Group(self, item, additional_transform=None, **kwargs):
         T = item.transformation + additional_transform
         self.collect(item.elements, additional_transform=T, **kwargs)
+        return self
+
+    def collect_SRef(self, item, additional_transform=None):
+        T = item.transformation + Translation(item.midpoint)
+        origin = Coord(0,0).transform(T).to_numpy_array()
+
+        rotation = 0
+        reflection = False
+        magnification = 1.0
+
+        if isinstance(T, CompoundTransform):
+            for t in T.__subtransforms__:
+                if isinstance(t, GenericTransform):
+                    rotation = t.rotation
+                    reflection = t.reflection
+                    magnification = t.magnification
+        else:
+            rotation = T.rotation
+            reflection = T.reflection
+            magnification = T.magnification
+
+        ref_cell = self.collector[item.reference]
+        self.collect_reference(ref_cell, origin, rotation, reflection, magnification)
         return self
 
     def collect_Polygon(self, item, additional_transform=None, **kwargs):

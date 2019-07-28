@@ -14,7 +14,6 @@ class OutputGdsiiAspect(__Aspects__):
         from spira.yevon.io.output_gdsii import OutputGdsii
         my_lib = Library(name=self.name, unit=unit, grid=grid)
         my_lib += self
-        # print(my_lib.cells)
         if layer_map is None:
             layer_map = RDD.GDSII.EXPORT_LAYER_MAP
         output = OutputGdsii(file_name=file_name, layer_map=layer_map)

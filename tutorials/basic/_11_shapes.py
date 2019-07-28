@@ -36,7 +36,7 @@ class ShapesExample(spira.Cell):
         # north_east = (7.0, 7.0)
         # t = ShapeFit(s, south_west, north_east)
         # S6 = Structure("shape_fit", Boundary(Layer(0), t))
-        
+
         # #create a shape which traces the contour with a certain line width
         # t = ShapePath(original_shape = s, path_width = 0.5)
         # S7 = Structure("ShapePath1", Boundary(Layer(0), t))

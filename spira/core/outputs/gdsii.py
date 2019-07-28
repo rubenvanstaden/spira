@@ -25,7 +25,7 @@ class OutputGdsii(ParameterInitializer):
 
         super().__init__(**kwargs)
 
-        self.__collected_cells__ = {}
+        self.collector = {}
         self.__collected_srefs__ = {}
         self.__collected_polygons__ = {}
         self.__collected_labels__ = {}
@@ -47,7 +47,7 @@ class OutputGdsii(ParameterInitializer):
         _polygon_ports = []
         for c in cell.dependencies():
             cp, cl, C_ports = {}, {}, {}
-            G = self.__collected_cells__[c]
+            G = self.collector[c]
 
             if self.disabled_ports['cells'] is True:
                 for p in c.ports:
@@ -87,7 +87,7 @@ class OutputGdsii(ParameterInitializer):
         from spira.yevon.visualization.viewer import PortLayout
         for c in cell.dependencies():
             cp, cl = {}, {}
-            G = self.__collected_cells__[c]
+            G = self.collector[c]
             for e in c.elements:
                 if isinstance(e, __ShapeElement__):
                     self.collect_polygons(e, cp)
@@ -103,7 +103,7 @@ class OutputGdsii(ParameterInitializer):
         from spira.core.transforms.generic import GenericTransform
 
         for c in cell.dependencies():
-            G = self.__collected_cells__[c]
+            G = self.collector[c]
             cs = {}
             for e in c.elements:
                 if isinstance(e, SRef):
@@ -128,7 +128,7 @@ class OutputGdsii(ParameterInitializer):
                             reflection = T.reflection
                             magnification = T.magnification
 
-                        ref_cell = self.__collected_cells__[e.reference]
+                        ref_cell = self.collector[e.reference]
 
                         S = gdspy.CellReference(
                             ref_cell=ref_cell,
@@ -145,7 +145,7 @@ class OutputGdsii(ParameterInitializer):
 
         for c in item.dependencies():
             G = gdspy.Cell(c.name, exclude_from_current=True)
-            self.__collected_cells__.update({c:G})
+            self.collector.update({c:G})
 
         self.collect_ports(item)
         self.collect_cells(item)
@@ -153,7 +153,7 @@ class OutputGdsii(ParameterInitializer):
 
     def gdspy_gdsii_output(self, library):
         """ Writes the SPiRA collected elements to a gdspy library. """
-        for c, G in self.__collected_cells__.items():
+        for c, G in self.collector.items():
             if c.name not in library.cell_dict.keys():
                 library.add(G)
 

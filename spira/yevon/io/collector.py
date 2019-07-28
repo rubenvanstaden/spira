@@ -16,23 +16,40 @@ class ListCollector(__Collector__):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self._list = []
+        self._list = {}
 
-    def __iadd__(self, item_list):
-        # print(item_list)
-        # self._list += item_list
-        self._list.append(item_list)
+    def __iadd__(self, item):
+        self._list.update(item)
         return self
-        
+
     def reset(self):
         return self
 
-    def output(self):
-        return self._list
+    def cells(self):
+        return self._list.values()
+
+
+# class ListCollector(__Collector__):
+
+#     def __init__(self, **kwargs):
+#         super().__init__(**kwargs)
+#         self._list = []
+
+#     def __iadd__(self, item_list):
+#         # print(item_list)
+#         # self._list += item_list
+#         self._list.append(item_list)
+#         return self
+
+#     def reset(self):
+#         return self
+
+#     def output(self):
+#         return self._list
 
 
 # class GdspyCollector(__Collector__):
-    
+
 #     def __init__(self, library, **kwargs):
 #         super().__init__(**kwargs)
 #         self._gdspy_library = library
