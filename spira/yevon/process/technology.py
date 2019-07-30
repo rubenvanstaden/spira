@@ -1,5 +1,3 @@
-import spira.all as spira
-
 
 __all__ = [
     'Database',

@@ -1,44 +1,44 @@
+from spira.core.parameters.variables import *
+from spira.core.parameters.descriptor import Parameter
 from spira.core.parameters.initializer import ParameterInitializer
+from spira.yevon.process.gdsii_layer import __Layer__, Layer
+from spira.yevon.process import get_rule_deck
 
- 
-class BasicInput(ParameterInitializer):
-    i_stream = DefinitionProperty(default = sys.stdin) # add limitation
 
-    def __init__(self, i_stream = sys.stdin, **kwargs):
-        super(BasicInput, self).__init__(
-            i_stream = i_stream,
-            **kwargs)
+RDD = get_rule_deck()
 
-    def read(self, size = None):
-        if size is None:
-            return self.parse(self.i_stream.read())
-        else:
-            return self.parse(self.i_stream.read(size))
+
+class __InputBasic__(ParameterInitializer):
+    """  """
+
+    file_name = StringParameter()
+    cell_name = StringParameter(allow_none=True, default=None)
+
+    def __init__(self, file_name, **kwargs):
+        super().__init__(file_name=file_name, **kwargs)
+
+    def read(self):
+        raise NotImplementedError('Must provide implementation in subclass.')
 
     def parse(self, item):
-        return item
+        raise NotImplementedError('Must provide implementation in subclass.')
 
 
-class InputBasic(BasicInput):
-    scaling = PositiveNumberProperty(default = 1.0)
-    layer_map = DefinitionProperty()
-    prefix = StringProperty(default = "")
-    
-    def __init__(self, i_stream = sys.stdin, **kwargs):
-        super(InputBasic, self).__init__(
-            i_stream = i_stream,
-            **kwargs)
+class InputBasic(__InputBasic__):
+    """  """
+
+    prefix = StringParameter(default='')
+    flatten = BoolParameter()
+    layer_map = Parameter(default=RDD.GDSII.IMPORT_LAYER_MAP)
+
+    def __init__(self, file_name, **kwargs):
+        super().__init__(file_name=file_name, **kwargs)
         self.library = None
 
     def read(self):
-        return self.parse()        
-
-    def parse(self):
-        return self.parse_library()
-
-    def parse_library(self):
-        self.library = Library("IMPORT")
-        self.__parse_library__()
+        self.library = Library('Imported')
+        for cell in self.parse.dependencies():
+            self.library += cell
         return self.library
 
     def map_layer(self, layer):
@@ -49,12 +49,6 @@ class InputBasic(BasicInput):
             return L
         else:
             return Layer(L)
-
-    def make_structure_name(self, name):
-        return self.prefix + name
-    
-    def define_layer_map(self):
-        return TECH.GDSII.IMPORT_LAYER_MAP #FIXME : using 'default' for the property would be better, but that gives an exception ...
 
 
 

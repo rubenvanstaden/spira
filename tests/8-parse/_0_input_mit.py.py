@@ -1,10 +1,8 @@
 import os
+from spira.technologies.mit.process import RDD
 import spira.all as spira
-from spira.yevon import io
+import spira.yevon.io.input_gdsii as io
 from copy import copy, deepcopy
-
-
-from spira.technologies.mit.process.database import RDD
 
 
 if __name__ == '__main__':
@@ -17,14 +15,11 @@ if __name__ == '__main__':
     # file_name = '/home/therealtyler/code/phd/spira/tests/8-parse/mit/lieze/dfft.gds'
     # file_name = '/home/therealtyler/code/phd/spira/tests/8-parse/mit/lieze/circuit.gds'
 
-    D = io.import_gds(filename=file_name, pcell=False)
+    # input_gdsii = spira.InputGdsii(file_name=file_name)
+    # input_gdsii.layer_map = RDD.GDSII.IMPORT_LAYER_MAP
 
-    # for e in D.elements.sref:
-    #     print(e)
-    #     for i in e.reference.elements:
-    #         print(i)
-    #     print('')
+    input_gdsii = spira.InputGdsii(file_name=file_name, layer_map=RDD.GDSII.IMPORT_LAYER_MAP)
+    D = input_gdsii.parse()
 
-    # D.gdsii_output()
-    D.gdsii_output_expanded()
+    D.gdsii_output(file_name='input')
 

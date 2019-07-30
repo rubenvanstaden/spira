@@ -6,6 +6,9 @@ from spira.yevon.process import get_rule_deck
 RDD = get_rule_deck()
 
 
+__all__ = ['OutputGdsii']
+
+
 class OutputGdsii(OutputBasic):
     """ Writes GDS output to a stream """
 
@@ -13,7 +16,6 @@ class OutputGdsii(OutputBasic):
         if file_name is None:
             raise ValueError('No GDSII file name specified.')
         super().__init__(file_name=file_name, **kwargs)
-        self.file_name = file_name
 
     def write(self, item):
         self.collect(item)
