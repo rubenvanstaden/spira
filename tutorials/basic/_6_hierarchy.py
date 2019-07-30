@@ -44,8 +44,8 @@ class ResistorExtended(Resistor):
 
 if __name__ == '__main__':
 
-    # D = Resistor()
-    D = ResistorExtended()
-    D.gdsii_output(name='Resistor')
+    D = Resistor()
+    # D = ResistorExtended()
+    D.gdsii_output(file_name='Resistor')
 
 

@@ -21,8 +21,8 @@ class OutputGdsiiAspect(__Aspects__):
         LOG.debug("Finished writing structure to GDS2.")
         if viewer is True:
             output.viewer()
-        
-       
+
+
 class OutputPlotlyNetlist(__Aspects__):
     pass
 

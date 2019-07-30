@@ -20,6 +20,6 @@ class Resistor(spira.PCell):
 if __name__ == '__main__':
 
     D = Resistor()
-    D.gdsii_output()
+    D.gdsii_output(file_name='Resistor')
 
 

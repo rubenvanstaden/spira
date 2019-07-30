@@ -32,7 +32,7 @@ class VirtualProcessModel(__VirtualModel__):
 
     def create_geometry(self):
         process_geom = {}
-        for pg in self.device.process_elements:
+        for pg in self.device.derived_merged_elements:
             if RDD.ENGINE.GEOMETRY == 'GMSH_ENGINE':
                 process_geom[pg.process] = GmshGeometry(process=pg.process, process_polygons=pg.elements)
             else:
@@ -112,7 +112,7 @@ class VirtualConnect(__VirtualModel__):
 
     def _connect_overlap_edges(self, D, edges, overlap_edges):
         """ Connect edges to the overlapping polygon. """
-        for j, e in enumerate(D.overlap_elements):
+        for j, e in enumerate(D.derived_overlap_elements):
             overlap_edges[e] = []
             for i, edge in enumerate(edges):
                 if len(edge.shape.intersections(e.shape)) != 0:

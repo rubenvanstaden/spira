@@ -81,10 +81,7 @@ class OutputBasic(__OutputBasic__):
         self.__collect_method_dict__ = {}
 
     def set_current_cell(self, item):
-        if item.name not in gdspy.current_library.cell_dict.keys():
-            c = gdspy.Cell(item.name, exclude_from_current=True)
-            self.collector.update({item: c})
-            self._current_cell = item
+        self._current_cell = item
 
     def do_collect(self, item, **kwargs):
         from spira.yevon.gdsii.library import Library
@@ -104,6 +101,9 @@ class OutputBasic(__OutputBasic__):
 
     def collect_Library(self, library, usecache = False, **kwargs):
         referenced_cells = self.library.referenced_cells()
+        for rc in referenced_cells:
+            c = gdspy.Cell(rc.name, exclude_from_current=True)
+            self.collector.update({rc: c})
         self.collect(referenced_cells, **kwargs)
         return self
 
@@ -148,6 +148,7 @@ class OutputBasic(__OutputBasic__):
 
         ref_cell = self.collector[item.reference]
         self.collect_reference(ref_cell, origin, rotation, reflection, magnification)
+
         return self
 
     def collect_Polygon(self, item, additional_transform=None, **kwargs):

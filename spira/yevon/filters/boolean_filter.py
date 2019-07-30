@@ -21,7 +21,7 @@ class ProcessBooleanFilter(Filter):
         ports = PortList()
         elems = ElementList()
 
-        for e in item.process_elements:
+        for e in item.derived_merged_elements:
             elems += e
         for e in item.elements.sref:
             elems += e

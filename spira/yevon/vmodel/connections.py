@@ -67,7 +67,7 @@ class ElectricalConnections(__Connection__):
 
         map1 = {RDD.PLAYER.M5.EDGE_CONNECTED : RDD.PLAYER.M5.INSIDE_EDGE_ENABLED}
 
-        pg_overlap = self.cell.overlap_elements
+        pg_overlap = self.cell.derived_overlap_elements
         edges = get_derived_elements(el, mapping=map1, store_as_edge=True)
 
         for j, pg in enumerate(pg_overlap):
