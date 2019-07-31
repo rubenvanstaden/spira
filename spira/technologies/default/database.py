@@ -228,7 +228,7 @@ RDD.VMODEL.PROCESS_FLOW = VModelProcessFlow(
 
 # ------------------------------------- Net FIlters ----------------------------------------------
 
-# f = ToggledCompoundFilter()
+# f = ToggledCompositeFilter()
 
 # RDD.NETS.FILTER = 
 

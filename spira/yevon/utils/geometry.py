@@ -15,6 +15,7 @@ RDD = get_rule_deck()
 
 
 def angle_diff(a1, a2):
+    """ The angle difference between two orientations. """
     return np.round(np.abs(np.mod(a2-a1, 360)), 3)
 
 
@@ -23,50 +24,27 @@ def angle_rad(coord, origin=(0.0, 0.0)):
     return math.atan2(coord[1] - origin[1], coord[0] - origin[0])
 
 
-def angle_deg(coord, origin=(0.0, 0.0)):
+def orientation(coord, origin=(0.0, 0.0)):
     """ Absolute angle (radians) of coordinate with respect to origin"""
     return angle_rad(coord, origin) * constants.RAD2DEG
 
 
-def distance(coord, origin=(0.0, 0.0)):
+def distance(coord, origin=(0,0)):
     """ Distance of coordinate to origin. """
     return np.sqrt((coord[0] - origin[0])**2 + (coord[1] - origin[1])**2)
+
+
+def midpoint(p1, p2, ratio=0.5):
+    """ Determine the midpoint between two points. """
+    return ratio * Coord(p1[0], p1[1]) + (1 - ratio) * Coord(p2[0], p2[1])
 
 
 def c2d(coord):
     """ Convert coordinate to 2D. """
     from spira import settings
     grids_per_unit = settings.get_grids_per_unit()
-    pp = [coord[i]*grids_per_unit for i in range(len(list(coord))-1)]
-    return pp
-
-
-def scale_coord_up(coord):
-    return [c*constants.SCALE_UP for c in coord]
-
-
-def scale_coord_down(coord):
-    return [c*constants.SCALE_DOWN for c in coord]
-
-
-# def scale_polygon_up(polygons, value=None):
-#     if value is None:
-#         value = constants.SCALE_UP
-#     new_poly = []
-#     for points in polygons:
-#         pp = np.array([np.array([np.floor(float(p[0]*value)), np.floor(float(p[1]*value))]) for p in points])
-#         new_poly.append(pp)
-#     return new_poly
-
-
-# def scale_polygon_down(polygons, value=None):
-#     if value is None:
-#         value = constants.SCALE_DOWN
-#     new_poly = []
-#     for points in polygons:
-#         pp = np.array([np.array([np.floor(np.int32(p[0]*value)), np.floor(np.int32(p[1]*value))]) for p in points])
-#         new_poly.append(pp)
-#     return new_poly
+    points = [coord[i]*grids_per_unit for i in range(len(list(coord))-1)]
+    return points
 
 
 def lines_cross(begin1, end1, begin2, end2, inclusive=False):
@@ -140,8 +118,3 @@ def points_unique(coordinates):
     return unique_coordinates
 
                                 
-def distance(coord, origin=(0,0)):
-    """ Distance of coordinate to origin. """
-    return np.sqrt((coord[0] - origin[0])**2 + (coord[1] - origin[1])**2)
-
-

@@ -14,52 +14,12 @@ RDD = get_rule_deck()
 
 
 class PolygonAspects(__GeometryAspects__):
-    """
-
-    Examples
-    --------
-    """
-
-    @property
-    def points(self):
-        return self.shape.points
-        
-    @property
-    def area(self):
-        return gdspy.Polygon(self.shape.points).area()
-
-    @property
-    def count(self):
-        return np.size(self.shape.points, 0)
-
-    @property
-    def process(self):
-        layer = RDD.GDSII.IMPORT_LAYER_MAP[self.layer]
-        return layer.process.symbol
-
-    @property
-    def purpose(self):
-        layer = RDD.GDSII.IMPORT_LAYER_MAP[self.layer]
-        return layer.purpose.symbol
-
-    @property
-    def center(self):
-        return self.bbox_info.center
-
-    @center.setter
-    def center(self, destination):
-        self.move(midpoint=self.center, destination=destination)
-
-    @property
-    def bbox_info(self):
-        return self.shape.bbox_info.transform_copy(self.transformation)
+    pass
 
 
 class PolygonClipperAspects(__ClipperAspects__):
     """
 
-    Examples
-    --------
     """
 
     def __and__(self, other):

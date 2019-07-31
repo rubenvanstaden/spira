@@ -1,5 +1,6 @@
 import gdspy
 
+from spira import log as LOG
 from spira.core.parameters.initializer import ParameterInitializer
 from spira.core.parameters.descriptor import RestrictedParameter
 from spira.core.parameters.restrictions import RestrictType
@@ -56,6 +57,7 @@ class __OutputBasic__(ParameterInitializer):
             collect_method = self.__collect_method_dict__.get(T, None)
             if collect_method is None:
                 for cls in inspect.getmro(T):
+                    print(cls.__name__)
                     collect_method_name = 'collect_{}'.format(cls.__name__)
                     if hasattr(self, collect_method_name):
                         collect_method = getattr(self, collect_method_name)
@@ -152,6 +154,7 @@ class OutputBasic(__OutputBasic__):
         return self
 
     def collect_Polygon(self, item, additional_transform=None, **kwargs):
+    # def collect___ShapeElement__(self, item, additional_transform=None, **kwargs):
         T = item.transformation + additional_transform
         shape = item.shape.transform_copy(T)
         shape.snap_to_grid(self.grids_per_unit)

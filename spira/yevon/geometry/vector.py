@@ -67,13 +67,13 @@ class Vector(Transformable, ParameterInitializer):
     def __eq__(self, other):
         if not isinstance(other, Vector):
             return False
-        return self.midpoint == other.midpoint and (self.angle_deg == other.angle_deg)
+        return self.midpoint == other.midpoint and (self.orientation == other.orientation)
 
     def __ne__(self, other):
-        return self.midpoint != other.midpoint or (self.angle_deg != other.angle_deg)
+        return self.midpoint != other.midpoint or (self.orientation != other.orientation)
 
     def __repr__(self):
-        return "<Vector (%f, %f), a=%f>" % (self.x, self.y, self.angle_deg)
+        return "<Vector (%f, %f), a=%f>" % (self.x, self.y, self.orientation)
 
     def cos(self):
         return cos(constants.DEG2RAD * self.__angle__)
@@ -89,7 +89,7 @@ class Vector(Transformable, ParameterInitializer):
 
     def transform(self, transformation):
         self.midpoint = transformation.apply_to_coord(self.midpoint)
-        self.angle_deg = transformation.apply_to_angle(self.angle_deg)
+        self.orientation = transformation.apply_to_angle(self.orientation)
         return self
 
 
@@ -100,8 +100,8 @@ def transformation_from_vector(vector):
 
 def vector_from_two_points(point1, point2):
     """ Make a vector out of two points """
-    from spira.yevon.utils.geometry import angle_deg
-    return Vector(midpoint=point1, orientation=angle_deg(point2, point1))
+    from spira.yevon.utils.geometry import orientation
+    return Vector(midpoint=point1, orientation=orientation(point2, point1))
 
 
 def vector_match_transform(v1, v2):

@@ -3,7 +3,7 @@ from spira.core.parameters.variables import StringParameter
 from spira.log import SPIRA_LOG as LOG
 
 
-__all__ = ['Filter', 'ToggledCompoundFilter']
+__all__ = ['Filter', 'ToggledCompositeFilter']
 
 
 class Filter(ParameterInitializer):
@@ -16,7 +16,7 @@ class Filter(ParameterInitializer):
     def __call__(self, item):
         if isinstance(item, list):
             L = []
-            for v in item: 
+            for v in item:
                 L += self.__call__(v)
             return L
         else:
@@ -24,7 +24,7 @@ class Filter(ParameterInitializer):
 
     def __add__(self, other):
         if isinstance(other, Filter):
-            return __CompoundFilter__(filters = [self, other])
+            return _CompositeFilter(filters = [self, other])
         elif other is None:
             return self
         else:
@@ -61,26 +61,14 @@ class Filter(ParameterInitializer):
         return [item]
 
 
-class __CompoundFilter__(Filter):
+class _CompositeFilter(Filter):
     """
 
     """
 
     def __init__(self, filters=[], **kwargs):
-        super(__CompoundFilter__,self).__init__(**kwargs)
+        super().__init__(**kwargs)
         self._sub_filters = filters
-
-    def __add__(self, other):
-        if isinstance(other, __CompoundFilter__):
-            return __CompoundFilter__(name=self.name, filters=self._sub_filters + other.__sub_filters)
-        elif isinstance(other, Filter):
-            return __CompoundFilter__(name=self.name, filters=self._sub_filters + [other])
-        else:
-            raise TypeError("Cannot add %s to Filter" % type(other))
-
-    def __iadd__(self, other):
-        self.add(other)
-        return self
 
     def __call__(self, item):
         LOG.debug("Applying all subfilters. Item = %s" % item)
@@ -92,6 +80,18 @@ class __CompoundFilter__(Filter):
         LOG.debug("Finished applying all subfilters. Item = %s" % item)        
         return v
 
+    def __add__(self, other):
+        if isinstance(other, _CompositeFilter):
+            return _CompositeFilter(name=self.name, filters=self._sub_filters + other.__sub_filters)
+        elif isinstance(other, Filter):
+            return _CompositeFilter(name=self.name, filters=self._sub_filters + [other])
+        else:
+            raise TypeError("Cannot add %s to Filter" % type(other))
+
+    def __iadd__(self, other):
+        self.add(other)
+        return self
+
     def __repr__(self):
         S = "< Compound Filter:"
         for i in self._sub_filters:
@@ -100,7 +100,7 @@ class __CompoundFilter__(Filter):
         return S
 
     def add(self, other):
-        if isinstance(other, __CompoundFilter__):
+        if isinstance(other, _CompositeFilter):
             self._sub_filters += other._sub_filter
         elif isinstance(other, Filter):
             self._sub_filters += [other]
@@ -108,7 +108,7 @@ class __CompoundFilter__(Filter):
             raise TypeError("Cannot add %s to Filter" % type(other))
 
 
-class ToggledCompoundFilter(__CompoundFilter__):
+class ToggledCompositeFilter(_CompositeFilter):
     """
     Compound filter in which filters can be turned on or off
     by doing filter['filter_name'] = True|False
@@ -117,6 +117,18 @@ class ToggledCompoundFilter(__CompoundFilter__):
     def __init__(self, filters=[], **kwargs):
         super().__init__(filters=filters, **kwargs)
         self._filter_status = dict()
+
+    def __call__(self, item):
+        LOG.debug("Applying all subfilters. Item = %s" % item)
+        v = item
+        k = self._filter_status.keys()
+        for R in self._sub_filters:
+            if R.name not in k or self._filter_status[R.name]:
+                LOG.debug("** Applying subfilter %s to %s"  % (R, v))
+                v = R(v)
+                LOG.debug("** Result after filtering = %s\n" % v)
+        LOG.debug("Finished applying all subfilters. Item = %s" % item)        
+        return v
 
     def __setitem__(self, key, item):
         """ dict behaviour: enable or disable a filter based on it's name """
@@ -132,18 +144,6 @@ class ToggledCompoundFilter(__CompoundFilter__):
         if not key in self._filter_status.keys():
             return True
         return self._filter_status[key]
-
-    def __call__(self, item):
-        LOG.debug("Applying all subfilters. Item = %s" % item)
-        v = item
-        k = self._filter_status.keys()
-        for R in self._sub_filters:
-            if R.name not in k or self._filter_status[R.name]:
-                LOG.debug("** Applying subfilter %s to %s"  % (R, v))
-                v = R(v)
-                LOG.debug("** Result after filtering = %s\n" % v)
-        LOG.debug("Finished applying all subfilters. Item = %s" % item)        
-        return v
 
     def __repr__(self):
         S = "< Toggled Compound Filter:"

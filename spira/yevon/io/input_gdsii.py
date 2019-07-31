@@ -22,7 +22,7 @@ class InputGdsii(InputBasic):
 
     def parse(self):
 
-        gdsii_lib = gdspy.GdsLibrary(name='SPiRA-gdspy_cell')
+        gdsii_lib = gdspy.GdsLibrary(name='SPiRA-cell')
         gdsii_lib.read_gds(self.file_name)
         top_level_gdspy_cells = gdsii_lib.top_level()
 

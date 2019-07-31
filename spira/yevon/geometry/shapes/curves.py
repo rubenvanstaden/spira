@@ -136,7 +136,7 @@ class BasicSpline(shapes.Shape):
 #             d = ep.x - ep.y*math.cos(turn_angle * DEG2RAD)/ math.sin(turn_angle*DEG2RAD)
         
 #         S.move((-d, 0.0))
-#         S.rotate((0.0,0.0), angle_deg(self.turn_point, self.start_point))
+#         S.rotate((0.0,0.0), orientation(self.turn_point, self.start_point))
 #         S.move(self.turn_point)
 #         S.remove_identicals()
         

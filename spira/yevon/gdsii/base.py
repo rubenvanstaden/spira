@@ -3,6 +3,7 @@ from spira.core.parameters.initializer import ParameterInitializer
 from spira.core.parameters.initializer import MetaInitializer
 from spira.core.parameters.descriptor import FunctionParameter
 from spira.yevon.process.gdsii_layer import LayerParameter
+from spira.yevon.geometry.shapes import ShapeParameter
 from spira.core.parameters.variables import *
 from spira.yevon.process import get_rule_deck
 
@@ -89,3 +90,108 @@ class __LayerElement__(__Element__):
 
     def __ne__(self,other):
         return not self.__eq__(other)      
+
+
+class __ShapeElement__(__LayerElement__):
+    """ Base class for an edge element. """
+
+    shape = ShapeParameter()
+
+    @property
+    def points(self):
+        return self.shape.points
+
+    @property
+    def area(self):
+        import gdspy 
+        return gdspy.Polygon(self.shape.points).area()
+
+    @property
+    def count(self):
+        return np.size(self.shape.points, 0)
+
+    @property
+    def bbox_info(self):
+        return self.shape.bbox_info.transform_copy(self.transformation)
+
+    @property
+    def center(self):
+        return self.bbox_info.center
+
+    @center.setter
+    def center(self, destination):
+        self.move(midpoint=self.center, destination=destination)
+
+    def id_string(self):
+        return '{} - hash {}'.format(self.short_string(), self.shape.hash_string)
+
+    def is_empty(self):
+        """ Returns `False` is the polygon shape has no points. """
+        return self.shape.is_empty()
+
+    def encloses(self, point):
+        """ Returns `True` if the polygon encloses the point. """
+        from spira.yevon.utils import clipping
+        shape = self.shape.transform_copy(self.transformation)
+        return clipping.encloses(coord=point, points=shape.points)
+
+    def expand_transform(self):
+        """ Expand the transform by applying it to the shape. """
+        from spira.core.transforms.identity import IdentityTransform
+        if not self.transformation.is_identity():
+            self.shape = self.shape.transform_copy(self.transformation)
+            self.transformation = IdentityTransform()
+        return self
+
+    def flatten(self, level=-1):
+        """ Flatten the polygon without creating a copy. """
+        return self.expand_transform()
+
+    def stretch(self, factor=(1,1), center=(0,0)):
+        """ Stretches the polygon by a factor. """
+        T = spira.Stretch(stretch_factor=factor, stretch_center=center)
+        return T.apply(self)
+
+    def stretch_copy(self, factor=(1,1), center=(0,0)):
+        """ Stretches a copy of the polygon by a factor. """
+        T = spira.Stretch(stretch_factor=factor, stretch_center=center)
+        return T.apply_copy(self)
+
+    def stretch_port(self, port, destination):
+        """ The element by moving the subject port, without 
+        distorting the entire element. Note: The opposite 
+        port position is used as the stretching center. """
+        opposite_port = bbox_info.bbox_info_opposite_boundary_port(self, port)
+        T = stretching.stretch_element_by_port(self, opposite_port, port, destination)
+        T.apply(self)
+        return self
+
+    def move(self, midpoint=(0,0), destination=None, axis=None):
+        """ Moves the polygon from `midpoint` to a `destination`. """
+
+        if destination is None:
+            destination = midpoint
+            midpoint = Coord(0,0)
+
+        if isinstance(midpoint, Coord):
+            m = midpoint
+        elif np.array(midpoint).size == 2:
+            m = Coord(midpoint)
+        elif issubclass(type(midpoint), __Port__):
+            m = midpoint.midpoint
+        else:
+            raise ValueError('Midpoint error')
+
+        if issubclass(type(destination), __Port__):
+            d = destination.midpoint
+        if isinstance(destination, Coord):
+            d = destination
+        elif np.array(destination).size == 2:
+            d = Coord(destination)
+        else:
+            raise ValueError('Destination error')
+
+        dxdy = d - m
+        self.translate(dxdy)
+        return self
+

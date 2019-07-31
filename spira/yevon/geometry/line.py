@@ -44,7 +44,7 @@ class Line(Transformable, ParameterInitializer):
         return np.arctan2(-self.a, self.b)
 
     @property
-    def angle_deg(self):
+    def orientation(self):
         return constants.RAD2DEG * self.angle_rad
 
     @property
@@ -72,7 +72,7 @@ class Line(Transformable, ParameterInitializer):
         if m is None:
             dx, dy = 0, distance
         else:
-            angle = self.angle_deg
+            angle = self.orientation
             angle = np.mod(angle, 360)
             if 90 < angle <= 270:
                 x = x0 + d / np.sqrt(1 + m**2)
@@ -95,7 +95,7 @@ class Line(Transformable, ParameterInitializer):
 
     def closest_point(self, point):
         """ Gives closest point on line """
-        line2 = straight_line_from_point_angle(point, self.angle_deg + 90.0)
+        line2 = straight_line_from_point_angle(point, self.orientation + 90.0)
         return self.intersection(line2)
 
     def is_on_same_side(self, point1, point2):
@@ -161,7 +161,7 @@ def line_from_point_angle(point, angle):
 
 def line_from_vector(vector):
     """ Creates a Line object from a vector. """
-    return line_from_point_angle(vector.position, vector.angle_deg)
+    return line_from_point_angle(vector.position, vector.orientation)
 
 
 def LineParameter(restriction=None, preprocess=None, **kwargs):

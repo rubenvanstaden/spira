@@ -25,10 +25,8 @@ def get_process_polygons(elements, operation='or'):
 
 
 class DerivedElements(__Aspects__):
-    """
-    Convert the cell elements into a new set
-    of elements for every active process.
-    """
+    """ Convert the cell elements into a new set
+    of elements for every active process. """
 
     derived_merged_elements = ElementListParameter()
     derived_overlap_elements = ElementListParameter()
@@ -41,13 +39,14 @@ class DerivedElements(__Aspects__):
         elems += get_process_polygons(self.elements, 'and')
         return elems
 
-    def write_gdsii_mask(self, **kwargs):
+    def gdsii_output_derived(self, derived_type, **kwargs):
         elems = ElementList()
         for pg in self.derived_merged_elements:
             for e in pg.elements:
                 elems += e
-        D = Cell(name=self.name + '_VMODEL', elements=elems)
-        D.gdsii_output()
+        name = '{}_{}'.format(self.name, derived_type)
+        D = Cell(name=name, elements=elems)
+        D.gdsii_output(file_name=derived_type)
 
 
 Cell.mixin(DerivedElements)

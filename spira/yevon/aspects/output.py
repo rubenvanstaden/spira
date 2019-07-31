@@ -22,6 +22,11 @@ class OutputGdsiiAspect(__Aspects__):
         if viewer is True:
             output.viewer()
 
+    def netlist_output(self):
+        from spira.yevon.io.output_netlist import PlotlyGraph
+        output = PlotlyGraph()
+        output._plotly_netlist(G=self.netlist.g, graphname=self.name)
+
 
 class OutputPlotlyNetlist(__Aspects__):
     pass

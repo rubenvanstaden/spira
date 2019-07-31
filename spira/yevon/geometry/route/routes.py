@@ -4,49 +4,28 @@ import numpy as np
 from numpy.linalg import norm
 from spira.yevon.geometry.vector import *
 from spira.yevon.geometry.ports.port import *
-from spira.yevon.gdsii.cell import Cell
-from spira.yevon.process.gdsii_layer import Layer
-from spira.yevon.gdsii.elem_list import ElementList
 from spira.yevon.geometry.ports.port_list import PortList
-from spira.yevon.utils.geometry import distance
-from spira.yevon.utils import geometry as ug
 from spira.yevon.geometry.route.route_shaper import *
-from spira.core.parameters.restrictions import RestrictTypeList
-from spira.yevon.geometry import shapes
 from spira.yevon import constants
-from spira.yevon.utils import clipping
-from spira.core.parameters.descriptor import FunctionParameter
-from spira.core.parameters.descriptor import Parameter
-from spira.yevon.gdsii.polygon import Polygon
 from spira.yevon.process import get_rule_deck
 
 
 RDD = get_rule_deck()
 
 
-__all__ = ['Route', 'RouteStraight', 'RoutePath', 'Route90', 'RouteShape', 'Route180', 'RouteManhattan']
+__all__ = ['Route', 'RouteStraight', 'RoutePath', 'Route90', 'Route180', 'RouteManhattan']
 
 
-class RouteShape(shapes.Shape):
-
-    path = Parameter()
-
-    def create_points(self, points):
-        if isinstance(self.path, gdspy.Path):
-            points = clipping.boolean(subj=self.path.polygons, clip_type='or')[0]
-        elif isinstance(self.path, gdspy.FlexPath):
-            points = self.path.get_polygons()[0]
-        return points
-
-
-class Route(Polygon):
+from spira.yevon.utils import clipping
+from spira.yevon.gdsii.base import __ShapeElement__
+from spira.yevon.aspects.port import TransformablePortAspects
+class Route(__ShapeElement__, TransformablePortAspects):
     """  """
 
     p1 = PortParameter(allow_none=None, default=None)
     p2 = PortParameter(allow_none=None, default=None)
 
     def __init__(self, shape, layer, **kwargs):
-        # sh = RouteShape(points=shape)
 
         if isinstance(shape, gdspy.Path):
             shape = clipping.boolean(subj=shape.polygons, clip_type='or')[0]
@@ -64,6 +43,12 @@ class Route(Polygon):
 
     def __str__(self):
         return self.__repr__()
+        
+    def flat_copy(self, level=-1):
+        """ Flatten a copy of the polygon. """
+        S = Route(shape=self.shape, layer=self.layer, transformation=self.transformation)
+        S.expand_transform()
+        return S
 
     def create_ports(self, ports):
         if (self.p1 is not None) and (self.p2 is not None):
@@ -72,12 +57,7 @@ class Route(Polygon):
 
 
 def RouteStraight(p1, p2, layer, path_type='straight', width_type='straight'):
-    """ Routes a straight polygon between two ports.
-
-    Example
-    -------
-    >>> R = RouteStraight()
-    """
+    """ Routes a straight polygon between two ports. """
 
     point_a = p1.midpoint
     point_b = p2.midpoint
@@ -106,14 +86,13 @@ def RouteStraight(p1, p2, layer, path_type='straight', width_type='straight'):
     if width_type == 'sine':
         width_fun = lambda t: (width_output - width_input)*(1-np.cos(t*np.pi))/2 + width_input
 
-    route_path = gdspy.Path(width=width_input, initial_point=(0,0))
-    route_path.parametric(curve_fun, curve_deriv_fun, final_width=width_fun)
+    path = gdspy.Path(width=width_input, initial_point=(0,0))
+    path.parametric(curve_fun, curve_deriv_fun, final_width=width_fun)
 
     port1 = Port(name='I1', midpoint=(0,0), width=width_input, orientation=180, process=layer.process)
     port2 = Port(name='I2', midpoint=(xf,yf), width=width_output, orientation=0, process=layer.process)
 
-    route_shape = RouteShape(path=route_path)
-    R = Route(shape=route_shape, p1=port1, p2=port2, layer=layer)
+    R = Route(shape=path, p1=port1, p2=port2, layer=layer)
     T = vector_match_transform(v1=R.ports[0], v2=p1)
     R.transform(T)
     return R
@@ -139,8 +118,7 @@ def RoutePath(port1, port2, start_straight, end_straight, path, width, layer):
     pts.append(p2)
 
     path = gdspy.FlexPath(points=pts, width=1, corners='miter')
-    route_shape = RouteShape(path=path)
-    R = Route(shape=route_shape, p1=port1, p2=port2, layer=RDD.PLAYER.M6.METAL)
+    R = Route(shape=path, p1=port1, p2=port2, layer=RDD.PLAYER.M6.METAL)
     return R
 
 
@@ -175,8 +153,7 @@ def Route90(port1, port2, layer, width=None, corners='miter', bend_radius=1):
     pl += Port(name='I1', midpoint=(0,0), width=port1.width, orientation=180, process=layer.process)
     pl += Port(name='I2', midpoint=list(np.subtract(p2, p1)), width=port2.width, orientation=90, process=layer.process)
 
-    route_shape = RouteShape(path=path)
-    R = Route(shape=route_shape, p1=pl[0], p2=pl[1], layer=layer)
+    R = Route(shape=path, p1=pl[0], p2=pl[1], layer=layer)
     T = vector_match_transform(v1=R.ports[0], v2=port1)
     R.transform(T)
     return R
@@ -217,15 +194,16 @@ def Route180(port1, port2, layer, width=None, corners='miter', bend_radius=1):
         pl += Port(name='I1', midpoint=(0,0), width=port1.width, orientation=180, process=layer.process)
         pl += Port(name='I2', midpoint=list(np.subtract(p2, p1)), width=port2.width, orientation=0, process=layer.process)
 
-    route_shape = RouteShape(path=path)
-    R = Route(shape=route_shape, p1=pl[0], p2=pl[1], layer=layer)
+    R = Route(shape=path, p1=pl[0], p2=pl[1], layer=layer)
     T = vector_match_transform(v1=R.ports[0], v2=port1)
     R.transform(T)
     return R
 
 
+from spira.yevon.utils import geometry as ug
+from spira.yevon.gdsii.elem_list import ElementList
 def RouteManhattan(ports, layer, width=None, corners='miter', bend_radius=1):
-    from spira.yevon.utils import geometry
+    """  """
 
     elems = ElementList()
 
@@ -261,6 +239,9 @@ def RouteManhattan(ports, layer, width=None, corners='miter', bend_radius=1):
 
 
 if __name__ == '__main__':
+
+    from spira.yevon.gdsii.cell import Cell
+    from spira.yevon.process.gdsii_layer import Layer
 
     # --------------------- 90 Degree Turns -------------------------
 

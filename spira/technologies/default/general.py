@@ -128,7 +128,7 @@ class PCellDatabase(DelayedDatabase):
         self.LCAR_DEVICE = 1
         self.LCAR_CIRCUIT = 100
 
-        f = filters.ToggledCompoundFilter()
+        f = filters.ToggledCompositeFilter()
         f += filters.ProcessBooleanFilter(name='boolean')
         f += filters.SimplifyFilter(name='simplify')
         f += filters.ViaConnectFilter(name='via_contact')

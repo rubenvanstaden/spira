@@ -49,8 +49,8 @@ class Device(PCell):
         elems += self.routes
 
         if self.pcell is True:
-            # D = Cell(elements=elems.flat_copy())
-            D = Cell(elements=elems)
+
+            D = Cell(elements=elems.flat_copy())
 
             F = RDD.PCELLS.FILTERS
             F['boolean'] = True
@@ -58,17 +58,13 @@ class Device(PCell):
             F['via_contact'] = True
             F['metal_connect'] = False
 
-            # for e in D.elements:
-            #     print(e.shape.points)
-            #     e.shape = e.shape.snap_to_grid()
-            #     print(e.shape.points)
-            #     print('')
+            elems = F(D).elements
 
-            # elems = F(D).elements
-            elems = D.elements
+            # D = Cell(elements=elems)
+            # elems = D.elements
 
         return elems
-        
+
     def create_netlist(self):
 
         print('Device netlist')

@@ -97,5 +97,24 @@ def ShapeEdge(original_shape, edge_width, edge_extend=0, edge_type=constants.EDG
     new_shape = Shape(points=pts)
     return new_shape
 
+    # if edge_type == constants.EDGE_TYPE_INSIDE:
+    #      return original_shape.move((0, -edge_extend/2.0))
+    # elif edge_type == constants.EDGE_TYPE_OUTSIDE:
+    #     return original_shape.move((0, edge_extend/2.0))
+    # elif edge_type == constants.EDGE_TYPE_SQUARE:
+    #     sf = 1 + 2*edge_extend/edge_width
+    #     return Stretch(stretch_factor=(sf,1), stretch_center=shape.center_of_mass)(shape)
+    # elif edge_type == constants.EDGE_TYPE_SIDE_edge_extend:
+    #     if 'side_edge_extend' not in kwargs:
+    #         raise ValueError('No `side_edge_extend` parameter given.')
+    #     side_edge_extend = kwargs['side_edge_extend']
+    #     sf = 1 + 2*side_edge_extend/edge_width
+    #     return Stretch(stretch_factor=(sf,1), stretch_center=shape.center_of_mass)(shape)
+    # elif edge_type == constants.EDGE_TYPE_EUCLIDEAN:
+    #     pass
+    # elif edge_type == constants.EDGE_TYPE_NORMAL:
+    #     pass
+    # raise ValueError("Invalid edge type in ShapeEdge factory method")
+
 
 

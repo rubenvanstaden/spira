@@ -1,16 +1,8 @@
 import os
-import gdspy
-import spira.all as spira
 import matplotlib.pyplot as plt
 import plotly.graph_objs as go
 import plotly.offline as offline
-from spira import log as LOG
-from spira.yevon.io import *
-from spira.yevon.utils.geometry import scale_coord_down as scd
-from spira.core.typed_graph import EdgeCapacitor, EdgeInductor
 from spira.yevon.visualization import color
-from spira import settings
-from spira.core.outputs.base import Outputs
 from spira.yevon.process import get_rule_deck
 
 
@@ -18,9 +10,6 @@ RDD = get_rule_deck()
 
 
 class PlotlyGraph(object):
-
-    def netlist_output(self):
-        self._plotly_netlist(G=self.netlist.g, graphname=self.name)
 
     def _plotly_netlist(self, G, graphname, labeltext='id'):
         edges = self._create_edges(G)
@@ -157,10 +146,5 @@ class BokehGraph(object):
 
     def bokeh_netlist(self):
         pass
-
-
-Outputs.mixin(PlotlyGraph)
-Outputs.mixin(BokehGraph)
-
 
 

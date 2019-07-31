@@ -2,13 +2,7 @@ from spira.yevon.aspects.base import __Aspects__
 from spira.yevon.geometry.ports.port_list import PortListParameter
 from spira.core.transformable import Transformable
 from spira.yevon.gdsii.elem_list import ElementListParameter
-from spira.core.parameters.descriptor import Parameter
-from spira.yevon.process.gdsii_layer import LayerParameter
 from spira.core.parameters.variables import *
-from spira.yevon import constants
-from copy import deepcopy
-from spira.yevon.geometry.ports.port import Port
-from spira.yevon.process.gdsii_layer import Layer
 from spira.yevon.geometry import shapes
 from spira.yevon.process import get_rule_deck
 
@@ -16,7 +10,7 @@ from spira.yevon.process import get_rule_deck
 RDD = get_rule_deck()
 
 
-class PortProperty(__Aspects__):
+class PortAspects(__Aspects__):
     """ Port properties that connects to layout structures. """
 
     ports = PortListParameter(fdef_name='__create_ports__', doc='List of ports to be added to the cell instance.')
@@ -28,7 +22,7 @@ class PortProperty(__Aspects__):
         return ports
 
 
-class CellPortProperty(PortProperty):
+class CellPortAspects(PortAspects):
     def __create_ports__(self, ports):
         from spira.yevon.gdsii.polygon import Polygon
         for e in self.elements:
@@ -38,14 +32,14 @@ class CellPortProperty(PortProperty):
         return self.create_ports(ports)
 
 
-class TransformablePortProperty(PortProperty, Transformable):
+class TransformablePortAspects(PortAspects, Transformable):
     def __create_ports__(self, ports):
         ports = self.create_ports(ports)
         ports = ports.transform_copy(self.transformation)
         return ports
 
 
-class SRefPortProperty(TransformablePortProperty):
+class SRefPortAspects(TransformablePortAspects):
     def create_ports(self, ports):
         ports = self.reference.ports
         ports = ports.transform_copy(self.transformation)
@@ -54,8 +48,8 @@ class SRefPortProperty(TransformablePortProperty):
         return ports
 
 
-class PolygonPortProperty(TransformablePortProperty):
-# class PolygonPortProperty(PortProperty):
+class PolygonPortAspects(TransformablePortAspects):
+# class PolygonPortAspects(PortAspects):
 
     edge_ports = ElementListParameter()
 

@@ -15,7 +15,7 @@ __all__ = [
 class ProcessBooleanFilter(Filter):
     """  """
 
-    def filter___Cell__(self, item):
+    def filter_Cell(self, item):
         from spira.yevon.gdsii.cell import Cell
 
         ports = PortList()
@@ -32,7 +32,6 @@ class ProcessBooleanFilter(Filter):
 
         cell = Cell(elements=elems, ports=ports)
         return cell
-        # return [cell] # FIXME: I think I have to return a list?
 
     def __repr__(self):
         return "<ProcessBooleanFilter: \'{}\'>".format(self.name)
@@ -41,7 +40,7 @@ class ProcessBooleanFilter(Filter):
 class SimplifyFilter(Filter):
     """  """
 
-    def filter___Cell__(self, item):
+    def filter_Cell(self, item):
         from spira.yevon.utils import clipping
         from spira.yevon.gdsii.cell import Cell
 
@@ -60,7 +59,6 @@ class SimplifyFilter(Filter):
             ports += p
 
         cell = Cell(elements=elems, ports=ports)
-        # cell = item.__class__(elements=elems, ports=ports)
         return cell
 
     def __repr__(self):
@@ -70,7 +68,7 @@ class SimplifyFilter(Filter):
 class MetalConnectFilter(Filter):
     """  """
 
-    def filter___Cell__(self, item):
+    def filter_Cell(self, item):
         from copy import deepcopy
         from spira.yevon.vmodel.virtual import virtual_connect
         from spira.yevon.geometry.shapes.adapters import ShapeConnected
@@ -109,7 +107,7 @@ class MetalConnectFilter(Filter):
 class ViaConnectFilter(Filter):
     """  """
 
-    def filter___Cell__(self, item):
+    def filter_Cell(self, item):
         from spira.yevon.gdsii.cell import Cell
         from spira.yevon.utils import clipping
         from spira.yevon.vmodel.virtual import virtual_connect
@@ -130,13 +128,8 @@ class ViaConnectFilter(Filter):
         for p in item.ports:
             ports += p
 
-        # item.elements = elems
-        # item.ports = ports
-        # return item
         cell = Cell(elements=elems, ports=ports)
         return cell
-        # return item.__class__(elements=elems)
-        # return [cell]
 
     def __repr__(self):
         return "<ViaConnectFilter: \'{}\'>".format(self.name)

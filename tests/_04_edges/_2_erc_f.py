@@ -38,15 +38,15 @@ p2.shape.move(pos=(7,0))
 # el += spira.Rectangle(p1=(3, 10), p2=(7, 11), layer=RDD.PLAYER.M5.METAL)
 
 # --------------- NOTE: Both cases.
-# p3 = spira.Rectangle(p1=(3, 10), p2=(8, 11), layer=RDD.PLAYER.M5.METAL)
+p3 = spira.Rectangle(p1=(3, 10), p2=(8, 11), layer=RDD.PLAYER.M5.METAL)
 # p3 = spira.Rectangle(p1=(3, 9), p2=(8, 11), layer=RDD.PLAYER.M5.METAL)
 # p3 = spira.Rectangle(p1=(2, 7), p2=(7, 11), layer=RDD.PLAYER.M5.METAL)
 
-# # --------------- NOTE: Angle cases.
-# p3 = spira.Rectangle(p1=(1, 8), p2=(7, 11), layer=RDD.PLAYER.M5.METAL)
-p3 = spira.Rectangle(p1=(2.5, 8), p2=(7, 11), layer=RDD.PLAYER.M5.METAL)
-p3.rotate(5)
-p1.rotate(-10)
+# # # --------------- NOTE: Angle cases.
+# # p3 = spira.Rectangle(p1=(1, 8), p2=(7, 11), layer=RDD.PLAYER.M5.METAL)
+# p3 = spira.Rectangle(p1=(2.5, 8), p2=(7, 11), layer=RDD.PLAYER.M5.METAL)
+# p3.rotate(5)
+# p1.rotate(-10)
 
 # ------------------------------------------------------------------------
 
@@ -60,12 +60,12 @@ device = spira.Cell(name='Device', elements=el)
 v_model = virtual_connect(device=device)
 v_model.gdsii_output_virtual_connect()
 
-F = MetalConnectFilter()
-D = F(device)
+# F = MetalConnectFilter()
+# D = F(device)
 
-D = spira.Circuit(name='TestElectricalConnections', elements=D.elements)
-# D.gdsii_output()
-D.netlist_output()
+# D = spira.Circuit(name='TestElectricalConnections', elements=D.elements)
+# # D.gdsii_output()
+# D.netlist_output()
 
 
 

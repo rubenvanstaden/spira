@@ -60,7 +60,6 @@ def offset(points, grow=1, jointype='miter'):
     return sf(pco.Execute(grow*sc), sc)
 
 
-# NOTE: Maybe automate this in Shape().
 def reverse_points(pts):
     """ If orientation is clockwise, convert to counter-clockwise. """
     points = []
