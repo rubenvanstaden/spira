@@ -38,8 +38,8 @@ class Route(__ShapeElement__, TransformablePortAspects):
         if self is None:
             return 'Route is None!'
         layer = RDD.GDSII.IMPORT_LAYER_MAP[self.layer]
-        class_string = "[SPiRA: Route {}] (center {}, vertices {}, process {}, purpose {})"
-        return class_string.format(self.alias, self.center, self.count, self.process, self.purpose)
+        class_string = "[SPiRA: Route] (center {}, vertices {}, process {}, purpose {})"
+        return class_string.format(self.center, self.count, self.layer.process.symbol, self.layer.purpose.symbol)
 
     def __str__(self):
         return self.__repr__()

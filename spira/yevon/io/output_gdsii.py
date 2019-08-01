@@ -25,7 +25,8 @@ class OutputGdsii(OutputBasic):
             del cell
         writer.close()
 
-    def viewer(self):
+    def viewer(self, item):
+        self.collect(item)
         library = gdspy.GdsLibrary(name=self.file_name)
         for c in self.collector.values():
             library.add(c)
@@ -42,12 +43,13 @@ class OutputGdsii(OutputBasic):
         self.collector[self._current_cell].add(e)
         return self
 
-    def collect_label(self, text, position, rotation):
-        layer = self.map_layer(item.layer)
+    def collect_label(self, text, position, rotation, layer):
+        layer = self.map_layer(layer)
         if layer is None: return self
         e = gdspy.Label(
-            text=text, position=position,
-            rotation=orientation,
+            text=text,
+            position=position,
+            rotation=rotation,
             layer=layer.number,
             texttype=layer.datatype
         )

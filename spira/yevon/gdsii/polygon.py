@@ -116,6 +116,8 @@ class Polygon(__ShapeElement__):
             F += filters.NetProcessLabelFilter(process_polygons=[deepcopy(self)])
             F += filters.NetDeviceLabelFilter(device_ports=cc)
             F += filters.NetEdgeFilter(process_polygons=deepcopy(self))
+            # F += filters.NetBranchFilter()
+            # F += filters.NetDummyFilter()
 
             net = Net(name=self.layer.process.symbol, geometry=geometry)
 

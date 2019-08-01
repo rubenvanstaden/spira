@@ -171,7 +171,7 @@ class OutputBasic(__OutputBasic__):
         T = item.transformation + additional_transform
         item.position = T.apply_to_coord(item.position)
         item.orientation = T.apply_to_angle(item.orientation)
-        position = position.to_numpy_array()
+        position = item.position.to_numpy_array()
         self.collect_label(text=item.text, position=position, rotation=item.orientation, layer=item.layer)
         return self
 
