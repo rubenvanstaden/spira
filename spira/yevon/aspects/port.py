@@ -23,12 +23,20 @@ class PortAspects(__Aspects__):
 
 
 class CellPortAspects(PortAspects):
-    def __create_ports__(self, ports):
+
+    # NOTE: Maybe remove this. This allows us
+    # to access the edge ports from a cell directly.
+    def _edge_layer_ports(self):
         from spira.yevon.gdsii.polygon import Polygon
-        for e in self.elements:
-            if isinstance(e, Polygon):
-                for p in e.ports:
-                    ports += p.transform(e.transformation)
+        from spira.yevon.geometry.ports.port_list import PortList
+        ports = PortList()
+        for e in self.elements.polygons:
+            for p in e.ports:
+                ports += p.transform(e.transformation)
+        return ports
+
+    def __create_ports__(self, ports):
+        ports += self._edge_layer_ports()
         return self.create_ports(ports)
 
 
@@ -54,12 +62,10 @@ class PolygonPortAspects(TransformablePortAspects):
     edge_ports = ElementListParameter()
 
     def create_edge_ports(self, edges):
-        shape = self.shape
+        # shape = self.shape
         # FIXME: Cannot apply transforms when stretching.
-        # shape = self.shape.transform_copy(self.transformation)
-        # s = deepcopy(self.shape).transform_copy(self.transformation)
-        s = self.shape.transform_copy(self.transformation)
-        return shapes.shape_edge_ports(shape, self.layer, self.id_string(), center=s.bbox_info.center, loc_name=self.location_name)
+        shape = self.shape.transform_copy(self.transformation)
+        return shapes.shape_edge_ports(shape, self.layer, self.id_string(), center=shape.bbox_info.center, loc_name=self.location_name)
 
     def create_ports(self, ports):
         layer = RDD.GDSII.IMPORT_LAYER_MAP[self.layer]

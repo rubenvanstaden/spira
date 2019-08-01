@@ -57,7 +57,6 @@ class __OutputBasic__(ParameterInitializer):
             collect_method = self.__collect_method_dict__.get(T, None)
             if collect_method is None:
                 for cls in inspect.getmro(T):
-                    print(cls.__name__)
                     collect_method_name = 'collect_{}'.format(cls.__name__)
                     if hasattr(self, collect_method_name):
                         collect_method = getattr(self, collect_method_name)

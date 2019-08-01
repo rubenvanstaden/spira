@@ -6,7 +6,7 @@ __all__ = [
     'ProcessLayerDatabase',
     'PurposeLayerDatabase',
     'PhysicalLayerDatabase',
-    'DelayedDatabase'
+    'LazyDatabase'
 ]
 
 
@@ -241,14 +241,14 @@ class PhysicalLayerDatabase(__Database__):
         return None
 
 
-class DelayedDatabase(__Database__):
+class LazyDatabase(__Database__):
     """
     A hierarchical tree for storing configuration settings,
     but with delayed initialisation : the initialize-function
     is called only at the moment a value is actually retrieved.
     """
     def __init__(self, **kwargs):
-        super(DelayedDatabase, self).__init__(**kwargs)
+        super().__init__(**kwargs)
         self.__initialized__ = False
 
     def __getattr__(self, key):

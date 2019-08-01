@@ -102,7 +102,10 @@ class EdgeGenerator(Group, __LayerElement__):
 
     def create_elements(self, elems):
 
-        for i, s in enumerate(self.shape.segments()):
+        shape = self.shape.remove_straight_angles()
+        shape = shape.reverse_points()
+
+        for i, s in enumerate(shape.segments()):
 
             shape = Shape(points=s)
 

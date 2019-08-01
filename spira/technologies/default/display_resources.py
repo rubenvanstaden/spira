@@ -3,7 +3,7 @@ from spira.yevon.process import RULE_DECK_DATABASE as RDD
 
 # ------------------------------ Display Resources -------------------------------
 
-class DisplayDatabase(DelayedDatabase):
+class DisplayDatabase(LazyDatabase):
     def initialize(self):
         from spira.yevon.visualization import color
         from spira.yevon.visualization.display import DisplayStyle, DisplayStyleSet

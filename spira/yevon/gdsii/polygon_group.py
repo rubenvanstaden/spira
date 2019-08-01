@@ -41,12 +41,22 @@ class PolygonGroup(Group, __LayerElement__):
             for e2 in other.elements:
                 shape1 = e1.shape.transform_copy(e1.transformation)
                 shape2 = e2.shape.transform_copy(e2.transformation)
+
                 # if (shape1 != shape2) and (e1.layer.process == e2.layer.process):
-                # FIXME: We need this for virtual contact connections.
-                if (shape1 != shape2):
-                    shapes = shape1 & shape2
-                    for shape in shapes:
-                        el += Polygon(shape=shape, layer=e1.layer)
+                #     shapes = shape1 & shape2
+                #     for shape in shapes:
+                #         el += Polygon(shape=shape, layer=e1.layer)
+                
+                # # FIXME: We need this for virtual contact connections.
+                # if shape1 != shape2:
+                #     shapes = shape1 & shape2
+                #     for shape in shapes:
+                #         el += Polygon(shape=shape, layer=e1.layer)
+
+                shapes = shape1 & shape2
+                for shape in shapes:
+                    el += Polygon(shape=shape, layer=e1.layer)
+
         self.elements = el
         return self
 

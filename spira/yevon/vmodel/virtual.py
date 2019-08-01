@@ -64,9 +64,7 @@ class VirtualConnect(__VirtualModel__):
             # for k, v in mapping.items():
             #     print(k, v)
             # print('')
-            # print(self.device.elements)
-
-            # print(deepcopy(self.device).elements)
+            # # print(self.device.elements)
 
             el = get_derived_elements(elements=deepcopy(self.device).elements, mapping=mapping)
             # el = get_derived_elements(elements=self.device.elements, mapping=mapping)
@@ -87,10 +85,11 @@ class VirtualConnect(__VirtualModel__):
                     ps = e1.layer.process.symbol
                     if e2.layer == RDD.VIAS[ps].LAYER_STACK[m]:
                         if e2.encloses(e1.center):
-                            e2.ports += spira.Port(
+                            port = spira.Port(
                                 name='Cv_{}'.format(ps),
                                 midpoint=e1.center,
                                 process=e1.layer.process)
+                            e2.ports += port
                             index += 1
         return self.device.elements
 
@@ -154,18 +153,22 @@ class VirtualConnect(__VirtualModel__):
 
         # for e in self.__make_polygons__():
         #     elems += e
+        
+        # EF = filters.EdgeShapeFilter(edge_type=constants.EDGE_TYPE_OUTSIDE, purpose=RDD.PURPOSE.METAL)
+        # for e in EF(self.device).elements:
+        #     F = filters.EdgeToPolygonFilter()
+        #     elems += F(e)
 
         for ply_overlap, edges in self.connected_edges.items():
             if ply_overlap.is_empty() is False:
-                EF = filters.EdgeToPolygonFilter()
-                # elems += EF(ply_overlap)
                 for e in edges:
+                    EF = filters.EdgeToPolygonFilter()
                     elems += EF(e)
 
         elems += self.device.elements
 
         D = spira.Cell(name='_VIRTUAL_CONNECT', elements=elems)
-        D.gdsii_output(file_name='Virtual')
+        D.gdsii_view()
 
 
 def virtual_process_model(device, process_flow):

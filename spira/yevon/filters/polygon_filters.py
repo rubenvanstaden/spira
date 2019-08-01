@@ -74,7 +74,8 @@ class PortToPolygonFilter(__PolygonFilter__):
     def filter_Polygon(self, item):
         elems = ElementList()
         for p in item.ports:
-            elems += self.filter_Port(p).elements
+            el = self.filter_Port(p).elements
+            elems += el.transform(item.transformation)
         cell = Cell(elements=elems)
         return cell
 
@@ -86,7 +87,9 @@ class PortCellFilter(PortToPolygonFilter):
 
     def filter_Cell(self, item):
         for p in item.ports:
-            item += self.filter_Port(p).elements
+            if p.purpose.symbol != 'E':
+                el = self.filter_Port(p).elements
+                item += el.transform(item.transformation)
         return item
 
     def __repr__(self):

@@ -26,8 +26,8 @@ class EdgeShapeFilter(__EdgeFilter__):
         from copy import deepcopy
         from spira.yevon.gdsii.cell import Cell
 
+        elems = ElementList()
         if self.width is None:
-            elems = ElementList()
             for p1 in deepcopy(item.elements.polygons):
                 if p1.layer.purpose == self.purpose:
                     for edge in p1.edges:

@@ -18,8 +18,11 @@ __all__ = ['Route', 'RouteStraight', 'RoutePath', 'Route90', 'Route180', 'RouteM
 
 from spira.yevon.utils import clipping
 from spira.yevon.gdsii.base import __ShapeElement__
-from spira.yevon.aspects.port import TransformablePortAspects
-class Route(__ShapeElement__, TransformablePortAspects):
+from spira.yevon.gdsii.polygon import Polygon
+from spira.yevon.aspects.port import TransformablePortAspects, PolygonPortAspects
+# class Route(__ShapeElement__, PolygonPortAspects):
+# class Route(__ShapeElement__, TransformablePortAspects):
+class Route(Polygon):
     """  """
 
     p1 = PortParameter(allow_none=None, default=None)
@@ -43,7 +46,10 @@ class Route(__ShapeElement__, TransformablePortAspects):
 
     def __str__(self):
         return self.__repr__()
-        
+
+    def short_string(self):
+        return "Route [{}, {}, {}]".format(self.center, self.layer.process.symbol, self.layer.purpose.symbol)
+
     def flat_copy(self, level=-1):
         """ Flatten a copy of the polygon. """
         S = Route(shape=self.shape, layer=self.layer, transformation=self.transformation)

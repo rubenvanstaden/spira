@@ -15,9 +15,7 @@ from spira.yevon.process import get_rule_deck
 RDD = get_rule_deck()
 
 
-__all__ = [
-    'get_derived_elements',
-]
+__all__ = ['get_derived_elements']
 
 
 def _derived_elements(elems, derived_layer):

@@ -15,12 +15,24 @@ class OutputGdsiiAspect(__Aspects__):
     def gdsii_view(self, unit=RDD.GDSII.UNIT, grid=RDD.GDSII.GRID, layer_map=None):
         my_lib = Library(name=self.name, unit=unit, grid=grid)
         # F = filters.ToggledCompositeFilter()
-        f1 = filters.PortCellFilter()
-        f2 = filters.PortPolygonFilter()
-        F = f1 + f2
+
+        # f1 = filters.PortCellFilter()
+        # f2 = filters.PortPolygonFilter()
+        # F = f1 + f2
+
+        # F = filters.PortCellFilter(name='cell_ports')
+        F = filters.PortPolygonFilter(name='polygon_ports')
+        
+        # D = F(self)
+        # print(D.elements)
+        # my_lib += D
+        # my_lib += self
+
         my_lib += F(self)
+
         if layer_map is None:
             layer_map = RDD.GDSII.EXPORT_LAYER_MAP
+
         output = OutputGdsii(file_name='', layer_map=layer_map)
         output.viewer(my_lib)
 

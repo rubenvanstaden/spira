@@ -105,7 +105,7 @@ RDD.PORT.WIDTH = 0.5
 
 # --------------------------------- Name Generator -------------------------------------
 
-class AdminDatabase(DelayedDatabase):
+class AdminDatabase(LazyDatabase):
     """ A technology tree with a name generator. """
 
     def initialize(self):
@@ -120,7 +120,7 @@ RDD.ADMIN = AdminDatabase()
 
 # ---------------------------- Parameterized Cell Data --------------------------------
 
-class PCellDatabase(DelayedDatabase):
+class PCellDatabase(LazyDatabase):
 
     def initialize(self):
         from spira.yevon import filters

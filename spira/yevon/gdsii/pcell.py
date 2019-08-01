@@ -20,7 +20,7 @@ class PCell(Cell):
     pcell = BoolParameter(default=True)
     routes = ElementListParameter(doc='List of `Route` elements connected to the cell.')
     structures = ElementListParameter(doc='List of cell structures that coalesces the top-level cell.')
-    
+
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
@@ -120,7 +120,6 @@ class Circuit(PCell):
                     c2dmap[cell] += S
                 else:
                     S = deepcopy(e)
-                    # print(S)
                     S.reference = c2dmap[e.reference]
                     c2dmap[cell] += S
 

@@ -26,6 +26,10 @@ RDD = get_rule_deck()
 __all__ = ['Shape', 'ShapeParameter', 'PointArrayParameter', 'shape_edge_ports']
 
 
+st = pyclipper.scale_to_clipper
+sf = pyclipper.scale_from_clipper
+
+
 class PointArrayParameter(ParameterDescriptor):
     """  """
 
@@ -129,6 +133,18 @@ class __Shape__(Transformable, ParameterInitializer):
     def bbox_info(self):
         return bbox_info.bbox_info_from_numpy_array(self.points)
 
+    def reverse_points(self):
+        """ If orientation is clockwise, convert to counter-clockwise. """
+        sc = constants.CLIPPER_SCALE
+        pts = st(self.points, sc)
+        if pyclipper.Orientation(pts) is False:
+            reverse_poly = pyclipper.ReversePath(pts)
+            solution = pyclipper.SimplifyPolygon(reverse_poly)
+        else:
+            solution = pyclipper.SimplifyPolygon(pts)
+        self.points = sf(solution, sc)[0]
+        return self
+    
     def segments(self):
         """ Returns a list of point pairs 
         with the segments of the shape. """
@@ -342,6 +358,40 @@ def ShapeParameter(restriction=None, preprocess=None, **kwargs):
     R = RestrictType(Shape) & restriction
     P = ProcessorTypeCast(Shape) + preprocess
     return ParameterDescriptor(restriction=R, preprocess=P, **kwargs)
+
+
+
+# from spira.yevon.gdsii.group import Group
+# from spira.yevon.gdsii.base import __LayerElement__
+# from spira.yevon.process.physical_layer import PLayer
+# class EdgeGenerator(Group, __LayerElement__):
+#     """ Generates edge objects for each shape segment. """
+
+#     shape = ShapeParameter()
+#     internal_pid = StringParameter(default='no_pid', doc='A unique polygon ID to which the edge connects.')
+
+#     def create_elements(self, elems):
+
+#         for i, s in enumerate(self.shape.segments()):
+
+#             shape = Shape(points=s)
+
+#             L = RDD.GDSII.IMPORT_LAYER_MAP[self.layer]
+#             width = RDD[L.process.symbol].MIN_SIZE
+
+#             layer = PLayer(process=L.process, purpose=RDD.PURPOSE.PORT.OUTSIDE_EDGE_DISABLED)
+
+#             elems += Edge(
+#                 shape=[],
+#                 line_shape=shape,
+#                 layer=layer,
+#                 internal_pid=self.internal_pid,
+#                 width=width,
+#                 transformation=self.transformation
+#             )
+            
+#         return elems
+
 
 
 def shape_edge_ports(shape, layer, local_pid='None', center=(0,0), loc_name=''):
