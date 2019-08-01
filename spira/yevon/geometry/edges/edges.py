@@ -107,7 +107,7 @@ class EdgeGenerator(Group, __LayerElement__):
 
         for i, s in enumerate(shape.segments()):
 
-            shape = Shape(points=s)
+            line_shape = Shape(points=s)
 
             L = RDD.GDSII.IMPORT_LAYER_MAP[self.layer]
             width = RDD[L.process.symbol].MIN_SIZE
@@ -116,7 +116,7 @@ class EdgeGenerator(Group, __LayerElement__):
 
             elems += Edge(
                 shape=[],
-                line_shape=shape,
+                line_shape=line_shape,
                 layer=layer,
                 internal_pid=self.internal_pid,
                 width=width,

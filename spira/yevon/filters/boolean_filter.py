@@ -94,7 +94,7 @@ class MetalConnectFilter(Filter):
                 D.elements[i].shape = ShapeConnected(
                     original_shape=original_shape,
                     clip_shape=clip_shape,
-                    edges=v_model.connected_edges)
+                    derived_edges=v_model.derived_edges)
                 D.elements[i].ports = D.elements[i].ports.transform_copy(e1.transformation)
                 D.elements[i].transformation = None
 
@@ -117,7 +117,7 @@ class ViaConnectFilter(Filter):
         elems = ElementList()
 
         v_model = virtual_connect(device=item)
-        for e in v_model.connected_elements:
+        for e in v_model.attached_contacts:
             elems += e
 
         for e in item.elements.sref:

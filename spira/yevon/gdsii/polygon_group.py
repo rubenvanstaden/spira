@@ -4,6 +4,7 @@ from copy import deepcopy
 from spira.yevon.utils import clipping
 from spira.yevon.gdsii.group import Group
 from spira.yevon.gdsii.polygon import Polygon
+from spira.yevon.geometry.shapes import Shape
 from spira.yevon.gdsii.elem_list import ElementList
 from spira.yevon.gdsii.base import __LayerElement__
 from spira.yevon.process import get_rule_deck
@@ -16,14 +17,8 @@ __all__ = ['PolygonGroup']
 
 
 class PolygonGroup(Group, __LayerElement__):
-    """ 
-    Collection of polygon elements. Boolean
-    operation can be applied on these polygons.
-
-    Example
-    -------
-    >>> cp = spira.PolygonGroup()
-    """
+    """ Collection of polygon elements. Boolean
+    operation can be applied on these polygons. """
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -69,15 +64,14 @@ class PolygonGroup(Group, __LayerElement__):
             s1 = e.shape.transform_copy(e.transformation)
             pts2.append(s1.points)
 
+        self.elements = ElementList()
         if (len(pts1) > 0) and (len(pts2) > 0):
             p1 = gdspy.PolygonSet(polygons=pts1)
             p2 = gdspy.PolygonSet(polygons=pts2)
-    
-            ply = gdspy.fast_boolean(p1, p2, operation='not')
-            elems = ElementList()
+            ply = gdspy.boolean(p1, p2, operation='not')
             for points in ply.polygons:
-                elems += Polygon(shape=points, layer=self.layer)
-            self.elements = elems
+                self.elements += Polygon(shape=points, layer=self.layer)
+
         return self
 
     def __or__(self, other):

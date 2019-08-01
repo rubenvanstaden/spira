@@ -55,7 +55,8 @@ class Device(PCell):
             F = RDD.PCELLS.FILTERS
             F['boolean'] = True
             F['simplify'] = True
-            F['via_contact'] = True
+            # F['via_contact'] = True
+            F['via_contact'] = False
             F['metal_connect'] = False
 
             elems = F(D).elements

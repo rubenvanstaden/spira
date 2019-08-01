@@ -35,4 +35,14 @@ class LayerFilterDelete(__LayerFilter__):
         return "[SPiRA: LayerFilterDelete] (layer count {})".format(len(self.layers))
 
 
+# class LayerFilterAllowPurpose(__LayerFilter__):
+#     def filter___LayerElement__(self, item):
+#         if item.layer in self.layers:
+#             return [item]
+#         else:
+#             LOG.debug("LayerFilterAllow is filtering out item %s" %item)
+#             return []
+
+#     def __repr__(self):
+#         return "[SPiRA: LayerFilterDelete] (layer count {})".format(len(self.layers))
 

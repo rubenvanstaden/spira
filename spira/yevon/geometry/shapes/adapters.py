@@ -26,16 +26,17 @@ class __ShapeAdapter__(Shape):
 class ShapeConnected(__ShapeAdapter__):
     """  """
 
-    edges = DictParameter()
+    derived_edges = DictParameter()
     clip_shape = ShapeParameter(doc='Edge shape that clipes the original shape for electrical connection.')
 
     def create_segment_labels(self):
         labels = []
         for i, s1 in enumerate(self.segments()):
             labels.append(str(i))
-        for ply, edges in self.edges.items():
-            for edge in edges:
-                bbox_shape = edge.shape.transform(edge.transformation).snap_to_grid()
+        for derived_edges in self.derived_edges.values():
+            for edge in derived_edges:
+                bbox_shape = edge.shape.transform(edge.transformation)
+                bbox_shape = bbox_shape.snap_to_grid()
                 for i, s1 in enumerate(self.segments()):
                     s1 = Shape(points=s1).snap_to_grid()
                     s1 = s1.points[0]
