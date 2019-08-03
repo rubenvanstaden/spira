@@ -5,7 +5,6 @@ from numpy.linalg import norm
 from spira.yevon.geometry.vector import *
 from spira.yevon.geometry.ports.port import *
 from spira.yevon.geometry.ports.port_list import PortList
-from spira.yevon.geometry.route.route_shaper import *
 from spira.yevon import constants
 from spira.yevon.process import get_rule_deck
 

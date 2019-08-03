@@ -17,6 +17,7 @@ RDD = get_rule_deck()
 
 __all__ = [
     'VirtualProcessModel',
+    'VirtualConnect',
     'virtual_process_model',
     'virtual_connect'
 ]
@@ -48,30 +49,8 @@ class VirtualConnect(__VirtualModel__):
     derived_contacts = spira.Parameter(fdef_name='create_derived_contacts')
     attached_contacts = spira.Parameter(fdef_name='create_attached_contacts')
 
-    # def create_derived_contacts(self):
-
-    #     mapping = {}
-    #     elems = spira.ElementList()
-    #     for k in RDD.VIAS.keys:
-    #         mapping[RDD.PLAYER[k].CLAYER_CONTACT] = RDD.VIAS[k].LAYER_STACK['VIA_LAYER']
-    #         # mapping[RDD.PLAYER[k].CLAYER_M1] = RDD.VIAS[k].LAYER_STACK['BOT_LAYER']
-    #         # mapping[RDD.PLAYER[k].CLAYER_M2] = RDD.VIAS[k].LAYER_STACK['TOP_LAYER']
-
-    #     # print('\nMapping:')
-    #     # for k, v in mapping.items():
-    #     #     print(k, v)
-    #     # print('')
-    #     # # print(self.device.elements)
-
-    #     el = get_derived_elements(elements=deepcopy(self.device).elements, mapping=mapping)
-    #     # el = get_derived_elements(elements=self.device.elements, mapping=mapping)
-    #     for e in el:
-    #         if e.layer.purpose.symbol in ['JJ', 'VIA']:
-    #             elems += e
-    #         # elems += e
-    #     return elems
-
     def create_derived_contacts(self):
+        """  """
 
         mapping = {}
         for k in RDD.VIAS.keys:
@@ -81,27 +60,10 @@ class VirtualConnect(__VirtualModel__):
 
         return get_derived_elements(elements=deepcopy(self.device).elements, mapping=mapping)
 
-    def create_attached_contacts(self):
-        """ Adds contact ports to each metal polygon connected by a
-        contact layer and return a list of the updated elements. """
-        index = 0
-        for e1 in self.derived_contacts:
-            for e2 in self.device.elements:
-                for m in ['BOT_LAYER', 'TOP_LAYER']:
-                    ps = e1.layer.process.symbol
-                    if e2.layer == RDD.VIAS[ps].LAYER_STACK[m]:
-                        if e2.encloses(e1.center):
-                            port = spira.Port(
-                                name='Cv_{}'.format(ps),
-                                midpoint=e1.center,
-                                process=e1.layer.process)
-                            e2.ports += port
-                            index += 1
-        return self.device.elements
-
     def create_derived_edges(self):
         """ Detect connecting and overlapping layer edges. Returns
         the derived merged polygons and derived intersection edges. """
+
         EF = filters.EdgeShapeFilter(edge_type=constants.EDGE_TYPE_OUTSIDE, purpose=RDD.PURPOSE.METAL)
         edge_elems = EF(self.device).elements
 
@@ -159,38 +121,43 @@ class VirtualConnect(__VirtualModel__):
         elems = spira.ElementList()
 
         if show_layers is True:
+            el = self.derived_contacts
+            F = filters.PurposeFilterAllow(purposes=['JJ', 'VIA'])
+            elems += F(el)
             elems += self.device.elements
-            
-        elems += self.derived_contacts
-        
+        else:
+            elems += self.derived_contacts
+
         for ply_overlap, edges in self.derived_edges.items():
             if ply_overlap.is_empty() is False:
                 for e in edges:
                     EF = filters.EdgeToPolygonFilter()
                     elems += EF(e)
 
-        D = spira.Cell(name='_VIRTUAL_CONNECT', elements=elems)
+        D = spira.Cell(name='_VIRTUAL_CONNECT', elements=elems, ports=self.device.ports)
         D.gdsii_view()
 
     def view_derived_contacts(self, show_layers=False, **kwargs):
-        
+
         elems = spira.ElementList()
 
         if show_layers is True:
             elems += self.device.elements
-            
-        elems += self.derived_contacts
-        
+
+        el = self.derived_contacts
+        F = filters.PurposeFilterAllow(purposes=['JJ', 'VIA'])
+        elems += F(el)
+
         D = spira.Cell(name='_DERIVED_CONTACTS', elements=elems)
         D.gdsii_view()
 
     def view_derived_edges(self, show_layers=False, **kwargs):
-        
+
         elems = spira.ElementList()
 
         if show_layers is True:
             elems += self.device.elements
-            
+
         for ply_overlap, edges in self.derived_edges.items():
             if ply_overlap.is_empty() is False:
                 for e in edges:
@@ -206,6 +173,9 @@ def virtual_process_model(device, process_flow):
 
 
 def virtual_connect(device):
+    # for p in device.ports:
+    #     print(p)
+    # print('')
     D = deepcopy(device).expand_flat_copy()
     return VirtualConnect(device=D)
 

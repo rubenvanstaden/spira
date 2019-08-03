@@ -62,7 +62,6 @@ def get_current_library():
 
 
 def get_current_layerlist():
-    # from spira.yevon.process.layer_list import LayerList
     from spira.yevon.process.gdsii_layer import LayerList
     if _current_layerlist is None:
         return LayerList()
@@ -104,7 +103,7 @@ def snap_shape(coordinates, grids_per_unit=None):
     """ Round the coordinates of a shape to a grid value. """
     from spira.yevon.geometry import shapes
     if grids_per_unit is None:
-        grids_per_unit == get_grids_per_unit()
+        grids_per_unit = get_grids_per_unit()
     shape = shapes.Shape(coordinates).snap_to_grid(grids_per_unit)
     return shape
 
@@ -112,6 +111,6 @@ def snap_shape(coordinates, grids_per_unit=None):
 def snap_points(points, grids_per_unit=None):
     """ Round a list of points to a grid value. """
     if grids_per_unit is None: 
-        grids_per_unit == get_grids_per_unit()
+        grids_per_unit = get_grids_per_unit()
     pts = (floor(points * grids_per_unit + 0.5)) / grids_per_unit
     return pts

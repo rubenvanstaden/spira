@@ -133,7 +133,6 @@ class __NetlistFilter__(Filter):
         for n in self.g.nodes():
             if 'device_reference' in self.g.node[n]:
                 D = self.g.node[n]['device_reference']
-                print(D)
                 if isinstance(D, spira.SRef):
                     branch_nodes.append(n)
                 if isinstance(D, spira.Port):

@@ -150,7 +150,7 @@ class Cell(__Cell__):
     alias = FunctionParameter(get_alias, set_alias, doc='Functions to generate an alias for cell name.')
 
     def __init__(self, name=None, elements=None, ports=None, nets=None, library=None, **kwargs):
-        __Cell__.__init__(self, **kwargs)
+        super().__init__(**kwargs)
 
         if name is not None:
             s = '{}_{}'.format(name, Cell._next_uid)
@@ -199,6 +199,8 @@ class Cell(__Cell__):
 
         S = self.expand_transform()
 
+        # print(self.ports)
+
         C = Cell(name=S.name + '_ExpandedCell')
         def _traverse_polygons(subj, cell, name):
             c_name = deepcopy(name)
@@ -220,8 +222,22 @@ class Cell(__Cell__):
 
                 elif isinstance(e, Polygon):
                     e.location_name = c_name
+
+                    # for p in cell.ports:
+                    #     if p.purpose.symbol == 'P':
+                    #         # if p.encloses(e.shape.points):
+                    #         print('wjefbkjewbfk')
+                    #         print(p)
+                    #         e.ports += p
+
                     subj += e
                 c_name = name
+
+            # # FIXME!!!
+            # for e in cell.ports:
+            #     if e.purpose.symbol == 'P':
+            #         subj.ports += e
+
             return subj
 
         D = _traverse_polygons(C, S, '')

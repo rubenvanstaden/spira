@@ -24,19 +24,9 @@ class PortAspects(__Aspects__):
 
 class CellPortAspects(PortAspects):
 
-    # NOTE: Maybe remove this. This allows us
-    # to access the edge ports from a cell directly.
-    def _edge_layer_ports(self):
-        from spira.yevon.gdsii.polygon import Polygon
-        from spira.yevon.geometry.ports.port_list import PortList
-        ports = PortList()
-        for e in self.elements.polygons:
-            for p in e.ports:
-                ports += p.transform(e.transformation)
-        return ports
-
     def __create_ports__(self, ports):
-        ports += self._edge_layer_ports()
+        for e in self.elements.polygons:
+            ports += e.ports
         return self.create_ports(ports)
 
 

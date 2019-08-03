@@ -25,7 +25,6 @@ class MetaPort(MetaInitializer):
             if (kwargs['name'] is None) or (kwargs['name'] == ''):
                 raise ValueError('Port name cannot be generated.')
             full_name = kwargs['name'].split(':')
-            # print(full_name)
             nl = full_name[-1].split('_')
         port_data = {}
         port_data['name'] = nl[0]

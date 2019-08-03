@@ -55,8 +55,8 @@ class Device(PCell):
             F = RDD.PCELLS.FILTERS
             F['boolean'] = True
             F['simplify'] = True
-            # F['via_contact'] = True
-            F['via_contact'] = False
+            F['contact_attach'] = True
+            F['pin_attach'] = False
             F['metal_connect'] = False
 
             elems = F(D).elements
@@ -126,16 +126,17 @@ class Circuit(PCell):
 
         if self.pcell is True:
 
-            c2dmap = {}
             ex_elems = elems.expand_transform()
 
             C = Cell(elements=ex_elems)
 
-            devices = {}
+            c2dmap, devices = {}, {}
 
             for cell in C.dependencies():
-                D = Cell(name=cell.name, elements=deepcopy(cell.elements.polygons))
-                c2dmap.update({cell:D})
+                D = Cell(name=cell.name,
+                    elements=deepcopy(cell.elements.polygons),
+                    ports=deepcopy(cell.ports))
+                c2dmap.update({cell: D})
 
             for cell in C.dependencies():
                 wrap_references(cell, c2dmap, devices)
@@ -144,8 +145,9 @@ class Circuit(PCell):
 
             F = RDD.PCELLS.FILTERS
             F['boolean'] = True
-            F['simplify'] = True
-            F['via_contact'] = False
+            F['simplify'] = False
+            F['pin_attach'] = False
+            F['contact_attach'] = False
             F['metal_connect'] = False
 
             Df = F(D)

@@ -92,6 +92,12 @@ class SRef(__RefElement__):
         d.add(self.reference.dependencies())
         return d
 
+    def net_source(self):
+        pass
+
+    def net_target(self):
+        pass
+
     def expand_transform(self):
         from spira.yevon.gdsii.sref import SRef
         from spira.yevon.gdsii.polygon import Polygon
@@ -117,7 +123,7 @@ class SRef(__RefElement__):
         self.midpoint = (0, 0)
 
         return self
-
+        
     def expand_flat_copy(self):
         """  """
         D = self.reference.expand_flat_copy()
@@ -364,47 +370,6 @@ class SRef(__RefElement__):
         # nets.transform(T)
 
         return nets 
-
-    # def expand_transform(self):
-    #     """
-
-    #     Note
-    #     ----
-    #     Use __class__ cause we want to keep the
-    #     subclass tree (spira.Device) in tacks for fitlering.
-    #     """
-    #     from spira.yevon.gdsii.sref import SRef
-    #     from spira.yevon.gdsii.polygon import Polygon
-    #     from spira.core.transforms.identity import IdentityTransform
-
-    #     if not self.transformation.is_identity():
-
-    #         self.reference.expand_transform()
-
-    #         # if self.alias is None:
-    #         #     name = '{}_{}'.format(self.reference.name, self.transformation.id_string())
-    #         # else:
-    #         #     name = '{}_{}'.format(self.reference.name, self.alias)
-
-    #         C = self.reference.__class__(
-    #             name='{}_{}'.format(self.reference.name, self.transformation.id_string()),
-    #             elements=deepcopy(self.reference.elements),
-    #             ports=deepcopy(self.reference.ports))
-
-    #         T = self.transformation + spira.Translation(self.midpoint)
-    #         # T = self.transformation
-
-    #         C.elements.transform(T)
-    #         C.ports.transform(T)
-    #         # C.expand_transform()
-            
-    #         self.reference = C
-    #         self.transformation = None
-    #         self.midpoint = (0,0)
-
-    #         # self.reference.expand_transform()
-
-    #     return self
 
 
 class ARef(__RefElement__):

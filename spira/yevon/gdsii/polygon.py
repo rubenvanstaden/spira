@@ -62,7 +62,8 @@ class Polygon(__ShapeElement__):
             return 'Polygon is None!'
         layer = RDD.GDSII.IMPORT_LAYER_MAP[self.layer]
         class_string = "[SPiRA: Polygon \'{}\'] (center {}, vertices {}, process {}, purpose {})"
-        return class_string.format(self.alias, self.center, self.count, self.layer.process.symbol, self.layer.purpose.symbol)
+        return class_string.format(self.alias, self.center, self.count,
+                                   self.layer.process.symbol, self.layer.purpose.symbol)
 
     def __str__(self):
         return self.__repr__()
@@ -104,13 +105,32 @@ class Polygon(__ShapeElement__):
                     process=self.layer.process,
                     process_polygons=[deepcopy(self)])
 
+            # cc = []
+            # for p in self.ports:
+            #     c_port= p.transform_copy(self.transformation)
+            #     if p.purpose == RDD.PURPOSE.PORT.PIN:
+            #         cc.append(c_port)
+            #     elif p.purpose == RDD.PURPOSE.PORT.CONTACT:
+            #         cc.append(c_port)
+
             cc = []
             for p in self.ports:
-                p = p.transform(self.transformation)
                 if p.purpose == RDD.PURPOSE.PORT.PIN:
                     cc.append(p)
                 elif p.purpose == RDD.PURPOSE.PORT.CONTACT:
-                    cc.append(p)
+                    c_port = p.transform_copy(self.transformation)
+                    cc.append(c_port)
+
+            # cc = []
+            # for p in self.ports:
+            #     if p.purpose == RDD.PURPOSE.PORT.PIN:
+            #         cc.append(p)
+            #     elif p.purpose == RDD.PURPOSE.PORT.CONTACT:
+            #         cc.append(p)
+
+            # for p in cc:
+            #     print(p)
+            # print('')
 
             F = filters.ToggledCompositeFilter()
             F += filters.NetProcessLabelFilter(process_polygons=[deepcopy(self)])

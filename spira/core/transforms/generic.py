@@ -153,9 +153,7 @@ class GenericTransform(ReversibleTransform):
                 T.rotation = s_1 * self.rotation + other.rotation
                 ca = other.__ca__
                 sa = other.__sa__
-                # print('A')
             else:
-                # print('B')
                 T.rotation = s_1 * self.rotation
                 ca = 1.0
                 sa = 0.0

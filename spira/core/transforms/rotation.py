@@ -54,23 +54,9 @@ class Rotation(__ConvertableTransform__):
             rotation_center = Coord(rotation_center[0], rotation_center[1])
         self.__rotation_center__ = rotation_center
         if hasattr(self, '__ca__'):
-            
-            # self.translation = Coord(
-            #     rotation_center.x * (1 - self.__ca__) + rotation_center.y * self.__sa__,
-            #     # rotation_center.y * (1 - self.__ca__) - rotation_center.x * self.__sa__)
-
             self.translation = Coord(
                   rotation_center.x * (1 - self.__ca__) + rotation_center.y * self.__sa__,
                 - rotation_center.x * self.__sa__       + rotation_center.y * (1 - self.__ca__))
-
-            # self.translation = Coord(
-            #       rotation_center.x * self.__ca__ + rotation_center.y * self.__sa__,
-            #     - rotation_center.x * self.__sa__ + rotation_center.y * self.__ca__)
-
-            # if self.translation.x != 0.0:
-            #     print(self.__ca__)
-            #     print(rotation_center)
-            #     print(self.translation)
 
     rotation_center = SetFunctionParameter(
         local_name='__rotation_center__',
@@ -81,7 +67,6 @@ class Rotation(__ConvertableTransform__):
     )
 
     def __neg__(self):
-        """ Returns the reverse transformation. """
         return Rotation(-self.rotation, self.rotation_center)
 
     def apply_to_coord(self, coord):

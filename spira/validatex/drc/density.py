@@ -39,15 +39,10 @@ class Density(__DoubleLayerDesignRule__):
 
             if presentage < self.minimum:
                 fails = True
-                print('\n ------ Design Rules ------')
-                print(self.layer1)
                 message = '[DRC: Density ({})]: (layer1 {}, layer2 {}, extracted_value {}%, rule_value {}%)'.format('fail', self.layer1.number, self.layer2.number, int(round(presentage)), self.min)
                 raise ValueError(message)
             else:
                 fails = False
-                print('\n ------ Design Rules ------')
-                print(self.layer1)
-                print('Density ({}): {}%'.format('pass', int(round(presentage))))
 
         return fails
 

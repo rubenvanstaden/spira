@@ -71,6 +71,12 @@ class Port(Vector, __Port__):
         self.orientation = transformation.apply_to_angle(self.orientation)
         return self
 
+    def net_source(self):
+        pass
+
+    def net_target(self):
+        pass
+
     def transform_copy(self, transformation):
         # port = self.copy(
         #     midpoint=transformation.apply_to_coord(self.midpoint),

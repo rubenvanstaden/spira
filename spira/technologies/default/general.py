@@ -131,8 +131,8 @@ class PCellDatabase(LazyDatabase):
         f = filters.ToggledCompositeFilter()
         f += filters.ProcessBooleanFilter(name='boolean')
         f += filters.SimplifyFilter(name='simplify')
-        f += filters.ViaConnectFilter(name='via_contact')
-        f += filters.MetalConnectFilter(name='metal_connect')
+        f += filters.ContactAttachFilter(name='contact_attach')
+        f += filters.ElectricalAttachFilter(name='metal_connect')
 
         self.FILTERS = f
 

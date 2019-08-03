@@ -62,26 +62,6 @@ class TypedList(ParameterInitializer, list):
     def clear(self):
         del self._list[:]
 
-    # def insert(self, i, v):
-    #     self._list.insert(i, v)
-
-    # # def append(self, val):
-    # #     self.insert(len(self._list), val)
-        
-    # # def append(self, item):
-    # #     self._list.append(item)
-
-    # def extend(self, items):
-    #     self._list.extend(items)
-        
-    # def append(self, val):
-    #     print('jwefbwejfkbk')
-    #     print(self._list)
-    #     print(type(val))
-    #     # self.insert(len(self._list), val)
-    #     self._list.append(val)
-    #     print(self._list)
-
     def remove(self, item):
         self._list.remove(item)
 
@@ -95,11 +75,9 @@ class TypedList(ParameterInitializer, list):
 
     def extend(self, items):
         if type(self) == type(items):
-            # list.extend(self, items)
             self._list.extend(items)
         elif isinstance(items, list) or isinstance(items, set):
             for i in items:
-                # list.append(self, i)  # type will be checked in the 'append' function
                 self._list.append(i)  # type will be checked in the 'append' function
         else:
             raise Exception("TypedList::extend should be used with a list as argument. Current argument if of type %s, which is not a list." % str(type(item)))
@@ -146,29 +124,5 @@ class TypedListParameter(ParameterInitializer):
         else:
             raise TypeError("Invalid type in setting value of %s (expected %s): %s" % (self.__class_, self.__list_type__, str(type(objects))))
         return
-
-
-# from spira.core.parameters.descriptor import ParameterDescriptor
-# class ListParameter(ParameterDescriptor):
-#     __type__ = TypedList
-
-#     def __init__(self, default=[], **kwargs):
-#         kwargs['default'] = self.__type__(default)
-#         super().__init__(**kwargs)
-
-#     def __get_parameter_value__(self, obj):
-#         value = obj.__store__[self.__name__]
-#         return list(value)
-
-#     def __set__(self, obj, value):
-#         if isinstance(value, self.__type__):
-#             obj.__store__[self.__name__] = value
-#         elif isinstance(value, list):
-#             obj.__store__[self.__name__] = self.__type__(items=value)
-#         else:
-#             raise TypeError("Invalid type in setting value " + 
-#                             "of {} (expected {}): {}"
-#                             .format(self.__class_, type(value)))
-
 
 

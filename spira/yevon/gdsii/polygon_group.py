@@ -78,6 +78,10 @@ class PolygonGroup(Group, __LayerElement__):
         raise ValueError('Not Implemented!')
 
     @property
+    def difference(self):
+        pass
+
+    @property
     def intersect(self):
         elems = ElementList()
         el1 = deepcopy(self.elements)
@@ -94,7 +98,7 @@ class PolygonGroup(Group, __LayerElement__):
         return self
 
     @property
-    def merge(self):
+    def union(self):
         elems = ElementList()
         if len(self.elements) > 1:
             points = []

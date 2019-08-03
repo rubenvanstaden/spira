@@ -17,9 +17,11 @@ def get_process_polygons(elements, operation='or'):
             LF = LayerFilterAllow(layers=[layer])
             el = LF(elements.polygons)
             if operation == 'or':
-                pg = PolygonGroup(elements=el, layer=layer).merge
+                pg = PolygonGroup(elements=el, layer=layer).union
             elif operation == 'and':
                 pg = PolygonGroup(elements=el, layer=layer).intersect
+            elif operation == 'not':
+                pg = PolygonGroup(elements=el, layer=layer).difference
             elems += pg
     return elems
 
@@ -30,6 +32,7 @@ class DerivedElements(__Aspects__):
 
     derived_merged_elements = ElementListParameter()
     derived_overlap_elements = ElementListParameter()
+    derived_diff_elements = ElementListParameter()
 
     def create_derived_merged_elements(self, elems):
         elems += get_process_polygons(self.elements, 'or')
@@ -38,15 +41,28 @@ class DerivedElements(__Aspects__):
     def create_derived_overlap_elements(self, elems):
         elems += get_process_polygons(self.elements, 'and')
         return elems
+        
+    def create_derived_diff_elements(self, elems):
+        elems += get_process_polygons(self.elements, 'not')
+        return elems
 
-    def gdsii_output_derived(self, derived_type, **kwargs):
+    def view_derived_merged_elements(self, **kwargs):
         elems = ElementList()
         for pg in self.derived_merged_elements:
             for e in pg.elements:
                 elems += e
-        name = '{}_{}'.format(self.name, derived_type)
+        name = '{}_{}'.format(self.name, 'DERIVED_MERGED_ELEMENTS')
         D = Cell(name=name, elements=elems)
-        D.gdsii_output(file_name=derived_type)
+        D.gdsii_view()
+
+    def view_derived_overlap_elements(self, **kwargs):
+        elems = ElementList()
+        for pg in self.derived_overlap_elements:
+            for e in pg.elements:
+                elems += e
+        name = '{}_{}'.format(self.name, 'DERIVED_OVERLAP_ELEMENTS')
+        D = Cell(name=name, elements=elems)
+        D.gdsii_view()
 
 
 Cell.mixin(DerivedElements)

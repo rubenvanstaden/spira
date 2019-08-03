@@ -20,15 +20,15 @@ class OutputGdsiiAspect(__Aspects__):
         # f2 = filters.PortPolygonFilter()
         # F = f1 + f2
 
-        # F = filters.PortCellFilter(name='cell_ports')
-        F = filters.PortPolygonFilter(name='polygon_ports')
-        
+        F = filters.PortCellFilter(name='cell_ports')
+        # F = filters.PortPolygonFilter(name='polygon_ports')
+        my_lib += F(self)
+
+        # my_lib += self
+
         # D = F(self)
         # print(D.elements)
         # my_lib += D
-        # my_lib += self
-
-        my_lib += F(self)
 
         if layer_map is None:
             layer_map = RDD.GDSII.EXPORT_LAYER_MAP
@@ -48,7 +48,7 @@ class OutputGdsiiAspect(__Aspects__):
 
 class OutputPlotlyNetlist(__Aspects__):
 
-    def netlist_output(self):
+    def netlist_view(self):
         from spira.yevon.io.output_netlist import PlotlyGraph
         output = PlotlyGraph()
         output._plotly_netlist(G=self.netlist.g, graphname=self.name)
