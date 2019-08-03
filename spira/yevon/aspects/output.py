@@ -1,6 +1,7 @@
 from spira.yevon.aspects.base import __Aspects__
 from spira.log import SPIRA_LOG as LOG
 from spira.yevon import filters
+from copy import deepcopy
 from spira.yevon.gdsii.library import Library
 from spira.yevon.io.output_gdsii import OutputGdsii
 from spira.yevon.process import get_rule_deck
@@ -20,9 +21,11 @@ class OutputGdsiiAspect(__Aspects__):
         # f2 = filters.PortPolygonFilter()
         # F = f1 + f2
 
+        D = deepcopy(self)
+
         F = filters.PortCellFilter(name='cell_ports')
         # F = filters.PortPolygonFilter(name='polygon_ports')
-        my_lib += F(self)
+        my_lib += F(D)
 
         # my_lib += self
 

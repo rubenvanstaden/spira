@@ -175,7 +175,9 @@ class Cell(__Cell__):
         return self.__repr__()
 
     def __deepcopy__(self, memo):
+        # FIXME: Check with stretching.
         return self.__class__(
+        # return Cell(
             name=self.name + '_copy',
             alias=self.alias,
             elements=deepcopy(self.elements),
@@ -186,6 +188,13 @@ class Cell(__Cell__):
         if not hasattr(self, '__name__'):
             self.__name__ = self.__name_generator__(self)
         return self.__name__
+
+    def create_netlist(self):
+        net = self.nets(lcar=self.lcar).disjoint()
+        return net
+
+    def nets(self, lcar):
+        return self.elements.nets(lcar=lcar)
 
     def expand_transform(self):
         self.elements.expand_transform()
@@ -312,13 +321,6 @@ class Cell(__Cell__):
                     if e.id_string() == port.local_pid:
                         self.elements[i] = T(e)
         return self
-
-    def nets(self, lcar):
-        return self.elements.nets(lcar=lcar)
-
-    def create_netlist(self):
-        net = self.nets(lcar=self.lcar).disjoint()
-        return net
 
 
 def CellParameter(local_name=None, restriction=None, **kwargs):

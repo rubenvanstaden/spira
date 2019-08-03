@@ -10,7 +10,7 @@ EXTERNAL_VALUE = 0
 CACHED_VALUE = 1
 
 
-class BaseParameter(object):
+class __Parameter__(object):
     """
     Sets the values of the Parameter when initialized.
     Binds a Parameter object with a class parameter.
@@ -43,7 +43,7 @@ class BaseParameter(object):
         return True
 
 
-class ParameterDescriptor(BaseParameter):
+class ParameterDescriptor(__Parameter__):
     __keywords__ = ['default', 'fdef_name', 'restriction', 'locked', 'preprocess']
 
     def __init__(self, local_name=None, **kwargs):
@@ -203,7 +203,7 @@ class ParameterDescriptor(BaseParameter):
         return value
 
 
-class FunctionParameter(BaseParameter):
+class FunctionParameter(__Parameter__):
     """ Property which calls a get and set method to set the variables.
     the get and set method are specified by name, so it supports override,
     but is slower than FunctionProperty. If set method is not specified,
@@ -220,7 +220,7 @@ class FunctionParameter(BaseParameter):
         else:
             self.fset = fset
             self.locked = False
-        BaseParameter.__init__(self, **kwargs)
+        __Parameter__.__init__(self, **kwargs)
 
     def __get__(self, obj, type=None):
         if obj is None:
@@ -234,7 +234,7 @@ class FunctionParameter(BaseParameter):
             raise ValueError('Cannot assign parameter.')
 
 
-class SetFunctionParameter(BaseParameter):
+class SetFunctionParameter(__Parameter__):
     """
     Parameter which calls a set method to set the variables,
     but it is stored in a known attribute, so a get method
@@ -308,14 +308,14 @@ def is_call_internal(obj, level=1):
     return (f["self"] is obj)
 
 
-class ConvertParameter(BaseParameter):
+class ConvertParameter(__Parameter__):
 
     def __init__(self, parent_class, parent_property_name, convert_method):
         self.convert_method = convert_method
         self.parent_class = parent_class
         self.parent_property_name = parent_property_name
         self.locked = True
-        BaseParameter.__init__(self)
+        __Parameter__.__init__(self)
 
     def __get__(self, obj, type=None):
         if obj is None:

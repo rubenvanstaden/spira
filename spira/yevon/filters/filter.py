@@ -24,7 +24,7 @@ class Filter(ParameterInitializer):
 
     def __add__(self, other):
         if isinstance(other, Filter):
-            return _CompositeFilter(filters = [self, other])
+            return _CompositeFilter(filters=[self, other])
         elif other is None:
             return self
         else:
@@ -47,7 +47,7 @@ class Filter(ParameterInitializer):
                 if hasattr(self, N):
                     LOG.debug("Applying method %s of %s to %s" %(N,self,item))
                     return getattr(self, N)(item)
-            return self.filter_default(item)
+            return self._filter_default(item)
         else:
             N = 'filter_{}'.format(T.__name__)
             if hasattr(self, N):
@@ -55,9 +55,9 @@ class Filter(ParameterInitializer):
                 LOG.debug('Executing {}'.format(expr))
                 return eval(expr)
             else:
-                return self.filter_default(item)
+                return self._filter_default(item)
 
-    def filter_default(self, item):
+    def _filter_default(self, item):
         return [item]
 
 
@@ -114,8 +114,10 @@ class ToggledCompositeFilter(_CompositeFilter):
     by doing filter['filter_name'] = True|False
     """
 
+    # FIXME: Have to hard reset filters=[] when instantiating.
+
     def __init__(self, filters=[], **kwargs):
-        super().__init__(filters=filters, **kwargs)
+        _CompositeFilter.__init__(self, filters=filters, **kwargs)
         self._filter_status = dict()
 
     def __call__(self, item):
@@ -148,11 +150,11 @@ class ToggledCompositeFilter(_CompositeFilter):
     def __repr__(self):
         S = "< Toggled Compound Filter:"
         for i in self._sub_filters:
-            S += "   %s" % i.__repr__() 
+            S += "\n  {}".format(i.__repr__())
             if i.name not in self._filter_status.keys() or self._filter_status[i.name]:
-                S += "(enabled)"
+                S += "    (enabled)"
             else:
-                S += "(disabled)"
+                S += "    (disabled)"
         S += ">"
         return S
 

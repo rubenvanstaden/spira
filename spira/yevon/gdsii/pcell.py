@@ -28,7 +28,7 @@ class PCell(Cell):
 class Device(PCell):
     """  """
 
-    # lcar = NumberParameter(default=RDD.PCELLS.LCAR_DEVICE)
+    # lcar = NumberParameter(default=RDD.PCELL.LCAR_DEVICE)
     lcar = NumberParameter(default=1)
 
     def __init__(self, pcell=True, **kwargs):
@@ -52,12 +52,13 @@ class Device(PCell):
 
             D = Cell(elements=elems.flat_copy())
 
-            F = RDD.PCELLS.FILTERS
-            F['boolean'] = True
-            F['simplify'] = True
-            F['contact_attach'] = True
-            F['pin_attach'] = False
-            F['metal_connect'] = False
+            F = RDD.FILTERS.DEVICE
+
+            # F['boolean'] = True
+            # F['simplify'] = True
+            # F['contact_attach'] = True
+            # F['pin_attach'] = False
+            # F['metal_connect'] = False
 
             elems = F(D).elements
 
@@ -90,7 +91,7 @@ class Circuit(PCell):
     corners = StringParameter(default='miter', doc='Define the type of path joins.')
     bend_radius = NumberParameter(allow_none=True, default=None, doc='Bend radius of path joins.')
 
-    lcar = NumberParameter(default=RDD.PCELLS.LCAR_CIRCUIT)
+    lcar = NumberParameter(default=RDD.PCELL.LCAR_CIRCUIT)
 
     def __repr__(self):
         class_string = "[SPiRA: Circuit(\'{}\')] (elements {}, ports {})"
@@ -143,12 +144,16 @@ class Circuit(PCell):
 
             D = c2dmap[C]
 
-            F = RDD.PCELLS.FILTERS
-            F['boolean'] = True
-            F['simplify'] = False
-            F['pin_attach'] = False
-            F['contact_attach'] = False
-            F['metal_connect'] = False
+            F = RDD.FILTERS.CIRCUIT
+
+            # F = RDD.FILTERS.DEVICE
+            # F['boolean'] = True
+            # F['simplify'] = False
+            # F['contact_attach'] = False
+            
+            # from spira.yevon import filters
+            # F = filters.ToggledCompositeFilter(filters=[])
+            # F += filters.ProcessBooleanFilter(name='boolean')
 
             Df = F(D)
 

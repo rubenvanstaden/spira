@@ -132,9 +132,8 @@ class PCellDatabase(LazyDatabase):
         f += filters.ProcessBooleanFilter(name='boolean')
         f += filters.SimplifyFilter(name='simplify')
         f += filters.ContactAttachFilter(name='contact_attach')
-        f += filters.ElectricalAttachFilter(name='metal_connect')
 
         self.FILTERS = f
 
-RDD.PCELLS = PCellDatabase()
+RDD.PCELL = PCellDatabase()
 
