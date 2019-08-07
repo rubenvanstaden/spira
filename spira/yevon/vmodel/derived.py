@@ -1,8 +1,8 @@
 from copy import deepcopy
 from spira.yevon.process.gdsii_layer import Layer
-from spira.yevon.process.gdsii_layer import __DerivedDoubleLayer__
-from spira.yevon.process.gdsii_layer import __DerivedLayerAnd__
-from spira.yevon.process.gdsii_layer import __DerivedLayerXor__
+from spira.yevon.process.gdsii_layer import _DerivedDoubleLayer
+from spira.yevon.process.gdsii_layer import _DerivedAndLayer
+from spira.yevon.process.gdsii_layer import _DerivedXorLayer
 
 from spira.yevon.gdsii.elem_list import ElementList
 from spira.yevon.gdsii.polygon import Polygon
@@ -27,12 +27,12 @@ def _derived_elements(elems, derived_layer):
         el = LF(elems.polygons)
         pg = PolygonGroup(elements=el, layer=derived_layer)
         return pg
-    elif isinstance(derived_layer, __DerivedDoubleLayer__):
+    elif isinstance(derived_layer, _DerivedDoubleLayer):
         p1 = _derived_elements(elems, derived_layer.layer1)
         p2 = _derived_elements(elems, derived_layer.layer2)
-        if isinstance(derived_layer, __DerivedLayerAnd__):
+        if isinstance(derived_layer, _DerivedAndLayer):
             pg = p1 & p2
-        elif isinstance(derived_layer, __DerivedLayerXor__):
+        elif isinstance(derived_layer, _DerivedXorLayer):
             pg = p1 ^ p2
         return pg
     else:

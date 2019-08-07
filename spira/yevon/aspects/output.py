@@ -51,10 +51,13 @@ class OutputGdsiiAspect(__Aspects__):
 
 class OutputPlotlyNetlist(__Aspects__):
 
-    def netlist_view(self):
+    def netlist_view(self, net=None):
         from spira.yevon.io.output_netlist import PlotlyGraph
         output = PlotlyGraph()
-        output._plotly_netlist(G=self.netlist.g, graphname=self.name)
+        if net is None:
+            output._plotly_netlist(G=self.netlist.g, graphname=self.name)
+        else:
+            output._plotly_netlist(G=net.g, graphname=self.name)
 
 
 class OutputBokehNetlist(__Aspects__):

@@ -55,9 +55,12 @@ class __Layer__(ParameterInitializer, metaclass=MetaLayer):
 
     doc = StringParameter()
 
+    def __invert__(self):
+        return _DerivedNotLayer(self)
+
     def __and__(self, other):
         if isinstance(other, __Layer__):
-            return __DerivedLayerAnd__(self, other)
+            return _DerivedAndLayer(self, other)
         elif other is None:
             return self
         else:
@@ -70,7 +73,7 @@ class __Layer__(ParameterInitializer, metaclass=MetaLayer):
 
     def __or__(self, other):
         if isinstance(other, __Layer__):
-            return __DerivedLayerOr__(self, other)
+            return _DerivedOrLayer(self, other)
         elif other is None:
             return self
         else:
@@ -83,7 +86,7 @@ class __Layer__(ParameterInitializer, metaclass=MetaLayer):
 
     def __xor__(self, other):
         if isinstance(other, __Layer__):
-            return __DerivedLayerXor__(self, other)
+            return _DerivedXorLayer(self, other)
         elif other is None:
             return self
         else:
@@ -94,18 +97,56 @@ class __Layer__(ParameterInitializer, metaclass=MetaLayer):
         self = C
         return self
 
-    def __invert__(self):
-        return __DerivedLayerNot__(self)
+
+class Layer(__Layer__):
+
+    name = StringParameter()
+    number = IntegerParameter(default=0, preprocess=ProcessorInt())
+    datatype = IntegerParameter(default=0, preprocess=ProcessorInt())
+
+    def __init__(self, number=0, datatype=0, layerlist=None, name=None, **kwargs):
+        if name is None:
+            name = 'layer' + str(number)
+        super().__init__(number=number, datatype=datatype, name=name, **kwargs)
+
+    def __repr__(self):
+        string = '[SPiRA: Layer] (\'{}\', layer {}, datatype {})'
+        return string.format(self.name, self.number, self.datatype)
+
+    def __str__(self):
+        return 'Layer{}'.format(self.number)
+
+    def __hash__(self):
+        return hash(self.key)
+
+    def __eq__(self, other):
+        if isinstance(other, Layer):
+            return self.key == other.key
+        else:
+            raise ValueError('Not Implemented!')
+
+    def __neq__(self, other):
+        if isinstance(other, Layer):
+            return self.key != other.key
+        else:
+            raise ValueError('Not Implemented!')
+
+    def is_equal_number(self, other):
+        return (self.number == other.number)
+
+    @property
+    def key(self):
+        return (self.number, self.datatype)
 
 
-class __DerivedLayer__(__Layer__):
+class _DerivedSingleLayer(__Layer__):
     name = StringParameter(allow_none=True, default=None)
 
-    def get_layers(self, lobject):
-        if isinstance(lobject, __DerivedLayer__):
-            return lobject.layers()
+    def get_layers(self, item):
+        if isinstance(item, _DerivedSingleLayer):
+            return item.layers()
         else:
-            return lobject
+            return item
 
     def __str__(self):
         if self.name != None:
@@ -114,11 +155,7 @@ class __DerivedLayer__(__Layer__):
             return self.__repr__()
 
 
-class __DerivedSingleLayer__(__DerivedLayer__):
-    pass
-
-
-class __DerivedDoubleLayer__(__DerivedLayer__):
+class _DerivedDoubleLayer(_DerivedSingleLayer):
     def __init__(self, layer1, layer2):
         super().__init__()
         self.layer1 = layer1
@@ -131,34 +168,7 @@ class __DerivedDoubleLayer__(__DerivedLayer__):
         return l 
 
 
-class __DerivedLayerAnd__(__DerivedDoubleLayer__):
-    def __repr__(self):
-        return "(%s AND %s)" % (self.layer1, self.layer2)
-
-    @property
-    def key(self):
-        return "%s AND %s"%(self.layer1, self.layer2)
-
-
-class __DerivedLayerOr__(__DerivedDoubleLayer__):        
-    def __repr__(self):
-        return "(%s OR %s)" % (self.layer1, self.layer2)
-
-    @property
-    def key(self):
-        return "%s OR %s"%(self.layer1, self.layer2)
-
-
-class __DerivedLayerXor__(__DerivedDoubleLayer__):        
-    def __repr__(self):
-        return "(%s XOR %s)" % (self.layer1, self.layer2)
-
-    @property
-    def key(self):
-        return "%s XOR %s"%(self.layer1, self.layer2)
-
-
-class __DerivedLayerNot__(__DerivedSingleLayer__):
+class _DerivedNotLayer(_DerivedSingleLayer):
     def __init__(self, layer1):
         super().__init__()
         self.layer1 = layer1
@@ -174,6 +184,33 @@ class __DerivedLayerNot__(__DerivedSingleLayer__):
         l = LayerList()
         l += self.get_layers(self.layer1)
         return l 
+
+
+class _DerivedAndLayer(_DerivedDoubleLayer):
+    def __repr__(self):
+        return "(%s AND %s)" % (self.layer1, self.layer2)
+
+    @property
+    def key(self):
+        return "%s AND %s"%(self.layer1, self.layer2)
+
+
+class _DerivedOrLayer(_DerivedDoubleLayer):
+    def __repr__(self):
+        return "(%s OR %s)" % (self.layer1, self.layer2)
+
+    @property
+    def key(self):
+        return "%s OR %s"%(self.layer1, self.layer2)
+
+
+class _DerivedXorLayer(_DerivedDoubleLayer):
+    def __repr__(self):
+        return "(%s XOR %s)" % (self.layer1, self.layer2)
+
+    @property
+    def key(self):
+        return "%s XOR %s"%(self.layer1, self.layer2)
 
 
 class LayerList(TypedList):
@@ -268,6 +305,7 @@ class LayerList(TypedList):
                 if self._list.__getitem__(self, i).key == key:
                     return i
             raise ValueError("layer " + key + " is not in LayerList")
+
         if isinstance(item, str):
             for i in range(0, len(self)):
                 if self._list.__getitem__(self, i).name == item:
@@ -292,10 +330,10 @@ class LayerList(TypedList):
         else:
             raise ValueError('Invalid layer list item type.')
 
-    def append(self, other, overwrite = False):
+    def append(self, other, overwrite=False):
         return self.add(other, overwrite)
 
-    def extend(self, other, overwrite = False):
+    def extend(self, other, overwrite=False):
         return self.add(other, overwrite)
 
     def clear(self):
@@ -324,47 +362,6 @@ class LayerListParameter(ParameterDescriptor):
             value = self.__type__()
         new_value = self.__cache_parameter_value__(obj, value)
         return new_value
-
-
-class Layer(__Layer__):
-
-    name = StringParameter()
-    number = IntegerParameter(default=0, preprocess=ProcessorInt())
-    datatype = IntegerParameter(default=0, preprocess=ProcessorInt())
-
-    def __init__(self, number=0, datatype=0, layerlist=None, name=None, **kwargs):
-        if name is None:
-            name = 'layer' + str(number)
-        super().__init__(number=number, datatype=datatype, name=name, **kwargs)
-
-    def __repr__(self):
-        string = '[SPiRA: Layer] (\'{}\', layer {}, datatype {})'
-        return string.format(self.name, self.number, self.datatype)
-
-    def __str__(self):
-        return 'Layer{}'.format(self.number)
-
-    def __hash__(self):
-        return hash(self.key)
-
-    def __eq__(self, other):
-        if isinstance(other, Layer):
-            return self.key == other.key
-        else:
-            raise ValueError('Not Implemented!')
-
-    def __neq__(self, other):
-        if isinstance(other, Layer):
-            return self.key != other.key
-        else:
-            raise ValueError('Not Implemented!')
-
-    def is_equal_number(self, other):
-        return (self.number == other.number)
-
-    @property
-    def key(self):
-        return (self.number, self.datatype)
 
 
 def LayerParameter(local_name=None, restriction=None, **kwargs):

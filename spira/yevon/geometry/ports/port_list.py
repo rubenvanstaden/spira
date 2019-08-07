@@ -83,7 +83,7 @@ class PortList(TypedList, Transformable):
             c.move(position)
         return self
 
-    def movecopy(self, position):
+    def move_copy(self, position):
         T = self.__class__()
         for c in self._list:
             T.append(c.movecopy(position))
@@ -105,7 +105,7 @@ class PortList(TypedList, Transformable):
             c.invert()
         return self
 
-    def invertcopy(self):
+    def invert_copy(self):
         L = self.__class__()
         for c in self._list:
             L += c.invertcopy()

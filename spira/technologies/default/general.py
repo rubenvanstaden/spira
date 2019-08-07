@@ -71,6 +71,7 @@ RDD.PURPOSE.TEXT.DUMMY = PurposeLayer(name='DummyText', symbol='DT')
 
 RDD.PURPOSE.PORT = PurposeLayerDatabase()
 RDD.PURPOSE.PORT.PIN = PurposeLayer(name='PinPort', symbol='P')
+RDD.PURPOSE.PORT.TERMINAL = PurposeLayer(name='PinPort', symbol='T')
 RDD.PURPOSE.PORT.EDGE = PurposeLayer(name='EdgePort', symbol='E')
 RDD.PURPOSE.PORT.CONTACT = PurposeLayer(name='ContactPort', symbol='C')
 RDD.PURPOSE.PORT.ROUTE = PurposeLayer(name='RoutePort', symbol='I')

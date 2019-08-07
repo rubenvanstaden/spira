@@ -14,7 +14,7 @@ __all__ = ['EdgeShapeFilter', 'EdgeToPolygonFilter']
 class __EdgeFilter__(Filter):
     """ Base class for edge filters. """
 
-    purpose = PurposeLayerParameter()
+    purposes = PurposeLayerParameter()
     width = NumberParameter(allow_none=True, default=None)
     edge_type = IntegerParameter(default=constants.EDGE_TYPE_NORMAL)
 
@@ -29,7 +29,7 @@ class EdgeShapeFilter(__EdgeFilter__):
         elems = ElementList()
         if self.width is None:
             for p1 in deepcopy(item.elements.polygons):
-                if p1.layer.purpose == self.purpose:
+                if p1.layer.purpose in self.purposes:
                     for edge in p1.edges:
                         shape = ShapeEdge(
                             original_shape=edge.line_shape,
@@ -38,6 +38,18 @@ class EdgeShapeFilter(__EdgeFilter__):
                         )
                         elems += edge.copy(shape=shape)
                     elems += p1
+        else:
+            for p1 in deepcopy(item.elements.polygons):
+                if p1.layer.purpose in self.purposes:
+                    for edge in p1.edges:
+                        shape = ShapeEdge(
+                            original_shape=edge.line_shape,
+                            edge_width=self.width,
+                            edge_type=self.edge_type
+                        )
+                        elems += edge.copy(shape=shape)
+                    elems += p1
+
 
         cell = Cell(elements=elems)
         return cell

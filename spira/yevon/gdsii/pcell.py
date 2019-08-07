@@ -10,6 +10,8 @@ from spira.yevon.process import get_rule_deck
 
 RDD = get_rule_deck()
 
+print(RDD)
+
 
 __all__ = ['PCell', 'Device', 'Circuit']
 
@@ -91,7 +93,8 @@ class Circuit(PCell):
     corners = StringParameter(default='miter', doc='Define the type of path joins.')
     bend_radius = NumberParameter(allow_none=True, default=None, doc='Bend radius of path joins.')
 
-    lcar = NumberParameter(default=RDD.PCELL.LCAR_CIRCUIT)
+    # lcar = NumberParameter(default=RDD.LCAR_CIRCUIT)
+    lcar = NumberParameter(default=100)
 
     def __repr__(self):
         class_string = "[SPiRA: Circuit(\'{}\')] (elements {}, ports {})"
@@ -116,6 +119,7 @@ class Circuit(PCell):
                     D.elements.transform(e.transformation)
                     D.ports.transform(e.transformation)
                     devices[D] = D.elements
+
                     D.elements = ElementList()
                     S = deepcopy(e)
                     S.reference = D
@@ -143,6 +147,10 @@ class Circuit(PCell):
                 wrap_references(cell, c2dmap, devices)
 
             D = c2dmap[C]
+            
+            # for e in D.elements.polygons:
+            #     if e.layer.purpose.symbol == 'METAL':
+            #         e.layer.purpose = RDD.PURPOSE.CIRCUIT_METAL
 
             F = RDD.FILTERS.CIRCUIT
 
@@ -150,22 +158,27 @@ class Circuit(PCell):
             # F['boolean'] = True
             # F['simplify'] = False
             # F['contact_attach'] = False
-            
+
             # from spira.yevon import filters
             # F = filters.ToggledCompositeFilter(filters=[])
             # F += filters.ProcessBooleanFilter(name='boolean')
 
             Df = F(D)
 
+            # NOTE: Add devices back into the circuit.
             for d in Df.dependencies():
                 if d in devices.keys():
                     d.elements = devices[d]
+                    # for e in d.elements.polygons:
+                    #     if e.layer.purpose.symbol == 'METAL':
+                    #         e.layer.purpose = RDD.PURPOSE.DEVICE_METAL
 
             elems = Df.elements
 
         return elems
 
     def create_netlist(self):
+        from spira.yevon import filters
 
         print('Circuit netlist')
 
@@ -173,6 +186,9 @@ class Circuit(PCell):
         net = netlist.combine_net_nodes(net=net, algorithm=['d2d'])
         # net = netlist.combine_net_nodes(net=net, algorithm=['s2s'])
         # net = netlist.combine_net_nodes(net=net, algorithm=['d2d', 's2s'])
+        
+        # F = filters.NetBranchCircuitFilter()
+        # net = F(net)[0]
 
         return net
 

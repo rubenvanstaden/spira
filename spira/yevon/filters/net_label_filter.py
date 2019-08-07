@@ -62,10 +62,17 @@ class NetDeviceLabelFilter(__NetFilter__):
                         item.g.node[n]['device_reference'] = D
                         item.g.node[n]['display'] = RDD.DISPLAY.STYLE_SET[D.layer]
                 
-                if D.purpose == RDD.PURPOSE.PORT.PIN:
+                # if D.purpose == RDD.PURPOSE.PORT.PIN:
+                #     if D.encloses(tri_shape.points):
+                #         item.g.node[n]['device_reference'] = D
+                #         item.g.node[n]['display'] = RDD.DISPLAY.STYLE_SET[D.layer]
+
+                if D.purpose == RDD.PURPOSE.PORT.TERMINAL:
+                    print(D)
                     if D.encloses(tri_shape.points):
                         item.g.node[n]['device_reference'] = D
                         item.g.node[n]['display'] = RDD.DISPLAY.STYLE_SET[D.layer]
+
         return [item]
 
     def __repr__(self):
@@ -113,6 +120,7 @@ class NetEdgeFilter(__NetFilter__):
         # print('\n---------------------------------\n')
 
         import re
+        from spira.yevon.geometry.coord import Coord
 
         for key, value in item.mesh_data.field_data.items():
 
@@ -135,12 +143,9 @@ class NetEdgeFilter(__NetFilter__):
                                     pos = re.search(r'\((.*?)\)', ply_string).group(1)
                                     pos = pos.split(',')
                                     pos = [float(p) for p in pos]
-                                    # print(pos)
-                                    # print(name)
-                                    # print(ply_string)
-                                    # print('')
-                                    # item.g.node[n]['process_polygon'] = Port(name=name, midpoint=pos, process=self.process_polygons.layer.process)
-                                    item.g.node[n]['device_reference'] = Port(name=name, midpoint=pos, process=self.process_polygons.layer.process)
+                                    midpoint = Coord(pos).snap_to_grid()
+                                    item.g.node[n]['device_reference'] = Port(
+                                        name=name, midpoint=midpoint, process=self.process_polygons.layer.process)
                                     item.g.node[n]['display'] = RDD.DISPLAY.STYLE_SET[RDD.PLAYER.I5.VIA]
                                     # item.g.node[n]['display'] = RDD.DISPLAY.STYLE_SET[RDD.PLAYER.M1.HOLE]
 

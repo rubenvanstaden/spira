@@ -11,7 +11,7 @@ __all__ = ['ProcessLayer', 'ProcessParameter']
 
 
 class MetaProcessLayer(MetaInitializer):
-    """ 
+    """
     Metaclass which creates unique process layers. 
     It is called when a new object is created. 
     """

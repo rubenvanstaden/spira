@@ -64,7 +64,8 @@ class VirtualConnect(__VirtualModel__):
         """ Detect connecting and overlapping layer edges. Returns
         the derived merged polygons and derived intersection edges. """
 
-        EF = filters.EdgeShapeFilter(edge_type=constants.EDGE_TYPE_OUTSIDE, purpose=RDD.PURPOSE.METAL)
+        purposes = [RDD.PURPOSE.METAL, RDD.PURPOSE.DEVICE_METAL, RDD.PURPOSE.CIRCUIT_METAL]
+        EF = filters.EdgeShapeFilter(edge_type=constants.EDGE_TYPE_OUTSIDE, width=0.3, purposes=purposes)
         edge_elems = EF(self.device).elements
 
         mapping = self._derived_edges_mapping()
@@ -79,7 +80,8 @@ class VirtualConnect(__VirtualModel__):
     def _derived_edges_mapping(self):
         """ Map the derived edge layers in the RDD to a physical layer. """
         mapping = {}
-        for pl in RDD.get_physical_layers_by_purpose(purposes=['METAL']):
+        purposes = ['METAL', 'DEVICE_METAL', 'CIRCUIT_METAL']
+        for pl in RDD.get_physical_layers_by_purpose(purposes=purposes):
             key = pl.process.symbol
             if hasattr(RDD.PLAYER[key], 'EDGE_CONNECTED'):
                 derived_layer = RDD.PLAYER[key].EDGE_CONNECTED
@@ -173,9 +175,6 @@ def virtual_process_model(device, process_flow):
 
 
 def virtual_connect(device):
-    # for p in device.ports:
-    #     print(p)
-    # print('')
     D = deepcopy(device).expand_flat_copy()
     return VirtualConnect(device=D)
 

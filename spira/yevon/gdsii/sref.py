@@ -93,10 +93,13 @@ class SRef(__RefElement__):
         return d
 
     def net_source(self):
-        pass
+        return 'source: {}'.format(self.reference.name)
 
     def net_target(self):
-        pass
+        return 'target: {}'.format(self.reference.name)
+
+    def is_valid_path(self):
+        return True
 
     def expand_transform(self):
         from spira.yevon.gdsii.sref import SRef
@@ -123,7 +126,7 @@ class SRef(__RefElement__):
         self.midpoint = (0, 0)
 
         return self
-        
+
     def expand_flat_copy(self):
         """  """
         D = self.reference.expand_flat_copy()

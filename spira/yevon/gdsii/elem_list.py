@@ -155,23 +155,7 @@ class ElementList(__ElementList__):
             elems += e.flatten(level)
         return elems
 
-    # def flatten(self):
-    #     from spira.yevon.gdsii.cell import Cell
-    #     from spira.yevon.gdsii.sref import SRef
-    #     if isinstance(self, collections.Iterable):
-    #         flat_list = ElementList()
-    #         for i in self._list:
-    #             if issubclass(type(i), Cell):
-    #                 i = i.flat_copy()
-    #             elif isinstance(i, SRef):
-    #                 i = i.flat_copy()
-    #             for a in i.flatten():
-    #                 flat_list += a
-    #         return flat_list
-    #     else:
-    #         return [self._list]
-
-    def isstored(self, pp):
+    def is_stored(self, pp):
         for e in self._list:
             return pp == e
 

@@ -85,7 +85,9 @@ class Polygon(__ShapeElement__):
         )
 
     def short_string(self):
-        return "Polygon [{}, {}, {}]".format(self.center, self.layer.process.symbol, self.layer.purpose.symbol)
+        # return "Polygon [{}, {}, {}]".format(self.center, self.layer.process.symbol, self.layer.purpose.symbol)
+        # NOTE: We want to ignore the purpose for CIRCUIT_METAL ot DEVICE_METAL net connections.
+        return "Polygon [{}, {}]".format(self.center, self.layer.process.symbol)
 
     def flat_copy(self, level=-1):
         """ Flatten a copy of the polygon. """
@@ -98,7 +100,7 @@ class Polygon(__ShapeElement__):
         from spira.yevon.vmodel.geometry import GmshGeometry
         from spira.yevon import filters
 
-        if self.layer.purpose.symbol == 'METAL':
+        if self.layer.purpose.symbol in ['METAL', 'DEVICE_METAL', 'CIRCUIT_METAL']:
 
             if RDD.ENGINE.GEOMETRY == 'GMSH_ENGINE':
                 geometry = GmshGeometry(lcar=lcar,
@@ -115,8 +117,10 @@ class Polygon(__ShapeElement__):
 
             cc = []
             for p in self.ports:
-                if p.purpose == RDD.PURPOSE.PORT.PIN:
-                    cc.append(p)
+                if p.purpose == RDD.PURPOSE.PORT.TERMINAL:
+                    c_port = p.transform_copy(self.transformation)
+                    cc.append(c_port)
+                    # cc.append(p)
                 elif p.purpose == RDD.PURPOSE.PORT.CONTACT:
                     c_port = p.transform_copy(self.transformation)
                     cc.append(c_port)
@@ -132,12 +136,14 @@ class Polygon(__ShapeElement__):
             #     print(p)
             # print('')
 
-            F = filters.ToggledCompositeFilter()
+            F = filters.ToggledCompositeFilter(filters=[])
             F += filters.NetProcessLabelFilter(process_polygons=[deepcopy(self)])
             F += filters.NetDeviceLabelFilter(device_ports=cc)
             F += filters.NetEdgeFilter(process_polygons=deepcopy(self))
-            # F += filters.NetBranchFilter()
-            # F += filters.NetDummyFilter()
+            F += filters.NetBranchFilter()
+
+            if self.layer.purpose.symbol == 'CIRCUIT_METAL':
+                F += filters.NetDummyFilter()
 
             net = Net(name=self.layer.process.symbol, geometry=geometry)
 

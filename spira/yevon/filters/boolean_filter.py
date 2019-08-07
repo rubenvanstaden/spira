@@ -28,6 +28,9 @@ class ProcessBooleanFilter(Filter):
     Derived merge boolean polygons is added as a filter, 
     since we want to apply this operation on all elements.
     """
+    from spira.yevon.process.purpose_layer import PurposeLayerParameter
+
+    metal_purpose = PurposeLayerParameter(default=RDD.PURPOSE.METAL)
 
     def filter_Cell(self, item):
         from spira.yevon.gdsii.cell import Cell
@@ -43,6 +46,8 @@ class ProcessBooleanFilter(Filter):
             elems += e
         for p in item.ports:
             if p.purpose.symbol == 'P':
+                ports += p
+            if p.purpose.symbol == 'T':
                 ports += p
 
         cell = Cell(elements=elems, ports=ports)
@@ -196,7 +201,8 @@ class PinAttachFilter(Filter):
 
         for e in D.elements.polygons:
             for p in item.ports:
-                if p.purpose.symbol == 'P':
+                # if p.purpose.symbol == 'P':
+                if p.purpose.symbol == 'T':
                     e.ports += p
                     # print(p)
                     

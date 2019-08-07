@@ -1,20 +1,20 @@
 import numpy as np
 import networkx as nx
-import spira.all as spira
 
 from copy import deepcopy
 from spira.core.parameters.variables import GraphParameter, StringParameter
-from spira.core.parameters.descriptor import Parameter
+from spira.core.parameters.descriptor import Parameter, RestrictedParameter
 from spira.yevon.geometry.coord import Coord
 from spira.yevon.vmodel.geometry import GeometryParameter
 from spira.yevon.geometry.ports.base import __Port__
+from spira.core.parameters.restrictions import RestrictType
 from spira.yevon.process import get_rule_deck
 
 
 RDD = get_rule_deck()
 
 
-__all__ = ['Net']
+__all__ = ['Net', 'NetParameter']
 
 
 ELM_TYPE = {1: 'line', 2: 'triangle'}
@@ -41,6 +41,8 @@ class Net(__Net__):
 
     mesh_data = Parameter(fdef_name='create_mesh_data')
     geometry = GeometryParameter(allow_none=True, default=None)
+
+    branch_nodes = Parameter(fdef_name='create_branch_nodes')
 
     lines = Parameter(fdef_name='create_lines')
     triangles = Parameter(fdef_name='create_triangles')
@@ -231,7 +233,124 @@ class Net(__Net__):
             self.g.node[n]['position'] = transformation.apply_to_coord(self.g.node[n]['position'])
         return self
 
+    def create_branch_nodes(self):
+        """ Nodes that defines different conducting branches. """
+        from spira.yevon.gdsii.sref import SRef
+        from spira.yevon.geometry.ports import Port
+        branch_nodes = list()
+        for n in self.g.nodes():
+            if 'device_reference' in self.g.node[n]:
+                D = self.g.node[n]['device_reference']
+                if isinstance(D, SRef):
+                    branch_nodes.append(n)
+                if isinstance(D, Port):
+                    branch_nodes.append(n)
+        return branch_nodes
 
+    def st_nodes(self):
+        """ Nodes that defines different conducting branches.
+        All nodes are ports. Chek port purposes.
+        """
+        from spira.yevon.gdsii.sref import SRef
+        from spira.yevon.geometry.ports import Port
+        branch_nodes = list()
+        for n in self.g.nodes():
+            if 'device_reference' in self.g.node[n]:
+                D = self.g.node[n]['device_reference']
+                P = self.g.node[n]['process_polygon']
+                # FIXME: Maybe implement node operators (__and__, etc)
+                # if (D.purpose.symbol == 'B') and (P.layer.purpose.symbol == 'DEVICE_METAL'):
+                #     branch_nodes.append(n)
+                if D.purpose.symbol == 'C':
+                    branch_nodes.append(n)
+                elif D.purpose.symbol == 'D':
+                    branch_nodes.append(n)
+                # elif D.purpose.symbol == 'P':
+                #     branch_nodes.append(n)
+                elif D.purpose.symbol == 'T':
+                    branch_nodes.append(n)
+                # elif (D.purpose.symbol == 'P') and (D.name[1] != 'E'):
+                #     branch_nodes.append(n)
+        return branch_nodes
+
+    def convert_to_branch_node(self, n, uid):
+        pass
+
+    def del_branch_attrs(self):
+        """ Reset the branch attrs for new branch node creation. """
+        for n in self.g.nodes():
+            if 'branch_node' in self.g.node[n]:
+                del self.g.node[n]['branch_node']
+        return self
+
+    def convert_pins(self):
+        """ Remove pin node attrs with more than 1 edge connected to it. """
+        for n in self.g.nodes():
+            if 'device_reference' in self.g.node[n]:
+                D = self.g.node[n]['device_reference']
+                if D.purpose.symbol == 'P':
+                    if len(self.g.edges(n)) > 1:
+                        del self.g.node[n]['device_reference']
+        return self
+
+    def convert_device(self):
+        """ Convert a device metal node to a dummy port.
+        Has to be connected to atleast 1 PEdge node. """
+
+        from spira.yevon.geometry.ports import Port
+
+        for n in self.g.nodes():
+            convert = False
+            
+            P = self.g.node[n]['process_polygon']
+
+            if P.layer.purpose.symbol == 'DEVICE_METAL':
+                for i in self.g.neighbors(n):
+                    if 'device_reference' in self.g.node[i]:
+                        D = self.g.node[i]['device_reference']
+                        print(D)
+                        if D.purpose.symbol == 'P':
+                            convert = True
+    
+            if convert is True:
+                port = Port(
+                    name='Djj{}'.format(n),
+                    midpoint=P.center,
+                    process=P.layer.process,
+                )
+                self.g.node[n]['device_reference'] = port
+        return self
+
+    def remove_nodes(self):
+        """
+        Nodes to be removed:
+        1. Are not a branch node.
+        2. Are not a device node.
+        3. Branch nodes must equal the branch id.
+        """
+        from spira.yevon.gdsii.sref import SRef
+        from spira.yevon.geometry.ports import Port
+
+        locked_nodes = []
+        remove_nodes = []
+        for n in self.g.nodes():
+            if 'branch_node' in self.g.node[n]:
+                D = self.g.node[n]['branch_node']
+                if isinstance(D, Port):
+                    locked_nodes.append(n)
+            elif 'device_reference' in self.g.node[n]:
+                D = self.g.node[n]['device_reference']
+                if isinstance(D, (Port, SRef)):
+                    locked_nodes.append(n)
+        for n in self.g.nodes():
+            if n not in locked_nodes:
+                remove_nodes.append(n)
+        self.g.remove_nodes_from(remove_nodes)
+
+
+def NetParameter(local_name=None, restriction=None, **kwargs):
+    R = RestrictType(Net) & restriction
+    return RestrictedParameter(local_name, restriction=R, **kwargs)
 
 
 

@@ -82,7 +82,9 @@ class Edge(Path):
         return hash(self.__repr__())
 
     def short_string(self):
-        return "Edge [{}, {}, {}]".format(self.center, self.layer.process.symbol, self.layer.purpose.symbol)
+        # return "Edge [{}, {}, {}]".format(self.center, self.layer.process.symbol, self.layer.purpose.symbol)
+        # NOTE: We want to ignore the purpose for CIRCUIT_METAL ot DEVICE_METAL net connections.
+        return "Edge [{}, {}]".format(self.center, self.layer.process.symbol)
 
     def flat_copy(self, level=-1):
         """ Flatten a copy of the polygon. """

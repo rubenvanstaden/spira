@@ -58,8 +58,12 @@ class Port(Vector, __Port__):
     def __ne__(self, other):
         return (self.midpoint != other.midpoint or (self.orientation != other.orientation)) 
 
+    # def id_string(self):
+    #     return self.__repr__()
+
     def id_string(self):
-        return self.__repr__()
+        name = self.name.split('_')[0]
+        return '{}_{}'.format(name, self.midpoint)
 
     def flip(self):
         """ Return the port rotated 180 degrees. """
@@ -72,10 +76,13 @@ class Port(Vector, __Port__):
         return self
 
     def net_source(self):
-        pass
+        return 'source: {}'.format(self.name)
 
     def net_target(self):
-        pass
+        return 'target: {}'.format(self.name)
+
+    def is_valid_path(self):
+        return True
 
     def transform_copy(self, transformation):
         # port = self.copy(

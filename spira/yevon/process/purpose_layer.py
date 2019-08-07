@@ -24,7 +24,7 @@ class MetaPurposeLayer(MetaInitializer):
         
         # extract the name of the new structure based on the arguments of
         # the constructor. For default structures, the name is passed as the first argument
-        
+
         L = type.__call__(cls, *params, **keyword_params)
         exist = DEFINED_PURPOSE_LAYERS.get(symbol, None)
         if exist:

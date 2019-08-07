@@ -59,7 +59,7 @@ class PolygonPortAspects(TransformablePortAspects):
 
     def create_ports(self, ports):
         layer = RDD.GDSII.IMPORT_LAYER_MAP[self.layer]
-        if layer.purpose.symbol == 'METAL':
+        if layer.purpose.symbol in ['METAL', 'DEVICE_METAL', 'CIRCUIT_METAL']:
             for edge in self.edge_ports:
                 ports += edge
         # FIXME: This fails with CompoundTransforms, i.e. when stretching.

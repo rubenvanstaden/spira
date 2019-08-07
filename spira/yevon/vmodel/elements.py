@@ -1,9 +1,6 @@
 from spira.yevon.gdsii.cell import Cell
 from spira.yevon.aspects.base import __Aspects__
 from spira.yevon.gdsii.elem_list import ElementListParameter, ElementList
-from spira.yevon.filters.layer_filter import LayerFilterAllow
-from spira.yevon.gdsii.polygon import Polygon
-from spira.yevon.gdsii.polygon_group import PolygonGroup
 from spira.yevon.process import get_rule_deck
 
 
@@ -11,6 +8,9 @@ RDD = get_rule_deck()
 
 
 def get_process_polygons(elements, operation='or'):
+    from spira.yevon.gdsii.polygon_group import PolygonGroup
+    from spira.yevon.filters.layer_filter import LayerFilterAllow
+    
     elems = ElementList()
     for process in RDD.VMODEL.PROCESS_FLOW.active_processes:
         for layer in RDD.get_physical_layers_by_process(processes=process):
