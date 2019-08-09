@@ -73,6 +73,6 @@ class ResistorConnect(spira.PCell):
 if __name__ == '__main__':
 
     D = ResistorConnect()
-    D.gdsii_output(name='RouteConnect')
+    D.gdsii_view()
 
 

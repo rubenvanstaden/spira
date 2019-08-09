@@ -13,8 +13,8 @@ class Resistor(spira.PCell):
 
     def create_elements(self, elems):
         w, l = self.width, self.length
-        shape = spira.Shape(points=[[0,0], [l,0], [l,w], [0,w]])
-        elems += spira.Polygon(shape=shape, layer=spira.RDD.PLAYER.R1.METAL)
+        # shape = spira.Shape(points=[[0,0], [l,0], [l,w], [0,w]])
+        # elems += spira.Polygon(shape=shape, layer=spira.RDD.PLAYER.R1.METAL)
         return elems
 
 

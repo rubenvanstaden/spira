@@ -2,7 +2,7 @@ import spira.all as spira
 from spira.yevon.geometry import shapes
 
 
-class Box(spira.Cell):
+class BoxDevice(spira.Cell):
 
     width = spira.NumberParameter(default=1)
     height = spira.NumberParameter(default=1)
@@ -14,11 +14,11 @@ class Box(spira.Cell):
         return elems
 
     def create_ports(self, ports):
-        ports += spira.Port(name='P1_M1', midpoint=(-0.5,0), orientation=180, width=1)
-        ports += spira.Port(name='P2_M1', midpoint=(0.5,0), orientation=0, width=1)
+        ports += spira.Port(name='P1', midpoint=(-0.5,0), orientation=180, width=1, process=spira.RDD.PROCESS.M1)
+        ports += spira.Port(name='P2', midpoint=(0.5,0), orientation=0, width=1, process=spira.RDD.PROCESS.M1)
         return ports
 
 
-D = Box()
-D.gdsii_output(name='Ports')
+D = BoxDevice()
+D.gdsii_view()
 

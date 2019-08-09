@@ -9,7 +9,6 @@ class GroupExample(spira.Cell):
         group += spira.Rectangle(p1=(0,0), p2=(10,10), layer=spira.Layer(1))
         group += spira.Rectangle(p1=(0,15), p2=(10,30), layer=spira.Layer(1))
 
-        # group.transform(spira.Rotation(30))
         group.rotate(30)
 
         elems += group
@@ -21,5 +20,5 @@ class GroupExample(spira.Cell):
 
 
 D = GroupExample()
-D.gdsii_output(name='Group')
+D.gdsii_view()
 
