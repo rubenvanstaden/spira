@@ -11,6 +11,7 @@ from spira.yevon.geometry.shapes.adapters import ShapeEdge
 from spira.core.parameters.variables import *
 from spira.yevon.process.physical_layer import PLayer
 from spira.yevon.geometry import shapes
+from copy import deepcopy
 from spira.yevon.geometry.vector import transformation_from_vector
 from spira.yevon.process.purpose_layer import PurposeLayerParameter
 from spira.yevon.process import get_rule_deck
@@ -73,6 +74,9 @@ class PortToPolygonFilter(__PolygonFilter__):
 
     def filter_Polygon(self, item):
         elems = ElementList()
+        for p in item.edge_ports:
+            el = self.filter_Port(p).elements
+            elems += el.transform(item.transformation)
         for p in item.ports:
             el = self.filter_Port(p).elements
             elems += el.transform(item.transformation)

@@ -40,6 +40,8 @@ class Polygon(__ShapeElement__):
 
     _next_uid = 0
 
+    location_name = StringParameter(default='')
+
     def get_alias(self):
         if not hasattr(self, '__alias__'):
             self.__alias__ = self.layer.process.symbol
@@ -73,6 +75,8 @@ class Polygon(__ShapeElement__):
 
     # NOTE: We are not copying the ports, so they
     # can be re-calculated for the transformed shape.
+    # Specifically after a expand_flat_copy.
+    # FIXME: But this causes problems with the netlist extraction.
     def __deepcopy__(self, memo):
         # ports = self.ports.transform_copy(self.transformation)
         # return self.__class__(
@@ -80,7 +84,7 @@ class Polygon(__ShapeElement__):
             shape=deepcopy(self.shape),
             layer=deepcopy(self.layer),
             ports=deepcopy(self.ports),
-            # ports=self.ports.transform_copy(self.transformation),
+            location_name=self.location_name,
             transformation=deepcopy(self.transformation)
         )
 
@@ -107,16 +111,9 @@ class Polygon(__ShapeElement__):
                     process=self.layer.process,
                     process_polygons=[deepcopy(self)])
 
-            # cc = []
-            # for p in self.ports:
-            #     c_port= p.transform_copy(self.transformation)
-            #     if p.purpose == RDD.PURPOSE.PORT.PIN:
-            #         cc.append(c_port)
-            #     elif p.purpose == RDD.PURPOSE.PORT.CONTACT:
-            #         cc.append(c_port)
-
             cc = []
             for p in self.ports:
+                # if p.purpose == RDD.PURPOSE.PORT.PIN:
                 if p.purpose == RDD.PURPOSE.PORT.TERMINAL:
                     c_port = p.transform_copy(self.transformation)
                     cc.append(c_port)
@@ -124,17 +121,7 @@ class Polygon(__ShapeElement__):
                 elif p.purpose == RDD.PURPOSE.PORT.CONTACT:
                     c_port = p.transform_copy(self.transformation)
                     cc.append(c_port)
-
-            # cc = []
-            # for p in self.ports:
-            #     if p.purpose == RDD.PURPOSE.PORT.PIN:
-            #         cc.append(p)
-            #     elif p.purpose == RDD.PURPOSE.PORT.CONTACT:
-            #         cc.append(p)
-
-            # for p in cc:
-            #     print(p)
-            # print('')
+                    # cc.append(p)
 
             F = filters.ToggledCompositeFilter(filters=[])
             F += filters.NetProcessLabelFilter(process_polygons=[deepcopy(self)])
@@ -148,17 +135,6 @@ class Polygon(__ShapeElement__):
             net = Net(name=self.layer.process.symbol, geometry=geometry)
 
             net = F(net)[0]
-
-            # from spira.yevon.utils.netlist import combine_net_nodes
-            # net = combine_net_nodes(net=net, algorithm=['d2d'])
-
-            # from spira.yevon.geometry.nets.net import CellNet
-            # cn = CellNet()
-            # cn.g = net.g
-            # cn.generate_branches()
-            # cn.detect_dummy_nodes()
-
-            # return cn
 
             return net
 

@@ -1,6 +1,7 @@
 from spira.yevon.aspects.base import __Aspects__
 from spira.yevon.geometry.ports.port_list import PortListParameter
 from spira.core.transformable import Transformable
+from spira.core.transformation import ReversibleTransform
 from spira.yevon.gdsii.elem_list import ElementListParameter
 from spira.core.parameters.variables import *
 from spira.yevon.geometry import shapes
@@ -23,6 +24,8 @@ class PortAspects(__Aspects__):
 
 
 class CellPortAspects(PortAspects):
+    """ Factory class that gets all cell instance 
+    ports and related polygon ports, such as edges. """
 
     def __create_ports__(self, ports):
         for e in self.elements.polygons:
@@ -31,6 +34,8 @@ class CellPortAspects(PortAspects):
 
 
 class TransformablePortAspects(PortAspects, Transformable):
+    """ Factory class that automatically transform ports. """
+
     def __create_ports__(self, ports):
         ports = self.create_ports(ports)
         ports = ports.transform_copy(self.transformation)
@@ -38,6 +43,9 @@ class TransformablePortAspects(PortAspects, Transformable):
 
 
 class SRefPortAspects(TransformablePortAspects):
+    """ Factory class that moves cell reference
+    ports into position when they are accesse. """
+
     def create_ports(self, ports):
         ports = self.reference.ports
         ports = ports.transform_copy(self.transformation)
@@ -46,24 +54,45 @@ class SRefPortAspects(TransformablePortAspects):
         return ports
 
 
+# FIXME: Run when stretching.
 class PolygonPortAspects(TransformablePortAspects):
-# class PolygonPortAspects(PortAspects):
 
     edge_ports = ElementListParameter()
 
     def create_edge_ports(self, edges):
-        # shape = self.shape
-        # FIXME: Cannot apply transforms when stretching.
-        shape = self.shape.transform_copy(self.transformation)
-        return shapes.shape_edge_ports(shape, self.layer, self.id_string(), center=shape.bbox_info.center, loc_name=self.location_name)
+        shape = self.shape
+        return shapes.shape_edge_ports(shape, self.layer, self.id_string(),
+            center=shape.bbox_info.center, loc_name=self.location_name)
 
     def create_ports(self, ports):
-        layer = RDD.GDSII.IMPORT_LAYER_MAP[self.layer]
-        if layer.purpose.symbol in ['METAL', 'DEVICE_METAL', 'CIRCUIT_METAL']:
-            for edge in self.edge_ports:
-                ports += edge
-        # FIXME: This fails with CompoundTransforms, i.e. when stretching.
-        # ports.transform(-self.transformation)
+        # layer = RDD.GDSII.IMPORT_LAYER_MAP[self.layer]
+        # # TODO: Move this to the RDD, so I can select which purposes must be edge-generators.
+        # if layer.purpose.symbol in ['METAL', 'DEVICE_METAL', 'CIRCUIT_METAL']:
+        #     for edge in self.edge_ports:
+        #         ports += edge
+        # # FIXME: This fails with CompoundTransforms, i.e. when stretching.
+        # if isinstance(self.transformation, ReversibleTransform):
+        #     ports.reverse_transform(self.transformation)
         return ports
+
+
+# # FIXME: Run default (not stretching).
+# class PolygonPortAspects(TransformablePortAspects):
+
+#     edge_ports = ElementListParameter()
+
+#     def create_edge_ports(self, edges):
+#         shape = self.shape.transform_copy(self.transformation)
+#         return shapes.shape_edge_ports(shape, self.layer, self.id_string(),
+#             center=shape.bbox_info.center, loc_name=self.location_name)
+
+#     def create_ports(self, ports):
+#         layer = RDD.GDSII.IMPORT_LAYER_MAP[self.layer]
+#         if layer.purpose.symbol in ['METAL', 'DEVICE_METAL', 'CIRCUIT_METAL']:
+#             for edge in self.edge_ports:
+#                 ports += edge
+#         return ports
+
+
 
 

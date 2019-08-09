@@ -360,7 +360,6 @@ def ShapeParameter(restriction=None, preprocess=None, **kwargs):
     return ParameterDescriptor(restriction=R, preprocess=P, **kwargs)
 
 
-
 # from spira.yevon.gdsii.group import Group
 # from spira.yevon.gdsii.base import __LayerElement__
 # from spira.yevon.process.physical_layer import PLayer
@@ -393,8 +392,8 @@ def ShapeParameter(restriction=None, preprocess=None, **kwargs):
 #         return elems
 
 
-
 def shape_edge_ports(shape, layer, local_pid='None', center=(0,0), loc_name=''):
+
     # FIXME: Integrate with edges.
     from spira.yevon.geometry.ports.port import Port
     from spira.yevon.process.gdsii_layer import Layer
@@ -421,7 +420,9 @@ def shape_edge_ports(shape, layer, local_pid='None', center=(0,0), loc_name=''):
     for i in range(0, n):
         # name = 'E{}_{}'.format(i, layer.process.symbol)
         # name = 'E{}_{}_{}'.format(i, layer.process.symbol, shape.bbox_info.center)
+        # print(loc_name)
         name = '{}E{}_{}'.format(loc_name, i, layer.process.symbol)
+        # print(name)
         x = np.sign(clockwise) * (xpts[i+1] - xpts[i])
         y = np.sign(clockwise) * (ypts[i] - ypts[i+1])
         orientation = (np.arctan2(x, y) * constants.RAD2DEG)

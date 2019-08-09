@@ -109,7 +109,8 @@ class SRef(__RefElement__):
         C = self.reference.__class__(
             name='{}_{}'.format(self.reference.name, self.transformation.id_string()),
             elements=deepcopy(self.reference.elements),
-            ports=deepcopy(self.reference.ports))
+            # ports=deepcopy(self.reference.ports)
+        )
 
         T = self.transformation + spira.Translation(self.midpoint)
 
@@ -119,7 +120,7 @@ class SRef(__RefElement__):
                 e.transform(self.transformation)
             elif isinstance(e, Polygon):
                 e.transform(T)
-        C.ports.transform(T)
+        # C.ports.transform(T)
 
         self.reference = C
         self.transformation = None
@@ -344,6 +345,8 @@ class SRef(__RefElement__):
 
         D = self.expand_flat_copy()
 
+        print(D.ports)
+
         port = D.ports[port_name]
         destination = D.ports[destination_name]
 
@@ -359,14 +362,6 @@ class SRef(__RefElement__):
         from spira.yevon.geometry.nets.net_list import NetList
         nets = NetList()
         nets += self.reference.netlist
-
-        # from spira.yevon.gdsii.pcell import Device
-        # if isinstance(self.reference, Device):
-        #     nets = [self.reference.netlist]
-        # else:
-        #     nets = self.reference.nets(lcar)
-
-        # nets = self.reference.nets(lcar, contacts)
 
         # FIXME: Is this transformation required?
         # T = self.transformation + Translation(self.midpoint)

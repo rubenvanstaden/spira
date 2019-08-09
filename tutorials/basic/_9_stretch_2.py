@@ -33,7 +33,7 @@ class Top(spira.Cell):
     def create_elements(self, elems):
         t1, t2 = self.get_transforms()
         elems += spira.SRef(alias='Sj1', reference=Jj(), transformation=t1)
-        elems += spira.SRef(alias='Sr1', reference=ResVia(), transformation=t2)
+        elems += spira.SRef(alias='Sr1', reference=ResVia(), midpoint=(0, -8))
         elems += spira.Rectangle(p1=(-10, -23), p2=(10, 10), layer=RDD.PLAYER.M2.METAL)
         return elems
 
@@ -47,7 +47,7 @@ class Bot(spira.Cell):
 
     def create_elements(self, elems):
         t1, t2 = self.get_transforms()
-        elems += spira.SRef(alias='Sr2', reference=ResVia(), transformation=t2)
+        elems += spira.SRef(alias='Sr2', reference=ResVia(), midpoint=(0, -30))
         elems += spira.Rectangle(p1=(-10, -55), p2=(10, -35), layer=RDD.PLAYER.M2.METAL)
         return elems
 
@@ -64,7 +64,7 @@ class Junction(spira.Cell):
         t1, t2 = self.get_transforms()
         elems += spira.Rectangle(p1=(-13, -60), p2=(13, 12), layer=RDD.PLAYER.M1.METAL)
         elems += spira.SRef(alias='S1', reference=Top(), transformation=t1)
-        elems += spira.SRef(alias='S2', reference=Bot(), transformation=t2)
+        elems += spira.SRef(alias='S2', reference=Bot(), midpoint=(0, -5))
         return elems
 
 
@@ -74,16 +74,18 @@ if __name__ == '__main__':
 
     C = spira.Cell(name='TestingCell')
 
-    # S = spira.SRef(alias='Jj', reference=D)
+    S = spira.SRef(alias='Jj', reference=D)
 
     # S.stretch_by_factor(factor=(2,1))
+    # S.stretch_p2p(port_name='Jj:S1:Sr1:E3_R1', destination_name='Jj:S2:Sr2:E1_R1')
     # S.stretch_p2p(port_name='S1:Sr1:E3_R1', destination_name='S2:Sr2:E1_R1')
     # S.stretch_p2c(port_name='S1:Sr1:E3_R1', destination_name='S2:Sr2:E1_R1')
 
-    # C += S
+    C += S
 
-    # D = C.expand_flat_copy()
-    D = D.expand_flat_copy()
+    D = C.expand_flat_copy()
+
+    # print(D.ports)
 
     # print('\n*************************************')
     # for e in D.elements.polygons:

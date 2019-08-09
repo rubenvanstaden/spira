@@ -149,7 +149,7 @@ class Cell(__Cell__):
 
     alias = FunctionParameter(get_alias, set_alias, doc='Functions to generate an alias for cell name.')
 
-    def __init__(self, name=None, elements=None, ports=None, nets=None, library=None, **kwargs):
+    def __init__(self, name=None, elements=None, ports=None, library=None, **kwargs):
         super().__init__(**kwargs)
 
         if name is not None:
@@ -208,19 +208,17 @@ class Cell(__Cell__):
 
         S = self.expand_transform()
 
-        # print(self.ports)
-
-        C = Cell(name=S.name + '_ExpandedCell')
+        C = Cell(name=S.name + '_ExpandedCell', ports=S.ports)
         def _traverse_polygons(subj, cell, name):
             c_name = deepcopy(name)
             for e in cell.elements:
                 if isinstance(e, SRef):
-                    # subj = _traverse_polygons(subj=subj, cell=e.reference, name='')
 
                     if e.alias is not None:
                         c_name += e.alias + ':'
                     else:
                         c_name += ':'
+
                     if exclude_devices is True:
                         if isinstance(e.reference, Device):
                             subj += e
@@ -231,21 +229,13 @@ class Cell(__Cell__):
 
                 elif isinstance(e, Polygon):
                     e.location_name = c_name
-
-                    # for p in cell.ports:
-                    #     if p.purpose.symbol == 'P':
-                    #         # if p.encloses(e.shape.points):
-                    #         print('wjefbkjewbfk')
-                    #         print(p)
-                    #         e.ports += p
-
                     subj += e
                 c_name = name
 
-            # # FIXME!!!
-            # for e in cell.ports:
-            #     if e.purpose.symbol == 'P':
-            #         subj.ports += e
+            # FIXME!!! Required for contact detection.
+            for e in cell.ports:
+                # print(e)
+                subj.ports += e
 
             return subj
 

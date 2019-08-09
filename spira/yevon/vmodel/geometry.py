@@ -116,7 +116,7 @@ class GmshGeometry(__Geometry__):
             self.geom, verbose=False, dim=2,
             prune_vertices=False,
             remove_faces=False,
-            # geo_filename=geo_file
+            geo_filename=geo_file
         )
 
         # meshio.write(mesh_file, mesh_data)

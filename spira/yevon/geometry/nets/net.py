@@ -308,7 +308,7 @@ class Net(__Net__):
                 for i in self.g.neighbors(n):
                     if 'device_reference' in self.g.node[i]:
                         D = self.g.node[i]['device_reference']
-                        print(D)
+                        # print(D)
                         if D.purpose.symbol == 'P':
                             convert = True
     

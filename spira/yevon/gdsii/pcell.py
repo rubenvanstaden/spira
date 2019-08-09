@@ -51,21 +51,8 @@ class Device(PCell):
         elems += self.routes
 
         if self.pcell is True:
-
             D = Cell(elements=elems.flat_copy())
-
-            F = RDD.FILTERS.DEVICE
-
-            # F['boolean'] = True
-            # F['simplify'] = True
-            # F['contact_attach'] = True
-            # F['pin_attach'] = False
-            # F['metal_connect'] = False
-
-            elems = F(D).elements
-
-            # D = Cell(elements=elems)
-            # elems = D.elements
+            elems = RDD.FILTERS.DEVICE(D).elements
 
         return elems
 
@@ -153,11 +140,6 @@ class Circuit(PCell):
             #         e.layer.purpose = RDD.PURPOSE.CIRCUIT_METAL
 
             F = RDD.FILTERS.CIRCUIT
-
-            # F = RDD.FILTERS.DEVICE
-            # F['boolean'] = True
-            # F['simplify'] = False
-            # F['contact_attach'] = False
 
             # from spira.yevon import filters
             # F = filters.ToggledCompositeFilter(filters=[])

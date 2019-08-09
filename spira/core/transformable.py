@@ -2,6 +2,7 @@ import numpy as np
 from copy import deepcopy
 from numpy.linalg import norm
 from spira.core.mixin import MixinBowl
+from spira.core.transformation import Transform
 from spira.core.transformation import TransformationParameter
 
 
@@ -28,8 +29,6 @@ class __Transformable__(MixinBowl):
 class Transformable(__Transformable__):
     """ Object that can be transformed. """
 
-    from spira.core.transformation import Transform
-
     __transform_type__ = Transform
 
     transformation = TransformationParameter()
@@ -48,13 +47,5 @@ class Transformable(__Transformable__):
         else:
             raise TypeError("Wrong type " + str(type(transformation)) + " for transformation in Transformable")
         return self
-
-    # def expand_transform(self):
-    #     """ Tries to propagate the transformation as deep 
-    #     as possible in the hierarchy. """
-    #     return self
-
-
-
 
 

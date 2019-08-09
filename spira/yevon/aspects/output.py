@@ -14,38 +14,53 @@ class OutputGdsiiAspect(__Aspects__):
     """  """
 
     def gdsii_view(self, unit=RDD.GDSII.UNIT, grid=RDD.GDSII.GRID, layer_map=None):
-        my_lib = Library(name=self.name, unit=unit, grid=grid)
-        # F = filters.ToggledCompositeFilter()
-
-        # f1 = filters.PortCellFilter()
-        # f2 = filters.PortPolygonFilter()
-        # F = f1 + f2
+        library = Library(name=self.name, unit=unit, grid=grid)
 
         D = deepcopy(self)
 
-        F = filters.PortCellFilter(name='cell_ports')
-        # F = filters.PortPolygonFilter(name='polygon_ports')
-        my_lib += F(D)
+        F = filters.ToggledCompositeFilter(filters=[])
+        F += filters.PortCellFilter(name='cell_ports')
+        F += filters.PortPolygonFilter(name='polygon_ports')
 
-        # my_lib += self
+        F['cell_ports'] = True
+        F['polygon_ports'] = True
+        
+        D = F(D)
 
-        # D = F(self)
-        # print(D.elements)
-        # my_lib += D
+        # for e in D.elements.polygons:
+        #     print(e.edge_ports)
+        #     e.ports += e.edge_ports
+        #     print('')
+
+        library += D
+        # library += F(D)
 
         if layer_map is None:
             layer_map = RDD.GDSII.EXPORT_LAYER_MAP
 
         output = OutputGdsii(file_name='', layer_map=layer_map)
-        output.viewer(my_lib)
+        output.viewer(library)
 
     def gdsii_output(self, file_name=None, unit=RDD.GDSII.UNIT, grid=RDD.GDSII.GRID, layer_map=None):
-        my_lib = Library(name=self.name, unit=unit, grid=grid)
-        my_lib += self
+        library = Library(name=self.name, unit=unit, grid=grid)
+        
+        D = deepcopy(self)
+
+        F = filters.ToggledCompositeFilter(filters=[])
+        F += filters.PortCellFilter(name='cell_ports')
+        F += filters.PortPolygonFilter(name='polygon_ports')
+
+        F['cell_ports'] = True
+        F['polygon_ports'] = False
+
+        library += F(D)
+        
         if layer_map is None:
             layer_map = RDD.GDSII.EXPORT_LAYER_MAP
+
         output = OutputGdsii(file_name=file_name, layer_map=layer_map)
-        output.write(my_lib)
+        output.write(library)
+
         LOG.debug("Finished writing structure to GDS2.")
 
 

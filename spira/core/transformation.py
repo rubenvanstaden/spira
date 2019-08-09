@@ -12,26 +12,6 @@ class Transform(ParameterInitializer):
 
     _ID = 0
 
-    def apply(self, item):
-        """ Apply the transform directly on the object, without making a copy. """
-        if isinstance(item, list):
-            raise ValueError('Not implemented yet!')
-            # from .shape import Shape
-            # L = Shape(item)
-            # L.transform(self)
-            # return L
-        else: 
-            return item.transform(self)
-
-    def apply_to_copy(self, item):
-        if isinstance(item, list):
-            raise ValueError('Not implemented yet!')
-            # from .shape import Shape
-            # L = Shape(item).transform_copy(self)
-            # return L
-        else:
-            return item.transform_copy(self)
-
     def __call__(self, item):
         """ Apply the transform on the object, after having made a copy. """
         if item is None:
@@ -54,22 +34,28 @@ class Transform(ParameterInitializer):
         else:
             raise TypeError("Cannot subtract an irreversible transform")
 
+    def apply(self, item):
+        """ Apply the transform directly on the
+        object, without making a copy. """
+        if isinstance(item, list):
+            from spira.yevon.geometry.shapes import Shape
+            return Shape(item).transform(self)
+        else: 
+            return item.transform(self)
+
+    def apply_to_copy(self, item):
+        if isinstance(item, list):
+            from spira.yevon.geometry.shapes import Shape
+            return Shape(item).transform_copy(self)
+        else:
+            return item.transform_copy(self)
+
     def is_identity(self):
         return True
 
 
 class ReversibleTransform(Transform):
     """ Base class for a transformation that can be reversed. """
-
-    def reverse(self, item):
-        if isinstance(item, list):
-            raise TypeError("Cannot add object of type " + str(type(other)) + " to transform")
-            # from .shape import Shape
-            # L = Shape(item)
-            # L.reverse_transform(self)
-            # return L
-        else:
-            return item.reverse_transform(self)
 
     def __add__(self, other):
         if other is None:
@@ -89,6 +75,15 @@ class ReversibleTransform(Transform):
 
     def __neg__(self):
         pass
+        # T = ReversibleCompoundTransform()
+        # T.reverse(self)
+
+    def reverse(self, item):
+        if isinstance(item, list):
+            from spira.yevon.geometry.shapes import Shape
+            return Shape(item).reverse_transform(self)
+        else:
+            return item.reverse_transform(self)
 
 
 class CompoundTransform(Transform):
@@ -125,19 +120,18 @@ class CompoundTransform(Transform):
     def apply(self, item):
         """ Apply the transform to the transformable item. """
         if isinstance(item, list):
-            raise TypeError("Cannot add object of type " + str(type(other)) + " to transform")
-            # from .shape import Shape
-            # L = Shape(item)
-            # for c in self.__subtransforms__:
-            #     L = c.apply(L)
-            # return L
+            from spira.yevon.geometry.shapes import Shape
+            shape = Shape(item)
+            for c in self.__subtransforms__:
+                shape = c.apply(shape)
+            return shape
         else:
             for c in self.__subtransforms__:
                 item = c.apply(item)
 
+    # FIXME: This is required for transforming polygon ports.
+    # This is currently just a temporary fix.
     def apply_to_angle(self, angle):
-        # FIXME: This is required for transforming polygon ports.
-        # This is currently just a temporary fix.
         return angle
 
     def add(self, other):
@@ -177,28 +171,6 @@ class ReversibleCompoundTransform(CompoundTransform, ReversibleTransform):
     def __make_irreversible__(self):
         self.__class__ = CompoundTransform
 
-    def reverse(self, item):
-        if isinstance(item, list):
-            raise TypeError("Cannot add object of type " + str(type(other)) + " to transform")
-            # from .shape import Shape
-            # L = Shape(item)
-            # for c in reversed(self.__subtransforms__):
-            #     L = c.reverse(L)
-            # return L
-        else:
-            for c in reversed(self.__subtransforms__):
-                item = c.reverse(item)
-
-    def reverse_on_coord(self, coord):
-        for c in reversed(self.__subtransforms__):
-            coord = c.reverse_on_coord(coord)
-        return coord
-
-    def reverse_on_array(self, coords):
-        for c in reversed(self.__subtransforms__):
-            coords = c.reverse_on_array(coords)
-        return coords
-
     def __add__(self, other):
         T = ReversibleCompoundTransform(self)
         if other != None: 
@@ -218,6 +190,12 @@ class ReversibleCompoundTransform(CompoundTransform, ReversibleTransform):
         self.add(-other)
         return self
 
+    def __neg__(self):
+        T = ReversibleCompoundTransform()
+        for c in reversed(self):
+            T.add(-c)
+        return T
+
     def add(self, other):
         if isinstance(other, CompoundTransform):
             for c in other.__subtransforms__:
@@ -230,17 +208,31 @@ class ReversibleCompoundTransform(CompoundTransform, ReversibleTransform):
         else:
             raise TypeError("Cannot add object of type " + str(type(other)) + " to transform")
 
-    def __neg__(self):
-        T = ReversibleCompoundTransform()
-        for c in reversed(self):
-            T.add(-c)
-        return T
+    def reverse(self, item):
+        if isinstance(item, list):
+            from spira.yevon.geometry.shapes import Shape
+            shape = Shape(item)
+            for c in reversed(self.__subtransforms__):
+                shape = c.reverse(shape)
+            return shape
+        else:
+            for c in reversed(self.__subtransforms__):
+                item = c.reverse(item)
+
+    def reverse_on_coord(self, coord):
+        for c in reversed(self.__subtransforms__):
+            coord = c.reverse_on_coord(coord)
+        return coord
+
+    def reverse_on_array(self, coords):
+        for c in reversed(self.__subtransforms__):
+            coords = c.reverse_on_array(coords)
+        return coords
 
 
 class ProcessoTransformation(ProcessorTypeCast):
     def __init__(self):
         ProcessorTypeCast.__init__(self, Transform)
-        # ProcessorTypeCast.__init__(self, CompoundTransform)
         # ProcessorTypeCast.__init__(self, ReversibleTransform)
         # super().__init__(ReversibleTransform)
 
@@ -249,7 +241,7 @@ class ProcessoTransformation(ProcessorTypeCast):
         if value is None:
             return IdentityTransform()
         else:
-            return ProcessorTypeCast.process(self, value, obj)
+            return ProcessorTypeCast.process(self, value=value, obj=obj)
 
 
 def TransformationParameter(restriction=None, preprocess=None, **kwargs):

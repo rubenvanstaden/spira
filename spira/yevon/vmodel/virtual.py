@@ -117,7 +117,7 @@ class VirtualConnect(__VirtualModel__):
                 edge.layer.purpose = RDD.PURPOSE.PORT.OUTSIDE_EDGE_ENABLED
                 overlap_edges[c_edge] = [edge]
 
-    def view_virtual_connect(self, show_layers=False, **kwargs):
+    def view_virtual_connect(self, show_layers=False, write=False, **kwargs):
         """ View that contains all derived connections (attached contacts, derived edges). """
 
         elems = spira.ElementList()
@@ -135,20 +135,31 @@ class VirtualConnect(__VirtualModel__):
                 for e in edges:
                     EF = filters.EdgeToPolygonFilter()
                     elems += EF(e)
+                if not isinstance(ply_overlap, spira.Edge):
+                    elems += ply_overlap
 
-        D = spira.Cell(name='_VIRTUAL_CONNECT', elements=elems, ports=self.device.ports)
+        name = self.device.name + '_VConnect'
+        D = spira.Cell(name=name, elements=elems, ports=self.device.ports, transformation=self.device.transformation)
         D.gdsii_view()
+        if write is True:
+            D.gdsii_output(file_name=name)
 
     def view_derived_contacts(self, show_layers=False, **kwargs):
 
         elems = spira.ElementList()
 
-        if show_layers is True:
-            elems += self.device.elements
+        # if show_layers is True:
+        #     elems += self.device.elements
+
+        # el = self.derived_contacts
+        # F = filters.PurposeFilterAllow(purposes=['JJ', 'VIA'])
+        # elems += F(el)
 
         el = self.derived_contacts
-        F = filters.PurposeFilterAllow(purposes=['JJ', 'VIA'])
-        elems += F(el)
+
+        print(el)
+
+        elems += el
 
         D = spira.Cell(name='_DERIVED_CONTACTS', elements=elems)
         D.gdsii_view()

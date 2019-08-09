@@ -163,6 +163,7 @@ class __Port__(ParameterInitializer, metaclass=MetaPort):
         p1 = Coord(self.midpoint[0], self.midpoint[1]) - Coord(other[0], other[1])
         return p1
 
+    # TODO: Maybe make this a getter and setter?
     @property
     def layer(self):
         return PLayer(self.process, self.purpose)

@@ -57,6 +57,7 @@ class PolygonGroup(Group, __LayerElement__):
 
     def __xor__(self, other):
         pts1, pts2 = [], []
+
         for e in self.elements:
             s1 = e.shape.transform_copy(e.transformation)
             pts1.append(s1.points)

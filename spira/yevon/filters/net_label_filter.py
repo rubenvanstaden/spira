@@ -68,7 +68,7 @@ class NetDeviceLabelFilter(__NetFilter__):
                 #         item.g.node[n]['display'] = RDD.DISPLAY.STYLE_SET[D.layer]
 
                 if D.purpose == RDD.PURPOSE.PORT.TERMINAL:
-                    print(D)
+                    # print(D)
                     if D.encloses(tri_shape.points):
                         item.g.node[n]['device_reference'] = D
                         item.g.node[n]['display'] = RDD.DISPLAY.STYLE_SET[D.layer]

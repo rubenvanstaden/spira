@@ -13,10 +13,3 @@ class __CellContainer__(Cell):
         elems += SRef(reference=self.cell)
         return elems
 
-#     def __cell_swapper__(self, new_cell, c, c2dmap):
-#         for e in c.elements.sref:
-#             S = deepcopy(e)
-#             if e.reference in c2dmap.keys():
-#                 S.ref = c2dmap[e.reference]
-#                 new_cell += S
-

@@ -35,8 +35,6 @@ class __Element__(Transformable, ParameterInitializer, metaclass=MetaElement):
 
     node_id = FunctionParameter(get_node_id, set_node_id)
 
-    location_name = StringParameter(default='')
-
     def __init__(self, transformation=None, **kwargs):
         super().__init__(transformation=transformation, **kwargs)
 
