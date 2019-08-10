@@ -200,46 +200,65 @@ class Cell(__Cell__):
         self.elements.expand_transform()
         return self
 
+    def flat_container(self, cc, name_tree=[]):
+        self.elements.flat_container(cc, name_tree=name_tree)
+        return cc
+
     def expand_flat_copy(self, exclude_devices=False):
         from spira.yevon.gdsii.pcell import Device
         from spira.yevon.gdsii.polygon import Polygon
         from spira.yevon.gdsii.sref import SRef
-        from spira.core.transforms.translation import Translation
 
         S = self.expand_transform()
 
-        C = Cell(name=S.name + '_ExpandedCell', ports=S.ports)
-        def _traverse_polygons(subj, cell, name):
-            c_name = deepcopy(name)
-            for e in cell.elements:
-                if isinstance(e, SRef):
+        # D = S.flatten(name_tree=[])
 
-                    if e.alias is not None:
-                        c_name += e.alias + ':'
-                    else:
-                        c_name += ':'
+        cell = Cell(name=S.name + '_ExpandedCell')
+        D = S.flat_container(cc=cell, name_tree=[])
 
-                    if exclude_devices is True:
-                        if isinstance(e.reference, Device):
-                            subj += e
-                        else:
-                            subj = _traverse_polygons(subj=subj, cell=e.reference, name=c_name)
-                    else:
-                        subj = _traverse_polygons(subj=subj, cell=e.reference, name=c_name)
+        # print(cell.elements)
 
-                elif isinstance(e, Polygon):
-                    e.location_name = c_name
-                    subj += e
-                c_name = name
+        return cell
 
-            # FIXME!!! Required for contact detection.
-            for e in cell.ports:
-                # print(e)
-                subj.ports += e
 
-            return subj
+        # name_list = []
+        # C = Cell(name=S.name + '_ExpandedCell', ports=S.ports)
+        # def _traverse_polygons(subj, cell, name_list):
+        #     for e in cell.elements:
+        #         if isinstance(e, SRef):
 
-        D = _traverse_polygons(C, S, '')
+        #             # if e.alias is not None:
+        #             name_list.append(e.alias)
+
+        #             # print(e.alias)
+
+        #             # if e.alias is not None:
+        #             #     c_name += e.alias + ':'
+        #             # else:
+        #             #     c_name += ':'
+
+        #             if exclude_devices is True:
+        #                 if isinstance(e.reference, Device):
+        #                     subj += e
+        #                 else:
+        #                     subj = _traverse_polygons(subj=subj, cell=e.reference, name_list=name_list)
+        #             else:
+        #                 subj = _traverse_polygons(subj=subj, cell=e.reference, name_list=name_list)
+        #         elif isinstance(e, Polygon):
+        #             print(name_list)
+        #             e.alias = name_list
+        #             # print(e.alias)
+        #             subj += e
+        #             # subj += e.set(alias=name_list)
+        #         name_list = []
+
+        #     # FIXME!!! Required for contact detection.
+        #     for e in cell.ports:
+        #         subj.ports += e
+
+        #     return subj
+
+        # D = _traverse_polygons(C, S, name_list)
 
         return D
 

@@ -24,13 +24,8 @@ class OutputGdsiiAspect(__Aspects__):
 
         F['cell_ports'] = True
         F['polygon_ports'] = True
-        
-        D = F(D)
 
-        # for e in D.elements.polygons:
-        #     print(e.edge_ports)
-        #     e.ports += e.edge_ports
-        #     print('')
+        D = F(D)
 
         library += D
         # library += F(D)

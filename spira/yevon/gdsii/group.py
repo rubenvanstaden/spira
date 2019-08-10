@@ -25,8 +25,8 @@ class __Group__(ParameterInitializer):
         return self.elements.__iter__()
 
     def __iadd__(self, element):
-        from spira.yevon.geometry.ports.base import __Port__
         """ Add element and reduce the class to a simple compound elements. """
+        from spira.yevon.geometry.ports.base import __Port__
         if isinstance(element, (list, Group, spira.ElementList)):
             self.extend(element)
         elif issubclass(type(element), __Element__):
@@ -55,8 +55,8 @@ class __Group__(ParameterInitializer):
             el.extend(elems)
         self.elements = el
 
-    def flatten(self, level=-1):
-        self.elements = self.elements.flatten(level=level)
+    def flatten(self, level=-1, name_tree=[]):
+        self.elements = self.elements.flatten(level=level, name_tree=name_tree)
         return self
 
     def is_empty(self):

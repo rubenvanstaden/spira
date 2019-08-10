@@ -29,7 +29,7 @@ class CellPortAspects(PortAspects):
 
     def __create_ports__(self, ports):
         for e in self.elements.polygons:
-            ports += e.ports
+            ports += e.edge_ports
         return self.create_ports(ports)
 
 
@@ -59,21 +59,26 @@ class PolygonPortAspects(TransformablePortAspects):
 
     edge_ports = ElementListParameter()
 
-    def create_edge_ports(self, edges):
-        shape = self.shape
-        return shapes.shape_edge_ports(shape, self.layer, self.id_string(),
-            center=shape.bbox_info.center, loc_name=self.location_name)
-
-    def create_ports(self, ports):
-        # layer = RDD.GDSII.IMPORT_LAYER_MAP[self.layer]
-        # # TODO: Move this to the RDD, so I can select which purposes must be edge-generators.
-        # if layer.purpose.symbol in ['METAL', 'DEVICE_METAL', 'CIRCUIT_METAL']:
-        #     for edge in self.edge_ports:
-        #         ports += edge
-        # # FIXME: This fails with CompoundTransforms, i.e. when stretching.
+    def create_edge_ports(self, edge_ports):
+        # shape = self.shape
+        shape = self.shape.transform_copy(self.transformation)
+        layer = RDD.GDSII.IMPORT_LAYER_MAP[self.layer]
+        if layer.purpose.symbol in ['METAL', 'DEVICE_METAL', 'CIRCUIT_METAL']:
+            edge_ports = shapes.shape_edge_ports(shape, self.layer, self.id_string(), center=shape.bbox_info.center, loc_name=self.alias + ':')
         # if isinstance(self.transformation, ReversibleTransform):
-        #     ports.reverse_transform(self.transformation)
-        return ports
+        #     edge_ports.reverse_transform(self.transformation)
+        return edge_ports
+
+    # def create_ports(self, ports):
+    #     layer = RDD.GDSII.IMPORT_LAYER_MAP[self.layer]
+    #     # TODO: Move this to the RDD, so I can select which purposes must be edge-generators.
+    #     if layer.purpose.symbol in ['METAL', 'DEVICE_METAL', 'CIRCUIT_METAL']:
+    #         for edge in self.edge_ports:
+    #             ports += edge
+    #     # FIXME: This fails with CompoundTransforms, i.e. when stretching.
+    #     if isinstance(self.transformation, ReversibleTransform):
+    #         ports.reverse_transform(self.transformation)
+    #     return ports
 
 
 # # FIXME: Run default (not stretching).
@@ -84,7 +89,7 @@ class PolygonPortAspects(TransformablePortAspects):
 #     def create_edge_ports(self, edges):
 #         shape = self.shape.transform_copy(self.transformation)
 #         return shapes.shape_edge_ports(shape, self.layer, self.id_string(),
-#             center=shape.bbox_info.center, loc_name=self.location_name)
+#             center=shape.bbox_info.center, loc_name=self.name)
 
 #     def create_ports(self, ports):
 #         layer = RDD.GDSII.IMPORT_LAYER_MAP[self.layer]

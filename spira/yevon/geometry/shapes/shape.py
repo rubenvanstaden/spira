@@ -421,7 +421,7 @@ def shape_edge_ports(shape, layer, local_pid='None', center=(0,0), loc_name=''):
         # name = 'E{}_{}'.format(i, layer.process.symbol)
         # name = 'E{}_{}_{}'.format(i, layer.process.symbol, shape.bbox_info.center)
         # print(loc_name)
-        name = '{}E{}_{}'.format(loc_name, i, layer.process.symbol)
+        name = '{}E{}'.format(loc_name, i)
         # print(name)
         x = np.sign(clockwise) * (xpts[i+1] - xpts[i])
         y = np.sign(clockwise) * (ypts[i] - ypts[i+1])

@@ -21,26 +21,26 @@ class MetaPort(MetaInitializer):
     """ Called when an instance of a SPiRA Port is created. """
 
     def get_port_data(self, kwargs):
+
         if 'name' in kwargs:
             if (kwargs['name'] is None) or (kwargs['name'] == ''):
                 raise ValueError('Port name cannot be generated.')
-            full_name = kwargs['name'].split(':')
-            nl = full_name[-1].split('_')
-        port_data = {}
-        port_data['name'] = nl[0]
-        port_data['purpose_symbol'] = nl[0][0]
 
-        if len(nl) == 1:
-            port_data['process_symbol'] = None
-        # elif len(nl) == 2:
-        elif len(nl) > 1:
-            port_data['process_symbol'] = nl[1]
+            name = kwargs['name']
+            name_list = name.split(':')
 
-        if len(nl) == 3:
-            port_data['sref_name'] = nl[2]
-        # else: 
-        #     error_message = "Port name format must be: \'port_data_Process\' or \'port_data\'"
-        #     raise ValueError(error_message)
+            port_data = {}
+            port_data['name'] = name
+            port_data['purpose_symbol'] = name_list[-1][0]
+    
+            if len(name_list) == 1:
+                port_data['process_symbol'] = None
+            elif len(name_list) > 1:
+                port_data['process_symbol'] = name_list[-2]
+        else: 
+            error_message = "Port name format must be: \'port_data_Process\' or \'port_data\'"
+            raise ValueError(error_message)
+
         return port_data
 
     def _bind_purpose(self, kwargs):
@@ -83,7 +83,7 @@ class MetaPort(MetaInitializer):
             error_message = "Cannot connect port \'{}\' to a process."
             raise ValueError(error_message.format(port_data['name']))
         process = kwargs['process']
-        name = '{}_{}'.format(port_data['name'], process.symbol)
+        name = '{}:{}'.format(process.symbol, port_data['name'])
         return name, process
 
     def _bind_name_to_process(self, kwargs):

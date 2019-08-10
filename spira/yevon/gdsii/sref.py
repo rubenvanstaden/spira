@@ -109,7 +109,7 @@ class SRef(__RefElement__):
         C = self.reference.__class__(
             name='{}_{}'.format(self.reference.name, self.transformation.id_string()),
             elements=deepcopy(self.reference.elements),
-            # ports=deepcopy(self.reference.ports)
+            ports=deepcopy(self.reference.ports)
         )
 
         T = self.transformation + spira.Translation(self.midpoint)
@@ -120,7 +120,7 @@ class SRef(__RefElement__):
                 e.transform(self.transformation)
             elif isinstance(e, Polygon):
                 e.transform(T)
-        # C.ports.transform(T)
+        C.ports.transform(T)
 
         self.reference = C
         self.transformation = None
@@ -141,10 +141,21 @@ class SRef(__RefElement__):
         elems = elems.transform(T)
         return elems
 
-    def flatten(self, level=-1):
+    def flatten(self, level=-1, name_tree=[]):
         if level == 0: return self.reference
-        D = self.reference.flatten(level)
+        name_tree.append(self.alias)
+        nt = deepcopy(name_tree)
+        D = self.reference.flatten(level, name_tree=nt)
+        name_tree.pop()
         return D.elements
+        
+    def flat_container(self, cc, name_tree=[]):
+        if self.alias is None:
+            self.alias = ''
+        name_tree.append(self.alias)
+        nt = deepcopy(name_tree)
+        self.reference.flat_container(cc, name_tree=nt)
+        name_tree.pop()
 
     def move(self, midpoint=(0,0), destination=None, axis=None):
         """ Move the reference internal port to the destination.
@@ -341,14 +352,25 @@ class SRef(__RefElement__):
         >>> S.stretch_p2p(port_name='S1:Sr1:E3_R1', destination_name='S2:Sr2:E1_R1')
         """
         from spira.yevon.gdsii.polygon import Polygon
+        from spira.yevon.geometry.ports import PortList
         from spira.yevon.geometry.bbox_info import bbox_info_opposite_boundary_port
 
         D = self.expand_flat_copy()
 
         print(D.ports)
+        print('\n------------------\n')
 
-        port = D.ports[port_name]
-        destination = D.ports[destination_name]
+        print('\n*************************************')
+        ports = PortList()
+        for e in D.reference.elements.polygons:
+            print(e.edge_ports)
+            ports += e.edge_ports
+
+        port = ports[port_name]
+        destination = ports[destination_name]
+
+        print(port)
+        print(destination)
 
         for i, e in enumerate(D.reference.elements.polygons):
             if e.id_string() == port.local_pid:

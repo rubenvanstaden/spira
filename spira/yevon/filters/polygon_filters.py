@@ -76,7 +76,8 @@ class PortToPolygonFilter(__PolygonFilter__):
         elems = ElementList()
         for p in item.edge_ports:
             el = self.filter_Port(p).elements
-            elems += el.transform(item.transformation)
+            elems += el
+            # elems += el.transform(item.transformation)
         for p in item.ports:
             el = self.filter_Port(p).elements
             elems += el.transform(item.transformation)

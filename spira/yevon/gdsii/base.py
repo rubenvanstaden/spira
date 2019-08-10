@@ -141,7 +141,7 @@ class __ShapeElement__(__LayerElement__):
             self.transformation = IdentityTransform()
         return self
 
-    def flatten(self, level=-1):
+    def flatten(self, level=-1, name_tree=[]):
         """ Flatten the polygon without creating a copy. """
         return self.expand_transform()
 

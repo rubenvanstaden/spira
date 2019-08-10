@@ -24,7 +24,8 @@ class __ElementList__(TypedList, Transformable):
         if isinstance(value, str):
             for e in self._list:
                 if issubclass(type(e), (Cell, SRef, Polygon)):
-                    if e.alias == value: r_val = e
+                    if e.alias == value:
+                        r_val = e
         elif isinstance(value, int):
             r_val = self._list[value]
         else:
@@ -149,11 +150,15 @@ class ElementList(__ElementList__):
             elems += e.flat_copy(level)
         return elems
 
-    def flatten(self, level=-1):
+    def flatten(self, level=-1, name_tree=[]):
         elems = ElementList()
         for e in self._list:
-            elems += e.flatten(level)
+            elems += e.flatten(level, name_tree)
         return elems
+        
+    def flat_container(self, cc, name_tree=[]):
+        for e in self._list:
+            e.flat_container(cc, name_tree)
 
     def is_stored(self, pp):
         for e in self._list:

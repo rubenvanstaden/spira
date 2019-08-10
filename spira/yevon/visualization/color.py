@@ -10,6 +10,9 @@ from spira.core.parameters.restrictions import RestrictType
 # Color Map: https://www.rapidtables.com/web/color/html-color-codes.html
 
 
+# __all__ = ['Color', 'ColorParameter']
+
+
 class Color(ParameterInitializer):
     """ Defines a color in terms of a name and RGB values. """
 
@@ -28,7 +31,7 @@ class Color(ParameterInitializer):
         return other.red != self.red or other.green != self.green or other.blue != self.blue
 
     def __repr__(self):
-        return ("[SPiRA: Color] (name '{}', hex {})").format(self.name, self.hexcode)
+        return ("[SPiRA: Color] (name '{}', hex {}, rgb ({}, {}, {})").format(self.name, self.hexcode, self.red, self.green, self.blue)
 
     def __str__(self):
         return self.__repr__()
@@ -37,11 +40,29 @@ class Color(ParameterInitializer):
     def hexcode(self):
         return '#{:02x}{:02x}{:02x}'.format(int(self.red), int(self.green), int(self.blue))
 
+    @property
+    def norm(self):
+        return (self.red/255, self.green/255, self.blue/255)
+
     def rgb_tuple(self):
         return (self.red, self.green, self.blue)
 
     def numpy_array(self):
         return np.array([self.red, self.green, self.blue])
+
+    def tint(self, factor=0.0):
+        """ Make color lighter. """
+        r = self.red   + (255-self.red)   * factor
+        g = self.green + (255-self.green) * factor
+        b = self.blue  + (255-self.blue)  * factor
+        return Color(int(r), int(g), int(b))
+        
+    def shade(self, factor=0.0):
+        """ Make color darker. """
+        r = self.red   * (1 - factor)
+        g = self.green * (1 - factor)
+        b = self.blue  * (1 - factor)
+        return Color(int(r), int(g), int(b))
 
     def set(self, red, green, blue):
         self.red = red
@@ -49,6 +70,8 @@ class Color(ParameterInitializer):
         self.blue = blue
 
 
+COLOR_KEYNOTE_BLACK = Color(name='white', red=34, green=34, blue=34)
+COLOR_KEYNOTE_GRAY = Color(name='white', red=167, green=170, blue=169)
 COLOR_BLACK = Color(name='black', red=0, green=0, blue=0)
 COLOR_WHITE = Color(name='white', red=255, green=255, blue=255)
 COLOR_GREEN = Color(name='green', red=0, green=128, blue=0)

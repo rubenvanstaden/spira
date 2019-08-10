@@ -11,6 +11,12 @@ RDD = get_rule_deck()
 
 class PlotlyGraph(object):
 
+    def _plotly_color(self, color):
+        r = color.norm[0]
+        b = color.norm[1]
+        g = color.norm[2]
+        return 'rgba({},{},{},{})'.format(r, b, g, 1)
+
     def _plotly_netlist(self, G, graphname, labeltext='id'):
         edges = self._create_edges(G)
         nodes = self._create_nodes(G, labeltext)
@@ -18,7 +24,9 @@ class PlotlyGraph(object):
         edge_trace = go.Scatter(
             x=edges['x_pos'],
             y=edges['y_pos'],
-            line=dict(width=1.5, color='#888'),
+            line=dict(
+                width=1.5,
+                color=color.COLOR_KEYNOTE_GRAY.hexcode),
             hoverinfo='none',
             mode='lines')
 
@@ -32,7 +40,11 @@ class PlotlyGraph(object):
             marker=dict(
                 color=nodes['color'],
                 size=30,
-                line=dict(width=2))
+                line=dict(
+                    width=3,
+                    color=nodes['line_color']
+                    )
+                )
             )
 
         edge_label_trace = go.Scatter(
@@ -42,18 +54,27 @@ class PlotlyGraph(object):
             mode='markers',
             hoverinfo='text',
             marker=dict(
-                color='#6666FF',
-                size=2,
-                line=dict(width=4))
+                # color='#6666FF',
+                # color=color.COLOR_GHOSTWHITE.hexcode,
+                color=edges['color'],
+                size=3,
+                line=dict(
+                    width=2,
+                    # color=color.COLOR_GHOSTWHITE.hexcode,
+                    color=color.COLOR_KEYNOTE_GRAY.hexcode
+                    )
+                )
             )
 
         fig = go.Figure(
             data=[edge_trace, node_trace, edge_label_trace],
             layout=go.Layout(
                 title='<br>' + graphname,
-                titlefont=dict(size=24),
+                titlefont=dict(size=24, color=color.COLOR_KEYNOTE_GRAY.hexcode),
+                paper_bgcolor=self._plotly_color(color=color.COLOR_KEYNOTE_BLACK),
+                plot_bgcolor=self._plotly_color(color=color.COLOR_KEYNOTE_BLACK),
                 showlegend=False,
-                width=1900,
+                width=2000,
                 height=900,
                 hovermode='closest',
                 margin=dict(b=20,l=5,r=5,t=20),
@@ -89,6 +110,7 @@ class PlotlyGraph(object):
         edges['y_labels'] = []
 
         edges['text'] = []
+        edges['color'] = []
 
         for e in G.edges():
             x0, y0 = G.node[e[0]]['position']
@@ -111,6 +133,8 @@ class PlotlyGraph(object):
                 if isinstance(edge['process_polygon'], EdgeInductor):
                     edges['text'].append(edge['process_polygon'].id)
 
+            edges['color'].append(color.COLOR_GHOSTWHITE.hexcode)
+
         return edges
 
     def _create_nodes(self, G, labeltext):
@@ -120,6 +144,7 @@ class PlotlyGraph(object):
         nodes['y_pos'] = []
         nodes['text'] = []
         nodes['color'] = []
+        nodes['line_color'] = []
 
         for n in G.nodes():
             x, y = G.node[n]['position']
@@ -135,8 +160,11 @@ class PlotlyGraph(object):
                 node_value = G.node[n]['process_polygon']
 
             if node_value is not None:
+                nc = G.node[n]['display'].color
+                sc = nc.shade(factor=0.3)
                 nodes['text'].append('({}) {}'.format(n, str(node_value)))
-                nodes['color'].append(G.node[n]['display'].color.hexcode)
+                nodes['color'].append(nc.hexcode)
+                nodes['line_color'].append(sc.hexcode)
 
         return nodes
 

@@ -40,16 +40,16 @@ class Polygon(__ShapeElement__):
 
     _next_uid = 0
 
-    location_name = StringParameter(default='')
-
     def get_alias(self):
         if not hasattr(self, '__alias__'):
             self.__alias__ = self.layer.process.symbol
         return self.__alias__
 
     def set_alias(self, value):
-        if value is not None:
+        if isinstance(value, str):
             self.__alias__ = value
+        elif isinstance(value, list):
+            self.__alias__ = ':'.join(value)
 
     alias = FunctionParameter(get_alias, set_alias, doc='Functions to generate an alias for cell name.')
 
@@ -81,23 +81,41 @@ class Polygon(__ShapeElement__):
         # ports = self.ports.transform_copy(self.transformation)
         # return self.__class__(
         return Polygon(
+            alias=self.alias,
             shape=deepcopy(self.shape),
             layer=deepcopy(self.layer),
             ports=deepcopy(self.ports),
-            location_name=self.location_name,
-            transformation=deepcopy(self.transformation)
+            # FIXME: Deepcopy removes the Stretching from Compound Transform.
+            # transformation=deepcopy(self.transformation)
+            transformation=self.transformation
         )
 
     def short_string(self):
         # return "Polygon [{}, {}, {}]".format(self.center, self.layer.process.symbol, self.layer.purpose.symbol)
         # NOTE: We want to ignore the purpose for CIRCUIT_METAL ot DEVICE_METAL net connections.
-        return "Polygon [{}, {}]".format(self.center, self.layer.process.symbol)
+        layer = RDD.GDSII.IMPORT_LAYER_MAP[self.layer]
+        return "Polygon [{}, {}]".format(self.center, layer.process.symbol)
 
     def flat_copy(self, level=-1):
         """ Flatten a copy of the polygon. """
         S = Polygon(shape=self.shape, layer=self.layer, transformation=self.transformation)
         S.expand_transform()
         return S
+
+    # def flatten(self, level=-1, name_tree=[]):
+    #     """ Flatten the polygon without creating a copy. """
+    #     self.alias = name_tree
+    #     self.alias += ':' + self.layer.process.symbol
+    #     print(self)
+    #     return self
+
+    def flat_container(self, cc, name_tree=[]):
+        """ Flatten the polygon without creating a copy. """
+        self.alias = name_tree
+        self.alias += ':' + self.layer.process.symbol
+        cc += self
+        # cc.ports += self.edge_ports
+        return cc
 
     def nets(self, lcar):
         from spira.yevon.geometry.nets.net import Net
@@ -112,6 +130,10 @@ class Polygon(__ShapeElement__):
                     process_polygons=[deepcopy(self)])
 
             cc = []
+
+            # for p in self.edge_ports:
+            #     cc.append(p)
+
             for p in self.ports:
                 # if p.purpose == RDD.PURPOSE.PORT.PIN:
                 if p.purpose == RDD.PURPOSE.PORT.TERMINAL:
@@ -126,11 +148,11 @@ class Polygon(__ShapeElement__):
             F = filters.ToggledCompositeFilter(filters=[])
             F += filters.NetProcessLabelFilter(process_polygons=[deepcopy(self)])
             F += filters.NetDeviceLabelFilter(device_ports=cc)
-            F += filters.NetEdgeFilter(process_polygons=deepcopy(self))
-            F += filters.NetBranchFilter()
+            # F += filters.NetEdgeFilter(process_polygons=deepcopy(self))
+            # F += filters.NetBranchFilter()
 
-            if self.layer.purpose.symbol == 'CIRCUIT_METAL':
-                F += filters.NetDummyFilter()
+            # if self.layer.purpose.symbol == 'CIRCUIT_METAL':
+            #     F += filters.NetDummyFilter()
 
             net = Net(name=self.layer.process.symbol, geometry=geometry)
 

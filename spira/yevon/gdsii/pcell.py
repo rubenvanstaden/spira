@@ -63,13 +63,6 @@ class Device(PCell):
         net = super().create_netlist()
         net = netlist.combine_net_nodes(net=net, algorithm=['d2d'])
         net = netlist.combine_net_nodes(net=net, algorithm=['s2s'])
-        # net = netlist.combine_net_nodes(net=net, algorithm=['d2d', 's2s'])
-
-        # import networkx as nx
-        # from spira.yevon.geometry.nets.net import Net
-        # net = self.nets(lcar=self.lcar).disjoint(connect=True)
-        # graphs = list(nx.connected_component_subgraphs(net.g))
-        # net = Net(g=nx.disjoint_union_all(graphs))
 
         return net
 
@@ -165,7 +158,7 @@ class Circuit(PCell):
         print('Circuit netlist')
 
         net = super().create_netlist()
-        net = netlist.combine_net_nodes(net=net, algorithm=['d2d'])
+        # net = netlist.combine_net_nodes(net=net, algorithm=['d2d'])
         # net = netlist.combine_net_nodes(net=net, algorithm=['s2s'])
         # net = netlist.combine_net_nodes(net=net, algorithm=['d2d', 's2s'])
         

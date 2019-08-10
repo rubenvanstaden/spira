@@ -347,7 +347,7 @@ class ParameterInitializer(__ParameterInitializer__):
 
         Example
         -------
-        >>> ports += p1.set(width=2.0)
+        >>> ports += port.set(width=2.0)
         """
         for key, value in override_kwargs.items():
             if key not in self.__parameters__():
