@@ -10,9 +10,6 @@ from spira.core.parameters.restrictions import RestrictType
 # Color Map: https://www.rapidtables.com/web/color/html-color-codes.html
 
 
-# __all__ = ['Color', 'ColorParameter']
-
-
 class Color(ParameterInitializer):
     """ Defines a color in terms of a name and RGB values. """
 
@@ -31,7 +28,8 @@ class Color(ParameterInitializer):
         return other.red != self.red or other.green != self.green or other.blue != self.blue
 
     def __repr__(self):
-        return ("[SPiRA: Color] (name '{}', hex {}, rgb ({}, {}, {})").format(self.name, self.hexcode, self.red, self.green, self.blue)
+        _str = "[SPiRA: Color] (name '{}', hex {}, rgb ({}, {}, {})"
+        return _str.format(self.name, self.hexcode, self.red, self.green, self.blue)
 
     def __str__(self):
         return self.__repr__()
@@ -89,6 +87,9 @@ COLOR_LIGHT_GRAY = Color(name='light gray', red=211, green=211, blue=211)
 COLOR_SALMON = Color(name='salmon', red=250, green=128, blue=144)
 COLOR_SALMON_LIGHT = Color(name='salmon light', red=255, green=160, blue=122)
 COLOR_SALMON_DARK = Color(name='salmon dark', red=233, green=150, blue=122)
+
+COLOR_POWER_BLUE = Color(name='power blue', red=176, green=224, blue=230)
+COLOR_AQUAMARINE = Color(name='aquamarine', red=127, green=255, blue=212)
 
 COLOR_TURQUOISE_PALE = Color(name='turquoise pale', red=175, green=238, blue=238)
 COLOR_TURQUOISE_DARK = Color(name='turquoise dark', red=0, green=206, blue=209)

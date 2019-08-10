@@ -102,13 +102,6 @@ class Polygon(__ShapeElement__):
         S.expand_transform()
         return S
 
-    # def flatten(self, level=-1, name_tree=[]):
-    #     """ Flatten the polygon without creating a copy. """
-    #     self.alias = name_tree
-    #     self.alias += ':' + self.layer.process.symbol
-    #     print(self)
-    #     return self
-
     def flat_container(self, cc, name_tree=[]):
         """ Flatten the polygon without creating a copy. """
         self.alias = name_tree
@@ -131,9 +124,6 @@ class Polygon(__ShapeElement__):
 
             cc = []
 
-            # for p in self.edge_ports:
-            #     cc.append(p)
-
             for p in self.ports:
                 # if p.purpose == RDD.PURPOSE.PORT.PIN:
                 if p.purpose == RDD.PURPOSE.PORT.TERMINAL:
@@ -148,8 +138,8 @@ class Polygon(__ShapeElement__):
             F = filters.ToggledCompositeFilter(filters=[])
             F += filters.NetProcessLabelFilter(process_polygons=[deepcopy(self)])
             F += filters.NetDeviceLabelFilter(device_ports=cc)
-            # F += filters.NetEdgeFilter(process_polygons=deepcopy(self))
-            # F += filters.NetBranchFilter()
+            F += filters.NetEdgeFilter(process_polygons=deepcopy(self))
+            F += filters.NetBranchFilter()
 
             # if self.layer.purpose.symbol == 'CIRCUIT_METAL':
             #     F += filters.NetDummyFilter()

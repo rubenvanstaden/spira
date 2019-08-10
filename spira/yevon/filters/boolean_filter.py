@@ -161,7 +161,7 @@ class ContactAttachFilter(Filter):
                         if e2.layer == RDD.VIAS[ps].LAYER_STACK[m]:
                             if e2.encloses(e1.center):
                                 port = Port(
-                                    name='Cv_{}'.format(ps),
+                                    name='{}:Cv'.format(ps),
                                     midpoint=e1.center,
                                     process=e1.layer.process)
                                 e2.ports += port

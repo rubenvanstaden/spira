@@ -289,7 +289,7 @@ class Net(__Net__):
             if 'device_reference' in self.g.node[n]:
                 D = self.g.node[n]['device_reference']
                 if D.purpose.symbol == 'P':
-                    if len(self.g.edges(n)) > 1:
+                    if len(self.g.edges(n)) > 0:
                         del self.g.node[n]['device_reference']
         return self
 

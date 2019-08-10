@@ -357,20 +357,20 @@ class SRef(__RefElement__):
 
         D = self.expand_flat_copy()
 
-        print(D.ports)
-        print('\n------------------\n')
+        # print(D.ports)
+        # print('\n------------------\n')
 
-        print('\n*************************************')
+        # print('\n*************************************')
         ports = PortList()
         for e in D.reference.elements.polygons:
-            print(e.edge_ports)
+            # print(e.edge_ports)
             ports += e.edge_ports
 
         port = ports[port_name]
         destination = ports[destination_name]
 
-        print(port)
-        print(destination)
+        # print(port)
+        # print(destination)
 
         for i, e in enumerate(D.reference.elements.polygons):
             if e.id_string() == port.local_pid:

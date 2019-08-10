@@ -26,7 +26,6 @@ __all__ = ['Port', 'PortParameter']
 class Port(Vector, __Port__):
     """  """
 
-    name = StringParameter()
     width = NumberParameter(default=2)
     length = NumberParameter(default=0.5)
 
@@ -34,9 +33,9 @@ class Port(Vector, __Port__):
         super().__init__(name=name, **kwargs)
 
     def __repr__(self):
-        class_string = "[SPiRA: Port] (name {}, midpoint {} orientation {} width {}, process {}, purpose {})"
-        return class_string.format(self.name, self.midpoint, self.orientation, self.width,
-                                   self.process.symbol, self.purpose.name)
+        class_string = "[SPiRA: Port \'{}\'] (name {}, midpoint {} orientation {} width {}, process {}, purpose {})"
+        return class_string.format(self.alias, self.name, self.midpoint, self.orientation, self.width,
+                                self.process.symbol, self.purpose.name)
 
     def __str__(self):
         return self.__repr__()

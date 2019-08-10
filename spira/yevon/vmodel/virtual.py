@@ -157,8 +157,6 @@ class VirtualConnect(__VirtualModel__):
 
         el = self.derived_contacts
 
-        print(el)
-
         elems += el
 
         D = spira.Cell(name='_DERIVED_CONTACTS', elements=elems)

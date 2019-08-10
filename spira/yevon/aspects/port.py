@@ -30,6 +30,10 @@ class CellPortAspects(PortAspects):
     def __create_ports__(self, ports):
         for e in self.elements.polygons:
             ports += e.edge_ports
+        # for e in self.elements.polygons:
+        #     ports += e.ports
+        # for e in self.elements.sref:
+        #     ports += e.ports
         return self.create_ports(ports)
 
 

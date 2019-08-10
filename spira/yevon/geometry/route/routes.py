@@ -213,7 +213,7 @@ def RouteManhattan(ports, layer, width=None, corners='miter', bend_radius=1):
     elems = ElementList()
 
     if isinstance(ports, list):
-        list1 = [p for p in ports if (p.name[0] == 'D')]
+        list1 = [p for p in ports if (p.alias[0] == 'D')]
     else:
         list1 = ports.get_ports_by_type('D')
     list2 = [p.flip() for p in list1]
@@ -232,7 +232,9 @@ def RouteManhattan(ports, layer, width=None, corners='miter', bend_radius=1):
     for x in range(len(pl)-1):
         p1, p2 = pl[x], pl[x+1]
         angle = ug.angle_diff(p2.orientation, p1.orientation)
-        
+
+        print(angle)
+
         if angle not in [90, 180, 270]:
             raise ValueError('Angle must be in 90 degree angles.')
 

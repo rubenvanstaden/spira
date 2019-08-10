@@ -158,13 +158,9 @@ class Circuit(PCell):
         print('Circuit netlist')
 
         net = super().create_netlist()
-        # net = netlist.combine_net_nodes(net=net, algorithm=['d2d'])
+        net = netlist.combine_net_nodes(net=net, algorithm=['d2d'])
         # net = netlist.combine_net_nodes(net=net, algorithm=['s2s'])
-        # net = netlist.combine_net_nodes(net=net, algorithm=['d2d', 's2s'])
         
-        # F = filters.NetBranchCircuitFilter()
-        # net = F(net)[0]
-
         return net
 
 

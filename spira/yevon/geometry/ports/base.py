@@ -131,6 +131,7 @@ class MetaPort(MetaInitializer):
             kwargs['process'] = process
         if purpose is not None:
             kwargs['purpose'] = purpose
+        kwargs['alias'] = name.split(':')[-1]
 
         cls = super().__call__(**kwargs)
         cls.__keywords__ = kwargs
@@ -142,6 +143,8 @@ class __Port__(ParameterInitializer, metaclass=MetaPort):
     """  """
 
     doc = StringParameter()
+    name = StringParameter(doc='The full name tree of the port.')
+    alias = StringParameter(doc='The name of the port without the tree hierarchy.')
     process = ProcessParameter(allow_none=True, default=None)
     purpose = PurposeLayerParameter(allow_none=True, default=None)
     text_type = NumberParameter(default=RDD.GDSII.TEXT)

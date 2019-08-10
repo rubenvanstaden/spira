@@ -74,7 +74,7 @@ class PlotlyGraph(object):
                 paper_bgcolor=self._plotly_color(color=color.COLOR_KEYNOTE_BLACK),
                 plot_bgcolor=self._plotly_color(color=color.COLOR_KEYNOTE_BLACK),
                 showlegend=False,
-                width=2000,
+                width=1900,
                 height=900,
                 hovermode='closest',
                 margin=dict(b=20,l=5,r=5,t=20),
@@ -161,7 +161,7 @@ class PlotlyGraph(object):
 
             if node_value is not None:
                 nc = G.node[n]['display'].color
-                sc = nc.shade(factor=0.3)
+                sc = nc.shade(factor=0.5)
                 nodes['text'].append('({}) {}'.format(n, str(node_value)))
                 nodes['color'].append(nc.hexcode)
                 nodes['line_color'].append(sc.hexcode)
