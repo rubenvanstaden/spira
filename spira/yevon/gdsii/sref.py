@@ -48,7 +48,7 @@ class SRef(__RefElement__):
     """
 
     midpoint = CoordParameter(default=(0,0))
-    
+
     def __init__(self, reference, midpoint=(0,0), alias=None, transformation=None, **kwargs):
         super().__init__(reference=reference, midpoint=midpoint, alias=alias, transformation=transformation, **kwargs)
 

@@ -79,8 +79,9 @@ if __name__ == '__main__':
     # S.stretch_by_factor(factor=(2,1))
     # S.stretch_p2p(port_name='Jj:S1:Sr1:E3_R1', destination_name='Jj:S2:Sr2:E1_R1')
     # S.stretch_p2p(port_name='Jj:S1:Sr1:R1:E3', destination_name='Jj:S2:Sr2:R1:E1')
-    S.stretch_p2p(port_name='S1:Sr1:R1:E3', destination_name='S2:Sr2:R1:E1')
     # S.stretch_p2c(port_name='S1:Sr1:E3_R1', destination_name='S2:Sr2:E1_R1')
+    
+    S.stretch_p2p(port_name='S1:Sr1:R1:E3', destination_name='S2:Sr2:R1:E1')
 
     C += S
 

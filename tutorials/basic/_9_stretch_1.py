@@ -63,7 +63,7 @@ class Junction(spira.Cell):
         t1, t2 = self.get_transforms()
         elems += spira.Rectangle(p1=(-13, -60), p2=(13, 12), layer=RDD.PLAYER.M1.METAL)
         elems += spira.SRef(alias='S1', reference=Top(), transformation=t1)
-        elems += spira.SRef(alias='S2', reference=Bot(), transformation=t2)
+        elems += spira.SRef(alias='S2', reference=Bot(), midpoint=(0, -5))
         return elems
 
 
@@ -80,9 +80,11 @@ class Jtl(spira.Cell):
         jj = Junction()
 
         elems += spira.SRef(alias='ref_jj1', reference=jj, transformation=t1)
-        elems += spira.SRef(alias='ref_jj2', reference=jj, transformation=t2)
+        elems += spira.SRef(alias='ref_jj2', reference=jj, midpoint=(150, 0))
+        # elems += spira.SRef(alias='ref_jj2', reference=jj, transformation=t2)
 
-        elems += spira.Rectangle(p1=(7, -13), p2=(143, 1), layer=spira.Layer(number=2))
+        # elems += spira.Rectangle(p1=(7, -13), p2=(143, 1), layer=spira.Layer(number=2))
+        elems += spira.Rectangle(p1=(7, -13), p2=(143, 1), layer=RDD.PLAYER.M2.METAL)
 
         return elems
 
@@ -98,11 +100,15 @@ if __name__ == '__main__':
 
     S = spira.SRef(alias='Jj', reference=jtl)
 
-    S.stretch_p2p(port_name='ref_jj1:S1:Sr1:E3_R1', destination_name='ref_jj1:S2:Sr2:E1_R1')
-
+    S.stretch_p2p(port_name='ref_jj1:S1:Sr1:R1:E3', destination_name='ref_jj1:S2:Sr2:R1:E1')
+    
     C += S
 
-    C.gdsii_output()
-    # C.gdsii_expanded_output()
+    # D = C.expand_flat_copy()
+    D = C.expand_transform()
+    # D = C
+
+    D.gdsii_view()
+    # C.gdsii_view()
 
 
