@@ -397,6 +397,9 @@ def shape_edge_ports(shape, layer, local_pid='None', center=(0,0), loc_name=''):
     # FIXME: Integrate with edges.
     from spira.yevon.geometry.ports.port import Port
     from spira.yevon.process.gdsii_layer import Layer
+    
+    shape = shape.remove_straight_angles()
+    # shape = shape.reverse_points()
 
     edges = PortList()
 

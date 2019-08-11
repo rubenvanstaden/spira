@@ -137,8 +137,8 @@ class Polygon(__ShapeElement__):
 
             F = filters.ToggledCompositeFilter(filters=[])
             F += filters.NetProcessLabelFilter(process_polygons=[deepcopy(self)])
-            F += filters.NetDeviceLabelFilter(device_ports=cc)
             F += filters.NetEdgeFilter(process_polygons=deepcopy(self))
+            F += filters.NetDeviceLabelFilter(device_ports=cc)
             F += filters.NetBranchFilter()
 
             # if self.layer.purpose.symbol == 'CIRCUIT_METAL':

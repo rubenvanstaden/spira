@@ -76,16 +76,21 @@ if __name__ == '__main__':
 
     S = spira.SRef(alias='Jj', reference=D)
 
+    print(S.reference.elements['S1'])
+    
+    # S.reference.elements['S1'].stretch_by_factor(factor=(2,1))
+
     # S.stretch_by_factor(factor=(2,1))
     # S.stretch_p2p(port_name='Jj:S1:Sr1:E3_R1', destination_name='Jj:S2:Sr2:E1_R1')
     # S.stretch_p2p(port_name='Jj:S1:Sr1:R1:E3', destination_name='Jj:S2:Sr2:R1:E1')
     # S.stretch_p2c(port_name='S1:Sr1:E3_R1', destination_name='S2:Sr2:E1_R1')
     
-    S.stretch_p2p(port_name='S1:Sr1:R1:E3', destination_name='S2:Sr2:R1:E1')
+    # S.stretch_p2p(port_name='S1:Sr1:R1:E3', destination_name='S2:Sr2:R1:E1')
 
     C += S
 
     # D = C.expand_flat_copy()
+    D = C
 
     # print(D.elements)
 
@@ -95,7 +100,10 @@ if __name__ == '__main__':
     #     # print(e.location_name)
 
     # D.gdsii_view()
-    C.gdsii_view()
+    
+    # D.gdsii_output(file_name='expaneded')
+    # D.gdsii_output(file_name='original')
+    D.gdsii_output(file_name='stretch')
 
 
 

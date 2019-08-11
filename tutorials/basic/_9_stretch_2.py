@@ -108,7 +108,9 @@ if __name__ == '__main__':
     # D = C.expand_transform()
     D = C
 
-    D.gdsii_view()
+    # D.gdsii_view()
     # C.gdsii_view()
+
+    D.gdsii_output(file_name='stretch_2')
 
 

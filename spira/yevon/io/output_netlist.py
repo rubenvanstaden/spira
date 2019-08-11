@@ -34,6 +34,7 @@ class PlotlyGraph(object):
             x=nodes['x_pos'],
             y=nodes['y_pos'],
             text=nodes['text'],
+            textfont=dict(size=50),
             name='markers',
             mode='markers',
             hoverinfo='text',
