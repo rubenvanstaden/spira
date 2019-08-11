@@ -79,36 +79,28 @@ COLOR_CYAN = Color(name='cyan', red=0, green=255, blue=255)
 COLOR_YELLOW = Color(name='yellow', red=255, green=255, blue=0)
 COLOR_BLUE_VIOLET = Color(name='blue violet', red=238, green=130, blue=238)
 COLOR_GHOSTWHITE = Color(name='ghost white', red=248, green=248, blue=255)
-
 COLOR_SILVER = Color(name='silver', red=192, green=192, blue=192)
 COLOR_GRAY = Color(name='gray', red=128, green=128, blue=128)
 COLOR_LIGHT_GRAY = Color(name='light gray', red=211, green=211, blue=211)
-
 COLOR_SALMON = Color(name='salmon', red=250, green=128, blue=144)
 COLOR_SALMON_LIGHT = Color(name='salmon light', red=255, green=160, blue=122)
 COLOR_SALMON_DARK = Color(name='salmon dark', red=233, green=150, blue=122)
-
 COLOR_POWER_BLUE = Color(name='power blue', red=176, green=224, blue=230)
 COLOR_AQUAMARINE = Color(name='aquamarine', red=127, green=255, blue=212)
-
 COLOR_TURQUOISE_PALE = Color(name='turquoise pale', red=175, green=238, blue=238)
 COLOR_TURQUOISE_DARK = Color(name='turquoise dark', red=0, green=206, blue=209)
 COLOR_TURQUOISE_MEDIUM = Color(name='turquoise medium', red=72, green=209, blue=204)
 COLOR_TURQUOISE = Color(name='turquoise', red=95, green=158, blue=160)
-
 COLOR_CORAL = Color(name='coral', red=255, green=127, blue=80)
 COLOR_CORAL_LIGHT = Color(name='coral light', red=240, green=128, blue=128)
-
 COLOR_PLUM = Color(name='plum', red=221, green=160, blue=221)
 COLOR_VIOLET = Color(name='violet', red=238, green=130, blue=238)
 COLOR_ORCHID = Color(name='orchid', red=218, green=112, blue=214)
-
 COLOR_SEA_GREEN_DARK = Color(name='sea green dark', red=143, green=188, blue=143)
 COLOR_SEA_GREEN = Color(name='sea green', red=46, green=139, blue=87)
 COLOR_SEA_GREEN_MEDIUM = Color(name='sea green medium', red=60, green=179, blue=113)
 COLOR_SEA_GREEN_LIGHT = Color(name='sea green light', red=32, green=178, blue=170)
 COLOR_SEA_GREEN_PALE = Color(name='sea green pale', red=152, green=251, blue=152)
-
 COLOR_CADET_BLUE = Color(name='cadet blue', red=95, green=158, blue=160)
 COLOR_AZURE = Color(name='azure', red=240, green=255, blue=255)
 COLOR_DARK_SLATE_GREY = Color(name='dark slate grey', red=47, green=79, blue=79)

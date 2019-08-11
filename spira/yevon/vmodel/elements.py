@@ -10,7 +10,7 @@ RDD = get_rule_deck()
 def get_process_polygons(elements, operation='or'):
     from spira.yevon.gdsii.polygon_group import PolygonGroup
     from spira.yevon.filters.layer_filter import LayerFilterAllow
-    
+
     elems = ElementList()
     for process in RDD.VMODEL.PROCESS_FLOW.active_processes:
         for layer in RDD.get_physical_layers_by_process(processes=process):

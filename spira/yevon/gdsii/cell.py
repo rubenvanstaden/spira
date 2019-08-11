@@ -178,7 +178,8 @@ class Cell(__Cell__):
         # FIXME: Check with stretching.
         return self.__class__(
         # return Cell(
-            name=self.name + '_copy',
+            # name=self.name + '_copy',
+            # name=self.name,
             alias=self.alias,
             elements=deepcopy(self.elements),
             ports=deepcopy(self.ports)

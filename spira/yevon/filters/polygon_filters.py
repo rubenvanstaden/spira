@@ -20,7 +20,13 @@ from spira.yevon.process import get_rule_deck
 RDD = get_rule_deck()
 
 
-__all__ = ['PortCellFilter', 'PortPolygonFilter', 'PortToPolygonFilter', 'RouteToPolygonFilter']
+__all__ = [
+    'PortCellFilter',
+    'PortPolygonEdgeFilter',
+    'PortPolygonContactFilter',
+    'PortToPolygonFilter',
+    'RouteToPolygonFilter'
+]
 
 
 class __PolygonFilter__(Filter):
@@ -32,9 +38,18 @@ class __PolygonFilter__(Filter):
     surface_width = NumberParameter()
     surface_length = NumberParameter()
 
-    def _create_edge(self, item):
+    def _edge_template(self, item):
         dw = item.width
-        dl = item.length/10
+        dl = item.length/5
+        layer = PLayer(process=item.process, purpose=item.purpose)
+        p = Box(width=dw, height=dl, layer=layer)
+        T = transformation_from_vector(item) + Rotation(rotation=-90, rotation_center=item.midpoint)
+        p.transform(T)
+        return p
+        
+    def _contact_template(self, item):
+        dw = item.length / 2
+        dl = item.length / 2
         layer = PLayer(process=item.process, purpose=item.purpose)
         p = Box(width=dw, height=dl, layer=layer)
         T = transformation_from_vector(item) + Rotation(rotation=-90, rotation_center=item.midpoint)
@@ -43,8 +58,8 @@ class __PolygonFilter__(Filter):
 
     def _create_arrow(self, item):
         layer = PLayer(item.process, RDD.PURPOSE.PORT.DIRECTION)
-        w = 0.01
-        l = 0.2
+        w = 0.05
+        l = 0.6
         arrow_shape = shapes.ArrowShape(width=w, length=l, head=l*0.2)
         p = Polygon(shape=arrow_shape, layer=layer)
         T = transformation_from_vector(item)
@@ -66,9 +81,12 @@ class PortToPolygonFilter(__PolygonFilter__):
 
     def filter_Port(self, item):
         elems = ElementList()
-        elems += self._create_edge(item)
-        elems += self._create_arrow(item)
         elems += self._create_label(item)
+        if item.purpose.symbol == 'C':
+            elems += self._contact_template(item)
+        else:
+            elems += self._edge_template(item)
+            elems += self._create_arrow(item)
         cell = Cell(elements=elems)
         return cell
 
@@ -76,9 +94,6 @@ class PortToPolygonFilter(__PolygonFilter__):
         elems = ElementList()
         for p in item.edge_ports:
             elems += self.filter_Port(p).elements
-        for p in item.ports:
-            el = self.filter_Port(p).elements
-            elems += el.transform(item.transformation)
         cell = Cell(elements=elems)
         return cell
 
@@ -99,7 +114,28 @@ class PortCellFilter(PortToPolygonFilter):
         return "[SPiRA: PortCellFilter] ())".format()
 
 
-class PortPolygonFilter(PortToPolygonFilter):
+class PortPolygonEdgeFilter(PortToPolygonFilter):
+
+    def filter_Cell(self, item):
+        elems = ElementList()
+        for c in item.dependencies():
+            for p in c.elements.polygons:
+                c += self.filter_Polygon(p).elements
+        return item
+
+    def __repr__(self):
+        return "[SPiRA: PortCellFilter] ())".format()
+        
+
+class PortPolygonContactFilter(PortToPolygonFilter):
+
+    def filter_Polygon(self, item):
+        elems = ElementList()
+        for p in item.ports:
+            el = self.filter_Port(p).elements
+            elems += el.transform(item.transformation)
+        cell = Cell(elements=elems)
+        return cell
 
     def filter_Cell(self, item):
         elems = ElementList()

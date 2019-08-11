@@ -1,0 +1,78 @@
+
+Netlist Extraction Update
+-------------------------
+
+Issues related to developing a Netlist Extractor:
+
+* Incomplete PDK and lack of understanding how a PDK has to be developed.
+* Effectively handling layout elements, especially in the hierarchical domain.
+* Developing an ERC solution that can scale for extracting netlists for both flattened and hierarhical layouts.
+* Translating data between layout elements in a hierarchical fashion.
+
+Solution Methodolody:
+
+* First develop an understanding of the PDK.
+* Develop a parameterized system that can effectively connect PDK data to layout elements.
+* This parameterized system must be able to translate data between different elements in different hierarchical levels.
+* The data connected to all the different layout consistuents will enable us to develop an ERC solution.
+* Once an ERC solution is develop, a path dependent netlist solution can be developed using graph theory.
+
+Background:
+
+Developing a netlist extraction solution results in a tremendious amount of effort being spend on effectively
+handling data (and data restrictions) between different components in a cell layout. Therefore, naturelly a
+parameterized system emerges.
+
+Once we have developed a parameterized system, we can integrate it with data from a PDK.
+To create a parameterized system that can scale in conjunction with advances made in the PDK domain,
+we have to develop a templated framework that uses parameters to connect data from the PDK.
+
+In short: We want to take a hard-crafted layout and convert it from the visual domain into a programmatical domain.
+This leads to asking the question: Why dont we just design a layout in the programming domain to start with?
+
+The SPiRA framework does just that. It is a templated parameterized framework that allows designers to
+develop their layouts directly in a programming domain. Having developed this framework we can use it as
+a building block to develop an ERC solution, followed by a netlist extraction solution, followed by a post-layout DRC solution.
+
+Current State of SPiRA:
+
+The currently version of SPiRA offers a fully functional design environment for hardware engineers
+to create their own parameterized cells using a template-base scheme. Parameter restrictions can
+be added to each individual parameter to check for any design violations, a process known as validate-by-design.
+If any of these parameter restrictions are voilated the PCell will throw an error on instance creation.
+
+Extensions for netlist extraction:
+
+1. In order to develop an ERC solutions we had to upgrade to SPiRA framework to use parameterized transforms.
+This allows us to send transformations (reflection, rotation, translation) between layout elements as parameters,
+which makes solving ERC for hierarchical layout much simpler. This is fully working in the current verion os SPiRA.
+
+2. Building from the parameterized transformations implementation, we introduced a novel layout flattening method,
+called "expanded transformations". These transforms expands the transformation parameters on each element instance,
+while maintianing the hierarchical structure of the over cell and the PDK data connected to the specific instance.
+This is fully functional in the current SPiRA version.
+
+3. These expanded transforms are then used to expand flatten the layout, allowing us to develop a scalable ERC solution.
+This also allows us to stretch specific layout elements of each element instance, without having to work with flattened cells.
+Stretching works in the current version of SPiRA.
+
+4. Extending the SPiRA framework to include ERC checking required us to add a few abstract concepts:
+
+* Port objects: Ports are used to create physical connections between different polygon elements.
+Works in current version.
+* Derived layers: Derived layers are the result of layer operations, such as merging and layer overlaps.
+Introducing derived layers as an abstraction allows us to handle and define layer manipulations inside the SPiRA PDK, called the RDD.
+Derived layers are not explicitly defined in the PDK, but are automatically derived by SPiRA based on a set of layer booleans specified in the PDK.
+Works in current version.
+* Filters: Filters are a set of unique classes we added to filter specific data from a cell, such as ERC violation layers (which are derived layers).
+Works in current version.
+* Virtual Modelling: Virual Modelling (VModel) leverages derived layers in conjunction with fitlers to virtualy construct a model of the layout.
+The ERC algorthm constructs an ERC VModel that mainly consist of a set of derived layers that describes layer overlaps, layer connections and port objects.
+This ERC VModel can then be used for ERC debugging, seperate from the original layout design.
+Works fine, but still has a few issues that should be solved in the next few weeks.
+
+5. The next and final step is to extract a graph netlist from these expanded layouts. A prototype version has already
+been prooven to work, but is still not ready for release. The most difficult part of this implementation is to make it
+scalable between a hand-crafted layout and a PCell. The individual components of developing a full netlist extraction
+solution is working, but hooking everything together still causes a few issues. A working version is expected
+to be finished within the next 2-3 months.

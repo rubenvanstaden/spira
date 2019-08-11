@@ -13,7 +13,6 @@ from spira.yevon.geometry.ports.base import __Port__
 from spira.yevon.geometry.coord import Coord
 from spira.yevon.geometry.vector import *
 from spira.yevon.geometry.line import *
-from spira.yevon.gdsii.generators import PortGenerator
 from spira.yevon.process import get_rule_deck
 
 

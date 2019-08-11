@@ -52,7 +52,7 @@ class Device(PCell):
 
         if self.pcell is True:
             D = Cell(elements=elems.flat_copy())
-            elems = RDD.FILTERS.DEVICE(D).elements
+            elems = RDD.FILTERS.PCELL.DEVICE(D).elements
 
         return elems
 
@@ -132,7 +132,7 @@ class Circuit(PCell):
             #     if e.layer.purpose.symbol == 'METAL':
             #         e.layer.purpose = RDD.PURPOSE.CIRCUIT_METAL
 
-            F = RDD.FILTERS.CIRCUIT
+            F = RDD.FILTERS.PCELL.CIRCUIT
 
             # from spira.yevon import filters
             # F = filters.ToggledCompositeFilter(filters=[])

@@ -49,8 +49,8 @@ if __name__ == '__main__':
     # v_model = virtual_connect(device=D)
     # v_model.gdsii_output_virtual_connect()
 
-    from spira.yevon.filters.boolean_filter import MetalConnectFilter
-    D = MetalConnectFilter()(D)
+    # from spira.yevon.filters.boolean_filter import MetalConnectFilter
+    # D = MetalConnectFilter()(D)
 
     # D.gdsii_output()
-    D.netlist_output()
+    D.netlist_view()

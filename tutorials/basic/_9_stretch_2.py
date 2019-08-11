@@ -1,7 +1,6 @@
 import spira.all as spira
 from spira.yevon.geometry import shapes
 from spira.yevon.geometry.coord import Coord
-from spira.yevon import process as pc
 from spira.yevon.process import get_rule_deck
 
 
@@ -33,7 +32,7 @@ class Top(spira.Cell):
     def create_elements(self, elems):
         t1, t2 = self.get_transforms()
         elems += spira.SRef(alias='Sj1', reference=Jj(), transformation=t1)
-        elems += spira.SRef(alias='Sr1', reference=ResVia(), midpoint=(0, -8))
+        elems += spira.SRef(alias='Sr1', reference=ResVia(), transformation=t2)
         elems += spira.Rectangle(p1=(-10, -23), p2=(10, 10), layer=RDD.PLAYER.M2.METAL)
         return elems
 
@@ -47,7 +46,7 @@ class Bot(spira.Cell):
 
     def create_elements(self, elems):
         t1, t2 = self.get_transforms()
-        elems += spira.SRef(alias='Sr2', reference=ResVia(), midpoint=(0, -30))
+        elems += spira.SRef(alias='Sr2', reference=ResVia(), transformation=t2)
         elems += spira.Rectangle(p1=(-10, -55), p2=(10, -35), layer=RDD.PLAYER.M2.METAL)
         return elems
 
@@ -68,34 +67,48 @@ class Junction(spira.Cell):
         return elems
 
 
+class Jtl(spira.Cell):
+
+    def get_transforms(self):
+        t1 = spira.Translation(Coord(0, 0))
+        t2 = spira.Translation(Coord(150, 0))
+        return [t1, t2]
+
+    def create_elements(self, elems):
+        t1, t2 = self.get_transforms()
+
+        jj = Junction()
+
+        elems += spira.SRef(alias='ref_jj1', reference=jj, transformation=t1)
+        elems += spira.SRef(alias='ref_jj2', reference=jj, midpoint=(150, 0))
+        # elems += spira.SRef(alias='ref_jj2', reference=jj, transformation=t2)
+
+        # elems += spira.Rectangle(p1=(7, -13), p2=(143, 1), layer=spira.Layer(number=2))
+        elems += spira.Rectangle(p1=(7, -13), p2=(143, 1), layer=RDD.PLAYER.M2.METAL)
+
+        return elems
+
+
+# --------------------------------------------------------------------------------------------------------------------
+
+
 if __name__ == '__main__':
 
-    D = Junction()
-
+    jtl = Jtl()
+    
     C = spira.Cell(name='TestingCell')
 
-    S = spira.SRef(alias='Jj', reference=D)
+    S = spira.SRef(alias='Jj', reference=jtl)
 
-    # S.stretch_by_factor(factor=(2,1))
-    # S.stretch_p2p(port_name='Jj:S1:Sr1:E3_R1', destination_name='Jj:S2:Sr2:E1_R1')
-    # S.stretch_p2p(port_name='Jj:S1:Sr1:R1:E3', destination_name='Jj:S2:Sr2:R1:E1')
-    # S.stretch_p2c(port_name='S1:Sr1:E3_R1', destination_name='S2:Sr2:E1_R1')
+    S.stretch_p2p(port_name='ref_jj1:S1:Sr1:R1:E3', destination_name='ref_jj1:S2:Sr2:R1:E1')
     
-    S.stretch_p2p(port_name='S1:Sr1:R1:E3', destination_name='S2:Sr2:R1:E1')
-
     C += S
 
-    D = C.expand_flat_copy()
-
-    # print(D.elements)
-
-    # print('\n*************************************')
-    # for e in D.elements.polygons:
-    #     print(e.ports)
-    #     # print(e.location_name)
+    # D = C.expand_flat_copy()
+    # D = C.expand_transform()
+    D = C
 
     D.gdsii_view()
     # C.gdsii_view()
-
 
 

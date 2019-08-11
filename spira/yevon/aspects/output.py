@@ -18,17 +18,9 @@ class OutputGdsiiAspect(__Aspects__):
 
         D = deepcopy(self)
 
-        F = filters.ToggledCompositeFilter(filters=[])
-        F += filters.PortCellFilter(name='cell_ports')
-        F += filters.PortPolygonFilter(name='polygon_ports')
+        F = RDD.FILTERS.OUTPUT.PORTS
 
-        F['cell_ports'] = True
-        F['polygon_ports'] = True
-
-        D = F(D)
-
-        library += D
-        # library += F(D)
+        library += F(D)
 
         if layer_map is None:
             layer_map = RDD.GDSII.EXPORT_LAYER_MAP
@@ -41,12 +33,7 @@ class OutputGdsiiAspect(__Aspects__):
         
         D = deepcopy(self)
 
-        F = filters.ToggledCompositeFilter(filters=[])
-        F += filters.PortCellFilter(name='cell_ports')
-        F += filters.PortPolygonFilter(name='polygon_ports')
-
-        F['cell_ports'] = True
-        F['polygon_ports'] = False
+        F = RDD.FILTERS.OUTPUT.PORTS
 
         library += F(D)
         

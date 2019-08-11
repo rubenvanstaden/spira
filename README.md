@@ -88,6 +88,9 @@ python spira/technologies/default/circuits/ytron_circuit.py
 
 ## History of changes
 
+### Version 0.2.0 (August 12, 2019)
+* 
+
 ### Version 0.1.1 (July 16, 2019)
 * Updated the advanced tutorial documentation.
 * Added developers documentations.
