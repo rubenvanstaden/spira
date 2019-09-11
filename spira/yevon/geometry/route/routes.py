@@ -233,8 +233,6 @@ def RouteManhattan(ports, layer, width=None, corners='miter', bend_radius=1):
         p1, p2 = pl[x], pl[x+1]
         angle = ug.angle_diff(p2.orientation, p1.orientation)
 
-        print(angle)
-
         if angle not in [90, 180, 270]:
             raise ValueError('Angle must be in 90 degree angles.')
 

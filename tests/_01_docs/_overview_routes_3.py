@@ -23,4 +23,5 @@ class RouteExample(spira.Cell):
 
 D = RouteExample()
 D.gdsii_view()
+D.gdsii_output(file_name='Route')
 

@@ -15,7 +15,6 @@ class NameGenerator(object):
         else:
             prefix = ''
         prefix = '{}{}'.format(prefix, self.process_name)
-        print(prefix)
         c = self.names_counters.get(prefix, self.counter)
         c += 1
         self.names_counters[prefix] = c

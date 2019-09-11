@@ -95,11 +95,10 @@ class Jtl(spira.Cell):
 if __name__ == '__main__':
 
     jtl = Jtl()
-    
+
     C = spira.Cell(name='TestingCell')
 
     S = spira.SRef(alias='Jj', reference=jtl)
-
     S.stretch_p2p(port_name='ref_jj1:S1:Sr1:R1:E3', destination_name='ref_jj1:S2:Sr2:R1:E1')
     
     C += S

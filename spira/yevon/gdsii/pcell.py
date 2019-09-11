@@ -10,8 +10,6 @@ from spira.yevon.process import get_rule_deck
 
 RDD = get_rule_deck()
 
-print(RDD)
-
 
 __all__ = ['PCell', 'Device', 'Circuit']
 
