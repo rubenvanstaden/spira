@@ -110,7 +110,7 @@ def vector_match_transform(v1, v2):
     T = Translation(v2.midpoint - v1.midpoint)
     R = Rotation(rotation=angle, rotation_center=v2.midpoint)
     return T + R
-    
+
 
 def vector_match_axis(v1, v2, axis='x'):
     """ Returns transformation to realign vectort 1 to match midpoint and opposite orientation of vector 2 """

@@ -2,6 +2,7 @@ from spira.yevon.gdsii.cell import Cell
 from spira.yevon.utils import netlist
 from spira.yevon.gdsii.elem_list import ElementListParameter, ElementList
 from spira.yevon.geometry.ports import PortList
+from spira.core.parameters.descriptor import Parameter
 from copy import deepcopy
 
 from spira.core.parameters.variables import *
@@ -20,6 +21,7 @@ class PCell(Cell):
     pcell = BoolParameter(default=True)
     routes = ElementListParameter(doc='List of `Route` elements connected to the cell.')
     structures = ElementListParameter(doc='List of cell structures that coalesces the top-level cell.')
+    extract_netlist = Parameter(fdef_name='create_extract_netlist')
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -63,6 +65,9 @@ class Device(PCell):
         net = netlist.combine_net_nodes(net=net, algorithm=['s2s'])
 
         return net
+
+    def create_extract_netlist(self):
+        return self.netlist
 
 
 class Circuit(PCell):
@@ -161,5 +166,23 @@ class Circuit(PCell):
         
         return net
 
+    def create_extract_netlist(self):
 
+        net = self.netlist
+
+        net = net.convert_pins()
+        net = net.del_branch_attrs()
+
+        from spira.yevon import filters
+        f = filters.ToggledCompositeFilter(filters=[])
+        f += filters.NetBranchCircuitFilter()
+        f += filters.NetDummyFilter()
+        f += filters.NetBranchCircuitFilter()
+
+        # net = f(net)[0]
+
+        from spira.yevon.utils import netlist
+        net = netlist.combine_net_nodes(net=net, algorithm=['b2b'])
+
+        return net
 

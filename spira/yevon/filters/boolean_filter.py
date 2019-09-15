@@ -188,14 +188,6 @@ class PinAttachFilter(Filter):
     """
 
     def filter_Cell(self, item):
-        from copy import deepcopy
-        from spira.yevon.gdsii.cell import Cell
-        from spira import settings
-        from spira.yevon.geometry.ports import Port
-        from spira.yevon.vmodel.virtual import virtual_connect
-
-        # ports = PortList()
-        # elems = ElementList()
 
         D = item.expand_flat_copy()
 
@@ -203,71 +195,20 @@ class PinAttachFilter(Filter):
             for p in item.ports:
                 # if p.purpose.symbol == 'P':
                 if p.purpose.symbol == 'T':
-                    e.ports += p
-                    # print(p)
                     
                     # if p.encloses(e.shape.points):
                     #     e.ports += p
                     
-                    # # c_port= p.transform_copy(e.transformation)
-                    # shape = e.shape.transform_copy(e.transformation).snap_to_grid()
-                    # if p.encloses(shape.points):
-                    #     e.ports += p
-                    #     print(p)
-
+                    # c_port= p.transform_copy(e.transformation)
+                    shape = e.shape.transform_copy(e.transformation).snap_to_grid()
+                    if p.encloses(shape.points):
+                        e.ports += p
         return item
 
-        
-
-        # # for p in item.ports:
-        # #     ports += p
-        # #     print(p)
-
-        # # for e in item.elements:
-        # #     elems += e
-
-        # v_model = virtual_connect(device=item)
-
-        # # for e in v_model.device.elements:
-        # #     print(e.transformation)
-
-        # # for p in v_model.device.ports:
-        # #     print(p)
-        # #     if p.purpose.symbol == 'P':
-        # #         print(p)
-        # # print('')
-
-        # for e in v_model.device.elements:
-        # # for e in item.elements.polygons:
-        #     print(e)
-        #     # for p in v_model.device.ports:
-        #     for p in item.ports:
-        #         if p.purpose.symbol == 'P':
-        #             e.ports += p
-        #             print(p)
-                    
-        #             # if p.encloses(e.shape.points):
-        #             #     e.ports += p
-                    
-        #             # # c_port= p.transform_copy(e.transformation)
-        #             # shape = e.shape.transform_copy(e.transformation).snap_to_grid()
-        #             # if p.encloses(shape.points):
-        #             #     e.ports += p
-        #             #     print(p)
-
+        # for e in item.elements.sref:
         #     elems += e
-
-        # # for p in D.ports:
-        # #     if p.purpose.symbol == 'P':
-        # #         ports += p
-
-        # # # for p in item.ports:
-        # #     # print(p)
-
-        for e in item.elements.sref:
-            elems += e
-        for e in item.elements.labels:
-            elems += e
+        # for e in item.elements.labels:
+        #     elems += e
 
         # # cell = Cell(elements=elems, ports=ports)
         # cell = Cell(elements=elems)

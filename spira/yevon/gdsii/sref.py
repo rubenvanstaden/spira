@@ -227,6 +227,10 @@ class SRef(__RefElement__):
         T = vector_match_transform(v1=p, v2=destination)
         self.midpoint = T.apply_to_coord(self.midpoint)
         self.transform(T - spira.Translation(self.midpoint))
+        # self.transformation = T - spira.Translation(self.midpoint)
+        # self.transformation = T
+        # print(T - spira.Translation(self.midpoint))
+        # print(T)
 
         return self
 
@@ -266,7 +270,6 @@ class SRef(__RefElement__):
         self.move(midpoint=self.midpoint, destination=coord)
         return self
 
-
     # FIXME~~~~ Look at lieze_dcsfq.py
     def port_alignment(self, ports, p1, p2):
         """
@@ -275,25 +278,32 @@ class SRef(__RefElement__):
 
         Example
         -------
-        >>> 
+        >>>
         """
         self.connect(ports[0], deepcopy(p1))
+        # print(self.transformation)
 
         if isinstance(ports[1], str):
             pin1 = self.ports[ports[1]]
         elif issubclass(type(ports[1]), __Port__):
-            pin1 = ports[1].transform(self.transformation)
+            # pin1 = ports[1].transform(self.transformation)
+            pin1 = ports[1].transform(spira.Translation(self.midpoint))
+
+        # print(pin1)
+        # print(p2)
+        # print(ports[0])
 
         if ports[0].orientation in (0, 180):
             T = vector_match_axis(v1=pin1, v2=p2, axis='x')
         elif ports[0].orientation in (90, 270):
             T = vector_match_axis(v1=pin1, v2=p2, axis='y')
+
         T = T + self.transformation
-        # self.transform(T) 
-        self.midpoint = T.apply_to_coord(Coord(0,0))
-        # self.transformation = T - spira.Translation(self.midpoint)
+        # self.midpoint = T.apply_to_coord(Coord(0,0))
         # self.midpoint = T.apply_to_coord(self.midpoint)
-        self.transform(T - spira.Translation(self.midpoint))
+        # self.transform(T + spira.Translation(self.midpoint))
+        self.transform(T)
+
         return self
 
     def stretch_by_factor(self, factor=(1,1), center=(0,0)):
