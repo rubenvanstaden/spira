@@ -118,7 +118,8 @@ class Polygon(__ShapeElement__):
         if self.layer.purpose.symbol in ['METAL', 'DEVICE_METAL', 'CIRCUIT_METAL']:
 
             if RDD.ENGINE.GEOMETRY == 'GMSH_ENGINE':
-                geometry = GmshGeometry(lcar=lcar,
+                geometry = GmshGeometry(lcar=0.5,
+                # geometry = GmshGeometry(lcar=lcar,
                     process=self.layer.process,
                     process_polygons=[deepcopy(self)])
 

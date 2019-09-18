@@ -72,6 +72,7 @@ class InputGdsii(InputBasic):
             midpoint = Coord(e.origin[0], e.origin[1])
             S = spira.SRef(reference=D, midpoint=(0,0))
 
+            # FIXME: Reflection still causes errors.
             if e.x_reflection == True:
                 T = Reflection(reflection=True)
                 center = T.apply_to_coord(center)
@@ -82,7 +83,8 @@ class InputGdsii(InputBasic):
                 center = T.apply_to_coord(center)
                 S.transform(T)
 
-            midpoint.move(center)
+            # midpoint.move(center)
+            midpoint.translate(center)
             S.translate(midpoint)
 
             c2dmap[gdspy_cell] += S

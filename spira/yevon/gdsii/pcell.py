@@ -89,8 +89,6 @@ class Circuit(PCell):
     def __create_elements__(self, elems):
         from spira.yevon.gdsii.sref import SRef
 
-        # print('\n[*] Circuit elements\n')
-
         elems = self.create_elements(elems)
         elems += self.structures
         elems += self.routes
@@ -162,7 +160,7 @@ class Circuit(PCell):
 
         net = super().create_netlist()
         net = netlist.combine_net_nodes(net=net, algorithm=['d2d'])
-        # net = netlist.combine_net_nodes(net=net, algorithm=['s2s'])
+        net = netlist.combine_net_nodes(net=net, algorithm=['s2s'])
         
         return net
 
@@ -179,7 +177,7 @@ class Circuit(PCell):
         f += filters.NetDummyFilter()
         f += filters.NetBranchCircuitFilter()
 
-        # net = f(net)[0]
+        net = f(net)[0]
 
         from spira.yevon.utils import netlist
         net = netlist.combine_net_nodes(net=net, algorithm=['b2b'])

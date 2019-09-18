@@ -195,10 +195,10 @@ class PinAttachFilter(Filter):
             for p in item.ports:
                 # if p.purpose.symbol == 'P':
                 if p.purpose.symbol == 'T':
-                    
+
                     # if p.encloses(e.shape.points):
                     #     e.ports += p
-                    
+
                     # c_port= p.transform_copy(e.transformation)
                     shape = e.shape.transform_copy(e.transformation).snap_to_grid()
                     if p.encloses(shape.points):

@@ -209,59 +209,10 @@ class Cell(__Cell__):
         from spira.yevon.gdsii.pcell import Device
         from spira.yevon.gdsii.polygon import Polygon
         from spira.yevon.gdsii.sref import SRef
-
         S = self.expand_transform()
-
-        # D = S.flatten(name_tree=[])
-
         cell = Cell(name=S.name + '_ExpandedCell')
         D = S.flat_container(cc=cell, name_tree=[])
-
-        # print(cell.elements)
-
         return cell
-
-
-        # name_list = []
-        # C = Cell(name=S.name + '_ExpandedCell', ports=S.ports)
-        # def _traverse_polygons(subj, cell, name_list):
-        #     for e in cell.elements:
-        #         if isinstance(e, SRef):
-
-        #             # if e.alias is not None:
-        #             name_list.append(e.alias)
-
-        #             # print(e.alias)
-
-        #             # if e.alias is not None:
-        #             #     c_name += e.alias + ':'
-        #             # else:
-        #             #     c_name += ':'
-
-        #             if exclude_devices is True:
-        #                 if isinstance(e.reference, Device):
-        #                     subj += e
-        #                 else:
-        #                     subj = _traverse_polygons(subj=subj, cell=e.reference, name_list=name_list)
-        #             else:
-        #                 subj = _traverse_polygons(subj=subj, cell=e.reference, name_list=name_list)
-        #         elif isinstance(e, Polygon):
-        #             print(name_list)
-        #             e.alias = name_list
-        #             # print(e.alias)
-        #             subj += e
-        #             # subj += e.set(alias=name_list)
-        #         name_list = []
-
-        #     # FIXME!!! Required for contact detection.
-        #     for e in cell.ports:
-        #         subj.ports += e
-
-        #     return subj
-
-        # D = _traverse_polygons(C, S, name_list)
-
-        return D
 
     def move(self, midpoint=(0,0), destination=None, axis=None):
         """  """

@@ -36,7 +36,7 @@ def device_detector(cell):
                     c2dmap.update({C: D})
         else:
             c2dmap.update({C: C})
-            
+
     return c2dmap[cell]
 
 

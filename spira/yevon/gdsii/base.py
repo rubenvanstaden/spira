@@ -5,6 +5,7 @@ from spira.core.parameters.descriptor import FunctionParameter
 from spira.yevon.process.gdsii_layer import LayerParameter
 from spira.yevon.geometry.shapes import ShapeParameter
 from spira.core.parameters.variables import *
+from spira.yevon.geometry.coord import Coord
 from spira.yevon.process import get_rule_deck
 
 
@@ -166,6 +167,7 @@ class __ShapeElement__(__LayerElement__):
 
     def move(self, midpoint=(0,0), destination=None, axis=None):
         """ Moves the polygon from `midpoint` to a `destination`. """
+        from spira.yevon.geometry.ports import Port
 
         if destination is None:
             destination = midpoint
@@ -175,12 +177,14 @@ class __ShapeElement__(__LayerElement__):
             m = midpoint
         elif np.array(midpoint).size == 2:
             m = Coord(midpoint)
-        elif issubclass(type(midpoint), __Port__):
+        # elif issubclass(type(midpoint), __Port__):
+        elif isinstance(midpoint, Port):
             m = midpoint.midpoint
         else:
             raise ValueError('Midpoint error')
 
-        if issubclass(type(destination), __Port__):
+        # if issubclass(type(destination), __Port__):
+        if isinstance(destination, Port):
             d = destination.midpoint
         if isinstance(destination, Coord):
             d = destination
