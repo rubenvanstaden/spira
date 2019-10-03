@@ -662,7 +662,8 @@ displays the individual layers of each instance.
 .. image:: _figures/_adv_junction_false.png
     :align: center
 
-By enabling PCell operations again we can see that the overlapping metal layers are merged by similar process polygon, as shown in the figure below.
+By enabling PCell operations again we can see that the overlapping metal layers are merged by similar process
+polygon, as shown in the figure below.
 
 .. image:: _figures/_adv_junction_true.png
     :align: center
@@ -796,3 +797,98 @@ is place a distance of 2.5 to the bottom of :py:data:`p3`.
 
 .. image:: _figures/_adv_jtl_false.png
     :align: center
+    
+
+************************
+Electrical Rule Checking
+************************
+
+The electrical rule checking algorithm is executed using a filtering method. Therefore,
+it is easily enabled/disabled for debugging purposes.
+
+Demonstrates
+============
+
+* How to toggle the ERC algorithm.
+* How to view the electrical rule checking results using **virtual modeling**.
+
+.. code-block:: python
+
+    # Create an instance of the PCell class.
+    D = Jtl()
+
+    # Apply the ERC and Port Excitation algorithms to the cell.
+    f = RDD.FILTERS.PCELL.MASK
+
+    D = f(D)
+
+    from spira.yevon.vmodel.virtual import virtual_connect
+    v_model = virtual_connect(device=D)
+
+    v_model.view_virtual_connect(show_layers=True)
+
+The above example illustrates how electrical rule checking can be debugged using virtually constructed
+polygons. The resultant layout or view of a cicuit that contains virtual elements that will not be included
+in the final design, is called a virtual model.
+
+
+******************
+Netlist Extraction
+******************
+
+Netlists for PCells can be extracted and viewed in a graph representation.
+
+Demonstrates
+============
+
+* How to extract the netlist graph of a PCell.
+* How to view the extracted graph.
+
+.. code-block:: python
+
+    # Create an instance of the PCell class.
+    D = Jtl()
+
+    # Apply the ERC and Port Excitation algorithms to the cell.
+    D = RDD.FILTERS.PCELL.MASK(D)
+
+    # Extract the physical netlist.
+    net = D.extract_netlist
+
+    # View the netlist.
+    D.netlist_view(net=net)
+
+Before running the netlist extraction algorithm it is important to first
+apply the required filters to the pcell instance. These filters includes
+the electrical rule checking run and compressing terminal ports down onto
+their corresponding polygon instances. The following image shows the 
+extracted netlist of a basic JTL layout.
+
+.. image:: _figures/_adv_jtl_netlist.png
+    :align: center
+
+Once the pcell instance has been updated with the necessary information,
+a netlist can be extracted and viewed. It is also possible to toggle certain
+filters for debugging purposes:
+
+.. code-block:: python
+
+    D = Jtl()
+
+    f = RDD.FILTERS.PCELL.MASK
+
+    f['pin_attach'] = False
+
+    D = f(D)
+
+    net = D.extract_netlist
+
+    D.netlist_view(net=net)
+
+The above example illustrates the extracted netlist if the **pin attach**
+algorithm is disabled. The added terminal ports are not detected by the 
+netlist run, since they are not compressed down the layout hierarchy onto 
+their corresponding polygons.
+
+
+

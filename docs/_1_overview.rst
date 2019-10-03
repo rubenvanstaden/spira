@@ -552,24 +552,56 @@ SPiRA offers a variety of different route algorithms that can be generated depen
 
 .. .. --------------------------------------------------------------------------------------
 
-.. *******
-.. Filters
-.. *******
+*******
+Filters
+*******
+
+Filters are algorithms that can be toggled between enabled or disabled. These algorithms are 
+typically used to add or remove extra information to an already working design, hence the name *filter*.
+
+Boolean
+=======
+
+The most basic filters are boolean operations that can be applied to all polygon elments in a layout, 
+instead of individually looping through the entire tree hierarchy.
 
 
+Layer
+=====
 
-.. Boolean
-.. =======
-
-
-
-.. Layer
-.. =====
+Sometimes we want to filter certain layers, since they only served a temporary purpose, or
+because we only want to view layers in the design of, for example a specific purpose type.
 
 
+*******
+Netlist
+*******
 
-.. Netlist
-.. =======
+The netlist extraction algorithm consists of a chain of filtering methods and thus uses the
+*chain of responsiblity* software design pattern. The basic algorithmic steps is divided into
+two categories:
+
+1. Extracting a netlist for each individual metal layer. 
+2. Chaining the metal netlists into a single mask netlist.
+
+For each of these steps there is a chain of filter algorithms applied to ensure the correct extraction:
+
+Polygon Netlist
+===============
+
+* Label all nodes in the netlist to the metal layer they represent.
+* Label the nodes that are represetative of detected devices.
+* Label the nodes that represents ERC connections between differenct metal polygons.
+* Calcaulte the cross-over nodes and determine the individual inductive branches.
+
+Mask Netlist
+============
+
+* Combine all metal netlists into a single netlist domain and connect shared nodes.
+* Calculate individual branches between device nodes.
+* Calculate cross-over nodes between different branches.
+* Recalcalate individual branches which includes the detected cross-over nodes.
+* Collapse all nodes belonging to the same branch into a single node representation.
 
 
 
@@ -591,15 +623,134 @@ SPiRA offers a variety of different route algorithms that can be generated depen
 
 
 
-.. .. --------------------------------------------------------------------------------------
+.. --------------------------------------------------------------------------------------
 
-.. ************
-.. RDD Advanced
-.. ************
+************
+RDD Advanced
+************
 
+The advanced RDD tutorials includes how discussions on how to defined filters inside the 
+the RDD, how to create a LVS database, and how to define derived layers.
 
+Filters
+=======
 
-.. .. --------------------------------------------------------------------------------------
+.. code-block:: python
+
+    # First we create a filters database.
+    RDD.FILTERS = ParameterDatabase()
+    
+    class PCellFilterDatabase(LazyDatabase):
+        """ Define the filters that will be used when creating a spira.PCell object. """
+    
+        def initialize(self):
+            from spira.yevon import filters
+    
+            f = filters.ToggledCompositeFilter(filters=[])
+            f += filters.ProcessBooleanFilter(name='boolean', metal_purpose=RDD.PURPOSE.DEVICE_METAL)
+            f += filters.SimplifyFilter(name='simplify')
+            f += filters.ContactAttachFilter(name='contact_attach')
+    
+            f['boolean'] = True
+            f['simplify'] = True
+            f['contact_attach'] = True
+    
+            self.DEVICE = f
+    
+            f = filters.ToggledCompositeFilter(filters=[])
+            f += filters.ProcessBooleanFilter(name='boolean', metal_purpose=RDD.PURPOSE.CIRCUIT_METAL)
+            f += filters.SimplifyFilter(name='simplify')
+    
+            f['boolean'] = True
+            f['simplify'] = True
+    
+            self.CIRCUIT = f
+    
+            f = filters.ToggledCompositeFilter(name='mask_filters', filters=[])
+            f += filters.ElectricalAttachFilter(name='erc')
+            f += filters.PinAttachFilter(name='pin_attach')
+            f += filters.DeviceMetalFilter(name='device_metal')
+    
+            f['erc'] = True
+            f['pin_attach'] = True
+            f['device_metal'] = False
+    
+            self.MASK = f
+    
+    RDD.FILTERS.PCELL = PCellFilterDatabase()
+
+The code above shows the creation of three composite filter algorithms. The device 
+filters will only be applied on detected device cells, the circuit filters only on
+non-device cell, and the mask filters will be executed on the top-level layout cell.
+As seen from the class definition, the pcell filter database is only instantiated when 
+a specific filter is called. Therefore, it inherits from the LazyDatabase class to delay
+its construction. A filter can be accessed using the dot operator as shown below:
+
+.. code-block:: python
+
+    f = RDD.FILTERS.PCELL.DEVICE
+
+Derived Layers
+==============
+
+Defining derived layers form the most basic part of creating the LVS database, since 
+derived layers innately defines via connections.
+
+.. code-block:: python
+
+    RDD.VIAS.C5R = ParameterDatabase()
+    
+    RDD.VIAS.C5R.LAYER_STACK = {
+        'BOT_LAYER' : RDD.PLAYER.R5.METAL,
+        'TOP_LAYER' : RDD.PLAYER.M6.METAL,
+        'VIA_LAYER' : RDD.PLAYER.C5R.VIA
+    }
+    RDD.PLAYER.C5R.CLAYER_CONTACT = RDD.PLAYER.R5.METAL & RDD.PLAYER.M6.METAL & RDD.PLAYER.C5R.VIA
+    RDD.PLAYER.C5R.CLAYER_M1 = RDD.PLAYER.R5.METAL ^ RDD.PLAYER.C5R.VIA
+    RDD.PLAYER.C5R.CLAYER_M2 = RDD.PLAYER.M6.METAL ^ RDD.PLAYER.C5R.VIA
+    
+    class C5R_PCELL_Database(LazyDatabase):
+        def initialize(self):
+            from ..devices.via import ViaC5RA, ViaC5RS
+            self.DEFAULT = ViaC5RA
+            self.STANDARD = ViaC5RS
+    
+    RDD.VIAS.C5R.PCELLS = C5R_PCELL_Database()
+
+The example above defines the detection of a C5R via, which connect layer M6 to R5 through a 
+contact layer C5R. First, a layer stack is created to defined the top, bottom, and via layers.
+Second, the derived layers are create that specifies the boolean operations between different layers
+required in order to detect a via connection. Finally, a via PCell is added to a database for 
+object creation. Note, that the :py:data:'RDD.PLAYER.C5R.CLAYER_CONTACT' is the via derived layer
+that specifies the connection while the two derived layers below is used for debugging purposes.
+
+LVS Database
+============
+
+The LVS database is populated with device PCells is a similar fashion as defining vias
+(which also forms part of the LVS database), using a lazy database class to define the 
+device PCell for the specific device. 
+
+.. code-block:: python
+
+    RDD.DEVICES = ParameterDatabase()
+    
+    RDD.DEVICES.JUNCTION = ParameterDatabase()
+    
+    class Junction_PCELL_Database(LazyDatabase):
+        def initialize(self):
+            from ..devices.junction import Junction
+            self.DEFAULT = Junction
+    
+    RDD.DEVICES.JUNCTION.PCELLS = Junction_PCELL_Database()
+
+A Josephson junction device is added to the LVS database be importing a 
+defined PCell. This PCell will include the creating and detection of vias 
+and can be constucted using the dot operator:
+
+.. code-block:: python
+
+    RDD.DEVICES.JUNCTION.PCELLS.DEFAULT
 
 
 

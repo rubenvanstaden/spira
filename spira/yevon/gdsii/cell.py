@@ -258,8 +258,11 @@ class Cell(__Cell__):
             e.move(midpoint=o, destination=d)
 
         for p in self.ports:
-            mc = np.array(p.midpoint) + np.array(d) - np.array(o)
-            p.move(midpoint=p.midpoint, destination=mc)
+            # mc = np.array(p.midpoint) + np.array(d) - np.array(o)
+            mc = np.array([p.midpoint[0], p.midpoint[1]]) + np.array([d[0], d[1]]) - np.array([o[0], o[1]])
+            # p.move(midpoint=p.midpoint, destination=mc)
+            # print(p)
+            p.move(mc)
 
         return self
 

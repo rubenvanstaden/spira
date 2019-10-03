@@ -61,8 +61,8 @@ class Device(PCell):
         print('Device netlist')
 
         net = super().create_netlist()
-        net = netlist.combine_net_nodes(net=net, algorithm=['d2d'])
-        net = netlist.combine_net_nodes(net=net, algorithm=['s2s'])
+        # net = netlist.combine_net_nodes(net=net, algorithm=['d2d'])
+        # net = netlist.combine_net_nodes(net=net, algorithm=['s2s'])
 
         return net
 
@@ -161,26 +161,26 @@ class Circuit(PCell):
         net = super().create_netlist()
         net = netlist.combine_net_nodes(net=net, algorithm=['d2d'])
         net = netlist.combine_net_nodes(net=net, algorithm=['s2s'])
-        
+
         return net
 
     def create_extract_netlist(self):
 
         net = self.netlist
 
-        net = net.convert_pins()
-        net = net.del_branch_attrs()
+        # net = net.convert_pins()
+        # net = net.del_branch_attrs()
 
-        from spira.yevon import filters
-        f = filters.ToggledCompositeFilter(filters=[])
-        f += filters.NetBranchCircuitFilter()
-        f += filters.NetDummyFilter()
-        f += filters.NetBranchCircuitFilter()
+        # from spira.yevon import filters
+        # f = filters.ToggledCompositeFilter(filters=[])
+        # f += filters.NetBranchCircuitFilter()
+        # f += filters.NetDummyFilter()
+        # f += filters.NetBranchCircuitFilter()
 
-        net = f(net)[0]
+        # net = f(net)[0]
 
-        from spira.yevon.utils import netlist
-        net = netlist.combine_net_nodes(net=net, algorithm=['b2b'])
+        # from spira.yevon.utils import netlist
+        # net = netlist.combine_net_nodes(net=net, algorithm=['b2b'])
 
         return net
 

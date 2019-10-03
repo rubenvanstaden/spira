@@ -32,7 +32,6 @@ def device_detector(cell):
         # transformations in the parsed cells.
         # D = spira.Cell(elements=cc.elements).flat_copy()
         # elems = RDD.FILTERS.PCELL.DEVICE(D).elements
-        # print(elems)
         # c.elements = elems
         # c.elements = D.elements
 
@@ -44,18 +43,14 @@ def device_detector(cell):
             if p.alias == 'J5':
                 _type = cell_types[0]
 
-        # print(cc.elements)
-
         for key in RDD.VIAS.keys:
             # via_layer = RDD.VIAS[key].LAYER_STACK['VIA_LAYER']
             for p in cc.elements:
                 if p.alias == key:
                     pcell = RDD.VIAS[key].PCELLS.DEFAULT
 
-                    D = spira.Cell(elements=cc.elements)
+                    D = spira.Cell(elements=deepcopy(cc).elements.flat_copy())
                     elems = RDD.FILTERS.PCELL.DEVICE(D).elements
-
-                    print(elems)
 
                     D = pcell(elements=elems)
 
@@ -63,27 +58,18 @@ def device_detector(cell):
 
         for key in RDD.DEVICES.keys:
 
-            # print(key)
             if _type == key:
                 pcell = RDD.DEVICES[key].PCELLS.DEFAULT
 
-                D = spira.Cell(elements=cc.elements)
+                D = spira.Cell(elements=deepcopy(cc).elements.flat_copy())
                 elems = RDD.FILTERS.PCELL.DEVICE(D).elements
 
                 D = pcell(elements=elems)
-                
+
                 c2dmap[c] = D
-
-        #         print(c)
-
-        # print(c)
-        # print('')
 
     for c in cell.dependencies():
         wrap_references(c, c2dmap, devices)
-        
-    # for c in cell.dependencies():
-    #     print(c)
 
     return cell
 
@@ -92,11 +78,11 @@ if __name__ == '__main__':
 
     # file_name = '/home/therealtyler/code/phd/spira/tests/8-parse/jj_mitll.gds'
     # file_name = '/home/therealtyler/code/phd/spira/tests/8-parse/mit/ruben/jtl_mitll_diff.gds'
-    file_name = '/home/therealtyler/code/phd/spira/tests/8-parse/mit/lieze/jtl.gds'
-    # file_name = '/home/therealtyler/code/phd/spira/tests/8-parse/mit/lieze/LSmitll_jtlt.gds'
-    # file_name = '/home/therealtyler/code/phd/spira/tests/8-parse/mit/lieze/ptlrx_gs.gds'
+    # file_name = '/home/therealtyler/code/phd/spira/tests/8-parse/mit/lieze/jtl.gds'
+    file_name = '/home/therealtyler/code/phd/spira/tests/8-parse/mit/lieze/ptlrx.gds'
     # file_name = '/home/therealtyler/code/phd/spira/tests/8-parse/mit/lieze/dfft.gds'
     # file_name = '/home/therealtyler/code/phd/spira/tests/8-parse/mit/lieze/circuit.gds'
+    # file_name = '/home/therealtyler/code/phd/spira/tests/8-parse/mit/lieze/jtlt.gds'
 
     # input_gdsii = spira.InputGdsii(file_name=file_name)
     # input_gdsii.layer_map = RDD.GDSII.IMPORT_LAYER_MAP
@@ -107,7 +93,23 @@ if __name__ == '__main__':
     # NOTE: Parse the input layout to SPiRA elements.
     D = device_detector(cell=D)
 
-    # NOTE: Covert device cells to spira.Device objects.
+    D = RDD.FILTERS.PCELL.CIRCUIT(D)
+
+    C = spira.Circuit(elements=D.elements)
+
+    D = RDD.FILTERS.PCELL.MASK(C)
+
+    # from spira.yevon.vmodel.virtual import virtual_connect
+    # v_model = virtual_connect(device=D)
+    # v_model.view_virtual_connect(show_layers=True, write=True)
 
     D.gdsii_view()
+
+    net = D.extract_netlist
+
+    D.netlist_view(net=net)
+
+
+    # FIXME: Add ports to layouts for i/o.
+
 

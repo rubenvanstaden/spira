@@ -148,7 +148,7 @@ class ContactAttachFilter(Filter):
         from spira.yevon.vmodel.virtual import virtual_connect
         from shapely.geometry import Polygon as ShapelyPolygon
 
-        ports = PortList()
+        # ports = PortList()
         elems = ElementList()
 
         v_model = virtual_connect(device=item)
@@ -171,10 +171,11 @@ class ContactAttachFilter(Filter):
             elems += e
         for e in item.elements.labels:
             elems += e
-        for p in item.ports:
-            ports += p
+        # for p in item.ports:
+        #     ports += p
 
-        cell = Cell(elements=elems, ports=ports)
+        # cell = Cell(elements=elems, ports=ports)
+        cell = Cell(elements=elems)
         return cell
 
     def __repr__(self):
@@ -203,6 +204,7 @@ class PinAttachFilter(Filter):
                     shape = e.shape.transform_copy(e.transformation).snap_to_grid()
                     if p.encloses(shape.points):
                         e.ports += p
+
         return item
 
         # for e in item.elements.sref:

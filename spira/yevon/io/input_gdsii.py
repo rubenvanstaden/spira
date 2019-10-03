@@ -47,11 +47,27 @@ class InputGdsii(InputBasic):
             D = spira.Cell(name=gdspy_cell.name)
             for e in gdspy_cell.polygons:
 
-                # FIXME: Maybe check the datatype and add layer mapping.
-                for n, p in zip(e.layers, e.polygons):
-                    layer = spira.Layer(number=int(n), datatype=0)
+                for i, p in enumerate(e.polygons):
+                    n = e.layers[i]
+                    d = e.datatypes[i]
+                    # print(n, d)
+                    layer = spira.Layer(number=int(n), datatype=int(d))
                     L = self.map_layer(layer)
-                    D += spira.Polygon(shape=p, layer=L)
+                    # print(L)
+                    # D += spira.Polygon(shape=p, layer=L)
+                    ply = spira.Polygon(shape=p, layer=L)
+                    # print(ply)
+                    D += ply
+
+                # print(e.datatypes)
+
+                # key = (e.layer)
+
+                # # FIXME: Maybe check the datatype and add layer mapping.
+                # for n, p in zip(e.layers, e.polygons):
+                #     layer = spira.Layer(number=int(n), datatype=int(0))
+                #     L = self.map_layer(layer)
+                #     D += spira.Polygon(shape=p, layer=L)
 
             c2dmap.update({gdspy_cell: D})
 
@@ -67,6 +83,8 @@ class InputGdsii(InputBasic):
         for e in gdspy_cell.references:
             ref_device = deepcopy(c2dmap[e.ref_cell])
             center = ref_device.center
+            print(e)
+            print(center)
             D = ref_device.move(midpoint=center, destination=(0,0))
 
             midpoint = Coord(e.origin[0], e.origin[1])

@@ -46,7 +46,7 @@ class __PolygonFilter__(Filter):
         T = transformation_from_vector(item) + Rotation(rotation=-90, rotation_center=item.midpoint)
         p.transform(T)
         return p
-        
+
     def _contact_template(self, item):
         dw = item.length / 2
         dl = item.length / 2
@@ -133,7 +133,10 @@ class PortPolygonContactFilter(PortToPolygonFilter):
         elems = ElementList()
         for p in item.ports:
             el = self.filter_Port(p).elements
+            # FIXME: We have to use this for PCells.
             elems += el.transform(item.transformation)
+            # FIXME: Have to use this for GDS files.
+            # elems += el
         cell = Cell(elements=elems)
         return cell
 
