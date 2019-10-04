@@ -6,6 +6,10 @@ from spira.log import SPIRA_LOG as LOG
 __all__ = ['Filter', 'ToggledCompositeFilter']
 
 
+# NOTE: Device and Circuit metal labeling can only be done in Mask Filter,
+# since we first want to implement ERC with metal, then convert it afterwards.
+
+
 class Filter(ParameterInitializer):
     """
 

@@ -714,7 +714,7 @@ derived layers innately defines via connections.
             from ..devices.via import ViaC5RA, ViaC5RS
             self.DEFAULT = ViaC5RA
             self.STANDARD = ViaC5RS
-    
+
     RDD.VIAS.C5R.PCELLS = C5R_PCELL_Database()
 
 The example above defines the detection of a C5R via, which connect layer M6 to R5 through a 
