@@ -556,32 +556,32 @@ SPiRA offers a variety of different route algorithms that can be generated depen
 Filters
 *******
 
-Filters are algorithms that can be toggled between enabled or disabled. These algorithms are 
+Filters are algorithms whos state can be toggled (enabled or disabled). These algorithms are 
 typically used to add or remove extra information to an already working design, hence the name *filter*.
 
 Boolean
 =======
 
-The most basic filters are boolean operations that can be applied to all polygon elments in a layout, 
-instead of individually looping through the entire tree hierarchy.
+Instead of individually looping through the entire tree hierarchy of a layout to apply 
+boolean operations on all polygons, a *boolean filter* can be used to automate this process.
 
 
 Layer
 =====
 
-Sometimes we want to filter certain layers, since they only served a temporary purpose, or
-because we only want to view layers in the design of, for example a specific purpose type.
+Sometimes we want to filter certain layers, since they only serve a temporary purpose, or
+because we only want to view layers in the design, for example a specific purpose type.
+In these cases we can use the *layer filter* to automatically filter certain layers in a cell.
 
 
 *******
 Netlist
 *******
 
-The netlist extraction algorithm consists of a chain of filtering methods and thus uses the
-*chain of responsiblity* software design pattern. The basic algorithmic steps is divided into
-two categories:
+The netlist extraction algorithm consists of a chain of filtering methods. 
+The basic algorithmic steps is divided into two categories:
 
-1. Extracting a netlist for each individual metal layer. 
+1. Extracting a netlist for each individual metal polygon.
 2. Chaining the metal netlists into a single mask netlist.
 
 For each of these steps there is a chain of filter algorithms applied to ensure the correct extraction:
@@ -613,11 +613,6 @@ Mask Netlist
 
 
 
-.. Derived Layers
-.. ==============
-
-
-
 .. Derived Edges
 .. =============
 
@@ -629,11 +624,17 @@ Mask Netlist
 RDD Advanced
 ************
 
-The advanced RDD tutorials includes how discussions on how to defined filters inside the 
-the RDD, how to create a LVS database, and how to define derived layers.
+The goal of the advanced RDD tutorial is to discuss:
+
+* How to define filters.
+* How to define derived layers.
+* How to create a LVS database.
 
 Filters
 =======
+
+Filters leverages the *chain of responsiblity* design pattern to chain a number of 
+algorithms that has to be executed in a sequential order on a specific layout object.
 
 .. code-block:: python
 
@@ -679,12 +680,15 @@ Filters
     
     RDD.FILTERS.PCELL = PCellFilterDatabase()
 
-The code above shows the creation of three composite filter algorithms. The device 
-filters will only be applied on detected device cells, the circuit filters only on
-non-device cell, and the mask filters will be executed on the top-level layout cell.
-As seen from the class definition, the pcell filter database is only instantiated when 
-a specific filter is called. Therefore, it inherits from the LazyDatabase class to delay
-its construction. A filter can be accessed using the dot operator as shown below:
+The code above shows the creation of three composite filter algorithms: 
+
+* The **device filters** will only be applied on detected device cells.
+* The **circuit filters** will only be aplied on non-device cell.
+* The **mask filters** will be executed on the top-level layout cell.
+
+The PCell filter class inherits from the :py:data:`LazyDatabase` class to delay its construction.
+Therefore, the PCell filter database is only instantiated when a specific filter is called using
+the dot operator as shown below:
 
 .. code-block:: python
 
@@ -693,8 +697,8 @@ its construction. A filter can be accessed using the dot operator as shown below
 Derived Layers
 ==============
 
-Defining derived layers form the most basic part of creating the LVS database, since 
-derived layers innately defines via connections.
+Defining **derived layers** forms the basis of creating the LVS database, since derived layers
+almost by definition defines via connections.
 
 .. code-block:: python
 
@@ -714,27 +718,25 @@ derived layers innately defines via connections.
             from ..devices.via import ViaC5RA, ViaC5RS
             self.DEFAULT = ViaC5RA
             self.STANDARD = ViaC5RS
-    
+
     RDD.VIAS.C5R.PCELLS = C5R_PCELL_Database()
 
-The example above defines the detection of a C5R via, which connect layer M6 to R5 through a 
-contact layer C5R. First, a layer stack is created to defined the top, bottom, and via layers.
-Second, the derived layers are create that specifies the boolean operations between different layers
-required in order to detect a via connection. Finally, a via PCell is added to a database for 
-object creation. Note, that the :py:data:'RDD.PLAYER.C5R.CLAYER_CONTACT' is the via derived layer
-that specifies the connection while the two derived layers below is used for debugging purposes.
+The example above defines a C5R via which connects layer M6 to R5 through a contact layer C5R.
+The logic steps for creating this coding snippet is as follow:
+
+1. A layer stack is created to defined the top, bottom, and via layers.
+2. The derived layers are create that specifies the boolean operations between different layers required in order to detect a via connection. Note, that the :py:data:`RDD.PLAYER.C5R.CLAYER_CONTACT` is the via derived layer that specifies the via connection, while the other two derived layers is used for debugging purposes.
+3. A set of different via PCell classes is added to the database. These classes will be constructed and used during the device detection run.
 
 LVS Database
 ============
 
-The LVS database is populated with device PCells is a similar fashion as defining vias
-(which also forms part of the LVS database), using a lazy database class to define the 
-device PCell for the specific device. 
+Defining devices in the LVS database is done similarly to defining vias as already explained:
 
 .. code-block:: python
 
     RDD.DEVICES = ParameterDatabase()
-    
+
     RDD.DEVICES.JUNCTION = ParameterDatabase()
     
     class Junction_PCELL_Database(LazyDatabase):
@@ -744,13 +746,16 @@ device PCell for the specific device.
     
     RDD.DEVICES.JUNCTION.PCELLS = Junction_PCELL_Database()
 
-A Josephson junction device is added to the LVS database be importing a 
-defined PCell. This PCell will include the creating and detection of vias 
-and can be constucted using the dot operator:
+A Josephson junction device is added to the LVS database by importing an already defined
+PCell class and can be constucted using the dot operator:
 
 .. code-block:: python
 
-    RDD.DEVICES.JUNCTION.PCELLS.DEFAULT
+    # Create a JTL instance from the definition in the RDD LVS database.
+    JtlPCell = RDD.DEVICES.JUNCTION.PCELLS.DEFAULT()
+
+    # View the created instance.
+    JtlPCell.gdsii_view()
 
 
 

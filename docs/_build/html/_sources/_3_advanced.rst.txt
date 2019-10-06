@@ -803,8 +803,8 @@ is place a distance of 2.5 to the bottom of :py:data:`p3`.
 Electrical Rule Checking
 ************************
 
-The electrical rule checking algorithm is executed using a filtering method. Therefore,
-it is easily enabled/disabled for debugging purposes.
+The electrical rule checking algorithm is applied on an instance using a filtering method.
+Therefore, it is easily enabled/disabled for debugging purposes.
 
 Demonstrates
 ============
@@ -826,10 +826,12 @@ Demonstrates
     v_model = virtual_connect(device=D)
 
     v_model.view_virtual_connect(show_layers=True)
+    
+.. image:: _figures/_adv_jtl_erc.png
+    :align: center
 
-The above example illustrates how electrical rule checking can be debugged using virtually constructed
-polygons. The resultant layout or view of a cicuit that contains virtual elements that will not be included
-in the final design, is called a virtual model.
+The resultant layout or view of a cicuit that contains *virtual elements* that will not be included in the final design, is called a **virtual model**.
+The above example illustrates how electrical rule checking can be debugged using virtually constructed polygons.
 
 
 ******************
@@ -858,18 +860,9 @@ Demonstrates
     # View the netlist.
     D.netlist_view(net=net)
 
-Before running the netlist extraction algorithm it is important to first
-apply the required filters to the pcell instance. These filters includes
-the electrical rule checking run and compressing terminal ports down onto
-their corresponding polygon instances. The following image shows the 
-extracted netlist of a basic JTL layout.
-
-.. image:: _figures/_adv_jtl_netlist.png
-    :align: center
-
-Once the pcell instance has been updated with the necessary information,
-a netlist can be extracted and viewed. It is also possible to toggle certain
-filters for debugging purposes:
+Before running the netlist extraction algorithm it is important to first apply the required filters to the pcell instance.
+These filters includes running electrical rule checking algorithm and compressing terminal ports down onto their corresponding polygon instances.
+It is also possible to toggle certain filters for debugging purposes:
 
 .. code-block:: python
 
@@ -885,10 +878,11 @@ filters for debugging purposes:
 
     D.netlist_view(net=net)
 
-The above example illustrates the extracted netlist if the **pin attach**
-algorithm is disabled. The added terminal ports are not detected by the 
-netlist run, since they are not compressed down the layout hierarchy onto 
-their corresponding polygons.
+The above example illustrates the extracted netlist if the **pin attach** algorithm is disabled.
+The added terminal ports are not detected by the netlist run, since they are not compressed down the layout hierarchy onto their corresponding polygons.
+The following image shows the different extracted netlists for a basic JTL layout using the code snippets previously discussed.
 
+.. image:: _figures/_adv_jtl_net.png
+    :align: center
 
 
