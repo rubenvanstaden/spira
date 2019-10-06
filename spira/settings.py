@@ -7,11 +7,11 @@ from math import floor
 # ----------------------------- SPiRA Information -----------------------------
 
 
-__version__ = '0.1.1'
+__version__ = '0.2.0'
 __release__ = 'Auron [Beta]'
 
 LIB_NAME = 'SPiRA'
-LIB_DESCRIPTION = 'SPiRA: The Virtuoso'
+LIB_DESCRIPTION = 'SPiRA: Blueprint your Layout'
 VERSION = 'Version {}-{}'.format(__version__, __release__)
 COPYRIGHT_INFO = 'MIT License'
 AUTHOR = 'Ruben van Staden'
