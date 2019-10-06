@@ -19,10 +19,10 @@
 <br />
 <p align="center">
   <a href="https://github.com/rubenvanstaden/spira">
-    <img src="docs/_figures/spira_logo.png" alt="Logo" width="120" height="170">
+    <img src="docs/_figures/spira_logo.png" alt="Logo" width="200" height="280">
   </a>
 
-  <h3 align="center">Blueprint your Layout</h3>
+  <h3 align="center">Quantum Layout Design Environment</h3>
 
   <p align="center">
     The next-generation object-oriented script-based PCell design environment.
@@ -48,7 +48,7 @@
   * [Installation](#installation)
 * [Usage](#usage)
 * [Roadmap](#roadmap)
-* [Contributing](#contributing)
+* [Contribute](#contribute)
 * [License](#license)
 * [Contact](#contact)
 * [Acknowledgements](#acknowledgements)
@@ -70,7 +70,7 @@ A new PDK scheme is introduced, called the Rule Deck Database (RDD), that effect
 process data to the SPiRA framework. The design of the **RDD** revolves around the principle that
 a PDK cannot be created, but rather that it evolves as our understanding of physical layout design evolves.
 
-**Benefits of using SPiRA:**
+### Benefits of using SPiRA
 
 * Create a PCell framework that is easy to use by designers with the focus falling on Superconducting and Quantum Integrated Circuits.
 * Effectively connect process data to layout elements in a generic process-independent fashion.
@@ -78,7 +78,7 @@ a PDK cannot be created, but rather that it evolves as our understanding of phys
 * Easily share designs between colleagues.
 * Created PCells can easily be included in a hand-designed layout.
 
-**Features:**
+### Features
 
 * Define layout elements in a templated environment.
 * Ability to leverage object-oriented inheritance to simply complex designs.
@@ -90,7 +90,8 @@ a PDK cannot be created, but rather that it evolves as our understanding of phys
 A list of used resources that was helpful in the development of the SPiRA framework.
 
 ### Built With
-This section should list any major frameworks that you built your project using. Leave any add-ons/plugins for the acknowledgements section. Here are a few examples.
+
+Love
 
 
 
@@ -164,7 +165,7 @@ As a short overview here is the project focus over the next 12 month:
 
 
 <!-- CONTRIBUTING -->
-## Contributing
+## Contribute
 
 Contributions are what make the open source community such an amazing place to be learn, inspire, and create.
 Any contributions you make are **greatly appreciated**.
@@ -206,8 +207,14 @@ Distributed under the MIT License. See `LICENSE` for more information.
 <!-- HISTORY OF CHANGES -->
 ## History of changes
 
-### Version 0.2.0 (August 12, 2019)
-* 
+### Version 0.2.0 (October 4, 2019)
+* Added layout netlist extraction and viewing.
+* Added electrical rule checking (ERC).
+* Added **filters** for advanced layout manipulation.
+* Updated ports for more information descriptions. Terminals can now be separated from port definitions.
+* A new concept, called **virtual modeling** (VModel) is introduced. This allows you to create multiple, virtual versions of a single layout for either debugging or fabrication purposes.
+* Routing algorithms have been updated to leverage speed improvements made in the Gdspy library.
+* The GDSII parser has been updated for better code structure and faster read/write operations.
 
 ### Version 0.1.1 (July 16, 2019)
 * Updated the advanced tutorial documentation.
