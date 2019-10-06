@@ -136,7 +136,7 @@ pip install -e .
 <!-- USAGE EXAMPLES -->
 ## Usage
 
-_For examples, please refer to the [Documentation](https://example.com)_
+_For examples, please refer to the [Documentation](https://spira.readthedocs.io/en/latest/)_
 
 All examples can be ran from the environment directory, which is the home directory of your ``spira`` folder.
 For the basic tutorial samples:
