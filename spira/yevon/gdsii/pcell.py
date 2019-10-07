@@ -58,7 +58,7 @@ class Device(PCell):
 
     def create_netlist(self):
 
-        print('Device netlist')
+        print('[*] Generating device netlist')
 
         net = super().create_netlist()
         # net = netlist.combine_net_nodes(net=net, algorithm=['d2d'])
@@ -156,7 +156,7 @@ class Circuit(PCell):
     def create_netlist(self):
         from spira.yevon import filters
 
-        print('Circuit netlist')
+        print('[*] Generating circuit netlist')
 
         net = super().create_netlist()
         net = netlist.combine_net_nodes(net=net, algorithm=['d2d'])

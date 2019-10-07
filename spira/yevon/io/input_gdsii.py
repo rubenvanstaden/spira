@@ -83,8 +83,8 @@ class InputGdsii(InputBasic):
         for e in gdspy_cell.references:
             ref_device = deepcopy(c2dmap[e.ref_cell])
             center = ref_device.center
-            print(e)
-            print(center)
+            # print(e)
+            # print(center)
             D = ref_device.move(midpoint=center, destination=(0,0))
 
             midpoint = Coord(e.origin[0], e.origin[1])

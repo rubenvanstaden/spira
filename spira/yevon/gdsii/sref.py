@@ -206,7 +206,6 @@ class SRef(__RefElement__):
         --------
         >>> S.connect()
         """
-        print(port)
         if issubclass(type(port), __Port__):
             p = port
         elif port in self.ports.get_names():

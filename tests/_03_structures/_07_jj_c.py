@@ -16,7 +16,7 @@ class ResistorCell(spira.Cell):
     def create_ports(self, ports):
 
         ply = self.elementals['RES']
-        print(ply.ports)
+        # print(ply.ports)
 
         ports += ply.ports['E3_M3'].copy(name='P3_M3')
 
