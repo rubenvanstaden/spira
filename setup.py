@@ -46,13 +46,4 @@ setup(
     ],
 
     packages=find_packages(exclude=["*.tests", "*.tests.*", "tests.*", "tests"]),
-    # packages=['spira',
-    #           'spira.core',
-    #           'spira',
-    #           'spira.validatex',
-    #           'spira.inductex',
-    #           'spira.josim',
-    # ],
-
-    # package_dir={'spira': 'spira'}
 )
