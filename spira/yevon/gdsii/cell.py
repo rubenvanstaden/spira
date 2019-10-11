@@ -228,7 +228,7 @@ class Cell(__Cell__):
             o = midpoint
         elif np.array(midpoint).size == 2:
             o = midpoint
-        elif midpoint in obj.ports:
+        elif midpoint in self.ports:
             o = obj.ports[midpoint].midpoint
         else:
             raise ValueError("[PHIDL] [DeviceReference.move()] ``midpoint`` " +

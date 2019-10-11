@@ -106,55 +106,6 @@ def test_elem_label():
     assert l1.reflection == False
     assert l1.texttype == 0
 
-# -------------------------------------------- spira.Cell -------------------------------------------
-
-def test_elem_cell():
-    c1 = spira.Cell(name='CellA')
-    assert c1.name == 'CellA'
-    assert len(c1.ports) == 0
-    assert len(c1.elementals) == 0
-
-    c1.ports += spira.Port(name='P1')
-    assert len(c1.ports) == 1
-
-    c1.elementals += spira.Polygon(shape=[[[0,0], [1,0], [1,1], [0,1]]])
-    assert len(c1.elementals) == 1
-
-    c1.center = (0,0)
-    np.testing.assert_array_equal(c1.center, [0,0])
-
-    c1.move(midpoint=c1.center, destination=(5,0))
-    np.testing.assert_array_equal(c1.center, [5,0])
-
-    class CellB(spira.Cell):
-        def create_elementals(self, elems):
-            elems += spira.Polygon(
-                shape=[[[0,0], [3,0], [3,1], [0,1]]],
-                gds_layer=spira.Layer(number=77)
-            )
-            return elems
-    c2 = CellB()
-    assert c2.name == 'CellB-0'
-    assert len(c1.elementals) == 1
-    assert isinstance(c2.elementals[0], spira.Polygon)
-
-# -------------------------------------------- spira.SRef -------------------------------------------
-
-def test_elem_sref():
-    class CellB(spira.Cell):
-        def create_elementals(self, elems):
-            elems += spira.Polygon(
-                shape=[[[0,0], [3,0], [3,1], [0,1]]],
-                gds_layer=spira.Layer(number=77)
-            )
-            return elems
-    c2 = CellB()
-    s1 = spira.SRef(structure=c2)
-    assert all([a == b for a, b in zip(s1.midpoint, [0,0])])
-    assert s1.rotation == 0
-    assert s1.magnification == 1
-    assert s1.reflection == False
-
 # -------------------------------------------- spira.Port -------------------------------------------
 
 def test_elem_port():
