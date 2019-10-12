@@ -33,7 +33,7 @@ def test_add_polygon():
 
     c1.elements += spira.Polygon(shape=[[[0,0], [1,0], [1,1], [0,1]]], layer=spira.Layer(0))
     assert len(c1.elements) == 2
-    
+
 
 def test_move():
     c1 = spira.Cell(name='CellA')

@@ -56,9 +56,6 @@ class Port(Vector, __Port__):
     def __ne__(self, other):
         return (self.midpoint != other.midpoint or (self.orientation != other.orientation)) 
 
-    # def id_string(self):
-    #     return self.__repr__()
-
     # FIXME: Why do it like this?
     def id_string(self):
         name = self.name.split('_')[0]
@@ -75,16 +72,6 @@ class Port(Vector, __Port__):
         return self
 
     def transform_copy(self, transformation):
-        # port = self.copy(
-        #     midpoint=transformation.apply_to_coord(self.midpoint),
-        #     orientation=transformation.apply_to_angle(self.orientation),
-        # )
-        
-        # port = self.__class__(
-        #     midpoint=transformation.apply_to_coord(self.midpoint),
-        #     orientation=transformation.apply_to_angle(self.orientation),
-        # )
-
         port = Port(
             name=self.name,
             midpoint=transformation.apply_to_coord(self.midpoint),
@@ -93,9 +80,7 @@ class Port(Vector, __Port__):
             purpose=self.purpose,
             width=self.width,
             length=self.length,
-            local_pid=self.local_pid
-        )
-
+            local_pid=self.local_pid)
         return port
 
     def net_source(self):
@@ -125,7 +110,8 @@ class Port(Vector, __Port__):
 
     @property
     def key(self):
-        return (self.name, self.layer, self.midpoint[0], self.midpoint[1])
+        # return (self.name, self.layer, self.midpoint[0], self.midpoint[1])
+        return (self.name, self.layer.process.symbol, self.layer.purpose.symbol, (self.midpoint[0], self.midpoint[1]))
 
 
 def PortParameter(local_name=None, restriction=None, **kwargs):

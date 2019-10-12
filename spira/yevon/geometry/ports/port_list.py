@@ -23,6 +23,7 @@ class PortList(TypedList, Transformable):
     def __str__(self):
         return self.__repr__()
 
+    # TODO: Implement spira exceptions here.
     def __getitem__(self, key):
         from spira.yevon.geometry.ports.base import __Port__
         if isinstance(key, int):
@@ -65,25 +66,18 @@ class PortList(TypedList, Transformable):
     def difference(self, other):
         return self.__sub__(self, other)
 
-    def update_layercopy(self, layer):
-        P = self.__class__()
-        for p in self._list:
-            p.edgelayer = layer
-            P.append(p)
-        return P
-
     def flat_copy(self, level=-1):
         el = PortList()
         for e in self._list:
             el += e.flat_copy(level)
         return el
 
-    def move(self, position):
+    def move(self, coordinate):
         for c in self._list:
-            c.move(position)
+            c.move(coordinate)
         return self
 
-    def move_copy(self, position):
+    def move_copy(self, coordinate):
         T = self.__class__()
         for c in self._list:
             T.append(c.movecopy(position))
@@ -136,11 +130,11 @@ class PortList(TypedList, Transformable):
             raise AttributeError("Direction should be NORTH, EAST, SOUTH or WEST")
 
     def angle_sorted(self, reference_angle=0.0):
-        """ sorts ports by angle, using angles between the reference_angle and reference_angle+360 """
+        """ Sorts ports by angle, using angles between the reference_angle and reference_angle+360 """
         return self.__class__(sorted(self._list, key=lambda f: ((f.orientation - reference_angle) % 360.0)))
 
     def angle_sorted_backward(self, reference_angle=0.0):
-        """ sorts ports by angle, using angles between the reference_angle and reference_angle+360 """
+        """ Sorts ports by angle, using angles between the reference_angle and reference_angle+360 """
         return self.__class__(sorted(self._list, key=lambda f: (-(f.orientation - reference_angle) % 360.0)))
 
     def get_names(self):
@@ -157,7 +151,7 @@ class PortList(TypedList, Transformable):
         for p in self._list:
             a = (p.orientation - sa) % 360.0
             if a <= aspread: pl.append(p)
-        return pl    
+        return pl
 
     def get_ports_on_process(self, process):
         pl = self.__class__()
@@ -175,10 +169,9 @@ class PortList(TypedList, Transformable):
         
     def get_ports_by_type(self, port_type):
         pl = self.__class__()
-        if port_type == 'D':
-            for p in self._list:
-                if p.name[0] == 'D':
-                    pl.append()
+        for p in self._list:
+            if p.name[0] == port_type:
+                pl.append()
         return pl
 
     @property
